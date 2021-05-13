@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "gh-build": "ng build --prod --output-path docs --base-href /pk-project/",
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
