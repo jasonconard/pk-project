@@ -1,1 +1,70 @@
 /* You can add global styles to this file, and also import other style files */
+
+html {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  //max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
+
+  * {
+    box-sizing: border-box;
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: transparent;
+
+    input, textarea {
+      -webkit-touch-callout: default; /* iOS Safari */
+      -webkit-user-select: text; /* Safari */
+      -moz-user-select: text; /* Firefox */
+      -ms-user-select: text; /* Internet Explorer/Edge */
+      user-select: text;
+      -webkit-tap-highlight-color: black;
+    }
+
+
+  }
+
+  input {
+    font-family: 'Roboto', sans-serif;
+  }
+  textarea {
+    font-family: 'Roboto', sans-serif;
+  }
+
+  app-root {
+    height: 100%;
+    width: 100%;
+
+    position: relative;
+    display: block;
+    overflow: hidden;
+
+    will-change: height;
+    transform: translate3d(0,0,0);
+    transition: height 200ms ease-in-out;
+  }
+
+  *:focus {
+    outline: none;
+  }
+
+  input:-webkit-autofill,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px white inset;
+  }
+}

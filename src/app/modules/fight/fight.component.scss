@@ -1,0 +1,55 @@
+:host {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: gainsboro;
+
+  .fight-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .fight-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+
+      .fight-bar {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 200px;
+        display: flex;
+        height: 20px;
+        align-items: flex-end;
+
+        .fight-bar-left {
+          flex: 4;
+          height: 2px;
+          background: green;
+        }
+
+        .fight-bar-right {
+          flex: 1;
+          height: 2px;
+          background: greenyellow;
+        }
+
+        .fight-cursor {
+          position: absolute;
+          top: 0;
+          //width: 20px;
+          //height: 20px;
+          //background: red;
+
+          height : 0;
+          width : 0;
+          border-top : 17px solid red;
+          border-right : 10px solid transparent;
+          border-left : 10px solid transparent;
+        }
+      }
+
+    }
+  }
+}

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "trpg-maker": {
+    "pk-project": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/trpg-maker",
+            "outputPath": "dist/pk-project",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -66,18 +66,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "trpg-maker:build"
+            "browserTarget": "pk-project:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "trpg-maker:build:production"
+              "browserTarget": "pk-project:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "trpg-maker:build"
+            "browserTarget": "pk-project:build"
           }
         },
         "test": {
@@ -114,15 +114,19 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "trpg-maker:serve"
+            "devServerTarget": "pk-project:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "trpg-maker:serve:production"
+              "devServerTarget": "pk-project:serve:production"
             }
           }
         }
       }
-    }},
-  "defaultProject": "trpg-maker"
+    }
+  },
+  "defaultProject": "pk-project",
+  "cli": {
+    "analytics": "13bc7334-f6b9-4d7e-a031-34301e67e424"
+  }
 }
