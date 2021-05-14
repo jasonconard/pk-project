@@ -269,11 +269,21 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     uvAtt.needsUpdate = true;
   }
 
+
+  private pushedBtns: string[] = [];
+
+  public isBtnPushed(btn: string) {
+    return this.pushedBtns.indexOf(btn) >= 0;
+  }
+
   touchBtn(btn: string, action: string) {
     const key = btn === 'a' ? KeyCode.confirm : KeyCode.cancel;
+    const btnId = this.pushedBtns.indexOf(btn);
     if(action === 'up') {
+      this.pushedBtns.splice(btnId, 1);
       this.keyService.setKeyUp(key);
     } else if (action === 'down'){
+      if(btnId < 0) { this.pushedBtns.push(btn); }
       this.keyService.setKeyDown(key);
     }
   }

@@ -15,12 +15,18 @@
 <app-stick></app-stick>
 
 <div class="right-touch-btns" *ngIf="isTouchDevice">
-  <div class="btn-container btn-a" (touchend)="touchBtn('a', 'up')" (touchstart)="touchBtn('a', 'down')">
+  <div class="btn-container btn-a"
+       [class.pushed]="isBtnPushed('a')"
+       (touchend)="touchBtn('a', 'up')"
+       (touchstart)="touchBtn('a', 'down')">
     <div class="btn">
       A
     </div>
   </div>
-  <div class="btn-container btn-b" (touchend)="touchBtn('b', 'up')" (touchstart)="touchBtn('b', 'down')">
+  <div class="btn-container btn-b"
+       [class.pushed]="isBtnPushed('b')"
+       (touchend)="touchBtn('b', 'up')"
+       (touchstart)="touchBtn('b', 'down')">
     <div class="btn">
       B
     </div>
