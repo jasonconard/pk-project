@@ -6,13 +6,26 @@
   {{ framePerSec }} fps
 </div>
 
-<div class="axes-count" *ngIf="axes.length">
-  <div *ngFor="let axe of axes">
-    {{ axe | number:'.2' }}
-  </div>
-</div>
+<!--<div class="axes-count" *ngIf="axes.length">-->
+<!--  <div *ngFor="let axe of axes">-->
+<!--    {{ axe | number:'.2' }}-->
+<!--  </div>-->
+<!--</div>-->
 
 <app-stick></app-stick>
+
+<div class="right-touch-btns" *ngIf="isTouchDevice">
+  <div class="btn-container btn-a" (mouseup)="touchBtn('a', 'up')" (mousedown)="touchBtn('a', 'down')">
+    <div class="btn">
+      A
+    </div>
+  </div>
+  <div class="btn-container btn-b" (mouseup)="touchBtn('b', 'up')" (mousedown)="touchBtn('b', 'down')">
+    <div class="btn">
+      B
+    </div>
+  </div>
+</div>
 <!--<div class="where-is-brian" [ngStyle]="{ left: axes[0]-30 + 'px', top: axes[1]-30 + 'px'}">-->
 
 <!--</div>-->

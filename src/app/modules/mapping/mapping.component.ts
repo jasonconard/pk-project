@@ -9,6 +9,7 @@ import { GamepadService } from '../../shared/service/gamepad.service';
 import { SCENE_MAP } from './shared/data/scene';
 import { SCENE_PLAYER } from './shared/data/characters/player';
 import { debounceTime } from 'rxjs/operators';
+import { TouchService } from '../../shared/service/touch.service';
 
 @Component({
   selector: 'mapping-main',
@@ -28,14 +29,19 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
   public axes: number[] = [];
 
+  public isTouchDevice = false;
+
   private lastDirection: KeyCode = KeyCode.down;
 
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef;
 
-  constructor(private keyService: KeyService) {
+  constructor(private keyService: KeyService,
+              private touchService: TouchService) {
   }
 
   ngOnInit() {
+    this.isTouchDevice = this.touchService.isTouchDevice;
+
     this.subs.push(this.keyService.pressedState.subscribe(keys => {
       this.pressedKeys = keys;
     }));
@@ -261,6 +267,15 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     uvAtt.needsUpdate = true;
+  }
+
+  touchBtn(btn: string, action: string) {
+    const key = btn === 'a' ? KeyCode.confirm : KeyCode.cancel;
+    if(action === 'up') {
+      this.keyService.setKeyUp(key);
+    } else if (action === 'down'){
+      this.keyService.setKeyDown(key);
+    }
   }
 
 }
