@@ -1,1 +1,8 @@
-<router-outlet></router-outlet>
+<div class="app-container">
+  <router-outlet></router-outlet>
+
+  <div class="btn-fullscreen" (click)="toggleFullscreen()">
+    <img *ngIf="!deviceFullscreenEnabled" src="assets/img/ui/icon-fullscreen.svg">
+    <img *ngIf="deviceFullscreenEnabled" src="assets/img/ui/icon-fullscreen-exit.svg">
+  </div>
+</div>

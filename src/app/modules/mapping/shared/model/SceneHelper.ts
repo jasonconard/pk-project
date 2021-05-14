@@ -2,10 +2,12 @@ import * as THREE from 'three';
 import { MathService } from '../services/math.service';
 import { SceneMap } from './SceneMap';
 import { BasicMeshService } from '../services/basic-mesh.service';
-import { MODELS } from '../constants/models';
+import { MODELS } from '../data/models/models';
 import { ScenePlayer } from './ScenePlayer';
 import { convertVec2, convertVec3 } from './SceneUtils';
+import { SceneBuilding } from './SceneBuilding';
 
+// export const CAMERA_LOOK = new THREE.Vector3(0, 2, 160);
 export const CAMERA_LOOK = new THREE.Vector3(0, 140, 160);
 export const TOO_CLOSE_LIMIT = 40;
 export const TOO_FAR_LIMIT = 480;
@@ -38,6 +40,25 @@ export class SceneHelper {
     this.camera.aspect = rect.width / rect.height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize( rect.width, rect.height );
+  }
+
+  public getPlayerScreenCoords(): THREE.Vector2 {
+    const vector = new THREE.Vector3();
+
+    const player = this.getPlayerMesh();
+    if(!player) { return null; }
+
+    const widthHalf = this.elem.clientWidth / 2;
+    const heightHalf = this.elem.clientHeight / 2;
+
+    player.updateMatrixWorld();
+    vector.setFromMatrixPosition(player.matrixWorld);
+    vector.project(this.camera);
+
+    vector.x = ( vector.x * widthHalf ) + widthHalf;
+    vector.y = - ( vector.y * heightHalf ) + heightHalf;
+
+    return new THREE.Vector2(vector.x, vector.y);
   }
 
   public buildPlayer() {
@@ -78,6 +99,33 @@ export class SceneHelper {
       });
     });
 
+  }
+
+  private flowersCount = 0;
+  public addFlowersToCoords(v: THREE.Vector3) {
+    const parcel = this.sceneMap.parcels[0];
+    const key = 'custom-flowers-' + (this.flowersCount++);
+    const model = MODELS.find(m => m.id === 'flowers');
+    const building: SceneBuilding = {
+      id: key,
+      modelId: 'flowers',
+      pos: {x: v.x, y: v.y, z: v.z},
+      passable: true,
+      canHide: false,
+      originModel: model,
+      events: []
+    }
+    parcel.buildings.push(building);
+
+    if(model) {
+      this.addMesh(parcel.id + '-' + key, BasicMeshService.makeModel(model));
+      const buildingMesh = this.meshes[parcel.id + '-' + key];
+      buildingMesh.position.x = parcel.pos.x + building.pos.x;
+      buildingMesh.position.y = parcel.pos.y + building.pos.y;
+      buildingMesh.position.z = parcel.pos.z + building.pos.z;
+    }
+
+    console.log(parcel.buildings);
   }
 
   public updateCameraAim() {

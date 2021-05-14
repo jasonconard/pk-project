@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { KeyCode } from '../model/key';
+import { getKeyFromAxes, KeyCode } from '../model/key';
 
 @Injectable({
   providedIn: 'root'
@@ -26,18 +26,9 @@ export class GamepadService {
       if(gamepad.buttons[15].pressed) { keySet.add(KeyCode.right); }
 
       const axes = [...gamepad.axes];
-      let xDir: KeyCode = null;
-      let zDir: KeyCode = null;
-      if(axes[0] < -0.2) { xDir = KeyCode.left; }
-      if(axes[0] > 0.2) { xDir = KeyCode.right; }
-      if(axes[1] < -0.2) { zDir = KeyCode.up; }
-      if(axes[1] > 0.2) { zDir = KeyCode.down; }
-      if(xDir != null && zDir != null) {
-        keySet.add(Math.abs(axes[0]) > Math.abs(axes[1]) ? xDir : zDir);
-      } else if(xDir != null) {
-        keySet.add(xDir);
-      } else if(zDir != null) {
-        keySet.add(zDir);
+      const key = getKeyFromAxes({ x: axes[0], y: axes[1] });
+      if(key) {
+        keySet.add(key);
       }
 
     }

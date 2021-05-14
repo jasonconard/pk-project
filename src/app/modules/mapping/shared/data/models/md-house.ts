@@ -1,4 +1,5 @@
-import { ObjSide, SceneModel } from '../model/SceneMap';
+import { SceneModel } from '../../model/SceneModel';
+import { ObjSide } from '../../model/SceneMap';
 
 export const MD_HOUSE: SceneModel = {
   id: 'house',
@@ -23,6 +24,9 @@ export const MD_HOUSE: SceneModel = {
     size: {x: 76, y: 31, z: 30},
     pos: {x: 0, y: 0, z: 0},
     rot: {x: 0, y: 0, z: 0},
+    depthWrite: true,
+    depthTest: true,
+    side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 0, y: 31}, max: {x: 76, y: 0}},
       back: {min: {x: 0, y: 31}, max: {x: 0, y: 0}},

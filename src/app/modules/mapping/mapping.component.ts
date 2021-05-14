@@ -6,8 +6,8 @@ import { SceneHelper } from './shared/model/SceneHelper';
 import { SceneService } from './shared/services/scene.service';
 import * as THREE from 'three';
 import { GamepadService } from '../../shared/service/gamepad.service';
-import { SCENE_MAP } from './shared/constants/scene';
-import { SCENE_PLAYER } from './shared/constants/player';
+import { SCENE_MAP } from './shared/data/scene';
+import { SCENE_PLAYER } from './shared/data/characters/player';
 import { debounceTime } from 'rxjs/operators';
 
 @Component({
@@ -18,6 +18,7 @@ import { debounceTime } from 'rxjs/operators';
 export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
+  private holdedKeys: PressedKey[] = [];
   private pressedKeys: PressedKey[] = [];
 
   private sceneHelper: SceneHelper = null;
@@ -38,12 +39,17 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     this.subs.push(this.keyService.pressedState.subscribe(keys => {
       this.pressedKeys = keys;
     }));
+    this.subs.push(this.keyService.holdedState.subscribe(keys => {
+      this.holdedKeys = keys;
+    }));
 
     this.subs.push(fromEvent(window, 'resize').pipe(debounceTime(200)).subscribe(
       (event) => {
         console.log('resize');
         if(this.sceneHelper) {
           this.sceneHelper.refreshRenderer();
+          const coords = this.sceneHelper.getPlayerScreenCoords();
+          this.axes = [coords.x, coords.y];
         }
       }));
   }
@@ -55,11 +61,14 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngAfterViewInit() {
     this.sceneHelper = SceneService.makeScene(this.canvasRef.nativeElement, SCENE_MAP, SCENE_PLAYER);
+    this.keyService.initTouch(this.canvasRef.nativeElement);
     this.sceneHelper.buildMeshes();
     this.sceneHelper.buildPlayer();
     this.updateSprite(SCENE_PLAYER.id);
 
-    console.log(this.sceneHelper.meshes);
+    this.sceneHelper.refreshRenderer();
+    const coords = this.sceneHelper.getPlayerScreenCoords();
+    this.axes = [coords.x, coords.y];
 
     setInterval(() => {
       this.framePerSec = this.frame;
@@ -69,9 +78,13 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     this.animate();
   }
 
+  public canAddFlowers: boolean = true;
+
   private animate(): void {
     this.frame++;
     requestAnimationFrame( () => { this.animate() });
+
+    this.keyService.updateGamePadKeys();
 
     const camera = this.sceneHelper.camera;
     this.sceneHelper.renderer.render( this.sceneHelper.scene, camera );
@@ -90,13 +103,6 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       sprite.position.y + move.y,
       sprite.position.z + move.z
     );
-
-    // const tree = this.sceneHelper.meshes['pallet-town-tree'];
-    // this.axes = [12, Object.keys(this.sceneHelper.meshes).length];
-    // if(tree) {
-    //   // console.log(tree);
-    //   tree.rotation.y += 0.01;
-    // }
 
     const spriteSize = new THREE.Vector3();
     new THREE.Box3().setFromObject(sprite).getSize(spriteSize);
@@ -151,6 +157,12 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       });
     });
 
+    if(this.pressedKeys.length) {
+      console.log(KeyCode[this.pressedKeys[0].code]);
+    }
+
+    this.keyService.clearPressedKey();
+
   }
 
   public vibrating = false;
@@ -175,7 +187,7 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     const move = new THREE.Vector3(0, 0, 0);
 
     const keySet = new Set<KeyCode>();
-    this.pressedKeys.forEach(key => { keySet.add(key.code)});
+    this.holdedKeys.forEach(key => { keySet.add(key.code)});
 
     GamepadService.getPressedKeys().forEach(key => { keySet.add(key) });
 
@@ -183,8 +195,22 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     // this.axes = keys;
 
     let speed = keys.indexOf(KeyCode.confirm) >= 0 ? 2.5 : 1.5;
-    if(keys.indexOf(KeyCode.cancel) >= 0) {
-      this.vibrate();
+
+    const pKeySet = new Set<KeyCode>();
+    this.pressedKeys.forEach(key => { pKeySet.add(key.code)});
+    let pKeys = Array.from(pKeySet);
+    if(this.pressedKeys.length) {
+      this.axes = [this.pressedKeys.length];
+    }
+    if(pKeys.indexOf(KeyCode.cancel) >= 0) {
+      // this.vibrate();
+
+      if(this.canAddFlowers) {
+        this.canAddFlowers = false;
+        const playerPos = this.sceneHelper.getPlayerMesh().position;
+        this.sceneHelper.addFlowersToCoords( new THREE.Vector3(playerPos.x,6,playerPos.z));
+        setTimeout( () => { this.canAddFlowers = true; }, 50);
+      }
     }
 
     for(let i = 0; i < keys.length; i++) {

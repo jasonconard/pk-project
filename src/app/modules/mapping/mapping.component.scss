@@ -49,3 +49,13 @@
   text-align: center;
   color: white;
 }
+
+.where-is-brian {
+  position: absolute;
+  z-index: 2;
+  width: 60px;
+  height: 60px;
+
+  border: 3px solid deeppink;
+  border-radius: 50%;
+}

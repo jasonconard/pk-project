@@ -1,4 +1,4 @@
-import { SceneModel } from '../model/SceneMap';
+import { SceneModel } from '../../model/SceneModel';
 
 export const MD_LABO: SceneModel = {
   id: 'labo',

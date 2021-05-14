@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { MaterialService } from './material.service';
-import { ObjSide, SceneModel } from '../model/SceneMap';
+import { ObjSide } from '../model/SceneMap';
+import { SceneModel } from '../model/SceneModel';
 
 @Injectable({
   providedIn: 'root'

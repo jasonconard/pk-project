@@ -1,4 +1,4 @@
-import { ScenePlayer } from '../model/ScenePlayer';
+import { ScenePlayer } from '../../model/ScenePlayer';
 
 export const SCENE_PLAYER: ScenePlayer = {
   id: 'player',

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MappingRoutingModule } from './mapping-routing.module';
 import { MappingComponent } from './mapping.component';
+import { StickComponent } from './stick/stick.component';
 
 @NgModule({
   imports: [
@@ -11,7 +12,8 @@ import { MappingComponent } from './mapping.component';
     MappingRoutingModule
   ],
   declarations: [
-    MappingComponent
+    MappingComponent,
+    StickComponent
   ],
   exports: [
     MappingComponent
