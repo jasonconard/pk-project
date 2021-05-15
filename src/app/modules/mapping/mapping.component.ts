@@ -1,20 +1,22 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
-import { KeyCode, PressedKey } from '../../shared/model/key';
-import { KeyService } from '../../shared/service/key.service';
+import { KeyCode, PressedKey } from '../../core/shared/model/PressedKey';
+import { KeyService } from '../../core/shared/service/key.service';
 import { SceneHelper } from './shared/model/SceneHelper';
 import { SceneService } from './shared/services/scene.service';
 import * as THREE from 'three';
-import { GamepadService } from '../../shared/service/gamepad.service';
+import { GamepadService } from '../../core/shared/service/gamepad.service';
 import { SCENE_MAP } from './shared/data/scene';
 import { SCENE_PLAYER } from './shared/data/characters/player';
 import { debounceTime } from 'rxjs/operators';
-import { TouchService } from '../../shared/service/touch.service';
+import { FADE_ANIM } from '../../core/shared/animations/FadeAnim';
+import { CoreService } from '../../core/shared/service/core.service';
 
 @Component({
   selector: 'mapping-main',
   templateUrl: './mapping.component.html',
-  styleUrls: ['./mapping.component.scss']
+  styleUrls: ['./mapping.component.scss'],
+  animations: [FADE_ANIM]
 })
 export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
@@ -24,23 +26,23 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private sceneHelper: SceneHelper = null;
 
+  public paused: boolean = false;
+  public loading: boolean = false;
+
   private frame: number = 0;
   public framePerSec: number = 0;
 
   public axes: number[] = [];
-
-  public isTouchDevice = false;
 
   private lastDirection: KeyCode = KeyCode.down;
 
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef;
 
   constructor(private keyService: KeyService,
-              private touchService: TouchService) {
+              private coreService: CoreService) {
   }
 
   ngOnInit() {
-    this.isTouchDevice = this.touchService.isTouchDevice;
 
     this.subs.push(this.keyService.pressedState.subscribe(keys => {
       this.pressedKeys = keys;
@@ -87,11 +89,28 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
   public canAddFlowers: boolean = true;
 
   private animate(): void {
-    this.frame++;
     requestAnimationFrame( () => { this.animate() });
 
     this.keyService.updateGamePadKeys();
 
+    const pauseClicked = !!this.pressedKeys.find( key => key.code === KeyCode.pause );
+
+    if(pauseClicked) {
+      this.togglePaused();
+    }
+
+    if(!this.paused) {
+      this.animateCanvas();
+    } else if(this.pressedKeys.find(key => key.code === KeyCode.cancel )) {
+      this.togglePaused();
+    }
+
+    this.keyService.clearPressedKey();
+
+  }
+
+  private animateCanvas() {
+    this.frame++;
     const camera = this.sceneHelper.camera;
     this.sceneHelper.renderer.render( this.sceneHelper.scene, camera );
 
@@ -109,6 +128,8 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       sprite.position.y + move.y,
       sprite.position.z + move.z
     );
+
+    // this.coreService.setLogs(JSON.stringify({ x: sprite.position.x, z: sprite.position.z}));
 
     const spriteSize = new THREE.Vector3();
     new THREE.Box3().setFromObject(sprite).getSize(spriteSize);
@@ -164,11 +185,8 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     });
 
     if(this.pressedKeys.length) {
-      console.log(KeyCode[this.pressedKeys[0].code]);
+      this.coreService.setLogs(KeyCode[this.pressedKeys[0].code]);
     }
-
-    this.keyService.clearPressedKey();
-
   }
 
   public vibrating = false;
@@ -205,9 +223,9 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     const pKeySet = new Set<KeyCode>();
     this.pressedKeys.forEach(key => { pKeySet.add(key.code)});
     let pKeys = Array.from(pKeySet);
-    if(this.pressedKeys.length) {
-      this.axes = [this.pressedKeys.length];
-    }
+    // if(this.pressedKeys.length) {
+    //   this.axes = [this.pressedKeys.length];
+    // }
     if(pKeys.indexOf(KeyCode.cancel) >= 0) {
       // this.vibrate();
 
@@ -269,23 +287,8 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     uvAtt.needsUpdate = true;
   }
 
-
-  private pushedBtns: string[] = [];
-
-  public isBtnPushed(btn: string) {
-    return this.pushedBtns.indexOf(btn) >= 0;
-  }
-
-  touchBtn(btn: string, action: string) {
-    const key = btn === 'a' ? KeyCode.confirm : KeyCode.cancel;
-    const btnId = this.pushedBtns.indexOf(btn);
-    if(action === 'up') {
-      this.pushedBtns.splice(btnId, 1);
-      this.keyService.setKeyUp(key);
-    } else if (action === 'down'){
-      if(btnId < 0) { this.pushedBtns.push(btn); }
-      this.keyService.setKeyDown(key);
-    }
+  togglePaused() {
+    this.paused = !this.paused;
   }
 
 }

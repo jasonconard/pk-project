@@ -7,7 +7,7 @@ import { ScenePlayer } from './ScenePlayer';
 import { convertVec2, convertVec3 } from './SceneUtils';
 import { SceneBuilding } from './SceneBuilding';
 
-// export const CAMERA_LOOK = new THREE.Vector3(0, 2, 160);
+// export const CAMERA_LOOK = new THREE.Vector3(0, 300, 160);
 export const CAMERA_LOOK = new THREE.Vector3(0, 140, 160);
 export const TOO_CLOSE_LIMIT = 40;
 export const TOO_FAR_LIMIT = 480;

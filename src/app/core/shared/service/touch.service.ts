@@ -1,23 +1,38 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
-import { Stick, STICK_RADIUS } from '../../modules/mapping/shared/model/Stick';
-import { Subject } from 'rxjs';
+import { Stick, STICK_RADIUS } from '../model/Stick';
+import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TouchService {
 
-  private stickSubject = new Subject<Stick>();
-  public stickState = this.stickSubject.asObservable();
+
+  public isTouchDevice: boolean = false;
+  private isTouchDeviceSubject = new BehaviorSubject<boolean>(this.isTouchDevice);
+  public isTouchDeviceState = this.isTouchDeviceSubject.asObservable();
 
   public stick: Stick = null;
-
-  public isTouchDevice: boolean = ("ontouchstart" in document.documentElement);
+  private stickSubject = new Subject<Stick>();
+  public stickState = this.stickSubject.asObservable();
 
   private directionTouches = null;
 
   constructor() {
+    this.updateIsTouchDevice();
+    fromEvent(window, 'resize').subscribe(
+      (event) => {
+        this.updateIsTouchDevice();
+      })
+  }
+
+  public updateIsTouchDevice() {
+    this.isTouchDevice = (('ontouchstart' in window) ||
+      (navigator.maxTouchPoints > 0) ||
+      (navigator.msMaxTouchPoints > 0));
+    this.isTouchDeviceSubject.next(this.isTouchDevice);
   }
 
   public updateStick(stick: Stick) {

@@ -2,7 +2,11 @@
   <router-outlet></router-outlet>
 
   <div class="btn-fullscreen" (click)="toggleFullscreen()">
-    <img *ngIf="!deviceFullscreenEnabled" src="assets/img/ui/icon-fullscreen.svg">
-    <img *ngIf="deviceFullscreenEnabled" src="assets/img/ui/icon-fullscreen-exit.svg">
+    <img *ngIf="!fullScreened" src="assets/img/ui/icon-fullscreen.svg">
+    <img *ngIf="fullScreened" src="assets/img/ui/icon-fullscreen-exit.svg">
+  </div>
+
+  <div class="logs" *ngIf="logs && debugMode">
+    {{logs}}
   </div>
 </div>

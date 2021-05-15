@@ -1,7 +1,7 @@
-import { Vec2 } from '../../modules/mapping/shared/model/SceneUtils';
+import { Vec2 } from '../../../modules/mapping/shared/model/SceneUtils';
 
 export enum KeyCode {
-  confirm, cancel, left, right, down, up
+  confirm, cancel, left, right, down, up, x, y, pause, select
 }
 
 export interface PressedKey {

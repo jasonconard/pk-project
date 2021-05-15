@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { CoreService } from './shared/service/core.service';
+import { CoreService } from './core/shared/service/core.service';
+import { auditTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -7,32 +8,24 @@ import { CoreService } from './shared/service/core.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  public deviceFullscreenEnabled: boolean = false;
-  public canFullscreen: boolean = document.documentElement.requestFullscreen || document.documentElement['webkitRequestFullScreen'] || document.documentElement['mozRequestFullScreen'] || document.documentElement['msRequestFullscreen'];
 
-  public forcedFullscreen: boolean = false;
+  public logs: string = '';
+  public debugMode: boolean = false;
+  public fullScreened: boolean = false;
 
   constructor(private coreService: CoreService) {
   }
 
   ngOnInit() {
-    this.forcedFullscreen = this.coreService.forcedFullscreen;
-
-    this.coreService.forcedFullscreenState.subscribe(forced => {
-      this.forcedFullscreen = forced;
+    this.coreService.fullScreenedState.subscribe(forced => {
+      this.fullScreened = forced;
+    });
+    this.coreService.logsState.pipe(auditTime(20)).subscribe(logs => {
+      this.logs = logs;
     });
   }
 
   toggleFullscreen() {
-    if(this.deviceFullscreenEnabled) {
-      const rfs = document.exitFullscreen || document['webkitCancelFullScreen'] || document['mozCancelFullScreen'] || document['msExitFullscreen'];
-      rfs.call(document);
-      this.deviceFullscreenEnabled = false;
-    } else {
-      const el = document.documentElement;
-      const rfs = el.requestFullscreen || el['webkitRequestFullScreen'] || el['mozRequestFullScreen'] || el['msRequestFullscreen'];
-      rfs.call(el);
-      this.deviceFullscreenEnabled = true;
-    }
+    this.coreService.toggleFullScreen();
   }
 }

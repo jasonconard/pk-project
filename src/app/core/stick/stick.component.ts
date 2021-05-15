@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Stick } from '../shared/model/Stick';
-import { TouchService } from '../../../shared/service/touch.service';
+import { TouchService } from '../shared/service/touch.service';
 
 @Component({
-  selector: 'app-stick',
+  selector: 'core-stick',
   templateUrl: './stick.component.html',
   styleUrls: ['./stick.component.scss']
 })

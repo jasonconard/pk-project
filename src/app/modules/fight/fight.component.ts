@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
-import { KeyService } from '../../shared/service/key.service';
+import { KeyService } from '../../core/shared/service/key.service';
 import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
-import { KeyCode, PressedKey } from '../../shared/model/key';
-import { ElementType, getElementTable } from '../../shared/model/pokemon/pkElement';
+import { KeyCode, PressedKey } from '../../core/shared/model/key';
+import { ElementType, getElementTable } from '../../core/shared/model/pokemon/pkElement';
 
 @Component({
   selector: 'fight-main',

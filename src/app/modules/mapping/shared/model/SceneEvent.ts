@@ -1,5 +1,5 @@
 import { VecBox3 } from './SceneUtils';
-import { KeyCode } from '../../../../shared/model/key';
+import { KeyCode } from '../../../../core/shared/model/PressedKey';
 
 export interface SceneEvent {
   conditions: SceneEventCondition[]

@@ -1,0 +1,12 @@
+<div class="right-touch-btns" *ngIf="isTouchDevice">
+  <div class="btn-container"
+       *ngFor="let btn of btns"
+       [style]="getBtnStyle(btn, true)"
+       (touchend)="touchBtn(btn, 'up')"
+       (touchstart)="touchBtn(btn, 'down')">
+    <div class="btn"
+         [style]="getBtnStyle(btn, false)">
+      {{ btn.label.toUpperCase() }}
+    </div>
+  </div>
+</div>

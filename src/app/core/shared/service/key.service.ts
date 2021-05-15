@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, fromEvent } from 'rxjs';
-import { getKeyFromAxes, KeyCode, PressedKey } from '../model/key';
+import { getKeyFromAxes, KeyCode, PressedKey } from '../model/PressedKey';
 import { GamepadService } from './gamepad.service';
 import { TouchService } from './touch.service';
-import { Stick, STICK_RADIUS } from '../../modules/mapping/shared/model/Stick';
+import { Stick, STICK_RADIUS } from '../model/Stick';
+import { CoreService } from './core.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,8 @@ export class KeyService {
   private holdedSubject = new BehaviorSubject<PressedKey[]>(this.holdedKeys);
   public holdedState = this.holdedSubject.asObservable();
 
-  constructor(private touchService: TouchService) {
+  constructor(private coreService: CoreService,
+              private touchService: TouchService) {
     fromEvent(document, 'keydown').subscribe((ev: KeyboardEvent) => {
       const code: KeyCode = KeyService.getKeyCodeFromKeyboard(ev);
       this.setKeyDown(code)
@@ -35,6 +37,16 @@ export class KeyService {
     this.touchService.stickState.subscribe(stick => {
       this.updateStick(stick);
     });
+    this.coreService.resumedState.subscribe( resumed => {
+      this.clearKeys();
+    });
+  }
+
+  public clearKeys() {
+    this.pressedKeys = [];
+    this.pressedSubject.next(this.pressedKeys);
+    this.holdedKeys = [];
+    this.holdedSubject.next(this.holdedKeys);
   }
 
   public initTouch(e: HTMLElement) {
@@ -124,6 +136,17 @@ export class KeyService {
       case 'ArrowUp': return KeyCode.up;
       case 'ArrowLeft': return KeyCode.left;
       case 'ArrowRight': return KeyCode.right;
+      case 's': return KeyCode.down;
+      case 'z': return KeyCode.up;
+      case 'q': return KeyCode.left;
+      case 'd': return KeyCode.right;
+      case 'a': return KeyCode.cancel;
+      case 'e': return KeyCode.confirm;
+      case ' ': return KeyCode.confirm;
+      case 'r': return KeyCode.x;
+      case 'f': return KeyCode.y;
+      case 'p': return KeyCode.pause;
+      case 'o': return KeyCode.select;
     }
     return null;
   }

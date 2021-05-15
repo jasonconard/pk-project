@@ -1,4 +1,4 @@
-import { Vec2 } from './SceneUtils';
+import { Vec2 } from '../../../modules/mapping/shared/model/SceneUtils';
 
 export const STICK_RADIUS = 60;
 
