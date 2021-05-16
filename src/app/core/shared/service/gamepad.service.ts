@@ -6,6 +6,8 @@ import { getKeyFromAxes, KeyCode } from '../model/PressedKey';
 })
 export class GamepadService {
 
+  public vibrating = false;
+
   constructor() {
   }
 
@@ -40,5 +42,19 @@ export class GamepadService {
     return Array.from(keySet);
   }
 
+  public vibrate() {
+    const gamepad = navigator.getGamepads()[0];
+    const va = gamepad && gamepad['vibrationActuator'];
+    if(va && !this.vibrating) {
+      this.vibrating = true;
+      va.playEffect("dual-rumble", {
+        startDelay: 0,
+        duration: 2,
+        weakMagnitude: 0.5,
+        strongMagnitude: 0.5
+      });
+      // setTimeout( () => { this.vibrating = false; }, 20);
+    }
+  }
 
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MappingRoutingModule } from './mapping-routing.module';
 import { MappingComponent } from './mapping.component';
 import { CoreModule } from '../../core/core.module';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ModelChoiceComponent } from './model-choice/model-choice.component';
 
 @NgModule({
   imports: [
@@ -14,7 +14,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MappingRoutingModule
   ],
   declarations: [
-    MappingComponent
+    MappingComponent,
+    ModelChoiceComponent
   ],
   exports: [
     MappingComponent

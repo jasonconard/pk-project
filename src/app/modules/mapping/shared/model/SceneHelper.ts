@@ -7,7 +7,7 @@ import { ScenePlayer } from './ScenePlayer';
 import { convertVec2, convertVec3 } from './SceneUtils';
 import { SceneBuilding } from './SceneBuilding';
 
-// export const CAMERA_LOOK = new THREE.Vector3(0, 300, 160);
+// export const CAMERA_LOOK = new THREE.Vector3(0, 30, 160);
 export const CAMERA_LOOK = new THREE.Vector3(0, 140, 160);
 export const TOO_CLOSE_LIMIT = 40;
 export const TOO_FAR_LIMIT = 480;
@@ -101,14 +101,14 @@ export class SceneHelper {
 
   }
 
-  private flowersCount = 0;
-  public addFlowersToCoords(v: THREE.Vector3) {
+  private modelCount = 0;
+  public addModelToCoords(modelId: string, v: THREE.Vector3) {
     const parcel = this.sceneMap.parcels[0];
-    const key = 'custom-flowers-' + (this.flowersCount++);
-    const model = MODELS.find(m => m.id === 'flowers');
+    const key = 'custom-model-' + (this.modelCount++);
+    const model = MODELS.find(m => m.id === modelId);
     const building: SceneBuilding = {
       id: key,
-      modelId: 'flowers',
+      modelId,
       pos: {x: v.x, y: v.y, z: v.z},
       passable: true,
       canHide: false,
@@ -125,7 +125,6 @@ export class SceneHelper {
       buildingMesh.position.z = parcel.pos.z + building.pos.z;
     }
 
-    console.log(parcel.buildings);
   }
 
   public updateCameraAim() {

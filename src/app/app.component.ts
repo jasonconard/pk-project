@@ -10,7 +10,7 @@ import { auditTime } from 'rxjs/operators';
 export class AppComponent implements OnInit {
 
   public logs: string = '';
-  public debugMode: boolean = false;
+  public debugMode: boolean = true;
   public fullScreened: boolean = false;
 
   constructor(private coreService: CoreService) {
@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
     this.coreService.fullScreenedState.subscribe(forced => {
       this.fullScreened = forced;
     });
-    this.coreService.logsState.pipe(auditTime(20)).subscribe(logs => {
+    this.coreService.logsState.pipe(auditTime(1)).subscribe(logs => {
       this.logs = logs;
     });
   }

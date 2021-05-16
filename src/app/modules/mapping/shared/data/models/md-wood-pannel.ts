@@ -10,7 +10,7 @@ export const MD_WOOD_PANNEL: SceneModel = {
   planes: [],
   boxes: [{ // TEXT
     size: {x: 14, y: 8, z: 3},
-    pos: {x: 0, y: 3, z: 0},
+    pos: {x: 0, y: 5, z: 0},
     rot: {x: 0, y: 0, z: 0},
     uvs: {
       front: {min: {x: 0, y: 8}, max: {x: 14, y: 0}},
@@ -22,7 +22,7 @@ export const MD_WOOD_PANNEL: SceneModel = {
     }
   },{ // PILLAR
     size: {x: 4, y: 15, z: 4},
-    pos: {x: 0, y: 0.5, z: -2},
+    pos: {x: 0, y: 2.5, z: -2},
     rot: {x: 0, y: 0, z: 0},
     uvs: {
       front: {min: {x: 0, y: 27}, max: {x: 4, y: 12}},

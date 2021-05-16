@@ -2,7 +2,7 @@
 
 </div>
 
-<div class="fps-count" (click)="vibrate()">
+<div class="fps-count">
   {{ framePerSec }} fps
 </div>
 
@@ -21,6 +21,8 @@
 <div class="pause-screen" [@fadeAnim] *ngIf="paused" (touchend)="togglePaused()">
   Pause
 </div>
-<!--<div class="where-is-brian" [ngStyle]="{ left: axes[0]-30 + 'px', top: axes[1]-30 + 'px'}">-->
 
-<!--</div>-->
+<mapping-model-choice [@fadeAnim]
+  *ngIf="drawModelOpen"
+  [selectedModel]="drawModelId"
+  (onModelChange)="drawModelId = $event; drawModelOpen = false;"></mapping-model-choice>

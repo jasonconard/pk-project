@@ -10,7 +10,7 @@ export const MD_FLOWERS: SceneModel = {
   },
   planes: [{
     size: {x: 11, y: 12, z: 0},
-    pos: {x: 2, y: 0, z: 4},
+    pos: {x: 2, y: 6, z: 4},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: false,
     depthTest: false,
@@ -21,7 +21,7 @@ export const MD_FLOWERS: SceneModel = {
     }
   },{
     size: {x: 10, y: 13, z: 0},
-    pos: {x: -2, y: 0, z: -4},
+    pos: {x: -2, y: 6, z: -4},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: false,
     depthTest: false,

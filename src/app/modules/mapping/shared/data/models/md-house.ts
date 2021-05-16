@@ -10,7 +10,7 @@ export const MD_HOUSE: SceneModel = {
   },
   planes: [{ // FRONT TOP WALL
     size: {x: 76, y: 6, z: 0},
-    pos: {x: 0, y: 17, z: 15},
+    pos: {x: 0, y: 33, z: 15},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: false,
     depthTest: true,
@@ -22,7 +22,7 @@ export const MD_HOUSE: SceneModel = {
   }],
   boxes: [{ // WALLS
     size: {x: 76, y: 31, z: 30},
-    pos: {x: 0, y: 0, z: 0},
+    pos: {x: 0, y: 16, z: 0},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
@@ -37,7 +37,7 @@ export const MD_HOUSE: SceneModel = {
     }
   },{ // CEIL TOP
     size: {x: 58, y: 3, z: 32},
-    pos: {x: 0, y: 23, z: 2},
+    pos: {x: 0, y: 39.1, z: 2},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
@@ -52,7 +52,7 @@ export const MD_HOUSE: SceneModel = {
     }
   },{ // CEIL TOP LEFT
     size: {x: 18, y: 3, z: 32},
-    pos: {x: -35, y: 17, z: 1.99},
+    pos: {x: -35, y: 33, z: 1.99},
     rot: {x: 0, y: 0, z: Math.PI / 4},
     depthWrite: true,
     depthTest: true,
@@ -67,7 +67,7 @@ export const MD_HOUSE: SceneModel = {
     }
   },{ // CEIL TOP RIGHT
     size: {x: 18, y: 3, z: 32},
-    pos: {x: 35, y: 17, z: 1.99},
+    pos: {x: 35, y: 33, z: 1.99},
     rot: {x: 0, y: 0, z: -Math.PI / 4},
     depthWrite: true,
     depthTest: true,

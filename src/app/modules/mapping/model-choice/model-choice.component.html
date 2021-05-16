@@ -1,0 +1,11 @@
+<div class="choices">
+  <div class="choice" *ngFor="let choice of filteredChoices; let i = index"
+       [@modelChoiceFadeAnim]="{ value: ':leave, :enter', params: { leftOffset: i % 3 ? '-10' : '10' } }"
+       (mousedown)="selectModel(choice)"
+       [class.selected]="isSelectedModel(choice)">
+    <div class="pic">
+      <img *ngIf="choice.croppedPic" @fadeAnim [src]="choice.croppedPic">
+    </div>
+    <div class="title">{{ choice.model.id }}</div>
+  </div>
+</div>

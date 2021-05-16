@@ -22,21 +22,21 @@ export const PC_PALLET_TOWN: SceneParcel = {
   },{
     id: 'labo',
     modelId: 'labo',
-    pos: {x: 71, y: 16, z: 20},
+    pos: {x: 71, y: 0, z: 20},
     passable: false,
     canHide: true,
     events: []
   },{
     id: 'house1',
     modelId: 'house',
-    pos: {x: -71, y: 16, z: -70},
+    pos: {x: -71, y: 0, z: -70},
     passable: false,
     canHide: true,
     events: []
   },{
     id: 'house2',
     modelId: 'house',
-    pos: {x: 71, y: 16, z: -70},
+    pos: {x: 71, y: 0, z: -70},
     passable: false,
     canHide: true,
     events: []
@@ -71,21 +71,21 @@ export const PC_PALLET_TOWN: SceneParcel = {
   }}),{
     id: 'wood-pannel',
     modelId: 'wood-pannel',
-    pos: {x: -105, y: 2, z: 52},
+    pos: {x: -105, y: 0, z: 52},
     passable: false,
     canHide: false,
     events: []
   },{
     id: 'pannel',
     modelId: 'pannel',
-    pos: {x: -40, y: 2, z: 5},
+    pos: {x: -40, y: 0, z: 5},
     passable: false,
     canHide: false,
     events: []
   },{
     id: 'pannel2',
     modelId: 'pannel',
-    pos: {x: 72, y: 2, z: 85},
+    pos: {x: 72, y: 0, z: 85},
     passable: false,
     canHide: false,
     events: []
@@ -93,7 +93,7 @@ export const PC_PALLET_TOWN: SceneParcel = {
     return {
       id: 'barrier-' + i,
       modelId: 'barrier',
-      pos: {x: -108 + (i * 8), y: 4, z: 3},
+      pos: {x: -108 + (i * 8), y: 0, z: 3},
       passable: false,
       canHide: false,
       events: []
@@ -102,7 +102,7 @@ export const PC_PALLET_TOWN: SceneParcel = {
     return {
       id: 'barrier-' + i,
       modelId: 'barrier',
-      pos: {x: 20 + ((i - 8) * 8), y: 4, z: 83},
+      pos: {x: 20 + ((i - 8) * 8), y: 0, z: 83},
       passable: false,
       canHide: false,
       events: []
@@ -111,7 +111,7 @@ export const PC_PALLET_TOWN: SceneParcel = {
     return {
       id: 'barrier-' + i,
       modelId: 'barrier',
-      pos: {x: 36 + ((i - 8) * 8), y: 4, z: 83},
+      pos: {x: 36 + ((i - 8) * 8), y: 0, z: 83},
       passable: false,
       canHide: false,
       events: []
@@ -122,7 +122,7 @@ export const PC_PALLET_TOWN: SceneParcel = {
     return {
       id: 'flowers-' + i,
       modelId: 'flowers',
-      pos: {x, y: 6, z },
+      pos: {x, y: 0, z },
       passable: true,
       canHide: false,
       events: []

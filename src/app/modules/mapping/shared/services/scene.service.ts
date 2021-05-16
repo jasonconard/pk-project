@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { CAMERA_LOOK, SceneHelper, SHADE_OFFSET, TOO_FAR_LIMIT } from '../model/SceneHelper';
 import { SceneMap } from '../model/SceneMap';
-import { ScenePlayer } from '../model/ScenePlayer';
+import { PlayerDirection, ScenePlayer } from '../model/ScenePlayer';
+import { KeyCode } from '../../../../core/shared/model/PressedKey';
 
 @Injectable({
   providedIn: 'root'
@@ -58,5 +59,76 @@ export class SceneService {
     const elem = element;
 
     return new SceneHelper({ scene, elem, camera, light, renderer, meshes, sceneMap, scenePlayer });
+  }
+
+  public static checkCollisions(sceneHelper: SceneHelper, playerMesh: THREE.Mesh, move: THREE.Vector3) {
+    const nextPosition = new THREE.Vector3(
+      playerMesh.position.x + move.x,
+      playerMesh.position.y + move.y,
+      playerMesh.position.z + move.z
+    );
+
+    const spriteSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(playerMesh).getSize(spriteSize);
+
+    const parcel = sceneHelper.sceneMap.parcels[0];
+    const limitX = parcel.pos.x + (parcel.size.x / 2) - (spriteSize.x / 2);
+    const limitZ = parcel.pos.z + (parcel.size.y / 2);
+
+    if(nextPosition.x < -limitX) { move.x = 0; }
+    if(nextPosition.x > limitX) { move.x = 0; }
+    if(nextPosition.z < -limitZ) { move.z = 0; }
+    if(nextPosition.z > limitZ) { move.z = 0; }
+
+
+    sceneHelper.sceneMap.parcels.forEach(parcel => {
+      parcel.buildings.forEach(building => {
+        if(!building.originModel) {
+          return;
+        }
+        if(building.passable) {
+          return;
+        }
+        const bounds = sceneHelper.getBounds(parcel.id + '-' + building.id);
+        const hb = building.originModel.hitBox;
+        const spx = (spriteSize.x / 2);
+        const bMinX = bounds.min.x - spx - hb.min.x;
+        const bMaxX = bounds.max.x + spx - hb.max.x;
+        const npx = nextPosition.x;
+        const npz = nextPosition.z;
+
+
+        if(npx >= bMinX && npx <= bMaxX) {
+          if(npz >= bounds.min.z - hb.min.z && npz < bounds.max.z + hb.max.z) {
+            move.z = 0;
+            move.x = 0;
+          }
+        }
+      });
+    });
+  }
+
+
+  public static getMove(sceneHelper: SceneHelper, holdedCodes: KeyCode[]): { move: THREE.Vector3, speed: number } {
+    const move = new THREE.Vector3(0, 0, 0);
+
+    let speed = holdedCodes.indexOf(KeyCode.confirm) >= 0 ? 2.5 : 1.5;
+
+    let playerSpeed = 0;
+
+    let direction = sceneHelper.scenePlayer.dir;
+    for(let i = 0; i < holdedCodes.length; i++) {
+      const key = holdedCodes[i];
+      switch (key) {
+        case KeyCode.up: move.z = -speed; direction = PlayerDirection.UP; holdedCodes = []; playerSpeed = speed; break;
+        case KeyCode.left: move.x = -speed; direction = PlayerDirection.LEFT; holdedCodes = []; playerSpeed = speed; break;
+        case KeyCode.down: move.z = speed; direction = PlayerDirection.DOWN; holdedCodes = []; playerSpeed = speed; break;
+        case KeyCode.right: move.x = speed; direction = PlayerDirection.RIGHT; holdedCodes = []; playerSpeed = speed; break;
+      }
+    }
+
+    sceneHelper.scenePlayer.dir = direction;
+
+    return { move, speed: playerSpeed };
   }
 }

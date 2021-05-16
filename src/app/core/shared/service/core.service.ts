@@ -29,7 +29,7 @@ export class CoreService {
       ev.preventDefault();
     });
     fromEvent(document, 'contextmenu').subscribe((ev) => {
-      ev.preventDefault();
+      // ev.preventDefault();
     });
   }
 

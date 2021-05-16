@@ -14,12 +14,14 @@ export class KeyService {
   private gamepadKeys: KeyCode[] = [];
   private stickKeys: KeyCode[] = [];
 
-  private pressedKeys: PressedKey[] = [];
+  public pressedKeys: PressedKey[] = [];
+  public pressedCodes: KeyCode[] = [];
 
   private pressedSubject = new BehaviorSubject<PressedKey[]>(this.pressedKeys);
   public pressedState = this.pressedSubject.asObservable();
 
-  private holdedKeys: PressedKey[] = [];
+  public holdedKeys: PressedKey[] = [];
+  public holdedCodes: KeyCode[] = [];
 
   private holdedSubject = new BehaviorSubject<PressedKey[]>(this.holdedKeys);
   public holdedState = this.holdedSubject.asObservable();
@@ -44,8 +46,10 @@ export class KeyService {
 
   public clearKeys() {
     this.pressedKeys = [];
+    this.pressedCodes = [];
     this.pressedSubject.next(this.pressedKeys);
     this.holdedKeys = [];
+    this.holdedCodes = [];
     this.holdedSubject.next(this.holdedKeys);
   }
 
@@ -102,6 +106,7 @@ export class KeyService {
 
   public clearPressedKey() {
     this.pressedKeys = [];
+    this.pressedCodes = [];
     this.pressedSubject.next(this.pressedKeys);
   }
 
@@ -111,8 +116,10 @@ export class KeyService {
       if(!codeExists) {
         const pressedTime = new Date().getTime();
         this.pressedKeys.unshift({ code, pressedTime });
+        this.pressedCodes.unshift(code);
         this.pressedSubject.next(this.pressedKeys);
         this.holdedKeys.unshift({ code, pressedTime });
+        this.holdedCodes.unshift(code);
         this.holdedSubject.next(this.holdedKeys);
       }
     }
@@ -123,6 +130,7 @@ export class KeyService {
       const codeIndex = this.holdedKeys.findIndex(pressedKey => pressedKey.code === code);
       if(codeIndex >= 0) {
         this.holdedKeys.splice(codeIndex, 1);
+        this.holdedCodes.splice(codeIndex, 1);
         this.holdedSubject.next(this.holdedKeys);
       }
     }

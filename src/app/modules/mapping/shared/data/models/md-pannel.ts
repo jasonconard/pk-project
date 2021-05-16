@@ -10,7 +10,7 @@ export const MD_PANNEL: SceneModel = {
   planes: [],
   boxes: [{ // TEXT
     size: {x: 16, y: 9, z: 2},
-    pos: {x: 0, y: 4, z: 0},
+    pos: {x: 0, y: 6, z: 0},
     rot: {x: 0, y: 0, z: 0},
     uvs: {
       front: {min: {x: 16, y: 9}, max: {x: 0, y: 0}},
@@ -22,7 +22,7 @@ export const MD_PANNEL: SceneModel = {
     }
   },{ // PILLAR
     size: {x: 3, y: 11, z: 3},
-    pos: {x: -4, y: 0.5, z: -2},
+    pos: {x: -4, y: 2.5, z: -2},
     rot: {x: 0, y: 0, z: 0},
     uvs: {
       front: {min: {x: 3, y: 28}, max: {x: 0, y: 17}},
@@ -34,7 +34,7 @@ export const MD_PANNEL: SceneModel = {
     }
   },{ // PILLAR
     size: {x: 3, y: 11, z: 3},
-    pos: {x: 4, y: 0.5, z: -2},
+    pos: {x: 4, y: 2.5, z: -2},
     rot: {x: 0, y: 0, z: 0},
     uvs: {
       front: {min: {x: 3, y: 28}, max: {x: 0, y: 17}},
