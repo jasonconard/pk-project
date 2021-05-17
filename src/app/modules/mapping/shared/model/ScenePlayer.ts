@@ -1,5 +1,4 @@
 import { Vec2, Vec3 } from './SceneUtils';
-import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { SceneHelper } from './SceneHelper';
 
 export enum PlayerDirection {
@@ -28,16 +27,6 @@ export interface PlayerMove {
   currentFrame: number,
   framePerSecond: number,
   status: PlayerMoveStatus
-}
-
-export function getPlayerDirectionFromKeyCode(k: KeyCode) {
-  switch (k) {
-    case KeyCode.up: return PlayerDirection.UP;
-    case KeyCode.down: return PlayerDirection.DOWN;
-    case KeyCode.left: return PlayerDirection.LEFT;
-    case KeyCode.right: return PlayerDirection.RIGHT;
-    default: return null;
-  }
 }
 
 export function isPlayerMoving(pm: PlayerMove) {

@@ -11,8 +11,9 @@ import { FADE_ANIM } from '../../core/shared/animations/FadeAnim';
 import { PlayerDirection, PlayerMoveStatus } from './shared/model/ScenePlayer';
 import { PlayerService } from './shared/services/player.service';
 import * as THREE from 'three';
-import { CoreService } from '../../core/shared/service/core.service';
 import { Vec3 } from './shared/model/SceneUtils';
+import { EventService } from './shared/services/event.service';
+import { SceneEvent } from './shared/model/SceneEvent';
 
 @Component({
   selector: 'mapping-main',
@@ -37,10 +38,12 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
   public axes: number[] = [];
 
+  public sequenceLaunched = false;
+
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef;
 
   constructor(private keyService: KeyService,
-              private coreService: CoreService) {
+              private eventService: EventService) {
   }
 
   ngOnInit() {
@@ -113,7 +116,7 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
   }
 
-  private pixelSize = 16;
+  private pixelSize = 8;
   private isMoving = 0;
   private moveRatio: Vec3 = { x:0, y:0, z:0 };
   private moveSpeed: number = 0;
@@ -128,7 +131,7 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.funOption(this.keyService.pressedCodes);
 
-    const moveDetails = SceneService.getMove(this.sceneHelper, this.keyService.holdedCodes);
+    const moveDetails = this.sequenceLaunched ? { move: { x: 0, y: 0, z: 0 }, speed: 0 } : SceneService.getMove(this.sceneHelper, this.keyService.holdedCodes);
     const move = moveDetails.move;
 
     let mouvStatus: PlayerMoveStatus = PlayerMoveStatus.STAYING;
@@ -178,7 +181,18 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       sprite.position.z += this.moveRatio.z;
     }
 
-    SceneService.checkEvents(this.sceneHelper, sprite, this.keyService.pressedCodes);
+    if(!this.sequenceLaunched) {
+      const event: SceneEvent = EventService.checkEvents(this.sceneHelper, sprite, this.keyService.pressedCodes);
+
+      if(event) {
+        this.sequenceLaunched = true;
+        this.eventService.launchSequence(event);
+
+        setTimeout(() => {
+          this.sequenceLaunched = false;
+        }, 1);
+      }
+    }
 
     this.sceneHelper.sceneMap.parcels.forEach(parcel => {
       parcel.buildings.forEach(building => {

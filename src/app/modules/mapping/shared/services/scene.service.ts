@@ -109,30 +109,6 @@ export class SceneService {
     });
   }
 
-  public static checkEvents(sceneHelper: SceneHelper, playerMesh: THREE.Mesh, pressedCodes: KeyCode[]) {
-    sceneHelper.sceneMap.parcels.forEach(parcel => {
-      parcel.buildings.forEach(building => {
-        if(building.modelId === 'pannel') {
-          const bounds = sceneHelper.getBounds(parcel.id + '-' + building.id);
-          const zDiff = playerMesh.position.z - bounds.max.z;
-          if(bounds &&
-             bounds.min.x < playerMesh.position.x &&
-             bounds.max.x > playerMesh.position.x &&
-             zDiff > 0 && zDiff < 16
-          ) {
-            if(pressedCodes.indexOf(KeyCode.confirm) >= 0) {
-              if(sceneHelper.scenePlayer.dir === PlayerDirection.UP) {
-                CoreService.me.setLogs(building.id + ' clicked');
-                setTimeout( () => { CoreService.me.setLogs('')}, 1000);
-              }
-            }
-          }
-        }
-      });
-    });
-  }
-
-
   public static getMove(sceneHelper: SceneHelper, holdedCodes: KeyCode[]): { move: THREE.Vector3, speed: number } {
     const move = new THREE.Vector3(0, 0, 0);
 

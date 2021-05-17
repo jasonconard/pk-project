@@ -1,4 +1,7 @@
 import { SceneParcel } from '../../model/SceneMap';
+import { PlayerDirection } from '../../model/ScenePlayer';
+import { KeyCode } from '../../../../../core/shared/model/PressedKey';
+import { InstructionType } from '../../model/SceneEventInstruction';
 
 export const PC_PALLET_TOWN: SceneParcel = {
   id: 'pallet-town',
@@ -81,14 +84,38 @@ export const PC_PALLET_TOWN: SceneParcel = {
     pos: {x: -40, y: 0, z: 5},
     passable: false,
     canHide: false,
-    events: []
+    events: [{
+      conditions: {
+        direction: PlayerDirection.UP,
+        pressedKey: KeyCode.confirm,
+        bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 16} }
+      },
+      sequence: [
+        {
+          type: InstructionType.LOG,
+          log: { text: 'Coucou' }
+        }
+      ]
+    }]
   },{
     id: 'pannel2',
     modelId: 'pannel',
     pos: {x: 72, y: 0, z: 85},
     passable: false,
     canHide: false,
-    events: []
+    events: [{
+      conditions: {
+        direction: PlayerDirection.UP,
+        pressedKey: KeyCode.confirm,
+        bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 16} }
+      },
+      sequence: [
+        {
+          type: InstructionType.MESSAGE,
+          message: { name: 'Jason', text: 'Coucou' }
+        }
+      ]
+    }]
   }, ...[0, 1, 2, 3, 4, 5, 6, 7].map(i => {
     return {
       id: 'barrier-' + i,
