@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { isPlayerMoving, PlayerDirection, PlayerMove, PlayerMoveStatus } from '../model/ScenePlayer';
 
 import { VecBox2 } from '../model/SceneUtils';
-import { CoreService } from '../../../../core/shared/service/core.service';
 
 
 @Injectable({

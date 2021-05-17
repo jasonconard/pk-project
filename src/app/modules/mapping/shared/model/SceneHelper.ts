@@ -66,6 +66,8 @@ export class SceneHelper {
     if(!p) { return; }
     this.addMesh(p.id, BasicMeshService.makePlane(p.tex.link, convertVec2(p.tex.size), true));
     this.meshes[p.id].position.y = 21/2;
+    this.meshes[p.id].position.x = -8;
+    this.camera.position.x = -8;
     this.meshes[p.id].lookAt(this.camera.position);
   }
 

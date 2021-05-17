@@ -6,7 +6,7 @@ export const MD_HOUSE: SceneModel = {
   tex: {link: 'assets/tex/house.png', size: {x: 300, y: 200}},
   hitBox: {
     min: {x: -2, y: 0, z: 8},
-    max: {x: 4, y: 0, z: 8}
+    max: {x: 4, y: 0, z: 0}
   },
   planes: [{ // FRONT TOP WALL
     size: {x: 76, y: 6, z: 0},

@@ -6,7 +6,7 @@ export const MD_LABO: SceneModel = {
   tex: {link: 'assets/tex/labo.png', size: {x: 300, y: 200}},
   hitBox: {
     min: {x: 0, y: 0, z: 8},
-    max: {x: 0, y: 0, z: 8}
+    max: {x: 0, y: 0, z: 0}
   },
   planes: [],
   boxes: [{ // WALLS

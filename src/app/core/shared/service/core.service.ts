@@ -6,6 +6,8 @@ import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 })
 export class CoreService {
 
+  public static me = null;
+
   public logs: string = '';
   private logsSubject = new BehaviorSubject<string>(this.logs);
   public logsState = this.logsSubject.asObservable();
@@ -21,6 +23,7 @@ export class CoreService {
   public fullScreenedState = this.fullScreenedSubject.asObservable();
 
   constructor() {
+    CoreService.me = this;
     this.initResume();
 
     fromEvent(document, 'fullscreenchange').subscribe((ev) => {

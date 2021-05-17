@@ -4,6 +4,7 @@ import { CAMERA_LOOK, SceneHelper, SHADE_OFFSET, TOO_FAR_LIMIT } from '../model/
 import { SceneMap } from '../model/SceneMap';
 import { PlayerDirection, ScenePlayer } from '../model/ScenePlayer';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
+import { CoreService } from '../../../../core/shared/service/core.service';
 
 @Injectable({
   providedIn: 'root'
@@ -108,11 +109,34 @@ export class SceneService {
     });
   }
 
+  public static checkEvents(sceneHelper: SceneHelper, playerMesh: THREE.Mesh, pressedCodes: KeyCode[]) {
+    sceneHelper.sceneMap.parcels.forEach(parcel => {
+      parcel.buildings.forEach(building => {
+        if(building.modelId === 'pannel') {
+          const bounds = sceneHelper.getBounds(parcel.id + '-' + building.id);
+          const zDiff = playerMesh.position.z - bounds.max.z;
+          if(bounds &&
+             bounds.min.x < playerMesh.position.x &&
+             bounds.max.x > playerMesh.position.x &&
+             zDiff > 0 && zDiff < 16
+          ) {
+            if(pressedCodes.indexOf(KeyCode.confirm) >= 0) {
+              if(sceneHelper.scenePlayer.dir === PlayerDirection.UP) {
+                CoreService.me.setLogs(building.id + ' clicked');
+                setTimeout( () => { CoreService.me.setLogs('')}, 1000);
+              }
+            }
+          }
+        }
+      });
+    });
+  }
+
 
   public static getMove(sceneHelper: SceneHelper, holdedCodes: KeyCode[]): { move: THREE.Vector3, speed: number } {
     const move = new THREE.Vector3(0, 0, 0);
 
-    let speed = holdedCodes.indexOf(KeyCode.confirm) >= 0 ? 2.5 : 1.5;
+    let speed = holdedCodes.indexOf(KeyCode.confirm) >= 0 ? 4 : 2;
 
     let playerSpeed = 0;
 

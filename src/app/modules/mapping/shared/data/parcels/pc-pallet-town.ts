@@ -22,21 +22,21 @@ export const PC_PALLET_TOWN: SceneParcel = {
   },{
     id: 'labo',
     modelId: 'labo',
-    pos: {x: 71, y: 0, z: 20},
+    pos: {x: 72, y: 0, z: 20},
     passable: false,
     canHide: true,
     events: []
   },{
     id: 'house1',
     modelId: 'house',
-    pos: {x: -71, y: 0, z: -70},
+    pos: {x: -72, y: 0, z: -70},
     passable: false,
     canHide: true,
     events: []
   },{
     id: 'house2',
     modelId: 'house',
-    pos: {x: 71, y: 0, z: -70},
+    pos: {x: 72, y: 0, z: -70},
     passable: false,
     canHide: true,
     events: []
