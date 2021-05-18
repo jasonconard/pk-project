@@ -6,20 +6,21 @@ import { SceneHelper } from './shared/model/SceneHelper';
 import { SceneService } from './shared/services/scene.service';
 import { SCENE_MAP } from './shared/data/scene';
 import { SCENE_PLAYER } from './shared/data/characters/player';
-import { debounceTime } from 'rxjs/operators';
-import { FADE_ANIM } from '../../core/shared/animations/FadeAnim';
+import { auditTime } from 'rxjs/operators';
+import { FADE_ANIM, FADE_ONLEAVE_ANIM } from '../../core/shared/animations/FadeAnim';
 import { PlayerDirection, PlayerMoveStatus } from './shared/model/ScenePlayer';
 import { PlayerService } from './shared/services/player.service';
 import * as THREE from 'three';
 import { Vec3 } from './shared/model/SceneUtils';
 import { EventService } from './shared/services/event.service';
 import { SceneEvent } from './shared/model/SceneEvent';
+import { SequenceService } from './shared/services/sequence.service';
 
 @Component({
   selector: 'mapping-main',
   templateUrl: './mapping.component.html',
   styleUrls: ['./mapping.component.scss'],
-  animations: [FADE_ANIM]
+  animations: [FADE_ANIM, FADE_ONLEAVE_ANIM]
 })
 export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
@@ -31,25 +32,24 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
   private sceneHelper: SceneHelper = null;
 
   public paused: boolean = false;
-  public loading: boolean = false;
+  public loading: boolean = true;
 
   private frame: number = 0;
   public framePerSec: number = 0;
 
   public axes: number[] = [];
 
-  public sequenceLaunched = false;
+  public sequenceSub = this.sequenceService.sequenceSub;
 
   @ViewChild('canvas', { static: false }) canvasRef: ElementRef;
 
   constructor(private keyService: KeyService,
-              private eventService: EventService) {
+              private sequenceService: SequenceService) {
   }
 
   ngOnInit() {
-    this.subs.push(fromEvent(window, 'resize').pipe(debounceTime(200)).subscribe(
+    this.subs.push(fromEvent(window, 'resize').pipe(auditTime(200)).subscribe(
       (event) => {
-        console.log('resize');
         if(this.sceneHelper) {
           this.sceneHelper.refreshRenderer();
         }
@@ -68,6 +68,10 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     this.sceneHelper.buildPlayer();
 
     this.sceneHelper.refreshRenderer();
+
+    setTimeout( () => {
+      this.loading = false;
+    }, 400);
 
     setInterval(() => {
       this.framePerSec = this.frame;
@@ -131,7 +135,7 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.funOption(this.keyService.pressedCodes);
 
-    const moveDetails = this.sequenceLaunched ? { move: { x: 0, y: 0, z: 0 }, speed: 0 } : SceneService.getMove(this.sceneHelper, this.keyService.holdedCodes);
+    const moveDetails = this.sequenceSub.get() ? { move: { x: 0, y: 0, z: 0 }, speed: 0 } : SceneService.getMove(this.sceneHelper, this.keyService.holdedCodes);
     const move = moveDetails.move;
 
     let mouvStatus: PlayerMoveStatus = PlayerMoveStatus.STAYING;
@@ -181,16 +185,10 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       sprite.position.z += this.moveRatio.z;
     }
 
-    if(!this.sequenceLaunched) {
+    if(!this.sequenceSub.get()) {
       const event: SceneEvent = EventService.checkEvents(this.sceneHelper, sprite, this.keyService.pressedCodes);
-
       if(event) {
-        this.sequenceLaunched = true;
-        this.eventService.launchSequence(event);
-
-        setTimeout(() => {
-          this.sequenceLaunched = false;
-        }, 1);
+        this.sequenceService.launchSequence(event);
       }
     }
 

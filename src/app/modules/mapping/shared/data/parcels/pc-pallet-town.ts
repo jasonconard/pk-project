@@ -87,14 +87,46 @@ export const PC_PALLET_TOWN: SceneParcel = {
     events: [{
       conditions: {
         direction: PlayerDirection.UP,
-        pressedKey: KeyCode.confirm,
+        pressedKeys: [KeyCode.confirm, KeyCode.up],
         bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 16} }
       },
-      sequence: [
-        {
-          type: InstructionType.LOG,
-          log: { text: 'Coucou' }
-        }
+      instructions: [
+        { type: InstructionType.MESSAGE,
+          message: {
+            name: 'Hugo',
+            pic: 'assets/img/faces/face-hugo.png',
+            text: "J'adore manger des frites mais le problème c'est que ça fait trop grossir alors je me contente " +
+              "d'en manger de temps en temps mais pas tous les jours parce que sinon je ne ressemblerai jamais à Terry Crews.",
+            choices: [
+              { key: 'confirm', text: "N'oublie jamais le cheat meal !"},
+              { key: 'cancel', text: 'Tu devrais éviter la malbouffe.'},
+              { key: 'cancel', text: '...'}
+            ]
+          },
+          subInstructions: [{
+            condition: 'confirm',
+            instructions: [
+              { type: InstructionType.WAIT, wait: { time: 200 } },
+              { type: InstructionType.MESSAGE, message: { name: 'Hugo', text: "Un bon grec de temps en temps ça fait pas de mal !", pic: 'assets/img/faces/face-hugo.png' } },
+              { type: InstructionType.WAIT, wait: { time: 200 } },
+              { type: InstructionType.MESSAGE, message: { name: 'Jason', text: "Grave !!!!", pic: 'assets/img/faces/face-jason.png' } },
+              { type: InstructionType.WAIT, wait: { time: 400 } }
+            ]
+          },{
+            condition: 'cancel',
+            instructions: [
+              { type: InstructionType.WAIT, wait: { time: 200 } },
+              { type: InstructionType.MESSAGE, message: { name: 'Hugo', text: "Fais pas genre, t'as grave envie d'un bon gros keugré des familles", pic: 'assets/img/faces/face-hugo.png' } },
+              { type: InstructionType.WAIT, wait: { time: 200 } },
+              { type: InstructionType.MESSAGE, message: { name: 'Jason', text: "J'avoue, supplément oeuf et 3 fromages !", pic: 'assets/img/faces/face-jason.png' } },
+              { type: InstructionType.WAIT, wait: { time: 200 } },
+              { type: InstructionType.MESSAGE, message: { name: 'Hugo', text: "Et le petit piment !", pic: 'assets/img/faces/face-hugo.png' } },
+              { type: InstructionType.WAIT, wait: { time: 400 } }
+            ]
+          }]
+        },
+        // { type: InstructionType.WAIT, wait: { time: 1000 } },
+        // { type: InstructionType.LOG, log: { text: '' } }
       ]
     }]
   },{
@@ -106,14 +138,11 @@ export const PC_PALLET_TOWN: SceneParcel = {
     events: [{
       conditions: {
         direction: PlayerDirection.UP,
-        pressedKey: KeyCode.confirm,
+        pressedKeys: [KeyCode.confirm],
         bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 16} }
       },
-      sequence: [
-        {
-          type: InstructionType.MESSAGE,
-          message: { name: 'Jason', text: 'Coucou' }
-        }
+      instructions: [
+        { type: InstructionType.MESSAGE, message: { name: 'Jason', text: 'Coucou' } }
       ]
     }]
   }, ...[0, 1, 2, 3, 4, 5, 6, 7].map(i => {

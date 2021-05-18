@@ -2,32 +2,17 @@ import { Injectable } from '@angular/core';
 import { SceneHelper } from '../model/SceneHelper';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { PlayerDirection } from '../model/ScenePlayer';
-import { CoreService } from '../../../../core/shared/service/core.service';
 import * as THREE from 'three';
 import { SceneEvent, SceneEventHelper } from '../model/SceneEvent';
 import { VecBox3 } from '../model/SceneUtils';
 import { MathService } from './math.service';
-import { InstructionType } from '../model/SceneEventInstruction';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventService {
 
-  constructor(private coreService: CoreService) {
-  }
-
-  public launchSequence(event: SceneEvent) {
-    if (event) {
-      event.sequence.forEach(instruction => {
-        if (instruction.type === InstructionType.LOG && instruction.log) {
-          this.coreService.setLogs(instruction.log.text);
-        }
-        if (instruction.type === InstructionType.MESSAGE && instruction.message) {
-          this.coreService.setLogs(instruction.message.name + ' : ' + instruction.message.text);
-        }
-      });
-    }
+  constructor() {
   }
 
   public static checkEvents(sceneHelper: SceneHelper, playerMesh: THREE.Mesh, pressedCodes: KeyCode[]): SceneEvent {
@@ -37,7 +22,7 @@ export class EventService {
         building.events.forEach(evt => {
           const dirCond = EventService.checkDirection(evt.conditions.direction, sceneHelper);
           if(!dirCond) { return; }
-          const keyCond = EventService.checkPressedKey(evt.conditions.pressedKey, pressedCodes);
+          const keyCond = EventService.checkPressedKeys(evt.conditions.pressedKeys, pressedCodes);
           if(!keyCond) { return; }
           const buildingKey = parcel.id + '-' + building.id;
           const bounds = sceneHelper.getBounds(parcel.id + '-' + building.id);
@@ -65,9 +50,11 @@ export class EventService {
     return dir === sh.scenePlayer.dir;
   }
 
-  private static checkPressedKey(key: KeyCode, pressedCodes: KeyCode[]): boolean {
-    if(!KeyCode[key]) { return true; }
-    return pressedCodes.indexOf(key) >= 0;
+  private static checkPressedKeys(keys: KeyCode[], pressedCodes: KeyCode[]): boolean {
+    if(!keys || !keys.length) { return true; }
+    return keys.findIndex( key => {
+      return pressedCodes.indexOf(key) >= 0;
+    }) >= 0;
   }
 
   private static checkBounds(bounds: VecBox3, buildingBounds: THREE.Box3, playerMesh: THREE.Mesh): boolean {

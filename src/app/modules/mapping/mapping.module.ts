@@ -5,6 +5,7 @@ import { MappingRoutingModule } from './mapping-routing.module';
 import { MappingComponent } from './mapping.component';
 import { CoreModule } from '../../core/core.module';
 import { ModelChoiceComponent } from './model-choice/model-choice.component';
+import { MessageComponent } from '../../core/message/message.component';
 
 @NgModule({
   imports: [

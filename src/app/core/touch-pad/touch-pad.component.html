@@ -1,4 +1,4 @@
-<div class="right-touch-btns" *ngIf="isTouchDevice">
+<div class="right-touch-btns" @fadeAnimDelayed *ngIf="isTouchDevice && !hasMessage">
   <div class="btn-container"
        *ngFor="let btn of btns"
        [style]="getBtnStyle(btn, true)"

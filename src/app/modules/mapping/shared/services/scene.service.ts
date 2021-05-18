@@ -4,7 +4,6 @@ import { CAMERA_LOOK, SceneHelper, SHADE_OFFSET, TOO_FAR_LIMIT } from '../model/
 import { SceneMap } from '../model/SceneMap';
 import { PlayerDirection, ScenePlayer } from '../model/ScenePlayer';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
-import { CoreService } from '../../../../core/shared/service/core.service';
 
 @Injectable({
   providedIn: 'root'

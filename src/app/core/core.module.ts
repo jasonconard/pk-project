@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { TouchPadComponent } from './touch-pad/touch-pad.component';
 import { StickComponent } from './stick/stick.component';
 import { CommonModule } from '@angular/common';
+import { MessageComponent } from './message/message.component';
 
 @NgModule({
     imports: [
@@ -9,11 +10,13 @@ import { CommonModule } from '@angular/common';
     ],
     exports: [
       StickComponent,
-      TouchPadComponent
+      TouchPadComponent,
+      MessageComponent
     ],
     declarations: [
       StickComponent,
-      TouchPadComponent
+      TouchPadComponent,
+      MessageComponent
     ]
 })
 export class CoreModule { }

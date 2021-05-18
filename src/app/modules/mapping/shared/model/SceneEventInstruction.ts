@@ -1,20 +1,34 @@
 export enum InstructionType {
-  LOG, MESSAGE
+  LOG, MESSAGE, WAIT
 }
 
 export interface SceneEventInstruction {
   type: InstructionType,
   log?: InstructionLog,
-  message?: InstructionMessage
+  message?: InstructionMessage,
+  wait?: InstructionWait,
+  subInstructions?: SceneEventSubInstruction[]
+}
+
+export interface SceneEventSubInstruction {
+  condition: string,
+  instructions: SceneEventInstruction[]
+}
+
+export interface InstructionWait {
+  time: number
 }
 
 export interface InstructionLog {
-  text: string,
+  text: string
 }
-
 
 export interface InstructionMessage {
   name?: string,
   text: string,
-  pic?: string
+  pic?: string,
+  choices?: InstructionMessageChoice[]
+}
+export interface InstructionMessageChoice {
+  key: string, text: string
 }

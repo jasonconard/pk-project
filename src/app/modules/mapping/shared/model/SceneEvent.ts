@@ -6,13 +6,13 @@ import * as THREE from 'three';
 
 export interface SceneEvent {
   conditions: SceneEventCondition,
-  sequence: SceneEventInstruction[]
+  instructions: SceneEventInstruction[]
 }
 
 export interface SceneEventCondition {
   direction?: PlayerDirection, // Only use up down left right =)
   bounds?: VecBox3,
-  pressedKey?: KeyCode
+  pressedKeys?: KeyCode[]
 }
 
 export interface SceneEventHelper {

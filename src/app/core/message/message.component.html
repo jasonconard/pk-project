@@ -1,0 +1,28 @@
+<div class="message-container" [class.clickable]="!!message" (touchend)="closeMessage()">
+  <div class="message-content">
+    <div class="message-box" @fadeAnim *ngIf="message">
+      <div class="box-portrait" *ngIf="message.pic">
+        <img [src]="message.pic"/>
+      </div>
+      <div class="box-pokeball">
+        <img src="assets/svg/poke-ball.svg"/>
+      </div>
+      <div class="box-text">
+        {{ text }}
+      </div>
+    </div>
+    <div class="message-name" @fadeAnim *ngIf="message && message.name">
+      {{ message.name }}
+    </div>
+    <div class="message-choices">
+      <div class="message-choice" [@messageChoiceFadeAnim]="getChoiceAnim(i)"
+           [class.selected]="i === choiceId"
+           (click)="$event.stopPropagation();"
+           (touchstart)="$event.stopPropagation(); this.choiceId = i;"
+           (touchend)="$event.stopPropagation(); setChoice(choice.key)" *ngFor="let choice of choices; let i = index">
+        {{ choice.text }}
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -15,12 +15,14 @@
 <core-stick></core-stick>
 <core-touch-pad></core-touch-pad>
 
-<!--<div class="loading-screen" @fadeAnim *ngIf="loading">-->
-<!--  Chargement ...-->
-<!--</div>-->
+<div class="loading-screen" @fadeOnLeaveAnim *ngIf="loading">
+  Chargement ...
+</div>
 <div class="pause-screen" [@fadeAnim] *ngIf="paused" (touchend)="togglePaused()">
   Pause
 </div>
+
+<core-message></core-message>
 
 <mapping-model-choice [@fadeAnim]
   *ngIf="drawModelOpen"

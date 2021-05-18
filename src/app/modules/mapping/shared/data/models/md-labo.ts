@@ -41,7 +41,7 @@ export const MD_LABO: SceneModel = {
     }
   }, { // CHIMNEY BASE
     size: {x: 22, y: 2, z: 22},
-    pos: {x: 35, y: 37, z: -4},
+    pos: {x: 35, y: 35.5, z: -4},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
@@ -56,7 +56,7 @@ export const MD_LABO: SceneModel = {
     }
   }, { // CHIMNEY BACK
     size: {x: 16, y: 7, z: 3},
-    pos: {x: 35, y: 41.5, z: -10},
+    pos: {x: 35, y: 40, z: -10},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
@@ -71,7 +71,7 @@ export const MD_LABO: SceneModel = {
     }
   }, { // CHIMNEY FRONT
     size: {x: 16, y: 7, z: 3},
-    pos: {x: 35, y: 41.5, z: 2.5},
+    pos: {x: 35, y: 40, z: 2.5},
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
@@ -86,7 +86,7 @@ export const MD_LABO: SceneModel = {
     }
   }, { // CHIMNEY LEFT
     size: {x: 10, y: 7, z: 3},
-    pos: {x: 28.5, y: 41.5, z: -3.5},
+    pos: {x: 28.5, y: 40, z: -3.5},
     rot: {x: 0, y: Math.PI/2, z: 0},
     depthWrite: true,
     depthTest: true,
@@ -101,7 +101,7 @@ export const MD_LABO: SceneModel = {
     }
   }, { // CHIMNEY RIGHT
     size: {x: 10, y: 7, z: 3},
-    pos: {x: 41.5, y: 41.5, z: -3.5},
+    pos: {x: 41.5, y: 40, z: -3.5},
     rot: {x: 0, y: Math.PI/2, z: 0},
     depthWrite: true,
     depthTest: true,

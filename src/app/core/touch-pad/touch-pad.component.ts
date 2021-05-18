@@ -2,14 +2,17 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TouchService } from '../shared/service/touch.service';
 import { KeyCode } from '../shared/model/PressedKey';
 import { KeyService } from '../shared/service/key.service';
-import { fromEvent, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TOUCH_KEYS, TouchKey, TouchKeyType } from '../shared/model/TouchKey';
 import { CoreService } from '../shared/service/core.service';
+import { SequenceService } from '../../modules/mapping/shared/services/sequence.service';
+import { FADE_ANIM_DELAYED } from '../shared/animations/FadeAnim';
 
 @Component({
   selector: 'core-touch-pad',
   templateUrl: './touch-pad.component.html',
-  styleUrls: ['./touch-pad.component.scss']
+  styleUrls: ['./touch-pad.component.scss'],
+  animations: [FADE_ANIM_DELAYED]
 })
 export class TouchPadComponent implements OnInit, OnDestroy {
 
@@ -20,14 +23,24 @@ export class TouchPadComponent implements OnInit, OnDestroy {
 
   public btns: TouchKey[] = TOUCH_KEYS;
 
+  public hasMessage: boolean = false;
+
   constructor(private keyService: KeyService,
               private coreService: CoreService,
-              private touchService: TouchService) {
+              private touchService: TouchService,
+              private sequenceService: SequenceService) {
   }
 
   ngOnInit(): void {
     this.subs.push(this.touchService.isTouchDeviceState.subscribe(isTouchDevice => {
       this.isTouchDevice = isTouchDevice;
+    }));
+
+    this.subs.push(this.sequenceService.messageSub.subscribe(message => {
+      this.hasMessage = !!message;
+      if(this.hasMessage) {
+        this.pushedBtns = [];
+      }
     }));
 
     this.subs.push(this.coreService.resumedState.subscribe(() => {
