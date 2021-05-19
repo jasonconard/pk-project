@@ -29,7 +29,7 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
   public drawModelOpen: boolean = false;
   public drawModelId: string = 'flowers';
 
-  private sceneHelper: SceneHelper = null;
+  public sceneHelper: SceneHelper = null;
 
   public paused: boolean = false;
   public loading: boolean = true;
@@ -62,6 +62,10 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    setTimeout(() => { this.initScene(); });
+  }
+
+  private initScene() {
     this.sceneHelper = SceneService.makeScene(this.canvasRef.nativeElement, SCENE_MAP, SCENE_PLAYER);
     this.keyService.initTouch(this.canvasRef.nativeElement);
     this.sceneHelper.buildMeshes();
@@ -80,7 +84,6 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.animate();
   }
-
 
   private animate(): void {
     requestAnimationFrame( () => { this.animate() });

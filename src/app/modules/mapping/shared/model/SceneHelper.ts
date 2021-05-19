@@ -35,6 +35,10 @@ export class SceneHelper {
     this.scenePlayer = o.scenePlayer;
   }
 
+  public render() {
+    this.renderer.render(this.scene, this.camera);
+  }
+
   public refreshRenderer() {
     const rect = this.elem.getBoundingClientRect();
     this.camera.aspect = rect.width / rect.height;
@@ -64,10 +68,14 @@ export class SceneHelper {
   public buildPlayer() {
     const p = this.scenePlayer;
     if(!p) { return; }
-    this.addMesh(p.id, BasicMeshService.makePlane(p.tex.link, convertVec2(p.tex.size), true));
-    this.meshes[p.id].position.y = 21/2;
-    this.meshes[p.id].position.x = -8;
-    this.camera.position.x = -8;
+    const spriteGroup = new THREE.Group();
+    const spritePlane = BasicMeshService.makePlane(p.tex.link, convertVec2(p.tex.size), true);
+    spritePlane.position.x = -8;
+    spritePlane.position.y = p.tex.size.y / 2;
+    spriteGroup.add(spritePlane);
+
+    this.addMesh(p.id, spriteGroup);
+    this.camera.position.x = spritePlane.position.x + 8;
     this.meshes[p.id].lookAt(this.camera.position);
   }
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CoreService } from '../../../../core/shared/service/core.service';
 import { SceneEvent } from '../model/SceneEvent';
 import { SceneEventSequence } from '../model/SceneEventSequence';
-import { InstructionLog, InstructionMessage, InstructionType, InstructionWait } from '../model/SceneEventInstruction';
+import { InstructionLog, InstructionMessage, InstructionTeleport, InstructionType, InstructionWait } from '../model/SceneEventInstruction';
 import { SubjectHelper } from '../../../../core/shared/model/SubjectHelper';
 import { KeyService } from '../../../../core/shared/service/key.service';
 
@@ -13,6 +13,7 @@ export class SequenceService {
 
   public sequenceSub = new SubjectHelper<SceneEventSequence>();
   public messageSub = new SubjectHelper<InstructionMessage>();
+  public teleportSub = new SubjectHelper<InstructionTeleport>();
 
   constructor(private coreService: CoreService,
               private keyService: KeyService) {
@@ -34,6 +35,7 @@ export class SequenceService {
           case InstructionType.LOG: this.setLogs(instruction.log); break;
           case InstructionType.MESSAGE: this.setMessage(instruction.message); break;
           case InstructionType.WAIT: this.setWait(instruction.wait); break;
+          case InstructionType.TELEPORT: this.setTeleport(instruction.teleport); break;
         }
       } else {
         this.sequenceSub.next(null);
@@ -57,5 +59,10 @@ export class SequenceService {
     setTimeout( () => {
       this.nextSequence();
     }, wait.time);
+  }
+
+  private setTeleport(teleport: InstructionTeleport) {
+    if(!teleport) { return this.nextSequence(); }
+    this.teleportSub.next(teleport);
   }
 }

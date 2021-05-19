@@ -6,6 +6,7 @@ import { MappingComponent } from './mapping.component';
 import { CoreModule } from '../../core/core.module';
 import { ModelChoiceComponent } from './model-choice/model-choice.component';
 import { MessageComponent } from '../../core/message/message.component';
+import { TeleportComponent } from './teleport/teleport.component';
 
 @NgModule({
   imports: [
@@ -16,6 +17,7 @@ import { MessageComponent } from '../../core/message/message.component';
   ],
   declarations: [
     MappingComponent,
+    TeleportComponent,
     ModelChoiceComponent
   ],
   exports: [

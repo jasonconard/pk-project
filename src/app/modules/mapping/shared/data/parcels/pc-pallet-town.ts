@@ -3,10 +3,66 @@ import { PlayerDirection } from '../../model/ScenePlayer';
 import { KeyCode } from '../../../../../core/shared/model/PressedKey';
 import { InstructionType } from '../../model/SceneEventInstruction';
 
+export const PC_PALLET_TOWN_N: SceneParcel = {
+  id: 'pallet-town-n',
+  pos: {x: 0, y: 0, z: -512},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
+export const PC_PALLET_TOWN_NE: SceneParcel = {
+  id: 'pallet-town-ne',
+  pos: {x: 512, y: 0, z: -512},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
+export const PC_PALLET_TOWN_E: SceneParcel = {
+  id: 'pallet-town-e',
+  pos: {x: 512, y: 0, z: 0},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
+export const PC_PALLET_TOWN_SE: SceneParcel = {
+  id: 'pallet-town-se',
+  pos: {x: 512, y: 0, z: 512},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
+export const PC_PALLET_TOWN_S: SceneParcel = {
+  id: 'pallet-town-s',
+  pos: {x: 0, y: 0, z: 512},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
+export const PC_PALLET_TOWN_SW: SceneParcel = {
+  id: 'pallet-town-sw',
+  pos: {x: -512, y: 0, z: 512},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
+export const PC_PALLET_TOWN_W: SceneParcel = {
+  id: 'pallet-town-w',
+  pos: {x: -512, y: 0, z: 0},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
+export const PC_PALLET_TOWN_NW: SceneParcel = {
+  id: 'pallet-town-nw',
+  pos: {x: -512, y: 0, z: -512},
+  size: {x: 512, y: 512},
+  groundLink: 'assets/tex/ground2.png',
+  buildings: []
+}
 export const PC_PALLET_TOWN: SceneParcel = {
   id: 'pallet-town',
   pos: { x: 0, y: 0, z: 0 },
-  size: { x: 800, y: 800 },
+  size: { x: 512, y: 512 },
   groundLink: 'assets/tex/ground.png',
   buildings: [{
     id: 'letter-box-1',
@@ -142,7 +198,7 @@ export const PC_PALLET_TOWN: SceneParcel = {
         bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 16} }
       },
       instructions: [
-        { type: InstructionType.MESSAGE, message: { name: 'Jason', text: 'Coucou' } }
+        { type: InstructionType.TELEPORT, teleport: { pos: { x: 0, y: 0, z: 0 } } }
       ]
     }]
   }, ...[0, 1, 2, 3, 4, 5, 6, 7].map(i => {

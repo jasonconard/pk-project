@@ -1,5 +1,7 @@
+import { Vec3 } from './SceneUtils';
+
 export enum InstructionType {
-  LOG, MESSAGE, WAIT
+  LOG, MESSAGE, WAIT, TELEPORT
 }
 
 export interface SceneEventInstruction {
@@ -7,6 +9,7 @@ export interface SceneEventInstruction {
   log?: InstructionLog,
   message?: InstructionMessage,
   wait?: InstructionWait,
+  teleport?: InstructionTeleport,
   subInstructions?: SceneEventSubInstruction[]
 }
 
@@ -31,4 +34,8 @@ export interface InstructionMessage {
 }
 export interface InstructionMessageChoice {
   key: string, text: string
+}
+
+export interface InstructionTeleport {
+  pos: Vec3
 }

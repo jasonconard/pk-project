@@ -40,7 +40,7 @@ export class PlayerService {
       // default: b = { min: { x: 0, y: y1 }, max: { x: 14/w, y: y2 } }; break;
     }
 
-    const spriteGeo = pm.scene.meshes[pm.player.id].geometry;
+    const spriteGeo = pm.scene.meshes[pm.player.id].children[0].geometry;
     const uvAtt = spriteGeo.getAttribute('uv');
     const uv = new THREE.Vector2();
     for(let i = 0; i < uvAtt.count; i++) {
