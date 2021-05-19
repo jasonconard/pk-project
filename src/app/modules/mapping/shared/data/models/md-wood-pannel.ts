@@ -5,7 +5,7 @@ export const MD_WOOD_PANNEL: SceneModel = {
   tex: {link: 'assets/tex/wood-pannel.png', size: {x: 40, y: 40}},
   hitBox: {
     min: {x: 0, y: 0, z: 8},
-    max: {x: 0, y: 0, z: 7}
+    max: {x: 0, y: 0, z: 15}
   },
   planes: [],
   boxes: [{ // TEXT

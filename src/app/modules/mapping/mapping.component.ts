@@ -15,6 +15,7 @@ import { Vec3 } from './shared/model/SceneUtils';
 import { EventService } from './shared/services/event.service';
 import { SceneEvent } from './shared/model/SceneEvent';
 import { SequenceService } from './shared/services/sequence.service';
+import { CoreService } from '../../core/shared/service/core.service';
 
 @Component({
   selector: 'mapping-main',
@@ -68,7 +69,7 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
   private initScene() {
     this.sceneHelper = SceneService.makeScene(this.canvasRef.nativeElement, SCENE_MAP, SCENE_PLAYER);
     this.keyService.initTouch(this.canvasRef.nativeElement);
-    this.sceneHelper.buildMeshes();
+    this.sceneHelper.buildParcels();
     this.sceneHelper.buildPlayer();
 
     this.sceneHelper.refreshRenderer();
@@ -77,10 +78,58 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       this.loading = false;
     }, 400);
 
+
     setInterval(() => {
       this.framePerSec = this.frame;
       this.frame = 0;
     }, 1000);
+
+    setInterval(() => {
+      if(this.paused || this.drawModelOpen) { return; }
+      const moveDetails = this.sequenceSub.get() ? { move: { x: 0, y: 0, z: 0 }, speed: 0, status: PlayerMoveStatus.STAYING } : SceneService.getMove(this.sceneHelper, this.keyService.holdedCodes);
+      const move = moveDetails.move;
+
+      // CoreService.me.setLogs('' + moveDetails.speed);
+
+      let mouvStatus = moveDetails.status;
+
+      if(!this.isMoving) {
+        this.moveRatio = move;
+        this.moveSpeed = moveDetails.speed;
+        this.moveDir = this.sceneHelper.scenePlayer.dir;
+        this.moveStatus = mouvStatus;
+      } else {
+        this.sceneHelper.scenePlayer.dir = this.moveDir;
+      }
+      if(this.isMoving < this.pixelSize) {
+        this.isMoving += this.moveSpeed;
+      } else {
+        this.isMoving = 0;
+        this.moveSpeed = 0;
+        this.moveDir = PlayerDirection.DOWN;
+        this.moveRatio = { x:0, y:0, z:0 };
+        this.moveStatus = mouvStatus;
+      }
+
+      const sprite = this.sceneHelper.getPlayerMesh();
+
+      if(this.isMoving && this.isMoving === this.moveSpeed) {
+        const ratio = this.pixelSize / this.moveSpeed;
+        const collisions = { x: this.moveRatio.x * ratio, y: this.moveRatio.y * ratio, z: this.moveRatio.z * ratio };
+        SceneService.checkCollisions(this.sceneHelper, sprite, collisions);
+        this.moveRatio = { x: collisions.x / ratio, y: collisions.y / ratio, z: collisions.z / ratio };
+      }
+
+      const camera = this.sceneHelper.camera;
+      camera.position.x += this.moveRatio.x;
+      camera.position.z += this.moveRatio.z;
+      this.sceneHelper.updateCameraAim();
+      if(sprite) {
+        sprite.position.x += this.moveRatio.x;
+        sprite.position.z += this.moveRatio.z;
+      }
+
+    }, 1000 / 120);
 
     this.animate();
   }
@@ -138,33 +187,6 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.funOption(this.keyService.pressedCodes);
 
-    const moveDetails = this.sequenceSub.get() ? { move: { x: 0, y: 0, z: 0 }, speed: 0 } : SceneService.getMove(this.sceneHelper, this.keyService.holdedCodes);
-    const move = moveDetails.move;
-
-    let mouvStatus: PlayerMoveStatus = PlayerMoveStatus.STAYING;
-    switch (moveDetails.speed) {
-      case 2: mouvStatus = PlayerMoveStatus.WALKING; break;
-      case 4: mouvStatus = PlayerMoveStatus.RUNNING; break;
-    }
-
-    if(!this.isMoving) {
-      this.moveRatio = move;
-      this.moveSpeed = moveDetails.speed;
-      this.moveDir = this.sceneHelper.scenePlayer.dir;
-      this.moveStatus = mouvStatus;
-    } else {
-      this.sceneHelper.scenePlayer.dir = this.moveDir;
-    }
-    if(this.isMoving < this.pixelSize) {
-      this.isMoving += this.moveSpeed;
-    } else {
-      this.isMoving = 0;
-      this.moveSpeed = 0;
-      this.moveDir = PlayerDirection.DOWN;
-      this.moveRatio = { x:0, y:0, z:0 };
-      this.moveStatus = mouvStatus;
-    }
-
     PlayerService.updatePlayerSprite({
       scene: this.sceneHelper,
       player: this.sceneHelper.scenePlayer,
@@ -172,21 +194,6 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       currentFrame: this.frame,
       framePerSecond: this.framePerSec
     });
-
-    if(this.isMoving && this.isMoving === this.moveSpeed) {
-      const ratio = this.pixelSize / this.moveSpeed;
-      const collisions = { x: this.moveRatio.x * ratio, y: this.moveRatio.y * ratio, z: this.moveRatio.z * ratio };
-      SceneService.checkCollisions(this.sceneHelper, sprite, collisions);
-      this.moveRatio = { x: collisions.x / ratio, y: collisions.y / ratio, z: collisions.z / ratio };
-    }
-
-    camera.position.x += this.moveRatio.x;
-    camera.position.z += this.moveRatio.z;
-    this.sceneHelper.updateCameraAim();
-    if(sprite) {
-      sprite.position.x += this.moveRatio.x;
-      sprite.position.z += this.moveRatio.z;
-    }
 
     if(!this.sequenceSub.get()) {
       const event: SceneEvent = EventService.checkEvents(this.sceneHelper, sprite, this.keyService.pressedCodes);
@@ -196,9 +203,11 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     this.sceneHelper.sceneMap.parcels.forEach(parcel => {
-      parcel.buildings.forEach(building => {
-        this.sceneHelper.updateVisibleMesh(parcel.id + '-' + building.id, sprite.position, building.canHide);
-      });
+      if(parcel.visible) {
+        parcel.buildings.forEach(building => {
+          this.sceneHelper.updateVisibleMesh(parcel.id + '-' + building.id, sprite.position, building.canHide);
+        });
+      }
     });
   }
 

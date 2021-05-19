@@ -4,8 +4,8 @@ export const MD_TREE: SceneModel = {
   id: 'tree',
   tex: {link: 'assets/tex/tree.png', size: {x: 96, y: 120}},
   hitBox: {
-    min: {x: 0, y: 0, z: 16},
-    max: {x: 0, y: 0, z: -2}
+    min: {x: 0, y: 0, z: 8},
+    max: {x: 0, y: 0, z: 8}
   },
   boxes: [{
     size: {x: 9, y: 10, z: 9},

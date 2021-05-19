@@ -26,6 +26,9 @@ export class BasicMeshService {
 
   public static makePlane(link: string, size: THREE.Vector2, transparent?: boolean): THREE.Mesh {
     const planeMaterial = MaterialService.getMaterialFromLink(link, transparent);
+    planeMaterial.depthTest = true;
+    planeMaterial.depthWrite = true;
+    planeMaterial.side = THREE.DoubleSide;
     const geometry = new THREE.PlaneGeometry( size.x, size.y );
     return new THREE.Mesh( geometry, planeMaterial );
   }

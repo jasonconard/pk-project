@@ -142,9 +142,22 @@ export const PC_PALLET_TOWN: SceneParcel = {
     canHide: false,
     events: [{
       conditions: {
+        direction: PlayerDirection.DOWN,
+        pressedKeys: [KeyCode.confirm],
+        bounds: { min: { x:0, y:0, z:16 }, max: {x:0, y:0, z: 0} }
+      },
+      instructions: [
+        {
+          type: InstructionType.MESSAGE,
+          message: { name: 'Jason', text: 'Impossible de lire une pancarte par derrière' },
+        },
+        { type: InstructionType.WAIT, wait: { time: 400 } }
+      ]
+    },{
+      conditions: {
         direction: PlayerDirection.UP,
         pressedKeys: [KeyCode.confirm, KeyCode.up],
-        bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 16} }
+        bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 24} }
       },
       instructions: [
         { type: InstructionType.MESSAGE,
@@ -195,7 +208,7 @@ export const PC_PALLET_TOWN: SceneParcel = {
       conditions: {
         direction: PlayerDirection.UP,
         pressedKeys: [KeyCode.confirm],
-        bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 16} }
+        bounds: { min: { x:0, y:0, z:0 }, max: {x:0, y:0, z: 24} }
       },
       instructions: [
         { type: InstructionType.TELEPORT, teleport: { pos: { x: 0, y: 0, z: 0 } } }

@@ -28,7 +28,6 @@ export class SceneEventSequence {
       this.currentIndex = -1;
       this.instructions = [];
     }
-    console.log(current);
     return current;
   }
 }

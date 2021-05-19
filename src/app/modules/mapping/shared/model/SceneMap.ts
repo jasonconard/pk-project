@@ -1,5 +1,6 @@
 import { Vec2, Vec3 } from './SceneUtils';
 import { SceneBuilding } from './SceneBuilding';
+import * as THREE from 'three';
 
 export enum ObjSide {
   FRONT, BACK, BOTH
@@ -14,6 +15,8 @@ export interface SceneParcel {
   pos: Vec3,
   size: Vec2,
   groundLink: string,
+  visible?: boolean,
+  group?: THREE.Group,
   buildings: SceneBuilding[]
 }
 

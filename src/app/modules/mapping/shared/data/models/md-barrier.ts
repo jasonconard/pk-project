@@ -6,7 +6,7 @@ export const MD_BARRIER: SceneModel = {
   tex: {link: 'assets/tex/barrier.png', size: {x: 32, y: 22}},
   hitBox: {
     min: {x: 0, y: 0, z: 8},
-    max: {x: 0, y: 0, z: 8}
+    max: {x: 0, y: 0, z: 16}
   },
   planes: [],
   boxes: [{

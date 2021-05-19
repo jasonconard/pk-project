@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { isPlayerMoving, PlayerDirection, PlayerMove, PlayerMoveStatus } from '../model/ScenePlayer';
 
 import { VecBox2 } from '../model/SceneUtils';
+import { ObjSide } from '../model/SceneMap';
 
 
 @Injectable({
@@ -41,6 +42,7 @@ export class PlayerService {
     }
 
     const spriteGeo = pm.scene.meshes[pm.player.id].children[0].geometry;
+
     const uvAtt = spriteGeo.getAttribute('uv');
     const uv = new THREE.Vector2();
     for(let i = 0; i < uvAtt.count; i++) {

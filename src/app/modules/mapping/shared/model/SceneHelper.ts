@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import { MathService } from '../services/math.service';
-import { SceneMap } from './SceneMap';
+import { ObjSide, SceneMap, SceneParcel } from './SceneMap';
 import { BasicMeshService } from '../services/basic-mesh.service';
 import { MODELS } from '../data/models/models';
 import { ScenePlayer } from './ScenePlayer';
 import { convertVec2, convertVec3 } from './SceneUtils';
 import { SceneBuilding } from './SceneBuilding';
+import { CoreService } from '../../../../core/shared/service/core.service';
 
 // export const CAMERA_LOOK = new THREE.Vector3(0, 30, 160);
 export const CAMERA_LOOK = new THREE.Vector3(0, 140, 160);
@@ -70,26 +71,84 @@ export class SceneHelper {
     if(!p) { return; }
     const spriteGroup = new THREE.Group();
     const spritePlane = BasicMeshService.makePlane(p.tex.link, convertVec2(p.tex.size), true);
-    spritePlane.position.x = -8;
+    const mat = spritePlane.material;
+    mat.depthTest = true;
+    mat.depthWrite = true;
+    mat.side = THREE.DoubleSide;
+
+    spritePlane.position.x = 0;
     spritePlane.position.y = p.tex.size.y / 2;
+    spritePlane.position.z = 0;
     spriteGroup.add(spritePlane);
 
     this.addMesh(p.id, spriteGroup);
-    this.camera.position.x = spritePlane.position.x + 8;
+    this.camera.position.x = spritePlane.position.x;
     this.meshes[p.id].lookAt(this.camera.position);
+    this.scene.add(this.meshes[p.id]);
+
+    this.updateVisibleParcels();
+  }
+
+  public updateVisibleParcels() {
+    const parcels = this.sceneMap.parcels;
+    const player = this.getPlayerMesh();
+    const comparePos = new THREE.Vector3(player.position.x, player.position.y, this.camera.position.z);
+    parcels.forEach(parcel => {
+      // HIDE BEHIND CAMERA
+      if( (parcel.pos.z - parcel.size.y / 2) > comparePos.z) {
+        parcel.group.visible = false;
+        return parcel.visible = false;
+      }
+
+      // HIDE TOO FAR
+      if( (parcel.pos.z + (parcel.size.y * 1.4)) < comparePos.z) {
+        parcel.group.visible = false;
+        return parcel.visible = false;
+      }
+
+      // HIDE TOO FAR LEFT
+      if( (parcel.pos.x + (parcel.size.x * 1.2)) < comparePos.x) {
+        parcel.group.visible = false;
+        return parcel.visible = false;
+      }
+
+      // HIDE TOO FAR RIGHT
+      if( (parcel.pos.x - (parcel.size.x * 1.2)) > comparePos.x) {
+        parcel.group.visible = false;
+        return parcel.visible = false;
+      }
+
+      // HIDE TOO FAR HEIGHT
+      if(Math.abs(parcel.pos.y - comparePos.y) > (TOO_FAR_LIMIT + SHADE_OFFSET) ) {
+        parcel.group.visible = false;
+        return parcel.visible = false;
+      }
+
+
+      parcel.group.visible = true;
+      return parcel.visible = true;
+
+      // const dist = MathService.getDist(convertVec3(parcel.pos), comparePos);
+      // if(min === -1 || min > dist) { min = dist; }
+      // return dist < 512;
+    });
+
   }
 
   public getPlayerMesh(): THREE.Mesh {
     return this.meshes[this.scenePlayer.id];
   }
 
-  public buildMeshes() {
+  public buildParcels() {
     this.sceneMap.parcels.forEach(parcel => {
+      parcel.group = new THREE.Group();
+      // return;
       this.addMesh(
         parcel.id,
         BasicMeshService.makePlane(parcel.groundLink, convertVec2(parcel.size)),
         convertVec3(parcel.pos)
       );
+      parcel.group.add(this.meshes[parcel.id]);
       this.meshes[parcel.id].rotation.x = Math.PI / -2;
 
       // this.meshes[parcel.id].castShadow = true;
@@ -105,8 +164,11 @@ export class SceneHelper {
           buildingMesh.position.x = parcel.pos.x + building.pos.x;
           buildingMesh.position.y = parcel.pos.y + building.pos.y;
           buildingMesh.position.z = parcel.pos.z + building.pos.z;
+          parcel.group.add(buildingMesh);
         }
       });
+
+      this.scene.add(parcel.group);
     });
 
   }
@@ -127,12 +189,14 @@ export class SceneHelper {
     }
     parcel.buildings.push(building);
 
-    if(model) {
+    if(model && parcel.group) {
       this.addMesh(parcel.id + '-' + key, BasicMeshService.makeModel(model));
       const buildingMesh = this.meshes[parcel.id + '-' + key];
       buildingMesh.position.x = parcel.pos.x + building.pos.x;
       buildingMesh.position.y = parcel.pos.y + building.pos.y;
       buildingMesh.position.z = parcel.pos.z + building.pos.z;
+
+      parcel.group.add(buildingMesh);
     }
 
   }
@@ -143,6 +207,7 @@ export class SceneHelper {
       this.camera.position.y - CAMERA_LOOK.y,
       this.camera.position.z - CAMERA_LOOK.z
     );
+    this.updateVisibleParcels();
   }
 
   public addMesh(key: string, mesh: THREE.Mesh, position?: THREE.Vector3) {
@@ -151,7 +216,6 @@ export class SceneHelper {
     mesh.position.x = pos.x;
     mesh.position.y = pos.y;
     mesh.position.z = pos.z;
-    this.scene.add(this.meshes[key]);
   }
 
   public getBounds(key: string): THREE.Box3 {
