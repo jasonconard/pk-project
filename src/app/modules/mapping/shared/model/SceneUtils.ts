@@ -4,6 +4,7 @@ export interface Vec2 { x: number, y: number }
 export interface Vec3 { x: number, y: number, z: number }
 export interface VecBox2 { min: Vec2, max: Vec2 }
 export interface VecBox3 { min: Vec3, max: Vec3 }
+export interface Square3 { a: Vec3, b: Vec3, c: Vec3, d: Vec3 }
 
 export function convertVec2(v: Vec2): THREE.Vector2 {
   return new THREE.Vector2(v.x, v.y);

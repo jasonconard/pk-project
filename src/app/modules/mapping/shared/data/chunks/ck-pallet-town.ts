@@ -1,69 +1,156 @@
-import { SceneParcel } from '../../model/SceneMap';
+import { SceneChunk } from '../../model/SceneMap';
 import { PlayerDirection } from '../../model/ScenePlayer';
 import { KeyCode } from '../../../../../core/shared/model/PressedKey';
 import { InstructionType } from '../../model/SceneEventInstruction';
 
-export const PC_PALLET_TOWN_N: SceneParcel = {
+export const PC_PALLET_TOWN_N: SceneChunk = {
   id: 'pallet-town-n',
   pos: {x: 0, y: 0, z: -512},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 100, z: -256 },
+      b: { x: 256, y: 100, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN_NE: SceneParcel = {
+export const PC_PALLET_TOWN_NE: SceneChunk = {
   id: 'pallet-town-ne',
   pos: {x: 512, y: 0, z: -512},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 100, z: -256 },
+      b: { x: 256, y: 200, z: -256 },
+      c: { x: 256, y: 100, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN_E: SceneParcel = {
+export const PC_PALLET_TOWN_E: SceneChunk = {
   id: 'pallet-town-e',
   pos: {x: 512, y: 0, z: 0},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 0, z: -256 },
+      b: { x: 256, y: 0, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN_SE: SceneParcel = {
+export const PC_PALLET_TOWN_SE: SceneChunk = {
   id: 'pallet-town-se',
   pos: {x: 512, y: 0, z: 512},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 0, z: -256 },
+      b: { x: 256, y: 0, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN_S: SceneParcel = {
+export const PC_PALLET_TOWN_S: SceneChunk = {
   id: 'pallet-town-s',
   pos: {x: 0, y: 0, z: 512},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 0, z: -256 },
+      b: { x: 256, y: 0, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN_SW: SceneParcel = {
+export const PC_PALLET_TOWN_SW: SceneChunk = {
   id: 'pallet-town-sw',
   pos: {x: -512, y: 0, z: 512},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 0, z: -256 },
+      b: { x: 256, y: 0, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN_W: SceneParcel = {
+export const PC_PALLET_TOWN_W: SceneChunk = {
   id: 'pallet-town-w',
   pos: {x: -512, y: 0, z: 0},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 0, z: -256 },
+      b: { x: 256, y: 0, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN_NW: SceneParcel = {
+export const PC_PALLET_TOWN_NW: SceneChunk = {
   id: 'pallet-town-nw',
   pos: {x: -512, y: 0, z: -512},
   size: {x: 512, y: 512},
-  groundLink: 'assets/tex/ground2.png',
-  buildings: []
+  buildings: [],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground2.png',
+    points: {
+      a: { x: -256, y: 0, z: -256 },
+      b: { x: 256, y: 0, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }
-export const PC_PALLET_TOWN: SceneParcel = {
+export const PC_PALLET_TOWN: SceneChunk = {
   id: 'pallet-town',
   pos: { x: 0, y: 0, z: 0 },
   size: { x: 512, y: 512 },
-  groundLink: 'assets/tex/ground.png',
   buildings: [{
     id: 'letter-box-1',
     modelId: 'letter-box',
@@ -252,5 +339,17 @@ export const PC_PALLET_TOWN: SceneParcel = {
       canHide: false,
       events: []
     }
-  })]
+  })],
+  grounds: [{
+    id: 'main-ground',
+    link: 'assets/tex/ground.png',
+    points: {
+      a: { x: -256, y: 0, z: -256 },
+      b: { x: 256, y: 0, z: -256 },
+      c: { x: 256, y: 0, z: 256 },
+      d: { x: -256, y: 0, z: 256 }
+    },
+    passable: true,
+    canHide: true
+  }]
 }

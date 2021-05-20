@@ -6,10 +6,10 @@ import {
   PC_PALLET_TOWN_NW, PC_PALLET_TOWN_S,
   PC_PALLET_TOWN_SE, PC_PALLET_TOWN_SW,
   PC_PALLET_TOWN_W
-} from './parcels/pc-pallet-town';
+} from './chunks/ck-pallet-town';
 
 export const SCENE_MAP: SceneMap = {
-  parcels: [
+  chunks: [
     PC_PALLET_TOWN,
     PC_PALLET_TOWN_E, PC_PALLET_TOWN_NE, PC_PALLET_TOWN_SE,
     PC_PALLET_TOWN_W, PC_PALLET_TOWN_NW, PC_PALLET_TOWN_SW,

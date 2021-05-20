@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import { MathService } from '../services/math.service';
-import { ObjSide, SceneMap, SceneParcel } from './SceneMap';
+import { SceneMap } from './SceneMap';
 import { BasicMeshService } from '../services/basic-mesh.service';
 import { MODELS } from '../data/models/models';
 import { ScenePlayer } from './ScenePlayer';
-import { convertVec2, convertVec3 } from './SceneUtils';
+import { convertVec2, convertVec3, convertVecBox3 } from './SceneUtils';
 import { SceneBuilding } from './SceneBuilding';
-import { CoreService } from '../../../../core/shared/service/core.service';
 
 // export const CAMERA_LOOK = new THREE.Vector3(0, 30, 160);
 export const CAMERA_LOOK = new THREE.Vector3(0, 140, 160);
@@ -86,49 +85,49 @@ export class SceneHelper {
     this.meshes[p.id].lookAt(this.camera.position);
     this.scene.add(this.meshes[p.id]);
 
-    this.updateVisibleParcels();
+    this.updateVisibleChunks();
   }
 
-  public updateVisibleParcels() {
-    const parcels = this.sceneMap.parcels;
+  public updateVisibleChunks() {
+    const chunks = this.sceneMap.chunks;
     const player = this.getPlayerMesh();
     const comparePos = new THREE.Vector3(player.position.x, player.position.y, this.camera.position.z);
-    parcels.forEach(parcel => {
+    chunks.forEach(chunk => {
       // HIDE BEHIND CAMERA
-      if( (parcel.pos.z - parcel.size.y / 2) > comparePos.z) {
-        parcel.group.visible = false;
-        return parcel.visible = false;
+      if( (chunk.pos.z - chunk.size.y / 2) > comparePos.z) {
+        chunk.group.visible = false;
+        return chunk.visible = false;
       }
 
       // HIDE TOO FAR
-      if( (parcel.pos.z + (parcel.size.y * 1.4)) < comparePos.z) {
-        parcel.group.visible = false;
-        return parcel.visible = false;
+      if( (chunk.pos.z + (chunk.size.y * 1.4)) < comparePos.z) {
+        chunk.group.visible = false;
+        return chunk.visible = false;
       }
 
       // HIDE TOO FAR LEFT
-      if( (parcel.pos.x + (parcel.size.x * 1.2)) < comparePos.x) {
-        parcel.group.visible = false;
-        return parcel.visible = false;
+      if( (chunk.pos.x + (chunk.size.x * 1.2)) < comparePos.x) {
+        chunk.group.visible = false;
+        return chunk.visible = false;
       }
 
       // HIDE TOO FAR RIGHT
-      if( (parcel.pos.x - (parcel.size.x * 1.2)) > comparePos.x) {
-        parcel.group.visible = false;
-        return parcel.visible = false;
+      if( (chunk.pos.x - (chunk.size.x * 1.2)) > comparePos.x) {
+        chunk.group.visible = false;
+        return chunk.visible = false;
       }
 
       // HIDE TOO FAR HEIGHT
-      if(Math.abs(parcel.pos.y - comparePos.y) > (TOO_FAR_LIMIT + SHADE_OFFSET) ) {
-        parcel.group.visible = false;
-        return parcel.visible = false;
+      if(Math.abs(chunk.pos.y - comparePos.y) > (TOO_FAR_LIMIT + SHADE_OFFSET) ) {
+        chunk.group.visible = false;
+        return chunk.visible = false;
       }
 
 
-      parcel.group.visible = true;
-      return parcel.visible = true;
+      chunk.group.visible = true;
+      return chunk.visible = true;
 
-      // const dist = MathService.getDist(convertVec3(parcel.pos), comparePos);
+      // const dist = MathService.getDist(convertVec3(chunk.pos), comparePos);
       // if(min === -1 || min > dist) { min = dist; }
       // return dist < 512;
     });
@@ -139,43 +138,49 @@ export class SceneHelper {
     return this.meshes[this.scenePlayer.id];
   }
 
-  public buildParcels() {
-    this.sceneMap.parcels.forEach(parcel => {
-      parcel.group = new THREE.Group();
+  public buildChunks() {
+    this.sceneMap.chunks.forEach(chunk => {
+      chunk.group = new THREE.Group();
+
+      chunk.grounds.forEach(ground => {
+        const key = chunk.id + '-g-' + ground.id;
+        this.addMesh(
+          key,
+          BasicMeshService.makePlaneFromPoints(ground.link, ground.points),
+          convertVec3(chunk.pos)
+        );
+        ground.mesh = this.meshes[key];
+        chunk.group.add(ground.mesh);
+        // ground.mesh.rotation.x = Math.PI / -2;
+      });
       // return;
-      this.addMesh(
-        parcel.id,
-        BasicMeshService.makePlane(parcel.groundLink, convertVec2(parcel.size)),
-        convertVec3(parcel.pos)
-      );
-      parcel.group.add(this.meshes[parcel.id]);
-      this.meshes[parcel.id].rotation.x = Math.PI / -2;
 
-      // this.meshes[parcel.id].castShadow = true;
-      // this.meshes[parcel.id].receiveShadow = true;
 
-      parcel.buildings.forEach( building => {
-        const key = parcel.id + '-' + building.id;
+      // this.meshes[chunk.id].castShadow = true;
+      // this.meshes[chunk.id].receiveShadow = true;
+
+      chunk.buildings.forEach( building => {
+        const key = chunk.id + '-' + building.id;
         const model = MODELS.find(m => m.id === building.modelId);
         if(model) {
           building.originModel = model;
           this.addMesh(key, BasicMeshService.makeModel(model));
           const buildingMesh = this.meshes[key];
-          buildingMesh.position.x = parcel.pos.x + building.pos.x;
-          buildingMesh.position.y = parcel.pos.y + building.pos.y;
-          buildingMesh.position.z = parcel.pos.z + building.pos.z;
-          parcel.group.add(buildingMesh);
+          buildingMesh.position.x = chunk.pos.x + building.pos.x;
+          buildingMesh.position.y = chunk.pos.y + building.pos.y;
+          buildingMesh.position.z = chunk.pos.z + building.pos.z;
+          chunk.group.add(buildingMesh);
         }
       });
 
-      this.scene.add(parcel.group);
+      this.scene.add(chunk.group);
     });
 
   }
 
   private modelCount = 0;
   public addModelToCoords(modelId: string, v: THREE.Vector3) {
-    const parcel = this.sceneMap.parcels[0];
+    const chunk = this.sceneMap.chunks[0];
     const key = 'custom-model-' + (this.modelCount++);
     const model = MODELS.find(m => m.id === modelId);
     const building: SceneBuilding = {
@@ -187,16 +192,16 @@ export class SceneHelper {
       originModel: model,
       events: []
     }
-    parcel.buildings.push(building);
+    chunk.buildings.push(building);
 
-    if(model && parcel.group) {
-      this.addMesh(parcel.id + '-' + key, BasicMeshService.makeModel(model));
-      const buildingMesh = this.meshes[parcel.id + '-' + key];
-      buildingMesh.position.x = parcel.pos.x + building.pos.x;
-      buildingMesh.position.y = parcel.pos.y + building.pos.y;
-      buildingMesh.position.z = parcel.pos.z + building.pos.z;
+    if(model && chunk.group) {
+      this.addMesh(chunk.id + '-' + key, BasicMeshService.makeModel(model));
+      const buildingMesh = this.meshes[chunk.id + '-' + key];
+      buildingMesh.position.x = chunk.pos.x + building.pos.x;
+      buildingMesh.position.y = chunk.pos.y + building.pos.y;
+      buildingMesh.position.z = chunk.pos.z + building.pos.z;
 
-      parcel.group.add(buildingMesh);
+      chunk.group.add(buildingMesh);
     }
 
   }
@@ -207,7 +212,7 @@ export class SceneHelper {
       this.camera.position.y - CAMERA_LOOK.y,
       this.camera.position.z - CAMERA_LOOK.z
     );
-    this.updateVisibleParcels();
+    this.updateVisibleChunks();
   }
 
   public addMesh(key: string, mesh: THREE.Mesh, position?: THREE.Vector3) {

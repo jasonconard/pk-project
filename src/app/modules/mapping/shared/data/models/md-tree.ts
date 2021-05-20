@@ -1,4 +1,5 @@
 import { SceneModel } from '../../model/SceneModel';
+import { ObjSide } from '../../model/SceneMap';
 
 export const MD_TREE: SceneModel = {
   id: 'tree',
@@ -11,6 +12,9 @@ export const MD_TREE: SceneModel = {
     size: {x: 9, y: 10, z: 9},
     pos: {x: 0, y: 5, z: 0},
     rot: {x: 0, y: 0, z: 0},
+    depthWrite: true,
+    depthTest: true,
+    side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 11, y: 100}, max: {x: 19, y: 90}},
       back: {min: {x: 11, y: 100}, max: {x: 19, y: 90}},
@@ -29,6 +33,9 @@ export const MD_TREE: SceneModel = {
           size: {x: 30, y: 20, z: 0},
           pos: {x: 0, y: 2 + (6*(5-i)), z},
           rot: {x: rotX, y: 0, z: 0},
+          depthWrite: true,
+          depthTest: true,
+          side: ObjSide.BOTH,
           uvs: {
             front: {min: {x: 0, y: (i+1)*20}, max: {x: 30, y: i*20}},
             back: {min: {x: 0, y: (i+1)*20}, max: {x: 30, y: i*20}},

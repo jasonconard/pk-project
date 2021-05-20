@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } fr
 import { fromEvent, Subscription } from 'rxjs';
 import { KeyCode } from '../../core/shared/model/PressedKey';
 import { KeyService } from '../../core/shared/service/key.service';
-import { SceneHelper } from './shared/model/SceneHelper';
+import { CAMERA_LOOK, SceneHelper } from './shared/model/SceneHelper';
 import { SceneService } from './shared/services/scene.service';
 import { SCENE_MAP } from './shared/data/scene';
 import { SCENE_PLAYER } from './shared/data/characters/player';
@@ -11,7 +11,7 @@ import { FADE_ANIM, FADE_ONLEAVE_ANIM } from '../../core/shared/animations/FadeA
 import { PlayerDirection, PlayerMoveStatus } from './shared/model/ScenePlayer';
 import { PlayerService } from './shared/services/player.service';
 import * as THREE from 'three';
-import { Vec3 } from './shared/model/SceneUtils';
+import { convertVec3, Vec3 } from './shared/model/SceneUtils';
 import { EventService } from './shared/services/event.service';
 import { SceneEvent } from './shared/model/SceneEvent';
 import { SequenceService } from './shared/services/sequence.service';
@@ -66,10 +66,12 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
     setTimeout(() => { this.initScene(); });
   }
 
+  public raycaster = new THREE.Raycaster();
+
   private initScene() {
     this.sceneHelper = SceneService.makeScene(this.canvasRef.nativeElement, SCENE_MAP, SCENE_PLAYER);
     this.keyService.initTouch(this.canvasRef.nativeElement);
-    this.sceneHelper.buildParcels();
+    this.sceneHelper.buildChunks();
     this.sceneHelper.buildPlayer();
 
     this.sceneHelper.refreshRenderer();
@@ -128,6 +130,35 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
         sprite.position.x += this.moveRatio.x;
         sprite.position.z += this.moveRatio.z;
       }
+
+
+      const spriteRayOrigin = new THREE.Vector3(sprite.position.x, sprite.position.y + 16, sprite.position.z);
+      this.raycaster.ray = new THREE.Ray(spriteRayOrigin, new THREE.Vector3(0, -1, 0));
+      let dist = -1;
+
+      this.sceneHelper.sceneMap.chunks.forEach( chunk => {
+        if(chunk.visible) {
+          chunk.grounds.forEach(ground => {
+            const rayCasting = this.raycaster.intersectObject(ground.mesh)[0];
+            if(rayCasting && rayCasting.distance) {
+              if(dist === -1  || rayCasting.distance < dist) {
+                dist = rayCasting.distance
+              }
+            }
+          });
+        }
+      });
+
+      if(dist > -1) {
+        sprite.position.y -= dist - 16;
+        camera.position.y -= dist - 16;
+      } else {
+        sprite.position.x -= this.moveRatio.x;
+        sprite.position.z -= this.moveRatio.z;
+        camera.position.x -= this.moveRatio.x;
+        camera.position.z -= this.moveRatio.z;
+      }
+
 
     }, 1000 / 120);
 
@@ -202,10 +233,10 @@ export class MappingComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     }
 
-    this.sceneHelper.sceneMap.parcels.forEach(parcel => {
-      if(parcel.visible) {
-        parcel.buildings.forEach(building => {
-          this.sceneHelper.updateVisibleMesh(parcel.id + '-' + building.id, sprite.position, building.canHide);
+    this.sceneHelper.sceneMap.chunks.forEach(chunk => {
+      if(chunk.visible) {
+        chunk.buildings.forEach(building => {
+          this.sceneHelper.updateVisibleMesh(chunk.id + '-' + building.id, sprite.position, building.canHide);
         });
       }
     });

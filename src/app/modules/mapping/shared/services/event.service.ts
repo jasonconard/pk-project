@@ -17,16 +17,16 @@ export class EventService {
 
   public static checkEvents(sceneHelper: SceneHelper, playerMesh: THREE.Mesh, pressedCodes: KeyCode[]): SceneEvent {
     let eventsHelper: SceneEventHelper[] = [];
-    sceneHelper.sceneMap.parcels.forEach(parcel => {
-      if(parcel.visible) {
-        parcel.buildings.forEach(building => {
+    sceneHelper.sceneMap.chunks.forEach(chunk => {
+      if(chunk.visible) {
+        chunk.buildings.forEach(building => {
           building.events.forEach(evt => {
             const dirCond = EventService.checkDirection(evt.conditions.direction, sceneHelper);
             if(!dirCond) { return; }
             const keyCond = EventService.checkPressedKeys(evt.conditions.pressedKeys, pressedCodes);
             if(!keyCond) { return; }
-            const buildingKey = parcel.id + '-' + building.id;
-            const bounds = sceneHelper.getBounds(parcel.id + '-' + building.id);
+            const buildingKey = chunk.id + '-' + building.id;
+            const bounds = sceneHelper.getBounds(chunk.id + '-' + building.id);
             const boundsCond = EventService.checkBounds(evt.conditions.bounds, bounds, playerMesh);
             if(!boundsCond) { return; }
             eventsHelper.push({ evt, buildingMesh: sceneHelper.meshes[buildingKey] });

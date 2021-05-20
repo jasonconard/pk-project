@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { MaterialService } from './material.service';
 import { ObjSide } from '../model/SceneMap';
 import { SceneModel } from '../model/SceneModel';
+import { convertVec3, Square3 } from '../model/SceneUtils';
+import { CoreService } from '../../../../core/shared/service/core.service';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +33,33 @@ export class BasicMeshService {
     planeMaterial.side = THREE.DoubleSide;
     const geometry = new THREE.PlaneGeometry( size.x, size.y );
     return new THREE.Mesh( geometry, planeMaterial );
+  }
+
+  public static makePlaneFromPoints(link: string, points: Square3, transparent?: boolean): THREE.Mesh {
+    const planeMaterial = MaterialService.getMaterialFromLink(link, transparent);
+    planeMaterial.depthTest = true;
+    planeMaterial.depthWrite = true;
+    planeMaterial.side = THREE.DoubleSide;
+
+    let geometry = new THREE.BufferGeometry();
+    geometry.setIndex([0, 3, 2, 0, 1, 2]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array([
+      points.a.x, points.a.y, points.a.z,
+      points.b.x, points.b.y, points.b.z,
+      points.c.x, points.c.y, points.c.z,
+      points.d.x, points.d.y, points.d.z
+    ]), 3 ));
+
+    const uvs = [
+      0, 1,
+      1, 1,
+      1, 0,
+      0, 0
+    ]
+
+    geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( uvs, 2 ) );
+    return new THREE.Mesh( geometry, planeMaterial );
+
   }
 
   public static makePhongPlane(link: string, size: THREE.Vector2, transparent?: boolean): THREE.Mesh {
@@ -100,6 +129,7 @@ export class BasicMeshService {
       const geo = new THREE.PlaneGeometry(plane.size.x, plane.size.y);
       const uvAtt = geo.getAttribute('uv');
       const uv = new THREE.Vector2();
+      // console.log(uvAtt.count);
       for(let i = 0; i < uvAtt.count; i++) {
         uv.fromBufferAttribute( uvAtt, i );
         const face = Math.floor(i/4);

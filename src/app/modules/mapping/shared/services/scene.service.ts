@@ -71,9 +71,9 @@ export class SceneService {
     const spriteSize = new THREE.Vector3();
     new THREE.Box3().setFromObject(playerMesh).getSize(spriteSize);
 
-    // const parcel = sceneHelper.sceneMap.parcels[0];
-    // const limitX = parcel.pos.x + (parcel.size.x / 2) - (spriteSize.x / 2);
-    // const limitZ = parcel.pos.z + (parcel.size.y / 2);
+    // const chunk = sceneHelper.sceneMap.chunks[0];
+    // const limitX = chunk.pos.x + (chunk.size.x / 2) - (spriteSize.x / 2);
+    // const limitZ = chunk.pos.z + (chunk.size.y / 2);
 
     // if(nextPosition.x < -limitX) { move.x = 0; }
     // if(nextPosition.x > limitX) { move.x = 0; }
@@ -81,16 +81,16 @@ export class SceneService {
     // if(nextPosition.z > limitZ) { move.z = 0; }
 
 
-    sceneHelper.sceneMap.parcels.forEach(parcel => {
-      if(parcel.visible) {
-        parcel.buildings.forEach(building => {
+    sceneHelper.sceneMap.chunks.forEach(chunk => {
+      if(chunk.visible) {
+        chunk.buildings.forEach(building => {
           if(!building.originModel) {
             return;
           }
           if(building.passable) {
             return;
           }
-          const bounds = sceneHelper.getBounds(parcel.id + '-' + building.id);
+          const bounds = sceneHelper.getBounds(chunk.id + '-' + building.id);
           const hb = building.originModel.hitBox;
           const spx = (spriteSize.x / 2);
           const bMinX = bounds.min.x - spx - hb.min.x;
