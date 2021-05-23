@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MappingModule } from './modules/mapping/mapping.module';
+import { GameModule } from './modules/game/game.module';
 
 const routes: Routes = [{
   path: '',
-  loadChildren: () => MappingModule
+  loadChildren: () => GameModule
 }];
 
 @NgModule({

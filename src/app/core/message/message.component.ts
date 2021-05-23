@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { InstructionMessage, InstructionMessageChoice } from '../../modules/mapping/shared/model/SceneEventInstruction';
-import { SequenceService } from '../../modules/mapping/shared/services/sequence.service';
 import { KeyService } from '../shared/service/key.service';
 import { Subscription } from 'rxjs';
 import { FADE_ANIM, MESSAGE_CHOICE_FADE_ANIM } from '../shared/animations/FadeAnim';
 import { KeyCode } from '../shared/model/PressedKey';
+import { InstructionMessage, InstructionMessageChoice } from "../../modules/game/shared/model/SceneEventInstruction";
+import { SequenceService } from "../../modules/game/shared/services/sequence.service";
 
 @Component({
   selector: 'core-message',

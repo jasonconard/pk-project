@@ -5,8 +5,8 @@ import { KeyService } from '../shared/service/key.service';
 import { Subscription } from 'rxjs';
 import { TOUCH_KEYS, TouchKey, TouchKeyType } from '../shared/model/TouchKey';
 import { CoreService } from '../shared/service/core.service';
-import { SequenceService } from '../../modules/mapping/shared/services/sequence.service';
 import { FADE_ANIM_DELAYED } from '../shared/animations/FadeAnim';
+import { SequenceService } from "../../modules/game/shared/services/sequence.service";
 
 @Component({
   selector: 'core-touch-pad',

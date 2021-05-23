@@ -1,5 +1,5 @@
 import { KeyCode } from './PressedKey';
-import { Vec2 } from '../../../modules/mapping/shared/model/SceneUtils';
+import { Vec2 } from "../../../modules/game/shared/model/SceneUtils";
 
 export enum TouchKeyType {
   CIRCLE, RECT
