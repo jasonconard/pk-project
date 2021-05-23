@@ -28,4 +28,4 @@
 <mapping-model-choice [@fadeAnim]
   *ngIf="game && game.drawModelOpen"
   [selectedModel]="game.drawModelId"
-  (onModelChange)="game.drawModelId = $event; game.drawModelOpen = false;"></mapping-model-choice>
+  (onModelChange)="updateModelChoice($event);"></mapping-model-choice>

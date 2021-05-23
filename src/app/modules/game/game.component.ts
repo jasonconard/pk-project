@@ -38,5 +38,10 @@ export class GameComponent implements AfterViewInit, OnInit, OnDestroy {
     this.gameService.togglePaused();
   }
 
+  public updateModelChoice(val: string) {
+    console.log(val);
+    this.game.drawModelId = val;
+    this.game.drawModelOpen = false;
+  }
 }
 

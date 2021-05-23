@@ -13,8 +13,6 @@ import { KeyCode } from "../../../../core/shared/model/PressedKey";
 })
 export class GameService {
 
-  public drawModelOpen: boolean = false;
-
   private game: Game = null;
 
   constructor(private keyService: KeyService,
@@ -96,7 +94,7 @@ export class GameService {
 
     this.keyService.updateGamePadKeys();
 
-    if(!this.game.paused && !this.drawModelOpen) {
+    if(!this.game.paused && !this.game.drawModelOpen) {
       this.game.renderer.render(this.game.scene, this.game.camera);
     }
 
@@ -114,13 +112,13 @@ export class GameService {
     if(pressed.pause) {
       this.togglePaused();
     } else if(pressed.select) {
-      this.drawModelOpen = true;
+      this.game.drawModelOpen = true;
     } else if(pressed.cancel) {
       if(this.game.paused) {
         this.togglePaused();
       }
-      if(this.drawModelOpen) {
-        this.drawModelOpen = false;
+      if(this.game.drawModelOpen) {
+        this.game.drawModelOpen = false;
       }
     }
 

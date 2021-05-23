@@ -11,8 +11,6 @@ import { FADE_ANIM, MODEL_CHOICE_FADE_ANIM } from '../../../core/shared/animatio
 })
 export class ModelChoiceComponent implements OnInit, OnDestroy {
 
-  private subs: Subscription[] = [];
-
   @Input() selectedModel: string = '';
   @Output() onModelChange = new EventEmitter<string>();
 
