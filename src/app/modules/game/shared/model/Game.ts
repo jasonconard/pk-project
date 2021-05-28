@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
+import { FightHelper } from "../../../fight/shared/models/FightHelper";
 
 export enum GameMode {
   MAP, FIGHT
@@ -20,6 +21,7 @@ export class Game {
   light: THREE.AmbientLight;
   renderer: THREE.WebGLRenderer;
   mapHelper: MapHelper;
+  fightHelper: FightHelper;
   mode: GameMode;
   loading: boolean;
   frame: number;

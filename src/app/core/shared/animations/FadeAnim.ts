@@ -36,6 +36,18 @@ export const FADE_ONLEAVE_ANIM =
     ])
   ])
 
+export const LOADING_ANIM =
+  trigger('loadingAnim', [
+    transition(':enter', [
+      style({ opacity: 0 }),
+      animate('200ms', style( { opacity: 1 }))
+    ]),
+    transition(':leave', [
+      style({ opacity: 1, }),
+      animate('400ms 200ms', style({ opacity: 0 }))
+    ])
+  ])
+
 export const MODEL_CHOICE_FADE_ANIM =
   trigger('modelChoiceFadeAnim', [
     transition(':enter', [

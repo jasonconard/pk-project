@@ -2,7 +2,7 @@
 
 </div>
 
-<div class="fps-count" *ngIf="game && game.framePerSec">
+<div class="fps-count" *ngIf="game && game.framePerSec" (click)="toggleGameMode()">
   {{ game.framePerSec }} fps
 </div>
 
@@ -15,7 +15,7 @@
 <core-stick></core-stick>
 <core-touch-pad></core-touch-pad>
 
-<div class="loading-screen" @fadeOnLeaveAnim *ngIf="game && game.loading">
+<div class="loading-screen" [@loadingAnim] *ngIf="game && game.loading">
   Chargement ...
 </div>
 <div class="pause-screen" [@fadeAnim] *ngIf="game && game.paused" (touchend)="togglePaused()">

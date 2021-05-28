@@ -6,6 +6,7 @@ import { auditTime } from "rxjs/operators";
 import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
+import { FightService } from "../../../fight/shared/services/fight.service";
 
 
 @Injectable({
@@ -16,12 +17,12 @@ export class GameService {
   private game: Game = null;
 
   constructor(private keyService: KeyService,
+              private fightService: FightService,
               private gameMapService: GameMapService) {
     this.initCheckResize();
   }
 
   init(canvas: HTMLCanvasElement, gameMode: GameMode = GameMode.MAP): Game {
-
     this.keyService.initTouch(canvas);
 
     const rect = canvas.getBoundingClientRect();
@@ -33,7 +34,7 @@ export class GameService {
     const scene = new THREE.Scene();
     const raycaster = new THREE.Raycaster();
 
-    const loading = true;
+    const loading = false;
 
     const frame = 0;
     const framePerSec = 0;
@@ -52,7 +53,7 @@ export class GameService {
       mode
     });
 
-    this.switchGameMode(gameMode);
+    this.switchGameMode(gameMode, true);
 
     setTimeout( () => {
       this.game.loading = false;
@@ -72,24 +73,40 @@ export class GameService {
     return this.game;
   }
 
-  switchGameMode(gameMode: GameMode) {
-    if(!this.game) { return; }
-
-    switch (gameMode) {
-      case GameMode.FIGHT:
-        this.gameMapService.clear(this.game);
-        // this.fightService.init(this.game);
-        break;
-      case GameMode.MAP:
-        // this.fightService.clear(this.game);
-        this.gameMapService.init(this.game);
-        break;
+  switchGameMode(gameMode: GameMode, firstInit?: boolean) {
+    if(!this.game) {
+      return;
+    }
+    if(this.game.loading) {
+      return;
     }
 
-    this.game.refreshRenderer();
+    this.game.loading = true;
+    this.game.mode = gameMode;
+
+
+    setTimeout( () => {
+      switch (gameMode) {
+        case GameMode.FIGHT:
+          this.gameMapService.clear(this.game);
+          this.fightService.init(this.game);
+          break;
+        case GameMode.MAP:
+          this.fightService.clear(this.game);
+          this.gameMapService.init(this.game);
+          break;
+      }
+      this.game.refreshRenderer();
+
+      setTimeout( () => {
+        this.game.loading = false;
+      }, 300);
+    }, firstInit ? 0 : 300);
+
   }
 
   renderLoop() {
+    if(!this.game || !this.game.camera) { return; }
     this.game.frame++;
 
     this.keyService.updateGamePadKeys();

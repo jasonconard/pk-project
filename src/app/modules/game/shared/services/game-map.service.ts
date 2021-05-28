@@ -13,6 +13,7 @@ import { KeyService } from "../../../../core/shared/service/key.service";
 import * as THREE from 'three';
 import { SequenceService } from "./sequence.service";
 import { WORLD_MAP } from "../../../../../assets/map/world/world";
+import { CoreService } from "../../../../core/shared/service/core.service";
 
 
 @Injectable({
@@ -32,34 +33,47 @@ export class GameMapService {
   }
 
   init(game: Game) {
-    game.mapHelper = new MapHelper({
-      originGame: game,
-      meshes: {},
-      sceneMap: WORLD_MAP,
-      scenePlayer: SCENE_PLAYER
-    });
+    if(game.mapHelper) {
+      Object.keys(game.mapHelper.meshes).forEach(key => {
+        const mesh = game.mapHelper.meshes[key];
+        mesh.visible = true;
+      });
+    } else {
+      game.mapHelper = new MapHelper({
+        originGame: game,
+        meshes: {},
+        sceneMap: WORLD_MAP,
+        scenePlayer: SCENE_PLAYER
+      });
 
-    const rect = game.canvas.getBoundingClientRect();
+      const rect = game.canvas.getBoundingClientRect();
 
-    game.camera = new THREE.PerspectiveCamera( 45, rect.width / rect.height, 1, TOO_FAR_LIMIT + SHADE_OFFSET );
-    game.camera.position.set(CAMERA_LOOK.x, CAMERA_LOOK.y, CAMERA_LOOK.z);
-    game.camera.lookAt( 0, 0, 0 );
+      game.camera = new THREE.PerspectiveCamera( 45, rect.width / rect.height, 1, TOO_FAR_LIMIT + SHADE_OFFSET );
+      game.camera.position.set(CAMERA_LOOK.x, CAMERA_LOOK.y, CAMERA_LOOK.z);
+      game.camera.lookAt( 0, 0, 0 );
 
-    game.render();
+      game.render();
 
-    game.light = new THREE.AmbientLight( 0x404040 ); // soft white light
-    game.scene.add(game.light);
+      game.light = new THREE.AmbientLight( 0x404040 ); // soft white light
+      game.scene.add(game.light);
 
-    game.mapHelper.buildChunks();
-    game.mapHelper.buildPlayer();
+      game.mapHelper.buildChunks();
+      game.mapHelper.buildPlayer();
+    }
   }
 
   clear(game: Game) {
-
+    if(game.mapHelper) {
+      Object.keys(game.mapHelper.meshes).forEach(key => {
+        const mesh = game.mapHelper.meshes[key];
+        mesh.visible = false;
+      });
+    }
   }
 
   inputLoop(game: Game) {
     const mapHelper = game.mapHelper;
+    if(!mapHelper) { return; }
     if(game.paused || game.drawModelOpen) { return; }
     const moveDetails = this.sequenceService.sequenceSub.get() ?
       { move: { x: 0, y: 0, z: 0 }, speed: 0, status: PlayerMoveStatus.STAYING } :
@@ -160,6 +174,20 @@ export class GameMapService {
         });
       }
     });
+
+    // if(this.keyService.holdedKeys.find(key => { return key.code === KeyCode.y; })) {
+    //   camera.zoom = Math.min(2, camera.zoom + 0.01);
+    // } else if(this.keyService.holdedKeys.find(key => { return key.code === KeyCode.x; })) {
+    //   camera.zoom = Math.max(0.5, camera.zoom - 0.005);
+    // } else {
+    //   if(camera.zoom > 1) {
+    //     camera.zoom = Math.max(1, camera.zoom - 0.01);
+    //   } else if(camera.zoom < 1) {
+    //     camera.zoom = Math.min(1, camera.zoom + 0.005);
+    //   }
+    // }
+    // CoreService.me.setLogs(camera.zoom);
+    // camera.updateProjectionMatrix();
 
   }
 

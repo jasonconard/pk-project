@@ -1,14 +1,14 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { KeyService } from '../../core/shared/service/key.service';
-import { Game } from './shared/model/Game';
-import { FADE_ANIM, FADE_ONLEAVE_ANIM } from '../../core/shared/animations/FadeAnim';
+import { Game, GameMode } from './shared/model/Game';
+import { FADE_ANIM, FADE_ONLEAVE_ANIM, LOADING_ANIM } from '../../core/shared/animations/FadeAnim';
 import { GameService } from "./shared/services/game.service";
 
 @Component({
   selector: 'game-main',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
-  animations: [FADE_ANIM, FADE_ONLEAVE_ANIM]
+  animations: [FADE_ANIM, LOADING_ANIM, FADE_ONLEAVE_ANIM]
 })
 export class GameComponent implements AfterViewInit, OnInit, OnDestroy {
 
@@ -42,6 +42,14 @@ export class GameComponent implements AfterViewInit, OnInit, OnDestroy {
     console.log(val);
     this.game.drawModelId = val;
     this.game.drawModelOpen = false;
+  }
+
+  public toggleGameMode() {
+    if(this.game.mode === GameMode.MAP) {
+      this.gameService.switchGameMode(GameMode.FIGHT);
+    } else {
+      this.gameService.switchGameMode(GameMode.MAP);
+    }
   }
 }
 
