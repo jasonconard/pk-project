@@ -4,6 +4,7 @@ import { PkAbility, PkStats, Pokemon } from "../../../../core/shared/model/pokem
 import { PkStatus } from "../../../../core/shared/model/pokemon/PkSkill";
 import { PK_NATURE_LIST, PkNature } from "../../../../core/shared/model/pokemon/PkNature";
 import { POKEMONS } from "../../../../../assets/pokemons/pokemons";
+import { getXpValues } from "../../../../core/shared/model/pokemon/PkExp";
 
 export const PKMN_SKILL_NB = 4;
 export const PKMN_MAX_LEVEL = 100;
@@ -14,6 +15,7 @@ export class GamePokemon {
   public surname: string;
   public level: number;
   public xp: number;
+  public xpValues: number;
   public combativeness: number;
   public iv: PkStats;
   public ev: PkStats;
@@ -30,6 +32,7 @@ export class GamePokemon {
     this.surname = o.surname;
     this.level = o.level;
     this.xp = o.xp;
+    this.xpValues = o.xpValues;
     this.combativeness = o.combativeness;
     this.iv = o.iv;
     this.ev = o.ev;
@@ -49,6 +52,7 @@ export class GamePokemon {
     const nature = PK_NATURE_LIST[natureKeys[idNature]];
 
     const level = 50;
+    const xpValues = getXpValues(base.levellingRate);
     const baseSkills = base.learnSkills.filter( ls => ls.level <= level).map( ls => {
       return {
         base: ls.skill,
@@ -61,7 +65,8 @@ export class GamePokemon {
       currentHp: 0,
       surname: surname || base.name,
       level,
-      xp: 0,
+      xp: xpValues[level],
+      xpValues,
       combativeness: 1,
       iv: this.getRandomStats(0, 31),
       ev: { hp: 0, atk: 0, def: 0, spAtk: 0, spDef: 0, speed: 0 },

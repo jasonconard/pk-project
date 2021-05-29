@@ -29,3 +29,6 @@
   *ngIf="game && game.drawModelOpen"
   [selectedModel]="game.drawModelId"
   (onModelChange)="updateModelChoice($event);"></mapping-model-choice>
+
+
+<fight-ui *ngIf="game && game.mode === 1"></fight-ui>

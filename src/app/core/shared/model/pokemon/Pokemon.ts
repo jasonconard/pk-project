@@ -1,5 +1,6 @@
 import { PkSkill } from "./PkSkill";
 import { ElementType } from "./PkElement";
+import { PkExp } from "./PkExp";
 
 export interface Pokemon {
   id: string,
@@ -22,7 +23,7 @@ export interface Pokemon {
   hatchTime: number, // nb of steps
   baby: Pokemon, // null = himSelf
 
-  levellingRate: PkLevellingRate,
+  levellingRate: PkExp,
   catchRate: number,
 
   abilities: PkAbility[],
@@ -58,10 +59,6 @@ export interface PkGenderRatio {
 
 export enum PkEggGroup {
   FOO, FEE, FAA
-}
-
-export enum PkLevellingRate {
-  SLOW, MEDIUM_SLOW
 }
 
 export enum PkAbility {

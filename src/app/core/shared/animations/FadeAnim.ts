@@ -71,3 +71,15 @@ export const MESSAGE_CHOICE_FADE_ANIM =
       animate('200ms', style({ opacity: 0, right: '{{rightOffset}}px' }))
     ])
   ])
+
+export const FIGHT_MENU_ANIM =
+  trigger('fightMenuAnim', [
+    transition(':enter', [
+      style({ opacity: 0, transform: 'translateX(400px)' }),
+      animate('200ms', style( { opacity: 1, transform: 'translateX(0)' }))
+    ]),
+    transition(':leave', [
+      style({ opacity: 1, transform: 'translateX(0)' }),
+      animate('200ms', style({ opacity: 0, transform: 'translateX(400px)' }))
+    ])
+  ])

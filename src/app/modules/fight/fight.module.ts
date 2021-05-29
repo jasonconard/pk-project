@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FightComponent } from './fight.component';
 import { FightRoutingModule } from './fight-routing.module';
+import { FightUiComponent } from "./fight-ui/fight-ui.component";
 
 @NgModule({
   imports: [
@@ -11,10 +12,12 @@ import { FightRoutingModule } from './fight-routing.module';
     FightRoutingModule
   ],
   declarations: [
-    FightComponent
+    FightComponent,
+    FightUiComponent
   ],
   exports: [
-    FightComponent
+    FightComponent,
+    FightUiComponent
   ]
 })
 export class FightModule { }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 import { KeyService } from '../../core/shared/service/key.service';
 import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
-import { ElementType, getElementTable } from '../../core/shared/model/pokemon/pkElement';
+import { ElementType, getElementTable } from '../../core/shared/model/pokemon/PkElement';
 import { KeyCode, PressedKey } from "../../core/shared/model/PressedKey";
 
 @Component({

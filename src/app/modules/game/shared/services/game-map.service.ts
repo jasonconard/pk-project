@@ -13,7 +13,6 @@ import { KeyService } from "../../../../core/shared/service/key.service";
 import * as THREE from 'three';
 import { SequenceService } from "./sequence.service";
 import { WORLD_MAP } from "../../../../../assets/map/world/world";
-import { CoreService } from "../../../../core/shared/service/core.service";
 
 
 @Injectable({

@@ -1,6 +1,7 @@
 import { ElementType } from "../../app/core/shared/model/pokemon/PkElement";
-import { PkAbility, PkLevellingRate, Pokemon } from "../../app/core/shared/model/pokemon/Pokemon";
+import { PkAbility, Pokemon } from "../../app/core/shared/model/pokemon/Pokemon";
 import { SK_SCRATCH } from "../skills/sk-scratch";
+import { PkExp } from "../../app/core/shared/model/pokemon/PkExp";
 
 export const PK_CHARMANDER: Pokemon = {
   id: '004',
@@ -30,7 +31,7 @@ export const PK_CHARMANDER: Pokemon = {
   hatchTime: 5120,
   baby: null,
 
-  levellingRate: PkLevellingRate.MEDIUM_SLOW,
+  levellingRate: PkExp.MEDIUM_SLOW,
   catchRate: 45,
 
   abilities: [ PkAbility.BLAZE, PkAbility.SOLAR_POWER ],

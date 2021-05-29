@@ -1,0 +1,23 @@
+<div class="menu" *ngIf="menuItems && menuItems.length" @fightMenuAnim
+     [class.back]="selectedMenu && selectedMenu.subMenus && selectedMenu.subMenus.length">
+  <div class="menu-choice" *ngFor="let item of menuItems"
+       [class.disabled]="!item.enabled"
+       [class.selected]="item.id === currentMenu.id">
+    <div class="choice-label">{{item.label}}</div>
+    <div class="choice-amount" *ngIf="item.amount">{{item.amount}}</div>
+  </div>
+</div>
+
+<div class="menu sub-menu" @fightMenuAnim
+     *ngIf="selectedMenu && selectedMenu.subMenus && selectedMenu.subMenus.length" >
+  <div class="menu-choice" *ngFor="let item of selectedMenu.subMenus"
+       [class.disabled]="!item.enabled"
+       [class.selected]="item.id === currentSubMenu.id">
+    <div class="choice-label">{{item.label}}</div>
+    <div class="choice-amount" *ngIf="item.amount">{{item.amount}}</div>
+  </div>
+</div>
+
+<div class="ui-desc" @fadeAnim *ngIf="description">
+    {{ description }}
+</div>

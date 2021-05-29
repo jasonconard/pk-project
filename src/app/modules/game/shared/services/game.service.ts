@@ -145,8 +145,8 @@ export class GameService {
   inputLoop() {
     switch (this.game.mode) {
       case GameMode.MAP: this.gameMapService.inputLoop(this.game); break;
+      case GameMode.FIGHT: this.fightService.inputLoop(this.game); break;
       default: break;
-      // case GameMode.FIGHT: this.gameFightService.inputLoop(this.game); break;
     }
   }
 

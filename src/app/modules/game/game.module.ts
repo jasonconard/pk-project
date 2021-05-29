@@ -6,14 +6,16 @@ import { GameComponent } from './game.component';
 import { CoreModule } from '../../core/core.module';
 import { ModelChoiceComponent } from './model-choice/model-choice.component';
 import { TeleportComponent } from './teleport/teleport.component';
+import { FightModule } from "../fight/fight.module";
 
 @NgModule({
-  imports: [
-    CoreModule,
-    CommonModule,
-    FormsModule,
-    GameRoutingModule
-  ],
+    imports: [
+        CoreModule,
+        CommonModule,
+        FormsModule,
+        GameRoutingModule,
+        FightModule
+    ],
   declarations: [
     GameComponent,
     TeleportComponent,
