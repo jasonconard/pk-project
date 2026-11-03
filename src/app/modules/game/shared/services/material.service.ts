@@ -1,45 +1,35 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import * as THREE from 'three';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class MaterialService {
 
-  constructor() {
+  private static loadTexture(link: string): THREE.Texture {
+    const texture = new THREE.TextureLoader().load(link);
+    // Since three r152 the renderer outputs sRGB: color textures must be flagged as sRGB
+    // to keep the same rendering as before (pixel-art colors unchanged).
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    return texture;
   }
 
   public static getMaterialFromLink(link: string, transparent?: boolean): THREE.MeshBasicMaterial {
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load(link);
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
-
     return new THREE.MeshBasicMaterial({
-      map: texture,
+      map: MaterialService.loadTexture(link),
       transparent: !!transparent
     });
   }
 
   public static getSpriteMaterialFromLink(link: string): THREE.SpriteMaterial {
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load(link);
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
-
     return new THREE.SpriteMaterial({
-      map: texture
+      map: MaterialService.loadTexture(link)
     });
   }
 
   public static getPhongMaterialFromLink(link: string, transparent?: boolean): THREE.MeshPhongMaterial {
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load(link);
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
-
     return new THREE.MeshPhongMaterial({
-      map: texture,
+      map: MaterialService.loadTexture(link),
       transparent: !!transparent
     });
   }

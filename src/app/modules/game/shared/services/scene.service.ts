@@ -1,18 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import * as THREE from 'three';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { PlayerDirection, PlayerMoveStatus } from "../model/ScenePlayer";
 import { MapHelper } from "../model/MapHelper";
+import { Vec3 } from "../model/SceneUtils";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class SceneService {
 
-  constructor() {
-  }
-
-  public static checkCollisions(mapHelper: MapHelper, playerMesh: THREE.Mesh, move: THREE.Vector3) {
+  public static checkCollisions(mapHelper: MapHelper, playerMesh: THREE.Object3D, move: Vec3) {
     const nextPosition = new THREE.Vector3(
       playerMesh.position.x + move.x,
       playerMesh.position.y + move.y,
@@ -32,7 +28,10 @@ export class SceneService {
             return;
           }
           const bounds = mapHelper.getBounds(chunk.id + '-' + building.id);
-          const hb = building.originModel.hitBox;
+          const hb = building.originModel?.hitBox;
+          if (!bounds || !hb) {
+            return;
+          }
           const spx = (spriteSize.x / 2);
           const bMinX = bounds.min.x - spx - hb.min.x;
           const bMaxX = bounds.max.x + spx - hb.max.x;

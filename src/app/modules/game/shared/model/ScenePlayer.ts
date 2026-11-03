@@ -1,5 +1,4 @@
 import { Vec2, Vec3 } from './SceneUtils';
-import { Game } from './Game';
 import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
 
@@ -16,7 +15,7 @@ export interface ScenePlayer {
   tex: PlayerTex,
   pos: Vec3,
   dir: PlayerDirection,
-  mesh?: THREE.Mesh
+  mesh?: THREE.Object3D
 }
 
 export interface PlayerTex {

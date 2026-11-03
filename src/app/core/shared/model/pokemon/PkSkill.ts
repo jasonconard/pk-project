@@ -9,11 +9,11 @@ export interface PkSkill {
   category: PkSkillCategory,
   accuracy: number,
   pp: number,
-  aim: PkAim,
-  statsModifier: PkStats,
-  status: PkStatus,
-  specialStatus: PkSpecialStatus,
-  volatileStatus: PkVolatileStatus
+  aim: PkAim | null,
+  statsModifier: PkStats | null,
+  status: PkStatus | null,
+  specialStatus: PkSpecialStatus | null,
+  volatileStatus: PkVolatileStatus | null
 }
 
 export enum PkSkillCategory {

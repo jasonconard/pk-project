@@ -1,18 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import * as THREE from 'three';
 import { isPlayerMoving, PlayerDirection, PlayerMove, PlayerMoveStatus } from '../model/ScenePlayer';
 
 import { VecBox2 } from '../model/SceneUtils';
-import { ObjSide } from '../model/SceneMap';
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class PlayerService {
-
-  constructor() {
-  }
 
   public static updatePlayerSprite(pm: PlayerMove) {
 
@@ -40,12 +34,12 @@ export class PlayerService {
       case PlayerDirection.RIGHT: b = { min: { x: 45/w, y: y1 }, max: { x: 59/w, y: y2 } }; break;
     }
 
-    const spriteGeo = pm.mapHelper.meshes[pm.player.id].children[0].geometry;
+    const spriteGeo = (pm.mapHelper.meshes[pm.player.id].children[0] as THREE.Mesh).geometry;
 
     const uvAtt = spriteGeo.getAttribute('uv');
     const uv = new THREE.Vector2();
     for(let i = 0; i < uvAtt.count; i++) {
-      uv.fromBufferAttribute(uvAtt, i);
+      uv.fromBufferAttribute(uvAtt as THREE.BufferAttribute, i);
       if( i%4 === 0 ) { uvAtt.setXY( i, b.min.x, b.max.y ) } // 0, 1
       if( i%4 === 1 ) { uvAtt.setXY( i, b.max.x, b.max.y ) } // 1, 1
       if( i%4 === 2 ) { uvAtt.setXY( i, b.min.x, b.min.y ) } // 0, 0

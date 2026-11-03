@@ -1,55 +1,39 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { KeyService } from '../../core/shared/service/key.service';
-import { Game, GameMode } from './shared/model/Game';
-import { FADE_ANIM, FADE_ONLEAVE_ANIM, LOADING_ANIM } from '../../core/shared/animations/FadeAnim';
-import { GameService } from "./shared/services/game.service";
+import { afterNextRender, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { GameMode } from './shared/model/Game';
+import { GameService } from './shared/services/game.service';
+import { StickComponent } from '../../core/stick/stick.component';
+import { TouchPadComponent } from '../../core/touch-pad/touch-pad.component';
+import { MessageComponent } from '../../core/message/message.component';
+import { TeleportComponent } from './teleport/teleport.component';
+import { ModelChoiceComponent } from './model-choice/model-choice.component';
+import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 
 @Component({
   selector: 'game-main',
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, ModelChoiceComponent, FightUiComponent],
   templateUrl: './game.component.html',
-  styleUrls: ['./game.component.scss'],
-  animations: [FADE_ANIM, LOADING_ANIM, FADE_ONLEAVE_ANIM]
+  styleUrl: './game.component.scss',
 })
-export class GameComponent implements AfterViewInit, OnInit, OnDestroy {
+export class GameComponent {
+  private readonly gameService = inject(GameService);
+  private readonly canvasRef = viewChild.required<ElementRef<HTMLElement>>('canvas');
 
-  public game: Game = null;
+  protected readonly hud = this.gameService.hud;
+  protected readonly GameMode = GameMode;
 
-  @ViewChild('canvas', { static: false }) canvasRef: ElementRef;
-
-  constructor(private keyService: KeyService,
-              private gameService: GameService) {
+  constructor() {
+    afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
   }
 
-  ngOnInit() {
-  }
-
-  ngOnDestroy() {
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => { this.initGame(); });
-  }
-
-  private initGame() {
-    this.game = this.gameService.init(this.canvasRef.nativeElement);
-  }
-
-  public togglePaused() {
+  protected togglePaused(): void {
     this.gameService.togglePaused();
   }
 
-  public updateModelChoice(val: string) {
-    console.log(val);
-    this.game.drawModelId = val;
-    this.game.drawModelOpen = false;
+  protected updateModelChoice(modelId: string): void {
+    this.gameService.selectDrawModel(modelId);
   }
 
-  public toggleGameMode() {
-    if(this.game.mode === GameMode.MAP) {
-      this.gameService.switchGameMode(GameMode.FIGHT);
-    } else {
-      this.gameService.switchGameMode(GameMode.MAP);
-    }
+  protected toggleGameMode(): void {
+    this.gameService.switchGameMode(this.hud()?.mode === GameMode.MAP ? GameMode.FIGHT : GameMode.MAP);
   }
 }
-

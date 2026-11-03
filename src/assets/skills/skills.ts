@@ -1,5 +1,4 @@
-import { PkSkill, PkSkillCategory } from "../../app/core/shared/model/pokemon/pkSkill";
-import { ElementType } from "../../app/core/shared/model/pokemon/pkElement";
+import { PkSkill } from "../../app/core/shared/model/pokemon/PkSkill";
 import { SK_SCRATCH } from "./sk-scratch";
 
 export const SKILLS: PkSkill[] = [

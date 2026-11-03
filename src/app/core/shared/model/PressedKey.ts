@@ -9,11 +9,9 @@ export interface PressedKey {
   pressedTime: number
 }
 
-export function getKeyFromAxes(axes: Vec2): KeyCode {
-  if(!axes) { return null; }
-
-  let xDir: KeyCode = null;
-  let zDir: KeyCode = null;
+export function getKeyFromAxes(axes: Vec2): KeyCode | null {
+  let xDir: KeyCode | null = null;
+  let zDir: KeyCode | null = null;
   if(axes.x < -0.2) { xDir = KeyCode.left; }
   if(axes.x > 0.2) { xDir = KeyCode.right; }
   if(axes.y < -0.2) { zDir = KeyCode.up; }
@@ -25,4 +23,5 @@ export function getKeyFromAxes(axes: Vec2): KeyCode {
   } else if(zDir != null) {
     return zDir;
   }
+  return null;
 }

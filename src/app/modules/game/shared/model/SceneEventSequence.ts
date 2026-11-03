@@ -1,30 +1,26 @@
 import { SceneEventInstruction } from './SceneEventInstruction';
 
 export class SceneEventSequence {
-  public currentIndex: number = -1;
-  public instructions: SceneEventInstruction[];
+  private currentIndex = -1;
 
-  constructor(instructions: SceneEventInstruction[]) {
-    this.currentIndex = -1;
-    this.instructions = instructions || [];
-  }
+  constructor(private instructions: SceneEventInstruction[] = []) {}
 
-  public current(): SceneEventInstruction {
+  current(): SceneEventInstruction | undefined {
     return this.instructions[this.currentIndex];
   }
 
-  public next(val?: string): SceneEventInstruction {
+  next(val?: string): SceneEventInstruction | undefined {
     const instruction = this.current();
     this.currentIndex++;
-    ((instruction && instruction.subInstructions) || []).forEach(subIns => {
-      if(!subIns.condition || subIns.condition === val) {
-        subIns.instructions.forEach((instruction, index) => {
-          this.instructions.splice(this.currentIndex + index + 1, 0, { ... instruction });
+    (instruction?.subInstructions ?? []).forEach(subIns => {
+      if (!subIns.condition || subIns.condition === val) {
+        subIns.instructions.forEach((subInstruction, index) => {
+          this.instructions.splice(this.currentIndex + index + 1, 0, { ...subInstruction });
         });
       }
     });
     const current = this.current();
-    if(!current) {
+    if (!current) {
       this.currentIndex = -1;
       this.instructions = [];
     }

@@ -1,72 +1,55 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { fromEvent, Subscription } from 'rxjs';
+import { Component, DestroyRef, inject, input, linkedSignal, output, signal } from '@angular/core';
 import { MODEL_CHOICES, ModelChoice } from '../shared/model/ModelChoice';
-import { FADE_ANIM, MODEL_CHOICE_FADE_ANIM } from '../../../core/shared/animations/FadeAnim';
 
 @Component({
   selector: 'mapping-model-choice',
   templateUrl: './model-choice.component.html',
-  styleUrls: ['./model-choice.component.scss'],
-  animations: [FADE_ANIM, MODEL_CHOICE_FADE_ANIM]
+  styleUrl: './model-choice.component.scss'
 })
-export class ModelChoiceComponent implements OnInit, OnDestroy {
+export class ModelChoiceComponent {
+  readonly selectedModel = input('');
+  readonly modelSelected = output<string>();
 
-  @Input() selectedModel: string = '';
-  @Output() onModelChange = new EventEmitter<string>();
-
-  private modelChoices: ModelChoice[] = MODEL_CHOICES;
-
-  public filteredChoices: ModelChoice[] = [];
-
-
+  protected readonly currentModel = linkedSignal(() => this.selectedModel());
+  protected readonly filteredChoices = signal<ModelChoice[]>([]);
+  protected readonly croppedPics = signal<Record<string, string>>({});
 
   constructor() {
-  }
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    inject(DestroyRef).onDestroy(() => timeouts.forEach(clearTimeout));
 
-  ngOnInit(): void {
-    setTimeout( () => {
-      this.filteredChoices = [];
-      const sortedChoices = this.modelChoices.sort( (c1, c2) => {
-        return c1.model.id > c2.model.id ? 1 : -1;
+    timeouts.push(setTimeout(() => {
+      const sortedChoices = [...MODEL_CHOICES].sort((c1, c2) => c1.model.id > c2.model.id ? 1 : -1);
+
+      sortedChoices.forEach((choice, index) => {
+        timeouts.push(setTimeout(() => this.filteredChoices.update(list => [...list, choice]), index * 80));
+        this.cropPicture(choice);
       });
-
-      sortedChoices.forEach( (c, index) => {
-        const canvas : any =  document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = document.createElement('img');
-        img.src = c.model.tex.link;
-
-        canvas.width = c.texPos.max.x - c.texPos.min.x;
-        canvas.height = c.texPos.max.y - c.texPos.min.y;
-
-        setTimeout( () => {
-          this.filteredChoices.push(c);
-        }, index * 80);
-
-        fromEvent(img, 'load').subscribe( () => {
-          ctx.drawImage(img, c.texPos.min.x, c.texPos.min.y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-          c.croppedPic = canvas.toDataURL();
-        });
-
-
-      });
-    }, 200);
+    }, 200));
   }
 
-  ngOnDestroy(): void {
+  private cropPicture(choice: ModelChoice): void {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    const img = document.createElement('img');
+    canvas.width = choice.texPos.max.x - choice.texPos.min.x;
+    canvas.height = choice.texPos.max.y - choice.texPos.min.y;
+
+    img.addEventListener('load', () => {
+      ctx.drawImage(img, choice.texPos.min.x, choice.texPos.min.y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+      const croppedPic = canvas.toDataURL();
+      choice.croppedPic = croppedPic;
+      this.croppedPics.update(pics => ({ ...pics, [choice.model.id]: croppedPic }));
+    }, { once: true });
+    img.src = choice.model.tex.link;
   }
 
-  selectModel(choice: ModelChoice) {
+  protected selectModel(choice: ModelChoice): void {
     const modelKey = choice.model.id;
-    this.selectedModel = modelKey;
-    setTimeout( () => {
-      this.onModelChange.emit(modelKey);
-    }, 200);
-  }
-
-
-  isSelectedModel(choice: ModelChoice): boolean {
-    const modelKey = choice.model.id;
-    return modelKey === this.selectedModel;
+    this.currentModel.set(modelKey);
+    setTimeout(() => this.modelSelected.emit(modelKey), 200);
   }
 }

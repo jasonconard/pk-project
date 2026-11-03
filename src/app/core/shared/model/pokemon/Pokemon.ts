@@ -21,7 +21,7 @@ export interface Pokemon {
   genderRatio: PkGenderRatio,
   eggGroups: PkEggGroup[], // [] = no reproduction available
   hatchTime: number, // nb of steps
-  baby: Pokemon, // null = himSelf
+  baby: Pokemon | null, // null = himSelf
 
   levellingRate: PkExp,
   catchRate: number,

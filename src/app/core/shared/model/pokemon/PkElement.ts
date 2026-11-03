@@ -52,12 +52,7 @@ export function getElementTable(): ElementTableRow[] {
 }
 
 export function getAllElements(): PkElement[] {
-  const keys = Object.keys(PkElements);
-  const elements: PkElement[] = [];
-  keys.forEach(key => {
-    elements.push(PkElements[key]);
-  });
-  return elements;
+  return Object.values(PkElements);
 }
 
 export const PkElements: { [key: number]: PkElement } = {

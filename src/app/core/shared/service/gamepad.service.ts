@@ -1,15 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import { getKeyFromAxes, KeyCode } from '../model/PressedKey';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class GamepadService {
 
   public vibrating = false;
-
-  constructor() {
-  }
 
   public static isGamepadAvailable(): boolean {
     return !!navigator.getGamepads()[0];
@@ -33,7 +28,7 @@ export class GamepadService {
 
       const axes = [...gamepad.axes];
       const key = getKeyFromAxes({ x: axes[0], y: axes[1] });
-      if(key) {
+      if(key !== null) {
         keySet.add(key);
       }
 
@@ -44,7 +39,7 @@ export class GamepadService {
 
   public vibrate() {
     const gamepad = navigator.getGamepads()[0];
-    const va = gamepad && gamepad['vibrationActuator'];
+    const va = gamepad?.vibrationActuator;
     if(va && !this.vibrating) {
       this.vibrating = true;
       va.playEffect("dual-rumble", {

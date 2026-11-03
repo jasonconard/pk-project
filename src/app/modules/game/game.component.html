@@ -1,34 +1,40 @@
-<div class="canvas-container" #canvas>
+<div class="canvas-container" #canvas></div>
 
-</div>
+@if (hud(); as hud) {
+  @if (hud.framePerSec) {
+    <div class="fps-count" (click)="toggleGameMode()">
+      {{ hud.framePerSec }} fps
+    </div>
+  }
+}
 
-<div class="fps-count" *ngIf="game && game.framePerSec" (click)="toggleGameMode()">
-  {{ game.framePerSec }} fps
-</div>
+<core-stick />
+<core-touch-pad />
 
-<!--<div class="axes-count" *ngIf="axes.length">-->
-<!--  <div *ngFor="let axe of axes">-->
-<!--    {{ axe | number:'.2' }}-->
-<!--  </div>-->
-<!--</div>-->
+@if (hud()?.loading) {
+  <div class="loading-screen" animate.enter="anim-fade-in" animate.leave="anim-loading-out">
+    Chargement ...
+  </div>
+}
+@if (hud()?.paused) {
+  <div class="pause-screen" animate.enter="anim-fade-in" animate.leave="anim-fade-out" (touchend)="togglePaused()">
+    Pause
+  </div>
+}
 
-<core-stick></core-stick>
-<core-touch-pad></core-touch-pad>
+<core-message />
+@if (hud()?.mapHelper; as mapHelper) {
+  <core-teleport [mapHelper]="mapHelper" />
+}
 
-<div class="loading-screen" [@loadingAnim] *ngIf="game && game.loading">
-  Chargement ...
-</div>
-<div class="pause-screen" [@fadeAnim] *ngIf="game && game.paused" (touchend)="togglePaused()">
-  Pause
-</div>
+@if (hud(); as hud) {
+  @if (hud.drawModelOpen) {
+    <mapping-model-choice animate.enter="anim-fade-in" animate.leave="anim-fade-out"
+      [selectedModel]="hud.drawModelId"
+      (modelSelected)="updateModelChoice($event)" />
+  }
+}
 
-<core-message></core-message>
-<core-teleport *ngIf="game && game.mapHelper" [mapHelper]="game.mapHelper"></core-teleport>
-
-<mapping-model-choice [@fadeAnim]
-  *ngIf="game && game.drawModelOpen"
-  [selectedModel]="game.drawModelId"
-  (onModelChange)="updateModelChoice($event);"></mapping-model-choice>
-
-
-<fight-ui *ngIf="game && game.mode === 1"></fight-ui>
+@if (hud()?.mode === GameMode.FIGHT) {
+  <fight-ui />
+}

@@ -17,5 +17,5 @@ export interface SceneEventCondition {
 
 export interface SceneEventHelper {
   evt: SceneEvent,
-  buildingMesh: THREE.Mesh
+  buildingMesh: THREE.Object3D
 }

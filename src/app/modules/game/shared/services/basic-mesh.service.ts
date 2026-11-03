@@ -1,17 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import * as THREE from 'three';
 import { MaterialService } from './material.service';
 import { ObjSide } from '../model/SceneMap';
 import { SceneModel } from '../model/SceneModel';
 import { Square3 } from '../model/SceneUtils';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class BasicMeshService {
-
-  constructor() {
-  }
 
   public static makeCube(link: string, size: number): THREE.Mesh {
     const cubeMaterial = MaterialService.getMaterialFromLink(link);
@@ -91,7 +86,7 @@ export class BasicMeshService {
       const uvAtt = geo.getAttribute('uv');
       const uv = new THREE.Vector2();
       for(let i = 0; i < uvAtt.count; i++) {
-        uv.fromBufferAttribute( uvAtt, i );
+        uv.fromBufferAttribute( uvAtt as THREE.BufferAttribute, i );
         const face = Math.floor(i/4);
         let faceUv = null;
         switch (face) {
@@ -123,6 +118,7 @@ export class BasicMeshService {
       }
       boxMat.depthWrite = !!box.depthWrite;
       boxMat.depthTest = !!box.depthTest;
+      boxMat.alphaTest = 0.5;
 
       const mesh = new THREE.Mesh( geo, boxMat );
       // mesh.castShadow = true;
@@ -143,7 +139,7 @@ export class BasicMeshService {
       const uv = new THREE.Vector2();
       // console.log(uvAtt.count);
       for(let i = 0; i < uvAtt.count; i++) {
-        uv.fromBufferAttribute( uvAtt, i );
+        uv.fromBufferAttribute( uvAtt as THREE.BufferAttribute, i );
         const face = Math.floor(i/4);
         let faceUv = null;
         switch (face) {
@@ -170,6 +166,8 @@ export class BasicMeshService {
       }
       mat.depthWrite = !!plane.depthWrite;
       mat.depthTest = !!plane.depthTest;
+      // Since three r152 opaque materials force alpha=1: discard transparent texels instead of drawing them black
+      mat.alphaTest = 0.5;
 
       const mesh = new THREE.Mesh( geo, mat );
       mesh.position.x = plane.pos.x;

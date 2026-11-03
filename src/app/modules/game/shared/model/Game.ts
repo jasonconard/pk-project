@@ -13,39 +13,40 @@ export const TOO_FAR_LIMIT = 480;
 //export const TOO_FAR_LIMIT = 300;
 export const SHADE_OFFSET = 32;
 
+export interface GameInit {
+  scene: THREE.Scene;
+  raycaster: THREE.Raycaster;
+  renderer: THREE.WebGLRenderer;
+  canvas: HTMLElement;
+  mode: GameMode;
+  drawModelId: string;
+}
+
 export class Game {
   scene: THREE.Scene;
   raycaster: THREE.Raycaster;
-  canvas: HTMLCanvasElement;
-  camera: THREE.PerspectiveCamera;
-  light: THREE.AmbientLight;
+  canvas: HTMLElement;
+  /** Replaced by the map / fight services when the game mode changes. */
+  camera = new THREE.PerspectiveCamera();
+  light?: THREE.AmbientLight;
   renderer: THREE.WebGLRenderer;
-  mapHelper: MapHelper;
-  fightHelper: FightHelper;
+  mapHelper?: MapHelper;
+  fightHelper?: FightHelper;
   mode: GameMode;
-  loading: boolean;
-  frame: number;
-  framePerSec: number;
-  paused: boolean;
+  loading = false;
+  frame = 0;
+  framePerSec = 0;
+  paused = false;
 
-  drawModelOpen: boolean;
+  drawModelOpen = false;
   drawModelId: string;
 
-  constructor(o: any) {
+  constructor(o: GameInit) {
     this.scene = o.scene;
     this.raycaster = o.raycaster;
     this.canvas = o.canvas;
-    this.camera = o.camera;
-    this.light = o.light;
     this.renderer = o.renderer;
-    this.mapHelper = o.mapHelper;
     this.mode = o.mode;
-    this.loading = o.loading;
-    this.frame = o.frame || 0;
-    this.framePerSec = o.framePerSec || 0;
-    this.paused = o.paused;
-
-    this.drawModelOpen = o.drawModelOpen;
     this.drawModelId = o.drawModelId;
   }
 

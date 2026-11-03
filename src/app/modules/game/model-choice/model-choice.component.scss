@@ -72,3 +72,23 @@
     }
   }
 }
+
+// Replaces the former `modelChoiceFadeAnim` trigger (@angular/animations).
+@keyframes model-choice-in {
+  from {
+    opacity: 0;
+    left: var(--offset, 0);
+  }
+  to {
+    opacity: 1;
+    left: 0;
+  }
+}
+
+.model-choice-enter {
+  animation: model-choice-in 200ms both;
+}
+
+.model-choice-leave {
+  animation: model-choice-in 200ms reverse forwards;
+}

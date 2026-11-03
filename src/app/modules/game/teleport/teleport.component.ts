@@ -1,66 +1,46 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InstructionTeleport } from '../shared/model/SceneEventInstruction';
-import { Vec3 } from '../shared/model/SceneUtils';
-import { FADE_ANIM } from '../../../core/shared/animations/FadeAnim';
 import { SequenceService } from '../shared/services/sequence.service';
-import { MapHelper } from "../shared/model/MapHelper";
+import { MapHelper } from '../shared/model/MapHelper';
 
 @Component({
   selector: 'core-teleport',
   templateUrl: './teleport.component.html',
-  styleUrls: ['./teleport.component.scss'],
-  animations: [FADE_ANIM]
+  styleUrl: './teleport.component.scss'
 })
-export class TeleportComponent implements OnInit, OnDestroy {
+export class TeleportComponent {
+  private readonly sequenceService = inject(SequenceService);
 
-  private subs: Subscription[] = [];
+  readonly mapHelper = input.required<MapHelper>();
+  protected readonly teleport = signal<InstructionTeleport | null>(null);
 
-  @Input() public mapHelper: MapHelper;
-  public teleport: InstructionTeleport = null;
-
-  constructor(private sequenceService: SequenceService) {
+  constructor() {
+    this.sequenceService.teleport$
+      .pipe(takeUntilDestroyed())
+      .subscribe(teleport => this.onTeleport(teleport));
   }
 
-  ngOnInit(): void {
-    this.subs.push(this.sequenceService.teleportSub.subscribe((teleport: InstructionTeleport) => {
-      if(!teleport || !this.mapHelper) {
-        this.sequenceService.teleportSub.next(null);
-        this.sequenceService.nextSequence();
-      } else {
-        this.teleport = teleport;
-        setTimeout( () => {
-          const sprite = this.mapHelper.scenePlayer.mesh;
-          const diff: Vec3 = {
-            x: teleport.pos.x - sprite.position.x,
-            y: teleport.pos.y - sprite.position.y,
-            z: teleport.pos.z - sprite.position.z,
-          };
-
-          const camera = this.mapHelper.originGame.camera;
-          camera.position.x += diff.x;
-          // camera.position.y += diff.y;
-          camera.position.z += diff.z;
-          this.mapHelper.updateCameraAim();
-          if(sprite) {
-            sprite.position.x += diff.x;
-            // sprite.position.y += diff.y;
-            sprite.position.z += diff.z;
-          }
-          this.mapHelper.originGame.render();
-          this.teleport = null;
-          setTimeout( () => {
-            this.sequenceService.nextSequence();
-          }, 200);
-        }, 300);
+  private onTeleport(teleport: InstructionTeleport): void {
+    const mapHelper = this.mapHelper();
+    this.teleport.set(teleport);
+    setTimeout(() => {
+      const sprite = mapHelper.scenePlayer.mesh;
+      if (sprite) {
+        const diff = {
+          x: teleport.pos.x - sprite.position.x,
+          z: teleport.pos.z - sprite.position.z,
+        };
+        const camera = mapHelper.originGame.camera;
+        camera.position.x += diff.x;
+        camera.position.z += diff.z;
+        mapHelper.updateCameraAim();
+        sprite.position.x += diff.x;
+        sprite.position.z += diff.z;
+        mapHelper.originGame.render();
       }
-    }));
+      this.teleport.set(null);
+      setTimeout(() => this.sequenceService.nextSequence(), 200);
+    }, 300);
   }
-
-  ngOnDestroy(): void {
-    this.subs.forEach(sub => sub.unsubscribe());
-    this.subs = [];
-  }
-
-
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { CAMERA_LOOK, Game, SHADE_OFFSET, TOO_FAR_LIMIT } from "../model/Game";
 import { SCENE_PLAYER } from "../../../../../assets/characters/player";
 import { MapHelper } from "../model/MapHelper";
@@ -6,7 +6,6 @@ import { PlayerDirection, PlayerMoveStatus } from "../model/ScenePlayer";
 import { SceneService } from "./scene.service";
 import { Vec3 } from "../model/SceneUtils";
 import { PlayerService } from "./player.service";
-import { SceneEvent } from "../model/SceneEvent";
 import { EventService } from "./event.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { KeyService } from "../../../../core/shared/service/key.service";
@@ -15,10 +14,11 @@ import { SequenceService } from "./sequence.service";
 import { WORLD_MAP } from "../../../../../assets/map/world/world";
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class GameMapService {
+  private readonly keyService = inject(KeyService);
+  private readonly sequenceService = inject(SequenceService);
+
 
   private pixelSize = 8;
   private isMoving = 0;
@@ -27,23 +27,16 @@ export class GameMapService {
   private moveDir: PlayerDirection = PlayerDirection.DOWN;
   private moveStatus: PlayerMoveStatus = PlayerMoveStatus.STAYING;
 
-  constructor(private keyService: KeyService,
-              private sequenceService: SequenceService) {
-  }
-
   init(game: Game) {
     if(game.mapHelper) {
-      Object.keys(game.mapHelper.meshes).forEach(key => {
-        const mesh = game.mapHelper.meshes[key];
-        mesh.visible = true;
-      });
+      Object.values(game.mapHelper.meshes).forEach(mesh => mesh.visible = true);
     } else {
-      game.mapHelper = new MapHelper({
+      const mapHelper = new MapHelper({
         originGame: game,
-        meshes: {},
         sceneMap: WORLD_MAP,
         scenePlayer: SCENE_PLAYER
       });
+      game.mapHelper = mapHelper;
 
       const rect = game.canvas.getBoundingClientRect();
 
@@ -56,25 +49,23 @@ export class GameMapService {
       game.light = new THREE.AmbientLight( 0x404040 ); // soft white light
       game.scene.add(game.light);
 
-      game.mapHelper.buildChunks();
-      game.mapHelper.buildPlayer();
+      mapHelper.buildChunks();
+      mapHelper.buildPlayer();
     }
   }
 
   clear(game: Game) {
     if(game.mapHelper) {
-      Object.keys(game.mapHelper.meshes).forEach(key => {
-        const mesh = game.mapHelper.meshes[key];
-        mesh.visible = false;
-      });
+      Object.values(game.mapHelper.meshes).forEach(mesh => mesh.visible = false);
     }
   }
 
   inputLoop(game: Game) {
     const mapHelper = game.mapHelper;
-    if(!mapHelper) { return; }
+    const sprite = mapHelper?.scenePlayer.mesh;
+    if(!mapHelper || !sprite) { return; }
     if(game.paused || game.drawModelOpen) { return; }
-    const moveDetails = this.sequenceService.sequenceSub.get() ?
+    const moveDetails = this.sequenceService.isRunning ?
       { move: { x: 0, y: 0, z: 0 }, speed: 0, status: PlayerMoveStatus.STAYING } :
       SceneService.getMove(mapHelper, this.keyService.holdedCodes);
     const move = moveDetails.move;
@@ -99,8 +90,6 @@ export class GameMapService {
       this.moveStatus = mouvStatus;
     }
 
-    const sprite = mapHelper.scenePlayer.mesh;
-
     if(this.isMoving && this.isMoving === this.moveSpeed) {
       const ratio = this.pixelSize / this.moveSpeed;
       const collisions = { x: this.moveRatio.x * ratio, y: this.moveRatio.y * ratio, z: this.moveRatio.z * ratio };
@@ -112,10 +101,8 @@ export class GameMapService {
     camera.position.x += this.moveRatio.x;
     camera.position.z += this.moveRatio.z;
     mapHelper.updateCameraAim();
-    if(sprite) {
-      sprite.position.x += this.moveRatio.x;
-      sprite.position.z += this.moveRatio.z;
-    }
+    sprite.position.x += this.moveRatio.x;
+    sprite.position.z += this.moveRatio.z;
 
 
     const spriteRayOrigin = new THREE.Vector3(sprite.position.x, sprite.position.y + 16, sprite.position.z);
@@ -125,7 +112,7 @@ export class GameMapService {
     mapHelper.sceneMap.chunks.forEach( chunk => {
       if(chunk.visible) {
         chunk.grounds.forEach(ground => {
-          if(!ground.passable) { return; }
+          if(!ground.passable || !ground.mesh) { return; }
           const rayCasting = game.raycaster.intersectObject(ground.mesh)[0];
           if(rayCasting && rayCasting.distance) {
             if(dist === -1  || rayCasting.distance < dist) {
@@ -147,7 +134,7 @@ export class GameMapService {
     }
 
 
-    this.funOption(mapHelper, this.keyService.pressedCodes);
+    this.funOption(mapHelper, sprite, this.keyService.pressedCodes);
 
     PlayerService.updatePlayerSprite({
       mapHelper: mapHelper,
@@ -157,8 +144,8 @@ export class GameMapService {
       framePerSecond: game.framePerSec
     });
 
-    if(!this.sequenceService.sequenceSub.get()) {
-      const event: SceneEvent = EventService.checkEvents(mapHelper, sprite, this.keyService.pressedCodes);
+    if(!this.sequenceService.isRunning) {
+      const event = EventService.checkEvents(mapHelper, sprite, this.keyService.pressedCodes);
       if(event) {
         this.sequenceService.launchSequence(event);
       }
@@ -191,12 +178,12 @@ export class GameMapService {
   }
 
 
-  public canMakeFun: boolean = true;
-  private funOption(mapHelper: MapHelper, pressedCodes: KeyCode[]) {
+  private canMakeFun = true;
+  private funOption(mapHelper: MapHelper, sprite: THREE.Object3D, pressedCodes: KeyCode[]) {
     if(pressedCodes.indexOf(KeyCode.cancel) >= 0) {
       if(this.canMakeFun) {
         this.canMakeFun = false;
-        const playerPos = mapHelper.scenePlayer.mesh.position;
+        const playerPos = sprite.position;
         mapHelper.addModelToCoords(mapHelper.originGame.drawModelId, new THREE.Vector3(playerPos.x,0,playerPos.z));
         setTimeout( () => { this.canMakeFun = true; }, 50);
       }

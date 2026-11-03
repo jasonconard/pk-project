@@ -1,5 +1,7 @@
-<div class="stick-circle" *ngIf="stick"
-     [ngStyle]="getContentStyle()">
-  <div class="stick-current"  *ngIf="stick.current"
-       [ngStyle]="getCurrentStyle()"></div>
-</div>
+@if (stick(); as stick) {
+  <div class="stick-circle" [style]="contentStyle()">
+    @if (stick.current) {
+      <div class="stick-current" [style]="currentStyle()"></div>
+    }
+  </div>
+}

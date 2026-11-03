@@ -1,111 +1,69 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, computed, inject, linkedSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { KeyService } from '../shared/service/key.service';
-import { Subscription } from 'rxjs';
-import { FADE_ANIM, MESSAGE_CHOICE_FADE_ANIM } from '../shared/animations/FadeAnim';
-import { KeyCode } from '../shared/model/PressedKey';
-import { InstructionMessage, InstructionMessageChoice } from "../../modules/game/shared/model/SceneEventInstruction";
-import { SequenceService } from "../../modules/game/shared/services/sequence.service";
+import { KeyCode, PressedKey } from '../shared/model/PressedKey';
+import { SequenceService } from '../../modules/game/shared/services/sequence.service';
 
 @Component({
   selector: 'core-message',
   templateUrl: './message.component.html',
-  styleUrls: ['./message.component.scss'],
-  animations: [FADE_ANIM, MESSAGE_CHOICE_FADE_ANIM]
+  styleUrl: './message.component.scss'
 })
-export class MessageComponent implements OnInit, OnDestroy {
+export class MessageComponent {
+  private readonly sequenceService = inject(SequenceService);
+  private readonly keyService = inject(KeyService);
 
-  public message: InstructionMessage = null;
+  protected readonly message = this.sequenceService.message;
+  protected readonly text = computed(() => this.message()?.text ?? '');
+  protected readonly choices = computed(() => this.message()?.choices ?? []);
+  protected readonly choiceId = linkedSignal<number>(() => this.choices().length ? 0 : -1);
 
-  public subs: Subscription[] = [];
-
-  public text: string = "";
-
-  public choiceId: number = -1;
-  public timeouts: number[] = [];
-
-  public choices: InstructionMessageChoice[] = [];
-
-  constructor(private sequenceService: SequenceService,
-              private keyService: KeyService) {
+  constructor() {
+    this.keyService.pressedState
+      .pipe(takeUntilDestroyed())
+      .subscribe(keys => this.onKeysPressed(keys));
   }
 
-  ngOnInit(): void {
-    this.subs.push(this.sequenceService.messageSub.subscribe(message => {
-      this.choices = (message && message.choices) || [];
-      this.timeouts = [];
-      this.text = '';
-      if(message) {
-        this.text = message.text;
-        // for(let i = 0; i < message.text.length; i++) {
-        //   this.timeouts.push(setTimeout( () => {
-        //     this.text += message.text.charAt(i);
-        //   }, i*3));
-        // }
-      }
-      this.choiceId = message && message.choices && message.choices[0] ? 0 : -1;
-      this.message = message;
-    }));
-
-    this.subs.push(this.keyService.pressedState.subscribe( keys => {
-      if(keys.length && this.message) {
-        if(!this.choices || !this.choices.length) {
-          this.keyService.clearPressedKey();
-          this.closeMessage();
-        } else {
-          const codes = this.keyService.pressedCodes;
-          if(codes.indexOf(KeyCode.confirm) >= 0) {
-            this.setChoice(this.choices[this.choiceId].key);
-          } else {
-            if(codes.indexOf(KeyCode.up) >= 0 && this.choiceId > 0) {
-              this.choiceId--;
-            } else if(codes.indexOf(KeyCode.down) >= 0 && this.choiceId < this.choices.length - 1) {
-              this.choiceId++;
-            }
-          }
-          this.keyService.clearPressedKey();
-        }
-      }
-    }));
-  }
-
-  ngOnDestroy(): void {
-    this.clearTimeouts();
-    this.subs.forEach(sub => sub.unsubscribe());
-    this.subs = [];
-  }
-
-  clearTimeouts(): void {
-    this.text = '';
-    this.timeouts.forEach(to => {
-      clearTimeout(to);
-    });
-  }
-
-  setChoice(key: string) {
-    this.clearTimeouts();
-    this.choices = [];
-    this.sequenceService.messageSub.next(null);
-    this.sequenceService.nextSequence(key);
-  }
-
-  closeMessage() {
-    if(this.message && this.choices && this.choices.length) {
+  private onKeysPressed(keys: PressedKey[]): void {
+    if (!keys.length || !this.message()) {
       return;
     }
-    this.clearTimeouts();
-    this.sequenceService.messageSub.next(null);
-    this.sequenceService.nextSequence();
-  }
-
-  getChoiceAnim(i: number) {
-    return {
-      value: ':leave, :enter',
-      params: {
-        rightOffset: -20,
-        rightOffsetEnd: (this.choiceId === i ? 30 : 0),
-        delay: (i+2) * 100
-      }
+    const choices = this.choices();
+    if (!choices.length) {
+      this.keyService.clearPressedKey();
+      this.closeMessage();
+      return;
     }
+
+    const codes = this.keyService.pressedCodes;
+    if (codes.includes(KeyCode.confirm)) {
+      this.setChoice(choices[this.choiceId()].key);
+    } else if (codes.includes(KeyCode.up) && this.choiceId() > 0) {
+      this.choiceId.update(id => id - 1);
+    } else if (codes.includes(KeyCode.down) && this.choiceId() < choices.length - 1) {
+      this.choiceId.update(id => id + 1);
+    }
+    this.keyService.clearPressedKey();
   }
 
+  protected selectChoice(event: Event, index: number): void {
+    event.stopPropagation();
+    this.choiceId.set(index);
+  }
+
+  protected confirmChoice(event: Event, key: string): void {
+    event.stopPropagation();
+    this.setChoice(key);
+  }
+
+  private setChoice(key: string): void {
+    this.sequenceService.closeMessage(key);
+  }
+
+  protected closeMessage(): void {
+    if (this.message() && this.choices().length) {
+      return;
+    }
+    this.sequenceService.closeMessage();
+  }
 }

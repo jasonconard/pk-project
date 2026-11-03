@@ -206,3 +206,27 @@
   }
 
 }
+
+// Replaces the former `messageChoiceFadeAnim` trigger (@angular/animations).
+// The end position is the element's own `right` value (0, or 40px when selected).
+@keyframes message-choice-in {
+  from {
+    opacity: 0;
+    right: -20px;
+  }
+}
+
+@keyframes message-choice-out {
+  to {
+    opacity: 0;
+    right: -20px;
+  }
+}
+
+.message-choice-enter {
+  animation: message-choice-in 200ms var(--enter-delay, 0ms) both;
+}
+
+.message-choice-leave {
+  animation: message-choice-out 200ms forwards;
+}

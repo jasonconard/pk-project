@@ -1,106 +1,76 @@
-import { Injectable } from '@angular/core';
+import { Service, signal } from '@angular/core';
 import * as THREE from 'three';
+import { fromEvent } from 'rxjs';
 import { Stick, STICK_RADIUS } from '../model/Stick';
-import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+const isTouchDevice = (): boolean => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+/** Non-standard property set by iOS Safari on pinch gestures. */
+interface ScalableTouchEvent extends TouchEvent {
+  scale?: number;
+}
+
+@Service()
 export class TouchService {
+  private readonly isTouchDeviceState = signal(isTouchDevice());
+  readonly isTouchDevice = this.isTouchDeviceState.asReadonly();
 
+  private readonly stickState = signal<Stick | null>(null);
+  readonly stick = this.stickState.asReadonly();
 
-  public isTouchDevice: boolean = false;
-  private isTouchDeviceSubject = new BehaviorSubject<boolean>(this.isTouchDevice);
-  public isTouchDeviceState = this.isTouchDeviceSubject.asObservable();
-
-  public stick: Stick = null;
-  private stickSubject = new Subject<Stick>();
-  public stickState = this.stickSubject.asObservable();
-
-  private directionTouches = null;
+  private directionTouch: Touch | null = null;
 
   constructor() {
-    this.updateIsTouchDevice();
-    fromEvent(window, 'resize').subscribe(
-      (event) => {
-        this.updateIsTouchDevice();
-      })
+    fromEvent(window, 'resize').subscribe(() => this.isTouchDeviceState.set(isTouchDevice()));
   }
 
-  public updateIsTouchDevice() {
-    this.isTouchDevice = (('ontouchstart' in window) ||
-      (navigator.maxTouchPoints > 0) ||
-      (navigator.msMaxTouchPoints > 0));
-    this.isTouchDeviceSubject.next(this.isTouchDevice);
+  private updateStick(stick: Stick | null): void {
+    this.stickState.set(stick);
   }
 
-  public updateStick(stick: Stick) {
-    this.stick = stick;
-    this.stickSubject.next(stick);
-  }
-
-  public bindTouching(canvas: HTMLElement) {
-
-    canvas.addEventListener("touchstart", (e) => {
-      const touches = e.touches[e.touches.length - 1];
+  bindTouching(canvas: HTMLElement): void {
+    canvas.addEventListener('touchstart', (e: TouchEvent) => {
+      const touch = e.touches[e.touches.length - 1];
       const canvasWidth = canvas.getBoundingClientRect().width;
-      if(touches.clientX < canvasWidth / 2) {
+      if (touch.clientX < canvasWidth / 2) {
         this.updateStick({
-          begin: { x: touches.clientX, y: touches.clientY },
-          current: { x: touches.clientX, y: touches.clientY },
+          begin: { x: touch.clientX, y: touch.clientY },
+          current: { x: touch.clientX, y: touch.clientY },
           radius: STICK_RADIUS
         });
-
-        if(!this.directionTouches){
-          this.directionTouches = touches;
-        }
+        this.directionTouch ??= touch;
       }
     }, false);
 
-
-    canvas.addEventListener("touchend", (e) => {
-      this.updateStick(null)
-      const currentFingerReleased = e.changedTouches[0];
-      if(this.directionTouches && currentFingerReleased.identifier === this.directionTouches.identifier){
-        this.directionTouches = null;
+    canvas.addEventListener('touchend', (e: TouchEvent) => {
+      this.updateStick(null);
+      const releasedTouch = e.changedTouches[0];
+      if (this.directionTouch && releasedTouch.identifier === this.directionTouch.identifier) {
+        this.directionTouch = null;
       }
     }, false);
 
-    canvas.addEventListener("touchmove", (e) => {
-      if (e['scale'] !== 1) { e.preventDefault(); }
-      const currentFingerMoved = e.changedTouches[0];
-      if(this.directionTouches && currentFingerMoved.identifier === this.directionTouches.identifier){
+    canvas.addEventListener('touchmove', (e: ScalableTouchEvent) => {
+      if (e.scale !== undefined && e.scale !== 1) { e.preventDefault(); }
+      const movedTouch = e.changedTouches[0];
+      const directionTouch = this.directionTouch;
+      const stick = this.stick();
+      if (!directionTouch || !stick || movedTouch.identifier !== directionTouch.identifier) {
+        return;
+      }
 
-        const diffX = currentFingerMoved.clientX - this.directionTouches.clientX;
-        const diffY = currentFingerMoved.clientY - this.directionTouches.clientY;
-        let computedAngle = Math.asin( diffY / Math.sqrt((diffX*diffX)+(diffY*diffY))) * 180 / Math.PI;
+      const diffX = movedTouch.clientX - directionTouch.clientX;
+      const diffY = movedTouch.clientY - directionTouch.clientY;
+      let computedAngle = Math.asin(diffY / Math.sqrt((diffX * diffX) + (diffY * diffY))) * 180 / Math.PI;
+      computedAngle = diffX > 0 ? 180 - computedAngle : (360 + computedAngle) % 360;
 
-
-        if(diffX > 0) {
-          computedAngle = 180 - computedAngle;
-        } else {
-          computedAngle = (360 + computedAngle) % 360;
-        }
-
-
-        if(this.stick) {
-          const dist = Math.sqrt( Math.pow(this.stick.begin.x - currentFingerMoved.clientX, 2) + Math.pow(this.stick.begin.y - currentFingerMoved.clientY, 2));
-          if(dist > this.stick.radius -10) {
-            const x = Math.cos(THREE.MathUtils.degToRad(computedAngle)) * (-this.stick.radius+10);
-            const y = Math.sin(THREE.MathUtils.degToRad(computedAngle)) * (this.stick.radius-10);
-            this.updateStick({
-              ...this.stick,
-              current: { x: x + this.stick.begin.x, y: y + this.stick.begin.y }
-            });
-          } else {
-            this.updateStick({
-              ...this.stick,
-              current: { x: currentFingerMoved.clientX, y: currentFingerMoved.clientY }
-            });
-          }
-        }
-
+      const dist = Math.hypot(stick.begin.x - movedTouch.clientX, stick.begin.y - movedTouch.clientY);
+      if (dist > stick.radius - 10) {
+        const x = Math.cos(THREE.MathUtils.degToRad(computedAngle)) * (-stick.radius + 10);
+        const y = Math.sin(THREE.MathUtils.degToRad(computedAngle)) * (stick.radius - 10);
+        this.updateStick({ ...stick, current: { x: x + stick.begin.x, y: y + stick.begin.y } });
+      } else {
+        this.updateStick({ ...stick, current: { x: movedTouch.clientX, y: movedTouch.clientY } });
       }
     }, { passive: false });
   }

@@ -4,15 +4,11 @@ import { GameItem } from "./GameItem";
 
 export const PLAYER_MAX_PKMN = 6;
 
-export class GamePlayer {
-  public name: string;
-  public money: number;
-  public badges: number;
-  public pokemons: Pokemon[];
-  public computer: GameComputer;
-  public bag: GameItem[];
-
-  constructor(o: any) {
-  }
-
+export interface GamePlayer {
+  name: string;
+  money: number;
+  badges: number;
+  pokemons: Pokemon[];
+  computer: GameComputer;
+  bag: GameItem[];
 }

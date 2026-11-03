@@ -1,5 +1,6 @@
-import { FighterPokemon } from "./Fighters";
-import { GamePkSkill } from "../../../game/shared/model/GamePkSkill";
+import { FighterPokemon } from './Fighters';
+import { GamePkSkill } from '../../../game/shared/model/GamePkSkill';
+import { GameItem } from '../../../game/shared/model/GameItem';
 
 export interface FightMenu {
   id: string,
@@ -10,7 +11,7 @@ export interface FightMenu {
   desc?: string,
   subMenus: FightMenu[],
   skill?: GamePkSkill,
-  pokemon?: FighterPokemon
-  item?: any,
+  pokemon?: FighterPokemon,
+  item?: GameItem,
   isEscape?: boolean
 }

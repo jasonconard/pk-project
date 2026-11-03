@@ -1,91 +1,77 @@
-import { Component, OnInit } from '@angular/core';
-import { interval, Subscription } from 'rxjs';
+import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
+import { animationFrameScheduler, interval } from 'rxjs';
 import { KeyService } from '../../core/shared/service/key.service';
-import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
 import { ElementType, getElementTable } from '../../core/shared/model/pokemon/PkElement';
-import { KeyCode, PressedKey } from "../../core/shared/model/PressedKey";
+import { KeyCode, PressedKey } from '../../core/shared/model/PressedKey';
 
 @Component({
   selector: 'fight-main',
+  imports: [DecimalPipe],
   templateUrl: './fight.component.html',
-  styleUrls: ['./fight.component.scss']
+  styleUrl: './fight.component.scss'
 })
-export class FightComponent implements OnInit {
+export class FightComponent {
+  private readonly keyService = inject(KeyService);
 
-  private subs: Subscription[] = [];
-
-  public pos: number = 0;
-  public speed: number = 230;
-  public limited: boolean = true;
-  public frozen: boolean = false;
-  public recovering: boolean = false;
-
+  protected readonly pos = signal(0);
+  private readonly speed = 230;
+  private limited = true;
+  private frozen = false;
+  private recovering = false;
   private pressedKeys: PressedKey[] = [];
 
-  public ElementType = ElementType;
-  public elementTable = getElementTable();
+  protected readonly ElementType = ElementType;
+  protected readonly elementTable = getElementTable();
 
-  constructor(private keyService: KeyService) {
+  constructor() {
+    this.keyService.pressedState
+      .pipe(takeUntilDestroyed())
+      .subscribe(keys => this.pressedKeys = keys);
+
+    interval(0, animationFrameScheduler)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.tick());
   }
 
-  ngOnInit() {
-
-    console.log(this.elementTable);
-
-    this.subs.push(this.keyService.pressedState.subscribe(keys => {
-      this.pressedKeys = keys
-    }));
-
-    interval(0, animationFrame).subscribe( () => {
-      this.updatePlayerPosition();
-
-      this.frozen = !!this.pressedKeys.find( pressedKey => pressedKey.code === KeyCode.down);
-
-      if(!this.recovering) {
-        const shot = !!this.pressedKeys.find( pressedKey => pressedKey.code === KeyCode.up);
-        if(shot) {
-          this.recovering = true;
-          setTimeout( () => this.recovering = false, 1000);
-          const nextPos = Math.max(0, this.pos - 45);
-          if(this.pos > 80 && nextPos < 80) {
-            this.limited = true;
-            console.log('cancelled');
-          }
-          this.pos = nextPos;
-        }
-      }
-      //console.log(this.pos);
-    });
+  private isPressed(code: KeyCode): boolean {
+    return this.pressedKeys.some(pressedKey => pressedKey.code === code);
   }
 
-  updatePlayerPosition() {
-    if(this.frozen) {
-      return false;
-    }
-    if(this.pos < 80 && this.limited) {
-      this.pos = Math.min(80, this.pos + (this.speed/1000));
-    }
-    if(this.pos === 80 && this.limited) {
-      const confirmed = !!this.pressedKeys.find( pressedKey => pressedKey.code === KeyCode.confirm);
-      if(confirmed) {
-        this.limited = false;
-      }
-    }
-    if(this.pos >= 80 && !this.limited) {
-      this.pos = Math.min(100, this.pos + (this.speed/2000));
-    }
-    if(this.pos === 100 && !this.limited) {
-      const confirmed = !!this.pressedKeys.find( pressedKey => pressedKey.code === KeyCode.confirm);
-      if(confirmed) {
+  private tick(): void {
+    this.updatePlayerPosition();
+
+    this.frozen = this.isPressed(KeyCode.down);
+
+    if (!this.recovering && this.isPressed(KeyCode.up)) {
+      this.recovering = true;
+      setTimeout(() => this.recovering = false, 1000);
+      const pos = this.pos();
+      const nextPos = Math.max(0, pos - 45);
+      if (pos > 80 && nextPos < 80) {
         this.limited = true;
-        this.pos = 0;
       }
+      this.pos.set(nextPos);
     }
   }
 
-  ngOnDestroy() {
-    this.subs.forEach(sub => sub.unsubscribe());
-    this.subs = [];
+  private updatePlayerPosition(): void {
+    if (this.frozen) {
+      return;
+    }
+    if (this.pos() < 80 && this.limited) {
+      this.pos.update(pos => Math.min(80, pos + (this.speed / 1000)));
+    }
+    if (this.pos() === 80 && this.limited && this.isPressed(KeyCode.confirm)) {
+      this.limited = false;
+    }
+    if (this.pos() >= 80 && !this.limited) {
+      this.pos.update(pos => Math.min(100, pos + (this.speed / 2000)));
+    }
+    if (this.pos() === 100 && !this.limited && this.isPressed(KeyCode.confirm)) {
+      this.limited = true;
+      this.pos.set(0);
+    }
   }
-
 }

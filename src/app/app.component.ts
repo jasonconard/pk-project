@@ -1,31 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { CoreService } from './core/shared/service/core.service';
-import { auditTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
+  private readonly coreService = inject(CoreService);
 
-  public logs: string = '';
-  public debugMode: boolean = true;
-  public fullScreened: boolean = false;
+  protected readonly debugMode = signal(true);
+  protected readonly fullScreened = this.coreService.fullScreened;
+  protected readonly logs = this.coreService.logs;
 
-  constructor(private coreService: CoreService) {
-  }
-
-  ngOnInit() {
-    this.coreService.fullScreenedState.subscribe(forced => {
-      this.fullScreened = forced;
-    });
-    this.coreService.logsState.pipe(auditTime(1)).subscribe(logs => {
-      this.logs = logs;
-    });
-  }
-
-  toggleFullscreen() {
+  protected toggleFullscreen(): void {
     this.coreService.toggleFullScreen();
   }
 }

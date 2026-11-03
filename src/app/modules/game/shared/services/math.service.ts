@@ -1,13 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import * as THREE from 'three';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class MathService {
-
-  constructor() {
-  }
 
   public static getDist(a: THREE.Vector3, b: THREE.Vector3): number {
     const pX = Math.pow(a.x - b.x, 2);

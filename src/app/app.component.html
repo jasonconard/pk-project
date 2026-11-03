@@ -1,12 +1,16 @@
 <div class="app-container">
-  <router-outlet></router-outlet>
+  <router-outlet />
 
-  <div class="btn-fullscreen" (click)="toggleFullscreen()">
-    <img *ngIf="!fullScreened" src="assets/img/ui/icon-fullscreen.svg">
-    <img *ngIf="fullScreened" src="assets/img/ui/icon-fullscreen-exit.svg">
-  </div>
+  <button type="button" class="btn-fullscreen" (click)="toggleFullscreen()"
+          [attr.aria-label]="fullScreened() ? 'Quitter le plein écran' : 'Plein écran'">
+    @if (fullScreened()) {
+      <img src="assets/img/ui/icon-fullscreen-exit.svg" alt="">
+    } @else {
+      <img src="assets/img/ui/icon-fullscreen.svg" alt="">
+    }
+  </button>
 
-  <div class="logs" *ngIf="logs && debugMode">
-    {{logs}}
-  </div>
+  @if (logs() && debugMode()) {
+    <div class="logs">{{ logs() }}</div>
+  }
 </div>

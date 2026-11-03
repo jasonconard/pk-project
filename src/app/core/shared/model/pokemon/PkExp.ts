@@ -14,7 +14,7 @@ export function getXpValues(pkExp: PkExp): number[] {
 }
 
 function getErraticXpValues(): number[] {
-  const xpValues = [];
+  const xpValues: number[] = [];
   for(let i = 0; i <= 100; i++) {
     let xpNeeded = 0;
     if(i <= 50) {
@@ -33,7 +33,7 @@ function getErraticXpValues(): number[] {
 
 
 function getFastXpValues(): number[] {
-  const xpValues = [];
+  const xpValues: number[] = [];
   for(let i = 0; i <= 100; i++) {
     xpValues.push(Math.floor(Math.pow(i, 3) * 4 / 5));
   }
@@ -42,7 +42,7 @@ function getFastXpValues(): number[] {
 
 
 function getMediumFastXpValues(): number[] {
-  const xpValues = [];
+  const xpValues: number[] = [];
   for(let i = 0; i <= 100; i++) {
     xpValues.push(Math.pow(i, 3));
   }
@@ -51,7 +51,7 @@ function getMediumFastXpValues(): number[] {
 
 
 function getMediumSlowXpValues(): number[] {
-  const xpValues = [];
+  const xpValues: number[] = [];
   for(let i = 0; i <= 100; i++) {
     const i3 = Math.pow(i, 3) * 6/5;
     const i2 = Math.pow(i, 2) * 15;
@@ -63,7 +63,7 @@ function getMediumSlowXpValues(): number[] {
 
 
 function getSlowXpValues(): number[] {
-  const xpValues = [];
+  const xpValues: number[] = [];
   for(let i = 0; i <= 100; i++) {
     xpValues.push(Math.floor(Math.pow(i, 3) * 5 / 4));
   }
@@ -72,7 +72,7 @@ function getSlowXpValues(): number[] {
 
 
 function getFluctuatingXpValues(): number[] {
-  const xpValues = [];
+  const xpValues: number[] = [];
   for(let i = 0; i <= 100; i++) {
     const i3 = Math.pow(i, 3) / 50;
     let ratio = 1;

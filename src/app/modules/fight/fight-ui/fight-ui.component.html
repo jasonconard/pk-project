@@ -1,23 +1,44 @@
-<div class="menu" *ngIf="menuItems && menuItems.length" @fightMenuAnim
-     [class.back]="selectedMenu && selectedMenu.subMenus && selectedMenu.subMenus.length">
-  <div class="menu-choice" *ngFor="let item of menuItems"
-       [class.disabled]="!item.enabled"
-       [class.selected]="item.id === currentMenu.id">
-    <div class="choice-label">{{item.label}}</div>
-    <div class="choice-amount" *ngIf="item.amount">{{item.amount}}</div>
+@if (menuItems().length) {
+  <div class="menu" role="listbox" aria-label="Menu de combat"
+       animate.enter="anim-slide-in-right" animate.leave="anim-slide-out-right"
+       [class.back]="subMenus().length">
+    @for (item of menuItems(); track item.id) {
+      <div class="menu-choice" role="option"
+           [attr.aria-selected]="item === currentMenu()"
+           [attr.aria-disabled]="!item.enabled"
+           [class.disabled]="!item.enabled"
+           [class.selected]="item === currentMenu()">
+        <div class="choice-label">{{ item.label }}</div>
+        @if (item.amount) {
+          <div class="choice-amount">{{ item.amount }}</div>
+        }
+      </div>
+    }
   </div>
-</div>
+}
 
-<div class="menu sub-menu" @fightMenuAnim
-     *ngIf="selectedMenu && selectedMenu.subMenus && selectedMenu.subMenus.length" >
-  <div class="menu-choice" *ngFor="let item of selectedMenu.subMenus"
-       [class.disabled]="!item.enabled"
-       [class.selected]="item.id === currentSubMenu.id">
-    <div class="choice-label">{{item.label}}</div>
-    <div class="choice-amount" *ngIf="item.amount">{{item.amount}}</div>
+@if (selectedMenu(); as selectedMenu) {
+  @if (subMenus().length) {
+    <div class="menu sub-menu" role="listbox" [attr.aria-label]="selectedMenu.label"
+         animate.enter="anim-slide-in-right" animate.leave="anim-slide-out-right">
+      @for (item of subMenus(); track item.id) {
+        <div class="menu-choice" role="option"
+             [attr.aria-selected]="item === currentSubMenu()"
+             [attr.aria-disabled]="!item.enabled"
+             [class.disabled]="!item.enabled"
+             [class.selected]="item === currentSubMenu()">
+          <div class="choice-label">{{ item.label }}</div>
+          @if (item.amount) {
+            <div class="choice-amount">{{ item.amount }}</div>
+          }
+        </div>
+      }
+    </div>
+  }
+}
+
+@if (description()) {
+  <div class="ui-desc" aria-live="polite" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    {{ description() }}
   </div>
-</div>
-
-<div class="ui-desc" @fadeAnim *ngIf="description">
-    {{ description }}
-</div>
+}

@@ -1,46 +1,29 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { Stick } from '../shared/model/Stick';
+import { Component, computed, inject } from '@angular/core';
 import { TouchService } from '../shared/service/touch.service';
 
 @Component({
   selector: 'core-stick',
   templateUrl: './stick.component.html',
-  styleUrls: ['./stick.component.scss']
+  styleUrl: './stick.component.scss'
 })
-export class StickComponent implements OnInit, OnDestroy {
+export class StickComponent {
+  protected readonly stick = inject(TouchService).stick;
 
-  private subs: Subscription[] = [];
+  protected readonly contentStyle = computed(() => {
+    const stick = this.stick();
+    return stick ? {
+      width: (stick.radius * 2) + 'px',
+      height: (stick.radius * 2) + 'px',
+      left: (stick.begin.x - stick.radius) + 'px',
+      top: (stick.begin.y - stick.radius - 10) + 'px'
+    } : null;
+  });
 
-  public stick: Stick = null;
-
-  constructor(private touchService: TouchService) { }
-
-  ngOnInit(): void {
-    this.subs.push(this.touchService.stickState.subscribe(stick => {
-       this.stick = stick;
-    }));
-  }
-
-  ngOnDestroy(): void {
-    this.subs.forEach(sub => sub.unsubscribe());
-    this.subs = [];
-  }
-
-  getContentStyle() {
-    return {
-      width: (this.stick.radius*2) + 'px',
-      height: (this.stick.radius*2) + 'px',
-      left: (this.stick.begin.x - this.stick.radius) + 'px',
-      top: (this.stick.begin.y - this.stick.radius - 10) + 'px'
-    };
-  }
-
-  getCurrentStyle() {
-    return {
-      left: (this.stick.current.x - this.stick.begin.x + this.stick.radius) + 'px',
-      top: (this.stick.current.y - this.stick.begin.y + this.stick.radius) + 'px'
-    }
-  }
-
+  protected readonly currentStyle = computed(() => {
+    const stick = this.stick();
+    return stick ? {
+      left: (stick.current.x - stick.begin.x + stick.radius) + 'px',
+      top: (stick.current.y - stick.begin.y + stick.radius) + 'px'
+    } : null;
+  });
 }

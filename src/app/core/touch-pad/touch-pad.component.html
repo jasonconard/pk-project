@@ -1,12 +1,14 @@
-<div class="right-touch-btns" @fadeAnimDelayed *ngIf="isTouchDevice && !hasMessage">
-  <div class="btn-container"
-       *ngFor="let btn of btns"
-       [style]="getBtnStyle(btn, true)"
-       (touchend)="touchBtn(btn, 'up')"
-       (touchstart)="touchBtn(btn, 'down')">
-    <div class="btn"
-         [style]="getBtnStyle(btn, false)">
-      {{ btn.label.toUpperCase() }}
-    </div>
+@if (isTouchDevice() && !hasMessage()) {
+  <div class="right-touch-btns" animate.enter="anim-fade-in-delayed" animate.leave="anim-fade-out">
+    @for (btn of btns; track btn.label) {
+      <div class="btn-container"
+           [style]="getBtnStyle(btn, true)"
+           (touchend)="touchBtn(btn, 'up')"
+           (touchstart)="touchBtn(btn, 'down')">
+        <div class="btn" [style]="getBtnStyle(btn, false)">
+          {{ btn.label.toUpperCase() }}
+        </div>
+      </div>
+    }
   </div>
-</div>
+}

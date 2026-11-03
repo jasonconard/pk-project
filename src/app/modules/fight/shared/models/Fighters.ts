@@ -4,7 +4,7 @@ import { PkSpecialStatus, PkStatus, PkVolatileStatus } from "../../../../core/sh
 
 export interface Fighters {
   currentFighter: Fighter,
-  ally: Fighter,
+  ally: Fighter | null,
   opponents: Fighter[],
   isDoubleFight: boolean
 }
@@ -20,7 +20,7 @@ export interface FighterPokemon {
   origin: GamePokemon,
   current: boolean,
   currentStats: PkStats,
-  status: PkStatus,
+  status: PkStatus | null,
   specialStatus: PkSpecialStatus[],
   volatileStatus: PkVolatileStatus[]
 }

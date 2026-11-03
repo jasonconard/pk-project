@@ -1,68 +1,80 @@
-import { Injectable } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 import { CoreService } from '../../../../core/shared/service/core.service';
 import { SceneEvent } from '../model/SceneEvent';
 import { SceneEventSequence } from '../model/SceneEventSequence';
 import { InstructionLog, InstructionMessage, InstructionTeleport, InstructionType, InstructionWait } from '../model/SceneEventInstruction';
-import { SubjectHelper } from '../../../../core/shared/model/SubjectHelper';
 import { KeyService } from '../../../../core/shared/service/key.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class SequenceService {
+  private readonly coreService = inject(CoreService);
+  private readonly keyService = inject(KeyService);
 
-  public sequenceSub = new SubjectHelper<SceneEventSequence>();
-  public messageSub = new SubjectHelper<InstructionMessage>();
-  public teleportSub = new SubjectHelper<InstructionTeleport>();
+  private sequence: SceneEventSequence | null = null;
 
-  constructor(private coreService: CoreService,
-              private keyService: KeyService) {
+  private readonly messageState = signal<InstructionMessage | null>(null);
+  /** Message currently displayed to the player, if any. */
+  readonly message = this.messageState.asReadonly();
 
+  private readonly teleportSubject = new Subject<InstructionTeleport>();
+  /** Emits each teleport instruction; the listener must call `nextSequence()` once done. */
+  readonly teleport$: Observable<InstructionTeleport> = this.teleportSubject.asObservable();
+
+  /** `true` while an event sequence is being played (player inputs are frozen). */
+  get isRunning(): boolean {
+    return this.sequence !== null;
   }
 
-  public launchSequence(event: SceneEvent) {
+  launchSequence(event: SceneEvent): void {
     this.keyService.clearKeys();
-    this.sequenceSub.next(new SceneEventSequence(event.instructions.map(i => { return { ... i } })));
+    this.sequence = new SceneEventSequence(event.instructions.map(i => ({ ...i })));
     this.nextSequence();
   }
 
-  public nextSequence(val?: string) {
-    const sequence = this.sequenceSub.get();
-    if(sequence) {
-      const instruction = sequence.next(val);
-      if(instruction) {
-        switch (instruction.type) {
-          case InstructionType.LOG: this.setLogs(instruction.log); break;
-          case InstructionType.MESSAGE: this.setMessage(instruction.message); break;
-          case InstructionType.WAIT: this.setWait(instruction.wait); break;
-          case InstructionType.TELEPORT: this.setTeleport(instruction.teleport); break;
-        }
-      } else {
-        this.sequenceSub.next(null);
-      }
+  /** Closes the current message and resumes the sequence with the (optional) chosen answer. */
+  closeMessage(choiceKey?: string): void {
+    this.messageState.set(null);
+    this.nextSequence(choiceKey);
+  }
+
+  nextSequence(val?: string): void {
+    const sequence = this.sequence;
+    if (!sequence) {
+      return;
+    }
+    const instruction = sequence.next(val);
+    if (!instruction) {
+      this.sequence = null;
+      return;
+    }
+    switch (instruction.type) {
+      case InstructionType.LOG: this.setLogs(instruction.log); break;
+      case InstructionType.MESSAGE: this.setMessage(instruction.message); break;
+      case InstructionType.WAIT: this.setWait(instruction.wait); break;
+      case InstructionType.TELEPORT: this.setTeleport(instruction.teleport); break;
     }
   }
 
-  private setLogs(log: InstructionLog) {
-    if(!log) { return this.nextSequence(); }
-    this.coreService.setLogs(log.text);
+  private setLogs(log: InstructionLog | undefined): void {
+    if (log) {
+      this.coreService.setLogs(log.text);
+    }
     this.nextSequence();
   }
 
-  private setMessage(msg: InstructionMessage) {
-    if(!msg) { return this.nextSequence(); }
-    this.messageSub.next(msg);
+  private setMessage(msg: InstructionMessage | undefined): void {
+    if (!msg) { return this.nextSequence(); }
+    this.messageState.set(msg);
   }
 
-  private setWait(wait: InstructionWait) {
-    if(!wait) { return this.nextSequence(); }
-    setTimeout( () => {
-      this.nextSequence();
-    }, wait.time);
+  private setWait(wait: InstructionWait | undefined): void {
+    if (!wait) { return this.nextSequence(); }
+    setTimeout(() => this.nextSequence(), wait.time);
   }
 
-  private setTeleport(teleport: InstructionTeleport) {
-    if(!teleport) { return this.nextSequence(); }
-    this.teleportSub.next(teleport);
+  private setTeleport(teleport: InstructionTeleport | undefined): void {
+    if (!teleport) { return this.nextSequence(); }
+    this.teleportSubject.next(teleport);
   }
 }

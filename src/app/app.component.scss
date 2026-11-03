@@ -34,6 +34,9 @@
   }
 
   .btn-fullscreen {
+    border: none;
+    padding: 0;
+    cursor: pointer;
     position: absolute;
     z-index: 1002;
     right: 10px;
