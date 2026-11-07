@@ -34,6 +34,7 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 - [Nuageux](meteos/cloudy.md)
 - [Brouillard](meteos/fog.md)
 - [Brouillard rôdeur](meteos/stalking-fog.md)
+- [Brume matinale](meteos/morning-mist.md)
 - [Brume marine](meteos/sea-mist.md)
 - [Smog](meteos/smog.md)
 
@@ -56,9 +57,11 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 - [Brume de cristal](meteos/crystal-mist.md)
 - [Blizzard](meteos/blizzard.md)
 - [Gel](meteos/frost.md)
+- [Aurore glacée](meteos/deep-freeze.md)
 
 ### 🔥 Chaleur & feu
 - [Canicule](meteos/heatwave.md)
+- [Mirage](meteos/mirage.md)
 - [Tempête de sable](meteos/sandstorm.md)
 - [Volcanique](meteos/volcanic.md)
 - [Éruption imminente](meteos/eruption.md)
@@ -94,6 +97,7 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 - [Climat empoisonné](meteos/poison.md)
 - [Pluie acide](meteos/acid-rain.md)
 - [Ténèbres](meteos/darkness.md)
+- [Nuit sans lune](meteos/moonless.md)
 - [Malédiction](meteos/curse.md)
 - [Brume hantée](meteos/haunted.md)
 
