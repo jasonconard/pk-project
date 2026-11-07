@@ -51,6 +51,18 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Un brouillard épais, plus dense au loin et au ras du sol, qui dérive en nappes avec le vent. La nuit, les fenêtres percent la brume.',
     effects: ['Brouillard en nappes', 'Visibilité réduite au loin'],
   },
+  [WeatherType.STALKING_FOG]: {
+    category: 'classic', sound: false,
+    summary: 'Le brouillard s\'ouvre quand on marche, se referme à l\'arrêt.',
+    description: 'Un mur de brouillard entoure le joueur. Quand il marche, la brume s\'écarte et révèle les alentours ; dès qu\'il s\'arrête, elle se referme lentement sur lui, comme si elle l\'attendait.',
+    effects: ['Éclaircie autour du joueur', 'Rayon qui suit le mouvement', 'Bord déchiré qui ondule'],
+  },
+  [WeatherType.SMOG]: {
+    category: 'classic', sound: true,
+    summary: 'Brume jaune, ville qui gronde au loin.',
+    description: 'Une brume jaune-brun épaisse et pesante, un soleil orange pâle, des couleurs ternes. Au loin, la rumeur de la circulation, des klaxons et parfois une sirène.',
+    effects: ['Brume polluée', 'Couleurs ternies', 'Bruits de ville lointains'],
+  },
   [WeatherType.SEA_MIST]: {
     category: 'classic', sound: true,
     summary: 'Brume bleutée, vagues et mouettes.',
@@ -81,6 +93,12 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Ciel noir, pluie battante, éclairs simples ou doubles. Le tonnerre arrive plus ou moins tard selon la distance de l\'éclair.',
     effects: ['Grosse pluie', 'Éclairs proches ou lointains', 'Tonnerre varié'],
   },
+  [WeatherType.MONSOON]: {
+    category: 'rain', sound: true,
+    summary: 'Déluge tropical chaud, grenouilles.',
+    description: 'Une pluie tropicale battante et chaude sous une brume verte : le sol se gorge d\'eau très vite, les grenouilles chantent et l\'orage gronde au loin.',
+    effects: ['Pluie très dense', 'Flaques express', 'Grenouilles', 'Tonnerre lointain'],
+  },
   [WeatherType.HAIL]: {
     category: 'rain', sound: true,
     summary: 'Grêlons qui rebondissent partout.',
@@ -99,10 +117,34 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Une grosse pluie, et l\'eau monte lentement au-dessus du sol jusqu\'à tout recouvrir. Chaque pas éclabousse. L\'eau se retire ensuite.',
     effects: ['Niveau d\'eau qui monte', 'Clapotis', 'Pas dans l\'eau partout'],
   },
+  [WeatherType.INVERTED]: {
+    category: 'magic', sound: true,
+    summary: 'Couleurs en négatif, sons à l\'envers.',
+    description: 'Une dimension parallèle : tout passe en négatif, les ombres deviennent claires et les lumières sombres, les sons arrivent à l\'envers. Même la température s\'inverse : il fait plus chaud la nuit.',
+    effects: ['Image en négatif', 'Ombres claires', 'Sons à l\'envers'],
+  },
+  [WeatherType.TIME_WARP]: {
+    category: 'magic', sound: true,
+    summary: 'Le temps ralentit autour de toi.',
+    description: 'Le temps se dérègle : tout ralentit, des poussières de lumière restent suspendues, l\'air ondule et des anneaux se propagent autour de toi. Une horloge égrène ses secondes, étirées et graves.',
+    effects: ['Ralenti', 'Anneaux autour du joueur', 'Poussières figées', 'Horloge au ralenti'],
+  },
+  [WeatherType.GEYSERS]: {
+    category: 'nature', sound: true,
+    summary: 'Bouches de vapeur qui entrent en éruption.',
+    description: 'Un air tiède et brumeux : quelques bouches fument doucement, gargouillent… puis crachent une haute colonne de vapeur en sifflant. Ne reste pas dessus, elles te projettent en l\'air !',
+    effects: ['Vapeur qui s\'échappe du sol', 'Éruptions', 'Le joueur est projeté', 'Gargouillis et sifflement'],
+  },
+  [WeatherType.EARTHQUAKE]: {
+    category: 'rain', sound: true,
+    summary: 'Le sol tremble par secousses.',
+    description: 'De temps en temps, la terre tremble : l\'image secoue, de la poussière tombe le long des murs et monte du sol, un grondement sourd fait vibrer l\'air. Puis tout redevient calme… jusqu\'à la prochaine secousse.',
+    effects: ['Secousses de la caméra', 'Poussière qui tombe des toits', 'Grondement sourd'],
+  },
   [WeatherType.TORNADO]: {
     category: 'rain', sound: true,
     summary: 'Une tornade qui erre sur la carte.',
-    description: 'Ciel vert-gris, vent violent : une colonne de poussière et de débris erre sur la carte. Si tu t\'en approches trop, elle t\'emporte !',
+    description: 'Ciel vert-gris, vent violent : un tourbillon de poussière nuageux, chargé de débris, erre sur la carte. Si tu t\'en approches trop, il t\'emporte !',
     effects: ['Tornade mobile', 'Le joueur s\'envole', 'Grondement selon la distance'],
   },
   [WeatherType.SNOW]: {
@@ -110,6 +152,12 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     summary: 'Neige qui recouvre les toits.',
     description: 'Des flocons tombent doucement et la neige s\'accumule petit à petit sur les toits et le sol. Les pas crissent.',
     effects: ['Flocons', 'Neige qui s\'accumule', 'Pas dans la neige'],
+  },
+  [WeatherType.CRYSTAL_MIST]: {
+    category: 'cold', sound: true,
+    summary: 'Éclats de glace aux reflets de prisme.',
+    description: 'Une brume glacée et lumineuse où flottent de minuscules éclats de glace : ils captent la lumière en reflets de prisme, les toits s\'irisent et de fins tintements cristallins résonnent.',
+    effects: ['Éclats de glace scintillants', 'Reflets irisés', 'Brume bleutée', 'Tintements'],
   },
   [WeatherType.MAGIC_SNOW]: {
     category: 'cold', sound: true,
@@ -120,8 +168,8 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
   [WeatherType.BLIZZARD]: {
     category: 'cold', sound: true,
     summary: 'Tempête de neige, vent hurlant.',
-    description: 'Une tempête de neige : flocons soufflés presque à l\'horizontale, vent violent qui hurle, brume blanche et presque aucune visibilité.',
-    effects: ['Neige à l\'horizontale', 'Vent forcé', 'Hurlements du vent'],
+    description: 'Une tempête de neige : flocons soufflés presque à l\'horizontale, neige poudreuse arrachée au sol en bourrasques, vent violent qui hurle, brume blanche et presque aucune visibilité.',
+    effects: ['Neige à l\'horizontale', 'Bourrasques au ras du sol', 'Vent forcé', 'Hurlements du vent'],
   },
   [WeatherType.FROST]: {
     category: 'cold', sound: true,
@@ -143,21 +191,33 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
   },
   [WeatherType.VOLCANIC]: {
     category: 'heat', sound: true,
-    summary: 'Lumière orange et braises.',
-    description: 'Une lumière orangée, une brume étouffante et l\'air qui ondule. Des braises s\'échappent du sol, on entend gronder et crépiter.',
-    effects: ['Braises', 'Ondulations', 'Grondement et crépitements'],
+    summary: 'Lumière orange, braises et fumées.',
+    description: 'Une lumière orangée, une brume étouffante et l\'air qui ondule. Des braises s\'échappent du sol et des fumées sombres montent çà et là ; on entend gronder et crépiter.',
+    effects: ['Braises', 'Fumées sombres', 'Ondulations', 'Grondement et crépitements'],
+  },
+  [WeatherType.ERUPTION]: {
+    category: 'heat', sound: true,
+    summary: 'Le volcan se réveille : secousses de plus en plus fréquentes.',
+    description: 'L\'ambiance volcanique, avec des cendres qui tombent, et des secousses qui deviennent de plus en plus fréquentes. La tension monte avec elles : de plus en plus de braises et de fumées, jusqu\'à une grande secousse qui fait jaillir une gerbe de braises… puis le cycle recommence.',
+    effects: ['Secousses de plus en plus rapprochées', 'Grande secousse finale', 'Gerbes de braises et fumées', 'Cendres', 'Grondement et crépitements'],
   },
   [WeatherType.ASH]: {
     category: 'heat', sound: true,
     summary: 'Flocons de cendres grises.',
-    description: 'Le soleil orange est voilé, des flocons de cendres grises tombent lentement en tourbillonnant. Un feu crépite au loin.',
-    effects: ['Cendres qui tombent', 'Soleil voilé', 'Crépitement lointain'],
+    description: 'Le soleil orange est voilé, des flocons de cendres grises tombent lentement en tourbillonnant et des nappes de fumée dérivent avec le vent. Un feu crépite au loin.',
+    effects: ['Cendres qui tombent', 'Nappes de fumée', 'Soleil voilé', 'Crépitement lointain'],
   },
   [WeatherType.FOREST]: {
     category: 'nature', sound: true,
     summary: 'Ombres de feuillage et oiseaux.',
     description: 'Comme sous les arbres : ombres de feuillage qui bougent avec le vent, pollen doré, oiseaux le jour, grillons et hibou la nuit.',
     effects: ['Ombres de feuillage', 'Pollen', 'Oiseaux, grillons, hibou'],
+  },
+  [WeatherType.AUTUMN_DRIZZLE]: {
+    category: 'nature', sound: true,
+    summary: 'Bruine dorée et feuilles mortes.',
+    description: 'Une lumière d\'automne basse et dorée, une fine bruine et des feuilles mortes qui tombent ensemble. Les façades rougeoient, quelques oiseaux chantent encore.',
+    effects: ['Lumière dorée rasante', 'Bruine', 'Feuilles d\'automne', 'Oiseaux discrets'],
   },
   [WeatherType.LEAVES]: {
     category: 'nature', sound: false,
@@ -188,6 +248,30 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     summary: 'Voiles d\'aurore vert et violet.',
     description: 'Une nuit claire éclairée par des voiles d\'aurore vert et violet qui ondulent sur le sol et les toits.',
     effects: ['Aurores mouvantes'],
+  },
+  [WeatherType.STARRY_NIGHT]: {
+    category: 'magic', sound: true,
+    summary: 'Ciel clair, étoiles dans les flaques.',
+    description: 'Une nuit claire et fraîche : lune brillante et nette, rosée au sol, des étoiles qui scintillent dans les petites flaques, quelques lucioles et le chant des grillons.',
+    effects: ['Lumière de lune nette', 'Rosée et flaques', 'Étoiles dans les flaques', 'Grillons'],
+  },
+  [WeatherType.LIGHT_TIDE]: {
+    category: 'magic', sound: true,
+    summary: 'Vagues de lumière bleue au sol.',
+    description: 'Une nuit bleu profond : des vagues de lumière parcourent le sol comme du plancton bioluminescent, scintillent à leur passage puis s\'éteignent. On entend un doux ressac.',
+    effects: ['Vagues lumineuses', 'Plancton scintillant', 'Ressac doux'],
+  },
+  [WeatherType.FIREWORKS]: {
+    category: 'magic', sound: true,
+    summary: 'Gerbes colorées qui illuminent la nuit.',
+    description: 'Une nuit de fête : des fusées sifflent en montant puis éclatent en gerbes de couleurs qui retombent en pluie d\'étincelles. Chaque explosion colore toute la scène un instant.',
+    effects: ['Fusées et gerbes colorées', 'Scène illuminée à chaque éclat', 'Sifflements et détonations'],
+  },
+  [WeatherType.MARS]: {
+    category: 'magic', sound: true,
+    summary: 'Ciel rouille et sable rouge.',
+    description: 'Comme sur une autre planète : un ciel couleur rouille, un vent qui soulève du sable rouge et le dépose partout, des poussières qui flottent longtemps dans l\'air. La nuit tombe glaciale.',
+    effects: ['Sable rouge soufflé', 'Sol qui rougit', 'Poussières en faible gravité', 'Froid extrême'],
   },
   [WeatherType.SOLAR_STORM]: {
     category: 'magic', sound: true,
@@ -225,17 +309,23 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Il pleut du sang : les flaques et le sol se teintent de rouge, des éclairs rouges illuminent la scène.',
     effects: ['Gouttes de sang', 'Flaques rouges', 'Éclairs rouges'],
   },
+  [WeatherType.ACID_RAIN]: {
+    category: 'dark', sound: true,
+    summary: 'Pluie verdâtre qui ronge le sol.',
+    description: 'Un ciel jaune-vert maladif et une pluie verdâtre qui ronge tout : le sol se tache, des vapeurs s\'élèvent là où elle tombe et on l\'entend grésiller.',
+    effects: ['Pluie acide', 'Flaques et taches vertes', 'Vapeurs qui montent', 'Grésillement'],
+  },
   [WeatherType.POISON]: {
     category: 'dark', sound: true,
     summary: 'Brume violette et pluie toxique.',
-    description: 'Un climat empoisonné : grosse brume violette, pluie violette, flaques toxiques et air étouffant qui ondule. Des bulles éclatent.',
-    effects: ['Brume violette', 'Pluie toxique', 'Bulles toxiques'],
+    description: 'Un climat empoisonné : grosse brume violette, pluie violette, flaques toxiques d\'où montent des fumées violettes, air étouffant qui ondule. Des bulles éclatent.',
+    effects: ['Brume violette', 'Pluie toxique', 'Fumées violettes', 'Bulles toxiques'],
   },
   [WeatherType.DARKNESS]: {
     category: 'dark', sound: true,
     summary: 'Le noir se referme autour de toi.',
-    description: 'Une brume noire engloutit tout à quelques pas. Les fenêtres percent à peine. Ambiance sonore oppressante.',
-    effects: ['Vision réduite', 'Bourdonnement, cœur, chuchotements'],
+    description: 'Une brume noire engloutit tout à quelques pas, et des volutes de ténèbres rampent tout autour de toi. Les fenêtres percent à peine. Ambiance sonore oppressante.',
+    effects: ['Vision réduite', 'Volutes noires qui rampent', 'Bourdonnement, cœur, chuchotements'],
   },
   [WeatherType.CURSE]: {
     category: 'dark', sound: true,
@@ -246,8 +336,8 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
   [WeatherType.HAUNTED]: {
     category: 'dark', sound: true,
     summary: 'Silhouettes dans la brume.',
-    description: 'Une brume épaisse où des silhouettes se forment au loin… et se dissipent quand on s\'approche. Gémissements dans le vent.',
-    effects: ['Brume épaisse', 'Silhouettes fantomatiques', 'Gémissements'],
+    description: 'Une brume épaisse d\'où s\'élèvent des volutes pâles, et où des silhouettes se forment au loin… puis se dissipent quand on s\'approche. Gémissements dans le vent.',
+    effects: ['Brume épaisse', 'Volutes qui s\'élèvent', 'Silhouettes fantomatiques', 'Gémissements'],
   },
 };
 

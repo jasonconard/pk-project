@@ -21,6 +21,7 @@ const HEAT_FRAGMENT = /* glsl */`
 uniform sampler2D tScene;
 uniform float uHeat;
 uniform float uWash;
+uniform float uInvert;
 uniform float uTime;
 uniform float uAspect;
 uniform vec2 uScale;
@@ -49,6 +50,13 @@ void main() {
   c = mix(c, vec3(luma), ${DESATURATION.toFixed(2)} * uWash);
   c *= mix(vec3(1.0), uTint, uWash);
 
+  // Inverted world: photographic negative, done in display (gamma) space so mid greys stay mid greys
+  if (uInvert > 0.0) {
+    vec3 shown = pow(max(c, 0.0), vec3(1.0 / 2.2));
+    vec3 negative = pow(clamp(1.0 - shown, 0.0, 1.0), vec3(2.2));
+    c = mix(c, negative, uInvert);
+  }
+
   gl_FragColor = vec4(c, 1.0);
   #include <colorspace_fragment>
 }
@@ -74,6 +82,7 @@ export class HeatHazePass {
         tScene: { value: this.sceneTarget.texture },
         uHeat: { value: 0 },
         uWash: { value: 0 },
+        uInvert: { value: 0 },
         uTime: { value: 0 },
         uAspect: { value: 1 },
         uScale: { value: SHIMMER_SCALE },
@@ -92,7 +101,7 @@ export class HeatHazePass {
    * @param heat shimmer strength, 0..1
    * @param wash washed-out warm colors, 0..1
    */
-  render(renderer: THREE.WebGLRenderer, drawFrame: (target: THREE.WebGLRenderTarget) => void, heat: number, wash: number, time: number) {
+  render(renderer: THREE.WebGLRenderer, drawFrame: (target: THREE.WebGLRenderTarget) => void, heat: number, wash: number, time: number, invert = 0) {
     renderer.getDrawingBufferSize(this.size);
     if (this.sceneTarget.width !== this.size.x || this.sceneTarget.height !== this.size.y) {
       this.sceneTarget.setSize(this.size.x, this.size.y);
@@ -102,6 +111,7 @@ export class HeatHazePass {
     const u = this.material.uniforms;
     u['uHeat'].value = heat;
     u['uWash'].value = wash;
+    u['uInvert'].value = invert;
     u['uTime'].value = time;
     u['uAspect'].value = this.size.x / this.size.y;
     renderer.setRenderTarget(null);

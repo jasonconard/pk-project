@@ -26,6 +26,21 @@ export enum WeatherType {
   BLIZZARD = 'blizzard',
   DARKNESS = 'darkness',
   FOREST = 'forest',
+  MONSOON = 'monsoon',
+  AUTUMN_DRIZZLE = 'autumn-drizzle',
+  STARRY_NIGHT = 'starry-night',
+  SMOG = 'smog',
+  FIREWORKS = 'fireworks',
+  LIGHT_TIDE = 'light-tide',
+  EARTHQUAKE = 'earthquake',
+  GEYSERS = 'geysers',
+  TIME_WARP = 'time-warp',
+  INVERTED = 'inverted',
+  STALKING_FOG = 'stalking-fog',
+  ERUPTION = 'eruption',
+  CRYSTAL_MIST = 'crystal-mist',
+  MARS = 'mars',
+  ACID_RAIN = 'acid-rain',
   HAIL = 'hail',
   SEA_MIST = 'sea-mist',
   SPRING_SHOWER = 'spring-shower',
@@ -122,6 +137,52 @@ export interface WeatherParams {
   leaves: number;
   /** Fog thickness, 0 = none, 1 = thick fog (thicker far away and near the ground, drifting with the wind). */
   fog: number;
+  /** How fast the ground gets wet and the puddles fill (1 = normal rain, more = tropical downpour). */
+  soak: number;
+  /** Lightning only far away: smallest strike distance, 0 = anywhere .. 1 = always on the horizon. */
+  lightningFar: number;
+  /** Frogs croaking (monsoon), 0 = none, 1 = full chorus. */
+  frogs: number;
+  /** Autumn leaves falling whatever the leaves mode chosen for the "Feuilles" weather, 0 = none, 1 = max. */
+  autumnLeaves: number;
+  /** Night dew: the ground stays slightly wet with shallow puddles, 0 = none, 1 = full. */
+  dew: number;
+  /** Stars twinkling in the puddles, 0 = none, 1 = full. */
+  stars: number;
+  /** Light tide: waves of bioluminescent plankton glowing on the ground, 0 = none, 1 = full. */
+  tide: number;
+  /** Earthquakes: how often and how hard the ground shakes, 0 = never, 1 = full. */
+  quake: number;
+  /** Geysers steaming and erupting on the map, 0 = none, 1 = active. */
+  geysers: number;
+  /** Time distortion: the weather runs in slow motion, ripples spread around the player, 0 = none, 1 = full. */
+  timeWarp: number;
+  /** Inverted world: photographic negative of the whole image, sounds played backwards, 0 = none, 1 = full. */
+  invert: number;
+  /** Stalking fog: a fog wall that clears around the walking player and closes in when they stop, 0 = none, 1 = full. */
+  stalkingFog: number;
+  /** Imminent eruption: tremors growing more frequent until a big quake that throws up embers and smoke, 0 = none, 1 = full. */
+  eruption: number;
+  /** Crickets chirping at night (without the forest), 0 = none, 1 = full. */
+  crickets: number;
+  /** Distant city sounds (traffic, horns, sirens), 0 = none, 1 = full. */
+  city: number;
+  /** Fireworks: how often rockets are launched, 0 = none, 1 = a show. */
+  fireworks: number;
+  /** Floating ice crystals catching the light (prismatic glints), 0 = none, 1 = max. */
+  crystals: number;
+  /** Dust motes floating for a long time as in a low gravity (Mars), 0 = none, 1 = max. */
+  marsDust: number;
+  /** Acid rain density (sickly green drops staining the ground), 0 = none, 1 = max. */
+  acidRain: number;
+  /** Acid fumes rising from the ground where the rain eats it, 0 = none, 1 = max. */
+  fumes: number;
+  /** Toxic purple fumes rising from the puddles (poisoned climate), 0 = none, 1 = max. */
+  poisonFumes: number;
+  /** Color of the sand layer on the ground (linear RGB). */
+  sandColor: THREE.Color;
+  /** Tint of the blown sand grains and dust puffs (white = their own sandy colors). */
+  sandTint: THREE.Color;
   /** Hail density (white pellets, ticking on the roofs), 0 = none, 1 = max. */
   hail: number;
   /** Sea sounds (waves, gulls), 0 = none, 1 = full. */
@@ -204,6 +265,29 @@ const DAY_BASE: WeatherParams = {
   sand: 0,
   electric: 0,
   fog: 0,
+  soak: 1,
+  lightningFar: 0,
+  frogs: 0,
+  autumnLeaves: 0,
+  dew: 0,
+  stars: 0,
+  tide: 0,
+  quake: 0,
+  geysers: 0,
+  timeWarp: 0,
+  invert: 0,
+  stalkingFog: 0,
+  eruption: 0,
+  crickets: 0,
+  city: 0,
+  fireworks: 0,
+  crystals: 0,
+  marsDust: 0,
+  acidRain: 0,
+  fumes: 0,
+  poisonFumes: 0,
+  sandColor: new THREE.Color().setRGB(0.86, 0.71, 0.48),
+  sandTint: new THREE.Color(0xffffff),
   hail: 0,
   sea: 0,
   sunRain: 0,
@@ -531,6 +615,7 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     lightPulse: 0.06,
     heatHaze: 1,
     poisonRain: 0.6,
+    poisonFumes: 1,
     fog: 0.8,
     fogColor: new THREE.Color(0x9a62c8),
   }),
@@ -548,6 +633,25 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     windowGlow: 0.5,
     rain: 1,
     lightning: 1,
+  }),
+  // Monsoon: warm tropical downpour, green steamy haze, puddles filling fast, frogs, thunder far away
+  [WeatherType.MONSOON]: preset(DAY_BASE, {
+    litLevel: 0.66,
+    shadowLevel: 0.54,
+    ambientColor: new THREE.Color(0xb4cdb8),
+    sunColor: new THREE.Color(0xdcecd8),
+    unlitTint: new THREE.Color(0xbcd2c0),
+    specular: 0.3,
+    cloudCover: 0.85,
+    cloudAmbient: 0.2,
+    cloudSpeed: 35,
+    rain: 1,
+    soak: 3,
+    lightning: 0.25,
+    lightningFar: 0.65,
+    frogs: 0.6,
+    fog: 0.45,
+    fogColor: new THREE.Color(0x8fae94),
   }),
   // Overcast white sky: soft shadows, bright diffuse light bounced by the snow
   [WeatherType.SNOW]: preset(DAY_BASE, {
@@ -610,6 +714,146 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fogColor: new THREE.Color(0xf3dcb8),
   }),
   // Soft golden light, leaves (or cherry petals) gliding down from the trees
+  // Golden autumn drizzle: low warm orange light, fine drizzle and dead leaves falling together
+  // Acid rain: sickly yellow-green sky, greenish rain eating the ground: fumes rising, sizzling
+  [WeatherType.ACID_RAIN]: preset(DAY_BASE, {
+    litLevel: 0.72,
+    shadowLevel: 0.58,
+    ambientColor: new THREE.Color(0xccd8a4),
+    sunColor: new THREE.Color(0xeaf2b8),
+    unlitTint: new THREE.Color(0xd0dcac),
+    specular: 0.3,
+    cloudCover: 0.75,
+    cloudAmbient: 0.14,
+    cloudSpeed: 25,
+    acidRain: 0.7,
+    fumes: 1,
+    fog: 0.3,
+    fogColor: new THREE.Color(0xaec486),
+  }),
+  // Mars: rust-colored sky, red sand blown by the wind and piling up, dust floating as in a low gravity
+  [WeatherType.MARS]: preset(DAY_BASE, {
+    litLevel: 0.8,
+    shadowLevel: 0.56,
+    ambientColor: new THREE.Color(0xe4a684),
+    sunColor: new THREE.Color(0xffd2b0),
+    unlitTint: new THREE.Color(0xe8b496),
+    specular: 0.15,
+    cloudCover: 0.4,
+    cloudAmbient: 0.08,
+    cloudSpeed: 30,
+    sand: 0.7,
+    minWind: 0.5,
+    sandColor: new THREE.Color().setRGB(0.6, 0.24, 0.12),
+    sandTint: new THREE.Color(0xff8a6a),
+    marsDust: 1,
+    fog: 0.5,
+    fogColor: new THREE.Color(0xc27a52),
+  }),
+  // Earthquake: dusty air; now and then the ground shakes, dust falls along the walls and rises from the ground
+  [WeatherType.EARTHQUAKE]: preset(DAY_BASE, {
+    litLevel: 0.92,
+    shadowLevel: 0.6,
+    ambientColor: new THREE.Color(0xeee2d0),
+    sunColor: new THREE.Color(0xfff0dc),
+    unlitTint: new THREE.Color(0xf0e6d8),
+    specular: 0.2,
+    cloudCover: 0.2,
+    cloudSpeed: 6,
+    quake: 1,
+    fog: 0.18,
+    fogColor: new THREE.Color(0xc8b8a0),
+  }),
+  // Geysers: warm misty air, vents steaming gently then erupting into tall jets of steam
+  [WeatherType.GEYSERS]: preset(DAY_BASE, {
+    litLevel: 0.92,
+    shadowLevel: 0.62,
+    ambientColor: new THREE.Color(0xe8eef0),
+    sunColor: new THREE.Color(0xfff8ec),
+    unlitTint: new THREE.Color(0xeef2f4),
+    specular: 0.5,
+    cloudCover: 0.25,
+    cloudSpeed: 8,
+    dew: 0.5,
+    geysers: 1,
+    fog: 0.3,
+    fogColor: new THREE.Color(0xd8e0e4),
+  }),
+  // Time warp: pale violet light, everything in slow motion, ripples spreading from the player, frozen motes
+  [WeatherType.TIME_WARP]: preset(DAY_BASE, {
+    litLevel: 0.9,
+    shadowLevel: 0.62,
+    ambientColor: new THREE.Color(0xdcd6f2),
+    sunColor: new THREE.Color(0xf2ecff),
+    unlitTint: new THREE.Color(0xe2dcf4),
+    specular: 0.5,
+    cloudCover: 0.3,
+    cloudSpeed: 10,
+    heatHaze: 0.3,
+    timeWarp: 1,
+    fog: 0.22,
+    fogColor: new THREE.Color(0xc8c0e8),
+  }),
+  // Inverted world: the image turns to its negative (dark skies of light, glowing shadows), sounds play backwards
+  [WeatherType.INVERTED]: preset(DAY_BASE, {
+    litLevel: 0.95,
+    shadowLevel: 0.5,
+    specular: 0.4,
+    cloudCover: 0.3,
+    cloudSpeed: 10,
+    invert: 1,
+    fog: 0.12,
+  }),
+  // Crystal mist: icy blue haze, tiny ice crystals floating and glinting in prism colors, rainbow sheen, chimes
+  [WeatherType.CRYSTAL_MIST]: preset(DAY_BASE, {
+    litLevel: 0.95,
+    shadowLevel: 0.66,
+    ambientColor: new THREE.Color(0xe0ecff),
+    sunColor: new THREE.Color(0xf4f8ff),
+    unlitTint: new THREE.Color(0xe6eeff),
+    specular: 1.2,
+    sunGlow: 0.3,
+    cloudCover: 0.2,
+    cloudSpeed: 4,
+    iridescence: 0.7,
+    crystals: 1,
+    fog: 0.4,
+    fogColor: new THREE.Color(0xd8e6fa),
+  }),
+  // Smog: thick yellow-brown haze, pale orange sun, dull washed-out colors, the city rumbling far away
+  [WeatherType.SMOG]: preset(DAY_BASE, {
+    litLevel: 0.74,
+    shadowLevel: 0.58,
+    ambientColor: new THREE.Color(0xd6cba4),
+    sunColor: new THREE.Color(0xffd498),
+    unlitTint: new THREE.Color(0xd8cdaa),
+    specular: 0.1,
+    cloudCover: 0.4,
+    cloudAmbient: 0.08,
+    cloudSpeed: 4,
+    heatWash: 0.7,
+    city: 1,
+    fog: 0.7,
+    fogColor: new THREE.Color(0xb2a26e),
+  }),
+  [WeatherType.AUTUMN_DRIZZLE]: preset(DAY_BASE, {
+    litLevel: 0.92,
+    shadowLevel: 0.6,
+    ambientColor: new THREE.Color(0xecd2b2),
+    sunColor: new THREE.Color(0xffb468),
+    unlitTint: new THREE.Color(0xffe2c0),
+    specular: 0.5,
+    sunGlow: 0.55,
+    godRays: 0.25,
+    cloudCover: 0.35,
+    cloudAmbient: 0.06,
+    cloudSpeed: 12,
+    drizzle: 0.55,
+    autumnLeaves: 0.6,
+    birds: 0.35,
+    fog: 0.2,
+    fogColor: new THREE.Color(0xe2c49a),
+  }),
   [WeatherType.LEAVES]: preset(DAY_BASE, {
     litLevel: 1.02,
     shadowLevel: 0.62,
@@ -704,6 +948,27 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fog: 0.65,
     fogColor: new THREE.Color(0xe08a50),
   }),
+  // Imminent eruption: the volcanic heat, falling ash and tremors building up to a big quake
+  [WeatherType.ERUPTION]: preset(DAY_BASE, {
+    litLevel: 0.85,
+    shadowLevel: 0.5,
+    ambientColor: new THREE.Color(0xff9a68),
+    sunColor: new THREE.Color(0xff8840),
+    unlitTint: new THREE.Color(0xffb890),
+    specular: 0.5,
+    sunGlow: 0.3,
+    cloudCover: 0.5,
+    cloudAmbient: 0.1,
+    cloudSpeed: 8,
+    lightPulse: 0.1,
+    heatHaze: 0.9,
+    lava: 1,
+    ash: 0.4,
+    quake: 1,
+    eruption: 1,
+    fog: 0.7,
+    fogColor: new THREE.Color(0xc8704a),
+  }),
   // Light grey sky, dense fine drizzle, a hint of mist
   [WeatherType.DRIZZLE]: preset(DAY_BASE, {
     litLevel: 0.86,
@@ -718,6 +983,20 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     drizzle: 1,
     fog: 0.25,
     fogColor: new THREE.Color(0xd5dbe3),
+  }),
+  // Stalking fog: a white wall that parts in front of the walking player and closes back in when they stop
+  [WeatherType.STALKING_FOG]: preset(DAY_BASE, {
+    litLevel: 0.8,
+    shadowLevel: 0.66,
+    ambientColor: new THREE.Color(0xe6eaef),
+    sunColor: new THREE.Color(0xeff1f4),
+    unlitTint: new THREE.Color(0xe0e5ea),
+    specular: 0,
+    cloudCover: 0.3,
+    cloudSpeed: 4,
+    fog: 0.3,
+    fogColor: new THREE.Color(0xdde2e8),
+    stalkingFog: 1,
   }),
   // Thick white fog: soft diffuse light, faint shadows, the far side of the map fades away
   [WeatherType.FOG]: preset(DAY_BASE, {
@@ -789,8 +1068,183 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     lightPulse: 0.08,
     heatHaze: 1,
     poisonRain: 0.6,
+    poisonFumes: 1,
     fog: 0.8,
     fogColor: new THREE.Color(0x4a2a6e),
+  }),
+  // Starry night: clear sky, bright crisp moonlight, dew puddles with stars twinkling in them, crickets
+  [WeatherType.STARRY_NIGHT]: preset(NIGHT_BASE, {
+    litLevel: 0.52,
+    shadowLevel: 0.26,
+    ambientColor: new THREE.Color(0x6c86c4),
+    sunColor: new THREE.Color(0xd4e2ff),
+    unlitTint: new THREE.Color(0x7a8cbc),
+    specular: 0.6,
+    windowGlow: 0.45,
+    fireflies: 0.2,
+    dew: 1,
+    stars: 1,
+    crickets: 0.8,
+  }),
+  // Light tide: a dark blue night, waves of bioluminescent light sweeping the ground like plankton
+  [WeatherType.LIGHT_TIDE]: preset(NIGHT_BASE, {
+    litLevel: 0.3,
+    shadowLevel: 0.18,
+    ambientColor: new THREE.Color(0x2c3c70),
+    sunColor: new THREE.Color(0x8aa8ff),
+    unlitTint: new THREE.Color(0x4a5a88),
+    specular: 0.6,
+    windowGlow: 0.4,
+    dew: 0.6,
+    tide: 1,
+    fog: 0.18,
+    fogColor: new THREE.Color(0x101c40),
+  }),
+  // Fireworks: a clear night, rockets bursting into colored sparks above the map, lighting the scene
+  [WeatherType.FIREWORKS]: preset(NIGHT_BASE, {
+    litLevel: 0.4,
+    shadowLevel: 0.24,
+    ambientColor: new THREE.Color(0x5a6a9a),
+    unlitTint: new THREE.Color(0x6a7698),
+    specular: 0.5,
+    windowGlow: 0.6,
+    fireworks: 1,
+  }),
+  [WeatherType.CRYSTAL_MIST]: preset(NIGHT_BASE, {
+    litLevel: 0.46,
+    shadowLevel: 0.3,
+    ambientColor: new THREE.Color(0x6c84c4),
+    sunColor: new THREE.Color(0xd0e0ff),
+    unlitTint: new THREE.Color(0x7888b8),
+    specular: 1.1,
+    iridescence: 0.7,
+    crystals: 1,
+    fog: 0.4,
+    fogColor: new THREE.Color(0x384a74),
+  }),
+  [WeatherType.ACID_RAIN]: preset(NIGHT_BASE, {
+    litLevel: 0.32,
+    shadowLevel: 0.22,
+    ambientColor: new THREE.Color(0x56664a),
+    sunColor: new THREE.Color(0xc8d8a0),
+    unlitTint: new THREE.Color(0x5c6c50),
+    specular: 0.3,
+    cloudCover: 0.6,
+    cloudSpeed: 25,
+    windowGlow: 0.5,
+    acidRain: 0.7,
+    fumes: 1,
+    fog: 0.3,
+    fogColor: new THREE.Color(0x323e26),
+  }),
+  // Mars night: dark red-brown haze under a cold light
+  [WeatherType.MARS]: preset(NIGHT_BASE, {
+    litLevel: 0.34,
+    shadowLevel: 0.22,
+    ambientColor: new THREE.Color(0x6a4440),
+    sunColor: new THREE.Color(0xa8b8e0),
+    unlitTint: new THREE.Color(0x70504c),
+    specular: 0.15,
+    cloudCover: 0.3,
+    cloudSpeed: 30,
+    sand: 0.6,
+    minWind: 0.5,
+    sandColor: new THREE.Color().setRGB(0.6, 0.24, 0.12),
+    sandTint: new THREE.Color(0xff8a6a),
+    marsDust: 1,
+    fog: 0.5,
+    fogColor: new THREE.Color(0x3c2020),
+  }),
+  [WeatherType.EARTHQUAKE]: preset(NIGHT_BASE, {
+    litLevel: 0.4,
+    shadowLevel: 0.25,
+    ambientColor: new THREE.Color(0x6a6a84),
+    unlitTint: new THREE.Color(0x707088),
+    specular: 0.2,
+    windowGlow: 0.6,
+    quake: 1,
+    fog: 0.18,
+    fogColor: new THREE.Color(0x3a3634),
+  }),
+  [WeatherType.GEYSERS]: preset(NIGHT_BASE, {
+    litLevel: 0.4,
+    shadowLevel: 0.26,
+    ambientColor: new THREE.Color(0x5c6c8c),
+    unlitTint: new THREE.Color(0x6a7890),
+    specular: 0.5,
+    windowGlow: 0.5,
+    dew: 0.5,
+    geysers: 1,
+    fog: 0.3,
+    fogColor: new THREE.Color(0x2c3644),
+  }),
+  [WeatherType.TIME_WARP]: preset(NIGHT_BASE, {
+    litLevel: 0.4,
+    shadowLevel: 0.26,
+    ambientColor: new THREE.Color(0x5c5490),
+    sunColor: new THREE.Color(0xc0b0ff),
+    unlitTint: new THREE.Color(0x6a6294),
+    specular: 0.5,
+    windowGlow: 0.5,
+    heatHaze: 0.3,
+    timeWarp: 1,
+    fog: 0.22,
+    fogColor: new THREE.Color(0x2c2650),
+  }),
+  [WeatherType.INVERTED]: preset(NIGHT_BASE, {
+    windowGlow: 0.5,
+    invert: 1,
+    fog: 0.12,
+  }),
+  // Smog night: the haze glows orange-brown with the city lights
+  [WeatherType.SMOG]: preset(NIGHT_BASE, {
+    litLevel: 0.38,
+    shadowLevel: 0.28,
+    ambientColor: new THREE.Color(0x7a6a50),
+    sunColor: new THREE.Color(0xc8a878),
+    unlitTint: new THREE.Color(0x7c6c54),
+    specular: 0.1,
+    cloudCover: 0.3,
+    cloudSpeed: 4,
+    windowGlow: 0.6,
+    windowTint: new THREE.Color(0xffc890),
+    heatWash: 0.5,
+    city: 0.7,
+    fog: 0.7,
+    fogColor: new THREE.Color(0x4c4030),
+  }),
+  [WeatherType.AUTUMN_DRIZZLE]: preset(NIGHT_BASE, {
+    litLevel: 0.36,
+    shadowLevel: 0.24,
+    ambientColor: new THREE.Color(0x6e5a54),
+    sunColor: new THREE.Color(0xd8b090),
+    unlitTint: new THREE.Color(0x76645c),
+    specular: 0.4,
+    cloudCover: 0.3,
+    cloudSpeed: 12,
+    windowGlow: 0.7,
+    windowTint: new THREE.Color(0xffc080),
+    drizzle: 0.55,
+    autumnLeaves: 0.5,
+    fog: 0.22,
+    fogColor: new THREE.Color(0x3c3029),
+  }),
+  [WeatherType.MONSOON]: preset(NIGHT_BASE, {
+    litLevel: 0.32,
+    shadowLevel: 0.22,
+    ambientColor: new THREE.Color(0x4f6a5c),
+    unlitTint: new THREE.Color(0x587060),
+    specular: 0.3,
+    cloudCover: 0.6,
+    cloudSpeed: 35,
+    windowGlow: 0.6,
+    rain: 1,
+    soak: 3,
+    lightning: 0.25,
+    lightningFar: 0.65,
+    frogs: 1,
+    fog: 0.45,
+    fogColor: new THREE.Color(0x2c4034),
   }),
   [WeatherType.STORM]: preset(NIGHT_BASE, {
     litLevel: 0.3,
@@ -1115,6 +1569,26 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fog: 0.65,
     fogColor: new THREE.Color(0x6a3424),
   }),
+  [WeatherType.ERUPTION]: preset(NIGHT_BASE, {
+    litLevel: 0.4,
+    shadowLevel: 0.2,
+    ambientColor: new THREE.Color(0x9a4a30),
+    sunColor: new THREE.Color(0xff7a3a),
+    unlitTint: new THREE.Color(0xa85a3c),
+    specular: 0.5,
+    cloudCover: 0.4,
+    cloudSpeed: 8,
+    windowGlow: 0.7,
+    windowTint: new THREE.Color(0xffa060),
+    lightPulse: 0.16,
+    heatHaze: 0.9,
+    lava: 1,
+    ash: 0.4,
+    quake: 1,
+    eruption: 1,
+    fog: 0.7,
+    fogColor: new THREE.Color(0x5a2618),
+  }),
   // Blood moon: oppressive red moonlight, deep shadows, red window lights, a red mist, the light slowly breathes
   [WeatherType.BLOOD_MOON]: preset(NIGHT_BASE, {
     litLevel: 0.44,
@@ -1132,6 +1606,17 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     embers: 1,
     fog: 0.45,
     fogColor: new THREE.Color(0x8a3036),
+  }),
+  [WeatherType.STALKING_FOG]: preset(NIGHT_BASE, {
+    litLevel: 0.34,
+    shadowLevel: 0.27,
+    ambientColor: new THREE.Color(0x6a7aa6),
+    unlitTint: new THREE.Color(0x6a7798),
+    specular: 0,
+    windowGlow: 0.5,
+    fog: 0.3,
+    fogColor: new THREE.Color(0x2a3040),
+    stalkingFog: 1,
   }),
   // Night fog: windows glow through a dark blue haze
   [WeatherType.FOG]: preset(NIGHT_BASE, {
@@ -1154,17 +1639,26 @@ export const TEMPERATURES: Record<WeatherType, [number, number]> = {
   [WeatherType.RAINY]: [13, 9],
   [WeatherType.BLOOD_RAIN]: [12, 8],
   [WeatherType.POISON]: [29, 24],
+  [WeatherType.ACID_RAIN]: [19, 15],
   [WeatherType.STORM]: [17, 13],
+  [WeatherType.MONSOON]: [30, 26],
+  [WeatherType.AUTUMN_DRIZZLE]: [14, 9],
+  [WeatherType.STARRY_NIGHT]: [16, 11],
   [WeatherType.SNOW]: [-4, -10],
   [WeatherType.BLIZZARD]: [-14, -19],
   [WeatherType.DARKNESS]: [9, 4],
   [WeatherType.FOREST]: [21, 14],
   [WeatherType.HAIL]: [7, 4],
   [WeatherType.SEA_MIST]: [14, 11],
+  [WeatherType.SMOG]: [27, 21],
+  [WeatherType.FIREWORKS]: [22, 18],
+  [WeatherType.LIGHT_TIDE]: [19, 16],
   [WeatherType.SPRING_SHOWER]: [19, 13],
   [WeatherType.ASH]: [24, 18],
   [WeatherType.FREEZING_RAIN]: [-2, -5],
   [WeatherType.MAGIC_SNOW]: [-3, -8],
+  [WeatherType.CRYSTAL_MIST]: [-2, -6],
+  [WeatherType.MARS]: [-15, -40],
   [WeatherType.STARDUST]: [18, 12],
   [WeatherType.SOLAR_STORM]: [23, 15],
   [WeatherType.CURSE]: [11, 7],
@@ -1173,6 +1667,13 @@ export const TEMPERATURES: Record<WeatherType, [number, number]> = {
   [WeatherType.HAUNTED]: [8, 5],
   [WeatherType.FLOOD]: [14, 11],
   [WeatherType.TORNADO]: [24, 19],
+  [WeatherType.EARTHQUAKE]: [17, 12],
+  [WeatherType.GEYSERS]: [23, 17],
+  [WeatherType.TIME_WARP]: [15, 12],
+  // Inverted: warmer at night than by day
+  [WeatherType.INVERTED]: [12, 18],
+  [WeatherType.STALKING_FOG]: [8, 5],
+  [WeatherType.ERUPTION]: [54, 46],
   [WeatherType.AURORA]: [-6, -8],
   [WeatherType.FOG]: [8, 5],
   [WeatherType.DRIZZLE]: [11, 8],
@@ -1299,16 +1800,21 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.SUNNY, label: 'Ensoleillé', icon: '☀️' },
   { type: WeatherType.HEATWAVE, label: 'Canicule', icon: '🔥' },
   { type: WeatherType.VOLCANIC, label: 'Volcanique', icon: '🌋' },
+  { type: WeatherType.ERUPTION, label: 'Éruption imminente', icon: '💥' },
   { type: WeatherType.ASH, label: 'Neige de cendres', icon: '🌫️' },
   { type: WeatherType.FOREST, label: 'Forêt', icon: '🌲' },
   { type: WeatherType.PETAL_WHIRL, label: 'Vent de pétales', icon: '🌸' },
+  { type: WeatherType.GEYSERS, label: 'Geysers', icon: '♨️' },
   { type: WeatherType.LEAVES, label: 'Feuilles', icon: '🍂' },
+  { type: WeatherType.AUTUMN_DRIZZLE, label: 'Bruine d\'automne', icon: '🍁' },
   { type: WeatherType.SPORES, label: 'Spores', icon: '🦠' },
   { type: WeatherType.SANDSTORM, label: 'Tempête de sable', icon: '🏜️' },
   { type: WeatherType.ELECTRIC, label: 'Champ électrique', icon: '⚡' },
   { type: WeatherType.CLOUDY, label: 'Nuageux', icon: '☁️' },
   { type: WeatherType.FOG, label: 'Brouillard', icon: '🌫️' },
+  { type: WeatherType.STALKING_FOG, label: 'Brouillard rôdeur', icon: '🌁' },
   { type: WeatherType.SEA_MIST, label: 'Brume marine', icon: '🌊' },
+  { type: WeatherType.SMOG, label: 'Smog', icon: '🏭' },
   { type: WeatherType.DARKNESS, label: 'Ténèbres', icon: '🌑' },
   { type: WeatherType.CURSE, label: 'Malédiction', icon: '🕯️' },
   { type: WeatherType.HAUNTED, label: 'Brume hantée', icon: '👻' },
@@ -1318,15 +1824,25 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.HAIL, label: 'Grêle', icon: '🧊' },
   { type: WeatherType.RAINY, label: 'Pluvieux', icon: '🌧️' },
   { type: WeatherType.STORM, label: 'Orage', icon: '⛈️' },
+  { type: WeatherType.MONSOON, label: 'Mousson', icon: '🌴' },
   { type: WeatherType.TORNADO, label: 'Tornade', icon: '🌪️' },
+  { type: WeatherType.EARTHQUAKE, label: 'Séisme', icon: '🫨' },
   { type: WeatherType.FLOOD, label: 'Inondation', icon: '🌊' },
   { type: WeatherType.BLOOD_RAIN, label: 'Pluie de mort', icon: '💀' },
   { type: WeatherType.POISON, label: 'Climat empoisonné', icon: '☠️' },
+  { type: WeatherType.ACID_RAIN, label: 'Pluie acide', icon: '🧪' },
   { type: WeatherType.SNOW, label: 'Neige', icon: '❄️' },
   { type: WeatherType.MAGIC_SNOW, label: 'Neige magique', icon: '✨' },
+  { type: WeatherType.CRYSTAL_MIST, label: 'Brume de cristal', icon: '💎' },
   { type: WeatherType.BLIZZARD, label: 'Blizzard', icon: '🌨️' },
   { type: WeatherType.FROST, label: 'Gel', icon: '🧊' },
   { type: WeatherType.AURORA, label: 'Aurore', icon: '🌌' },
+  { type: WeatherType.STARRY_NIGHT, label: 'Nuit étoilée', icon: '🌃' },
+  { type: WeatherType.TIME_WARP, label: 'Distorsion temporelle', icon: '⏳' },
+  { type: WeatherType.INVERTED, label: 'Monde inversé', icon: '🔮' },
+  { type: WeatherType.MARS, label: 'Vent de Mars', icon: '🪐' },
+  { type: WeatherType.FIREWORKS, label: 'Feu d\'artifice', icon: '🎆' },
+  { type: WeatherType.LIGHT_TIDE, label: 'Marée de lumière', icon: '🌊' },
   { type: WeatherType.SOLAR_STORM, label: 'Tempête solaire', icon: '☀️' },
   { type: WeatherType.STARDUST, label: 'Poussière d\'étoiles', icon: '🌠' },
   { type: WeatherType.FIREFLIES, label: 'Lucioles', icon: '✨' },
@@ -1367,5 +1883,5 @@ export function windToX(strength: number, direction: WindDirection): number {
 }
 
 export function cloneWeatherParams(p: WeatherParams): WeatherParams {
-  return { ...p, ambientColor: p.ambientColor.clone(), sunColor: p.sunColor.clone(), unlitTint: p.unlitTint.clone(), fogColor: p.fogColor.clone(), windowTint: p.windowTint.clone(), lightningColor: p.lightningColor.clone() };
+  return { ...p, ambientColor: p.ambientColor.clone(), sunColor: p.sunColor.clone(), unlitTint: p.unlitTint.clone(), fogColor: p.fogColor.clone(), sandColor: p.sandColor.clone(), sandTint: p.sandTint.clone(), windowTint: p.windowTint.clone(), lightningColor: p.lightningColor.clone() };
 }

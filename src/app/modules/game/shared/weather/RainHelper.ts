@@ -95,6 +95,16 @@ export const SUN_RAIN_STYLE: RainStyle = {
   splashColor: 0xb0a070,
 };
 
+/** Acid rain: thin sickly yellow-green drops, green splashes. */
+export const ACID_RAIN_STYLE: RainStyle = {
+  ...RAIN_STYLE,
+  maxDrops: 2200,
+  color: 0xc4e86a,
+  opacity: 0.8,
+  followLight: true,
+  splashColor: 0x5a8a20,
+};
+
 /** Poisoned climate: toxic purple drops, a bit thinner and slower than the rain. */
 export const POISON_RAIN_STYLE: RainStyle = {
   ...RAIN_STYLE,

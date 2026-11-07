@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { LEAF_PALETTES, makeLeafTexture } from './LeafHelper';
 import { registerUnlitMaterial } from './weather-shader';
+import { makeSmokeTexture } from './GlowParticles';
 
 /** Funnel: dust puffs, height, radius at the bottom / top (world units), turning speed (rad / s). */
 const PUFFS = 650;
@@ -27,21 +28,6 @@ const LEASH = 240;
 /** Further than this from the player (teleport...), it vanishes and appears again near them. */
 const LOST_DISTANCE = 600;
 
-function makePuffTexture(): THREE.CanvasTexture {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,0.9)');
-  g.addColorStop(0.5, 'rgba(255,255,255,0.45)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
 
 /**
  * Tornado: a funnel of dust turning fast (narrow at the ground, wide at the top), a dust ring at its base,
@@ -75,11 +61,15 @@ export class TornadoHelper {
   private readonly scale = new THREE.Vector3();
   private readonly quaternion = new THREE.Quaternion();
   private readonly euler = new THREE.Euler();
+  private readonly spin = new THREE.Quaternion();
+  private readonly turned = new THREE.Quaternion();
+  private static readonly FORWARD = new THREE.Vector3(0, 0, 1);
   private readonly color = new THREE.Color();
 
   constructor(scene: THREE.Scene) {
     const puffMaterial = registerUnlitMaterial(new THREE.MeshBasicMaterial({
-      map: makePuffTexture(), transparent: true, opacity: 0.6, depthWrite: false,
+      // Smoke puffs (cloudy outline) rather than round blobs: the funnel looks like a whirl of dust
+      map: makeSmokeTexture(), transparent: true, opacity: 0.95, depthWrite: false,
     }));
     this.funnel = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), puffMaterial, PUFFS + RING_PUFFS);
     this.funnel.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -146,7 +136,9 @@ export class TornadoHelper {
       }
       this.pos.set(this.position.x + x, this.position.y + y, this.position.z + z);
       this.scale.setScalar(size * p);
-      this.matrix.compose(this.pos, camera.quaternion, this.scale);
+      // Each puff turns on itself (faster low in the funnel), facing the camera
+      this.spin.setFromAxisAngle(TornadoHelper.FORWARD, puff.jitter * 20 + t * SPIN * (puff.ring ? 1.5 : 1.6 - puff.h));
+      this.matrix.compose(this.pos, this.turned.copy(camera.quaternion).multiply(this.spin), this.scale);
       this.funnel.setMatrixAt(i, this.matrix);
     });
     // Debris: orbiting fast around the base, climbing then falling back in

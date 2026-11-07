@@ -14,6 +14,14 @@
  *   curse: whispers;
  * - frost: ice cracking; haunted mist: ghostly moans; flood: water lapping; tornado: roar (by distance);
  * - blood moon: a deep dissonant drone throbbing with the red light, heartbeats, wolves howling far away;
+ * - monsoon: a chorus of frogs croaking, each on its own rhythm;
+ * - smog: the city far away (traffic rumble, horns, a siren now and then);
+ * - fireworks: the rockets whistling up, the bursts banging and crackling;
+ * - acid rain: sizzling (the ground being eaten);
+ * - earthquake: deep rumble and things rattling, following the quake strength;
+ * - geysers: gurgling then a burst when one erupts, steam hissing (by closeness);
+ * - time warp: a slowed-down clock ticking with long echoes over a deep wavering drone;
+ * - inverted world: sounds played backwards (swells cut short, bells rising to a sudden stop);
  * - poison: thick toxic bubbles popping (alone or in gurgling bursts) over a low bubbling bed;
  * - footsteps: CC0 samples (src/assets/sounds) on dry ground / snow; on wet ground and in the puddles the ground
  *   steps get a synthesized wet layer (splash noise + water drop "plinks").
@@ -68,6 +76,22 @@ export interface AmbienceLevels {
   whirl: number;
   /** Blood moon oppressive ambience. */
   bloodMoon: number;
+  /** Current earthquake strength 0..1. */
+  quake: number;
+  /** Steam hissing (geysers, by closeness and eruption). */
+  steam: number;
+  /** Time warp: slow clock and drone. */
+  timeWarp: number;
+  /** Inverted world: backwards sounds. */
+  inverted: number;
+  /** Frogs croaking (monsoon). */
+  frogs: number;
+  /** Crickets without the forest (starry night). */
+  crickets: number;
+  /** Distant city (smog). */
+  city: number;
+  /** Acid rain sizzling. */
+  sizzle: number;
 }
 
 type SampledSurface = Exclude<StepSurface, 'water'>;
@@ -127,11 +151,37 @@ const CRACK_GAIN = 0.12;
 const MOAN_GAIN = 0.16;
 const MOAN_INTERVAL = [5, 12] as const;
 const ROAR_GAIN = 0.7;
+/** Earthquake: rumble loudness and rattles per second at full strength. */
+const QUAKE_GAIN = 0.8;
+/** Geysers: steam hiss loudness, eruption burst loudness. */
+const STEAM_GAIN = 0.3;
+/** Time warp: slowed clock tick loudness and period (s), drone loudness. */
+const TICK_GAIN = 0.25;
+/** Inverted world: backwards sounds loudness and seconds between two. */
+const REVERSE_GAIN = 0.18;
+const REVERSE_INTERVAL = [2, 5] as const;
+const TICK_PERIOD = 1.6;
+const WARP_DRONE_GAIN = 0.12;
+const GEYSER_BURST_GAIN = 0.5;
+const RATTLE_RATE = 18;
 /** Blood moon: drone loudness, seconds between two heartbeat bouts / two howls, howl loudness. */
 const BLOOD_DRONE_GAIN = 0.2;
 const BLOOD_HEART_INTERVAL = [9, 18] as const;
 const BLOOD_HOWL_INTERVAL = [14, 28] as const;
 const HOWL_CALL_GAIN = 0.1;
+/** Frogs: croak loudness, seconds between two croaks of a frog. */
+const FROG_GAIN = 0.09;
+const FROG_INTERVAL = [0.8, 3.5] as const;
+/** Distant city: traffic rumble loudness, seconds between two horns, chance that the event is a siren. */
+const TRAFFIC_GAIN = 0.16;
+const HORN_GAIN = 0.05;
+const HORN_INTERVAL = [4, 11] as const;
+const SIREN_CHANCE = 0.15;
+/** Fireworks: whistle and bang loudness. */
+const ROCKET_GAIN = 0.035;
+const BANG_GAIN = 0.55;
+/** Acid rain: sizzling loudness. */
+const SIZZLE_GAIN = 0.09;
 const DRONE_GAIN = 0.22;
 const BREATH_GAIN = 0.16;
 const DREAD_GAIN = 0.35;
@@ -176,6 +226,12 @@ export class WeatherAudio {
   private breathGain?: GainNode;
   private breathFilter?: BiquadFilterNode;
   private dreadTimer = 4;
+  private sizzleGain?: GainNode;
+  private trafficGain?: GainNode;
+  private trafficFilter?: BiquadFilterNode;
+  private hornTimer = 3;
+  /** Each frog: time until its next croak, its pitch and side. */
+  private readonly frogsState = [0, 1, 2, 3].map(() => ({ timer: Math.random() * 2, pitch: rand(170, 340), side: rand(-0.9, 0.9) }));
   private bloodDroneGain?: GainNode;
   private bloodDroneFilter?: BiquadFilterNode;
   private bloodHeartTimer = 5;
@@ -193,6 +249,12 @@ export class WeatherAudio {
   private moanTimer = 3;
   private roarGain?: GainNode;
   private roarFilter?: BiquadFilterNode;
+  private quakeGain?: GainNode;
+  private steamGain?: GainNode;
+  private warpDroneGain?: GainNode;
+  private tickTimer = 0;
+  private tock = false;
+  private reverseTimer = 1;
   private whirlGain?: GainNode;
   private whirlFilter?: BiquadFilterNode;
   private humGain?: GainNode;
@@ -272,6 +334,10 @@ export class WeatherAudio {
 
     this.updateDarkness(dt, levels.darkness, now);
     this.updateBloodMoon(dt, levels.bloodMoon, now);
+    this.updateFrogs(dt, levels.frogs);
+    this.updateCity(dt, levels.city, now);
+    this.updateTimeWarp(dt, levels.timeWarp, now);
+    this.updateInverted(dt, levels.inverted);
     this.updateHail(dt, levels.hail);
     this.lapping = levels.lapping;
     this.updateSea(dt, levels.sea, now);
@@ -313,19 +379,22 @@ export class WeatherAudio {
         this.bird(birds * day);
       }
     }
-    if (f < 0.3) {
-      return;
-    }
-    // Night: crickets, an owl now and then
+    // Night: crickets (forest or starry night), an owl now and then in the forest
     const night = 1 - day;
-    if (night > 0.2) {
+    const crickets = Math.max(f, levels.crickets);
+    if (crickets >= 0.3 && night > 0.2) {
       for (const c of this.crickets) {
         c.timer -= dt;
         if (c.timer <= 0) {
           c.timer = c.period * rand(0.9, 1.1);
-          this.cricket(c.freq, c.side, f * night);
+          this.cricket(c.freq, c.side, crickets * night);
         }
       }
+    }
+    if (f < 0.3) {
+      return;
+    }
+    if (night > 0.2) {
       this.owlTimer -= dt * night;
       if (this.owlTimer <= 0) {
         this.owlTimer = rand(OWL_INTERVAL[0], OWL_INTERVAL[1]);
@@ -658,6 +727,9 @@ export class WeatherAudio {
     const crackle = Math.random() < 0.3 ? 1 : 0.4;
     this.staticGain?.gain.setTargetAtTime(STATIC_GAIN * levels.static * (0.15 + 0.85 * this.staticBurst) * crackle, now, 0.01);
     this.staticFilter?.frequency.setTargetAtTime(rand(1200, 3500), now, 0.02);
+    // Acid rain sizzling: a bright hiss crackling irregularly, like something frying
+    const fry = Math.random() < 0.45 ? rand(0.6, 1) : rand(0.15, 0.35);
+    this.sizzleGain?.gain.setTargetAtTime(SIZZLE_GAIN * levels.sizzle * fry, now, 0.015);
     // Curse whispers
     if (levels.whispers > 0.3) {
       this.whisperTimer -= dt;
@@ -701,6 +773,21 @@ export class WeatherAudio {
     const swirl = Math.sin(this.time * 4.2) * 0.6 + Math.sin(this.time * 6.9 + 1) * 0.4;
     this.whirlGain?.gain.setTargetAtTime(WHIRL_GAIN * w * w * (0.75 + 0.25 * swirl), now, 0.12);
     this.whirlFilter?.frequency.setTargetAtTime(500 + 500 * w + 350 * swirl, now, 0.06);
+    // Earthquake: a deep rumble following the shake, and things rattling (short dry knocks)
+    const q = levels.quake;
+    this.quakeGain?.gain.setTargetAtTime(QUAKE_GAIN * q, now, 0.08);
+    if (q > 0.1 && Math.random() < RATTLE_RATE * q * dt) {
+      const at = ctx.currentTime;
+      const src = ctx.createBufferSource();
+      src.buffer = this.noise!;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.12 * q * rand(0.4, 1), at);
+      g.gain.exponentialRampToValueAtTime(0.001, at + rand(0.02, 0.06));
+      src.connect(this.bandpass(rand(400, 1800), rand(3, 7))).connect(g).connect(this.panned(rand(-1, 1)));
+      src.start(at, Math.random() * 3, 0.08);
+    }
+    // Geysers: steam hissing (a broad high hiss, fluttering)
+    this.steamGain?.gain.setTargetAtTime(STEAM_GAIN * levels.steam * (0.85 + 0.15 * Math.sin(this.time * 23)), now, 0.1);
     const r = levels.roar;
     this.roarGain?.gain.setTargetAtTime(ROAR_GAIN * r * r * (0.85 + 0.15 * Math.sin(this.time * 1.7)), now, 0.3);
     this.roarFilter?.frequency.setTargetAtTime(150 + 600 * r, now, 0.3);
@@ -777,6 +864,199 @@ export class WeatherAudio {
     if (this.bloodHowlTimer <= 0) {
       this.bloodHowlTimer = rand(BLOOD_HOWL_INTERVAL[0], BLOOD_HOWL_INTERVAL[1]);
       this.wolfHowl(level);
+    }
+  }
+
+  /**
+   * Inverted world: sounds heard backwards. A sound played backwards starts silent, swells up and stops dead
+   * (the natural attack becomes the end): reversed whooshes, reversed bells, reversed echoes.
+   */
+  private updateInverted(dt: number, level: number) {
+    if (level < 0.3) {
+      return;
+    }
+    this.reverseTimer -= dt;
+    if (this.reverseTimer > 0) {
+      return;
+    }
+    this.reverseTimer = rand(REVERSE_INTERVAL[0], REVERSE_INTERVAL[1]);
+    const ctx = this.ctx!;
+    const at = ctx.currentTime;
+    const length = rand(1, 2.2);
+    const out = this.panned(rand(-0.8, 0.8));
+    const g = ctx.createGain();
+    // Backwards envelope: slow exponential rise, sudden cut
+    g.gain.setValueAtTime(0.0005, at);
+    g.gain.exponentialRampToValueAtTime(REVERSE_GAIN * level, at + length);
+    g.gain.setValueAtTime(0, at + length + 0.01);
+    g.connect(out);
+    if (Math.random() < 0.5) {
+      // Reversed cymbal / whoosh: noise getting brighter
+      const src = ctx.createBufferSource();
+      src.buffer = this.noise!;
+      const band = this.bandpass(800, 0.7);
+      band.frequency.setValueAtTime(800, at);
+      band.frequency.exponentialRampToValueAtTime(6000, at + length);
+      src.connect(band).connect(g);
+      src.start(at, Math.random() * 2, length + 0.05);
+    } else {
+      // Reversed bell: the inharmonic partials of a bell, growing instead of dying
+      const f = CHIME_NOTES[Math.floor(Math.random() * CHIME_NOTES.length)] / 2;
+      for (const [mult, amount] of [[1, 1], [2.76, 0.35], [5.4, 0.12]] as const) {
+        const osc = ctx.createOscillator();
+        osc.frequency.value = f * mult;
+        const pg = ctx.createGain();
+        pg.gain.value = amount * 0.5;
+        osc.connect(pg).connect(g);
+        osc.start(at);
+        osc.stop(at + length + 0.05);
+      }
+    }
+  }
+
+  /** Time warp: a deep drone wavering slowly, and a clock ticking slowly (tick / tock) with long echoes. */
+  private updateTimeWarp(dt: number, level: number, now: number) {
+    this.warpDroneGain?.gain.setTargetAtTime(WARP_DRONE_GAIN * level * (0.8 + 0.2 * Math.sin(this.time * 0.4)), now, 0.5);
+    if (level < 0.3) {
+      return;
+    }
+    this.tickTimer -= dt;
+    if (this.tickTimer > 0) {
+      return;
+    }
+    this.tickTimer = TICK_PERIOD;
+    this.tock = !this.tock;
+    const ctx = this.ctx!;
+    const at = ctx.currentTime;
+    const out = this.panned(this.tock ? 0.3 : -0.3);
+    // The tick: a short knock, low and stretched (as if slowed down)
+    const osc = ctx.createOscillator();
+    osc.frequency.setValueAtTime(this.tock ? 220 : 260, at);
+    osc.frequency.exponentialRampToValueAtTime(this.tock ? 150 : 180, at + 0.25);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(TICK_GAIN * level, at + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, at + 0.35);
+    osc.connect(this.bandpass(this.tock ? 400 : 480, 3)).connect(g).connect(out);
+    osc.start(at);
+    osc.stop(at + 0.4);
+    // Long echo: the tick repeats fainter and fainter (delay line with feedback)
+    const delay = ctx.createDelay(1);
+    delay.delayTime.value = 0.42;
+    const feedback = ctx.createGain();
+    feedback.gain.value = 0.45;
+    g.connect(delay).connect(feedback).connect(delay);
+    feedback.connect(out);
+    // A feedback loop never stops by itself: cut it once the echo has died out (else the nodes pile up)
+    setTimeout(() => {
+      feedback.disconnect();
+      delay.disconnect();
+    }, 4000);
+  }
+
+  /** Smog: the city far away. A low traffic rumble that swells irregularly, horns, sometimes a siren. */
+  private updateCity(dt: number, level: number, now: number) {
+    const t = this.time;
+    const swell = 0.7 + 0.2 * Math.sin(t * 0.21) + 0.1 * Math.sin(t * 0.67 + 2);
+    this.trafficGain?.gain.setTargetAtTime(TRAFFIC_GAIN * level * swell, now, 0.5);
+    this.trafficFilter?.frequency.setTargetAtTime(220 + 120 * swell, now, 0.5);
+    if (level < 0.3) {
+      return;
+    }
+    this.hornTimer -= dt;
+    if (this.hornTimer <= 0) {
+      this.hornTimer = rand(HORN_INTERVAL[0], HORN_INTERVAL[1]);
+      if (Math.random() < SIREN_CHANCE) {
+        this.siren(level);
+      } else {
+        this.horn(level);
+      }
+    }
+  }
+
+  /** A car horn far away: one or two short honks, two notes together, muffled by the distance. */
+  private horn(level: number) {
+    const ctx = this.ctx!;
+    const out = this.panned(rand(-0.9, 0.9));
+    const base = rand(330, 440);
+    let at = ctx.currentTime;
+    for (let i = 0; i < (Math.random() < 0.5 ? 1 : 2); i++) {
+      const length = rand(0.15, 0.4);
+      for (const mult of [1, 1.26]) {
+        const osc = ctx.createOscillator();
+        osc.type = 'square';
+        osc.frequency.value = base * mult;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, at);
+        g.gain.linearRampToValueAtTime(HORN_GAIN * level, at + 0.02);
+        g.gain.setValueAtTime(HORN_GAIN * level, at + length - 0.03);
+        g.gain.linearRampToValueAtTime(0, at + length);
+        osc.connect(this.lowpass(900)).connect(g).connect(out);
+        osc.start(at);
+        osc.stop(at + length + 0.02);
+      }
+      at += length + rand(0.08, 0.15);
+    }
+  }
+
+  /** A siren far away: a tone slowly sweeping up and down a few times, very muffled. */
+  private siren(level: number) {
+    const ctx = this.ctx!;
+    const at = ctx.currentTime;
+    const length = rand(4, 7);
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    const sweep = ctx.createOscillator();
+    sweep.frequency.value = rand(0.4, 0.7);
+    const depth = ctx.createGain();
+    depth.gain.value = 160;
+    osc.frequency.value = 720;
+    sweep.connect(depth).connect(osc.frequency);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(HORN_GAIN * 0.7 * level, at + length * 0.4);
+    g.gain.linearRampToValueAtTime(0, at + length);
+    osc.connect(this.lowpass(1100)).connect(g).connect(this.panned(rand(-0.8, 0.8)));
+    osc.start(at);
+    sweep.start(at);
+    osc.stop(at + length + 0.05);
+    sweep.stop(at + length + 0.05);
+  }
+
+  /** Monsoon frogs: each one croaks now and then on its own rhythm (sometimes twice in a row). */
+  private updateFrogs(dt: number, level: number) {
+    if (level < 0.05) {
+      return;
+    }
+    for (const frog of this.frogsState) {
+      frog.timer -= dt;
+      if (frog.timer <= 0) {
+        frog.timer = rand(FROG_INTERVAL[0], FROG_INTERVAL[1]);
+        this.croak(frog.pitch, frog.side, level * rand(0.5, 1));
+      }
+    }
+  }
+
+  /** "Croâ": a buzzy low tone chopped into 2-3 quick pulses (the vocal sac), through a nasal band. */
+  private croak(pitch: number, side: number, level: number) {
+    const ctx = this.ctx!;
+    const out = this.panned(side);
+    let at = ctx.currentTime;
+    const pulses = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < pulses; i++) {
+      const length = rand(0.05, 0.08);
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(pitch * 0.9, at);
+      osc.frequency.linearRampToValueAtTime(pitch * 1.1, at + length);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, at);
+      g.gain.linearRampToValueAtTime(FROG_GAIN * level, at + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, at + length);
+      osc.connect(this.bandpass(pitch * 3.5, 4)).connect(this.lowpass(2200)).connect(g).connect(out);
+      osc.start(at);
+      osc.stop(at + length + 0.02);
+      at += length + rand(0.03, 0.06);
     }
   }
 
@@ -1000,6 +1280,101 @@ export class WeatherAudio {
       src.connect(band).connect(gain).connect(this.master!);
       src.start(at, Math.random() * 3, length + 0.02);
       at += 0.02 + Math.random() * 0.07;
+    }
+  }
+
+  /**
+   * A geyser erupting: a gurgle of bubbles, then a whoosh as the jet bursts out (louder when close).
+   * @param closeness 0..1
+   */
+  geyserBurst(closeness: number, side: number) {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || !this.noise || ctx.state !== 'running' || closeness <= 0) {
+      return;
+    }
+    this.bubbles(closeness);
+    const at = ctx.currentTime + 0.25;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    const band = this.bandpass(600, 0.8);
+    band.frequency.setValueAtTime(400, at);
+    band.frequency.exponentialRampToValueAtTime(2500, at + 0.6);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(GEYSER_BURST_GAIN * closeness, at + 0.15);
+    g.gain.exponentialRampToValueAtTime(0.001, at + 1.6);
+    src.connect(band).connect(g).connect(this.panned(side * 0.8));
+    src.start(at, Math.random() * 2, 1.7);
+  }
+
+  /** A rocket climbing: a thin whistle rising in pitch for the climb time. */
+  rocketWhistle(climb: number, side: number) {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || ctx.state !== 'running') {
+      return;
+    }
+    const at = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    osc.frequency.setValueAtTime(rand(500, 700), at);
+    osc.frequency.exponentialRampToValueAtTime(rand(1800, 2600), at + climb);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(ROCKET_GAIN, at + 0.1);
+    g.gain.linearRampToValueAtTime(ROCKET_GAIN * 0.4, at + climb);
+    g.gain.linearRampToValueAtTime(0, at + climb + 0.05);
+    osc.connect(g).connect(this.panned(side * 0.8));
+    osc.start(at);
+    osc.stop(at + climb + 0.1);
+  }
+
+  /**
+   * A burst: a deep bang (heard a little after the light: sound is slower), its echo, then the sparks crackling.
+   * @param closeness 0..1 (louder and sooner when close)
+   */
+  fireworkBang(closeness: number, side: number) {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || !this.noise || ctx.state !== 'running') {
+      return;
+    }
+    const at = ctx.currentTime + 0.15 + (1 - closeness) * 0.5;
+    const out = this.panned(side * 0.8);
+    // Bang: a short low noise burst + a falling low tone
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    const g = ctx.createGain();
+    const level = BANG_GAIN * (0.4 + 0.6 * closeness);
+    g.gain.setValueAtTime(level, at);
+    g.gain.exponentialRampToValueAtTime(0.001, at + 0.5);
+    src.connect(this.lowpass(700)).connect(g).connect(out);
+    src.start(at, Math.random() * 3, 0.55);
+    const osc = ctx.createOscillator();
+    osc.frequency.setValueAtTime(90, at);
+    osc.frequency.exponentialRampToValueAtTime(35, at + 0.4);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(level * 0.8, at);
+    og.gain.exponentialRampToValueAtTime(0.001, at + 0.45);
+    osc.connect(og).connect(out);
+    osc.start(at);
+    osc.stop(at + 0.5);
+    // Echo off the buildings
+    const echo = ctx.createDelay(1);
+    echo.delayTime.value = rand(0.25, 0.4);
+    const eg = ctx.createGain();
+    eg.gain.value = 0.25;
+    g.connect(echo).connect(eg).connect(out);
+    // Crackling sparks a moment later
+    if (Math.random() < 0.6) {
+      let t = at + 0.3;
+      for (let i = 0; i < 14; i++) {
+        const c = ctx.createBufferSource();
+        c.buffer = this.noise;
+        const cg = ctx.createGain();
+        cg.gain.setValueAtTime(level * 0.15 * rand(0.4, 1), t);
+        cg.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+        c.connect(this.bandpass(rand(2500, 5000), 3)).connect(cg).connect(out);
+        c.start(t, Math.random() * 3, 0.03);
+        t += rand(0.03, 0.12);
+      }
     }
   }
 
@@ -1249,6 +1624,22 @@ export class WeatherAudio {
     // Petal whirlwind: band of noise, its pitch swirling
     this.whirlFilter = this.bandpass(800, 1.4);
     this.whirlGain = this.loop(this.noise, [this.whirlFilter]);
+    // Geyser steam hiss: broad band of white noise
+    this.steamGain = this.loop(this.noise, [this.highpass(1500), this.lowpass(7000)]);
+    // Time warp drone: two low tones a little apart, beating slowly
+    this.warpDroneGain = ctx.createGain();
+    this.warpDroneGain.gain.value = 0;
+    this.warpDroneGain.connect(this.master);
+    for (const freq of [73, 74.5, 110]) {
+      const osc = ctx.createOscillator();
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      g.gain.value = freq > 100 ? 0.3 : 0.5;
+      osc.connect(g).connect(this.warpDroneGain);
+      osc.start();
+    }
+    // Earthquake rumble: very deep brown noise
+    this.quakeGain = this.loop(this.brownNoise, [this.lowpass(110)]);
     // Tornado roar: deep rumbling brown noise, brighter when close
     this.roarFilter = this.lowpass(300);
     this.roarGain = this.loop(this.brownNoise, [this.roarFilter]);
@@ -1266,6 +1657,11 @@ export class WeatherAudio {
       osc.connect(g).connect(this.bloodDroneFilter);
       osc.start();
     }
+    // Smog: distant traffic rumble (low brown noise)
+    this.trafficFilter = this.lowpass(280);
+    this.trafficGain = this.loop(this.brownNoise, [this.trafficFilter]);
+    // Acid rain sizzling: high band of white noise, its level flickering (see updateMagic)
+    this.sizzleGain = this.loop(this.noise, [this.highpass(3500), this.lowpass(9000)]);
     // Darkness drone: low tones slightly out of tune (slow beating) + a faint tritone above, all muffled
     this.droneGain = ctx.createGain();
     this.droneGain.gain.value = 0;

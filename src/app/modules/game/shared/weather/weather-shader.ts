@@ -33,6 +33,8 @@ export const WEATHER_UNIFORMS = {
   uSnowCover: { value: 0 },
   /** Sand layer (sandstorm): ground and roofs, plus the walls facing the wind. */
   uSandCover: { value: 0 },
+  /** Color of the sand layer (linear). */
+  uSandColor: { value: new THREE.Color().setRGB(0.86, 0.71, 0.48) },
   /** Wet surfaces (darker), puddles level on the ground, rain ripples in the puddles, reflected sky color. */
   uWetness: { value: 0 },
   uPuddles: { value: 0 },
@@ -57,10 +59,19 @@ export const WEATHER_UNIFORMS = {
   uIridescence: { value: 0 },
   /** Frost cover (crystalline white on the surfaces, grass and roofs first), 0..1. */
   uFrost: { value: 0 },
+  /** Stars twinkling in the puddles (starry night), 0..1. */
+  uStars: { value: 0 },
+  /** Light tide: bioluminescent waves on the ground, 0..1. */
+  uTide: { value: 0 },
+  /** Time warp: ripples spreading from the player (strength), and their center. */
+  uWarp: { value: 0 },
+  uWarpCenter: { value: new THREE.Vector3() },
   uAuroraRed: { value: 0 },
   /** Forest canopy: dappled leaf shadows, 0 = none, 1 = full. */
   uCanopy: { value: 0 },
   uDarkCenter: { value: new THREE.Vector3() },
+  uStalk: { value: 0 },
+  uStalkRadius: { value: 0 },
 };
 
 /** Per-vertex flexibility of the vegetation (0 = rigid / base, up to the model sway at the top). */
@@ -236,6 +247,7 @@ uniform vec3 uWindowTint;
 uniform float uAurora;
 uniform float uSnowCover;
 uniform float uSandCover;
+uniform vec3 uSandColor;
 uniform float uWetness;
 uniform float uPuddles;
 uniform float uRipples;
@@ -250,12 +262,26 @@ uniform float uDarkness;
 uniform float uIce;
 uniform float uIridescence;
 uniform float uFrost;
+uniform float uStars;
+uniform float uTide;
+uniform float uWarp;
+uniform vec3 uWarpCenter;
 uniform float uAuroraRed;
 uniform float uCanopy;
 uniform vec3 uDarkCenter;
+uniform float uStalk;
+uniform float uStalkRadius;
 varying vec3 vWeatherWorldPos;
 varying vec3 vWeatherWorldNormal;
 ` + BEAM_GLSL + PUDDLE_LEVEL_GLSL + CANOPY_GLSL;
+
+/** Stars in the puddles: grid cells per world unit (star spacing), share of cells with a star (higher = fewer). */
+/** Light tide: wave length (world units), speed (world units / s), color (linear, above 1 to bloom). */
+const TIDE_WAVELENGTH = 70;
+const TIDE_SPEED = 14;
+const TIDE_COLOR = [0.15, 0.55, 1.1] as const;
+const STAR_DENSITY = 1.2;
+const STAR_RARITY = 0.985;
 
 // Runs once all lights are accumulated: clouds only dim the sun (direct light), never the ambient.
 const FRAGMENT_BODY = /* glsl */`
@@ -332,9 +358,46 @@ const FRAGMENT_BODY = /* glsl */`
       ripple = (1.0 - smoothstep(0.0, 0.04, ring)) * (1.0 - phase) * uRipples;
     }
     vec3 reflection = uSkyColor * mix(vec3(1.0), uStainColor * 1.3, uBlood) * fresnel * (0.7 + 0.7 * ripple);
+    // Starry night: a few stars mirrored in the water, each twinkling on its own rhythm
+    if (uStars > 0.0) {
+      vec2 starCell = floor(vWeatherWorldPos.xz * ${STAR_DENSITY.toFixed(2)});
+      float star = step(${STAR_RARITY.toFixed(3)}, wbHash(starCell));
+      float twinkle = 0.4 + 0.6 * sin(uBeamTime * (2.0 + 3.0 * wbHash(starCell + 5.3)) + wbHash(starCell + 1.7) * 40.0);
+      reflection += vec3(0.85, 0.9, 1.0) * star * max(twinkle, 0.0) * fresnel * uStars * 1.6;
+    }
     float glint = pow(max(dot(reflect(-uSunDir, vec3(0.0, 1.0, 0.0)), viewDir), 0.0), 60.0);
     reflection += vec3(1.0, 0.97, 0.9) * glint * 1.5 * sunVisibility * uSpecular;
     reflectedLight.indirectDiffuse += reflection * wbPuddle;
+  }
+  // Time warp: rings of light spreading from the player across the ground, fading with the distance
+  if (uWarp > 0.0) {
+    vec3 warpNormal = normalize(vWeatherWorldNormal) * (gl_FrontFacing ? 1.0 : -1.0);
+    float warpGround = smoothstep(0.6, 0.9, warpNormal.y);
+    float warpDist = length(vWeatherWorldPos.xz - uWarpCenter.xz);
+    float rings = smoothstep(0.93, 1.0, sin(warpDist * 0.14 - uBeamTime * 2.5));
+    reflectedLight.indirectDiffuse += vec3(0.55, 0.45, 1.0) * rings * exp(-warpDist / 110.0) * uWarp * warpGround * 0.6;
+  }
+  // Light tide: bioluminescent waves sweeping the ground. Two wave trains crossing at an angle, their crests
+  // warped by noise (no straight lines); the plankton glows as tiny sparkles where a crest passes, with a soft halo.
+  if (uTide > 0.0) {
+    vec3 tideNormal = normalize(vWeatherWorldNormal) * (gl_FrontFacing ? 1.0 : -1.0);
+    float tideGround = smoothstep(0.6, 0.9, tideNormal.y) * (1.0 - step(1.0, vWeatherWorldPos.y));
+    if (tideGround > 0.0) {
+      vec2 tp = vWeatherWorldPos.xz;
+      // Crests bent by two octaves of noise: organic fronts, never straight lines
+      float warp = (wbNoise(tp * 0.015 + uBeamTime * 0.02) * 0.7 + wbNoise(tp * 0.05 - uBeamTime * 0.03) * 0.3) * 45.0;
+      float k = 6.2831 / ${TIDE_WAVELENGTH.toFixed(1)};
+      float wave = sin((dot(tp, vec2(0.8, 0.6)) + warp - uBeamTime * ${TIDE_SPEED.toFixed(1)}) * k);
+      // A slow second wave only modulates the strength (some crests bright, others faint), no grid
+      float swell = 0.35 + 0.65 * smoothstep(-0.3, 1.0, sin((dot(tp, vec2(-0.5, 0.86)) + warp * 0.5 - uBeamTime * 6.0) * k * 0.45));
+      float crest = smoothstep(0.86, 1.0, wave) * swell;
+      // Light lingering behind the crest (the plankton fades slowly after the wave)
+      float trail = smoothstep(0.2, 0.86, wave) * (1.0 - smoothstep(0.86, 1.0, wave)) * 0.25 * swell;
+      vec2 cell = floor(tp * 1.8);
+      float plankton = step(0.8, wbHash(cell)) * (0.5 + 0.5 * sin(uBeamTime * 4.0 + wbHash(cell + 3.1) * 30.0));
+      vec3 tideColor = vec3(${TIDE_COLOR.join(', ')});
+      reflectedLight.indirectDiffuse += tideColor * uTide * tideGround * (crest * 0.18 + (crest + trail) * plankton * 1.8);
+    }
   }
   // Frost: tiny ice crystals glittering in the sun
   if (wbFrost > 0.0) {
@@ -426,10 +489,13 @@ patchShadowFilter();
 const FOG_NEAR = 120;
 /** Darkness: radius around the player where one can still see (world units, 8 = one tile), and the darkening
  * share inside / beyond it. */
-const DARK_RADIUS = 64;
+export const DARK_RADIUS = 64;
 const DARK_NEAR = 0.45;
 const DARK_FAR = 0.99;
 const FOG_FAR = 420;
+/** Stalking fog: fog share inside the clearing / in the fog wall. */
+const STALK_NEAR = 0.12;
+const STALK_FAR = 0.97;
 
 // Replaces three's fog (runs on the final color): patchy fog, thicker far away and near the ground
 const FOG_FRAGMENT = /* glsl */`
@@ -454,6 +520,15 @@ if (uDarkness > 0.0) {
   float dark = smoothstep(edge * 0.3, edge, darkDist);
   gl_FragColor.rgb = mix(gl_FragColor.rgb, uFogColor, uDarkness * mix(${DARK_NEAR.toFixed(2)}, ${DARK_FAR.toFixed(2)}, dark));
 }
+// Stalking fog: a wall of fog with a clearing around the player, whose radius (uStalkRadius) opens while walking
+// and closes in when standing still. The edge is torn by drifting noise, like the darkness.
+if (uStalk > 0.0) {
+  float stalkDist = length(vWeatherWorldPos.xz - uDarkCenter.xz);
+  float curl = wbNoise(vWeatherWorldPos.xz * 0.05 + uFogOffset * 2.5 + vec2(uBeamTime * 0.04, 0.0));
+  float stalkEdge = uStalkRadius * mix(0.65, 1.35, curl);
+  float stalkFog = smoothstep(stalkEdge * 0.35, stalkEdge, stalkDist);
+  gl_FragColor.rgb = mix(gl_FragColor.rgb, uFogColor, uStalk * mix(${STALK_NEAR.toFixed(2)}, ${STALK_FAR.toFixed(2)}, stalkFog));
+}
 `;
 
 /** Max sand coverage: surfaces facing up / walls facing the wind. */
@@ -473,7 +548,7 @@ if (uSandCover > 0.0) {
   float amount = up * ${SAND_UP_MAX.toFixed(2)} + windward * wallLow * ${SAND_WALL_MAX.toFixed(2)};
   float sand = amount * smoothstep(drift - 0.15, drift + 0.15, uSandCover * 1.1);
   float sandLum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
-  vec3 sandColor = vec3(0.86, 0.71, 0.48) * min(0.75 + 0.35 * sandLum, 1.0);
+  vec3 sandColor = uSandColor * min(0.75 + 0.35 * sandLum, 1.0);
   diffuseColor.rgb = mix(diffuseColor.rgb, sandColor, sand);
 }
 `;
@@ -559,6 +634,6 @@ export function applyWeatherShader<T extends THREE.MeshLambertMaterial | THREE.M
       .replace('#include <fog_fragment>', '')
       .replace('#include <colorspace_fragment>', FOG_FRAGMENT + '#include <colorspace_fragment>');
   };
-  mat.customProgramCacheKey = () => 'weather-v26';
+  mat.customProgramCacheKey = () => 'weather-v32';
   return mat;
 }

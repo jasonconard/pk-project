@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SurfaceHeights } from './SurfaceHeights';
 import { registerUnlitMaterial } from './weather-shader';
+import { makeSmokeTexture } from './GlowParticles';
 
 /** Area (relative to the point the camera looks at) where the sand blows: covers the screen. */
 const AREA = { minX: -260, maxX: 260, minZ: -300, maxZ: 140 };
@@ -17,28 +18,16 @@ const GRAIN_WIDTH = 0.5;
 const PUFF_HEIGHT = [2, 25] as const;
 const PUFF_SPEED = [40, 80] as const;
 const PUFF_SIZE = [28, 55] as const;
-const PUFF_OPACITY = 0.2;
+const PUFF_OPACITY = 0.45;
+/** Dust clouds rolling on themselves (rad / s). */
+const PUFF_ROLL = 0.5;
+const FORWARD = new THREE.Vector3(0, 0, 1);
 /** Minimal wind used for the sand when the wind gauge is lower (the sand always blows). */
 const MIN_WIND = 0.6;
 // Lighter than the ochre-tinted ground so the streaks stand out
 const SAND_COLORS = [0xf2dcae, 0xe8c48a, 0xfff0cf, 0xdcb880];
 const DUST_COLORS = [0xd6b688, 0xc9a374, 0xe0c49c];
 
-function makePuffTexture(): THREE.CanvasTexture {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.5, 'rgba(255,255,255,0.55)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
 
 /** One group of particles blown along x (grains or puffs). */
 class Blown {
@@ -84,6 +73,8 @@ export class SandHelper {
   private readonly position = new THREE.Vector3();
   private readonly scale = new THREE.Vector3();
   private readonly color = new THREE.Color();
+  private readonly spin = new THREE.Quaternion();
+  private readonly turned = new THREE.Quaternion();
 
   constructor(scene: THREE.Scene, private readonly surfaces: SurfaceHeights) {
     const grainMaterial = registerUnlitMaterial(new THREE.MeshBasicMaterial({
@@ -92,7 +83,8 @@ export class SandHelper {
       depthWrite: false,
     }));
     const puffMaterial = registerUnlitMaterial(new THREE.MeshBasicMaterial({
-      map: makePuffTexture(),
+      // Cloudy outline (smoke texture) rather than a round blob: the dust looks billowing
+      map: makeSmokeTexture(),
       transparent: true,
       opacity: PUFF_OPACITY,
       depthWrite: false,
@@ -100,6 +92,13 @@ export class SandHelper {
     this.grains = new Blown(MAX_GRAINS, grainMaterial, 10);
     this.puffs = new Blown(MAX_PUFFS, puffMaterial, 11);
     scene.add(this.grains.mesh, this.puffs.mesh);
+  }
+
+  /** Tint of the grains and puffs (multiplies their sandy colors; white = unchanged). */
+  setTint(tint: THREE.Color) {
+    for (const mesh of [this.grains.mesh, this.puffs.mesh]) {
+      ((mesh.material as THREE.Material).userData['unlitBaseColor'] as THREE.Color | undefined)?.copy(tint);
+    }
   }
 
   /** Wind actually pushing the sand: at least MIN_WIND, in the wind direction. */
@@ -151,7 +150,13 @@ export class SandHelper {
       } else {
         this.scale.set(g.length[i] * (0.5 + 0.5 * Math.abs(wind)), GRAIN_WIDTH, 1);
       }
-      this.matrix.compose(this.position, camera.quaternion, this.scale);
+      if (puff) {
+        // Dust clouds roll on themselves while they are blown
+        this.spin.setFromAxisAngle(FORWARD, p * 3 + this.time * PUFF_ROLL * (p > Math.PI ? 1 : -1));
+        this.matrix.compose(this.position, this.turned.copy(camera.quaternion).multiply(this.spin), this.scale);
+      } else {
+        this.matrix.compose(this.position, camera.quaternion, this.scale);
+      }
       g.mesh.setMatrixAt(i, this.matrix);
     }
     g.mesh.count = count;
