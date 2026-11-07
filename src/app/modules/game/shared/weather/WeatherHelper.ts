@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { Game } from '../model/Game';
 import { cloneWeatherParams, DAWN, DAWN_TINT, DAY_PRESETS, daylightAt, DUSK, DUSK_TINT, getWeatherParams, isNightHour, twilightAt, WeatherParams, WeatherType } from './Weather';
 import { DARK_RADIUS, puddleAt, UNLIT_MATERIALS, WEATHER_UNIFORMS } from './weather-shader';
+import { StrikeHelper } from './StrikeHelper';
 import { StepSurface, ThunderBolt, WeatherAudio } from './WeatherAudio';
 import { ACID_RAIN_STYLE, BLOOD_RAIN_STYLE, DRIZZLE_STYLE, HAIL_STYLE, POISON_RAIN_STYLE, RainHelper, SUN_RAIN_STYLE } from './RainHelper';
 import { SnowHelper } from './SnowHelper';
@@ -9,7 +10,7 @@ import { SurfaceHeights } from './SurfaceHeights';
 import { GodRaysPass } from './GodRaysPass';
 import { BloomPass } from './BloomPass';
 import { HeatHazePass } from './HeatHazePass';
-import { ASH_SMOKE_STYLE, TIME_MOTE_STYLE, QUAKE_DEBRIS_STYLE, QUAKE_DUST_STYLE, SPINDRIFT_STYLE, STEAM_JET_STYLE, STEAM_STYLE, ASH_STYLE, CRYSTAL_STYLE, DARK_WISP_STYLE, FUME_STYLE, HAUNT_WISP_STYLE, POISON_FUME_STYLE, MARS_DUST_STYLE, VOLCANO_SMOKE_STYLE, EMBER_STYLE, FAIRY_STYLE, MAGIC_SNOW_STYLE, POLLEN_STYLE, STARDUST_STYLE, LAVA_STYLE, FIREFLY_STYLE, GlowParticles, SPORE_STYLE } from './GlowParticles';
+import { ASH_SMOKE_STYLE, STRIKE_SPARK_STYLE, GRAVITY_DROP_STYLE, GRAVITY_PEBBLE_STYLE, TIME_MOTE_STYLE, QUAKE_DEBRIS_STYLE, QUAKE_DUST_STYLE, SPINDRIFT_STYLE, STEAM_JET_STYLE, STEAM_STYLE, ASH_STYLE, CRYSTAL_STYLE, DARK_WISP_STYLE, FUME_STYLE, HAUNT_WISP_STYLE, POISON_FUME_STYLE, MARS_DUST_STYLE, VOLCANO_SMOKE_STYLE, EMBER_STYLE, FAIRY_STYLE, MAGIC_SNOW_STYLE, POLLEN_STYLE, STARDUST_STYLE, LAVA_STYLE, FIREFLY_STYLE, GlowParticles, SPORE_STYLE } from './GlowParticles';
 import { LeafHelper, LeafMode } from './LeafHelper';
 import { SandHelper } from './SandHelper';
 import { ElectricHelper } from './ElectricHelper';
@@ -127,6 +128,17 @@ const STALK_OPEN = 90;
 const STALK_CLOSED = 14;
 const STALK_OPEN_RATE = 1.2;
 const STALK_CLOSE_RATE = 0.25;
+/** Reversed gravity: player float height, bobbing amplitude (world units), bobbing speed (rad / s), sway (rad). */
+const FLOAT_HEIGHT = 8;
+const FLOAT_BOB = 2.5;
+const FLOAT_SPEED = 1.6;
+const FLOAT_SWAY = 0.08;
+/** Thunder rain: distance (world units) of a strike heard / seen as "far", camera jolt below this distance and its
+ * length (s), crackles heard up to this distance. */
+const STRIKE_FAR = 300;
+const STRIKE_JOLT_DISTANCE = 70;
+const STRIKE_JOLT_LENGTH = 0.7;
+const STRIKE_HEARING = 160;
 const TIME_WARP_SLOWDOWN = 0.8;
 const GEYSER_HEARING = 220;
 const QUAKE_INTERVAL = [7, 18] as const;
@@ -291,6 +303,13 @@ export class WeatherHelper {
   private readonly steam: GlowParticles;
   private readonly steamJet: GlowParticles;
   private readonly timeMotes: GlowParticles;
+  private readonly gravityPebbles: GlowParticles;
+  private readonly gravityDrops: GlowParticles;
+  private readonly strikes: StrikeHelper;
+  private readonly strikeSparks: GlowParticles;
+  /** Reversed gravity: current float height added to the player, and its bobbing clock. */
+  private floatOffset = 0;
+  private floatTime = 0;
   /** Earthquake: time until the next quake, current quake age (-1 = calm), length, power, and the camera
    * offset applied this frame (removed before the next one). */
   private quakeTimer = 3;
@@ -396,6 +415,24 @@ export class WeatherHelper {
     this.steam.spawnAt = () => this.geysers.spawnPoint(false);
     this.steamJet = new GlowParticles(game.scene, this.surfaces, STEAM_JET_STYLE);
     this.timeMotes = new GlowParticles(game.scene, this.surfaces, TIME_MOTE_STYLE);
+    this.gravityPebbles = new GlowParticles(game.scene, this.surfaces, GRAVITY_PEBBLE_STYLE);
+    this.gravityDrops = new GlowParticles(game.scene, this.surfaces, GRAVITY_DROP_STYLE);
+    this.strikes = new StrikeHelper(game.scene, this.surfaces);
+    this.strikes.onStrike = impact => this.onGroundStrike(impact);
+    this.strikes.onCrackle = (pos, strength) => {
+      const player = this.playerPosition();
+      const dx = pos.x - player.x;
+      const closeness = Math.max(0, 1 - Math.hypot(dx, pos.z - player.z) / STRIKE_HEARING);
+      if (closeness > 0) {
+        this.audio.zap(closeness * strength, THREE.MathUtils.clamp(dx / 60, -1, 1), THREE.MathUtils.randFloat(0.05, 0.25));
+      }
+    };
+    this.strikeSparks = new GlowParticles(game.scene, this.surfaces, STRIKE_SPARK_STYLE);
+    this.strikeSparks.spawnAt = () => {
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.random() * 5;
+      return [this.strikes.sparkAt.x + Math.cos(a) * r, this.strikes.sparkAt.z + Math.sin(a) * r];
+    };
     this.steamJet.spawnAt = () => this.geysers.spawnPoint(true);
     this.geysers.onEruption = g => {
       const player = this.playerPosition();
@@ -535,7 +572,7 @@ export class WeatherHelper {
     // three's Lambert/Phong divide by PI: these intensities give exactly litLevel on a flat ground in the sun
     // and shadowLevel in the shade, whatever the sun elevation.
     // Lightning flash: everything gets a short white-blue light boost (stronger sun = shadows "snap")
-    const flash = this.updateLightning(dt, p.lightning) * Math.min(p.lightning, 1);
+    const flash = this.updateLightning(dt, p.lightning) * Math.min(Math.max(p.lightning, p.thunderRain), 1);
     // Slow uneven "breathing" of the light (blood moon)
     const t = WEATHER_UNIFORMS.uBeamTime.value;
     // Solar storm interferences: brief random dips of all the lights
@@ -581,7 +618,7 @@ export class WeatherHelper {
     // Flutter gets faster with the wind; wrapped to keep float precision in the shader
     u.uFlutterPhase.value = (u.uFlutterPhase.value + dt * (2.5 + 5 * windAbs)) % (Math.PI * 2);
 
-    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
+    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
       this.surfaces.update(dt);
     }
     this.rain.update(dt, target, p.rain, this.windX);
@@ -634,6 +671,11 @@ export class WeatherHelper {
     this.steam.update(dt, target, Math.min(p.geysers, 1), this.game.camera, this.windX);
     this.steamJet.update(dt, target, Math.min(this.geysers.eruptions / 2, 1), this.game.camera, this.windX);
     this.timeMotes.update(dt, target, p.timeWarp, this.game.camera, this.windX);
+    this.gravityPebbles.update(dt, target, p.antigravity, this.game.camera, this.windX);
+    this.gravityDrops.update(dt, target, p.antigravity, this.game.camera, this.windX);
+    this.strikes.update(dt, target, this.playerPosition(), p.thunderRain, this.game.camera);
+    this.strikeSparks.update(dt, target, this.strikes.sparks, this.game.camera, 0);
+    this.updateFloat(dt, p.antigravity);
     this.ghosts.update(dt, this.playerPosition(), p.haunt);
     this.flood.update(dt, target, p.flood, this.surfaces.heightAt(target.x, target.z, target.y), this.windX);
     this.frostCover = p.frost > 0.05
@@ -686,6 +728,8 @@ export class WeatherHelper {
       quake: this.quakeShake,
       steam: this.steamLevel(),
       timeWarp: p.timeWarp,
+      antigravity: p.antigravity,
+      oldFilm: p.oldFilm,
       inverted: p.invert,
       frogs: p.frogs,
       crickets: p.crickets,
@@ -738,8 +782,8 @@ export class WeatherHelper {
       }
       return false;
     };
-    if (p.heatHaze >= 0.01 || p.heatWash >= 0.01 || p.invert >= 0.01) {
-      this.heatHaze.render(g.renderer, drawFrame, p.heatHaze, p.heatWash, WEATHER_UNIFORMS.uBeamTime.value, p.invert);
+    if (p.heatHaze >= 0.01 || p.heatWash >= 0.01 || p.invert >= 0.01 || p.oldFilm >= 0.01) {
+      this.heatHaze.render(g.renderer, drawFrame, p.heatHaze, p.heatWash, WEATHER_UNIFORMS.uBeamTime.value, p.invert, p.oldFilm);
       return true;
     }
     return drawFrame(null);
@@ -880,12 +924,12 @@ export class WeatherHelper {
    * @returns current flash brightness, 0..1
    */
   private updateLightning(dt: number, frequency: number): number {
-    if (frequency < 0.05) {
-      this.flashTime = -1;
+    // (also runs the flashes of the thunder rain strikes, see onGroundStrike)
+    if (frequency < 0.05 && this.flashTime < 0) {
       return 0;
     }
     this.lightningTimer -= dt * frequency;
-    if (this.lightningTimer <= 0) {
+    if (frequency >= 0.05 && this.lightningTimer <= 0) {
       this.lightningTimer = THREE.MathUtils.randFloat(LIGHTNING_INTERVAL[0], LIGHTNING_INTERVAL[1]);
       const bolts = newStrike(this.current.lightningFar);
       this.flashPulses = bolts.flatMap(boltPulses);
@@ -927,6 +971,50 @@ export class WeatherHelper {
    * Tornado: a player walking into it is lifted, spinning on themselves, then falls back down where they were.
    * Only the sprite inside the player group moves (the game logic position stays on its tile).
    */
+  /**
+   * Reversed gravity: the player floats above the ground, slowly bobbing and swaying. Relative offset (the previous
+   * one is removed first) so it never drifts, and left out while thrown in the air by a tornado / geyser.
+   */
+  private updateFloat(dt: number, level: number) {
+    const plane = this.game.mapHelper?.scenePlayer?.mesh?.children[0];
+    if (!plane) {
+      return;
+    }
+    plane.position.y -= this.floatOffset;
+    this.floatOffset = 0;
+    if (level < 0.01 || this.flightTime >= 0) {
+      plane.rotation.z = 0;
+      return;
+    }
+    this.floatTime += dt;
+    this.floatOffset = level * (FLOAT_HEIGHT + FLOAT_BOB * Math.sin(this.floatTime * FLOAT_SPEED));
+    plane.position.y += this.floatOffset;
+    plane.rotation.z = level * FLOAT_SWAY * Math.sin(this.floatTime * FLOAT_SPEED * 0.7);
+  }
+
+  /**
+   * Thunder rain: a bolt just hit the ground. Flash and thunder like a storm bolt, as close as the impact is to the
+   * player (blinding and immediate crack when close); right next to them, a short jolt of the camera.
+   */
+  private onGroundStrike(impact: THREE.Vector3) {
+    const player = this.playerPosition();
+    const dist = Math.hypot(impact.x - player.x, impact.z - player.z);
+    const bolt: ThunderBolt = {
+      at: 0,
+      distance: THREE.MathUtils.clamp(dist / STRIKE_FAR, 0, 1),
+      pan: THREE.MathUtils.clamp((impact.x - player.x) / 150, -1, 1),
+    };
+    this.flashPulses = boltPulses(bolt);
+    this.flashTime = 0;
+    this.audio.thunder([bolt]);
+    if (dist < STRIKE_JOLT_DISTANCE && this.quakeAge < 0) {
+      // Reuses the earthquake shake: a short, sharp one
+      this.quakeAge = 0;
+      this.quakeLength = STRIKE_JOLT_LENGTH;
+      this.quakePower = 0.4 + 0.6 * (1 - dist / STRIKE_JOLT_DISTANCE);
+    }
+  }
+
   private updateFlight(dt: number) {
     const plane = this.game.mapHelper?.scenePlayer?.mesh?.children[0];
     if (!plane) {

@@ -65,6 +65,9 @@ export const WEATHER_UNIFORMS = {
   uTide: { value: 0 },
   /** Time warp: ripples spreading from the player (strength), and their center. */
   uWarp: { value: 0 },
+  uStrikeOn: { value: 0 },
+  /** Thunder rain ground discharges: x, z, age (s), power (0 = unused). */
+  uStrikes: { value: [new THREE.Vector4(), new THREE.Vector4()] },
   uWarpCenter: { value: new THREE.Vector3() },
   uAuroraRed: { value: 0 },
   /** Forest canopy: dappled leaf shadows, 0 = none, 1 = full. */
@@ -265,6 +268,8 @@ uniform float uFrost;
 uniform float uStars;
 uniform float uTide;
 uniform float uWarp;
+uniform float uStrikeOn;
+uniform vec4 uStrikes[2];
 uniform vec3 uWarpCenter;
 uniform float uAuroraRed;
 uniform float uCanopy;
@@ -284,6 +289,11 @@ const STAR_DENSITY = 1.2;
 const STAR_RARITY = 0.985;
 
 // Runs once all lights are accumulated: clouds only dim the sun (direct light), never the ambient.
+/** Thunder rain: radius reached by the ground discharge (world units), time to reach it (s), its brightness. */
+const STRIKE_RADIUS = 45;
+const STRIKE_GROW = 0.25;
+const STRIKE_GLOW = 1.6;
+
 const FRAGMENT_BODY = /* glsl */`
 {
   // Project the point along the sun direction onto the y = 0 plane,
@@ -376,6 +386,41 @@ const FRAGMENT_BODY = /* glsl */`
     float warpDist = length(vWeatherWorldPos.xz - uWarpCenter.xz);
     float rings = smoothstep(0.93, 1.0, sin(warpDist * 0.14 - uBeamTime * 2.5));
     reflectedLight.indirectDiffuse += vec3(0.55, 0.45, 1.0) * rings * exp(-warpDist / 110.0) * uWarp * warpGround * 0.6;
+  }
+  // Thunder rain: from each lightning impact, an electric discharge spreads on the ground as branching lines
+  // (Lichtenberg figure): iso-lines of a noise sampled on a circle around the impact (so they run outwards),
+  // a second finer layer further out for the branching, jagged by a small noise. The puddles nearby light up.
+  if (uStrikeOn > 0.0) {
+    vec3 strikeNormal = normalize(vWeatherWorldNormal) * (gl_FrontFacing ? 1.0 : -1.0);
+    float strikeGround = smoothstep(0.6, 0.9, strikeNormal.y);
+    float discharge = 0.0;
+    for (int i = 0; i < 2; i++) {
+      vec4 st = uStrikes[i];
+      if (st.w <= 0.0) {
+        continue;
+      }
+      vec2 d = vWeatherWorldPos.xz - st.xy;
+      float r = length(d);
+      vec2 dir = d / max(r, 0.001);
+      float reach = ${STRIKE_RADIUS.toFixed(1)} * smoothstep(0.0, ${STRIKE_GROW.toFixed(2)}, st.z);
+      float fade = exp(-st.z * 2.2);
+      float jag = wbNoise(vWeatherWorldPos.xz * 0.35) * 0.12;
+      vec2 seed = st.xy * 0.13;
+      float n1 = wbNoise(dir * 4.0 + r * 0.008 + seed) + jag;
+      float n2 = wbNoise(dir * 11.0 + r * 0.012 + seed + 7.3) + jag;
+      float thin = 1.0 - r / max(reach, 0.001);
+      float veins = smoothstep(0.06 * thin, 0.0, abs(n1 - 0.5)) * 1.5
+        + smoothstep(0.045 * thin, 0.0, abs(n2 - 0.5)) * smoothstep(8.0, 22.0, r);
+      float inside = step(r, reach) * thin;
+      float flick = 0.6 + 0.4 * sin(uBeamTime * 70.0 + float(i) * 2.0);
+      // Scorched bright core at the impact
+      float core = exp(-r / 5.0) * 2.0;
+      discharge += (veins * inside + core) * fade * flick * strikeGround;
+      // Puddles nearby: the water carries the current, flickering longer
+      discharge += wbPuddle * (1.0 - smoothstep(${(STRIKE_RADIUS * 0.8).toFixed(1)}, ${(STRIKE_RADIUS * 1.6).toFixed(1)}, r))
+        * exp(-st.z * 1.2) * (0.55 + 0.45 * sin(uBeamTime * 45.0) * sin(uBeamTime * 31.0 + float(i))) * 0.6;
+    }
+    reflectedLight.indirectDiffuse += vec3(0.55, 0.75, 1.0) * discharge * ${STRIKE_GLOW.toFixed(2)};
   }
   // Light tide: bioluminescent waves sweeping the ground. Two wave trains crossing at an angle, their crests
   // warped by noise (no straight lines); the plankton glows as tiny sparkles where a crest passes, with a soft halo.
@@ -634,6 +679,6 @@ export function applyWeatherShader<T extends THREE.MeshLambertMaterial | THREE.M
       .replace('#include <fog_fragment>', '')
       .replace('#include <colorspace_fragment>', FOG_FRAGMENT + '#include <colorspace_fragment>');
   };
-  mat.customProgramCacheKey = () => 'weather-v32';
+  mat.customProgramCacheKey = () => 'weather-v35';
   return mat;
 }

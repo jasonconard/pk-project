@@ -84,6 +84,10 @@ export interface AmbienceLevels {
   timeWarp: number;
   /** Inverted world: backwards sounds. */
   inverted: number;
+  /** Reversed gravity: endlessly rising airy whoosh. */
+  antigravity: number;
+  /** Old film: projector whirr and crackles. */
+  oldFilm: number;
   /** Frogs croaking (monsoon). */
   frogs: number;
   /** Crickets without the forest (starry night). */
@@ -162,6 +166,15 @@ const REVERSE_GAIN = 0.18;
 const REVERSE_INTERVAL = [2, 5] as const;
 const TICK_PERIOD = 1.6;
 const WARP_DRONE_GAIN = 0.12;
+/** Reversed gravity: rising whoosh loudness, sweeps per second, and its filter sweep (Hz, center ± depth). */
+const FLOAT_GAIN = 0.1;
+/** Old film: projector whirr loudness, shutter rate (Hz), crackles per second and their loudness. */
+const PROJECTOR_GAIN = 0.07;
+const SHUTTER_RATE = 18;
+const FILM_CRACKLE_RATE = 7;
+const FILM_CRACKLE_GAIN = 0.12;
+const FLOAT_SWEEP_RATE = 0.22;
+const FLOAT_SWEEP = [1300, 900] as const;
 const GEYSER_BURST_GAIN = 0.5;
 const RATTLE_RATE = 18;
 /** Blood moon: drone loudness, seconds between two heartbeat bouts / two howls, howl loudness. */
@@ -252,6 +265,8 @@ export class WeatherAudio {
   private quakeGain?: GainNode;
   private steamGain?: GainNode;
   private warpDroneGain?: GainNode;
+  private floatGain?: GainNode;
+  private projectorGain?: GainNode;
   private tickTimer = 0;
   private tock = false;
   private reverseTimer = 1;
@@ -338,6 +353,9 @@ export class WeatherAudio {
     this.updateCity(dt, levels.city, now);
     this.updateTimeWarp(dt, levels.timeWarp, now);
     this.updateInverted(dt, levels.inverted);
+    this.floatGain?.gain.setTargetAtTime(FLOAT_GAIN * levels.antigravity, now, 0.5);
+    this.projectorGain?.gain.setTargetAtTime(PROJECTOR_GAIN * levels.oldFilm, now, 0.5);
+    this.updateFilmCrackle(dt, levels.oldFilm);
     this.updateHail(dt, levels.hail);
     this.lapping = levels.lapping;
     this.updateSea(dt, levels.sea, now);
@@ -865,6 +883,22 @@ export class WeatherAudio {
       this.bloodHowlTimer = rand(BLOOD_HOWL_INTERVAL[0], BLOOD_HOWL_INTERVAL[1]);
       this.wolfHowl(level);
     }
+  }
+
+  /** Old film: random tiny clicks, like dust on the film / a worn optical soundtrack. */
+  private updateFilmCrackle(dt: number, level: number) {
+    if (level < 0.05 || Math.random() > FILM_CRACKLE_RATE * level * dt) {
+      return;
+    }
+    const ctx = this.ctx!;
+    const at = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise!;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(FILM_CRACKLE_GAIN * level * rand(0.3, 1), at);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.006);
+    src.connect(this.highpass(1500)).connect(g).connect(this.panned(rand(-0.5, 0.5)));
+    src.start(at, Math.random() * 2, 0.01);
   }
 
   /**
@@ -1638,6 +1672,28 @@ export class WeatherAudio {
       osc.connect(g).connect(this.warpDroneGain);
       osc.start();
     }
+    // Reversed gravity: noise through a band-pass whose frequency is driven by a sawtooth: it rises slowly, drops back
+    // at once and rises again, an endless upward whoosh
+    const sweep = this.bandpass(FLOAT_SWEEP[0], 1.4);
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sawtooth';
+    lfo.frequency.value = FLOAT_SWEEP_RATE;
+    const depth = ctx.createGain();
+    depth.gain.value = FLOAT_SWEEP[1];
+    lfo.connect(depth).connect(sweep.frequency);
+    lfo.start();
+    this.floatGain = this.loop(this.noise, [sweep]);
+    // Old film projector: a mid whirr chopped by the shutter (square wave on its volume, 18 times per second)
+    const shutter = ctx.createGain();
+    shutter.gain.value = 0.6;
+    const shutterLfo = ctx.createOscillator();
+    shutterLfo.type = 'square';
+    shutterLfo.frequency.value = SHUTTER_RATE;
+    const shutterDepth = ctx.createGain();
+    shutterDepth.gain.value = 0.4;
+    shutterLfo.connect(shutterDepth).connect(shutter.gain);
+    shutterLfo.start();
+    this.projectorGain = this.loop(this.noise, [this.bandpass(1600, 1.5), shutter]);
     // Earthquake rumble: very deep brown noise
     this.quakeGain = this.loop(this.brownNoise, [this.lowpass(110)]);
     // Tornado roar: deep rumbling brown noise, brighter when close

@@ -38,6 +38,9 @@ export enum WeatherType {
   INVERTED = 'inverted',
   STALKING_FOG = 'stalking-fog',
   ERUPTION = 'eruption',
+  ANTIGRAVITY = 'antigravity',
+  OLD_FILM = 'old-film',
+  THUNDER_RAIN = 'thunder-rain',
   CRYSTAL_MIST = 'crystal-mist',
   MARS = 'mars',
   ACID_RAIN = 'acid-rain',
@@ -163,6 +166,12 @@ export interface WeatherParams {
   stalkingFog: number;
   /** Imminent eruption: tremors growing more frequent until a big quake that throws up embers and smoke, 0 = none, 1 = full. */
   eruption: number;
+  /** Reversed gravity: pebbles and drops falling upwards, the player floating, 0 = none, 1 = full. */
+  antigravity: number;
+  /** Old film: black and white, grain, scratches, flicker, projector sound, 0 = none, 1 = full. */
+  oldFilm: number;
+  /** Thunder rain: lightning striking the ground, electric discharges spreading on it, 0 = none, 1 = full. */
+  thunderRain: number;
   /** Crickets chirping at night (without the forest), 0 = none, 1 = full. */
   crickets: number;
   /** Distant city sounds (traffic, horns, sirens), 0 = none, 1 = full. */
@@ -278,6 +287,9 @@ const DAY_BASE: WeatherParams = {
   invert: 0,
   stalkingFog: 0,
   eruption: 0,
+  antigravity: 0,
+  oldFilm: 0,
+  thunderRain: 0,
   crickets: 0,
   city: 0,
   fireworks: 0,
@@ -634,6 +646,25 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     rain: 1,
     lightning: 1,
   }),
+  // Thunder rain: a dark downpour, lightning striking the ground all around, electricity crawling on the ground
+  [WeatherType.THUNDER_RAIN]: preset(DAY_BASE, {
+    litLevel: 0.45,
+    shadowLevel: 0.38,
+    ambientColor: new THREE.Color(0x8c98b8),
+    sunColor: new THREE.Color(0xc8d4ff),
+    unlitTint: new THREE.Color(0x96a2c0),
+    specular: 0.3,
+    cloudCover: 0.9,
+    cloudAmbient: 0.3,
+    cloudSpeed: 60,
+    windowGlow: 0.5,
+    rain: 1,
+    soak: 2,
+    thunderRain: 1,
+    electric: 0.35,
+    fog: 0.2,
+    fogColor: new THREE.Color(0x6a7490),
+  }),
   // Monsoon: warm tropical downpour, green steamy haze, puddles filling fast, frogs, thunder far away
   [WeatherType.MONSOON]: preset(DAY_BASE, {
     litLevel: 0.66,
@@ -969,6 +1000,29 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fog: 0.7,
     fogColor: new THREE.Color(0xc8704a),
   }),
+  // Reversed gravity: a strange cool light, everything loose drifting up into the sky
+  [WeatherType.ANTIGRAVITY]: preset(DAY_BASE, {
+    litLevel: 0.95,
+    shadowLevel: 0.6,
+    ambientColor: new THREE.Color(0xdcd8f4),
+    sunColor: new THREE.Color(0xf4f0ff),
+    unlitTint: new THREE.Color(0xe4e0f8),
+    specular: 0.3,
+    cloudCover: 0.3,
+    cloudSpeed: -8,
+    antigravity: 1,
+    fog: 0.15,
+    fogColor: new THREE.Color(0xd8d4f0),
+  }),
+  // Old film: the world as an old black and white movie
+  [WeatherType.OLD_FILM]: preset(DAY_BASE, {
+    litLevel: 1,
+    shadowLevel: 0.55,
+    cloudCover: 0.3,
+    cloudSpeed: 6,
+    oldFilm: 1,
+    fog: 0.12,
+  }),
   // Light grey sky, dense fine drizzle, a hint of mist
   [WeatherType.DRIZZLE]: preset(DAY_BASE, {
     litLevel: 0.86,
@@ -1258,6 +1312,24 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     cloudSpeed: 55,
     rain: 1,
     lightning: 1,
+  }),
+  [WeatherType.THUNDER_RAIN]: preset(NIGHT_BASE, {
+    litLevel: 0.26,
+    shadowLevel: 0.18,
+    ambientColor: new THREE.Color(0x4c5a88),
+    sunColor: new THREE.Color(0xa0aedd),
+    unlitTint: new THREE.Color(0x50608a),
+    specular: 0.3,
+    cloudCover: 0.8,
+    cloudAmbient: 0.2,
+    cloudSpeed: 60,
+    windowGlow: 0.5,
+    rain: 1,
+    soak: 2,
+    thunderRain: 1,
+    electric: 0.35,
+    fog: 0.2,
+    fogColor: new THREE.Color(0x1c2234),
   }),
   // The snow reflects the moonlight: slightly brighter night
   [WeatherType.SNOW]: preset(NIGHT_BASE, {
@@ -1589,6 +1661,24 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fog: 0.7,
     fogColor: new THREE.Color(0x5a2618),
   }),
+  [WeatherType.ANTIGRAVITY]: preset(NIGHT_BASE, {
+    ambientColor: new THREE.Color(0x6a68a8),
+    unlitTint: new THREE.Color(0x7470a8),
+    specular: 0.3,
+    cloudCover: 0.3,
+    cloudSpeed: -8,
+    windowGlow: 0.5,
+    antigravity: 1,
+    fog: 0.15,
+    fogColor: new THREE.Color(0x24223c),
+  }),
+  [WeatherType.OLD_FILM]: preset(NIGHT_BASE, {
+    litLevel: 0.5,
+    shadowLevel: 0.3,
+    windowGlow: 0.6,
+    oldFilm: 1,
+    fog: 0.12,
+  }),
   // Blood moon: oppressive red moonlight, deep shadows, red window lights, a red mist, the light slowly breathes
   [WeatherType.BLOOD_MOON]: preset(NIGHT_BASE, {
     litLevel: 0.44,
@@ -1674,6 +1764,9 @@ export const TEMPERATURES: Record<WeatherType, [number, number]> = {
   [WeatherType.INVERTED]: [12, 18],
   [WeatherType.STALKING_FOG]: [8, 5],
   [WeatherType.ERUPTION]: [54, 46],
+  [WeatherType.ANTIGRAVITY]: [18, 13],
+  [WeatherType.OLD_FILM]: [16, 11],
+  [WeatherType.THUNDER_RAIN]: [16, 12],
   [WeatherType.AURORA]: [-6, -8],
   [WeatherType.FOG]: [8, 5],
   [WeatherType.DRIZZLE]: [11, 8],
@@ -1824,6 +1917,7 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.HAIL, label: 'Grêle', icon: '🧊' },
   { type: WeatherType.RAINY, label: 'Pluvieux', icon: '🌧️' },
   { type: WeatherType.STORM, label: 'Orage', icon: '⛈️' },
+  { type: WeatherType.THUNDER_RAIN, label: 'Pluie de tonnerre', icon: '🌩️' },
   { type: WeatherType.MONSOON, label: 'Mousson', icon: '🌴' },
   { type: WeatherType.TORNADO, label: 'Tornade', icon: '🌪️' },
   { type: WeatherType.EARTHQUAKE, label: 'Séisme', icon: '🫨' },
@@ -1840,6 +1934,8 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.STARRY_NIGHT, label: 'Nuit étoilée', icon: '🌃' },
   { type: WeatherType.TIME_WARP, label: 'Distorsion temporelle', icon: '⏳' },
   { type: WeatherType.INVERTED, label: 'Monde inversé', icon: '🔮' },
+  { type: WeatherType.ANTIGRAVITY, label: 'Gravité inversée', icon: '🪐' },
+  { type: WeatherType.OLD_FILM, label: 'Vieux film', icon: '🎞️' },
   { type: WeatherType.MARS, label: 'Vent de Mars', icon: '🪐' },
   { type: WeatherType.FIREWORKS, label: 'Feu d\'artifice', icon: '🎆' },
   { type: WeatherType.LIGHT_TIDE, label: 'Marée de lumière', icon: '🌊' },

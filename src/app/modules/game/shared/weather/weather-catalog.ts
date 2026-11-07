@@ -93,6 +93,12 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Ciel noir, pluie battante, éclairs simples ou doubles. Le tonnerre arrive plus ou moins tard selon la distance de l\'éclair.',
     effects: ['Grosse pluie', 'Éclairs proches ou lointains', 'Tonnerre varié'],
   },
+  [WeatherType.THUNDER_RAIN]: {
+    category: 'rain', sound: true,
+    summary: 'La foudre frappe le sol, l\'électricité s\'y propage.',
+    description: 'Une pluie battante sous un ciel noir. Toutes les quelques secondes, la foudre frappe le sol à un endroit visible : un éclair ramifié, un flash, un coup de tonnerre sec. Depuis l\'impact, des fissures électriques s\'étendent sur le sol, les flaques proches s\'illuminent et grésillent, des étincelles jaillissent. Si elle tombe tout près, l\'écran tremble. Des arcs crépitent sur les toits.',
+    effects: ['Éclairs visibles qui frappent le sol', 'Décharges électriques au sol', 'Flaques électrifiées', 'Étincelles', 'Secousse si proche', 'Arcs sur les toits'],
+  },
   [WeatherType.MONSOON]: {
     category: 'rain', sound: true,
     summary: 'Déluge tropical chaud, grenouilles.',
@@ -116,6 +122,18 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     summary: 'L\'eau monte au-dessus du sol.',
     description: 'Une grosse pluie, et l\'eau monte lentement au-dessus du sol jusqu\'à tout recouvrir. Chaque pas éclabousse. L\'eau se retire ensuite.',
     effects: ['Niveau d\'eau qui monte', 'Clapotis', 'Pas dans l\'eau partout'],
+  },
+  [WeatherType.OLD_FILM]: {
+    category: 'magic', sound: true,
+    summary: 'Le monde en vieux film noir et blanc.',
+    description: 'Le monde devient un vieux film muet : noir et blanc légèrement sépia, grain, image qui saute et scintille, rayures et poussières sur la pellicule, coins assombris. On entend le ronronnement du projecteur et le crépitement de la bobine.',
+    effects: ['Noir et blanc sépia', 'Grain et scintillement', 'Rayures et poussières', 'Bruit de projecteur'],
+  },
+  [WeatherType.ANTIGRAVITY]: {
+    category: 'magic', sound: true,
+    summary: 'Tout tombe vers le ciel, le joueur flotte.',
+    description: 'La gravité s\'est inversée : cailloux et mottes de terre montent lentement vers le ciel, des gouttes d\'eau jaillissent du sol comme une pluie à l\'envers, et le joueur flotte au-dessus du sol en se balançant doucement. Un souffle aérien monte sans fin.',
+    effects: ['Cailloux qui montent', 'Pluie à l\'envers', 'Joueur qui flotte', 'Souffle ascendant'],
   },
   [WeatherType.INVERTED]: {
     category: 'magic', sound: true,

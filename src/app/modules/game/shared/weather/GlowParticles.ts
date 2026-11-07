@@ -412,6 +412,65 @@ export const TIME_MOTE_STYLE: GlowStyle = {
   windSpeed: 1,
 };
 
+/** Reversed gravity: pebbles and clods of earth slowly falling upwards, lit by the scene. */
+export const GRAVITY_PEBBLE_STYLE: GlowStyle = {
+  maxParticles: 650,
+  color: 0x5a4a3a,
+  palette: [0x3e3630, 0x7a6e60, 0x4e5a38],
+  intensity: 1,
+  blending: 'normal',
+  followLight: true,
+  rise: [5, 13],
+  wobble: 1.5,
+  wobbleSpeed: 0.6,
+  life: [5, 9],
+  size: [2.4, 4.6],
+  spawnHeight: [0, 3],
+  flicker: 0,
+  flickerSpeed: 1,
+  nearPlants: 0.2,
+  windSpeed: 3,
+};
+
+/** Reversed gravity: water drops streaking up from the ground, like rain played backwards. */
+export const GRAVITY_DROP_STYLE: GlowStyle = {
+  maxParticles: 500,
+  color: 0xf0f8ff,
+  palette: [0xffffff, 0xd0e4f8],
+  intensity: 1.3,
+  blending: 'normal',
+  followLight: true,
+  stretchY: 4,
+  rise: [30, 55],
+  wobble: 0.2,
+  wobbleSpeed: 1,
+  life: [1.5, 2.5],
+  size: [0.9, 1.4],
+  spawnHeight: [0, 1],
+  flicker: 0,
+  flickerSpeed: 1,
+  nearPlants: 0,
+  windSpeed: 6,
+};
+
+/** Thunder rain: blue-white sparks jumping from a lightning impact. */
+export const STRIKE_SPARK_STYLE: GlowStyle = {
+  maxParticles: 160,
+  color: 0xc8e0ff,
+  palette: [0xffffff, 0x88b8ff],
+  intensity: 2.4,
+  rise: [8, 30],
+  wobble: 4,
+  wobbleSpeed: 9,
+  life: [0.2, 0.6],
+  size: [0.7, 1.4],
+  spawnHeight: [0, 3],
+  flicker: 0.5,
+  flickerSpeed: 40,
+  nearPlants: 0,
+  windSpeed: 0,
+};
+
 /** Volcanic: dark smoke puffs rising here and there from the ground, spreading and fading (lit by the scene). */
 export const VOLCANO_SMOKE_STYLE: GlowStyle = {
   maxParticles: 300,

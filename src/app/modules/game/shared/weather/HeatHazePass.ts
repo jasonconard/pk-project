@@ -9,6 +9,9 @@ const SHIMMER_RISE_SPEED = 1.8;
 const DESATURATION = 0.3;
 const WARM_TINT = new THREE.Color(1.06, 1.0, 0.88);
 
+/** Old film: frames per second of the film (grain, scratches and flicker change at this rate). */
+const FILM_FPS = 18;
+
 const FULLSCREEN_VERTEX = /* glsl */`
 varying vec2 vUv;
 void main() {
@@ -22,6 +25,7 @@ uniform sampler2D tScene;
 uniform float uHeat;
 uniform float uWash;
 uniform float uInvert;
+uniform float uFilm;
 uniform float uTime;
 uniform float uAspect;
 uniform vec2 uScale;
@@ -43,6 +47,9 @@ void main() {
   vec2 wave = vec2(hhNoise(p), hhNoise(p + vec2(17.3, 5.1))) - 0.5;
   float strength = uHeat * mix(0.35, 1.0, vUv.y);
   vec2 offset = wave * ${SHIMMER_AMPLITUDE.toFixed(4)} * 2.0 * strength * vec2(1.0 / uAspect, 1.0);
+  // Old film: the frame number, and the picture jumping a little in the projector gate
+  float frame = floor(uTime * ${FILM_FPS.toFixed(1)});
+  offset.y += uFilm * (hhHash(vec2(frame, 9.0)) - 0.5) * 0.003;
   vec3 c = texture2D(tScene, vUv + offset).rgb;
 
   // Washed-out, warm colors
@@ -57,6 +64,26 @@ void main() {
     c = mix(c, negative, uInvert);
   }
 
+  // Old film: black and white with a hint of sepia, grain, flicker, scratches, dust specks and a vignette.
+  // Done in display (gamma) space, like a real print.
+  if (uFilm > 0.0) {
+    float s = pow(max(dot(c, vec3(0.2126, 0.7152, 0.0722)), 0.0), 1.0 / 2.2);
+    s = smoothstep(0.04, 0.96, s);
+    s *= 0.9 + 0.1 * hhHash(vec2(frame, 3.1));
+    s += (hhHash(gl_FragCoord.xy + frame * 17.0) - 0.5) * 0.14;
+    for (int i = 0; i < 2; i++) {
+      float fi = float(i);
+      float sx = hhHash(vec2(frame, fi * 7.0 + 2.0));
+      float on = step(0.55, hhHash(vec2(frame, fi * 13.0 + 1.0)));
+      s += on * 0.22 * (1.0 - smoothstep(0.0, 0.0012, abs(vUv.x - sx)));
+    }
+    float speck = step(0.9993, hhHash(floor(vUv * vec2(uAspect, 1.0) * 220.0) + frame * 3.7));
+    s -= speck * 0.5;
+    vec2 d = vUv - 0.5;
+    s *= 1.0 - dot(d, d) * 1.4;
+    vec3 film = pow(clamp(s * vec3(1.06, 1.0, 0.88), 0.0, 1.0), vec3(2.2));
+    c = mix(c, film, uFilm);
+  }
   gl_FragColor = vec4(c, 1.0);
   #include <colorspace_fragment>
 }
@@ -83,6 +110,7 @@ export class HeatHazePass {
         uHeat: { value: 0 },
         uWash: { value: 0 },
         uInvert: { value: 0 },
+        uFilm: { value: 0 },
         uTime: { value: 0 },
         uAspect: { value: 1 },
         uScale: { value: SHIMMER_SCALE },
@@ -101,7 +129,7 @@ export class HeatHazePass {
    * @param heat shimmer strength, 0..1
    * @param wash washed-out warm colors, 0..1
    */
-  render(renderer: THREE.WebGLRenderer, drawFrame: (target: THREE.WebGLRenderTarget) => void, heat: number, wash: number, time: number, invert = 0) {
+  render(renderer: THREE.WebGLRenderer, drawFrame: (target: THREE.WebGLRenderTarget) => void, heat: number, wash: number, time: number, invert = 0, film = 0) {
     renderer.getDrawingBufferSize(this.size);
     if (this.sceneTarget.width !== this.size.x || this.sceneTarget.height !== this.size.y) {
       this.sceneTarget.setSize(this.size.x, this.size.y);
@@ -112,6 +140,7 @@ export class HeatHazePass {
     u['uHeat'].value = heat;
     u['uWash'].value = wash;
     u['uInvert'].value = invert;
+    u['uFilm'].value = film;
     u['uTime'].value = time;
     u['uAspect'].value = this.size.x / this.size.y;
     renderer.setRenderTarget(null);
