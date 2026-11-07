@@ -88,6 +88,10 @@ export interface AmbienceLevels {
   antigravity: number;
   /** Old film: projector whirr and crackles. */
   oldFilm: number;
+  /** Mirage: high shimmering tone. */
+  mirage: number;
+  /** Deep freeze: ice cracking. */
+  deepFreeze: number;
   /** Frogs croaking (monsoon). */
   frogs: number;
   /** Crickets without the forest (starry night). */
@@ -170,6 +174,13 @@ const WARP_DRONE_GAIN = 0.12;
 const FLOAT_GAIN = 0.1;
 /** Old film: projector whirr loudness, shutter rate (Hz), crackles per second and their loudness. */
 const PROJECTOR_GAIN = 0.07;
+/** Moonless night: loudness of something running away in the dark. */
+const SCURRY_GAIN = 0.12;
+/** Deep freeze: ice cracks per second and their loudness. */
+const ICE_CRACK_RATE = 0.3;
+const ICE_CRACK_GAIN = 0.1;
+/** Mirage: loudness of the high shimmering tone. */
+const MIRAGE_GAIN = 0.018;
 const SHUTTER_RATE = 18;
 const FILM_CRACKLE_RATE = 7;
 const FILM_CRACKLE_GAIN = 0.12;
@@ -266,6 +277,7 @@ export class WeatherAudio {
   private steamGain?: GainNode;
   private warpDroneGain?: GainNode;
   private floatGain?: GainNode;
+  private mirageGain?: GainNode;
   private projectorGain?: GainNode;
   private tickTimer = 0;
   private tock = false;
@@ -355,6 +367,8 @@ export class WeatherAudio {
     this.updateInverted(dt, levels.inverted);
     this.floatGain?.gain.setTargetAtTime(FLOAT_GAIN * levels.antigravity, now, 0.5);
     this.projectorGain?.gain.setTargetAtTime(PROJECTOR_GAIN * levels.oldFilm, now, 0.5);
+    this.updateIceCracks(dt, levels.deepFreeze);
+    this.mirageGain?.gain.setTargetAtTime(MIRAGE_GAIN * levels.mirage * (0.7 + 0.3 * Math.sin(this.time * 0.9)), now, 0.3);
     this.updateFilmCrackle(dt, levels.oldFilm);
     this.updateHail(dt, levels.hail);
     this.lapping = levels.lapping;
@@ -1446,6 +1460,64 @@ export class WeatherAudio {
    * - far: a long, low, soft rolling rumble.
    * Every rumble is random (speed, swells, length, side): no two sound the same.
    */
+  /**
+   * Deep freeze: the ice cracking under the cold. A sharp snap, then the strange "pew" of a frozen lake: a tone
+   * falling fast from high to low (the crack travels through the ice, high frequencies arriving first).
+   */
+  private updateIceCracks(dt: number, level: number) {
+    if (level < 0.3 || Math.random() > ICE_CRACK_RATE * level * dt) {
+      return;
+    }
+    const ctx = this.ctx!;
+    const at = ctx.currentTime;
+    const out = this.panned(rand(-0.9, 0.9));
+    const loud = ICE_CRACK_GAIN * level * rand(0.4, 1);
+    const snap = ctx.createBufferSource();
+    snap.buffer = this.noise!;
+    const sg = ctx.createGain();
+    sg.gain.setValueAtTime(loud, at);
+    sg.gain.exponentialRampToValueAtTime(0.0001, at + 0.04);
+    snap.connect(this.highpass(2000)).connect(sg).connect(out);
+    snap.start(at, Math.random() * 2, 0.05);
+    const osc = ctx.createOscillator();
+    const f = rand(1800, 3200);
+    const length = rand(0.25, 0.5);
+    osc.frequency.setValueAtTime(f, at);
+    osc.frequency.exponentialRampToValueAtTime(f * 0.12, at + length);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(loud * 0.5, at);
+    og.gain.exponentialRampToValueAtTime(0.0001, at + length);
+    osc.connect(og).connect(out);
+    osc.start(at);
+    osc.stop(at + length + 0.02);
+  }
+
+  /**
+   * Moonless night: something runs away in the dark: a quick rustle of leaves (noise bursts in a band-pass,
+   * irregular like small steps), from its side.
+   */
+  scurry(side: number) {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || !this.noise || ctx.state !== 'running') {
+      return;
+    }
+    const out = this.panned(side);
+    const at = ctx.currentTime;
+    const steps = 4 + Math.floor(Math.random() * 5);
+    let t = 0;
+    for (let k = 0; k < steps; k++) {
+      const src = ctx.createBufferSource();
+      src.buffer = this.noise;
+      const g = ctx.createGain();
+      const level = SCURRY_GAIN * rand(0.5, 1) * (1 - k / steps * 0.6);
+      g.gain.setValueAtTime(level, at + t);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + t + 0.07);
+      src.connect(this.bandpass(rand(1800, 3500), 1.2)).connect(g).connect(out);
+      src.start(at + t, Math.random() * 2, 0.08);
+      t += rand(0.05, 0.12);
+    }
+  }
+
   thunder(bolts: ThunderBolt[]) {
     const ctx = this.ctx;
     if (!ctx || !this.master || !this.brownNoise || ctx.state !== 'running') {
@@ -1683,6 +1755,18 @@ export class WeatherAudio {
     lfo.connect(depth).connect(sweep.frequency);
     lfo.start();
     this.floatGain = this.loop(this.noise, [sweep]);
+    // Mirage: two close high tones beating (3 per second), like the ringing of the heat in the ears
+    this.mirageGain = ctx.createGain();
+    this.mirageGain.gain.value = 0;
+    this.mirageGain.connect(this.master);
+    for (const freq of [2900, 2903, 4350]) {
+      const osc = ctx.createOscillator();
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      g.gain.value = freq > 4000 ? 0.25 : 0.5;
+      osc.connect(g).connect(this.mirageGain);
+      osc.start();
+    }
     // Old film projector: a mid whirr chopped by the shutter (square wave on its volume, 18 times per second)
     const shutter = ctx.createGain();
     shutter.gain.value = 0.6;

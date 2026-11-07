@@ -66,6 +66,9 @@ export const WEATHER_UNIFORMS = {
   /** Time warp: ripples spreading from the player (strength), and their center. */
   uWarp: { value: 0 },
   uStrikeOn: { value: 0 },
+  uMirage: { value: 0 },
+  /** Deep freeze: height (world units) the frost has climbed up the walls. */
+  uFrostClimb: { value: 0 },
   /** Thunder rain ground discharges: x, z, age (s), power (0 = unused). */
   uStrikes: { value: [new THREE.Vector4(), new THREE.Vector4()] },
   uWarpCenter: { value: new THREE.Vector3() },
@@ -269,6 +272,8 @@ uniform float uStars;
 uniform float uTide;
 uniform float uWarp;
 uniform float uStrikeOn;
+uniform float uMirage;
+uniform float uFrostClimb;
 uniform vec4 uStrikes[2];
 uniform vec3 uWarpCenter;
 uniform float uAuroraRed;
@@ -289,6 +294,9 @@ const STAR_DENSITY = 1.2;
 const STAR_RARITY = 0.985;
 
 // Runs once all lights are accumulated: clouds only dim the sun (direct light), never the ambient.
+/** Mirage: distance to the player (world units) under which there's no fake water / from which it's full. */
+const MIRAGE_NEAR = 70;
+const MIRAGE_FAR = 130;
 /** Thunder rain: radius reached by the ground discharge (world units), time to reach it (s), its brightness. */
 const STRIKE_RADIUS = 45;
 const STRIKE_GROW = 0.25;
@@ -421,6 +429,24 @@ const FRAGMENT_BODY = /* glsl */`
         * exp(-st.z * 1.2) * (0.55 + 0.45 * sin(uBeamTime * 45.0) * sin(uBeamTime * 31.0 + float(i))) * 0.6;
     }
     reflectedLight.indirectDiffuse += vec3(0.55, 0.75, 1.0) * discharge * ${STRIKE_GLOW.toFixed(2)};
+  }
+  // Mirage: patches of fake water on the ground, only far from the player (fading out as they come closer, so they
+  // can never be reached): the ground there shows the bright sky instead of its own color, rippling.
+  if (uMirage > 0.0) {
+    vec3 mirageNormal = normalize(vWeatherWorldNormal) * (gl_FrontFacing ? 1.0 : -1.0);
+    float mirageGround = smoothstep(0.6, 0.9, mirageNormal.y) * (1.0 - step(1.0, vWeatherWorldPos.y));
+    float mirageDist = length(vWeatherWorldPos.xz - uDarkCenter.xz);
+    float distant = smoothstep(${MIRAGE_NEAR.toFixed(1)}, ${MIRAGE_FAR.toFixed(1)}, mirageDist);
+    vec2 mp = vWeatherWorldPos.xz * 0.02;
+    float patches = smoothstep(0.52, 0.62, wbNoise(mp + vec2(uBeamTime * 0.01, 0.0)) * 0.7 + wbNoise(mp * 2.7 - uBeamTime * 0.015) * 0.3);
+    float pool = patches * distant * mirageGround * uMirage;
+    if (pool > 0.0) {
+      // Thin horizontal shimmer lines moving fast, like heat over water
+      float ripple = 0.5 + 0.5 * sin(vWeatherWorldPos.z * 1.7 + uBeamTime * 5.0 + wbNoise(vWeatherWorldPos.xz * 0.3) * 6.0);
+      vec3 sky = vec3(0.72, 0.84, 0.98) * (0.85 + 0.35 * ripple);
+      reflectedLight.directDiffuse *= 1.0 - 0.7 * pool;
+      reflectedLight.indirectDiffuse = mix(reflectedLight.indirectDiffuse, sky, pool * 0.85);
+    }
   }
   // Light tide: bioluminescent waves sweeping the ground. Two wave trains crossing at an angle, their crests
   // warped by noise (no straight lines); the plankton glows as tiny sparkles where a crest passes, with a soft halo.
@@ -646,6 +672,8 @@ if (uFrost > 0.0) {
   float crystals = texture2D(uCloudMap, vWeatherWorldPos.xz * 0.09 + vWeatherWorldPos.y * 0.05).r * 0.6
     + wbNoise(vWeatherWorldPos.xz * 1.6 + vWeatherWorldPos.y * 0.8) * 0.4;
   float reach = uFrost * (0.3 + 0.22 * frostUp + 0.32 * green);
+  // Deep freeze: the frost also climbs up the walls from the ground, up to uFrostClimb
+  reach += uFrost * 0.55 * (1.0 - frostUp) * (1.0 - smoothstep(uFrostClimb * 0.6, uFrostClimb + 0.01, vWeatherWorldPos.y));
   wbFrost = smoothstep(crystals - 0.08, crystals + 0.08, reach) * (1.0 - uSnowCover);
   float frostLuma = dot(diffuseColor.rgb, vec3(0.3, 0.55, 0.15));
   diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.84, 0.91, 1.0) * (0.8 + 0.3 * frostLuma), wbFrost * 0.7);
@@ -679,6 +707,6 @@ export function applyWeatherShader<T extends THREE.MeshLambertMaterial | THREE.M
       .replace('#include <fog_fragment>', '')
       .replace('#include <colorspace_fragment>', FOG_FRAGMENT + '#include <colorspace_fragment>');
   };
-  mat.customProgramCacheKey = () => 'weather-v35';
+  mat.customProgramCacheKey = () => 'weather-v37';
   return mat;
 }

@@ -57,6 +57,12 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Un mur de brouillard entoure le joueur. Quand il marche, la brume s\'écarte et révèle les alentours ; dès qu\'il s\'arrête, elle se referme lentement sur lui, comme si elle l\'attendait.',
     effects: ['Éclaircie autour du joueur', 'Rayon qui suit le mouvement', 'Bord déchiré qui ondule'],
   },
+  [WeatherType.MORNING_MIST]: {
+    category: 'classic', sound: true,
+    summary: 'Brume basse à l\'aube, qui se dissipe au lever du soleil.',
+    description: 'Le petit matin : des nappes de brume basse traînent au ras du sol, les rayons du soleil levant les traversent, la rosée brille et les oiseaux se réveillent. La brume dépend de l\'heure : épaisse de 3 h à 7 h, elle se déchire quand le soleil monte et disparaît vers 10 h. Choisie à un autre moment, l\'heure passe à 6 h.',
+    effects: ['Nappes de brume au sol', 'Rayons de soleil', 'Rosée', 'Chant des oiseaux', 'Se dissipe avec l\'heure'],
+  },
   [WeatherType.SMOG]: {
     category: 'classic', sound: true,
     summary: 'Brume jaune, ville qui gronde au loin.',
@@ -194,6 +200,24 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     summary: 'Le givre gagne tout peu à peu.',
     description: 'Un froid sec et clair : le givre s\'étend lentement sur l\'herbe, les toits puis les murs, avec des cristaux qui scintillent. Les flaques gèlent.',
     effects: ['Givre progressif', 'Cristaux scintillants', 'Craquements de glace'],
+  },
+  [WeatherType.DEEP_FREEZE]: {
+    category: 'cold', sound: true,
+    summary: 'Froid extrême : givre sur les murs, haleine visible.',
+    description: 'Un froid mordant. Le givre recouvre tout et grimpe peu à peu le long des murs, le sol devient glacé et brillant, l\'haleine du joueur forme de petits nuages. La glace craque avec des sons étranges et le vent glacé souffle. La nuit, une aurore boréale danse au-dessus de la ville gelée.',
+    effects: ['Givre qui grimpe sur les murs', 'Haleine visible', 'Sol glacé', 'Craquements de glace', 'Aurore la nuit'],
+  },
+  [WeatherType.MOONLESS]: {
+    category: 'dark', sound: true,
+    summary: 'Le noir complet, une lanterne, des yeux qui brillent.',
+    description: 'Une nuit sans lune ni étoiles : on ne voit presque rien. Seules les fenêtres allumées percent l\'obscurité, et la lanterne du joueur éclaire un petit cercle chaud qui vacille. Dans le noir, des paires d\'yeux brillants observent, clignent… et s\'enfuient dans un bruissement quand on s\'approche. Uniquement la nuit.',
+    effects: ['Obscurité totale', 'Lanterne qui vacille', 'Yeux dans le noir', 'Fuite dans un bruissement'],
+  },
+  [WeatherType.MIRAGE]: {
+    category: 'heat', sound: true,
+    summary: 'De fausses flaques d\'eau scintillent au loin.',
+    description: 'Une chaleur écrasante : l\'air tremble et, au loin, des flaques d\'eau scintillantes reflètent ce qu\'il y a derrière elles. Comme un vrai mirage, elles restent toujours loin devant : on ne les atteint jamais, elles s\'effacent et réapparaissent ailleurs. L\'image se dédouble légèrement et un sifflement aigu flotte dans l\'air. Uniquement de jour.',
+    effects: ['Fausses flaques au loin', 'Image dédoublée', 'Air qui tremble', 'Sifflement de chaleur'],
   },
   [WeatherType.HEATWAVE]: {
     category: 'heat', sound: false,

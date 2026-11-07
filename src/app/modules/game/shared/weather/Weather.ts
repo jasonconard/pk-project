@@ -41,6 +41,10 @@ export enum WeatherType {
   ANTIGRAVITY = 'antigravity',
   OLD_FILM = 'old-film',
   THUNDER_RAIN = 'thunder-rain',
+  MORNING_MIST = 'morning-mist',
+  MIRAGE = 'mirage',
+  MOONLESS = 'moonless',
+  DEEP_FREEZE = 'deep-freeze',
   CRYSTAL_MIST = 'crystal-mist',
   MARS = 'mars',
   ACID_RAIN = 'acid-rain',
@@ -172,6 +176,14 @@ export interface WeatherParams {
   oldFilm: number;
   /** Thunder rain: lightning striking the ground, electric discharges spreading on it, 0 = none, 1 = full. */
   thunderRain: number;
+  /** Morning mist: low mist banks, sun rays and dew around dawn, fading as the sun climbs (see mistAt), 0 = none, 1 = full. */
+  morningMist: number;
+  /** Mirage: fake water patches far away, doubled picture, high shimmering tone, 0 = none, 1 = full. */
+  mirage: number;
+  /** Moonless night: pitch dark but a lantern around the player, eyes watching from the dark, 0 = none, 1 = full. */
+  moonless: number;
+  /** Deep freeze: frost climbing up the walls, the player's breath visible, ice cracking, 0 = none, 1 = full. */
+  deepFreeze: number;
   /** Crickets chirping at night (without the forest), 0 = none, 1 = full. */
   crickets: number;
   /** Distant city sounds (traffic, horns, sirens), 0 = none, 1 = full. */
@@ -290,6 +302,10 @@ const DAY_BASE: WeatherParams = {
   antigravity: 0,
   oldFilm: 0,
   thunderRain: 0,
+  morningMist: 0,
+  mirage: 0,
+  moonless: 0,
+  deepFreeze: 0,
   crickets: 0,
   city: 0,
   fireworks: 0,
@@ -410,6 +426,21 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     sunRain: 0.45,
     birds: 0.8,
   }),
+  // Morning mist: soft light, birds waking up; the mist itself depends on the hour (see mistAt)
+  [WeatherType.MORNING_MIST]: preset(DAY_BASE, {
+    litLevel: 0.95,
+    shadowLevel: 0.62,
+    ambientColor: new THREE.Color(0xf6f2ea),
+    sunColor: new THREE.Color(0xfff0d8),
+    unlitTint: new THREE.Color(0xf6f2ec),
+    specular: 0.6,
+    sunGlow: 0.4,
+    cloudCover: 0.1,
+    cloudSpeed: 4,
+    birds: 1,
+    morningMist: 1,
+    fogColor: new THREE.Color(0xeeeae4),
+  }),
   // Ash fall: dim orange sun through a grey haze, grey flakes slowly falling
   [WeatherType.ASH]: preset(DAY_BASE, {
     litLevel: 0.72,
@@ -527,6 +558,22 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     frost: 1,
     fog: 0.2,
     fogColor: new THREE.Color(0xe0eaf8),
+  }),
+  // Deep freeze: biting cold under a pale sky, frost everywhere and climbing up the walls, glassy ground
+  [WeatherType.DEEP_FREEZE]: preset(DAY_BASE, {
+    litLevel: 0.92,
+    shadowLevel: 0.64,
+    ambientColor: new THREE.Color(0xd0e0ff),
+    sunColor: new THREE.Color(0xf0f6ff),
+    unlitTint: new THREE.Color(0xd8e6ff),
+    specular: 0.9,
+    cloudSpeed: 8,
+    minWind: 0.4,
+    frost: 1,
+    ice: 0.5,
+    deepFreeze: 1,
+    fog: 0.25,
+    fogColor: new THREE.Color(0xdce8fa),
   }),
   // Haunted mist: thick grey mist, silhouettes forming in it and dissolving when approached
   [WeatherType.HAUNTED]: preset(DAY_BASE, {
@@ -730,6 +777,23 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     darkness: 1,
   }),
   // Scorching sun: warm orange light, washed-out colors, hot air shimmering above the ground
+  // Mirage: blinding heat, the air trembles, fake water shimmers far ahead (day only)
+  [WeatherType.MIRAGE]: preset(DAY_BASE, {
+    litLevel: 1.15,
+    shadowLevel: 0.7,
+    ambientColor: new THREE.Color(0xffeedc),
+    sunColor: new THREE.Color(0xffe2b0),
+    unlitTint: new THREE.Color(0xfff4e4),
+    specular: 1,
+    sunGlow: 0.7,
+    cloudSpeed: 3,
+    minWind: 0.3,
+    heatHaze: 0.7,
+    heatWash: 0.6,
+    mirage: 1,
+    fog: 0.15,
+    fogColor: new THREE.Color(0xf6e6cc),
+  }),
   [WeatherType.HEATWAVE]: preset(DAY_BASE, {
     litLevel: 1.12,
     shadowLevel: 0.68,
@@ -1331,6 +1395,12 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fog: 0.2,
     fogColor: new THREE.Color(0x1c2234),
   }),
+  [WeatherType.MORNING_MIST]: preset(NIGHT_BASE, {
+    specular: 0.4,
+    windowGlow: 0.4,
+    morningMist: 1,
+    fogColor: new THREE.Color(0x3a4258),
+  }),
   // The snow reflects the moonlight: slightly brighter night
   [WeatherType.SNOW]: preset(NIGHT_BASE, {
     litLevel: 0.47,
@@ -1372,6 +1442,23 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     darkness: 1,
   }),
   // Clear night lit by green / purple curtains, the moon turns slightly green
+  // Deep freeze night: an icy aurora above the frozen town
+  [WeatherType.DEEP_FREEZE]: preset(NIGHT_BASE, {
+    litLevel: 0.44,
+    shadowLevel: 0.28,
+    ambientColor: new THREE.Color(0x6a88c0),
+    sunColor: new THREE.Color(0xb0e0f0),
+    unlitTint: new THREE.Color(0x7090b8),
+    specular: 0.7,
+    windowGlow: 0.5,
+    minWind: 0.4,
+    aurora: 0.7,
+    frost: 1,
+    ice: 0.5,
+    deepFreeze: 1,
+    fog: 0.2,
+    fogColor: new THREE.Color(0x1c2840),
+  }),
   [WeatherType.AURORA]: preset(NIGHT_BASE, {
     litLevel: 0.4,
     shadowLevel: 0.24,
@@ -1679,6 +1766,21 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     oldFilm: 1,
     fog: 0.12,
   }),
+  // Moonless night (night only): no moon, no stars, only the lit windows and the player's lantern
+  [WeatherType.MOONLESS]: preset(NIGHT_BASE, {
+    litLevel: 0.3,
+    shadowLevel: 0.25,
+    ambientColor: new THREE.Color(0x4a5068),
+    unlitTint: new THREE.Color(0x4a5068),
+    specular: 0,
+    cloudCover: 0.6,
+    cloudSpeed: 3,
+    windowGlow: 0.8,
+    crickets: 0.4,
+    moonless: 1,
+    fog: 0.2,
+    fogColor: new THREE.Color(0x05060a),
+  }),
   // Blood moon: oppressive red moonlight, deep shadows, red window lights, a red mist, the light slowly breathes
   [WeatherType.BLOOD_MOON]: preset(NIGHT_BASE, {
     litLevel: 0.44,
@@ -1767,6 +1869,10 @@ export const TEMPERATURES: Record<WeatherType, [number, number]> = {
   [WeatherType.ANTIGRAVITY]: [18, 13],
   [WeatherType.OLD_FILM]: [16, 11],
   [WeatherType.THUNDER_RAIN]: [16, 12],
+  [WeatherType.MORNING_MIST]: [13, 7],
+  [WeatherType.MIRAGE]: [44, 44],
+  [WeatherType.MOONLESS]: [9, 9],
+  [WeatherType.DEEP_FREEZE]: [-22, -34],
   [WeatherType.AURORA]: [-6, -8],
   [WeatherType.FOG]: [8, 5],
   [WeatherType.DRIZZLE]: [11, 8],
@@ -1794,6 +1900,23 @@ export const DUSK: readonly [number, number] = [18, 20];
 /** Hour set when choosing a day-only weather at night / a night-only weather by day. */
 export const DAY_ONLY_HOUR = 12;
 export const NIGHT_ONLY_HOUR = 22;
+/** Morning mist: hour it jumps to when chosen while the mist isn't there (no mist out of the early morning). */
+export const MORNING_MIST_HOUR = 6;
+
+/**
+ * Morning mist strength at an hour, 0..1: builds up in the second half of the night, thick from 3:00 to 7:00,
+ * then burns off as the sun climbs, gone at 10:00.
+ */
+export function mistAt(hour: number): number {
+  const h = ((hour % 24) + 24) % 24;
+  if (h < 3) {
+    return THREE.MathUtils.smoothstep(h, 0, 3);
+  }
+  if (h < 7) {
+    return 1;
+  }
+  return 1 - THREE.MathUtils.smoothstep(h, 7, 10);
+}
 
 /** Daylight at an hour (0..24): 0 = night, 1 = day, in between at dawn / dusk. */
 export function daylightAt(hour: number): number {
@@ -1892,6 +2015,7 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.NEUTRAL, label: 'Neutre', icon: '⚪' },
   { type: WeatherType.SUNNY, label: 'Ensoleillé', icon: '☀️' },
   { type: WeatherType.HEATWAVE, label: 'Canicule', icon: '🔥' },
+  { type: WeatherType.MIRAGE, label: 'Mirage', icon: '🫠' },
   { type: WeatherType.VOLCANIC, label: 'Volcanique', icon: '🌋' },
   { type: WeatherType.ERUPTION, label: 'Éruption imminente', icon: '💥' },
   { type: WeatherType.ASH, label: 'Neige de cendres', icon: '🌫️' },
@@ -1905,6 +2029,9 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.ELECTRIC, label: 'Champ électrique', icon: '⚡' },
   { type: WeatherType.CLOUDY, label: 'Nuageux', icon: '☁️' },
   { type: WeatherType.FOG, label: 'Brouillard', icon: '🌫️' },
+  { type: WeatherType.MOONLESS, label: 'Nuit sans lune', icon: '🌚' },
+  { type: WeatherType.DEEP_FREEZE, label: 'Aurore glacée', icon: '🧊' },
+  { type: WeatherType.MORNING_MIST, label: 'Brume matinale', icon: '🌄' },
   { type: WeatherType.STALKING_FOG, label: 'Brouillard rôdeur', icon: '🌁' },
   { type: WeatherType.SEA_MIST, label: 'Brume marine', icon: '🌊' },
   { type: WeatherType.SMOG, label: 'Smog', icon: '🏭' },

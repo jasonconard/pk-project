@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import type { Game } from '../model/Game';
-import { cloneWeatherParams, DAWN, DAWN_TINT, DAY_PRESETS, daylightAt, DUSK, DUSK_TINT, getWeatherParams, isNightHour, twilightAt, WeatherParams, WeatherType } from './Weather';
+import { cloneWeatherParams, DAWN, DAWN_TINT, DAY_PRESETS, daylightAt, mistAt, DUSK, DUSK_TINT, getWeatherParams, isNightHour, twilightAt, WeatherParams, WeatherType } from './Weather';
 import { DARK_RADIUS, puddleAt, UNLIT_MATERIALS, WEATHER_UNIFORMS } from './weather-shader';
 import { StrikeHelper } from './StrikeHelper';
+import { EyesHelper } from './EyesHelper';
 import { StepSurface, ThunderBolt, WeatherAudio } from './WeatherAudio';
 import { ACID_RAIN_STYLE, BLOOD_RAIN_STYLE, DRIZZLE_STYLE, HAIL_STYLE, POISON_RAIN_STYLE, RainHelper, SUN_RAIN_STYLE } from './RainHelper';
 import { SnowHelper } from './SnowHelper';
@@ -10,7 +11,7 @@ import { SurfaceHeights } from './SurfaceHeights';
 import { GodRaysPass } from './GodRaysPass';
 import { BloomPass } from './BloomPass';
 import { HeatHazePass } from './HeatHazePass';
-import { ASH_SMOKE_STYLE, STRIKE_SPARK_STYLE, GRAVITY_DROP_STYLE, GRAVITY_PEBBLE_STYLE, TIME_MOTE_STYLE, QUAKE_DEBRIS_STYLE, QUAKE_DUST_STYLE, SPINDRIFT_STYLE, STEAM_JET_STYLE, STEAM_STYLE, ASH_STYLE, CRYSTAL_STYLE, DARK_WISP_STYLE, FUME_STYLE, HAUNT_WISP_STYLE, POISON_FUME_STYLE, MARS_DUST_STYLE, VOLCANO_SMOKE_STYLE, EMBER_STYLE, FAIRY_STYLE, MAGIC_SNOW_STYLE, POLLEN_STYLE, STARDUST_STYLE, LAVA_STYLE, FIREFLY_STYLE, GlowParticles, SPORE_STYLE } from './GlowParticles';
+import { ASH_SMOKE_STYLE, BREATH_STYLE, MIST_STYLE, STRIKE_SPARK_STYLE, GRAVITY_DROP_STYLE, GRAVITY_PEBBLE_STYLE, TIME_MOTE_STYLE, QUAKE_DEBRIS_STYLE, QUAKE_DUST_STYLE, SPINDRIFT_STYLE, STEAM_JET_STYLE, STEAM_STYLE, ASH_STYLE, CRYSTAL_STYLE, DARK_WISP_STYLE, FUME_STYLE, HAUNT_WISP_STYLE, POISON_FUME_STYLE, MARS_DUST_STYLE, VOLCANO_SMOKE_STYLE, EMBER_STYLE, FAIRY_STYLE, MAGIC_SNOW_STYLE, POLLEN_STYLE, STARDUST_STYLE, LAVA_STYLE, FIREFLY_STYLE, GlowParticles, SPORE_STYLE } from './GlowParticles';
 import { LeafHelper, LeafMode } from './LeafHelper';
 import { SandHelper } from './SandHelper';
 import { ElectricHelper } from './ElectricHelper';
@@ -139,6 +140,18 @@ const STRIKE_FAR = 300;
 const STRIKE_JOLT_DISTANCE = 70;
 const STRIKE_JOLT_LENGTH = 0.7;
 const STRIKE_HEARING = 160;
+/** Morning mist at full strength: extra fog, dew, sun rays. */
+const MIST_FOG = 0.55;
+const MIST_DEW = 0.6;
+const MIST_RAYS = 0.9;
+/** Deep freeze: seconds per breath, how far in front of the player it comes out, frost climbing speed up the walls
+ * (world units / s) and max height. */
+const BREATH_PERIOD = 3.2;
+const BREATH_FORWARD = 4;
+/** Puffs per second while breathing out. */
+const BREATH_PUFFS = 22;
+const FROST_CLIMB_SPEED = 0.6;
+const FROST_CLIMB_MAX = 28;
 const TIME_WARP_SLOWDOWN = 0.8;
 const GEYSER_HEARING = 220;
 const QUAKE_INTERVAL = [7, 18] as const;
@@ -307,6 +320,18 @@ export class WeatherHelper {
   private readonly gravityDrops: GlowParticles;
   private readonly strikes: StrikeHelper;
   private readonly strikeSparks: GlowParticles;
+  private readonly mist: GlowParticles;
+  private readonly eyes: EyesHelper;
+  private readonly breath: GlowParticles;
+  /** Deep freeze: height the frost has climbed up the walls, breathing clock. */
+  private frostClimb = 0;
+  private breathTime = 0;
+  /** Puffs allowed to appear (accumulated while breathing out: a steady stream, not all at once). */
+  private breathTokens = 0;
+  private readonly breathPos = new THREE.Vector3();
+  /** Moonless night: the player's position on screen (uv), for the lantern. */
+  private readonly lanternAt = new THREE.Vector2(0.5, 0.5);
+  private readonly lanternPos = new THREE.Vector3();
   /** Reversed gravity: current float height added to the player, and its bobbing clock. */
   private floatOffset = 0;
   private floatTime = 0;
@@ -428,6 +453,28 @@ export class WeatherHelper {
       }
     };
     this.strikeSparks = new GlowParticles(game.scene, this.surfaces, STRIKE_SPARK_STYLE);
+    this.mist = new GlowParticles(game.scene, this.surfaces, MIST_STYLE);
+    this.eyes = new EyesHelper(game.scene, this.surfaces);
+    this.breath = new GlowParticles(game.scene, this.surfaces, BREATH_STYLE);
+    // The breath comes out in front of the player's face (a bit towards the camera, so it's drawn over the sprite)
+    this.breath.spawnAt = () => {
+      const player = this.playerPosition();
+      this.breathPos.subVectors(this.game.camera.position, player).setY(0).setLength(BREATH_FORWARD);
+      return [player.x + this.breathPos.x + THREE.MathUtils.randFloatSpread(0.8), player.z + this.breathPos.z];
+    };
+    // New puffs only while breathing out; the others finish fading
+    this.breath.spawnGate = () => {
+      if (this.breathTokens < 1) {
+        return false;
+      }
+      this.breathTokens--;
+      return true;
+    };
+    this.eyes.onFlee = pos => {
+      const player = this.playerPosition();
+      const dx = pos.x - player.x;
+      this.audio.scurry(THREE.MathUtils.clamp(dx / 80, -1, 1));
+    };
     this.strikeSparks.spawnAt = () => {
       const a = Math.random() * Math.PI * 2;
       const r = Math.random() * 5;
@@ -618,7 +665,7 @@ export class WeatherHelper {
     // Flutter gets faster with the wind; wrapped to keep float precision in the shader
     u.uFlutterPhase.value = (u.uFlutterPhase.value + dt * (2.5 + 5 * windAbs)) % (Math.PI * 2);
 
-    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
+    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.morningMist > 0 || p.moonless > 0 || p.deepFreeze > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
       this.surfaces.update(dt);
     }
     this.rain.update(dt, target, p.rain, this.windX);
@@ -675,6 +722,17 @@ export class WeatherHelper {
     this.gravityDrops.update(dt, target, p.antigravity, this.game.camera, this.windX);
     this.strikes.update(dt, target, this.playerPosition(), p.thunderRain, this.game.camera);
     this.strikeSparks.update(dt, target, this.strikes.sparks, this.game.camera, 0);
+    this.mist.update(dt, target, p.morningMist, this.game.camera, this.windX);
+    this.eyes.update(dt, target, this.playerPosition(), p.moonless, this.game.camera);
+    // Breathing: a puff every BREATH_PERIOD, exhaled during the first third of it
+    this.breathTime += dt;
+    const breathPhase = (this.breathTime % BREATH_PERIOD) / BREATH_PERIOD;
+    this.breathTokens = breathPhase < 0.3 ? Math.min(this.breathTokens + dt * BREATH_PUFFS, 3) : 0;
+    this.breath.update(dt, target, p.deepFreeze, this.game.camera, this.windX);
+    this.frostClimb = p.deepFreeze > 0.05
+      ? Math.min(FROST_CLIMB_MAX, this.frostClimb + dt * p.deepFreeze * FROST_CLIMB_SPEED)
+      : Math.max(0, this.frostClimb - dt * FROST_CLIMB_SPEED * 3);
+    WEATHER_UNIFORMS.uFrostClimb.value = this.frostClimb;
     this.updateFloat(dt, p.antigravity);
     this.ghosts.update(dt, this.playerPosition(), p.haunt);
     this.flood.update(dt, target, p.flood, this.surfaces.heightAt(target.x, target.z, target.y), this.windX);
@@ -730,6 +788,8 @@ export class WeatherHelper {
       timeWarp: p.timeWarp,
       antigravity: p.antigravity,
       oldFilm: p.oldFilm,
+      mirage: p.mirage,
+      deepFreeze: p.deepFreeze,
       inverted: p.invert,
       frogs: p.frogs,
       crickets: p.crickets,
@@ -744,6 +804,7 @@ export class WeatherHelper {
     u.uCanopy.value = p.canopy;
     u.uDarkness.value = p.darkness;
     u.uStalk.value = p.stalkingFog;
+    u.uMirage.value = p.mirage;
     this.updateStalkingFog(dt, p.stalkingFog);
     u.uDarkCenter.value.copy(this.game.getCameraTarget());
     u.uFogColor.value.copy(p.fogColor);
@@ -782,8 +843,17 @@ export class WeatherHelper {
       }
       return false;
     };
-    if (p.heatHaze >= 0.01 || p.heatWash >= 0.01 || p.invert >= 0.01 || p.oldFilm >= 0.01) {
-      this.heatHaze.render(g.renderer, drawFrame, p.heatHaze, p.heatWash, WEATHER_UNIFORMS.uBeamTime.value, p.invert, p.oldFilm);
+    if (p.moonless >= 0.01) {
+      // The lantern light follows the player (at hip height) on screen
+      this.lanternPos.copy(this.playerPosition()).y += 8;
+      this.lanternPos.project(g.camera);
+      this.lanternAt.set(this.lanternPos.x * 0.5 + 0.5, this.lanternPos.y * 0.5 + 0.5);
+    }
+    if (p.heatHaze >= 0.01 || p.heatWash >= 0.01 || p.invert >= 0.01 || p.oldFilm >= 0.01 || p.mirage >= 0.01 || p.moonless >= 0.01) {
+      this.heatHaze.render(g.renderer, drawFrame, {
+        heat: p.heatHaze, wash: p.heatWash, time: WEATHER_UNIFORMS.uBeamTime.value, invert: p.invert, film: p.oldFilm,
+        mirage: p.mirage, lantern: p.moonless, lanternAt: this.lanternAt,
+      });
       return true;
     }
     return drawFrame(null);
@@ -1173,6 +1243,15 @@ export class WeatherHelper {
       to.fogColor.lerp(tint.fogColor, k);
       to.sunGlow += TWILIGHT_SUN_GLOW * k;
       to.litLevel += TWILIGHT_LIGHT * k;
+    }
+    // Morning mist: the preset only says "misty morning", the hour decides how much mist there is (it burns off
+    // as the sun climbs, the rays shine through it while the sun is low)
+    if (to.morningMist > 0) {
+      const mist = mistAt(this.hour);
+      to.morningMist *= mist;
+      to.fog += MIST_FOG * to.morningMist;
+      to.dew = Math.max(to.dew, MIST_DEW * to.morningMist);
+      to.godRays = Math.max(to.godRays, MIST_RAYS * to.morningMist * d);
     }
     return to;
   }

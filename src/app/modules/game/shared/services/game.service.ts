@@ -7,7 +7,7 @@ import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { FightService } from "../../../fight/shared/services/fight.service";
-import { DAY_ONLY_HOUR, NIGHT_ONLY_HOUR, FIREFLY_COLORS, FireflyColor, fireflyColorHex, isNightHour, isWeatherAvailable, LeafMode, WeatherType, WindDirection, windToX } from "../weather/Weather";
+import { DAY_ONLY_HOUR, NIGHT_ONLY_HOUR, MORNING_MIST_HOUR, mistAt, FIREFLY_COLORS, FireflyColor, fireflyColorHex, isNightHour, isWeatherAvailable, LeafMode, WeatherType, WindDirection, windToX } from "../weather/Weather";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
 export interface GameHud {
@@ -316,6 +316,9 @@ export class GameService {
     if (!isWeatherAvailable(type, this.night())) {
       // e.g. sunny at night, aurora by day: go to the right time of day
       this.setHour(isWeatherAvailable(type, true) ? NIGHT_ONLY_HOUR : DAY_ONLY_HOUR);
+    } else if (type === WeatherType.MORNING_MIST && mistAt(this.hourState()) < 0.5) {
+      // The morning mist only exists in the early morning
+      this.setHour(MORNING_MIST_HOUR);
     }
     this.game?.weather.setWeather(type);
     this.weatherState.set(type);

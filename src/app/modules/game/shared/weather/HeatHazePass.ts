@@ -11,6 +11,21 @@ const WARM_TINT = new THREE.Color(1.06, 1.0, 0.88);
 
 /** Old film: frames per second of the film (grain, scratches and flicker change at this rate). */
 const FILM_FPS = 18;
+/** Moonless night: lantern light radius (share of the screen height): full light inside, dark beyond. */
+const LANTERN_INNER = 0.05;
+const LANTERN_OUTER = 0.2;
+/** Values of the post effects for one frame (0..1 strengths). */
+export interface PostEffects {
+  heat: number;
+  wash: number;
+  time: number;
+  invert?: number;
+  film?: number;
+  mirage?: number;
+  /** Moonless night: lantern strength, and where the player is on screen (uv). */
+  lantern?: number;
+  lanternAt?: THREE.Vector2;
+}
 
 const FULLSCREEN_VERTEX = /* glsl */`
 varying vec2 vUv;
@@ -26,6 +41,9 @@ uniform float uHeat;
 uniform float uWash;
 uniform float uInvert;
 uniform float uFilm;
+uniform float uMirage;
+uniform float uLantern;
+uniform vec2 uLanternAt;
 uniform float uTime;
 uniform float uAspect;
 uniform vec2 uScale;
@@ -51,6 +69,12 @@ void main() {
   float frame = floor(uTime * ${FILM_FPS.toFixed(1)});
   offset.y += uFilm * (hhHash(vec2(frame, 9.0)) - 0.5) * 0.003;
   vec3 c = texture2D(tScene, vUv + offset).rgb;
+  // Mirage: the whole picture doubles a little, the copy slowly drifting (the fake water is on the ground, see
+  // the surface shader)
+  if (uMirage > 0.0) {
+    vec2 ghost = vec2(sin(uTime * 0.7), sin(uTime * 0.5 + 1.0)) * vec2(0.006, 0.003);
+    c = mix(c, texture2D(tScene, vUv + offset + ghost).rgb, 0.25 * uMirage);
+  }
 
   // Washed-out, warm colors
   float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
@@ -64,6 +88,18 @@ void main() {
     c = mix(c, negative, uInvert);
   }
 
+  // Moonless night: pitch dark except a warm flickering lantern light around the player (an ellipse: the circle on
+  // the ground seen in perspective). Very bright pixels (lit windows, glowing eyes) keep shining in the dark.
+  if (uLantern > 0.0) {
+    vec2 ld = (vUv - uLanternAt) * vec2(uAspect, 1.4);
+    float flick = 1.0 + 0.05 * sin(uTime * 13.0) + 0.03 * sin(uTime * 29.0 + 1.0);
+    float lit = 1.0 - smoothstep(${LANTERN_INNER.toFixed(3)}, ${LANTERN_OUTER.toFixed(3)} * flick, length(ld));
+    float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
+    float keep = smoothstep(0.25, 0.7, luma);
+    vec3 dark = c * mix(0.035, 1.0, keep);
+    vec3 lantern = c * vec3(1.5, 1.15, 0.75) * 1.6;
+    c = mix(c, mix(dark, lantern, lit), uLantern);
+  }
   // Old film: black and white with a hint of sepia, grain, flicker, scratches, dust specks and a vignette.
   // Done in display (gamma) space, like a real print.
   if (uFilm > 0.0) {
@@ -111,6 +147,9 @@ export class HeatHazePass {
         uWash: { value: 0 },
         uInvert: { value: 0 },
         uFilm: { value: 0 },
+        uMirage: { value: 0 },
+        uLantern: { value: 0 },
+        uLanternAt: { value: new THREE.Vector2(0.5, 0.5) },
         uTime: { value: 0 },
         uAspect: { value: 1 },
         uScale: { value: SHIMMER_SCALE },
@@ -126,10 +165,9 @@ export class HeatHazePass {
 
   /**
    * @param drawFrame renders the frame into the given target (the effect input)
-   * @param heat shimmer strength, 0..1
-   * @param wash washed-out warm colors, 0..1
+   * @param fx strengths of the effects (heat shimmer, warm wash, negative, old film, mirage, lantern)
    */
-  render(renderer: THREE.WebGLRenderer, drawFrame: (target: THREE.WebGLRenderTarget) => void, heat: number, wash: number, time: number, invert = 0, film = 0) {
+  render(renderer: THREE.WebGLRenderer, drawFrame: (target: THREE.WebGLRenderTarget) => void, fx: PostEffects) {
     renderer.getDrawingBufferSize(this.size);
     if (this.sceneTarget.width !== this.size.x || this.sceneTarget.height !== this.size.y) {
       this.sceneTarget.setSize(this.size.x, this.size.y);
@@ -137,11 +175,16 @@ export class HeatHazePass {
     drawFrame(this.sceneTarget);
 
     const u = this.material.uniforms;
-    u['uHeat'].value = heat;
-    u['uWash'].value = wash;
-    u['uInvert'].value = invert;
-    u['uFilm'].value = film;
-    u['uTime'].value = time;
+    u['uHeat'].value = fx.heat;
+    u['uWash'].value = fx.wash;
+    u['uInvert'].value = fx.invert ?? 0;
+    u['uFilm'].value = fx.film ?? 0;
+    u['uMirage'].value = fx.mirage ?? 0;
+    u['uLantern'].value = fx.lantern ?? 0;
+    if (fx.lanternAt) {
+      u['uLanternAt'].value.copy(fx.lanternAt);
+    }
+    u['uTime'].value = fx.time;
     u['uAspect'].value = this.size.x / this.size.y;
     renderer.setRenderTarget(null);
     renderer.render(this.quadScene, this.quadCamera);

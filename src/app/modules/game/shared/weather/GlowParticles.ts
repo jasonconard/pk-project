@@ -51,6 +51,15 @@ export interface GlowStyle {
   smoke?: { spin: number };
   /** Max opacity of normal-blended smoke puffs (overlapping light puffs melt into a plume). */
   smokeOpacity?: number;
+  /** Draw order among the transparent objects (default 10: after the buildings). Low ground mist uses a negative
+   * one: drawn before the player sprite, whose transparent quad would otherwise cut a clear rectangle in it. */
+  renderOrder?: number;
+  /** Lying flat above the ground instead of facing the camera (wide ground mist: a camera-facing quad that big
+   * would sink into the ground and be cut along a straight line). */
+  flat?: boolean;
+  /** Breath-like puff: appears at once, then spreads fast and fades out slowly (eased curves instead of the
+   * symmetric fade in / out). */
+  puff?: boolean;
 }
 
 /** Blood moon: red embers slowly rising from the ground. */
@@ -471,6 +480,54 @@ export const STRIKE_SPARK_STYLE: GlowStyle = {
   windSpeed: 0,
 };
 
+/** Morning mist: wide pale banks lying on the ground, drifting slowly, lit by the scene (golden at sunrise). */
+export const MIST_STYLE: GlowStyle = {
+  maxParticles: 160,
+  color: 0xf4f2ee,
+  palette: [0xe8ecf0, 0xfffaf0],
+  intensity: 1,
+  blending: 'normal',
+  followLight: true,
+  smoke: { spin: 0.03 },
+  rise: [-0.3, 0.6],
+  wobble: 2,
+  wobbleSpeed: 0.1,
+  life: [10, 18],
+  size: [45, 75],
+  spawnHeight: [1, 4],
+  flicker: 0,
+  flickerSpeed: 1,
+  nearPlants: 0,
+  windSpeed: 8,
+  grow: 1.3,
+  smokeOpacity: 0.32,
+  renderOrder: -1,
+  flat: true,
+};
+
+/** Deep freeze: the player's breath, small white puffs in front of their face, spreading and fading fast. */
+export const BREATH_STYLE: GlowStyle = {
+  maxParticles: 24,
+  color: 0xf4f8ff,
+  intensity: 1,
+  blending: 'normal',
+  followLight: true,
+  smoke: { spin: 0.8 },
+  rise: [1.5, 3],
+  wobble: 0.6,
+  wobbleSpeed: 1.5,
+  life: [0.9, 1.5],
+  size: [3, 4.5],
+  spawnHeight: [15, 16],
+  flicker: 0,
+  flickerSpeed: 1,
+  nearPlants: 0,
+  windSpeed: 6,
+  grow: 2.2,
+  smokeOpacity: 0.8,
+  puff: true,
+};
+
 /** Volcanic: dark smoke puffs rising here and there from the ground, spreading and fading (lit by the scene). */
 export const VOLCANO_SMOKE_STYLE: GlowStyle = {
   maxParticles: 300,
@@ -667,6 +724,9 @@ export class GlowParticles {
   private readonly spin = new THREE.Quaternion();
   private readonly turned = new THREE.Quaternion();
   private static readonly FORWARD = new THREE.Vector3(0, 0, 1);
+  private static readonly UP = new THREE.Vector3(0, 1, 0);
+  private static readonly HIDDEN = new THREE.Matrix4().makeScale(0, 0, 0);
+  private static readonly FLAT = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
   /** Displayed color (with the style intensity) and the one it blends to after setColor. */
   private readonly baseColor: THREE.Color;
   private readonly targetColor: THREE.Color;
@@ -713,7 +773,7 @@ export class GlowParticles {
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     this.mesh.setColorAt(0, this.baseColor); // creates the instance color buffer
     this.mesh.frustumCulled = false;
-    this.mesh.renderOrder = 10; // after the (possibly transparent) buildings, like the rain
+    this.mesh.renderOrder = style.renderOrder ?? 10; // after the (possibly transparent) buildings, like the rain
     this.mesh.count = 0;
     this.mesh.visible = false;
     scene.add(this.mesh);
@@ -749,7 +809,12 @@ export class GlowParticles {
 
     for (let i = 0; i < count; i++) {
       if (!this.alive[i]) {
-        this.respawn(i, target, true);
+        if (this.spawnGate && !this.spawnGate()) {
+          this.hide(i);
+          continue;
+        }
+        // (gated: a fresh puff starts at age 0, not at a random age)
+        this.respawn(i, target, !this.spawnGate);
       }
       this.age[i] += dt;
       this.y[i] += this.rise[i] * dt;
@@ -757,13 +822,20 @@ export class GlowParticles {
       const dx = this.x[i] - target.x;
       const dz = this.z[i] - target.z;
       if (this.age[i] >= this.life[i] || dx < AREA.minX || dx > AREA.maxX || dz < AREA.minZ || dz > AREA.maxZ) {
+        if (this.spawnGate && !this.spawnGate()) {
+          // Waits, hidden, until new particles may appear again
+          this.alive[i] = 0;
+          this.hide(i);
+          continue;
+        }
         this.respawn(i, target, false);
       }
 
       // Fade in / out over the life, plus a flicker
       const t = this.age[i] / this.life[i];
       const flicker = 1 - s.flicker * (0.5 + 0.5 * Math.sin(this.time * s.flickerSpeed + this.phase[i] * 3));
-      const brightness = Math.sin(Math.PI * t) * flicker;
+      // Puff: quick appearance (first 8% of the life), then an ease-out fade: (1 - u)² drops fast then lingers
+      const brightness = (s.puff ? (t < 0.08 ? t / 0.08 : Math.pow(1 - (t - 0.08) / 0.92, 2)) : Math.sin(Math.PI * t)) * flicker;
       const color = this.colorIndex[i] ? this.paletteColors[this.colorIndex[i] - 1] : this.baseColor;
       // Normal blending can't dim to transparent with the color: the particle shrinks instead
       const additive = s.blending !== 'normal';
@@ -772,11 +844,16 @@ export class GlowParticles {
       const p = this.phase[i];
       const w = this.time * s.wobbleSpeed + p;
       this.position.set(this.x[i] + Math.sin(w) * s.wobble, this.y[i], this.z[i] + Math.cos(w * 0.7) * s.wobble * 0.5);
-      const grow = 1 + ((s.grow ?? 1) - 1) * t;
+      // (a puff spreads fast at first, then slows down: ease-out 1 - (1 - t)²)
+      const grow = 1 + ((s.grow ?? 1) - 1) * (s.puff ? 1 - (1 - t) * (1 - t) : t);
       // Normal blending fades by shrinking, unless the smoke has its own opacity
       const size = this.size[i] * grow * (additive || this.opacity ? 1 : Math.sqrt(Math.max(brightness, 0)));
       this.scale.set(size, size * (s.stretchY ?? 1), size);
-      if (s.smoke) {
+      if (s.flat) {
+        // Lying flat, slowly turning around the vertical axis
+        this.spin.setFromAxisAngle(GlowParticles.UP, this.phase[i] * 3 + this.age[i] * (s.smoke?.spin ?? 0));
+        this.matrix.compose(this.position, this.turned.copy(this.spin).multiply(GlowParticles.FLAT), this.scale);
+      } else if (s.smoke) {
         // Facing the camera, turned around the view axis
         this.spin.setFromAxisAngle(GlowParticles.FORWARD, this.phase[i] * 3 + this.age[i] * s.smoke.spin * (this.phase[i] > Math.PI ? 1 : -1));
         this.matrix.compose(this.position, this.turned.copy(camera.quaternion).multiply(this.spin), this.scale);
@@ -815,6 +892,14 @@ export class GlowParticles {
   spawnFilter?: (x: number, z: number) => boolean;
   /** Where particles appear, decided by the caller (e.g. a few smoke vents); null = default spawn. */
   spawnAt?: (target: THREE.Vector3) => [number, number] | null;
+  /** When new particles may appear (e.g. only while breathing out); the living ones always end their life. */
+  spawnGate?: () => boolean;
+
+  /** A particle waiting to (re)appear: not drawn. */
+  private hide(i: number) {
+    this.mesh.setMatrixAt(i, GlowParticles.HIDDEN);
+    this.opacity?.setX(i, 0);
+  }
 
   private spawnPoint(target: THREE.Vector3): [number, number] {
     const forced = this.spawnAt?.(target);
