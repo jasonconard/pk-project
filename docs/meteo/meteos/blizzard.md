@@ -33,6 +33,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Comment c'est fait
 
+- **Bourrasques au ras du sol** : style `SPINDRIFT_STYLE` (`GlowParticles.ts`), de la fumée blanche (mélange normal, opacité par bouffée 0.5, voir [Volcanique](volcanic.md)) très aplatie (`stretchY` 0.35), qui naît entre 0 et 5 unités du sol et file à toute vitesse avec le vent (`windSpeed` 170). Chaque bouffée vit 1.5 à 3 s : la neige poudreuse est arrachée au sol puis retombe. La densité suit `(snowDrift - 1) / 2.5`, comme le hurlement du vent : il n'y en a que quand la neige est vraiment soufflée.
 - `snow: 1.8` (3600 flocons, max du `SnowHelper` : 4000) et `snowDrift: 3.5` : le vent emporte 3.5 fois plus les flocons. Voir [08 · Particules](../concepts/08-particules.md).
 - `minWind: 0.95` : vent minimal quasi maximal, imposé dans la direction choisie, quelle que soit la jauge. Voir [11 · Vent](../concepts/11-vent.md).
 - `fog: 1` : brouillard maximal (#dce3ec le jour, #8c98b8 la nuit). Voir [05 · Brouillard et ténèbres](../concepts/05-brouillard-et-tenebres.md).

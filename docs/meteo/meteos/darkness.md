@@ -32,6 +32,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Comment c'est fait
 
+- **Volutes noires** : style `DARK_WISP_STYLE` (`GlowParticles.ts`), de la fumée en mélange **normal** avec opacité par bouffée (le noir ne peut pas être additif, voir [Volcanique](volcanic.md)). Elles naissent sur un **anneau autour du joueur**, entre 0.7 et 1.15 × `DARK_RADIUS`, grâce à `spawnAt` (le point d'apparition est imposé par `WeatherHelper` au lieu d'être tiré dans toute la zone). Elles sont plus larges que hautes (`stretchY` 0.75), montent à peine et ondulent lentement : elles rampent au bord de la zone visible et la grignotent. Leur densité vaut `(darkness - 0.6) / 0.4`, donc la demi-obscurité de la [Brume hantée](haunted.md) n'en a pas.
 - `darkness: 1` : le brouillard se resserre autour du joueur, avec sa couleur au-delà d'un petit rayon. Voir [05 · Brouillard et ténèbres](../concepts/05-brouillard-et-tenebres.md).
 - `fog: 0.7` (0.75 la nuit) avec une couleur presque noire : #07070a le jour, #030305 la nuit.
 - `windowGlow` 0.25 le jour, 0.35 la nuit : fenêtres faibles (base nocturne : 1).

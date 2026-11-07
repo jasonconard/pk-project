@@ -33,6 +33,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Comment c'est fait
 
+- **Nappes de fumée** : style `ASH_SMOKE_STYLE` (`GlowParticles.ts`), 70 grandes bouffées grises (taille 22–32, plus larges que hautes avec `stretchY` 0.6) en mélange normal avec opacité par bouffée (`smokeOpacity` 0.35, voir [Volcanique](volcanic.md)). Elles suivent la lumière, flottent presque sans monter et sont surtout **poussées par le vent** (`windSpeed` 40) : elles dérivent en travers de l'écran. Elles sont pilotées par `ash`.
 - Style `ASH_STYLE` : **700** flocons max, couleur #8c8884 et palette #5c5856, #b0aaa4, intensité 1, mélange `normal` (ils ne brillent pas), chute **7–14** unités/s, balancement 4, vie 6–11 s, taille 1.4–2.6, apparition à 30–110 de haut, vent 30. Voir [08 · Particules](../concepts/08-particules.md).
 - `ash: 1`. Le paramètre est dans les `SNAP_KEYS` : mis à 0 une fois éteint pour arrêter le helper. Voir [01 · Architecture](../concepts/01-architecture.md).
 - `fog: 0.45` : #a89488 le jour, #3c2e2a la nuit. `cloudCover` 0.6 (0.5 la nuit), `cloudSpeed` **5**.

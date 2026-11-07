@@ -33,7 +33,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Comment c'est fait
 
-- `SandHelper.ts` : **1400** grains (traînées rapides de 130 à 220 unités/s, longueur 4–8, couleurs #f2dcae, #e8c48a, #fff0cf, #dcb880) et **70** nuages de poussière (taille 28–55, opacité 0.2, couleurs #d6b688, #c9a374, #e0c49c). Voir [08 · Particules](../concepts/08-particules.md) et [09 · Effets spéciaux](../concepts/09-effets-speciaux.md).
+- `SandHelper.ts` : **1400** grains (traînées rapides de 130 à 220 unités/s, longueur 4–8, couleurs #f2dcae, #e8c48a, #fff0cf, #dcb880) et **70** nuages de poussière (taille 28–55, opacité 0.45, couleurs #d6b688, #c9a374, #e0c49c). Les nuages utilisent la **texture de fumée** (`makeSmokeTexture`, voir [Pluie acide](acid-rain.md)) et roulent sur eux-mêmes en avançant (`PUFF_ROLL` = 0.5 rad/s, quaternion `camera × rotation Z`) : un contour nuageux au lieu d'un disque flou. Voir [08 · Particules](../concepts/08-particules.md) et [09 · Effets spéciaux](../concepts/09-effets-speciaux.md).
 - `sand: 1` : densité maximale ; `sandCover` grimpe en **30 s** (`SAND_ACCUMULATION_TIME`) et le shader accumule le sable. Voir [04 · Surfaces météo](../concepts/04-surfaces-meteo.md).
 - `minWind: 0.6` : vent minimal imposé (le `SandHelper` a aussi son propre `MIN_WIND` = 0.6). Voir [11 · Vent](../concepts/11-vent.md).
 - `fog: 0.65` couleur ocre #cfa874 : voir [05 · Brouillard et ténèbres](../concepts/05-brouillard-et-tenebres.md). `cloudCover` 0.55, `cloudSpeed` **40**.

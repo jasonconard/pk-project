@@ -38,6 +38,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 - Style `POISON_RAIN_STYLE` : **2000** gouttes max, vitesse 340, longueur 6, largeur 0.45, couleur #a64cf0, opacité 0.85, éclaboussures #6a2aa0. Voir [08 · Particules](../concepts/08-particules.md).
 - `poisonRain: 0.6`. Les flaques prennent la teinte du poison tant qu'il pleut ; l'eau d'une pluie normale les lave. Voir [04 · Surfaces météo](../concepts/04-surfaces-meteo.md).
+- **Fumées violettes** (`poisonFumes: 1`) : style `POISON_FUME_STYLE`, une copie de la fumée de la [Pluie acide](acid-rain.md) (`{ ...FUME_STYLE, … }`), en lavande plus claire (#9a78bc) et plus nombreuse (480) pour ressortir de l'épaisse brume violette. Les volutes naissent dans les flaques (`spawnFilter` avec `puddleAt`) et leur densité suit l'humidité du sol.
 - `heatHaze: 1` : ondulations de l'air (sans délavage). Voir [06 · Post-effets](../concepts/06-post-effets.md).
 - `fog: 0.8` violet #9a62c8 le jour, #4a2a6e la nuit : voir [05 · Brouillard et ténèbres](../concepts/05-brouillard-et-tenebres.md). `lightPulse` 0.06 (nuit : 0.08).
 - Nuit : fenêtres teintées #d090ff (`windowGlow` 0.6).

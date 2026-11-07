@@ -37,7 +37,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Comment c'est fait
 
-- `TornadoHelper.ts` : entonnoir de **650** nuages de poussière (couleurs gris-brun #d8d0c4, #c0b8ac, #ece4d8, #a8a094), hauteur **260**, rayon de **7** en bas à **70** en haut, rotation **2.2** rad/s, **160** débris et un anneau de poussière au pied. Voir [09 · Effets spéciaux](../concepts/09-effets-speciaux.md).
+- `TornadoHelper.ts` : entonnoir de **650** bouffées de poussière. Elles utilisent la **texture de fumée** (`makeSmokeTexture`, voir [Pluie acide](acid-rain.md)) avec une opacité de 0.95, et chacune **tourne sur elle-même** autour de l'axe de vue, plus vite en bas de l'entonnoir (composition de quaternions `camera.quaternion × rotation Z`). Le tout forme une colonne nuageuse continue plutôt que des ronds empilés ; (couleurs gris-brun #d8d0c4, #c0b8ac, #ece4d8, #a8a094), hauteur **260**, rayon de **7** en bas à **70** en haut, rotation **2.2** rad/s, **160** débris et un anneau de poussière au pied. Voir [09 · Effets spéciaux](../concepts/09-effets-speciaux.md).
 - Elle apparaît à 110–200 unités du joueur, avance à **16** unités/s, change de cap avec une vitesse de virage `TURN_SPEED` = 0.5, et se rapproche si elle s'éloigne de plus de 240 (laisse). Au-delà de 600, elle disparaît et réapparaît près du joueur.
 - **Envol** : à moins de **16** unités (`TORNADO_CATCH`) avec une force > 0.8, le joueur est emporté pendant **3.2 s** (`FLIGHT_TIME`), à **50** de haut en tournant sur lui-même, puis une pause de **5 s** (`FLIGHT_COOLDOWN`) évite de l'attraper en boucle.
 - Vent forcé : `minWind: 0.8` ; `cloudSpeed` **50**. Voir [11 · Vent](../concepts/11-vent.md).

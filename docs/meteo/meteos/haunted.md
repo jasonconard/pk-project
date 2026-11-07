@@ -33,6 +33,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Comment c'est fait
 
+- **Volutes** : style `HAUNT_WISP_STYLE` (`GlowParticles.ts`), dérivé de la fumée de la [Pluie acide](acid-rain.md) : 220 bouffées gris-bleu en mélange additif, qui suivent la lumière (`followLight`), montent lentement (2 à 4.5 unités/s), ondulent largement (`wobble` 5) et vivent 5 à 8 s en grossissant (`grow` 2.2). Elles sont pilotées par `haunt` et naissent partout. De jour elles forment des nappes pâles dans la brume ; la nuit elles se devinent à peine.
 - `haunt: 1` (dans `SNAP_KEYS`) active `GhostHelper.ts` : jusqu'à **4** fantômes, apparaissant à **70–150** unités du joueur, qui s'évanouissent à moins de **50**. Vie 8–18 s, taille 24–34, opacité 0.7, apparition lente (0.35/s) et disparition rapide (1.5/s). Voir [09 · Effets spéciaux](../concepts/09-effets-speciaux.md).
 - `fog: 0.85` gris #9aa4b0 le jour, #2a3038 la nuit : voir [05 · Brouillard et ténèbres](../concepts/05-brouillard-et-tenebres.md).
 - `darkness: 0.5` : une partie du noir de la [Ténèbres](darkness.md), pour resserrer la vue.

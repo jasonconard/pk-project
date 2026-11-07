@@ -38,6 +38,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 ## Comment c'est fait
 
 - Style `LAVA_STYLE` (`GlowParticles.ts`) : **420** particules, couleur #ff7a1a, palette #ffb020, #ff4a10, #ffd060, intensité 1.8, mélange `normal`, montée **10–22** unités/s, vie 1.5–4 s, taille 2.6–4.4, apparition au ras du sol (0–2), scintillement 0.5 à vitesse 12. Voir [08 · Particules](../concepts/08-particules.md).
+- **Fumées** : style `VOLCANO_SMOKE_STYLE` (300 bouffées, texture de fumée, `grow` 3, `stretchY` 1.2, `smokeOpacity` 0.55, `followLight`), piloté aussi par `lava`. Elles naissent au hasard sur tout le terrain. Une fumée sombre ne peut pas être additive (l'additif ne fait qu'éclaircir) : elle est en mélange normal avec une **opacité par instance**. Un attribut `aOpacity` (`InstancedBufferAttribute`) est injecté dans le shader par `addInstanceOpacity` (`GlowParticles.ts`) et multiplie l'alpha (`diffuseColor.a *= vOpacity`), donc chaque bouffée s'estompe au lieu de rétrécir. Voir aussi [Pluie acide](acid-rain.md) pour la texture de fumée.
 - `lava: 1`. Mélange `normal` : les braises restent orange de jour ; elles dépassent 1 en intensité pour déclencher le bloom la nuit. Voir [06 · Post-effets](../concepts/06-post-effets.md).
 - `heatHaze: 0.9` : ondulations (sans délavage, `heatWash` = 0). Voir [06 · Post-effets](../concepts/06-post-effets.md).
 - `fog: 0.65` couleur #e08a50 le jour, #6a3424 la nuit. `lightPulse` 0.06 (nuit : 0.1) : la lumière « respire ».

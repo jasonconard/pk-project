@@ -33,21 +33,26 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 - [Ensoleillé](meteos/sunny.md)
 - [Nuageux](meteos/cloudy.md)
 - [Brouillard](meteos/fog.md)
+- [Brouillard rôdeur](meteos/stalking-fog.md)
 - [Brume marine](meteos/sea-mist.md)
+- [Smog](meteos/smog.md)
 
 ### 🌧️ Pluie & tempêtes
 - [Bruine](meteos/drizzle.md)
 - [Pluvieux](meteos/rainy.md)
 - [Pluie de printemps](meteos/spring-shower.md)
 - [Orage](meteos/storm.md)
+- [Mousson](meteos/monsoon.md)
 - [Grêle](meteos/hail.md)
 - [Pluie verglaçante](meteos/freezing-rain.md)
 - [Inondation](meteos/flood.md)
 - [Tornade](meteos/tornado.md)
+- [Séisme](meteos/earthquake.md)
 
 ### ❄️ Froid
 - [Neige](meteos/snow.md)
 - [Neige magique](meteos/magic-snow.md)
+- [Brume de cristal](meteos/crystal-mist.md)
 - [Blizzard](meteos/blizzard.md)
 - [Gel](meteos/frost.md)
 
@@ -55,17 +60,26 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 - [Canicule](meteos/heatwave.md)
 - [Tempête de sable](meteos/sandstorm.md)
 - [Volcanique](meteos/volcanic.md)
+- [Éruption imminente](meteos/eruption.md)
 - [Neige de cendres](meteos/ash.md)
 
 ### 🌿 Nature
 - [Forêt](meteos/forest.md)
 - [Feuilles](meteos/leaves.md)
+- [Bruine d'automne](meteos/autumn-drizzle.md)
 - [Vent de pétales](meteos/petal-whirl.md)
+- [Geysers](meteos/geysers.md)
 - [Lucioles](meteos/fireflies.md)
 - [Spores](meteos/spores.md)
 
 ### ✨ Magie & ciel
 - [Aurore](meteos/aurora.md)
+- [Nuit étoilée](meteos/starry-night.md)
+- [Feu d'artifice](meteos/fireworks.md)
+- [Marée de lumière](meteos/light-tide.md)
+- [Distorsion temporelle](meteos/time-warp.md)
+- [Monde inversé](meteos/inverted.md)
+- [Vent de Mars](meteos/mars.md)
 - [Tempête solaire](meteos/solar-storm.md)
 - [Poussière d'étoiles](meteos/stardust.md)
 - [Brume féérique](meteos/fairy-mist.md)
@@ -75,6 +89,7 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 - [Lune de sang](meteos/blood-moon.md)
 - [Pluie de mort](meteos/blood-rain.md)
 - [Climat empoisonné](meteos/poison.md)
+- [Pluie acide](meteos/acid-rain.md)
 - [Ténèbres](meteos/darkness.md)
 - [Malédiction](meteos/curse.md)
 - [Brume hantée](meteos/haunted.md)
