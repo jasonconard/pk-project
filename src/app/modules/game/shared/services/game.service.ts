@@ -1,4 +1,4 @@
-import { inject, Service, signal } from '@angular/core';
+import { computed, effect, inject, Service, signal } from '@angular/core';
 import { MapHelper } from "../model/MapHelper";
 import * as THREE from 'three';
 import { GameMode, Game } from "../model/Game";
@@ -7,12 +7,15 @@ import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { FightService } from "../../../fight/shared/services/fight.service";
+import { DAY_ONLY_HOUR, NIGHT_ONLY_HOUR, FIREFLY_COLORS, FireflyColor, fireflyColorHex, isNightHour, isWeatherAvailable, LeafMode, WeatherType, WindDirection, windToX } from "../weather/Weather";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
 export interface GameHud {
   loading: boolean;
   paused: boolean;
   framePerSec: number;
+  /** Air temperature (°C, rounded to 0.1). */
+  temperature: number;
   mode: GameMode;
   drawModelOpen: boolean;
   drawModelId: string;
@@ -21,6 +24,84 @@ export interface GameHud {
 
 const sameHud = (a: GameHud | null, b: GameHud | null): boolean =>
   a === b || (!!a && !!b && (Object.keys(a) as (keyof GameHud)[]).every(key => a[key] === b[key]));
+
+/** Weather and ambience settings kept between sessions (browser storage). */
+interface SavedSettings {
+  weather: WeatherType;
+  hour: number;
+  timeFlow: boolean;
+  windStrength: number;
+  windDirection: WindDirection;
+  gusts: boolean;
+  cloudDensity: number;
+  soundVolume: number;
+  soundMuted: boolean;
+  fireflyColor: FireflyColor;
+  leafMode: LeafMode;
+}
+
+const SETTINGS_KEY = 'pk-weather-settings';
+
+/** Last saved settings; anything missing or invalid (old version, removed weather...) is left out. */
+function loadSettings(): Partial<SavedSettings> {
+  let raw: Record<string, unknown>;
+  try {
+    raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') ?? {};
+  } catch {
+    return {};
+  }
+  const out: Partial<SavedSettings> = {};
+  const unit = (v: unknown) => typeof v === 'number' && v >= 0 && v <= 1 ? v : undefined;
+  const bool = (v: unknown) => typeof v === 'boolean' ? v : undefined;
+  if (Object.values(WeatherType).includes(raw['weather'] as WeatherType)) {
+    out.weather = raw['weather'] as WeatherType;
+  }
+  if (typeof raw['hour'] === 'number' && raw['hour'] >= 0 && raw['hour'] < 24) {
+    out.hour = raw['hour'];
+  }
+  if (raw['windDirection'] === 'east' || raw['windDirection'] === 'west') {
+    out.windDirection = raw['windDirection'];
+  }
+  if (FIREFLY_COLORS.some(c => c.color === raw['fireflyColor'])) {
+    out.fireflyColor = raw['fireflyColor'] as FireflyColor;
+  }
+  if (raw['leafMode'] === 'autumn' || raw['leafMode'] === 'cherry') {
+    out.leafMode = raw['leafMode'];
+  }
+  out.windStrength = unit(raw['windStrength']);
+  out.cloudDensity = unit(raw['cloudDensity']);
+  out.soundVolume = unit(raw['soundVolume']);
+  out.timeFlow = bool(raw['timeFlow']);
+  out.gusts = bool(raw['gusts']);
+  out.soundMuted = bool(raw['soundMuted']);
+  return out;
+}
+
+/** What this tab saved last: only the settings that changed since are written. */
+let lastSaved: Partial<SavedSettings> = {};
+
+/**
+ * Saves the settings that changed, merged into the stored ones: with the game open in several tabs, one tab's
+ * clock going by doesn't overwrite the weather chosen in another one.
+ */
+function saveSettings(settings: SavedSettings) {
+  const changed = (Object.keys(settings) as (keyof SavedSettings)[]).filter(k => settings[k] !== lastSaved[k]);
+  if (!changed.length) {
+    return;
+  }
+  try {
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') ?? {};
+    changed.forEach(k => stored[k] = settings[k]);
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(stored));
+    lastSaved = { ...settings };
+  } catch {
+    // Storage unavailable (private mode...): settings just won't be kept
+  }
+}
+
+/** Real duration of a whole day (s) when the time goes by itself, and the time step (ms). */
+const DAY_DURATION = 12 * 60;
+const TIME_STEP = 250;
 
 @Service()
 export class GameService {
@@ -34,8 +115,55 @@ export class GameService {
   /** Reactive view of the (mutable) game object, synced on every rendered frame. */
   readonly hud = this.hudState.asReadonly();
 
+  /** Settings of the last session (weather, time, wind, clouds, sound...), see saveSettings. */
+  private readonly saved = (lastSaved = loadSettings());
+
+  private readonly weatherState = signal(this.saved.weather ?? WeatherType.NEUTRAL);
+  readonly weather = this.weatherState.asReadonly();
+  /** Time of day, 0..24 h (dawn 6-8 h, dusk 18-20 h). */
+  private readonly hourState = signal(this.saved.hour ?? 12);
+  readonly hour = this.hourState.asReadonly();
+  readonly night = computed(() => isNightHour(this.hourState()));
+  /** The time of day goes on by itself (a whole day in DAY_DURATION). */
+  private readonly timeFlowState = signal(this.saved.timeFlow ?? true);
+  readonly timeFlow = this.timeFlowState.asReadonly();
+  /** Wind strength 0..1 and where it blows towards. */
+  private readonly windStrengthState = signal(this.saved.windStrength ?? 0.3);
+  readonly windStrength = this.windStrengthState.asReadonly();
+  private readonly windDirectionState = signal<WindDirection>(this.saved.windDirection ?? 'east');
+  readonly windDirection = this.windDirectionState.asReadonly();
+  /** Sound volume 0..1 and mute. */
+  private readonly soundVolumeState = signal(this.saved.soundVolume ?? 0.7);
+  readonly soundVolume = this.soundVolumeState.asReadonly();
+  private readonly soundMutedState = signal(this.saved.soundMuted ?? false);
+  readonly soundMuted = this.soundMutedState.asReadonly();
+  /** Cloud density 0..1 (scattered .. overcast). */
+  private readonly cloudDensityState = signal(this.saved.cloudDensity ?? 0.5);
+  readonly cloudDensity = this.cloudDensityState.asReadonly();
+  /** Random wind gusts on top of the wind setting. */
+  private readonly gustsState = signal(this.saved.gusts ?? true);
+  readonly gusts = this.gustsState.asReadonly();
+  private readonly fireflyColorState = signal<FireflyColor>(this.saved.fireflyColor ?? 'green');
+  readonly fireflyColor = this.fireflyColorState.asReadonly();
+  private readonly leafModeState = signal<LeafMode>(this.saved.leafMode ?? 'autumn');
+  readonly leafMode = this.leafModeState.asReadonly();
+
   constructor() {
     this.initCheckResize();
+    // Saved on every change (the hour changes a few times per second while the time goes by: tiny writes)
+    effect(() => saveSettings({
+      weather: this.weatherState(),
+      hour: this.hourState(),
+      timeFlow: this.timeFlowState(),
+      windStrength: this.windStrengthState(),
+      windDirection: this.windDirectionState(),
+      gusts: this.gustsState(),
+      cloudDensity: this.cloudDensityState(),
+      soundVolume: this.soundVolumeState(),
+      soundMuted: this.soundMutedState(),
+      fireflyColor: this.fireflyColorState(),
+      leafMode: this.leafModeState(),
+    }));
   }
 
   init(canvas: HTMLElement, gameMode: GameMode = GameMode.MAP): Game {
@@ -56,6 +184,17 @@ export class GameService {
       drawModelId: 'flowers',
     });
     this.game = game;
+    // Start with the settings shown in the UI
+    game.weather.setWeather(this.weatherState());
+    game.weather.setHour(this.hourState());
+    game.weather.setWind(windToX(this.windStrengthState(), this.windDirectionState()));
+    game.weather.setFireflyColor(fireflyColorHex(this.fireflyColorState()));
+    game.weather.setLeafMode(this.leafModeState());
+    game.weather.setGusts(this.gustsState());
+    game.weather.setCloudDensity(this.cloudDensityState());
+    game.weather.setSoundVolume(this.soundVolumeState(), this.soundMutedState());
+    // Restored settings: start directly in them (no fade from the default weather)
+    game.weather.snapToTarget();
 
     this.switchGameMode(gameMode, true);
 
@@ -65,6 +204,13 @@ export class GameService {
     }, 1000);
 
     setInterval(() => this.inputLoop(game), 1000 / 120);
+
+    // Time going by: small steps (the light and the sun move smoothly in between, see WeatherHelper)
+    setInterval(() => {
+      if (this.timeFlowState() && !game.paused && !game.loading) {
+        this.advanceHour(TIME_STEP / 1000 * 24 / DAY_DURATION);
+      }
+    }, TIME_STEP);
 
     this.animate(game);
 
@@ -97,13 +243,20 @@ export class GameService {
     }, firstInit ? 0 : 300);
   }
 
+  private lastFrameTime = performance.now();
+
   private renderLoop(game: Game) {
     game.frame++;
+    const now = performance.now();
+    // Capped so effects don't jump after a pause or a background tab
+    const dt = Math.min((now - this.lastFrameTime) / 1000, 0.1);
+    this.lastFrameTime = now;
 
     this.keyService.updateGamePadKeys();
 
     if(!game.paused && !game.drawModelOpen) {
-      game.renderer.render(game.scene, game.camera);
+      game.updateLights(dt);
+      game.renderFrame();
     }
 
     const pressedCodes = this.keyService.pressedCodes;
@@ -126,6 +279,7 @@ export class GameService {
       loading: game.loading,
       paused: game.paused,
       framePerSec: game.framePerSec,
+      temperature: Math.round(game.weather.temperature * 10) / 10,
       mode: game.mode,
       drawModelOpen: game.drawModelOpen,
       drawModelId: game.drawModelId,
@@ -155,6 +309,69 @@ export class GameService {
     if (this.game) {
       this.game.paused = !this.game.paused;
       this.syncHud();
+    }
+  }
+
+  setWeather(type: WeatherType) {
+    if (!isWeatherAvailable(type, this.night())) {
+      // e.g. sunny at night, aurora by day: go to the right time of day
+      this.setHour(isWeatherAvailable(type, true) ? NIGHT_ONLY_HOUR : DAY_ONLY_HOUR);
+    }
+    this.game?.weather.setWeather(type);
+    this.weatherState.set(type);
+  }
+
+  setWind(strength: number, direction: WindDirection) {
+    this.windStrengthState.set(strength);
+    this.windDirectionState.set(direction);
+    this.game?.weather.setWind(windToX(strength, direction));
+  }
+
+  setFireflyColor(color: FireflyColor) {
+    this.fireflyColorState.set(color);
+    this.game?.weather.setFireflyColor(fireflyColorHex(color));
+  }
+
+  setSound(volume: number, muted: boolean) {
+    this.soundVolumeState.set(volume);
+    this.soundMutedState.set(muted);
+    this.game?.weather.setSoundVolume(volume, muted);
+  }
+
+  setCloudDensity(density: number) {
+    this.cloudDensityState.set(density);
+    this.game?.weather.setCloudDensity(density);
+  }
+
+  setGusts(enabled: boolean) {
+    this.gustsState.set(enabled);
+    this.game?.weather.setGusts(enabled);
+  }
+
+  setLeafMode(mode: LeafMode) {
+    this.leafModeState.set(mode);
+    this.game?.weather.setLeafMode(mode);
+  }
+
+  setTimeFlow(flowing: boolean) {
+    this.timeFlowState.set(flowing);
+  }
+
+  /**
+   * The time goes on: unlike a manual change, the weather is kept even when it only exists at the other
+   * time of day (a sunny day simply turns into a clear night, see WeatherHelper day / night mix).
+   */
+  private advanceHour(hours: number) {
+    const hour = (this.hourState() + hours) % 24;
+    this.game?.weather.setHour(hour);
+    this.hourState.set(hour);
+  }
+
+  setHour(hour: number) {
+    this.game?.weather.setHour(hour);
+    this.hourState.set(hour);
+    if (!isWeatherAvailable(this.weatherState(), this.night())) {
+      this.setWeather(WeatherType.NEUTRAL); // e.g. sunny day -> clear night, aurora -> clear day
     }
   }
 

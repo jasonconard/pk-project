@@ -29,9 +29,6 @@ export class FightService {
 
     game.render();
 
-    game.light = new THREE.AmbientLight( 0x404040 ); // soft white light
-    game.scene.add(game.light);
-
     fightHelper.buildBattlefield();
 
     const pk1 = GamePokemon.getRandomGamePokemon('salam1');

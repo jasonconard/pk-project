@@ -1,0 +1,154 @@
+<div class="toolbar" role="toolbar" aria-label="Météo et ambiance">
+  <div class="tool">
+    <button type="button" class="tool-btn weather" title="Météo (M)" (click)="openCatalog($event)">
+      <span class="weather-thumb">
+        @if (!thumbMissing()) {
+          <img [src]="currentThumb()" alt="" (error)="thumbMissing.set(true)" />
+        } @else {
+          <span aria-hidden="true">{{ current().icon }}</span>
+        }
+      </span>
+      <span class="tool-value">{{ current().label }}</span>
+      <kbd>M</kbd>
+    </button>
+  </div>
+
+  <div class="tool">
+    <button type="button" class="tool-btn" title="Heure (H)" [class.active]="panel() === 'hour'"
+            [attr.aria-expanded]="panel() === 'hour'" (click)="toggle('hour', $event)">
+      <span class="tool-icon" aria-hidden="true">{{ timeOfDay().icon }}</span>
+      <span class="tool-value">{{ hourLabel() }}</span>
+      <kbd>H</kbd>
+    </button>
+      @if (panel() === 'hour') {
+        <div class="popover" role="dialog">
+        <section class="setting time" aria-label="Heure">
+          <div class="wind-header">
+            <span class="section-title">{{ timeOfDay().icon }} Heure</span>
+            <span class="wind-value">{{ timeOfDay().label }} · {{ hourLabel() }}</span>
+          </div>
+          <input type="range" class="wind-gauge" min="0" max="23.75" step="0.25"
+                 aria-label="Heure de la journée"
+                 [attr.aria-valuetext]="hourLabel() + ', ' + timeOfDay().label"
+                 [value]="hour()"
+                 (input)="setHour($event)"
+                 (change)="releaseSlider($event)" />
+          <div class="time-marks" aria-hidden="true">
+            <span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span>
+          </div>
+          <button type="button" class="gusts" role="switch"
+                  [class.active]="timeFlow()"
+                  [attr.aria-checked]="timeFlow()"
+                  (click)="toggleTimeFlow($event)">
+            <span class="gusts-label">⏱️ Temps qui passe</span>
+            <span class="gusts-switch" aria-hidden="true"></span>
+          </button>
+        </section>
+          <p class="popover-hint">1 jour = 12 min · ← → régler · Entrée défilement · Échap fermer</p>
+        </div>
+      }
+  </div>
+
+  <div class="tool">
+    <button type="button" class="tool-btn" title="Vent (W)" [class.active]="panel() === 'wind'"
+            [attr.aria-expanded]="panel() === 'wind'" (click)="toggle('wind', $event)">
+      <span class="tool-icon" aria-hidden="true">💨</span>
+      <span class="tool-value">{{ windPercent() }}%</span>
+      <kbd>W</kbd>
+    </button>
+      @if (panel() === 'wind') {
+        <div class="popover" role="dialog">
+        <section class="setting" aria-label="Vent">
+          <div class="wind-header">
+            <span class="section-title">💨 Vent</span>
+            <span class="wind-value">{{ windLabel() }} · {{ windPercent() }}%</span>
+          </div>
+          <input type="range" class="wind-gauge" min="0" max="100" step="1"
+                 aria-label="Force du vent"
+                 [value]="windPercent()"
+                 [style.--fill.%]="windPercent()"
+                 (input)="setWindStrength($event)"
+                 (change)="releaseSlider($event)" />
+          <div class="wind-directions" role="radiogroup" aria-label="Sens du vent">
+            @for (dir of windDirections; track dir.direction) {
+              <button type="button" role="radio"
+                      [class.active]="dir.direction === windDirection()"
+                      [attr.aria-checked]="dir.direction === windDirection()"
+                      (click)="setWindDirection(dir.direction, $event)">
+                {{ dir.label }}
+              </button>
+            }
+          </div>
+          <button type="button" class="gusts" role="switch"
+                  [class.active]="gusts()"
+                  [attr.aria-checked]="gusts()"
+                  (click)="toggleGusts($event)">
+            <span class="gusts-label">🌬️ Rafales</span>
+            <span class="gusts-switch" aria-hidden="true"></span>
+          </button>
+        </section>
+          <p class="popover-hint">← → force · ↑ ↓ sens · Entrée rafales · Échap fermer</p>
+        </div>
+      }
+  </div>
+
+  <div class="tool">
+    <button type="button" class="tool-btn" title="Nuages (N)" [class.active]="panel() === 'clouds'"
+            [attr.aria-expanded]="panel() === 'clouds'" (click)="toggle('clouds', $event)">
+      <span class="tool-icon" aria-hidden="true">☁️</span>
+      <span class="tool-value">{{ cloudPercent() }}%</span>
+      <kbd>N</kbd>
+    </button>
+      @if (panel() === 'clouds') {
+        <div class="popover" role="dialog">
+        <section class="setting clouds" aria-label="Nuages">
+          <div class="wind-header">
+            <span class="section-title">☁️ Nuages</span>
+            <span class="wind-value">{{ cloudLabel() }} · {{ cloudPercent() }}%</span>
+          </div>
+          <input type="range" class="wind-gauge" min="0" max="100" step="1"
+                 aria-label="Densité des nuages"
+                 [value]="cloudPercent()"
+                 [style.--fill.%]="cloudPercent()"
+                 (input)="setCloudDensity($event)"
+                 (change)="releaseSlider($event)" />
+        </section>
+          <p class="popover-hint">← → régler · Échap fermer</p>
+        </div>
+      }
+  </div>
+
+  <div class="tool">
+    <button type="button" class="tool-btn" title="Son (V)" [class.active]="panel() === 'sound'"
+            [attr.aria-expanded]="panel() === 'sound'" (click)="toggle('sound', $event)">
+      <span class="tool-icon" aria-hidden="true">{{ soundMuted() || !soundPercent() ? '🔇' : '🔊' }}</span>
+      <span class="tool-value">{{ soundMuted() ? 'Muet' : soundPercent() + '%' }}</span>
+      <kbd>V</kbd>
+    </button>
+      @if (panel() === 'sound') {
+        <div class="popover" role="dialog">
+        <section class="setting sound" aria-label="Son">
+          <div class="wind-header">
+            <span class="section-title">{{ soundMuted() || !soundPercent() ? '🔇' : '🔊' }} Son</span>
+            <button type="button" class="mute" [attr.aria-pressed]="soundMuted()" (click)="toggleMute($event)">
+              {{ soundMuted() ? 'Activer' : 'Couper' }}
+            </button>
+          </div>
+          <input type="range" class="wind-gauge" min="0" max="100" step="1"
+                 aria-label="Volume"
+                 [value]="soundPercent()"
+                 [style.--fill.%]="soundMuted() ? 0 : soundPercent()"
+                 (input)="setSoundVolume($event)"
+                 (change)="releaseSlider($event)" />
+        </section>
+          <p class="popover-hint">← → volume · Entrée couper · Échap fermer</p>
+        </div>
+      }
+  </div>
+</div>
+
+<game-weather-catalog #catalog [weather]="weather()" [night]="night()"
+                      [fireflyColor]="fireflyColor()" [leafMode]="leafMode()"
+                      (weatherSelected)="weatherSelected.emit($event)"
+                      (fireflyColorChange)="fireflyColorChange.emit($event)"
+                      (leafModeChange)="leafModeChange.emit($event)" />

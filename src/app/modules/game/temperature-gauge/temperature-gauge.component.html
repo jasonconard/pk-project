@@ -1,0 +1,12 @@
+<div class="value">{{ label() }}°C</div>
+<div class="thermometer">
+  <div class="tube">
+    <div class="liquid" [style.height.%]="level()"></div>
+    @for (tick of ticks; track tick.value) {
+      <div class="tick" [class.zero]="tick.value === 0" [style.bottom.%]="tick.position">
+        <span>{{ tick.value }}</span>
+      </div>
+    }
+  </div>
+  <div class="bulb"></div>
+</div>

@@ -6,7 +6,9 @@ export interface SceneModel {
   tex: SceneModelTex,
   boxes: SceneModelBox[],
   planes: SceneModelPlane[],
-  hitBox: VecBox3
+  hitBox: VecBox3,
+  /** 0..1: how much the model bends in the wind (vegetation). Omitted = rigid. The base never moves. */
+  sway?: number
 }
 
 export interface SceneModelTex {
@@ -20,7 +22,9 @@ export interface SceneModelObj {
   rot: Vec3,
   depthWrite?: boolean,
   depthTest?: boolean,
-  side?: ObjSide
+  side?: ObjSide,
+  /** 0..1: strength of the sun reflections on this part (sunny weather). Omitted = matte. */
+  shininess?: number
 }
 
 export interface SceneModelBox extends SceneModelObj {

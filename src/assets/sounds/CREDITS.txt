@@ -1,0 +1,8 @@
+Sound effects (all CC0 / public domain), trimmed, normalized and converted to AAC:
+
+steps/ground-*.m4a  "Fantozzi's Footsteps (Grass/Sand & Stone)" by Fantozzi
+                    https://opengameart.org/content/fantozzis-footsteps-grasssand-stone (CC0)
+steps/snow-*.m4a    "9 wet snow steps" by Iwan "qubodup" Gabovitch
+                    https://opengameart.org/content/9-wet-snow-steps (CC0)
+
+Rain, wind, thunder and the wet steps layer (splash + water drops) are synthesized at runtime (Web Audio).

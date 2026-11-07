@@ -46,9 +46,6 @@ export class GameMapService {
 
       game.render();
 
-      game.light = new THREE.AmbientLight( 0x404040 ); // soft white light
-      game.scene.add(game.light);
-
       mapHelper.buildChunks();
       mapHelper.buildPlayer();
     }
@@ -65,7 +62,8 @@ export class GameMapService {
     const sprite = mapHelper?.scenePlayer.mesh;
     if(!mapHelper || !sprite) { return; }
     if(game.paused || game.drawModelOpen) { return; }
-    const moveDetails = this.sequenceService.isRunning ?
+    // No moves during a sequence, or while a tornado carries the player away
+    const moveDetails = this.sequenceService.isRunning || game.weather.playerFlying ?
       { move: { x: 0, y: 0, z: 0 }, speed: 0, status: PlayerMoveStatus.STAYING } :
       SceneService.getMove(mapHelper, this.keyService.holdedCodes);
     const move = moveDetails.move;

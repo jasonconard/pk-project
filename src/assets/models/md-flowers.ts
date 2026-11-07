@@ -4,6 +4,7 @@ import { ObjSide } from '../../app/modules/game/shared/model/SceneMap';
 export const MD_FLOWERS: SceneModel = {
   id: 'flowers',
   tex: {link: 'assets/tex/flowers.png', size: {x: 40, y: 40}},
+  sway: 0.6,
   hitBox: {
     min: {x: 0, y: 0, z: 0},
     max: {x: 0, y: 0, z: 0}

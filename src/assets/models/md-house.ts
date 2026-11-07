@@ -41,6 +41,7 @@ export const MD_HOUSE: SceneModel = {
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.5,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 0, y: 83}, max: {x: 58, y: 80}},
@@ -56,6 +57,7 @@ export const MD_HOUSE: SceneModel = {
     rot: {x: 0, y: 0, z: Math.PI / 4},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.5,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 60, y: 83}, max: {x: 78, y: 80}},
@@ -71,6 +73,7 @@ export const MD_HOUSE: SceneModel = {
     rot: {x: 0, y: 0, z: -Math.PI / 4},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.5,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 80, y: 83}, max: {x: 98, y: 80}},

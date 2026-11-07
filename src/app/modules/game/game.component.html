@@ -8,6 +8,19 @@
   }
 }
 
+@if (hud(); as hud) {
+  <game-temperature-gauge [temperature]="hud.temperature" />
+}
+
+<game-weather-panel [weather]="weather()" [night]="night()" [hour]="hour()" [timeFlow]="timeFlow()"
+                    [windStrength]="windStrength()" [windDirection]="windDirection()"
+                    [fireflyColor]="fireflyColor()" [leafMode]="leafMode()" [gusts]="gusts()" [cloudDensity]="cloudDensity()"
+                    [soundVolume]="soundVolume()" [soundMuted]="soundMuted()"
+                    (weatherSelected)="setWeather($event)" (hourChange)="setHour($event)" (timeFlowChange)="setTimeFlow($event)"
+                    (windChange)="setWind($event)" (fireflyColorChange)="setFireflyColor($event)"
+                    (leafModeChange)="setLeafMode($event)" (gustsChange)="setGusts($event)"
+                    (cloudDensityChange)="setCloudDensity($event)" (soundChange)="setSound($event)" />
+
 <core-stick />
 <core-touch-pad />
 

@@ -1,0 +1,146 @@
+@if (isOpen()) {
+  <div class="backdrop" (click)="close()"></div>
+  <section class="popup" role="dialog" aria-modal="true" aria-labelledby="catalog-title">
+    <header class="popup-header">
+      <h2 id="catalog-title">Météo</h2>
+      <label class="search">
+        <span aria-hidden="true">🔍</span>
+        <input #searchInput type="text" placeholder="Rechercher une météo…" aria-label="Rechercher une météo"
+               [value]="search()" (input)="setSearch($event)" />
+      </label>
+      <span class="shortcut" aria-hidden="true">M fermer · Tab catégories / cartes · ← → ↑ ↓ · Entrée</span>
+      <button type="button" class="close" aria-label="Fermer" (click)="close()">✕</button>
+    </header>
+
+    <div class="popup-body">
+      <nav class="categories" aria-label="Catégories" [class.keyboard]="zone() === 'categories'">
+        <button type="button" [class.active]="category() === null" (click)="selectCategory(null)">
+          <span class="cat-icon" aria-hidden="true">🗂️</span>
+          <span class="cat-label">Toutes</span>
+          <span class="cat-count">{{ total }}</span>
+        </button>
+        @for (c of categories; track c.id) {
+          <button type="button" [class.active]="category() === c.id" (click)="selectCategory(c.id)">
+            <span class="cat-icon" aria-hidden="true">{{ c.icon }}</span>
+            <span class="cat-label">{{ c.label }}</span>
+            <span class="cat-count">{{ counts()[c.id] }}</span>
+          </button>
+        }
+      </nav>
+
+      <div class="grid" #grid role="listbox" aria-label="Météos" [class.keyboard]="zone() === 'cards'">
+        @for (group of groups(); track group.category.id) {
+          @if (category() === null) {
+            <h3 class="group-title">{{ group.category.icon }} {{ group.category.label }}</h3>
+          }
+          <div class="cards">
+            @for (e of group.entries; track e.type) {
+              <button type="button" class="card" role="option" [attr.data-type]="e.type"
+                      [class.focused]="e.type === focused()"
+                      [class.current]="e.type === weather()"
+                      [class.other-time]="!available(e)"
+                      [attr.aria-selected]="e.type === focused()"
+                      (click)="focus(e)" (dblclick)="apply(e)">
+                <span class="thumb">
+                  @let src = screenshot(e, night());
+                  @if (!isMissing(src)) {
+                    <img [src]="src" [alt]="e.label" loading="lazy" (error)="markMissing(src)" />
+                  } @else {
+                    <span class="thumb-emoji" aria-hidden="true">{{ e.icon }}</span>
+                  }
+                  @if (e.type === weather()) {
+                    <span class="current-badge">Actuelle</span>
+                  }
+                </span>
+                <span class="card-text">
+                  <span class="card-name">{{ e.label }}</span>
+                  <span class="card-summary">{{ e.info.summary }}</span>
+                  <span class="badges">
+                    @if (e.only === 'day') { <span class="badge" title="Seulement le jour">☀️ Jour</span> }
+                    @if (e.only === 'night') { <span class="badge" title="Seulement la nuit">🌙 Nuit</span> }
+                    @if (e.info.sound) { <span class="badge" title="Sons d'ambiance">🔊</span> }
+                    <span class="badge temp">{{ e.temperature[night() && e.only !== 'day' ? 1 : 0] }}°C</span>
+                  </span>
+                </span>
+              </button>
+            }
+          </div>
+        } @empty {
+          <p class="empty">Aucune météo ne correspond à « {{ search() }} ».</p>
+        }
+      </div>
+
+      @let d = detail();
+      <aside class="detail" aria-live="polite">
+        <div class="detail-shot">
+          @let big = screenshot(d, detailNight());
+          @if (!isMissing(big)) {
+            <img [src]="big" [alt]="d.label" (error)="markMissing(big)" />
+          } @else {
+            <span class="thumb-emoji big" aria-hidden="true">{{ d.icon }}</span>
+          }
+          @if (!d.only) {
+            <div class="day-night" role="radiogroup" aria-label="Aperçu">
+              <button type="button" role="radio" [class.active]="!detailNight()" [attr.aria-checked]="!detailNight()"
+                      (click)="detailNight.set(false)">☀️</button>
+              <button type="button" role="radio" [class.active]="detailNight()" [attr.aria-checked]="detailNight()"
+                      (click)="detailNight.set(true)">🌙</button>
+            </div>
+          }
+        </div>
+        <div class="detail-text">
+          <span class="detail-category">{{ detailCategory().icon }} {{ detailCategory().label }}</span>
+          <h3>{{ d.icon }} {{ d.label }}</h3>
+          <p>{{ d.info.description }}</p>
+          <ul class="effects">
+            @for (effect of d.info.effects; track effect) {
+              <li>{{ effect }}</li>
+            }
+          </ul>
+          <dl class="facts">
+            <div><dt>🌡️ Température</dt><dd>
+              @if (d.only !== 'night') { ☀️ {{ d.temperature[0] }}°C }
+              @if (d.only !== 'day') { 🌙 {{ d.temperature[1] }}°C }
+            </dd></div>
+            <div><dt>🕒 Disponible</dt><dd>{{ d.only === 'day' ? 'Le jour seulement' : d.only === 'night' ? 'La nuit seulement' : 'Jour et nuit' }}</dd></div>
+            <div><dt>🔊 Sons</dt><dd>{{ d.info.sound ? 'Oui' : 'Non' }}</dd></div>
+          </dl>
+
+          @if (d.type === WeatherType.FIREFLIES) {
+            <div class="options">
+              <span class="options-title">Couleur des lucioles</span>
+              <div class="swatches" role="radiogroup" aria-label="Couleur des lucioles">
+                @for (c of fireflyColors; track c.color) {
+                  <button type="button" class="swatch" role="radio"
+                          [class.active]="c.color === fireflyColor()" [attr.aria-checked]="c.color === fireflyColor()"
+                          [title]="c.label" [attr.aria-label]="c.label" [style.--swatch]="c.hex"
+                          (click)="fireflyColorChange.emit(c.color)"></button>
+                }
+              </div>
+            </div>
+          }
+          @if (d.type === WeatherType.LEAVES) {
+            <div class="options">
+              <span class="options-title">Type de feuilles</span>
+              <div class="sub-options" role="radiogroup" aria-label="Type de feuilles">
+                @for (m of leafModes; track m.mode) {
+                  <button type="button" role="radio" [class.active]="m.mode === leafMode()"
+                          [attr.aria-checked]="m.mode === leafMode()" (click)="leafModeChange.emit(m.mode)">{{ m.label }}</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <div class="detail-actions">
+          @if (d.type === weather()) {
+            <button type="button" class="apply" disabled>✓ Météo actuelle</button>
+          } @else if (!available(d)) {
+            <button type="button" class="apply" (click)="apply(d)">Appliquer · {{ timeChangeHint(d) }}</button>
+          } @else {
+            <button type="button" class="apply" (click)="apply(d)">Appliquer</button>
+          }
+        </div>
+      </aside>
+    </div>
+  </section>
+}

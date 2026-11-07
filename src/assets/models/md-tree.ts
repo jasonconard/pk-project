@@ -4,6 +4,7 @@ import { ObjSide } from '../../app/modules/game/shared/model/SceneMap';
 export const MD_TREE: SceneModel = {
   id: 'tree',
   tex: {link: 'assets/tex/tree.png', size: {x: 96, y: 120}},
+  sway: 0.5,
   hitBox: {
     min: {x: 0, y: 0, z: 8},
     max: {x: 0, y: 0, z: 8}

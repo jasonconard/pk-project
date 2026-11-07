@@ -4,6 +4,8 @@ import { MaterialService } from './material.service';
 import { ObjSide } from '../model/SceneMap';
 import { SceneModel } from '../model/SceneModel';
 import { Square3 } from '../model/SceneUtils';
+import { RAIN_STOP_KEY } from '../weather/SurfaceHeights';
+import { getSwayDepthMaterial, SWAY_ATTRIBUTE } from '../weather/weather-shader';
 
 @Service()
 export class BasicMeshService {
@@ -42,14 +44,20 @@ export class BasicMeshService {
     return new THREE.Mesh( geometry, planeMaterial );
   }
 
+  /** Used for grounds: lit material so it receives the buildings' shadows. */
   public static makePlaneFromPoints(link: string, points: Square3, transparent?: boolean): THREE.Mesh {
-    const planeMaterial = MaterialService.getMaterialFromLink(link, transparent);
+    const planeMaterial = MaterialService.getLambertMaterialFromLink(link, transparent);
     planeMaterial.depthTest = true;
     planeMaterial.depthWrite = true;
     planeMaterial.side = THREE.DoubleSide;
 
     let geometry = new THREE.BufferGeometry();
-    geometry.setIndex([0, 3, 2, 0, 1, 2]);
+    // Both triangles must share the same winding, otherwise their normals cancel out and lighting breaks.
+    // Winding chosen so the normal points up (towards the sky) for a, b, c, d given clockwise seen from above.
+    const ab = new THREE.Vector3(points.b.x - points.a.x, points.b.y - points.a.y, points.b.z - points.a.z);
+    const ac = new THREE.Vector3(points.c.x - points.a.x, points.c.y - points.a.y, points.c.z - points.a.z);
+    const facesUp = ac.clone().cross(ab).y >= 0;
+    geometry.setIndex(facesUp ? [0, 3, 2, 0, 2, 1] : [0, 2, 3, 0, 1, 2]);
     geometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array([
       points.a.x, points.a.y, points.a.z,
       points.b.x, points.b.y, points.b.z,
@@ -65,7 +73,11 @@ export class BasicMeshService {
     ]
 
     geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( uvs, 2 ) );
-    return new THREE.Mesh( geometry, planeMaterial );
+    geometry.computeVertexNormals(); // required by lit materials
+    const mesh = new THREE.Mesh( geometry, planeMaterial );
+    mesh.receiveShadow = true;
+    mesh.userData[RAIN_STOP_KEY] = true;
+    return mesh;
 
   }
 
@@ -81,7 +93,7 @@ export class BasicMeshService {
     // mat.transparent = true;
 
     model.boxes.forEach(box => {
-      const boxMat = MaterialService.getMaterialFromLink(model.tex.link);
+      const boxMat = MaterialService.getModelMaterialFromLink(model.tex.link, box.shininess);
       const geo = new THREE.BoxGeometry(box.size.x, box.size.y, box.size.z);
       const uvAtt = geo.getAttribute('uv');
       const uv = new THREE.Vector2();
@@ -121,8 +133,9 @@ export class BasicMeshService {
       boxMat.alphaTest = 0.5;
 
       const mesh = new THREE.Mesh( geo, boxMat );
-      // mesh.castShadow = true;
-      // mesh.receiveShadow = true;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.userData[RAIN_STOP_KEY] = true;
       mesh.position.x = box.pos.x;
       mesh.position.y = box.pos.y;
       mesh.position.z = box.pos.z;
@@ -133,7 +146,7 @@ export class BasicMeshService {
     });
 
     model.planes.forEach(plane => {
-      const mat = MaterialService.getMaterialFromLink(model.tex.link);
+      const mat = MaterialService.getModelMaterialFromLink(model.tex.link, plane.shininess);
       const geo = new THREE.PlaneGeometry(plane.size.x, plane.size.y);
       const uvAtt = geo.getAttribute('uv');
       const uv = new THREE.Vector2();
@@ -170,6 +183,9 @@ export class BasicMeshService {
       mat.alphaTest = 0.5;
 
       const mesh = new THREE.Mesh( geo, mat );
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.userData[RAIN_STOP_KEY] = true;
       mesh.position.x = plane.pos.x;
       mesh.position.y = plane.pos.y;
       mesh.position.z = plane.pos.z;
@@ -179,6 +195,41 @@ export class BasicMeshService {
       group.add(mesh);
     });
 
+    if (model.sway) {
+      BasicMeshService.addSwayAttribute(group, model.sway);
+    }
+
     return group;
+  }
+
+  /**
+   * Per-vertex wind flexibility: 0 at the base of the model, `sway` at its top (bends like a plant).
+   * Read by the weather shader (see SWAY_ATTRIBUTE).
+   */
+  private static addSwayAttribute(group: THREE.Group, sway: number) {
+    const meshes = group.children.filter((c): c is THREE.Mesh => c instanceof THREE.Mesh);
+    const v = new THREE.Vector3();
+    let top = 0;
+    meshes.forEach(mesh => {
+      mesh.updateMatrix();
+      const pos = mesh.geometry.getAttribute('position');
+      for (let i = 0; i < pos.count; i++) {
+        top = Math.max(top, v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrix).y);
+      }
+    });
+    if (top <= 0) {
+      return;
+    }
+    meshes.forEach(mesh => {
+      const pos = mesh.geometry.getAttribute('position');
+      const flex = new Float32Array(pos.count);
+      for (let i = 0; i < pos.count; i++) {
+        const height = THREE.MathUtils.clamp(v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrix).y / top, 0, 1);
+        flex[i] = sway * Math.pow(height, 1.5); // the top bends much more than the middle
+      }
+      mesh.geometry.setAttribute(SWAY_ATTRIBUTE, new THREE.BufferAttribute(flex, 1));
+      // Its shadow bends the same way
+      mesh.customDepthMaterial = getSwayDepthMaterial();
+    });
   }
 }
