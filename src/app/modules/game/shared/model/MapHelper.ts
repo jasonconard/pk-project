@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { SceneChunk, SceneMap } from './SceneMap';
 import { ScenePlayer } from './ScenePlayer';
-import { CAMERA_LOOK, Game, SHADE_OFFSET, TOO_CLOSE_LIMIT, TOO_FAR_LIMIT } from "./Game";
+import { CAMERA_LOOK, Game, SHADE_OFFSET, SHADOW_AREA, TOO_CLOSE_LIMIT, TOO_FAR_LIMIT } from "./Game";
 import { BasicMeshService } from "../services/basic-mesh.service";
 import { convertVec2, convertVec3 } from "./SceneUtils";
 import { MODELS } from "../../../../../assets/models/models";
@@ -188,21 +188,29 @@ export class MapHelper {
     const mesh = this.meshes[key];
     if(!mesh) { return; }
 
-    const opacity = this.getOpacity(mesh, playerPos, canHide);
+    const bounds = new THREE.Box3().setFromObject(mesh);
+    const opacity = this.getOpacity(mesh, bounds, playerPos, canHide);
+    // A hidden mesh is only kept for its shadow while it is inside the area where shadows are computed
+    // (around the camera target): farther, it can't shade anything visible and is dropped completely.
+    const target = this.originGame.getCameraTarget();
+    const castsShadow = bounds.max.x > target.x - SHADOW_AREA && bounds.min.x < target.x + SHADOW_AREA
+      && bounds.max.z > target.z - SHADOW_AREA && bounds.min.z < target.z + SHADOW_AREA;
 
-    mesh.children.forEach(child => MapHelper.updateMeshOpacity(child, opacity));
+    mesh.children.forEach(child => MapHelper.updateMeshOpacity(child, opacity, castsShadow));
   }
 
-  private getOpacity(mesh: THREE.Object3D, playerPos: THREE.Vector3, canHide: boolean): number {
+  private getOpacity(mesh: THREE.Object3D, bounds: THREE.Box3, playerPos: THREE.Vector3, canHide: boolean): number {
     let opacity = 1;
 
-    const bounds = new THREE.Box3().setFromObject(mesh);
     const camera = this.originGame.camera;
 
-    // HIDE IF TOO CLOSE TO CAMERA
+    // HIDE IF TOO CLOSE TO CAMERA (out of view at the bottom of the screen). The camera looks down at an angle:
+    // a point h high is seen along the same line of sight as the ground h × CAMERA_LOOK.z / CAMERA_LOOK.y further
+    // ahead, so a tall building (the lab, a tower) is still on screen when its base already left it.
     const cameraZ = camera.position.z - TOO_CLOSE_LIMIT;
-    if((camera.position.z - TOO_CLOSE_LIMIT) < bounds.max.z) {
-      opacity = Math.max(0, 1 - (bounds.max.z - cameraZ) / SHADE_OFFSET);
+    const visibleZ = bounds.max.z - (bounds.max.y - bounds.min.y) * CAMERA_LOOK.z / CAMERA_LOOK.y;
+    if(cameraZ < visibleZ) {
+      opacity = Math.max(0, 1 - (visibleZ - cameraZ) / SHADE_OFFSET);
       return opacity;
     }
 
@@ -232,19 +240,24 @@ export class MapHelper {
     }
   }
 
-  private static updateMeshOpacity(mesh: THREE.Object3D, opacity: number) {
+  /**
+   * A hidden mesh (too close to the camera / too far) is not drawn but, while `castsShadow`, stays in the scene:
+   * it still casts its shadow, which would otherwise vanish at once from the visible ground (e.g. the lab's long
+   * shadow when walking past it). Hidden = no color and no depth written. Once its shadow can't reach the view
+   * anymore, it is removed (`visible = false`: no more drawing, shadow or weather effects on it).
+   */
+  private static updateMeshOpacity(mesh: THREE.Object3D, opacity: number, castsShadow: boolean) {
     if (!(mesh instanceof THREE.Mesh)) { return; }
     const material = mesh.material as THREE.Material;
     material.transparent = true;
-    if(opacity < 1) {
-      // mesh.material.transparent = true;
-      material.opacity = opacity;
-      mesh.visible = opacity > 0;
-    } else {
-      // mesh.material.transparent = false;
-      material.opacity = 1;
-      mesh.visible = true;
+    mesh.visible = opacity > 0 || castsShadow;
+    if (material.userData['depthWrite'] === undefined) {
+      material.userData['depthWrite'] = material.depthWrite;
     }
+    const hidden = opacity <= 0;
+    material.colorWrite = !hidden;
+    material.depthWrite = hidden ? false : material.userData['depthWrite'];
+    material.opacity = Math.min(opacity, 1);
   }
 
 }
