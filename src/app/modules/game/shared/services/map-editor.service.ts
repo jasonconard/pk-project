@@ -29,6 +29,8 @@ const SELECTION_COLOR = 0xffb04a;
 const HISTORY_SIZE = 100;
 /** Delay before saving the map in the browser after a change (ms: a burst of changes is saved once). */
 const SAVE_DELAY = 400;
+/** Max cells painted by one bucket fill. */
+const FILL_MAX = 4096;
 
 /** The selected object, as shown by the editor UI. */
 export interface EditSelection {
@@ -38,6 +40,9 @@ export interface EditSelection {
 }
 
 /** Editor command sent by the UI (keyboard shortcuts, buttons). */
+/** Ground brush: size in cells, or the bucket. */
+export type EditBrush = 1 | 2 | 3 | 'fill';
+
 export type EditCommand = 'undo' | 'redo' | 'delete' | 'deselect' | 'togglePassable' | 'toggleCanHide' | 'export' | 'reset';
 
 interface EditAction {
@@ -278,6 +283,11 @@ export class MapEditorService {
     }
     game.editTileId = tileId;
     this.brush.visible = false;
+  }
+
+  /** Brush size in cells (1 to 3), or 'fill' (bucket). */
+  setBrush(game: Game, brush: EditBrush) {
+    game.editBrush = brush;
   }
 
   /** Keyboard shortcuts and buttons of the editor UI. */
@@ -551,6 +561,9 @@ export class MapEditorService {
     const ground = game.editTileId ? this.groundAt(game, clientX, clientY) : null;
     const cell = ground && game.mapHelper?.cellAt(ground.x, ground.z);
     this.brush.visible = !!cell;
+    // The square covers the brush size (one cell for the bucket)
+    const size = game.editBrush === 'fill' ? 1 : game.editBrush;
+    this.brush.scale.set(size, 1, size);
     if (cell) {
       this.brush.position.set(
         cell.chunk.pos.x - cell.chunk.size.x / 2 + cell.col * TILE_SIZE,
@@ -559,10 +572,72 @@ export class MapEditorService {
     }
   }
 
+  /**
+   * Paints the cells under the brush: a square of `editBrush` cells (from the one under the mouse), or with the
+   * bucket ('fill', terrains only), the whole area of the same terrain around it (once per stroke).
+   */
   private paintAt(game: Game, clientX: number, clientY: number) {
     const ground = this.groundAt(game, clientX, clientY);
-    const cell = ground && game.mapHelper?.cellAt(ground.x, ground.z);
-    if (!cell || !this.stroke || !game.mapHelper) {
+    const mapHelper = game.mapHelper;
+    if (!ground || !this.stroke || !mapHelper) {
+      return;
+    }
+    const terrainTool = game.editTileId !== 'raise' && game.editTileId !== 'lower' && game.editTileId !== 'stairs';
+    if (game.editBrush === 'fill' && terrainTool) {
+      if (!this.stroke.cells.size) {
+        this.fillCells(game, ground.x, ground.z).forEach(cell => this.paintCell(game, cell));
+      }
+      return;
+    }
+    const size = game.editBrush === 'fill' ? 1 : game.editBrush;
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        const cell = mapHelper.cellAt(ground.x + i * TILE_SIZE, ground.z + j * TILE_SIZE);
+        if (cell) {
+          this.paintCell(game, cell);
+        }
+      }
+    }
+  }
+
+  /** Bucket: the cells of the same terrain connected to the one at (x, z) (4 neighbors, at most FILL_MAX). */
+  private fillCells(game: Game, x: number, z: number): { chunk: SceneChunk, col: number, row: number }[] {
+    const mapHelper = game.mapHelper!;
+    const start = mapHelper.cellAt(x, z);
+    if (!start) {
+      return [];
+    }
+    const terrainOf = (cell: { chunk: SceneChunk, col: number, row: number }) => cell.chunk.tiles?.[cell.col + ',' + cell.row];
+    const target = terrainOf(start);
+    const centerOf = (cell: { chunk: SceneChunk, col: number, row: number }) => [
+      cell.chunk.pos.x - cell.chunk.size.x / 2 + (cell.col + 0.5) * TILE_SIZE,
+      cell.chunk.pos.z - cell.chunk.size.y / 2 + (cell.row + 0.5) * TILE_SIZE,
+    ];
+    const seen = new Set<string>();
+    const result: { chunk: SceneChunk, col: number, row: number }[] = [];
+    const queue = [start];
+    while (queue.length && result.length < FILL_MAX) {
+      const cell = queue.shift()!;
+      const key = cell.chunk.id + ':' + cell.col + ',' + cell.row;
+      if (seen.has(key) || terrainOf(cell) !== target) {
+        continue;
+      }
+      seen.add(key);
+      result.push(cell);
+      const [cx, cz] = centerOf(cell);
+      for (const [dx, dz] of [[TILE_SIZE, 0], [-TILE_SIZE, 0], [0, TILE_SIZE], [0, -TILE_SIZE]]) {
+        const next = mapHelper.cellAt(cx + dx, cz + dz);
+        if (next) {
+          queue.push(next);
+        }
+      }
+    }
+    return result;
+  }
+
+  /** One cell of a stroke, with the current tool (terrain, eraser, height, stairs). */
+  private paintCell(game: Game, cell: { chunk: SceneChunk, col: number, row: number }) {
+    if (!this.stroke || !game.mapHelper) {
       return;
     }
     const key = cell.chunk.id + ':' + cell.col + ',' + cell.row;

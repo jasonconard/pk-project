@@ -52,57 +52,78 @@
 }
 
 @if (editMode()) {
-  <div class="palette" role="toolbar" aria-label="Modèles à poser" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-    <button type="button" class="entry none" title="Aucun (Échap) : la souris sélectionne et déplace la vue"
-            [class.selected]="!modelId() && !tileId()" [attr.aria-pressed]="!modelId() && !tileId()" (click)="pick(null, $event); tileSelected.emit(null)">
-      <span class="pic" aria-hidden="true">✋</span>
-      <span class="name">Aucun</span>
-    </button>
-    @for (entry of entries; track entry.id) {
-      <button type="button" class="entry" [title]="entry.label"
-              [class.selected]="entry.id === modelId()" [attr.aria-pressed]="entry.id === modelId()"
-              (click)="pick(entry.id, $event)">
-        <span class="pic">
-          @if (thumbs()[entry.id]; as thumb) {
-            <img [src]="thumb" alt="" />
+  <div class="palette-box" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    <div class="palette-head">
+      <div class="tabs" role="tablist" aria-label="Catégories">
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'objects'" (click)="setTab('objects', $event)">Objets</button>
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'ground'" (click)="setTab('ground', $event)">Sols</button>
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'relief'" (click)="setTab('relief', $event)">Reliefs</button>
+      </div>
+      @if (tab() !== 'objects') {
+        <div class="brushes" role="radiogroup" aria-label="Pinceau">
+          @for (b of brushes; track b.value) {
+            @if (tab() === 'ground' || b.value !== 'fill') {
+              <button type="button" role="radio" [title]="b.title" [attr.aria-checked]="brush() === b.value"
+                      (click)="setBrush(b.value, $event)">{{ b.label }}</button>
+            }
           }
-        </span>
-        <span class="name">{{ entry.label }}</span>
+        </div>
+      }
+    </div>
+    <div class="palette" role="toolbar" aria-label="Outils">
+      <button type="button" class="entry none" title="Aucun (Échap) : la souris sélectionne et déplace la vue"
+              [class.selected]="!modelId() && !tileId()" [attr.aria-pressed]="!modelId() && !tileId()" (click)="pick(null, $event); tileSelected.emit(null)">
+        <span class="pic" aria-hidden="true">✋</span>
+        <span class="name">Aucun</span>
       </button>
-    }
-    <span class="separator" aria-hidden="true"></span>
-    @for (tile of tiles; track tile.id) {
-      <button type="button" class="entry tile" [title]="'Sol : ' + tile.label"
-              [class.selected]="tile.id === tileId()" [attr.aria-pressed]="tile.id === tileId()"
-              (click)="pickTile(tile.id, $event)">
-        <span class="pic"><span class="tile-pic" [style.background]="tile.background"></span></span>
-        <span class="name">{{ tile.label }}</span>
-      </button>
-    }
-    <button type="button" class="entry tile" title="Gomme : revenir au sol d'origine"
-            [class.selected]="tileId() === 'erase'" [attr.aria-pressed]="tileId() === 'erase'"
-            (click)="pickTile('erase', $event)">
-      <span class="pic" aria-hidden="true">🧽</span>
-      <span class="name">Gomme</span>
-    </button>
-    <span class="separator" aria-hidden="true"></span>
-    <button type="button" class="entry tile" title="Relief : monter le sol d'un niveau (clic / glisser)"
-            [class.selected]="tileId() === 'raise'" [attr.aria-pressed]="tileId() === 'raise'"
-            (click)="pickTile('raise', $event)">
-      <span class="pic" aria-hidden="true">⛰️</span>
-      <span class="name">Monter</span>
-    </button>
-    <button type="button" class="entry tile" title="Relief : descendre le sol d'un niveau (clic / glisser)"
-            [class.selected]="tileId() === 'lower'" [attr.aria-pressed]="tileId() === 'lower'"
-            (click)="pickTile('lower', $event)">
-      <span class="pic" aria-hidden="true">🕳️</span>
-      <span class="name">Descendre</span>
-    </button>
-    <button type="button" class="entry tile" title="Escalier : monte d'un niveau vers le haut de l'écran (la gomme l'enlève)"
-            [class.selected]="tileId() === 'stairs'" [attr.aria-pressed]="tileId() === 'stairs'"
-            (click)="pickTile('stairs', $event)">
-      <span class="pic" aria-hidden="true">🪜</span>
-      <span class="name">Escalier</span>
-    </button>
+      @if (tab() === 'objects') {
+        @for (entry of entries; track entry.id) {
+          <button type="button" class="entry" [title]="entry.label"
+                  [class.selected]="entry.id === modelId()" [attr.aria-pressed]="entry.id === modelId()"
+                  (click)="pick(entry.id, $event)">
+            <span class="pic">
+              @if (thumbs()[entry.id]; as thumb) {
+                <img [src]="thumb" alt="" />
+              }
+            </span>
+            <span class="name">{{ entry.label }}</span>
+          </button>
+        }
+      } @else if (tab() === 'ground') {
+        @for (tile of tiles; track tile.id) {
+          <button type="button" class="entry tile" [title]="'Sol : ' + tile.label"
+                  [class.selected]="tile.id === tileId()" [attr.aria-pressed]="tile.id === tileId()"
+                  (click)="pickTile(tile.id, $event)">
+            <span class="pic"><span class="tile-pic" [style.background]="tile.background"></span></span>
+            <span class="name">{{ tile.label }}</span>
+          </button>
+        }
+        <button type="button" class="entry tile" title="Gomme : revenir au sol d'origine (enlève aussi les escaliers)"
+                [class.selected]="tileId() === 'erase'" [attr.aria-pressed]="tileId() === 'erase'"
+                (click)="pickTile('erase', $event)">
+          <span class="pic" aria-hidden="true">🧽</span>
+          <span class="name">Gomme</span>
+        </button>
+      } @else {
+        <button type="button" class="entry tile" title="Monter le sol d'un niveau (clic / glisser)"
+                [class.selected]="tileId() === 'raise'" [attr.aria-pressed]="tileId() === 'raise'"
+                (click)="pickTile('raise', $event)">
+          <span class="pic" aria-hidden="true">⛰️</span>
+          <span class="name">Monter</span>
+        </button>
+        <button type="button" class="entry tile" title="Descendre le sol d'un niveau (clic / glisser)"
+                [class.selected]="tileId() === 'lower'" [attr.aria-pressed]="tileId() === 'lower'"
+                (click)="pickTile('lower', $event)">
+          <span class="pic" aria-hidden="true">🕳️</span>
+          <span class="name">Descendre</span>
+        </button>
+        <button type="button" class="entry tile" title="Escalier : monte d'un niveau vers la case voisine plus haute (la gomme l'enlève)"
+                [class.selected]="tileId() === 'stairs'" [attr.aria-pressed]="tileId() === 'stairs'"
+                (click)="pickTile('stairs', $event)">
+          <span class="pic" aria-hidden="true">🪜</span>
+          <span class="name">Escalier</span>
+        </button>
+      }
+    </div>
   </div>
 }

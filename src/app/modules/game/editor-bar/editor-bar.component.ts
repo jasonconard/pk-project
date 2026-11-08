@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
 import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
-import { EditCommand, EditSelection } from '../shared/services/map-editor.service';
+import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
 
 /** Keyboard shortcut opening / closing the map editor (free key: the game uses z q s d a e r f p o). */
 const EDIT_KEY = 'b';
@@ -34,12 +34,22 @@ export class EditorBarComponent {
   readonly editMode = input(false);
   readonly modelId = input<string | null>(null);
   readonly tileId = input<string | null>(null);
+  readonly brush = input<EditBrush>(1);
   readonly selection = input<EditSelection | null>(null);
   readonly canUndo = input(false);
   readonly canRedo = input(false);
   readonly toggled = output<void>();
   readonly modelSelected = output<string | null>();
   readonly tileSelected = output<string | null>();
+  readonly brushChange = output<EditBrush>();
+  /** Palette tab shown. */
+  protected readonly tab = signal<'objects' | 'ground' | 'relief'>('objects');
+  protected readonly brushes: { value: EditBrush, label: string, title: string }[] = [
+    { value: 1, label: '1', title: 'Pinceau 1 case' },
+    { value: 2, label: '2', title: 'Pinceau 2 × 2 cases' },
+    { value: 3, label: '3', title: 'Pinceau 3 × 3 cases' },
+    { value: 'fill', label: '🪣', title: 'Pot de peinture : remplit toute la zone du même sol' },
+  ];
   /** Terrains of the palette, with their picture cut from the tileset (CSS background, 2× zoom). */
   protected readonly tiles = TERRAINS.map(t => {
     const pos = tilesetPos(...t.center);
@@ -84,6 +94,16 @@ export class EditorBarComponent {
   protected pickTile(id: string, event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.tileSelected.emit(id === this.tileId() ? null : id);
+  }
+
+  protected setTab(tab: 'objects' | 'ground' | 'relief', event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.tab.set(tab);
+  }
+
+  protected setBrush(brush: EditBrush, event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.brushChange.emit(brush);
   }
 
   protected send(command: EditCommand, event: Event): void {

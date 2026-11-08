@@ -11,9 +11,9 @@
 @if (hud(); as hud) {
   <game-temperature-gauge [temperature]="hud.temperature" />
   @if (hud.mode === GameMode.MAP) {
-    <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [selection]="hud.editSelection"
+    <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [brush]="hud.editBrush" [selection]="hud.editSelection"
                      [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo"
-                     (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (command)="editCommand($event)" />
+                     (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (brushChange)="setEditBrush($event)" (command)="editCommand($event)" />
   }
 }
 

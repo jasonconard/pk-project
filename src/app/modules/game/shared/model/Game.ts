@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
-import type { EditSelection } from "../services/map-editor.service";
+import type { EditBrush, EditSelection } from "../services/map-editor.service";
 
 export enum GameMode {
   MAP, FIGHT
@@ -57,6 +57,8 @@ export class Game {
   editModelId: string | null = null;
   /** Map editor: ground tile being painted ('erase' = original ground, null = none). */
   editTileId: string | null = null;
+  /** Map editor: ground brush size in cells, or the bucket. */
+  editBrush: EditBrush = 1;
   /** Map editor: the selected object (null = none), and whether there are changes to undo / redo. */
   editSelection: EditSelection | null = null;
   editCanUndo = false;

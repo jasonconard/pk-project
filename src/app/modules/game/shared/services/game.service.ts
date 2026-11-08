@@ -3,7 +3,7 @@ import { MapHelper } from "../model/MapHelper";
 import * as THREE from 'three';
 import { GameMode, Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
-import { EditCommand, EditSelection, MapEditorService } from './map-editor.service';
+import { EditBrush, EditCommand, EditSelection, MapEditorService } from './map-editor.service';
 import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
@@ -22,6 +22,8 @@ export interface GameHud {
   editModelId: string | null;
   /** Map editor: ground tile being painted. */
   editTileId: string | null;
+  /** Map editor: ground brush. */
+  editBrush: EditBrush;
   /** Map editor open (free camera, player frozen). */
   editMode: boolean;
   /** Map editor: selected object, changes to undo / redo. */
@@ -290,6 +292,7 @@ export class GameService {
       mode: game.mode,
       editModelId: game.editModelId,
       editTileId: game.editTileId,
+      editBrush: game.editBrush,
       editSelection: game.editSelection,
       editCanUndo: game.editCanUndo,
       editCanRedo: game.editCanRedo,
@@ -407,6 +410,14 @@ export class GameService {
   editCommand(command: EditCommand) {
     if (this.game) {
       this.mapEditorService.command(this.game, command);
+      this.syncHud();
+    }
+  }
+
+  /** Map editor: ground brush size / bucket. */
+  setEditBrush(brush: EditBrush) {
+    if (this.game) {
+      this.mapEditorService.setBrush(this.game, brush);
       this.syncHud();
     }
   }

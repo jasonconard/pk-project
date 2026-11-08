@@ -8,7 +8,7 @@ import { TeleportComponent } from './teleport/teleport.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { TemperatureGaugeComponent } from './temperature-gauge/temperature-gauge.component';
 import { EditorBarComponent } from './editor-bar/editor-bar.component';
-import { EditCommand } from './shared/services/map-editor.service';
+import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
 
@@ -47,6 +47,10 @@ export class GameComponent {
 
   protected editCommand(command: EditCommand): void {
     this.gameService.editCommand(command);
+  }
+
+  protected setEditBrush(brush: EditBrush): void {
+    this.gameService.setEditBrush(brush);
   }
 
   protected selectEditTile(tileId: string | null): void {
