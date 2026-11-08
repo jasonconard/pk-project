@@ -89,6 +89,7 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 - [Tempête solaire](meteos/solar-storm.md)
 - [Poussière d'étoiles](meteos/stardust.md)
 - [Brume féérique](meteos/fairy-mist.md)
+- [Énergie montante](meteos/rising-energy.md)
 - [Champ électrique](meteos/electric.md)
 
 ### 🌑 Sombre & surnaturel
