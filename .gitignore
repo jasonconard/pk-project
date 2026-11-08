@@ -47,3 +47,10 @@ Thumbs.db
 
 # Angular cache
 /.angular/cache
+
+# Resources given to Claude to work with (not versioned)
+/design-resources/
+
+# Android signing keys: never in the repo
+*.jks
+*.keystore

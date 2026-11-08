@@ -17,6 +17,21 @@ pushed. The version is shown in the game (hidden menu of the temperature / fps t
 The deploy workflow (`.github/workflows/main.yml`) checks that the tag matches the `package.json` version, builds
 the game and publishes it on the `gh-pages` branch. It can also be started by hand from the Actions tab.
 
+## Android app (APK)
+
+The same tag also builds the Android app (Capacitor 8, `android/`) and attaches `pk-project-vX.Y.Z.apk` to the
+GitHub release of the tag. Compared to the browser, the app keeps the screen at its highest refresh rate, awake,
+in full screen, and shows up in the phone's game tools.
+
+- Local build: `npm run android-build` (game built without the service worker, copied into `android/`), then
+  `cd android && ./gradlew assembleRelease` (JDK 21) or `npx cap open android`.
+- Version: `versionName` / `versionCode` are read from `package.json`.
+- Signing: an update installs over the previous version only if signed with the same key. The key is made once:
+  `keytool -genkeypair -v -keystore pk-release.jks -alias pk -keyalg RSA -keysize 2048 -validity 10000`,
+  kept safe (outside the repo), and given to the workflow as repository secrets: `PK_KEYSTORE_BASE64`
+  (`base64 -i pk-release.jks | pbcopy`), `PK_KEYSTORE_PASSWORD`, `PK_KEY_ALIAS`, `PK_KEY_PASSWORD`.
+  Without them, a local build is signed with the debug key.
+
 ## Code scaffolding
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.

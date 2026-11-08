@@ -40,6 +40,11 @@
               ],
               "serviceWorker": "ngsw-config.json"
             },
+            "android": {
+              "outputHashing": "all",
+              "outputPath": "dist/android",
+              "serviceWorker": false
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,

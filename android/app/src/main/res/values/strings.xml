@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PK Project</string>
+    <string name="title_activity_main">PK Project</string>
+    <string name="package_name">com.conardjason.pkproject</string>
+    <string name="custom_url_scheme">com.conardjason.pkproject</string>
+</resources>
