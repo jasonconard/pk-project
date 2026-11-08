@@ -25,7 +25,20 @@ Une fois validé, ce plan sera copié dans `docs/editeur/plan-sols-reliefs.md`.
   - L'eau est animée : 8 images de `src/assets/tex/tileset-anim.png`, lignes « Sea » (y = 32) et « Deep Sea » (y = 66), à x = 121 + 17·k.
   - Le sable contre l'eau forme une plage (`shoreVariants`, lignes 27–28).
   - Un modèle de rocher existe (`assets/models/md-rock.ts`).
-- **Étape 4 à faire**, en plusieurs prompts.
+- **Étape 4 faite.**
+  - Niveaux de hauteur par case (`chunk.heights`, 8 unités par niveau, 6 au maximum).
+  - Sol en grille avec parois rocheuses (`shared/model/GroundMesh.ts`).
+  - Outils Monter / Descendre.
+  - Pas d'escalade : collision testée sur les deux côtés des pieds.
+  - Saut en arc en entrant dans une case plus basse.
+  - Les objets suivent le sol quand on le monte ou le descend.
+  - Escaliers en rampe dans les 4 sens (`chunk.stairs`), orientés automatiquement vers la case voisine un niveau plus haut.
+  - Le sprite du joueur est vertical pour ne plus traverser les parois, et une copie invisible tournée vers le soleil projette son ombre.
+- **Étape 5 faite au fil des étapes** : sauvegarde et export des tuiles, hauteurs et escaliers ; conversion des anciennes tuiles.
+- **Reste l'étape 6** :
+  - palette en onglets ;
+  - taille de pinceau, pot de peinture et aperçu du pinceau à sa taille ;
+  - documentation de l'éditeur.
 
 ## Ce que permet le tileset (repéré sur la planche)
 
