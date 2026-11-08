@@ -2,10 +2,26 @@
 
 @if (hud(); as hud) {
   @if (hud.framePerSec) {
-    <div class="status-tile" role="status" title="Température et images par seconde">
+    <button type="button" class="status-tile" [class.open]="qualityMenu()" [attr.aria-expanded]="qualityMenu()"
+            title="Température et images par seconde" (click)="toggleQualityMenu($event)">
       <span class="temperature" [style.color]="temperatureColor()">{{ temperatureLabel() }} °C</span>
       <span class="fps" [class.ok]="hud.framePerSec >= 50" [class.slow]="hud.framePerSec < 30">{{ hud.framePerSec }} <small>fps</small></span>
-    </div>
+    </button>
+    @if (qualityMenu()) {
+      <div class="quality-backdrop" (click)="qualityMenu.set(false)"></div>
+      <section class="quality-menu" role="dialog" aria-label="Qualité graphique" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+        <h2>Qualité graphique</h2>
+        <div role="radiogroup" aria-label="Qualité">
+          @for (q of qualityChoices; track q.mode) {
+            <button type="button" role="radio" [attr.aria-checked]="quality() === q.mode" (click)="setQuality(q.mode)">
+              <span class="q-label">{{ q.label }}</span>
+              <span class="q-hint">{{ q.hint }}</span>
+            </button>
+          }
+        </div>
+        <p class="q-current">Résolution ×{{ hud.pixelRatio }} · Ombres {{ hud.shadowMapSize }}</p>
+      </section>
+    }
   }
 }
 

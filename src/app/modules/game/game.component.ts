@@ -1,4 +1,4 @@
-import { afterNextRender, Component, computed, ElementRef, inject, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { GameMode } from './shared/model/Game';
 import { GameService } from './shared/services/game.service';
 import { StickComponent } from '../../core/stick/stick.component';
@@ -8,6 +8,7 @@ import { TeleportComponent } from './teleport/teleport.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { EditorBarComponent } from './editor-bar/editor-bar.component';
 import { temperatureColor } from './shared/util/temperature-color';
+import { QUALITY_CHOICES, QualityMode } from './shared/model/Quality';
 import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
@@ -36,6 +37,10 @@ export class GameComponent {
   protected readonly soundVolume = this.gameService.soundVolume;
   protected readonly soundMuted = this.gameService.soundMuted;
   protected readonly GameMode = GameMode;
+  /** Hidden menu on the temperature / fps tile: graphics quality. */
+  protected readonly qualityMenu = signal(false);
+  protected readonly qualityChoices = QUALITY_CHOICES;
+  protected readonly quality = this.gameService.quality;
   /** Air temperature (°C, rounded) and its color, from icy blue to red. */
   protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));
   protected readonly temperatureColor = computed(() => temperatureColor(this.hud()?.temperature ?? 20));
@@ -98,6 +103,15 @@ export class GameComponent {
 
   protected setTimeFlow(flowing: boolean): void {
     this.gameService.setTimeFlow(flowing);
+  }
+
+  protected toggleQualityMenu(event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.qualityMenu.update(open => !open);
+  }
+
+  protected setQuality(mode: QualityMode): void {
+    this.gameService.setQuality(mode);
   }
 
   protected toggleEditMode(): void {

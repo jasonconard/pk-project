@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
+import { AUTO_HIGH_FPS, AUTO_HIGH_SECONDS, AUTO_LOW_FPS, AUTO_LOW_SECONDS, AUTO_MIN_RATIO, AUTO_RATIO_STEP, isTouchDevice, QUALITY_PRESETS, QualityMode } from "./Quality";
 import type { EditBrush, EditSelection } from "../services/map-editor.service";
 
 export enum GameMode {
@@ -18,11 +19,12 @@ export const SHADE_OFFSET = 32;
 /**
  * Shadows setup (the sun position and light levels are driven by the weather, see WeatherHelper).
  * - SHADOW_AREA: half size of the square (world units) around the camera target where shadows are computed.
- * - SHADOW_MAP_SIZE: shadow texture resolution (higher = sharper shadows, slower).
+ * - SHADOW_MAP_SIZE: shadow texture resolution at start (higher = sharper shadows, slower); then set by the
+ *   graphics quality (see Quality.ts).
  * - SUN_DISTANCE: distance between the sun light and the camera target (only matters for the shadow camera).
  */
 export const SHADOW_AREA = 256;
-export const SHADOW_MAP_SIZE = 4096;
+export const SHADOW_MAP_SIZE = 2048;
 export const SUN_DISTANCE = 500;
 
 export interface GameInit {
@@ -113,7 +115,7 @@ export class Game {
   /** Keep the sun (and its shadow area) centered on the camera target, lighting from `sunDir`. */
   public placeSun(target: THREE.Vector3, sunDir: THREE.Vector3) {
     // Snap to the shadow-map texel grid so shadows don't shimmer while the camera moves
-    const texel = (SHADOW_AREA * 2) / SHADOW_MAP_SIZE;
+    const texel = (SHADOW_AREA * 2) / this.shadowMapSize;
     const snapped = new THREE.Vector3(
       Math.round(target.x / texel) * texel,
       Math.round(target.y / texel) * texel,
@@ -128,8 +130,64 @@ export class Game {
     this.weather.update(dt);
   }
 
+  /** Graphics quality chosen, render pixel ratio and shadow texture size in use (see Quality.ts). */
+  qualityMode: QualityMode = 'auto';
+  pixelRatio = 1;
+  shadowMapSize = 2048;
+  /** Auto quality: seconds in a row below / above the fps thresholds. */
+  private slowSeconds = 0;
+  private fastSeconds = 0;
+
+  /** Applies a quality mode: render resolution (capped screen density) and shadow texture size. */
+  public setQuality(mode: QualityMode) {
+    this.qualityMode = mode;
+    const preset = QUALITY_PRESETS[mode === 'auto' ? (isTouchDevice() ? 'medium' : 'high') : mode];
+    this.slowSeconds = this.fastSeconds = 0;
+    this.applyResolution(Math.min(window.devicePixelRatio, preset.maxPixelRatio), preset.shadowMapSize);
+  }
+
+  /**
+   * Auto quality, called every second with the measured fps: too slow for a while → lower resolution (then
+   * smaller shadows once at the lowest resolution); fast for a while → back up, up to the high preset.
+   */
+  public adaptQuality(fps: number) {
+    if (this.qualityMode !== 'auto' || this.paused || this.loading) {
+      return;
+    }
+    this.slowSeconds = fps < AUTO_LOW_FPS ? this.slowSeconds + 1 : 0;
+    this.fastSeconds = fps >= AUTO_HIGH_FPS ? this.fastSeconds + 1 : 0;
+    const maxRatio = Math.min(window.devicePixelRatio, QUALITY_PRESETS.high.maxPixelRatio);
+    if (this.slowSeconds >= AUTO_LOW_SECONDS) {
+      this.slowSeconds = 0;
+      if (this.pixelRatio > AUTO_MIN_RATIO) {
+        this.applyResolution(Math.max(AUTO_MIN_RATIO, this.pixelRatio - AUTO_RATIO_STEP), this.shadowMapSize);
+      } else if (this.shadowMapSize > QUALITY_PRESETS.low.shadowMapSize) {
+        this.applyResolution(this.pixelRatio, this.shadowMapSize / 2);
+      }
+    } else if (this.fastSeconds >= AUTO_HIGH_SECONDS) {
+      this.fastSeconds = 0;
+      if (this.shadowMapSize < QUALITY_PRESETS.medium.shadowMapSize) {
+        this.applyResolution(this.pixelRatio, this.shadowMapSize * 2);
+      } else if (this.pixelRatio < maxRatio) {
+        this.applyResolution(Math.min(maxRatio, this.pixelRatio + AUTO_RATIO_STEP), this.shadowMapSize);
+      }
+    }
+  }
+
+  private applyResolution(pixelRatio: number, shadowMapSize: number) {
+    this.pixelRatio = pixelRatio;
+    this.renderer.setPixelRatio(pixelRatio);
+    if (shadowMapSize !== this.shadowMapSize || !this.sun.shadow.map) {
+      this.shadowMapSize = shadowMapSize;
+      this.sun.shadow.mapSize.set(shadowMapSize, shadowMapSize);
+      // The shadow texture is created again at its new size on the next frame
+      this.sun.shadow.map?.dispose();
+      this.sun.shadow.map = null;
+    }
+  }
+
   public render() {
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(this.pixelRatio);
     this.updateLights();
     this.renderFrame();
   }

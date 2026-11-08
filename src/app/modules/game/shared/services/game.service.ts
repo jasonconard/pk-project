@@ -3,6 +3,7 @@ import { MapHelper } from "../model/MapHelper";
 import * as THREE from 'three';
 import { GameMode, Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
+import { QUALITY_CHOICES, QualityMode } from '../model/Quality';
 import { EditBrush, EditCommand, EditSelection, MapEditorService } from './map-editor.service';
 import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
@@ -30,6 +31,9 @@ export interface GameHud {
   editSelection: EditSelection | null;
   editCanUndo: boolean;
   editCanRedo: boolean;
+  /** Render pixel ratio and shadow texture size in use (graphics quality). */
+  pixelRatio: number;
+  shadowMapSize: number;
   mapHelper: MapHelper | null;
 }
 
@@ -49,6 +53,7 @@ interface SavedSettings {
   soundMuted: boolean;
   fireflyColor: FireflyColor;
   leafMode: LeafMode;
+  quality: QualityMode;
 }
 
 const SETTINGS_KEY = 'pk-weather-settings';
@@ -75,6 +80,9 @@ function loadSettings(): Partial<SavedSettings> {
   }
   if (FIREFLY_COLORS.some(c => c.color === raw['fireflyColor'])) {
     out.fireflyColor = raw['fireflyColor'] as FireflyColor;
+  }
+  if (QUALITY_CHOICES.some(q => q.mode === raw['quality'])) {
+    out.quality = raw['quality'] as QualityMode;
   }
   if (raw['leafMode'] === 'autumn' || raw['leafMode'] === 'cherry') {
     out.leafMode = raw['leafMode'];
@@ -159,6 +167,9 @@ export class GameService {
   readonly fireflyColor = this.fireflyColorState.asReadonly();
   private readonly leafModeState = signal<LeafMode>(this.saved.leafMode ?? 'autumn');
   readonly leafMode = this.leafModeState.asReadonly();
+  /** Graphics quality (hidden menu on the temperature / fps tile). */
+  private readonly qualityState = signal<QualityMode>(this.saved.quality ?? 'auto');
+  readonly quality = this.qualityState.asReadonly();
 
   constructor() {
     this.initCheckResize();
@@ -175,6 +186,7 @@ export class GameService {
       soundMuted: this.soundMutedState(),
       fireflyColor: this.fireflyColorState(),
       leafMode: this.leafModeState(),
+      quality: this.qualityState(),
     }));
   }
 
@@ -182,7 +194,8 @@ export class GameService {
     this.keyService.initTouch(canvas);
 
     const rect = canvas.getBoundingClientRect();
-    const renderer = new THREE.WebGLRenderer();
+    // High performance GPU (phones with two modes, laptops with two GPUs)
+    const renderer = new THREE.WebGLRenderer({ powerPreference: 'high-performance' });
 
     renderer.setSize( rect.width, rect.height );
     canvas.appendChild( renderer.domElement );
@@ -210,9 +223,11 @@ export class GameService {
 
     this.switchGameMode(gameMode, true);
 
+    game.setQuality(this.qualityState());
     setInterval(() => {
       game.framePerSec = game.frame;
       game.frame = 0;
+      game.adaptQuality(game.framePerSec);
     }, 1000);
 
     setInterval(() => this.inputLoop(game), 1000 / 120);
@@ -296,6 +311,8 @@ export class GameService {
       editSelection: game.editSelection,
       editCanUndo: game.editCanUndo,
       editCanRedo: game.editCanRedo,
+      pixelRatio: game.pixelRatio,
+      shadowMapSize: game.shadowMapSize,
       editMode: game.editMode,
       mapHelper: game.mapHelper ?? null,
     } : null);
@@ -403,6 +420,12 @@ export class GameService {
     } else {
       this.mapEditorService.enter(game);
     }
+    this.syncHud();
+  }
+
+  setQuality(mode: QualityMode) {
+    this.qualityState.set(mode);
+    this.game?.setQuality(mode);
     this.syncHud();
   }
 
