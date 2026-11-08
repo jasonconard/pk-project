@@ -237,6 +237,20 @@ export class MapHelper {
     return cell ? cell.chunk.heights?.[cell.col + ',' + cell.row] ?? 0 : 0;
   }
 
+  /** Stairs cell under a world point: its side and its center (world), or null. */
+  public stairsAt(x: number, z: number): { side: StairsSide, cx: number, cz: number } | null {
+    const cell = this.cellAt(x, z);
+    const side = cell && stairsSide(cell.chunk.stairs?.[cell.col + ',' + cell.row]);
+    if (!cell || !side) {
+      return null;
+    }
+    return {
+      side,
+      cx: cell.chunk.pos.x - cell.chunk.size.x / 2 + (cell.col + 0.5) * TILE_SIZE,
+      cz: cell.chunk.pos.z - cell.chunk.size.y / 2 + (cell.row + 0.5) * TILE_SIZE,
+    };
+  }
+
   /** Is there a stairs cell under a world point? */
   public isStairsAt(x: number, z: number): boolean {
     const cell = this.cellAt(x, z);

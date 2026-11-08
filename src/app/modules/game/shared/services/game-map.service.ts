@@ -13,14 +13,17 @@ import { SequenceService } from "./sequence.service";
 import { WORLD_MAP } from "../../../../../assets/map/world/world";
 import { MapEditorService } from "./map-editor.service";
 import { loadMapEdits } from "./map-storage";
+import { DustPuff } from "../model/DustPuff";
 
 
 /** Ledge hop length (s) and height (world units). */
-const HOP_TIME = 0.35;
+const HOP_TIME = 0.42;
 const HOP_HEIGHT = 7;
 /** The ground height is found by a ray cast down from this high above the player (above any relief). */
 const GROUND_RAY_UP = 80;
 const RAY_NUDGE = 0.013;
+/** Half width of the body: the hop carries the player on until it's off the ledge. */
+const HOP_BODY = 7;
 
 @Service()
 export class GameMapService {
@@ -33,6 +36,12 @@ export class GameMapService {
   /** Ledge hop: time since it started (s, -1 = none) and the height currently added to the sprite. */
   private hopTime = -1;
   private hopOffset = 0;
+  /** Ledge hop: height dropped, camera offset, push forward still to apply (x, z). */
+  private hopDrop = 0;
+  private hopCameraOffset = 0;
+  private hopLastTime = 0;
+  private readonly hopNudge = new THREE.Vector2();
+  private dust?: DustPuff;
   /** Ground level (and stairs) under the player at the previous step, to notice stepping off a ledge. */
   private lastLevel = 0;
   private lastOnStairs = false;
@@ -68,22 +77,51 @@ export class GameMapService {
     }
   }
 
-  /** Ledge hop: the sprite rises and falls (a sine arch) while the ground drops under it. Relative offset. */
-  private updateHop(sprite: THREE.Object3D) {
+  /**
+   * Ledge hop. The ground under the player drops at once (the cell is lower); the sprite and the camera are drawn
+   * back up by the drop and come down progressively (falling faster and faster: t²), with an arch on top (sprite
+   * only). Relative offsets, removed before being computed again. The player is also carried forward until the
+   * whole body has left the ledge. Ends with a thud and a dust puff.
+   */
+  private updateHop(game: Game, sprite: THREE.Object3D) {
     const plane = sprite.children[0];
     if (!plane || this.hopTime < 0) {
       return;
     }
     plane.position.y -= this.hopOffset;
-    this.hopTime += 1 / 120;
-    const t = this.hopTime / HOP_TIME;
+    game.camera.position.y -= this.hopCameraOffset;
+    // Real time (the input loop doesn't always run at its 120 Hz)
+    const now = performance.now();
+    const dt = Math.min((now - this.hopLastTime) / 1000, 0.05);
+    this.hopLastTime = now;
+    const before = Math.min(this.hopTime / HOP_TIME, 1);
+    this.hopTime += dt;
+    const t = Math.min(this.hopTime / HOP_TIME, 1);
+    // Carried forward (spread over the hop)
+    const step = t - before;
+    sprite.position.x += this.hopNudge.x * step;
+    sprite.position.z += this.hopNudge.y * step;
+    game.camera.position.x += this.hopNudge.x * step;
+    game.camera.position.z += this.hopNudge.y * step;
     if (t >= 1) {
       this.hopTime = -1;
       this.hopOffset = 0;
+      this.hopCameraOffset = 0;
+      // Exactly on the step grid again (the nudge is spread over float steps)
+      sprite.position.x = Math.round(sprite.position.x);
+      sprite.position.z = Math.round(sprite.position.z);
+      game.mapHelper?.updateCameraAim();
+      game.weather.playLanding();
+      this.dust ??= new DustPuff(game.scene);
+      this.dust.spawn(sprite.position);
       return;
     }
-    this.hopOffset = HOP_HEIGHT * Math.sin(Math.PI * t);
+    const fall = this.hopDrop * (1 - t * t);
+    this.hopOffset = fall + HOP_HEIGHT * Math.sin(Math.PI * t);
+    this.hopCameraOffset = fall;
     plane.position.y += this.hopOffset;
+    game.camera.position.y += this.hopCameraOffset;
+    game.mapHelper?.updateCameraAim();
   }
 
   clear(game: Game) {
@@ -137,7 +175,8 @@ export class GameMapService {
     }
 
     const camera = game.camera;
-    this.updateHop(sprite);
+    this.updateHop(game, sprite);
+    this.dust?.update();
     mapHelper.updatePlayerShadow();
 
     camera.position.x += this.moveRatio.x;
@@ -168,6 +207,7 @@ export class GameMapService {
     });
 
     if(dist > -1) {
+      const previousY = sprite.position.y;
       sprite.position.y -= dist - GROUND_RAY_UP;
       camera.position.y -= dist - GROUND_RAY_UP;
       // Stepping off a ledge: a little hop, like in the Pokémon games, once the player really enters the lower cell
@@ -176,6 +216,19 @@ export class GameMapService {
       const stairs = mapHelper.isStairsAt(sprite.position.x, sprite.position.z);
       if (level < this.lastLevel && !stairs && !this.lastOnStairs && this.hopTime < 0) {
         this.hopTime = 0;
+        this.hopLastTime = performance.now();
+        this.hopDrop = previousY - sprite.position.y;
+        // Drawn back up at once (no frame where it already stands down)
+        this.hopOffset = this.hopDrop;
+        this.hopCameraOffset = this.hopDrop;
+        sprite.children[0].position.y += this.hopOffset;
+        camera.position.y += this.hopCameraOffset;
+        // Carried one more step forward if the back of the body is still over the ledge
+        const dx = Math.sign(this.moveRatio.x);
+        const dz = Math.sign(this.moveRatio.z);
+        const back = mapHelper.levelAtWorld(sprite.position.x - dx * HOP_BODY, sprite.position.z - dz * HOP_BODY);
+        this.hopNudge.set(back > level ? dx * this.pixelSize : 0, back > level ? dz * this.pixelSize : 0);
+        game.weather.playLedgeHop();
       }
       this.lastLevel = level;
       this.lastOnStairs = stairs;

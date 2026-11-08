@@ -1033,6 +1033,15 @@ export class WeatherHelper {
   }
 
   /** True while the tornado carries the player away (the game freezes their moves). */
+  /** Ledge hop sounds (the map moves): the drop whoosh, the landing thud. */
+  playLedgeHop() {
+    this.audio.ledgeHop();
+  }
+
+  playLanding() {
+    this.audio.thud();
+  }
+
   get playerFlying(): boolean {
     return this.flightTime >= 0;
   }

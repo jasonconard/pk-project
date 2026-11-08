@@ -65,20 +65,36 @@ export class SceneService {
   public static checkGroundCollisions(mapHelper: MapHelper, playerMesh: THREE.Object3D, move: Vec3) {
     const ahead = (v: number) => Math.sign(v) * GROUND_MARGIN;
     const pos = playerMesh.position;
+    const block = () => {
+      move.x = 0;
+      move.z = 0;
+    };
     // Both sides of the sprite (across the move), so it can't slip half over a higher / blocking cell
-    const sides: [number, number][] = move.z ? [[-FOOT_HALF_WIDTH, 0], [FOOT_HALF_WIDTH, 0]] : [[0, -FOOT_HALF_DEPTH], [0, FOOT_HALF_DEPTH]];
-    const levelHere = Math.max(...sides.map(([dx, dz]) => mapHelper.levelAtWorld(pos.x + dx, pos.z + dz)));
-    for (const [dx, dz] of sides) {
-      const x = pos.x + move.x + ahead(move.x) + dx;
-      const z = pos.z + move.z + ahead(move.z) + dz;
+    const alongZ = move.z !== 0;
+    const sides: [number, number][] = alongZ ? [[-FOOT_HALF_WIDTH, 0], [FOOT_HALF_WIDTH, 0]] : [[0, -FOOT_HALF_DEPTH], [0, FOOT_HALF_DEPTH]];
+    const here = sides.map(([dx, dz]) => [pos.x + dx, pos.z + dz]);
+    const next = sides.map(([dx, dz]) => [pos.x + move.x + ahead(move.x) + dx, pos.z + move.z + ahead(move.z) + dz]);
+    // Stairs are only used along their slope, the player centered on them: otherwise they are a wall
+    const stairs = [...here, ...next].map(([x, z]) => mapHelper.stairsAt(x, z));
+    const onStairs = stairs.some(s => s);
+    for (const s of stairs) {
+      if (!s) {
+        continue;
+      }
+      const along = (s.side === 'n' || s.side === 's') === alongZ;
+      const centered = alongZ ? Math.abs(pos.x - s.cx) < 1 : Math.abs(pos.z - s.cz) < 1;
+      if (!along || !centered) {
+        block();
+        return;
+      }
+    }
+    const levelHere = Math.max(...here.map(([x, z]) => mapHelper.levelAtWorld(x, z)));
+    for (const [x, z] of next) {
       const cell = mapHelper.cellAt(x, z);
-      // Climbing a wall is impossible, one level by stairs is fine (from or onto a stairs cell)
+      // Climbing a wall is impossible, one level by stairs is fine
       const rise = mapHelper.levelAtWorld(x, z) - levelHere;
-      const byStairs = rise === 1 && (mapHelper.isStairsAt(x, z) || mapHelper.isStairsAt(pos.x, pos.z));
-      const climbing = rise > 0 && !byStairs;
-      if (climbing || (cell && terrainById(cell.chunk.tiles?.[cell.col + ',' + cell.row])?.blocking)) {
-        move.x = 0;
-        move.z = 0;
+      if ((rise > 0 && !(rise === 1 && onStairs)) || (cell && terrainById(cell.chunk.tiles?.[cell.col + ',' + cell.row])?.blocking)) {
+        block();
         return;
       }
     }

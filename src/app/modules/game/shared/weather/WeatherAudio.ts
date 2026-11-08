@@ -1427,6 +1427,26 @@ export class WeatherAudio {
   }
 
   /** The player falling back on the ground: a dull thud. */
+  /** Ledge hop: a short airy whoosh falling in pitch (the player drops). */
+  ledgeHop() {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || !this.noise || ctx.state !== 'running') {
+      return;
+    }
+    const at = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    const band = this.bandpass(1400, 1.2);
+    band.frequency.setValueAtTime(1400, at);
+    band.frequency.exponentialRampToValueAtTime(300, at + 0.3);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(0.12, at + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.32);
+    src.connect(band).connect(g).connect(this.master);
+    src.start(at, Math.random() * 2, 0.35);
+  }
+
   thud() {
     const ctx = this.ctx;
     if (!ctx || !this.master || ctx.state !== 'running') {
