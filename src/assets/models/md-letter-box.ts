@@ -88,6 +88,9 @@ export const MD_LETTER_BOX: SceneModel = {
     size: {x: 4, y: 6, z: 4},
     pos: {x: 0, y: 0.5, z: 0},
     rot: {x: 0, y: 0, z: 0},
+    // A solid part: hidden by the box (without the depth test it was drawn over it)
+    depthWrite: true,
+    depthTest: true,
     uvs: {
       front: {min: {x: 0, y: 28}, max: {x: 4, y: 22}},
       back: {min: {x: 0, y: 28}, max: {x: 4, y: 22}},

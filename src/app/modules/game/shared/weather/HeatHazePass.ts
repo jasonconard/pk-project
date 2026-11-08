@@ -50,7 +50,8 @@ uniform vec2 uScale;
 uniform vec3 uTint;
 varying vec2 vUv;
 
-float hhHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+// Hash without sine: precise on phone GPUs too (see wbHash in weather-shader.ts)
+float hhHash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 float hhNoise(vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);

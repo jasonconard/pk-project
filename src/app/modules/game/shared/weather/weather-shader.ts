@@ -133,7 +133,9 @@ export function registerUnlitMaterial<T extends THREE.MeshBasicMaterial | THREE.
  * Returns 0 (between beams) .. 1 (inside a beam).
  */
 export const BEAM_GLSL = /* glsl */`
-float wbHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+// Hash without sine (Dave Hoskins): sin() of big values is imprecise on phone GPUs, the noise cells didn't
+// match anymore and the fog showed straight seams every ~5 tiles
+float wbHash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 float wbNoise(vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);
@@ -550,7 +552,7 @@ export function getSwayDepthMaterial(): THREE.MeshDepthMaterial {
       shader.vertexShader = `attribute float ${SWAY_ATTRIBUTE};\nuniform float uWindX;\nuniform float uBeamTime;\nuniform float uFlutterPhase;\n`
         + shader.vertexShader.replace('#include <project_vertex>', SWAY_VERTEX + '#include <project_vertex>');
     };
-    swayDepthMaterial.customProgramCacheKey = () => 'weather-sway-depth-v3';
+    swayDepthMaterial.customProgramCacheKey = () => 'weather-sway-depth-v4';
   }
   return swayDepthMaterial;
 }
@@ -732,6 +734,6 @@ export function applyWeatherShader<T extends THREE.MeshLambertMaterial | THREE.M
       .replace('#include <fog_fragment>', '')
       .replace('#include <colorspace_fragment>', FOG_FRAGMENT + '#include <colorspace_fragment>');
   };
-  mat.customProgramCacheKey = () => 'weather-v38';
+  mat.customProgramCacheKey = () => 'weather-v39';
   return mat;
 }
