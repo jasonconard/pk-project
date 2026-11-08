@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DrawCallGroup } from './DrawCallBreakdown';
 
 /** One second of measures, shown by the diagnostic console (hidden menu of the temperature / fps tile). */
 export interface DiagnosticsReport {
@@ -22,6 +23,8 @@ export interface DiagnosticsReport {
   /** GPU memory: geometries and textures alive. */
   geometries: number;
   textures: number;
+  /** Where the main pass draw calls come from (biggest first). */
+  breakdown: DrawCallGroup[];
 }
 
 /**
@@ -76,7 +79,8 @@ export class Diagnostics {
   }
 
   /** Every second: the report of the second that ended, counters back to 0. */
-  flush(renderer: THREE.WebGLRenderer, state: { pixelRatio: number, shadowMapSize: number, detail: number }) {
+  flush(renderer: THREE.WebGLRenderer, state: { pixelRatio: number, shadowMapSize: number, detail: number },
+        breakdown: () => DrawCallGroup[]) {
     if (!this.enabled) {
       this.report = null;
       renderer.info.autoReset = true;
@@ -98,6 +102,7 @@ export class Diagnostics {
       ...state,
       geometries: renderer.info.memory.geometries,
       textures: renderer.info.memory.textures,
+      breakdown: breakdown(),
     };
     this.input = this.weather = this.render = this.frames = this.frameMax = this.calls = this.triangles = 0;
   }

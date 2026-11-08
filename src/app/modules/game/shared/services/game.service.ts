@@ -5,6 +5,7 @@ import { GameMode, Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
 import { QUALITY_CHOICES, QualityMode } from '../model/Quality';
 import { DiagnosticsReport } from '../model/Diagnostics';
+import { drawCallBreakdown } from '../model/DrawCallBreakdown';
 import { EditBrush, EditCommand, EditSelection, MapEditorService } from './map-editor.service';
 import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
@@ -237,7 +238,8 @@ export class GameService {
       game.framePerSec = game.frame;
       game.frame = 0;
       game.adaptQuality(game.framePerSec);
-      game.diagnostics.flush(game.renderer, { pixelRatio: game.pixelRatio, shadowMapSize: game.shadowMapSize, detail: game.detail });
+      game.diagnostics.flush(game.renderer, { pixelRatio: game.pixelRatio, shadowMapSize: game.shadowMapSize, detail: game.detail },
+        () => drawCallBreakdown(game.scene, game.camera, game.mapHelper));
     }, 1000);
 
     // Moves and inputs at a fixed 120 steps per second of real time: when the device is slow, the timer is called

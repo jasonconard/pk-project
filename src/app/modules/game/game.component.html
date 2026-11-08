@@ -39,6 +39,11 @@
             {{ d.width }}×{{ d.height }} (×{{ d.pixelRatio }})</div>
           <div><span class="k">Réglages</span> ombres {{ d.shadowMapSize || 'aucune' }} · particules {{ d.detail * 100 | number:'1.0-0' }} % ·
             {{ d.geometries }} géométries · {{ d.textures }} textures</div>
+          <div><span class="k">Répartition</span>
+            @for (g of d.breakdown; track g.label) {
+              <span class="part">{{ g.label }} <b>{{ g.calls }}</b>@if (g.copies > 1) { ({{ g.copies }}×) }</span>
+            }
+          </div>
           <div class="hint">« Envoi du rendu » élevé : la carte graphique ou son pilote limite (trop d'appels de dessin, de pixels,
             d'ombres ou de transparences). Déplacements / météo élevés : c'est le calcul du jeu.</div>
         } @else {

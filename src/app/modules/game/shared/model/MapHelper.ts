@@ -695,7 +695,11 @@ export class MapHelper {
   private static updateMeshOpacity(mesh: THREE.Object3D, opacity: number, castsShadow: boolean) {
     if (!(mesh instanceof THREE.Mesh)) { return; }
     const material = mesh.material as THREE.Material;
-    material.transparent = true;
+    // Transparent only while fading: a transparent double sided material is drawn in two passes (back faces,
+    // then front faces), twice the draw calls; the cut-out texels are handled by the alphaTest anyway.
+    // One pass even while fading (the few overlapping faces of a fading building don't need the second one).
+    material.transparent = opacity > 0 && opacity < 1;
+    material.forceSinglePass = true;
     mesh.visible = opacity > 0 || castsShadow;
     if (material.userData['depthWrite'] === undefined) {
       material.userData['depthWrite'] = material.depthWrite;
