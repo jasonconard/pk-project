@@ -12,7 +12,7 @@ import { SurfaceHeights } from './SurfaceHeights';
 import { GodRaysPass } from './GodRaysPass';
 import { BloomPass } from './BloomPass';
 import { HeatHazePass } from './HeatHazePass';
-import { ASH_SMOKE_STYLE, BREATH_STYLE, MIST_STYLE, STRIKE_SPARK_STYLE, GRAVITY_DROP_STYLE, GRAVITY_PEBBLE_STYLE, TIME_MOTE_STYLE, QUAKE_DEBRIS_STYLE, QUAKE_DUST_STYLE, SPINDRIFT_STYLE, STEAM_JET_STYLE, STEAM_STYLE, ASH_STYLE, CRYSTAL_STYLE, DARK_WISP_STYLE, FUME_STYLE, HAUNT_WISP_STYLE, POISON_FUME_STYLE, MARS_DUST_STYLE, VOLCANO_SMOKE_STYLE, EMBER_STYLE, FAIRY_STYLE, MAGIC_SNOW_STYLE, POLLEN_STYLE, STARDUST_STYLE, LAVA_STYLE, FIREFLY_STYLE, GlowParticles, SPORE_STYLE } from './GlowParticles';
+import { ASH_SMOKE_STYLE, BREATH_STYLE, MIST_STYLE, STRIKE_SPARK_STYLE, GRAVITY_DROP_STYLE, GRAVITY_PEBBLE_STYLE, TIME_MOTE_STYLE, QUAKE_DEBRIS_STYLE, QUAKE_DUST_STYLE, SPINDRIFT_STYLE, STEAM_JET_STYLE, STEAM_STYLE, ASH_STYLE, CRYSTAL_STYLE, DARK_WISP_STYLE, FUME_STYLE, HAUNT_WISP_STYLE, POISON_FUME_STYLE, MARS_DUST_STYLE, VOLCANO_SMOKE_STYLE, EMBER_STYLE, ENERGY_STYLE, FAIRY_STYLE, MAGIC_SNOW_STYLE, POLLEN_STYLE, STARDUST_STYLE, LAVA_STYLE, FIREFLY_STYLE, GlowParticles, SPORE_STYLE } from './GlowParticles';
 import { LeafHelper, LeafMode } from './LeafHelper';
 import { SandHelper } from './SandHelper';
 import { ElectricHelper } from './ElectricHelper';
@@ -306,6 +306,7 @@ export class WeatherHelper {
   private readonly fireflies: GlowParticles;
   /** Fairy mist lights: pink fireflies, independent of the fireflies color choice. */
   private readonly fairyLights: GlowParticles;
+  private readonly risingEnergy: GlowParticles;
   private readonly lava: GlowParticles;
   private readonly volcanoSmoke: GlowParticles;
   private readonly leaves: LeafHelper;
@@ -435,6 +436,7 @@ export class WeatherHelper {
     this.embers = new GlowParticles(game.scene, this.surfaces, EMBER_STYLE);
     this.fireflies = new GlowParticles(game.scene, this.surfaces, FIREFLY_STYLE);
     this.fairyLights = new GlowParticles(game.scene, this.surfaces, FAIRY_STYLE);
+    this.risingEnergy = new GlowParticles(game.scene, this.surfaces, ENERGY_STYLE);
     this.lava = new GlowParticles(game.scene, this.surfaces, LAVA_STYLE);
     this.volcanoSmoke = new GlowParticles(game.scene, this.surfaces, VOLCANO_SMOKE_STYLE);
     this.leaves = new LeafHelper(game.scene, this.surfaces);
@@ -677,7 +679,7 @@ export class WeatherHelper {
     // Flutter gets faster with the wind; wrapped to keep float precision in the shader
     u.uFlutterPhase.value = (u.uFlutterPhase.value + dt * (2.5 + 5 * windAbs)) % (Math.PI * 2);
 
-    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.morningMist > 0 || p.moonless > 0 || p.deepFreeze > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
+    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.risingEnergy > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.morningMist > 0 || p.moonless > 0 || p.deepFreeze > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
       this.surfaces.update(dt);
     }
     this.rain.update(dt, target, p.rain, this.windX);
@@ -687,6 +689,7 @@ export class WeatherHelper {
     this.embers.update(dt, target, p.embers, this.game.camera, this.windX);
     this.fireflies.update(dt, target, p.fireflies, this.game.camera, this.windX);
     this.fairyLights.update(dt, target, p.fairyLights, this.game.camera, this.windX);
+    this.risingEnergy.update(dt, target, p.risingEnergy, this.game.camera, this.windX);
     // Imminent eruption: more embers and smoke as the tension builds, a burst while the ground shakes
     // (the densities are capped at 1: the calm level is lowered to leave room for the bursts)
     const stir = (1 + p.eruption * (ERUPTION_TENSION_BOOST * this.eruptionTension + ERUPTION_SHAKE_BOOST * this.quakeShake))
@@ -1355,6 +1358,9 @@ export class WeatherHelper {
     }
     if (to.fairyLights === 0 && c.fairyLights < 0.005) {
       c.fairyLights = 0;
+    }
+    if (to.risingEnergy === 0 && c.risingEnergy < 0.005) {
+      c.risingEnergy = 0;
     }
     if (to.leaves === 0 && c.leaves < 0.005) {
       c.leaves = 0;

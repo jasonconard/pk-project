@@ -21,6 +21,7 @@ export enum WeatherType {
   SANDSTORM = 'sandstorm',
   ELECTRIC = 'electric',
   FAIRY_MIST = 'fairy-mist',
+  RISING_ENERGY = 'rising-energy',
   VOLCANIC = 'volcanic',
   BLOOD_RAIN = 'blood-rain',
   BLIZZARD = 'blizzard',
@@ -130,6 +131,8 @@ export interface WeatherParams {
   fireflies: number;
   /** Fairy mist pink lights density, 0 = none, 1 = max. */
   fairyLights: number;
+  /** Rising energy: teal sparks flowing up from the ground to the sky, 0 = none, 1 = max. */
+  risingEnergy: number;
   /** Electric field: crackling arcs on the shiny surfaces, 0 = none, 1 = max. */
   electric: number;
   /** Sandstorm: blown sand density (the wind is forced strong, the sand piles up), 0 = none, 1 = max. */
@@ -279,6 +282,7 @@ const DAY_BASE: WeatherParams = {
   lava: 0,
   fireflies: 0,
   fairyLights: 0,
+  risingEnergy: 0,
   leaves: 0,
   spores: 0,
   pollen: 0,
@@ -1710,6 +1714,21 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fog: 0.45,
     fogColor: new THREE.Color(0xb06aa0),
   }),
+  // Rising energy (night only): a thick teal haze, and teal sparks flowing up from the ground to the sky
+  [WeatherType.RISING_ENERGY]: preset(NIGHT_BASE, {
+    litLevel: 0.38,
+    shadowLevel: 0.24,
+    ambientColor: new THREE.Color(0x4a9a8a),
+    sunColor: new THREE.Color(0xa8f0dc),
+    unlitTint: new THREE.Color(0x5a948a),
+    specular: 0.4,
+    windowGlow: 0.4,
+    cloudSpeed: 8,
+    lightPulse: 0.06,
+    risingEnergy: 1,
+    fog: 0.62,
+    fogColor: new THREE.Color(0x45b49b),
+  }),
   // Volcanic night: glowing orange ground light, dark ash haze, bright embers
   [WeatherType.VOLCANIC]: preset(NIGHT_BASE, {
     litLevel: 0.42,
@@ -1884,6 +1903,7 @@ export const TEMPERATURES: Record<WeatherType, [number, number]> = {
   [WeatherType.SANDSTORM]: [37, 24],
   [WeatherType.ELECTRIC]: [21, 16],
   [WeatherType.FAIRY_MIST]: [20, 16],
+  [WeatherType.RISING_ENERGY]: [17, 14],
   [WeatherType.VOLCANIC]: [48, 40],
 };
 for (const [presets, index] of [[DAY_PRESETS, 0], [NIGHT_PRESETS, 1]] as const) {
@@ -2070,6 +2090,7 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.STARDUST, label: 'Poussière d\'étoiles', icon: '🌠' },
   { type: WeatherType.FIREFLIES, label: 'Lucioles', icon: '✨' },
   { type: WeatherType.FAIRY_MIST, label: 'Brume féérique', icon: '🧚' },
+  { type: WeatherType.RISING_ENERGY, label: 'Énergie montante', icon: '💠' },
   { type: WeatherType.BLOOD_MOON, label: 'Lune de sang', icon: '🩸' },
 ];
 

@@ -333,6 +333,12 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Une brume rose de rêve qui ondule comme de l\'air chaud, avec des lucioles roses autour des plantes.',
     effects: ['Brume rose', 'Lumières roses', 'Ondulations'],
   },
+  [WeatherType.RISING_ENERGY]: {
+    category: 'magic', sound: false,
+    summary: 'Brume turquoise, étincelles qui montent.',
+    description: 'La nuit seulement : une brume épaisse turquoise recouvre la ville, et des étincelles de la même couleur montent du sol jusqu\'au ciel.',
+    effects: ['Brume turquoise épaisse', 'Étincelles montantes', 'Lumière qui respire'],
+  },
   [WeatherType.ELECTRIC]: {
     category: 'magic', sound: true,
     summary: 'Arcs électriques sur les toits.',

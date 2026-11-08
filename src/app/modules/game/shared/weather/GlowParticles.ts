@@ -613,6 +613,24 @@ export const FAIRY_STYLE: GlowStyle = {
   windSpeed: 8,
 };
 
+/** Rising energy: round teal sparks flowing straight up from the ground to the sky. */
+export const ENERGY_STYLE: GlowStyle = {
+  maxParticles: 210,
+  color: 0x45b49b,
+  palette: [0x6ff0d0, 0x2fd6b0, 0xa8ffe8],
+  intensity: 2.4,
+  rise: [12, 22],
+  wobble: 1.5,
+  wobbleSpeed: 0.8,
+  life: [3, 6],
+  size: [1.8, 3.2],
+  spawnHeight: [0, 4],
+  flicker: 0.35,
+  flickerSpeed: 3,
+  nearPlants: 0.2,
+  windSpeed: 6,
+};
+
 /** Spores: big soft green / purple lights slowly floating up from the ground and the plants. */
 export const SPORE_STYLE: GlowStyle = {
   maxParticles: 320,
