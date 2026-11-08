@@ -12,6 +12,9 @@ body {
   margin: 0 auto;
   position: relative;
   overflow: hidden;
+  // No browser zoom (pinch, double tap) nor page scroll on touch: the game handles its own gestures
+  touch-action: none;
+  overscroll-behavior: none;
   font-family: 'Roboto', sans-serif;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
 

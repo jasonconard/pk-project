@@ -58,6 +58,11 @@ interface SavedSettings {
 
 const SETTINGS_KEY = 'pk-weather-settings';
 
+/** Input / moves step (ms: 120 per second), most steps run at once, most time caught up at once (ms). */
+const INPUT_STEP = 1000 / 120;
+const MAX_INPUT_STEPS = 12;
+const MAX_INPUT_CATCH_UP = 250;
+
 /** Last saved settings; anything missing or invalid (old version, removed weather...) is left out. */
 function loadSettings(): Partial<SavedSettings> {
   let raw: Record<string, unknown>;
@@ -230,7 +235,24 @@ export class GameService {
       game.adaptQuality(game.framePerSec);
     }, 1000);
 
-    setInterval(() => this.inputLoop(game), 1000 / 120);
+    // Moves and inputs at a fixed 120 steps per second of real time: when the device is slow, the timer is called
+    // less often, so each call runs as many steps as the time elapsed (the walking speed doesn't depend on the fps)
+    let lastInput = performance.now();
+    let pending = 0;
+    setInterval(() => {
+      const now = performance.now();
+      pending += Math.min(now - lastInput, MAX_INPUT_CATCH_UP);
+      lastInput = now;
+      let steps = 0;
+      while (pending >= INPUT_STEP && steps < MAX_INPUT_STEPS) {
+        this.inputLoop(game);
+        pending -= INPUT_STEP;
+        steps++;
+      }
+      if (steps === MAX_INPUT_STEPS) {
+        pending = 0; // far behind (tab in background...): don't try to catch up
+      }
+    }, INPUT_STEP);
 
     // Time going by: small steps (the light and the sun move smoothly in between, see WeatherHelper)
     setInterval(() => {
