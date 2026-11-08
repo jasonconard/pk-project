@@ -1,0 +1,62 @@
+.update-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.update-dialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3001;
+  width: min(320px, calc(100% - 32px));
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(34, 35, 42, 0.97);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 14px;
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0 0 6px;
+  }
+
+  .hint {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .later, .install {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .later {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .install {
+    background: #4f8cff;
+    color: white;
+  }
+}

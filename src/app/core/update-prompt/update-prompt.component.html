@@ -1,0 +1,12 @@
+@if (update(); as u) {
+  <div class="update-backdrop" (click)="later()"></div>
+  <div class="update-dialog" role="dialog" aria-labelledby="update-title">
+    <h2 id="update-title">Mise à jour disponible</h2>
+    <p>La version <strong>{{ u.version }}</strong> est sortie (tu as la {{ current }}).</p>
+    <p class="hint">Le fichier ({{ u.sizeMb }} Mo) se télécharge, puis Android propose de l'installer.</p>
+    <div class="actions">
+      <button type="button" class="later" (click)="later()">Plus tard</button>
+      <a class="install" [href]="u.apkUrl" (click)="later()">Mettre à jour</a>
+    </div>
+  </div>
+}
