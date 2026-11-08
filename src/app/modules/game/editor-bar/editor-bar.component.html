@@ -1,0 +1,89 @@
+<div class="top">
+  <button type="button" class="edit-btn" [class.active]="editMode()" [attr.aria-pressed]="editMode()"
+          [title]="editMode() ? 'Quitter l\'édition (B)' : 'Éditer la carte (B)'" (click)="toggle($event)">
+    <span class="icon" aria-hidden="true">🛠️</span>
+    <span class="label">{{ editMode() ? 'Quitter l\'édition' : 'Éditer' }}</span>
+    <kbd>B</kbd>
+  </button>
+  @if (editMode()) {
+    <div class="history" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+      <button type="button" class="icon-btn" title="Annuler (Ctrl+Z)" aria-label="Annuler"
+              [disabled]="!canUndo()" (click)="send('undo', $event)">↶</button>
+      <button type="button" class="icon-btn" title="Refaire (Ctrl+Y)" aria-label="Refaire"
+              [disabled]="!canRedo()" (click)="send('redo', $event)">↷</button>
+      <button type="button" class="text-btn" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
+              (click)="send('export', $event)">⬇ Exporter</button>
+      <button type="button" class="text-btn" [class.danger]="confirmReset()"
+              [title]="confirmReset() ? 'Clique encore pour oublier les modifications' : 'Revenir à la carte du code (oublie les modifications enregistrées dans le navigateur)'"
+              (click)="reset($event)">{{ confirmReset() ? 'Confirmer ?' : '⟲ Réinitialiser' }}</button>
+    </div>
+    <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+      @if (tileId()) {
+        Clic / glisser : peindre le sol · Clic droit glissé : déplacer la vue · Échap : reposer le pinceau
+      } @else if (modelId()) {
+        Clic : poser · Échap : reposer le modèle · Glisser : déplacer la vue · Molette : zoom
+      } @else if (selection()) {
+        Glisser l'objet : le déplacer · Suppr : supprimer · Échap : désélectionner
+      } @else {
+        Clic sur un objet : le sélectionner · Glisser : déplacer la vue · Molette : zoom · Choisis un modèle en bas pour le poser
+      }
+    </p>
+  }
+</div>
+
+@if (editMode() && selection(); as selection) {
+  <section class="selection" aria-label="Objet sélectionné" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    <h2>
+      @if (thumbs()[selection.modelId]; as thumb) {
+        <img [src]="thumb" alt="" />
+      }
+      {{ selectionLabel() }}
+    </h2>
+    <label class="option">
+      <input type="checkbox" [checked]="!selection.passable" (change)="send('togglePassable', $event)" />
+      Bloque le passage
+    </label>
+    <label class="option">
+      <input type="checkbox" [checked]="selection.canHide" (change)="send('toggleCanHide', $event)" />
+      Transparent quand le joueur est derrière
+    </label>
+    <button type="button" class="delete" (click)="send('delete', $event)">🗑 Supprimer <kbd>Suppr</kbd></button>
+  </section>
+}
+
+@if (editMode()) {
+  <div class="palette" role="toolbar" aria-label="Modèles à poser" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    <button type="button" class="entry none" title="Aucun (Échap) : la souris sélectionne et déplace la vue"
+            [class.selected]="!modelId() && !tileId()" [attr.aria-pressed]="!modelId() && !tileId()" (click)="pick(null, $event); tileSelected.emit(null)">
+      <span class="pic" aria-hidden="true">✋</span>
+      <span class="name">Aucun</span>
+    </button>
+    @for (entry of entries; track entry.id) {
+      <button type="button" class="entry" [title]="entry.label"
+              [class.selected]="entry.id === modelId()" [attr.aria-pressed]="entry.id === modelId()"
+              (click)="pick(entry.id, $event)">
+        <span class="pic">
+          @if (thumbs()[entry.id]; as thumb) {
+            <img [src]="thumb" alt="" />
+          }
+        </span>
+        <span class="name">{{ entry.label }}</span>
+      </button>
+    }
+    <span class="separator" aria-hidden="true"></span>
+    @for (tile of tiles; track tile.id) {
+      <button type="button" class="entry tile" [title]="'Sol : ' + tile.label"
+              [class.selected]="tile.id === tileId()" [attr.aria-pressed]="tile.id === tileId()"
+              (click)="pickTile(tile.id, $event)">
+        <span class="pic"><span class="tile-pic" [style.background]="tile.background"></span></span>
+        <span class="name">{{ tile.label }}</span>
+      </button>
+    }
+    <button type="button" class="entry tile" title="Gomme : revenir au sol d'origine"
+            [class.selected]="tileId() === 'erase'" [attr.aria-pressed]="tileId() === 'erase'"
+            (click)="pickTile('erase', $event)">
+      <span class="pic" aria-hidden="true">🧽</span>
+      <span class="name">Gomme</span>
+    </button>
+  </div>
+}

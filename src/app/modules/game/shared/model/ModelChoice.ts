@@ -8,6 +8,7 @@ import { MD_TREE } from '../../../../../assets/models/md-tree';
 import { MD_HOUSE } from '../../../../../assets/models/md-house';
 import { MD_WOOD_PANNEL } from '../../../../../assets/models/md-wood-pannel';
 import { MD_LETTER_BOX } from '../../../../../assets/models/md-letter-box';
+import { MD_ROCK } from '../../../../../assets/models/md-rock';
 
 export interface ModelChoice {
   texPos: VecBox2,
@@ -16,6 +17,13 @@ export interface ModelChoice {
 }
 
 export const MODEL_CHOICES: ModelChoice[] = [
+    {
+      model: MD_ROCK,
+      texPos: {
+        min: { x: 0, y: 0},
+        max: { x: 16, y: 16}
+      }
+    },
     {
       model: MD_LABO,
       texPos: {
@@ -73,3 +81,23 @@ export const MODEL_CHOICES: ModelChoice[] = [
       }
     }
 ]
+
+/** Thumbnail of a model (its `texPos` crop of the texture), as a data URL; cached on the choice. */
+export function loadModelThumb(choice: ModelChoice): Promise<string> {
+  if (choice.croppedPic) {
+    return Promise.resolve(choice.croppedPic);
+  }
+  return new Promise(resolve => {
+    const canvas = document.createElement('canvas');
+    canvas.width = choice.texPos.max.x - choice.texPos.min.x;
+    canvas.height = choice.texPos.max.y - choice.texPos.min.y;
+    const img = document.createElement('img');
+    img.addEventListener('load', () => {
+      canvas.getContext('2d')?.drawImage(img, choice.texPos.min.x, choice.texPos.min.y, canvas.width, canvas.height,
+        0, 0, canvas.width, canvas.height);
+      choice.croppedPic = canvas.toDataURL();
+      resolve(choice.croppedPic);
+    }, { once: true });
+    img.src = choice.model.tex.link;
+  });
+}

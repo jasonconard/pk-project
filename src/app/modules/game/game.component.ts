@@ -5,15 +5,16 @@ import { StickComponent } from '../../core/stick/stick.component';
 import { TouchPadComponent } from '../../core/touch-pad/touch-pad.component';
 import { MessageComponent } from '../../core/message/message.component';
 import { TeleportComponent } from './teleport/teleport.component';
-import { ModelChoiceComponent } from './model-choice/model-choice.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { TemperatureGaugeComponent } from './temperature-gauge/temperature-gauge.component';
+import { EditorBarComponent } from './editor-bar/editor-bar.component';
+import { EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, ModelChoiceComponent, FightUiComponent, WeatherPanelComponent, TemperatureGaugeComponent],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, TemperatureGaugeComponent, EditorBarComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -44,8 +45,16 @@ export class GameComponent {
     this.gameService.togglePaused();
   }
 
-  protected updateModelChoice(modelId: string): void {
-    this.gameService.selectDrawModel(modelId);
+  protected editCommand(command: EditCommand): void {
+    this.gameService.editCommand(command);
+  }
+
+  protected selectEditTile(tileId: string | null): void {
+    this.gameService.selectEditTile(tileId);
+  }
+
+  protected selectEditModel(modelId: string | null): void {
+    this.gameService.selectEditModel(modelId);
   }
 
   protected setWeather(type: WeatherType): void {
@@ -82,6 +91,10 @@ export class GameComponent {
 
   protected setTimeFlow(flowing: boolean): void {
     this.gameService.setTimeFlow(flowing);
+  }
+
+  protected toggleEditMode(): void {
+    this.gameService.toggleEditMode();
   }
 
   protected toggleGameMode(): void {

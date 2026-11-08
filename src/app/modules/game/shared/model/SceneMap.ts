@@ -17,7 +17,9 @@ export interface SceneChunk {
   visible?: boolean,
   group?: THREE.Group,
   buildings: SceneBuilding[],
-  grounds: ChunkGround[]
+  grounds: ChunkGround[],
+  /** Ground tiles painted in the editor over the first ground: 'column,row' (TILE_SIZE cells from the chunk corner) → tile id. */
+  tiles?: Record<string, string>
 }
 
 

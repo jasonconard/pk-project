@@ -1,0 +1,305 @@
+:host {
+  position: absolute;
+  top: 10px;
+  left: 110px; // right of the fps counter
+  z-index: 800;
+  color: white;
+  pointer-events: none; // only the controls catch clicks
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.history {
+  pointer-events: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(34, 35, 42, 0.9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font-size: 20px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(64, 66, 78, 0.95);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+    outline-offset: 2px;
+  }
+}
+
+.text-btn {
+  height: 40px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(34, 35, 42, 0.9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(64, 66, 78, 0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+    outline-offset: 2px;
+  }
+
+  &.danger {
+    background: rgba(200, 60, 50, 0.9);
+  }
+}
+
+// Selected object: options under the top bar
+.selection {
+  pointer-events: auto;
+  width: 250px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(34, 35, 42, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+
+  h2 {
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+
+    img {
+      max-width: 40px;
+      max-height: 32px;
+      image-rendering: pixelated;
+    }
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    cursor: pointer;
+
+    input {
+      accent-color: #ffb04a;
+    }
+  }
+
+  .delete {
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(220, 70, 60, 0.25);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(220, 70, 60, 0.45);
+    }
+
+    kbd {
+      padding: 0 4px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.14);
+      font: inherit;
+      font-size: 10px;
+      opacity: 0.7;
+    }
+  }
+}
+
+.edit-btn {
+  pointer-events: auto;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(34, 35, 42, 0.9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out;
+
+  .icon {
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  kbd {
+    padding: 0 4px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.14);
+    font: inherit;
+    font-size: 10px;
+    opacity: 0.7;
+  }
+
+  &:hover {
+    background: rgba(64, 66, 78, 0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+    outline-offset: 2px;
+  }
+
+  // Edit mode on: orange outline, like a "recording" state
+  &.active {
+    box-shadow: 0 0 0 2px #ffb04a, 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Controls reminder: centered just above the palette
+.hint {
+  position: fixed;
+  left: 50%;
+  bottom: 104px;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  text-align: center;
+  white-space: normal;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(34, 35, 42, 0.75);
+  font-size: 12px;
+}
+
+// Small screens: icon only, no hint
+@media (max-width: 640px) {
+  .edit-btn .label,
+  .edit-btn kbd,
+  .hint {
+    display: none;
+  }
+
+  :host {
+    left: 10px;
+    top: 56px;
+  }
+}
+
+// Models palette: bottom center
+.palette {
+  pointer-events: auto;
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background: rgba(34, 35, 42, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.entry {
+  flex: none;
+  width: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out;
+
+  .pic {
+    width: 56px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      image-rendering: pixelated;
+    }
+  }
+
+  .name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+    outline-offset: -2px;
+  }
+
+  &.selected {
+    background: rgba(255, 176, 74, 0.18);
+    box-shadow: inset 0 0 0 2px #ffb04a;
+  }
+}
+
+.separator {
+  flex: none;
+  width: 1px;
+  margin: 4px 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+// Ground tiles: square pictures, a bit smaller than the models
+.entry.tile {
+  width: 64px;
+
+  .tile-pic {
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+  }
+}

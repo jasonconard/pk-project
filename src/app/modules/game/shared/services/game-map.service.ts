@@ -7,17 +7,19 @@ import { SceneService } from "./scene.service";
 import { Vec3 } from "../model/SceneUtils";
 import { PlayerService } from "./player.service";
 import { EventService } from "./event.service";
-import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import * as THREE from 'three';
 import { SequenceService } from "./sequence.service";
 import { WORLD_MAP } from "../../../../../assets/map/world/world";
+import { MapEditorService } from "./map-editor.service";
+import { loadMapEdits } from "./map-storage";
 
 
 @Service()
 export class GameMapService {
   private readonly keyService = inject(KeyService);
   private readonly sequenceService = inject(SequenceService);
+  private readonly mapEditorService = inject(MapEditorService);
 
 
   private pixelSize = 8;
@@ -31,6 +33,8 @@ export class GameMapService {
     if(game.mapHelper) {
       Object.values(game.mapHelper.meshes).forEach(mesh => mesh.visible = true);
     } else {
+      // The map edited in the editor (saved in the browser) replaces the one of the code
+      loadMapEdits(WORLD_MAP);
       const mapHelper = new MapHelper({
         originGame: game,
         sceneMap: WORLD_MAP,
@@ -61,7 +65,12 @@ export class GameMapService {
     const mapHelper = game.mapHelper;
     const sprite = mapHelper?.scenePlayer.mesh;
     if(!mapHelper || !sprite) { return; }
-    if(game.paused || game.drawModelOpen) { return; }
+    if(game.paused) { return; }
+    // Map editor: the player is frozen, the camera moves instead
+    if(game.editMode) {
+      this.mapEditorService.update(game);
+      return;
+    }
     // No moves during a sequence, or while a tornado carries the player away
     const moveDetails = this.sequenceService.isRunning || game.weather.playerFlying ?
       { move: { x: 0, y: 0, z: 0 }, speed: 0, status: PlayerMoveStatus.STAYING } :
@@ -92,6 +101,7 @@ export class GameMapService {
       const ratio = this.pixelSize / this.moveSpeed;
       const collisions = { x: this.moveRatio.x * ratio, y: this.moveRatio.y * ratio, z: this.moveRatio.z * ratio };
       SceneService.checkCollisions(mapHelper, sprite, collisions);
+      SceneService.checkGroundCollisions(mapHelper, sprite, collisions);
       this.moveRatio = { x: collisions.x / ratio, y: collisions.y / ratio, z: collisions.z / ratio };
     }
 
@@ -132,8 +142,6 @@ export class GameMapService {
     }
 
 
-    this.funOption(mapHelper, sprite, this.keyService.pressedCodes);
-
     PlayerService.updatePlayerSprite({
       mapHelper: mapHelper,
       player: mapHelper.scenePlayer,
@@ -173,19 +181,6 @@ export class GameMapService {
     // CoreService.me.setLogs(camera.zoom);
     // camera.updateProjectionMatrix();
 
-  }
-
-
-  private canMakeFun = true;
-  private funOption(mapHelper: MapHelper, sprite: THREE.Object3D, pressedCodes: KeyCode[]) {
-    if(pressedCodes.indexOf(KeyCode.cancel) >= 0) {
-      if(this.canMakeFun) {
-        this.canMakeFun = false;
-        const playerPos = sprite.position;
-        mapHelper.addModelToCoords(mapHelper.originGame.drawModelId, new THREE.Vector3(playerPos.x,0,playerPos.z));
-        setTimeout( () => { this.canMakeFun = true; }, 50);
-      }
-    }
   }
 
 }

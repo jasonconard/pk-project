@@ -7,6 +7,33 @@ import { convertVec2, convertVec3 } from "./SceneUtils";
 import { MODELS } from "../../../../../assets/models/models";
 import { SceneBuilding } from "./SceneBuilding";
 import { MathService } from "../services/math.service";
+import { autotile, NEIGHBORS, terrainById, TILE_SIZE, TILESET_ANIM_LINK, TILESET_LINK, tilesetPos, waterFramePos } from "./Terrain";
+import { applyWeatherShader } from "../weather/weather-shader";
+
+/** A chunk ground drawn on a canvas: its texture, then the painted tiles over it. */
+interface PaintedGround {
+  ctx: CanvasRenderingContext2D;
+  texture: THREE.CanvasTexture;
+  base: HTMLImageElement | null;
+}
+
+/** Water animation step (ms per frame). */
+const WATER_STEP = 220;
+
+/** Pictures loaded once (ground textures, tiles). */
+const IMAGES = new Map<string, Promise<HTMLImageElement>>();
+function loadImage(link: string): Promise<HTMLImageElement> {
+  let image = IMAGES.get(link);
+  if (!image) {
+    image = new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.src = link;
+    });
+    IMAGES.set(link, image);
+  }
+  return image;
+}
 
 export interface MapHelperInit {
   originGame: Game;
@@ -73,11 +100,12 @@ export class MapHelper {
     this.updateVisibleChunks();
   }
 
-  public updateVisibleChunks() {
+  /** @param focus point the view is centered on (the player by default; the camera target in the editor) */
+  public updateVisibleChunks(focus?: THREE.Vector3) {
     const chunks = this.sceneMap.chunks;
-    const player = this.scenePlayer.mesh;
-    if (!player) { return; }
-    const comparePos = new THREE.Vector3(player.position.x, player.position.y, this.originGame.camera.position.z);
+    const center = focus ?? this.scenePlayer.mesh?.position;
+    if (!center) { return; }
+    const comparePos = new THREE.Vector3(center.x, center.y, this.originGame.camera.position.z);
     chunks.forEach(chunk => {
       chunk.visible = MapHelper.isChunkVisible(chunk, comparePos);
       if (chunk.group) {
@@ -112,6 +140,9 @@ export class MapHelper {
         this.addMesh(key, groundMesh, convertVec3(chunk.pos));
         ground.mesh = groundMesh;
         group.add(groundMesh);
+        if (chunk.tiles && Object.keys(chunk.tiles).length && ground === chunk.grounds[0]) {
+          this.paintedGround(chunk);
+        }
         // ground.mesh.rotation.x = Math.PI / -2;
       });
       // return;
@@ -136,38 +167,285 @@ export class MapHelper {
 
   }
 
-  private modelCount = 0;
-  public addModelToCoords(modelId: string, v: THREE.Vector3) {
-    const chunk = this.sceneMap.chunks[0];
-    const key = 'custom-model-' + (this.modelCount++);
-    const model = MODELS.find(m => m.id === modelId);
-    const building: SceneBuilding = {
-      id: key,
-      modelId,
-      pos: {x: v.x, y: v.y, z: v.z},
-      passable: true,
-      canHide: false,
-      originModel: model,
-      events: []
-    }
-    chunk.buildings.push(building);
+  private readonly paintedGrounds = new Map<string, PaintedGround>();
+  /** Water animation: current frame of the animated water tiles. */
+  private waterFrame = 0;
+  private waterTimer?: ReturnType<typeof setInterval>;
 
-    if(model && chunk.group) {
-      const buildingMesh = BasicMeshService.makeModel(model);
-      this.addMesh(chunk.id + '-' + key, buildingMesh, convertVec3(chunk.pos).add(convertVec3(building.pos)));
-      chunk.group.add(buildingMesh);
+  /** The ground cell (column, row from the chunk corner) under a world point, if any. */
+  public cellAt(x: number, z: number): { chunk: SceneChunk, col: number, row: number } | null {
+    const chunk = this.chunkAt(x, z);
+    if (!chunk) {
+      return null;
     }
-
+    const col = Math.floor((x - chunk.pos.x + chunk.size.x / 2) / TILE_SIZE);
+    const row = Math.floor((z - chunk.pos.z + chunk.size.y / 2) / TILE_SIZE);
+    return { chunk, col, row };
   }
+
+  /** Paints a ground cell with a tile (null = back to the original ground). */
+  public paintCell(chunk: SceneChunk, col: number, row: number, tileId: string | null) {
+    const key = col + ',' + row;
+    chunk.tiles ??= {};
+    if (tileId) {
+      chunk.tiles[key] = tileId;
+    } else {
+      delete chunk.tiles[key];
+    }
+    const painted = this.paintedGround(chunk);
+    if (painted) {
+      this.drawCell(chunk, painted, col, row);
+    }
+    // The painted neighbors change their borders (autotiling), in this chunk or the next one
+    for (const [dc, dr] of NEIGHBORS) {
+      const n = this.neighborCell(chunk, col + dc, row + dr);
+      const nPainted = n && n.chunk.tiles?.[n.col + ',' + n.row] ? this.paintedGround(n.chunk) : null;
+      if (n && nPainted) {
+        this.drawCell(n.chunk, nPainted, n.col, n.row);
+      }
+    }
+  }
+
+  /** A cell given from a chunk, possibly out of it (then in the chunk next to it). */
+  private neighborCell(chunk: SceneChunk, col: number, row: number): { chunk: SceneChunk, col: number, row: number } | null {
+    const cols = chunk.size.x / TILE_SIZE;
+    const rows = chunk.size.y / TILE_SIZE;
+    if (col >= 0 && row >= 0 && col < cols && row < rows) {
+      return { chunk, col, row };
+    }
+    const x = chunk.pos.x - chunk.size.x / 2 + (col + 0.5) * TILE_SIZE;
+    const z = chunk.pos.z - chunk.size.y / 2 + (row + 0.5) * TILE_SIZE;
+    return this.cellAt(x, z);
+  }
+
+  /** Does a neighbor terrain get a border? The water has none towards a beach (the sand tile draws the shore). */
+  private differs(terrainId: string, neighborId: string | undefined): boolean {
+    if (neighborId === terrainId) {
+      return false;
+    }
+    return !(terrainById(terrainId)?.blocking && neighborId === 'sand');
+  }
+
+  private terrainIdAt(chunk: SceneChunk, col: number, row: number): string | undefined {
+    const cell = this.neighborCell(chunk, col, row);
+    return cell?.chunk.tiles?.[cell.col + ',' + cell.row];
+  }
+
+  /**
+   * The chunk ground switches to its own canvas texture (the original texture, the tiles over it), with its own
+   * material (the textures are shared between chunks). The canvas has 1 px per world unit like the ground textures.
+   */
+  private paintedGround(chunk: SceneChunk): PaintedGround | null {
+    const existing = this.paintedGrounds.get(chunk.id);
+    const ground = chunk.grounds[0];
+    if (existing || !ground?.mesh) {
+      return existing ?? null;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = chunk.size.x;
+    canvas.height = chunk.size.y;
+    const ctx = canvas.getContext('2d')!;
+    ctx.imageSmoothingEnabled = false;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.magFilter = THREE.NearestFilter;
+    const old = ground.mesh.material as THREE.MeshLambertMaterial;
+    const material = applyWeatherShader(new THREE.MeshLambertMaterial({ map: texture, side: old.side }));
+    ground.mesh.material = material;
+    const painted: PaintedGround = { ctx, texture, base: null };
+    this.paintedGrounds.set(chunk.id, painted);
+    // Once the original texture is there: drawn whole, then every painted cell
+    this.waterTimer ??= setInterval(() => this.animateWater(), WATER_STEP);
+    loadImage(ground.link).then(base => {
+      painted.base = base;
+      ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
+      Object.keys(chunk.tiles ?? {}).forEach(key => {
+        const [col, row] = key.split(',').map(Number);
+        this.drawCell(chunk, painted, col, row);
+      });
+      texture.needsUpdate = true;
+    });
+    return painted;
+  }
+
+  /** Redraws the open water cells (no border) of the visible painted chunks with the next animation frame. */
+  private animateWater() {
+    this.waterFrame++;
+    loadImage(TILESET_ANIM_LINK).then(img => this.paintedGrounds.forEach((painted, chunkId) => {
+      const chunk = this.sceneMap.chunks.find(c => c.id === chunkId);
+      if (!chunk?.visible || !chunk.tiles) {
+        return;
+      }
+      let changed = false;
+      Object.entries(chunk.tiles).forEach(([key, id]) => {
+        const terrain = terrainById(id);
+        if (!terrain?.blocking) {
+          return;
+        }
+        const [col, row] = key.split(',').map(Number);
+        const differs = NEIGHBORS.map(([dc, dr]) => this.differs(id, this.terrainIdAt(chunk, col + dc, row + dr)));
+        const [c, r] = autotile(terrain, differs);
+        if (c !== terrain.center[0] || r !== terrain.center[1]) {
+          return; // shores stay still
+        }
+        const src = waterFramePos(id, this.waterFrame);
+        if (!src) {
+          return;
+        }
+        painted.ctx.drawImage(img, src.x, src.y, TILE_SIZE, TILE_SIZE, col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        changed = true;
+      });
+      if (changed) {
+        painted.texture.needsUpdate = true;
+      }
+    }));
+  }
+
+  private drawCell(chunk: SceneChunk, painted: PaintedGround, col: number, row: number) {
+    const x = col * TILE_SIZE;
+    const y = row * TILE_SIZE;
+    const tileId = chunk.tiles?.[col + ',' + row];
+    const terrain = terrainById(tileId);
+    if (terrain) {
+      loadImage(TILESET_LINK).then(img => {
+        // (still the same terrain once loaded: the cell may have been repainted meanwhile)
+        if (chunk.tiles?.[col + ',' + row] === tileId) {
+          // The tile whose borders match the neighbors (autotiling)
+          const ids = NEIGHBORS.map(([dc, dr]) => this.terrainIdAt(chunk, col + dc, row + dr));
+          const differs = ids.map(id => this.differs(tileId!, id));
+          // Beach: every different neighbor is water
+          const others = ids.filter(id => id !== tileId);
+          const shore = others.length > 0 && others.every(id => terrainById(id)?.blocking);
+          const src = tilesetPos(...autotile(terrain, differs, shore));
+          painted.ctx.drawImage(img, src.x, src.y, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+          painted.texture.needsUpdate = true;
+        }
+      });
+    } else if (painted.base) {
+      const sx = painted.base.width / chunk.size.x;
+      const sy = painted.base.height / chunk.size.y;
+      painted.ctx.drawImage(painted.base, x * sx, y * sy, TILE_SIZE * sx, TILE_SIZE * sy, x, y, TILE_SIZE, TILE_SIZE);
+      painted.texture.needsUpdate = true;
+    }
+  }
+
+  /** Chunk containing a world point (x, z), if any. */
+  public chunkAt(x: number, z: number): SceneChunk | undefined {
+    return this.sceneMap.chunks.find(c =>
+      Math.abs(x - c.pos.x) <= c.size.x / 2 && Math.abs(z - c.pos.z) <= c.size.y / 2);
+  }
+
+  /**
+   * Map editor: adds a building / nature object at a world position, in the chunk under it. Its options
+   * (passable, canHide) are those most used by the same model on the map. Returns null outside the map.
+   */
+  public addBuildingAt(modelId: string, world: THREE.Vector3): SceneBuilding | null {
+    const chunk = this.chunkAt(world.x, world.z);
+    const model = MODELS.find(m => m.id === modelId);
+    if (!chunk || !model || !chunk.group) {
+      return null;
+    }
+    const building: SceneBuilding = {
+      id: `${modelId}-${Date.now().toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`,
+      modelId,
+      pos: { x: world.x - chunk.pos.x, y: world.y - chunk.pos.y, z: world.z - chunk.pos.z },
+      ...this.defaultOptions(modelId),
+      originModel: model,
+      events: [],
+    };
+    this.addBuilding(chunk, building);
+    return building;
+  }
+
+  /** Puts a building (new, or removed earlier: undo) in a chunk and in the scene. */
+  public addBuilding(chunk: SceneChunk, building: SceneBuilding) {
+    const model = building.originModel ?? MODELS.find(m => m.id === building.modelId);
+    if (!model || !chunk.group) {
+      return;
+    }
+    building.originModel = model;
+    chunk.buildings.push(building);
+    const mesh = BasicMeshService.makeModel(model);
+    this.addMesh(chunk.id + '-' + building.id, mesh, convertVec3(chunk.pos).add(convertVec3(building.pos)));
+    chunk.group.add(mesh);
+  }
+
+  /** Takes a building out of its chunk and of the scene (its data can be added back: undo). */
+  public removeBuilding(chunk: SceneChunk, building: SceneBuilding) {
+    const key = chunk.id + '-' + building.id;
+    const mesh = this.meshes[key];
+    mesh?.removeFromParent();
+    delete this.meshes[key];
+    chunk.buildings = chunk.buildings.filter(b => b !== building);
+  }
+
+  /** Moves a building to a world position, changing its chunk if it crosses a border. False outside the map. */
+  public moveBuilding(chunk: SceneChunk, building: SceneBuilding, world: THREE.Vector3): boolean {
+    const target = this.chunkAt(world.x, world.z);
+    if (!target) {
+      return false;
+    }
+    if (target !== chunk) {
+      this.removeBuilding(chunk, building);
+      building.pos = { x: world.x - target.pos.x, y: world.y - target.pos.y, z: world.z - target.pos.z };
+      this.addBuilding(target, building);
+      return true;
+    }
+    building.pos = { x: world.x - chunk.pos.x, y: world.y - chunk.pos.y, z: world.z - chunk.pos.z };
+    this.meshes[chunk.id + '-' + building.id]?.position.copy(world);
+    return true;
+  }
+
+  /** World position of a building. */
+  public buildingWorldPos(chunk: SceneChunk, building: SceneBuilding): THREE.Vector3 {
+    return convertVec3(chunk.pos).add(convertVec3(building.pos));
+  }
+
+  /** The building a scene object (one of its meshes) belongs to, if any. */
+  public findBuilding(object: THREE.Object3D): { chunk: SceneChunk, building: SceneBuilding } | null {
+    for (const chunk of this.sceneMap.chunks) {
+      for (const building of chunk.buildings) {
+        const mesh = this.meshes[chunk.id + '-' + building.id];
+        let o: THREE.Object3D | null = object;
+        while (o) {
+          if (o === mesh) {
+            return { chunk, building };
+          }
+          o = o.parent;
+        }
+      }
+    }
+    return null;
+  }
+
+  /** Building meshes that can be clicked (visible chunks, not hidden near the camera). */
+  public pickableBuildingMeshes(): THREE.Object3D[] {
+    return this.sceneMap.chunks
+      .filter(chunk => chunk.visible)
+      .flatMap(chunk => chunk.buildings.map(b => this.meshes[chunk.id + '-' + b.id]))
+      .filter((mesh): mesh is THREE.Object3D => !!mesh && mesh.visible);
+  }
+
+  /** Options used by most buildings of this model on the map (a new tree behaves like the other trees). */
+  private defaultOptions(modelId: string): { passable: boolean, canHide: boolean } {
+    const votes = new Map<string, number>();
+    this.sceneMap.chunks.forEach(c => c.buildings.forEach(b => {
+      if (b.modelId === modelId) {
+        const key = `${b.passable}-${b.canHide}`;
+        votes.set(key, (votes.get(key) ?? 0) + 1);
+      }
+    }));
+    const best = [...votes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    return best
+      ? { passable: best.startsWith('true'), canHide: best.endsWith('true') }
+      : { passable: false, canHide: false };
+  }
+
 
   public updateCameraAim() {
     const camera = this.originGame.camera;
-    camera.lookAt(
-      camera.position.x - CAMERA_LOOK.x,
-      camera.position.y - CAMERA_LOOK.y,
-      camera.position.z - CAMERA_LOOK.z
-    );
-    this.updateVisibleChunks();
+    camera.lookAt(this.originGame.getCameraTarget());
+    this.updateVisibleChunks(this.originGame.editMode ? this.originGame.getCameraTarget() : undefined);
   }
 
   public addMesh(key: string, mesh: THREE.Object3D, position?: THREE.Vector3) {
@@ -215,9 +493,11 @@ export class MapHelper {
     }
 
     // HIDE IF TOO FAR FOR CAMERA
+    // (farther when the editor zooms out)
+    const farLimit = TOO_FAR_LIMIT * Math.max(1, this.originGame.cameraZoom);
     const dist = MathService.getDist(mesh.position, camera.position);
-    if(dist > TOO_FAR_LIMIT) {
-      opacity = Math.max(0, 1 - (dist - TOO_FAR_LIMIT) / SHADE_OFFSET);
+    if(dist > farLimit) {
+      opacity = Math.max(0, 1 - (dist - farLimit) / SHADE_OFFSET);
       return opacity;
     }
 

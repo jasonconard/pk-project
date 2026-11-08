@@ -17,7 +17,7 @@ export interface WindSetting {
 /** The settings that open in a small popover under their toolbar button. */
 export type SettingPanel = 'hour' | 'wind' | 'clouds' | 'sound';
 
-/** Keyboard shortcuts (free keys: the game uses z q s d a e r f p o). M (weather catalog) is in the catalog. */
+/** Keyboard shortcuts (free keys: the game uses z q s d a e r f p o, the map editor b). M (weather catalog) is in the catalog. */
 const SHORTCUTS: Record<string, SettingPanel> = { h: 'hour', w: 'wind', n: 'clouds', v: 'sound' };
 /** Arrow steps: hour (h), gauges (share). */
 const HOUR_STEP = 0.25;

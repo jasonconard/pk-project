@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
+import type { EditSelection } from "../services/map-editor.service";
 
 export enum GameMode {
   MAP, FIGHT
@@ -30,7 +31,6 @@ export interface GameInit {
   renderer: THREE.WebGLRenderer;
   canvas: HTMLElement;
   mode: GameMode;
-  drawModelId: string;
 }
 
 export class Game {
@@ -51,8 +51,18 @@ export class Game {
   framePerSec = 0;
   paused = false;
 
-  drawModelOpen = false;
-  drawModelId: string;
+  /** Map editor: the player is frozen and the camera moves freely (see MapEditorService). */
+  editMode = false;
+  /** Map editor: model being placed (null = none selected: the mouse only moves the camera). */
+  editModelId: string | null = null;
+  /** Map editor: ground tile being painted ('erase' = original ground, null = none). */
+  editTileId: string | null = null;
+  /** Map editor: the selected object (null = none), and whether there are changes to undo / redo. */
+  editSelection: EditSelection | null = null;
+  editCanUndo = false;
+  editCanRedo = false;
+  /** Camera distance factor: 1 = normal view, the editor zooms in (< 1) and out (> 1). */
+  cameraZoom = 1;
 
   constructor(o: GameInit) {
     this.scene = o.scene;
@@ -60,7 +70,6 @@ export class Game {
     this.canvas = o.canvas;
     this.renderer = o.renderer;
     this.mode = o.mode;
-    this.drawModelId = o.drawModelId;
 
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -89,9 +98,14 @@ export class Game {
     return sun;
   }
 
+  /** Camera position relative to the point it looks at (CAMERA_LOOK, scaled by the zoom). */
+  public cameraOffset(): THREE.Vector3 {
+    return CAMERA_LOOK.clone().multiplyScalar(this.cameraZoom);
+  }
+
   /** Point of the ground the camera is looking at. */
   public getCameraTarget(): THREE.Vector3 {
-    return this.camera.position.clone().sub(CAMERA_LOOK);
+    return this.camera.position.clone().sub(this.cameraOffset());
   }
 
   /** Keep the sun (and its shadow area) centered on the camera target, lighting from `sunDir`. */

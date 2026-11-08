@@ -3,6 +3,7 @@ import { MapHelper } from "../model/MapHelper";
 import * as THREE from 'three';
 import { GameMode, Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
+import { EditCommand, EditSelection, MapEditorService } from './map-editor.service';
 import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
@@ -17,8 +18,16 @@ export interface GameHud {
   /** Air temperature (°C, rounded to 0.1). */
   temperature: number;
   mode: GameMode;
-  drawModelOpen: boolean;
-  drawModelId: string;
+  /** Map editor: model being placed (null = none). */
+  editModelId: string | null;
+  /** Map editor: ground tile being painted. */
+  editTileId: string | null;
+  /** Map editor open (free camera, player frozen). */
+  editMode: boolean;
+  /** Map editor: selected object, changes to undo / redo. */
+  editSelection: EditSelection | null;
+  editCanUndo: boolean;
+  editCanRedo: boolean;
   mapHelper: MapHelper | null;
 }
 
@@ -108,6 +117,7 @@ export class GameService {
   private readonly keyService = inject(KeyService);
   private readonly fightService = inject(FightService);
   private readonly gameMapService = inject(GameMapService);
+  private readonly mapEditorService = inject(MapEditorService);
 
   private game: Game | null = null;
 
@@ -181,9 +191,9 @@ export class GameService {
     const game = new Game({
       scene, raycaster, renderer, canvas,
       mode: gameMode,
-      drawModelId: 'flowers',
     });
     this.game = game;
+    this.mapEditorService.attach(game);
     // Start with the settings shown in the UI
     game.weather.setWeather(this.weatherState());
     game.weather.setHour(this.hourState());
@@ -254,7 +264,7 @@ export class GameService {
 
     this.keyService.updateGamePadKeys();
 
-    if(!game.paused && !game.drawModelOpen) {
+    if(!game.paused) {
       game.updateLights(dt);
       game.renderFrame();
     }
@@ -262,11 +272,8 @@ export class GameService {
     const pressedCodes = this.keyService.pressedCodes;
     if(pressedCodes.includes(KeyCode.pause)) {
       this.togglePaused();
-    } else if(pressedCodes.includes(KeyCode.select)) {
-      game.drawModelOpen = true;
     } else if(pressedCodes.includes(KeyCode.cancel)) {
       game.paused = false;
-      game.drawModelOpen = false;
     }
 
     this.keyService.clearPressedKey();
@@ -281,8 +288,12 @@ export class GameService {
       framePerSec: game.framePerSec,
       temperature: Math.round(game.weather.temperature * 10) / 10,
       mode: game.mode,
-      drawModelOpen: game.drawModelOpen,
-      drawModelId: game.drawModelId,
+      editModelId: game.editModelId,
+      editTileId: game.editTileId,
+      editSelection: game.editSelection,
+      editCanUndo: game.editCanUndo,
+      editCanRedo: game.editCanRedo,
+      editMode: game.editMode,
       mapHelper: game.mapHelper ?? null,
     } : null);
   }
@@ -378,10 +389,40 @@ export class GameService {
     }
   }
 
-  selectDrawModel(modelId: string) {
+  /** Opens / closes the map editor (on the map only, not during a fight or a loading). */
+  toggleEditMode() {
+    const game = this.game;
+    if (!game || game.loading || game.mode !== GameMode.MAP) {
+      return;
+    }
+    if (game.editMode) {
+      this.mapEditorService.exit(game);
+    } else {
+      this.mapEditorService.enter(game);
+    }
+    this.syncHud();
+  }
+
+  /** Map editor: undo, redo, delete, options of the selected object... */
+  editCommand(command: EditCommand) {
     if (this.game) {
-      this.game.drawModelId = modelId;
-      this.game.drawModelOpen = false;
+      this.mapEditorService.command(this.game, command);
+      this.syncHud();
+    }
+  }
+
+  /** Map editor: ground tile to paint ('erase', null = none). */
+  selectEditTile(tileId: string | null) {
+    if (this.game) {
+      this.mapEditorService.selectTile(this.game, tileId);
+      this.syncHud();
+    }
+  }
+
+  /** Map editor: model to place with the mouse (null = none). */
+  selectEditModel(modelId: string | null) {
+    if (this.game) {
+      this.mapEditorService.selectModel(this.game, modelId);
       this.syncHud();
     }
   }

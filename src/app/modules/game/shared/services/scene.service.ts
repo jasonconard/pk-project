@@ -4,6 +4,10 @@ import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { PlayerDirection, PlayerMoveStatus } from "../model/ScenePlayer";
 import { MapHelper } from "../model/MapHelper";
 import { Vec3 } from "../model/SceneUtils";
+import { terrainById } from "../model/Terrain";
+
+/** How far ahead of the player a blocking ground stops them (world units). */
+const GROUND_MARGIN = 6;
 
 @Service()
 export class SceneService {
@@ -48,6 +52,21 @@ export class SceneService {
         });
       }
     });
+  }
+
+  /**
+   * Blocking ground (water): the player stops before entering a cell of a blocking terrain. Checked a few units
+   * ahead in the move direction, so the sprite doesn't walk half into the water.
+   */
+  public static checkGroundCollisions(mapHelper: MapHelper, playerMesh: THREE.Object3D, move: Vec3) {
+    const ahead = (v: number) => Math.sign(v) * GROUND_MARGIN;
+    const x = playerMesh.position.x + move.x + ahead(move.x);
+    const z = playerMesh.position.z + move.z + ahead(move.z);
+    const cell = mapHelper.cellAt(x, z);
+    if (cell && terrainById(cell.chunk.tiles?.[cell.col + ',' + cell.row])?.blocking) {
+      move.x = 0;
+      move.z = 0;
+    }
   }
 
   public static getMove(mapHelper: MapHelper, holdedCodes: KeyCode[]): { move: THREE.Vector3, speed: number, status: PlayerMoveStatus } {

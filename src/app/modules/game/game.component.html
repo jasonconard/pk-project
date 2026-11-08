@@ -10,6 +10,11 @@
 
 @if (hud(); as hud) {
   <game-temperature-gauge [temperature]="hud.temperature" />
+  @if (hud.mode === GameMode.MAP) {
+    <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [selection]="hud.editSelection"
+                     [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo"
+                     (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (command)="editCommand($event)" />
+  }
 }
 
 <game-weather-panel [weather]="weather()" [night]="night()" [hour]="hour()" [timeFlow]="timeFlow()"
@@ -40,13 +45,6 @@
   <core-teleport [mapHelper]="mapHelper" />
 }
 
-@if (hud(); as hud) {
-  @if (hud.drawModelOpen) {
-    <mapping-model-choice animate.enter="anim-fade-in" animate.leave="anim-fade-out"
-      [selectedModel]="hud.drawModelId"
-      (modelSelected)="updateModelChoice($event)" />
-  }
-}
 
 @if (hud()?.mode === GameMode.FIGHT) {
   <fight-ui />

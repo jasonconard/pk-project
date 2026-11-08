@@ -6,6 +6,7 @@ import { MD_TREE } from './md-tree';
 import { MD_HOUSE } from './md-house';
 import { MD_WOOD_PANNEL } from './md-wood-pannel';
 import { MD_LETTER_BOX } from './md-letter-box';
+import { MD_ROCK } from './md-rock';
 import { SceneModel } from '../../app/modules/game/shared/model/SceneModel';
 
 export const MODELS: SceneModel[] = [
@@ -16,5 +17,6 @@ export const MODELS: SceneModel[] = [
   MD_TREE,
   MD_HOUSE,
   MD_WOOD_PANNEL,
-  MD_LETTER_BOX
+  MD_LETTER_BOX,
+  MD_ROCK
 ];
