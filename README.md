@@ -31,6 +31,8 @@ in full screen, and shows up in the phone's game tools.
   kept safe (outside the repo), and given to the workflow as repository secrets: `PK_KEYSTORE_BASE64`
   (`base64 -i pk-release.jks | pbcopy`), `PK_KEYSTORE_PASSWORD`, `PK_KEY_ALIAS`, `PK_KEY_PASSWORD`.
   Without them, a local build is signed with the debug key.
+- Updates: at launch, the app reads the latest GitHub release (`core/update-prompt`). If its tag is newer than the
+  app version, it offers to download the APK; Android then installs it over the current version.
 
 ## Code scaffolding
 

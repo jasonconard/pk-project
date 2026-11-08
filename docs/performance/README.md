@@ -2,7 +2,7 @@
 
 Le jeu ramait sur mobile (RedMagic : 26 à 40 FPS, instable, surtout en marchant et sous certaines météos). Cette page retrace les mesures et les optimisations, dans l'ordre où elles ont été faites, avec ce qu'il faut en retenir.
 
-**Résultat** (RedMagic, qualité Haute, météo Poison) : 60 FPS stables, pire image à 18–20 ms. Avant, on avait 26 à 40 FPS instables, 600 à 940 appels de dessin par image et des pires images à 25–42 ms.
+**Résultat** (RedMagic, qualité Haute, météo Poison) : 60 FPS stables dans le navigateur, pire image à 18–20 ms. Avant, on avait 26 à 40 FPS instables, 600 à 940 appels de dessin par image et des pires images à 25–42 ms. Avec l'application Android et le mode jeu : **144 FPS stables** (voir « Sur téléphone »).
 
 ## 1. Mesurer d'abord : la console de diagnostic
 
@@ -93,6 +93,20 @@ Les gouttes et les flocons s'arrêtent sur le sol et les toits. La hauteur est t
 En Haute (avec ombres) : environ 900 → 93.
 
 ## Sur téléphone
+
+### L'application Android (recommandée)
+
+Sur Android, on installe l'APK plutôt que la PWA : RedMagic, qualité Haute, Game Space en performances maximales, **144 FPS stables** (la fréquence maximale de l'écran), contre 60 dans Chrome.
+
+Le jeu tourne dans la WebView d'Android, avec le même moteur que Chrome : il n'est pas plus rapide à dessiner. Le gain vient de ce qu'une application peut faire et qu'un onglet ne peut pas (`android/app/src/main/java/com/conardjason/pkproject/MainActivity.java`) :
+
+- **Fréquence d'écran maximale** : l'application demande le mode d'affichage le plus rapide de l'écran (`preferredDisplayModeId`). L'écran ne redescend plus à 60 ou 30 Hz quand l'image bouge peu.
+- **Mode jeu** : Game Space reconnaît l'application et lui donne les performances maximales.
+- Écran toujours allumé et plein écran.
+
+L'APK est publié à chaque version, avec une Release GitHub. Au lancement, l'application vérifie s'il en existe une plus récente et propose de l'installer (`core/update-prompt`).
+
+### Dans le navigateur
 
 - **30 FPS quand on ne touche à rien** : c'est l'écran qui baisse sa fréquence de rafraîchissement, et le navigateur suit. Dans les paramètres d'affichage, choisis une fréquence fixe (120 ou 144 Hz) au lieu du mode automatique. Dans les options pour les développeurs, active « Forcer la fréquence d'actualisation maximale » si elle existe. Désactive l'économie de batterie.
 - **Game Space (RedMagic)** : il ne reconnaît que les applications installées. Installe le jeu depuis Chrome (« Installer l'application »), puis ajoute-le dans Game Space. S'il n'y apparaît pas, ajoute Chrome lui-même.
