@@ -21,12 +21,22 @@ button {
   position: absolute;
   top: 10px;
   right: 58px;
+  // Never under the tiles on the left (temperature / fps, edit button): the weather name gets cut instead
+  max-width: calc(100% - 58px - 200px);
   display: flex;
+  justify-content: flex-end;
   gap: 6px;
 }
 
 .tool {
   position: relative;
+  flex: none;
+
+  // The weather tool is the one that shrinks (its name truncated with "…")
+  &:first-child {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
 }
 
 .tool-btn {
@@ -65,10 +75,20 @@ button {
   }
 
   &.weather {
+    max-width: 100%;
+    min-width: 0;
     padding-left: 4px;
     font-weight: 600;
 
+    .tool-value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .weather-thumb {
+      flex: none;
       width: 50px;
       height: 32px;
       display: flex;
@@ -121,7 +141,11 @@ button {
 
 // Small screens: values and shortcuts hidden, icons only
 @media (max-width: 640px) {
-  .tool-btn .tool-value,
+  .toolbar {
+    max-width: calc(100% - 58px - 84px); // the edit button goes under the status tile
+  }
+
+  .tool-btn:not(.weather) .tool-value,
   .tool-btn kbd {
     display: none;
   }

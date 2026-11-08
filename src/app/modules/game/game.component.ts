@@ -1,4 +1,4 @@
-import { afterNextRender, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, viewChild } from '@angular/core';
 import { GameMode } from './shared/model/Game';
 import { GameService } from './shared/services/game.service';
 import { StickComponent } from '../../core/stick/stick.component';
@@ -6,15 +6,15 @@ import { TouchPadComponent } from '../../core/touch-pad/touch-pad.component';
 import { MessageComponent } from '../../core/message/message.component';
 import { TeleportComponent } from './teleport/teleport.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
-import { TemperatureGaugeComponent } from './temperature-gauge/temperature-gauge.component';
 import { EditorBarComponent } from './editor-bar/editor-bar.component';
+import { temperatureColor } from './shared/util/temperature-color';
 import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, TemperatureGaugeComponent, EditorBarComponent],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -36,6 +36,9 @@ export class GameComponent {
   protected readonly soundVolume = this.gameService.soundVolume;
   protected readonly soundMuted = this.gameService.soundMuted;
   protected readonly GameMode = GameMode;
+  /** Air temperature (°C, rounded) and its color, from icy blue to red. */
+  protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));
+  protected readonly temperatureColor = computed(() => temperatureColor(this.hud()?.temperature ?? 20));
 
   constructor() {
     afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
@@ -99,9 +102,5 @@ export class GameComponent {
 
   protected toggleEditMode(): void {
     this.gameService.toggleEditMode();
-  }
-
-  protected toggleGameMode(): void {
-    this.gameService.switchGameMode(this.hud()?.mode === GameMode.MAP ? GameMode.FIGHT : GameMode.MAP);
   }
 }

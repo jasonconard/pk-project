@@ -20,20 +20,51 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.5);
 }
 
-.fps-count {
+// Status tile (top left): temperature (colored from icy blue to red) above the frames per second
+.status-tile {
   position: absolute;
-  left: 0;
-  top: 0;
-  font-size: 24px;
-  width: 100px;
+  left: 10px;
+  top: 10px;
+  z-index: 800;
+  width: 64px;
   height: 40px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: 8px;
+  background: rgba(34, 35, 42, 0.9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   color: white;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
 
-  opacity: 0.4;
+  .temperature {
+    transition: color 600ms ease-in-out;
+  }
+
+  .fps {
+    color: #ff8a70; // below 30 fps
+
+    &:not(.slow) {
+      color: #ffc864; // 30 to 49 fps
+    }
+
+    &.ok {
+      color: #8fe08a;
+    }
+
+    small {
+      font-size: 9px;
+      font-weight: normal;
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
 }
 
 .axes-count {

@@ -2,14 +2,14 @@
 
 @if (hud(); as hud) {
   @if (hud.framePerSec) {
-    <div class="fps-count" (click)="toggleGameMode()">
-      {{ hud.framePerSec }} fps
+    <div class="status-tile" role="status" title="Température et images par seconde">
+      <span class="temperature" [style.color]="temperatureColor()">{{ temperatureLabel() }} °C</span>
+      <span class="fps" [class.ok]="hud.framePerSec >= 50" [class.slow]="hud.framePerSec < 30">{{ hud.framePerSec }} <small>fps</small></span>
     </div>
   }
 }
 
 @if (hud(); as hud) {
-  <game-temperature-gauge [temperature]="hud.temperature" />
   @if (hud.mode === GameMode.MAP) {
     <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [brush]="hud.editBrush" [selection]="hud.editSelection"
                      [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo"
