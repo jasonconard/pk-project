@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SceneChunk, SceneMap } from './SceneMap';
+import { SceneChunk, SceneMap, StairsSide, stairsSide } from './SceneMap';
 import { ScenePlayer } from './ScenePlayer';
 import { CAMERA_LOOK, Game, SHADE_OFFSET, SHADOW_AREA, TOO_CLOSE_LIMIT, TOO_FAR_LIMIT } from "./Game";
 import { BasicMeshService } from "../services/basic-mesh.service";
@@ -9,6 +9,7 @@ import { SceneBuilding } from "./SceneBuilding";
 import { MathService } from "../services/math.service";
 import { autotile, NEIGHBORS, terrainById, TILE_SIZE, TILESET_ANIM_LINK, TILESET_LINK, tilesetPos, waterFramePos } from "./Terrain";
 import { applyWeatherShader } from "../weather/weather-shader";
+import { buildGroundGeometry, LEVEL_HEIGHT, MAX_LEVEL, STAIRS_TILE } from "./GroundMesh";
 
 /** A chunk ground drawn on a canvas: its texture, then the painted tiles over it. */
 interface PaintedGround {
@@ -82,8 +83,20 @@ export class MapHelper {
     mat.depthWrite = true;
     mat.side = THREE.DoubleSide;
 
+    // Upright (not leaning back towards the camera: its top would go into a wall standing just behind the player),
+    // stretched so it still looks its normal height from the camera pitch
+    const stretch = 1 / Math.cos(Math.atan2(CAMERA_LOOK.y, CAMERA_LOOK.z));
+    spritePlane.scale.y = stretch;
+    // Shadow: an invisible copy (same geometry, so same walking frame) turned towards the sun casts it; the sprite
+    // itself faces the camera, the sun would light it edge-on and its shadow would be a thin line
+    const shadowMaterial = (spritePlane.material as THREE.Material).clone();
+    shadowMaterial.colorWrite = false;
+    shadowMaterial.depthWrite = false;
+    this.playerShadow = new THREE.Mesh(spritePlane.geometry, shadowMaterial);
+    this.playerShadow.castShadow = true;
+    spritePlane.add(this.playerShadow);
     spritePlane.position.x = 0;
-    spritePlane.position.y = p.tex.size.y / 2;
+    spritePlane.position.y = p.tex.size.y / 2 * stretch;
     spritePlane.position.z = 0;
     spriteGroup.add(spritePlane);
 
@@ -92,7 +105,6 @@ export class MapHelper {
 
     this.addMesh(p.id, spriteGroup);
     camera.position.x = spritePlane.position.x;
-    spriteGroup.lookAt(camera.position);
     scene.add(spriteGroup);
 
     this.scenePlayer.mesh = spriteGroup;
@@ -142,6 +154,13 @@ export class MapHelper {
         group.add(groundMesh);
         if (chunk.tiles && Object.keys(chunk.tiles).length && ground === chunk.grounds[0]) {
           this.paintedGround(chunk);
+        }
+        if (chunk.stairs && Object.keys(chunk.stairs).length && ground === chunk.grounds[0]) {
+          this.paintedGround(chunk);
+        }
+        if (((chunk.heights && Object.keys(chunk.heights).length) || (chunk.stairs && Object.keys(chunk.stairs).length))
+          && ground === chunk.grounds[0]) {
+          this.rebuildGround(chunk);
         }
         // ground.mesh.rotation.x = Math.PI / -2;
       });
@@ -206,6 +225,106 @@ export class MapHelper {
     }
   }
 
+  /** Ground level of a cell (possibly in the next chunk; 0 outside the map). */
+  public levelAt(chunk: SceneChunk, col: number, row: number): number {
+    const cell = this.neighborCell(chunk, col, row);
+    return cell?.chunk.heights?.[cell.col + ',' + cell.row] ?? 0;
+  }
+
+  /** Ground level under a world point (0 outside the map or on flat ground). */
+  public levelAtWorld(x: number, z: number): number {
+    const cell = this.cellAt(x, z);
+    return cell ? cell.chunk.heights?.[cell.col + ',' + cell.row] ?? 0 : 0;
+  }
+
+  /** Is there a stairs cell under a world point? */
+  public isStairsAt(x: number, z: number): boolean {
+    const cell = this.cellAt(x, z);
+    return !!cell?.chunk.stairs?.[cell.col + ',' + cell.row];
+  }
+
+  /**
+   * Puts / removes stairs on a cell: a ramp up one level towards `side` (null = no stairs), the stairs tile painted
+   * on it. 'auto' rises towards the neighbor exactly one level higher (north first), north if none.
+   */
+  public setStairs(chunk: SceneChunk, col: number, row: number, side: StairsSide | 'auto' | null) {
+    const key = col + ',' + row;
+    chunk.stairs ??= {};
+    if (side === 'auto') {
+      const level = this.levelAt(chunk, col, row);
+      const sides: [StairsSide, number, number][] = [['n', 0, -1], ['e', 1, 0], ['w', -1, 0], ['s', 0, 1]];
+      side = sides.find(([, dc, dr]) => this.levelAt(chunk, col + dc, row + dr) === level + 1)?.[0] ?? 'n';
+    }
+    if (side) {
+      chunk.stairs[key] = side;
+    } else {
+      delete chunk.stairs[key];
+    }
+    this.rebuildGround(chunk);
+    const painted = this.paintedGround(chunk);
+    if (painted) {
+      this.drawCell(chunk, painted, col, row);
+    }
+  }
+
+  /** Sets the ground level of a cell and rebuilds the ground (and the next chunk's on a border: its walls). */
+  public setLevel(chunk: SceneChunk, col: number, row: number, level: number) {
+    const key = col + ',' + row;
+    level = Math.max(0, Math.min(MAX_LEVEL, level));
+    chunk.heights ??= {};
+    if (level) {
+      chunk.heights[key] = level;
+    } else {
+      delete chunk.heights[key];
+    }
+    this.rebuildGround(chunk);
+    // The objects standing on the cell go up / down with it
+    chunk.buildings.forEach(building => {
+      const bc = Math.floor((building.pos.x + chunk.size.x / 2) / TILE_SIZE);
+      const br = Math.floor((building.pos.z + chunk.size.y / 2) / TILE_SIZE);
+      if (bc === col && br === row) {
+        building.pos = { ...building.pos, y: level * LEVEL_HEIGHT };
+        this.meshes[chunk.id + '-' + building.id]?.position.setY(chunk.pos.y + level * LEVEL_HEIGHT);
+      }
+    });
+    const cols = chunk.size.x / TILE_SIZE;
+    const rows = chunk.size.y / TILE_SIZE;
+    if (col === 0 || row === 0 || col === cols - 1 || row === rows - 1) {
+      for (const [dc, dr] of NEIGHBORS) {
+        const n = this.neighborCell(chunk, col + dc, row + dr);
+        if (n && n.chunk !== chunk) {
+          this.rebuildGround(n.chunk);
+        }
+      }
+    }
+  }
+
+  private wallMaterial?: THREE.MeshLambertMaterial;
+
+  /** The chunk ground becomes a grid of cells at their level, with rock walls (see buildGroundGeometry). */
+  private rebuildGround(chunk: SceneChunk) {
+    const mesh = chunk.grounds[0]?.mesh;
+    if (!mesh) {
+      return;
+    }
+    const old = mesh.geometry;
+    mesh.geometry = buildGroundGeometry(chunk, (col, row) => this.levelAt(chunk, col, row),
+      (col, row) => stairsSide(chunk.stairs?.[col + ',' + row]));
+    old.dispose();
+    if (!this.wallMaterial) {
+      const texture = new THREE.TextureLoader().load(TILESET_LINK);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestFilter;
+      this.wallMaterial = applyWeatherShader(new THREE.MeshLambertMaterial({ map: texture }));
+    }
+    if (!Array.isArray(mesh.material)) {
+      mesh.material = [mesh.material, this.wallMaterial];
+    }
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+  }
+
   /** A cell given from a chunk, possibly out of it (then in the chunk next to it). */
   private neighborCell(chunk: SceneChunk, col: number, row: number): { chunk: SceneChunk, col: number, row: number } | null {
     const cols = chunk.size.x / TILE_SIZE;
@@ -249,9 +368,11 @@ export class MapHelper {
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.magFilter = THREE.NearestFilter;
-    const old = ground.mesh.material as THREE.MeshLambertMaterial;
+    const current = ground.mesh.material;
+    const old = (Array.isArray(current) ? current[0] : current) as THREE.MeshLambertMaterial;
     const material = applyWeatherShader(new THREE.MeshLambertMaterial({ map: texture, side: old.side }));
-    ground.mesh.material = material;
+    // (with reliefs, the mesh has a second material: the walls)
+    ground.mesh.material = Array.isArray(current) ? [material, ...current.slice(1)] : material;
     const painted: PaintedGround = { ctx, texture, base: null };
     this.paintedGrounds.set(chunk.id, painted);
     // Once the original texture is there: drawn whole, then every painted cell
@@ -306,7 +427,22 @@ export class MapHelper {
     const y = row * TILE_SIZE;
     const tileId = chunk.tiles?.[col + ',' + row];
     const terrain = terrainById(tileId);
-    if (terrain) {
+    const stairs = stairsSide(chunk.stairs?.[col + ',' + row]);
+    if (stairs) {
+      loadImage(TILESET_LINK).then(img => {
+        if (stairsSide(chunk.stairs?.[col + ',' + row]) === stairs) {
+          // The steps are drawn for a ramp rising north: turned for the other sides
+          const src = tilesetPos(...STAIRS_TILE);
+          const ctx = painted.ctx;
+          ctx.save();
+          ctx.translate(x + TILE_SIZE / 2, y + TILE_SIZE / 2);
+          ctx.rotate({ n: 0, e: Math.PI / 2, s: Math.PI, w: -Math.PI / 2 }[stairs]);
+          ctx.drawImage(img, src.x, src.y, TILE_SIZE, TILE_SIZE, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+          ctx.restore();
+          painted.texture.needsUpdate = true;
+        }
+      });
+    } else if (terrain) {
       loadImage(TILESET_LINK).then(img => {
         // (still the same terrain once loaded: the cell may have been repainted meanwhile)
         if (chunk.tiles?.[col + ',' + row] === tileId) {
@@ -441,6 +577,22 @@ export class MapHelper {
       : { passable: false, canHide: false };
   }
 
+
+  /** Invisible copy of the player sprite casting its shadow (see buildPlayer). */
+  private playerShadow?: THREE.Mesh;
+
+  /** Turns the player's shadow caster towards the sun (horizontal direction from the player to the sun). */
+  public updatePlayerShadow() {
+    const caster = this.playerShadow;
+    const plane = caster?.parent;
+    if (!caster || !plane) {
+      return;
+    }
+    const sun = this.originGame.sun;
+    const dx = sun.position.x - sun.target.position.x;
+    const dz = sun.position.z - sun.target.position.z;
+    caster.rotation.y = Math.atan2(dx, dz) - plane.rotation.y;
+  }
 
   public updateCameraAim() {
     const camera = this.originGame.camera;

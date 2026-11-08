@@ -1,4 +1,4 @@
-import { SceneMap } from '../model/SceneMap';
+import { SceneMap, StairsSide } from '../model/SceneMap';
 import { SceneBuilding } from '../model/SceneBuilding';
 import { PlayerDirection } from '../model/ScenePlayer';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
@@ -16,6 +16,10 @@ interface StoredChunk {
   buildings: Omit<SceneBuilding, 'originModel'>[];
   /** Painted ground tiles. */
   tiles?: Record<string, string>;
+  /** Ground levels (reliefs). */
+  heights?: Record<string, number>;
+  /** Stairs cells. */
+  stairs?: Record<string, StairsSide | boolean>;
 }
 
 interface StoredMap {
@@ -48,6 +52,12 @@ export function loadMapEdits(map: SceneMap): boolean {
     if (saved?.buildings) {
       chunk.buildings = saved.buildings.map(b => ({ ...b }));
     }
+    if (saved?.heights) {
+      chunk.heights = { ...saved.heights };
+    }
+    if (saved?.stairs) {
+      chunk.stairs = { ...saved.stairs };
+    }
     if (saved?.tiles) {
       // (tiles of the first version renamed / dropped)
       chunk.tiles = {};
@@ -65,7 +75,7 @@ export function loadMapEdits(map: SceneMap): boolean {
 /** Saves the chunks content in the browser. */
 export function saveMapEdits(map: SceneMap) {
   const stored: StoredMap = { version: STORAGE_VERSION, chunks: {} };
-  map.chunks.forEach(chunk => stored.chunks[chunk.id] = { buildings: chunk.buildings.map(cleanBuilding), tiles: chunk.tiles });
+  map.chunks.forEach(chunk => stored.chunks[chunk.id] = { buildings: chunk.buildings.map(cleanBuilding), tiles: chunk.tiles, heights: chunk.heights, stairs: chunk.stairs });
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
   } catch {
@@ -145,6 +155,8 @@ export function exportChunksFile(map: SceneMap): string {
       buildings: chunk.buildings.map(cleanBuilding),
       grounds: chunk.grounds.map(({ mesh, ...ground }) => ground),
       tiles: chunk.tiles && Object.keys(chunk.tiles).length ? chunk.tiles : undefined,
+      heights: chunk.heights && Object.keys(chunk.heights).length ? chunk.heights : undefined,
+      stairs: chunk.stairs && Object.keys(chunk.stairs).length ? chunk.stairs : undefined,
     };
     return `export const ${constName(chunk.id)}: SceneChunk = ${toSource(data, '')};\n`;
   });

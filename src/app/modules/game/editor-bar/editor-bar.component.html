@@ -85,5 +85,24 @@
       <span class="pic" aria-hidden="true">🧽</span>
       <span class="name">Gomme</span>
     </button>
+    <span class="separator" aria-hidden="true"></span>
+    <button type="button" class="entry tile" title="Relief : monter le sol d'un niveau (clic / glisser)"
+            [class.selected]="tileId() === 'raise'" [attr.aria-pressed]="tileId() === 'raise'"
+            (click)="pickTile('raise', $event)">
+      <span class="pic" aria-hidden="true">⛰️</span>
+      <span class="name">Monter</span>
+    </button>
+    <button type="button" class="entry tile" title="Relief : descendre le sol d'un niveau (clic / glisser)"
+            [class.selected]="tileId() === 'lower'" [attr.aria-pressed]="tileId() === 'lower'"
+            (click)="pickTile('lower', $event)">
+      <span class="pic" aria-hidden="true">🕳️</span>
+      <span class="name">Descendre</span>
+    </button>
+    <button type="button" class="entry tile" title="Escalier : monte d'un niveau vers le haut de l'écran (la gomme l'enlève)"
+            [class.selected]="tileId() === 'stairs'" [attr.aria-pressed]="tileId() === 'stairs'"
+            (click)="pickTile('stairs', $event)">
+      <span class="pic" aria-hidden="true">🪜</span>
+      <span class="name">Escalier</span>
+    </button>
   </div>
 }

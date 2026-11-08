@@ -6,7 +6,7 @@ import { KeyService } from '../../../../core/shared/service/key.service';
 import { MODELS } from '../../../../../assets/models/models';
 import { BasicMeshService } from './basic-mesh.service';
 import { SceneBuilding } from '../model/SceneBuilding';
-import { SceneChunk } from '../model/SceneMap';
+import { SceneChunk, StairsSide, stairsSide } from '../model/SceneMap';
 import { TILE_SIZE } from '../model/Terrain';
 import { clearMapEdits, downloadChunksFile, saveMapEdits } from './map-storage';
 
@@ -48,6 +48,10 @@ interface EditAction {
 /** One painting stroke: each painted cell with its tile before and after (for undo / redo). */
 interface Stroke {
   cells: Map<string, { chunk: SceneChunk, col: number, row: number, before: string | null, after: string | null }>;
+  /** Height tool: each cell's level before / after (each cell moves one level per stroke). */
+  levels: Map<string, { chunk: SceneChunk, col: number, row: number, before: number, after: number }>;
+  /** Stairs tool / eraser: each cell's stairs before / after. */
+  stairs: Map<string, { chunk: SceneChunk, col: number, row: number, before: StairsSide | null, after: StairsSide | null }>;
 }
 
 interface Picked {
@@ -129,7 +133,7 @@ export class MapEditorService {
       if (ev.button !== 0) { return; }
       if (game.editTileId) {
         // Painting the ground: the press and every move paint
-        this.stroke = { cells: new Map() };
+        this.stroke = { cells: new Map(), levels: new Map(), stairs: new Map() };
         this.paintAt(game, ev.clientX, ev.clientY);
         el.setPointerCapture(ev.pointerId);
         return;
@@ -561,8 +565,30 @@ export class MapEditorService {
     if (!cell || !this.stroke || !game.mapHelper) {
       return;
     }
-    const after = game.editTileId === 'erase' ? null : game.editTileId;
     const key = cell.chunk.id + ':' + cell.col + ',' + cell.row;
+    if (game.editTileId === 'raise' || game.editTileId === 'lower') {
+      // Height tool: one level up / down per cell and per stroke
+      if (!this.stroke.levels.has(key)) {
+        const before = game.mapHelper.levelAt(cell.chunk, cell.col, cell.row);
+        const after = before + (game.editTileId === 'raise' ? 1 : -1);
+        game.mapHelper.setLevel(cell.chunk, cell.col, cell.row, after);
+        this.stroke.levels.set(key, { ...cell, before, after: game.mapHelper.levelAt(cell.chunk, cell.col, cell.row) });
+      }
+      return;
+    }
+    // Stairs tool puts stairs, the eraser removes them (with the painted terrain)
+    if (game.editTileId === 'stairs' || game.editTileId === 'erase') {
+      const before = stairsSide(cell.chunk.stairs?.[cell.col + ',' + cell.row]);
+      if (!this.stroke.stairs.has(key) && (before || game.editTileId === 'stairs')) {
+        game.mapHelper.setStairs(cell.chunk, cell.col, cell.row, game.editTileId === 'stairs' ? 'auto' : null);
+        const after = stairsSide(cell.chunk.stairs?.[cell.col + ',' + cell.row]);
+        this.stroke.stairs.set(key, { ...cell, before, after });
+      }
+      if (game.editTileId === 'stairs') {
+        return;
+      }
+    }
+    const after = game.editTileId === 'erase' ? null : game.editTileId;
     const before = cell.chunk.tiles?.[cell.col + ',' + cell.row] ?? null;
     if (before === after) {
       return;
@@ -576,14 +602,24 @@ export class MapEditorService {
   /** A stroke is undone / redone as a whole. */
   private endStroke(game: Game) {
     const cells = [...(this.stroke?.cells.values() ?? [])];
+    const levels = [...(this.stroke?.levels.values() ?? [])].filter(l => l.before !== l.after);
+    const stairs = [...(this.stroke?.stairs.values() ?? [])];
     this.stroke = null;
-    if (!cells.length || !game.mapHelper) {
+    if ((!cells.length && !levels.length && !stairs.length) || !game.mapHelper) {
       return;
     }
     const mapHelper = game.mapHelper;
     this.record(game, {
-      undo: () => cells.forEach(c => mapHelper.paintCell(c.chunk, c.col, c.row, c.before)),
-      redo: () => cells.forEach(c => mapHelper.paintCell(c.chunk, c.col, c.row, c.after)),
+      undo: () => {
+        cells.forEach(c => mapHelper.paintCell(c.chunk, c.col, c.row, c.before));
+        levels.forEach(l => mapHelper.setLevel(l.chunk, l.col, l.row, l.before));
+        stairs.forEach(s => mapHelper.setStairs(s.chunk, s.col, s.row, s.before));
+      },
+      redo: () => {
+        cells.forEach(c => mapHelper.paintCell(c.chunk, c.col, c.row, c.after));
+        levels.forEach(l => mapHelper.setLevel(l.chunk, l.col, l.row, l.after));
+        stairs.forEach(s => mapHelper.setStairs(s.chunk, s.col, s.row, s.after));
+      },
     });
   }
 
