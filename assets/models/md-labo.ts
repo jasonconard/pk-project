@@ -30,6 +30,7 @@ export const MD_LABO: SceneModel = {
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.5,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 112, y: 86}, max: {x: 0, y: 82}},

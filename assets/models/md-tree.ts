@@ -1,9 +1,10 @@
-import { SceneModel } from '../../app/modules/game/shared/model/SceneModel';
+import { SceneModel, SceneModelPlane } from '../../app/modules/game/shared/model/SceneModel';
 import { ObjSide } from '../../app/modules/game/shared/model/SceneMap';
 
 export const MD_TREE: SceneModel = {
   id: 'tree',
   tex: {link: 'assets/tex/tree.png', size: {x: 96, y: 120}},
+  sway: 0.5,
   hitBox: {
     min: {x: 0, y: 0, z: 8},
     max: {x: 0, y: 0, z: 8}
@@ -25,7 +26,7 @@ export const MD_TREE: SceneModel = {
     }
   }],
   planes: [
-    ...[1,-1].reduce((planes, j) => {
+    ...[1,-1].reduce<SceneModelPlane[]>((planes, j) => {
       return [...planes, ...[0,1,2,3].map(i => {
         const z = i === 4 ? 0 : -j*(2.8 + i/5);
         const rotX = i === 4 ? 0 : j * ((i+1) * 0.2);

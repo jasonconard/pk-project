@@ -26,6 +26,7 @@ export const MD_LETTER_BOX: SceneModel = {
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.8,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 0, y: 7}, max: {x: 12, y: 0}},
@@ -41,6 +42,7 @@ export const MD_LETTER_BOX: SceneModel = {
     rot: {x: 0, y: 0, z: 0},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.8,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 17, y: 9}, max: {x: 21, y: 8}},
@@ -56,6 +58,7 @@ export const MD_LETTER_BOX: SceneModel = {
     rot: {x: 0, y: 0, z: 0.8},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.8,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 13, y: 9}, max: {x: 17, y: 8}},
@@ -71,6 +74,7 @@ export const MD_LETTER_BOX: SceneModel = {
     rot: {x: 0, y: 0, z: -0.8},
     depthWrite: true,
     depthTest: true,
+    shininess: 0.8,
     side: ObjSide.BOTH,
     uvs: {
       front: {min: {x: 21, y: 9}, max: {x: 25, y: 8}},
