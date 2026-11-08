@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RENDER_DETAIL } from '../model/Quality';
 import type { Game } from '../model/Game';
 import { cloneWeatherParams, DAWN, DAWN_TINT, DAY_PRESETS, daylightAt, mistAt, DUSK, DUSK_TINT, getWeatherParams, isNightHour, twilightAt, WeatherParams, WeatherType } from './Weather';
 import { DARK_RADIUS, puddleAt, UNLIT_MATERIALS, WEATHER_UNIFORMS } from './weather-shader';
@@ -828,10 +829,11 @@ export class WeatherHelper {
     const p = this.current;
     // Frame with rays or bloom, into `target` (null = screen). False if none is needed.
     const drawFrame = (target: THREE.WebGLRenderTarget | null): boolean => {
-      if (p.godRays >= 0.01 && this.godRays.render(g.renderer, g.scene, g.camera, g.sun, this.sunDir, p.godRays, target)) {
+      // (no full screen effects at a low graphics quality)
+      if (RENDER_DETAIL.postEffects && p.godRays >= 0.01 && this.godRays.render(g.renderer, g.scene, g.camera, g.sun, this.sunDir, p.godRays, target)) {
         return true;
       }
-      if (p.windowGlow >= 0.01) {
+      if (RENDER_DETAIL.postEffects && p.windowGlow >= 0.01) {
         this.bloom.render(g.renderer, g.scene, g.camera, p.windowGlow, target);
         return true;
       }

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
-import { AUTO_HIGH_FPS, AUTO_HIGH_SECONDS, AUTO_LOW_FPS, AUTO_LOW_SECONDS, AUTO_MIN_RATIO, AUTO_RATIO_STEP, isTouchDevice, QUALITY_PRESETS, QualityMode } from "./Quality";
+import { AUTO_HIGH_FPS, AUTO_HIGH_SECONDS, AUTO_LOW_FPS, AUTO_LOW_SECONDS, AUTO_MIN_RATIO, AUTO_RATIO_STEP, isTouchDevice, QUALITY_PRESETS, QualityMode, RENDER_DETAIL } from "./Quality";
 import type { EditBrush, EditSelection } from "../services/map-editor.service";
 
 export enum GameMode {
@@ -115,7 +115,7 @@ export class Game {
   /** Keep the sun (and its shadow area) centered on the camera target, lighting from `sunDir`. */
   public placeSun(target: THREE.Vector3, sunDir: THREE.Vector3) {
     // Snap to the shadow-map texel grid so shadows don't shimmer while the camera moves
-    const texel = (SHADOW_AREA * 2) / this.shadowMapSize;
+    const texel = (SHADOW_AREA * 2) / (this.shadowMapSize || SHADOW_MAP_SIZE);
     const snapped = new THREE.Vector3(
       Math.round(target.x / texel) * texel,
       Math.round(target.y / texel) * texel,
@@ -138,17 +138,22 @@ export class Game {
   private slowSeconds = 0;
   private fastSeconds = 0;
 
-  /** Applies a quality mode: render resolution (capped screen density) and shadow texture size. */
+  /** Rendering detail in use (auto quality changes it): particles share, full screen effects. */
+  detail = 1;
+  postEffects = true;
+
+  /** Applies a quality mode: render resolution (capped screen density), shadows, particles, full screen effects. */
   public setQuality(mode: QualityMode) {
     this.qualityMode = mode;
     const preset = QUALITY_PRESETS[mode === 'auto' ? (isTouchDevice() ? 'medium' : 'high') : mode];
     this.slowSeconds = this.fastSeconds = 0;
-    this.applyResolution(Math.min(window.devicePixelRatio, preset.maxPixelRatio), preset.shadowMapSize);
+    this.applyQuality(Math.min(window.devicePixelRatio, preset.maxPixelRatio), preset.shadowMapSize, preset.detail, preset.postEffects);
   }
 
   /**
-   * Auto quality, called every second with the measured fps: too slow for a while → lower resolution (then
-   * smaller shadows once at the lowest resolution); fast for a while → back up, up to the high preset.
+   * Auto quality, called every second with the measured fps. Too slow for a while → one step down: lower
+   * resolution, then smaller shadows, then the low preset (no shadows, fewer particles, no full screen effects).
+   * Fast for a while → one step back up, the other way round, up to the high preset.
    */
   public adaptQuality(fps: number) {
     if (this.qualityMode !== 'auto' || this.paused || this.loading) {
@@ -156,34 +161,47 @@ export class Game {
     }
     this.slowSeconds = fps < AUTO_LOW_FPS ? this.slowSeconds + 1 : 0;
     this.fastSeconds = fps >= AUTO_HIGH_FPS ? this.fastSeconds + 1 : 0;
-    const maxRatio = Math.min(window.devicePixelRatio, QUALITY_PRESETS.high.maxPixelRatio);
+    const { high, medium, low } = QUALITY_PRESETS;
+    const maxRatio = Math.min(window.devicePixelRatio, high.maxPixelRatio);
+    const minShadows = medium.shadowMapSize / 2;
     if (this.slowSeconds >= AUTO_LOW_SECONDS) {
       this.slowSeconds = 0;
       if (this.pixelRatio > AUTO_MIN_RATIO) {
-        this.applyResolution(Math.max(AUTO_MIN_RATIO, this.pixelRatio - AUTO_RATIO_STEP), this.shadowMapSize);
-      } else if (this.shadowMapSize > QUALITY_PRESETS.low.shadowMapSize) {
-        this.applyResolution(this.pixelRatio, this.shadowMapSize / 2);
+        this.applyQuality(Math.max(AUTO_MIN_RATIO, this.pixelRatio - AUTO_RATIO_STEP), this.shadowMapSize, this.detail, this.postEffects);
+      } else if (this.shadowMapSize > minShadows) {
+        this.applyQuality(this.pixelRatio, this.shadowMapSize / 2, this.detail, this.postEffects);
+      } else if (this.shadowMapSize) {
+        this.applyQuality(this.pixelRatio, low.shadowMapSize, low.detail, low.postEffects);
       }
     } else if (this.fastSeconds >= AUTO_HIGH_SECONDS) {
       this.fastSeconds = 0;
-      if (this.shadowMapSize < QUALITY_PRESETS.medium.shadowMapSize) {
-        this.applyResolution(this.pixelRatio, this.shadowMapSize * 2);
+      if (!this.shadowMapSize) {
+        this.applyQuality(this.pixelRatio, minShadows, medium.detail, medium.postEffects);
+      } else if (this.shadowMapSize < medium.shadowMapSize) {
+        this.applyQuality(this.pixelRatio, this.shadowMapSize * 2, this.detail, this.postEffects);
       } else if (this.pixelRatio < maxRatio) {
-        this.applyResolution(Math.min(maxRatio, this.pixelRatio + AUTO_RATIO_STEP), this.shadowMapSize);
+        this.applyQuality(Math.min(maxRatio, this.pixelRatio + AUTO_RATIO_STEP), this.shadowMapSize, high.detail, this.postEffects);
       }
     }
   }
 
-  private applyResolution(pixelRatio: number, shadowMapSize: number) {
+  /** @param shadowMapSize shadow texture size, 0 = no shadows */
+  private applyQuality(pixelRatio: number, shadowMapSize: number, detail: number, postEffects: boolean) {
     this.pixelRatio = pixelRatio;
     this.renderer.setPixelRatio(pixelRatio);
-    if (shadowMapSize !== this.shadowMapSize || !this.sun.shadow.map) {
-      this.shadowMapSize = shadowMapSize;
+    this.detail = detail;
+    this.postEffects = postEffects;
+    RENDER_DETAIL.particles = detail;
+    RENDER_DETAIL.postEffects = postEffects;
+    // Shadows on / off: the materials are compiled again once (three.js notices the light change)
+    this.sun.castShadow = shadowMapSize > 0;
+    if (shadowMapSize && (shadowMapSize !== this.shadowMapSize || !this.sun.shadow.map)) {
       this.sun.shadow.mapSize.set(shadowMapSize, shadowMapSize);
       // The shadow texture is created again at its new size on the next frame
       this.sun.shadow.map?.dispose();
       this.sun.shadow.map = null;
     }
+    this.shadowMapSize = shadowMapSize;
   }
 
   public render() {

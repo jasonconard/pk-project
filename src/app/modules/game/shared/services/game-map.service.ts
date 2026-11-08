@@ -24,6 +24,8 @@ const GROUND_RAY_UP = 80;
 const RAY_NUDGE = 0.013;
 /** Half width of the body: the hop carries the player on until it's off the ledge. */
 const HOP_BODY = 7;
+/** Buildings visibility updated every this many input steps (120 per second). */
+const VISIBILITY_EVERY = 4;
 
 @Service()
 export class GameMapService {
@@ -36,6 +38,7 @@ export class GameMapService {
   /** Ledge hop: time since it started (s, -1 = none) and the height currently added to the sprite. */
   private hopTime = -1;
   private hopOffset = 0;
+  private visibilityTick = 0;
   /** Ledge hop: height dropped, camera offset, push forward still to apply (x, z). */
   private hopDrop = 0;
   private hopCameraOffset = 0;
@@ -257,13 +260,16 @@ export class GameMapService {
 
 
 
-    mapHelper.sceneMap.chunks.forEach(chunk => {
-      if(chunk.visible) {
-        chunk.buildings.forEach(building => {
-          mapHelper.updateVisibleMesh(chunk.id + '-' + building.id, sprite.position, building.canHide);
-        });
-      }
-    });
+    // Buildings fading / hiding: 30 times per second is plenty (every building's box is computed)
+    if (++this.visibilityTick % VISIBILITY_EVERY === 0) {
+      mapHelper.sceneMap.chunks.forEach(chunk => {
+        if(chunk.visible) {
+          chunk.buildings.forEach(building => {
+            mapHelper.updateVisibleMesh(chunk.id + '-' + building.id, sprite.position, building.canHide);
+          });
+        }
+      });
+    }
 
     // if(this.keyService.holdedKeys.find(key => { return key.code === KeyCode.y; })) {
     //   camera.zoom = Math.min(2, camera.zoom + 0.01);

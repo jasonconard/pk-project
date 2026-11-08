@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RENDER_DETAIL } from '../model/Quality';
 import { SurfaceHeights } from './SurfaceHeights';
 import { applyLinearFog, registerUnlitMaterial } from './weather-shader';
 
@@ -233,7 +234,8 @@ export class RainHelper {
     this.vx = windX * this.style.windSpeed;
     // Streak tilted along its motion: the top points upwind
     this.tilt.setFromAxisAngle(Z_AXIS, Math.atan2(this.vx, this.style.speed));
-    const count = Math.round(this.style.maxDrops * THREE.MathUtils.clamp(density, 0, 1));
+    // (fewer drops at a lower graphics quality)
+    const count = Math.round(this.style.maxDrops * RENDER_DETAIL.particles * THREE.MathUtils.clamp(density, 0, 1));
     for (let i = count; i < this.activeDrops; i++) {
       this.dropAlive[i] = 0;
     }

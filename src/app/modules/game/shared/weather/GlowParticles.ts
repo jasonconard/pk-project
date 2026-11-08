@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RENDER_DETAIL } from '../model/Quality';
 import { SurfaceHeights } from './SurfaceHeights';
 import { registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
 
@@ -791,7 +792,8 @@ export class GlowParticles {
    */
   update(dt: number, target: THREE.Vector3, density: number, camera: THREE.Camera, windX = 0) {
     const s = this.style;
-    const count = Math.round(s.maxParticles * THREE.MathUtils.clamp(density, 0, 1));
+    // (fewer particles at a lower graphics quality)
+    const count = Math.round(s.maxParticles * RENDER_DETAIL.particles * THREE.MathUtils.clamp(density, 0, 1));
     for (let i = count; i < this.active; i++) {
       this.alive[i] = 0;
     }
