@@ -347,10 +347,11 @@ export class MapEditorService {
   /** Box around the selected object, and what the UI shows about it. */
   private refreshSelection(game: Game) {
     const picked = this.selected;
-    const mesh = picked && game.mapHelper?.meshes[picked.chunk.id + '-' + picked.building.id];
-    this.selectionHelper.visible = !!mesh;
-    if (mesh) {
-      this.selectionBox.setFromObject(mesh);
+    // (instanced or not: the bounds come from the map)
+    const bounds = picked && game.mapHelper?.buildingBounds(picked.chunk, picked.building);
+    this.selectionHelper.visible = !!bounds;
+    if (bounds) {
+      this.selectionBox.copy(bounds);
     }
     game.editSelection = picked
       ? { modelId: picked.building.modelId, passable: picked.building.passable, canHide: picked.building.canHide }
@@ -366,7 +367,7 @@ export class MapEditorService {
     this.setRay(game, clientX, clientY);
     const hits = game.raycaster.intersectObjects(mapHelper.pickableBuildingMeshes(), true)
       .filter(hit => ((hit.object as THREE.Mesh).material as THREE.Material)?.colorWrite !== false);
-    return hits.length ? mapHelper.findBuilding(hits[0].object) : null;
+    return hits.length ? mapHelper.findBuilding(hits[0].object, hits[0].instanceId) : null;
   }
 
   /** Dragging the selected object: it follows the mouse on the ground, snapped to the grid. */
@@ -445,6 +446,8 @@ export class MapEditorService {
       building[option] = v;
       const chunk = this.chunkOf(game, building);
       if (chunk) {
+        // (fading or not changes how it is drawn: its own meshes or an instanced copy)
+        game.mapHelper?.refreshBuilding(chunk, building);
         this.select(game, { chunk, building });
       }
     };

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RENDER_DETAIL } from '../model/Quality';
 import { SurfaceHeights } from './SurfaceHeights';
-import { registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
+import { plantPositions, registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
 
 /** Area (relative to the point the camera looks at) where particles live: covers the screen. */
 const AREA = { minX: -240, maxX: 240, minZ: -300, maxZ: 140 };
@@ -883,7 +883,7 @@ export class GlowParticles {
     this.scene.traverseVisible(o => {
       const geometry = (o as THREE.Mesh).geometry as THREE.BufferGeometry | undefined;
       if (geometry?.getAttribute?.(SWAY_ATTRIBUTE)) {
-        plants.push(o.getWorldPosition(new THREE.Vector3()));
+        plants.push(...plantPositions(o));
       }
     });
     this.plants = plants;

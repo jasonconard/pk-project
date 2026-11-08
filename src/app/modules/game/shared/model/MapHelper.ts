@@ -10,6 +10,7 @@ import { MathService } from "../services/math.service";
 import { autotile, NEIGHBORS, terrainById, TILE_SIZE, TILESET_ANIM_LINK, TILESET_LINK, tilesetPos, waterFramePos } from "./Terrain";
 import { applyWeatherShader } from "../weather/weather-shader";
 import { buildGroundGeometry, LEVEL_HEIGHT, MAX_LEVEL, STAIRS_TILE } from "./GroundMesh";
+import { canInstance, ModelInstances } from "./ModelInstances";
 
 /** A chunk ground drawn on a canvas: its texture, then the painted tiles over it. */
 interface PaintedGround {
@@ -170,16 +171,8 @@ export class MapHelper {
       // this.meshes[chunk.id].castShadow = true;
       // this.meshes[chunk.id].receiveShadow = true;
 
-      chunk.buildings.forEach( building => {
-        const key = chunk.id + '-' + building.id;
-        const model = MODELS.find(m => m.id === building.modelId);
-        if(model) {
-          building.originModel = model;
-          const buildingMesh = BasicMeshService.makeModel(model);
-          this.addMesh(key, buildingMesh, convertVec3(chunk.pos).add(convertVec3(building.pos)));
-          group.add(buildingMesh);
-        }
-      });
+      // (the group is needed by the views: set before)
+      chunk.buildings.forEach(building => this.createView(chunk, building));
 
       this.originGame.scene.add(group);
     });
@@ -298,7 +291,12 @@ export class MapHelper {
       const br = Math.floor((building.pos.z + chunk.size.y / 2) / TILE_SIZE);
       if (bc === col && br === row) {
         building.pos = { ...building.pos, y: level * LEVEL_HEIGHT };
-        this.meshes[chunk.id + '-' + building.id]?.position.setY(chunk.pos.y + level * LEVEL_HEIGHT);
+        const set = this.instancesOf(chunk, building);
+        if (set) {
+          set.move(building, this.buildingWorldPos(chunk, building));
+        } else {
+          this.meshes[chunk.id + '-' + building.id]?.position.setY(chunk.pos.y + level * LEVEL_HEIGHT);
+        }
       }
     });
     const cols = chunk.size.x / TILE_SIZE;
@@ -515,17 +513,78 @@ export class MapHelper {
     }
     building.originModel = model;
     chunk.buildings.push(building);
+    this.createView(chunk, building);
+  }
+
+  /** Instanced copies per chunk and per model (see ModelInstances). */
+  private readonly instances = new Map<string, Map<string, ModelInstances>>();
+
+  /** The copies of a building's model in a chunk, if the building is drawn as one of them. */
+  private instancesOf(chunk: SceneChunk, building: SceneBuilding): ModelInstances | undefined {
+    const set = this.instances.get(chunk.id)?.get(building.modelId);
+    return set?.has(building) ? set : undefined;
+  }
+
+  /**
+   * What draws a building: a copy of its model (instancing: repeated objects that don't fade, e.g. trees,
+   * barriers) or its own meshes (houses, the lab, objects with events).
+   */
+  private createView(chunk: SceneChunk, building: SceneBuilding) {
+    const model = building.originModel ?? MODELS.find(m => m.id === building.modelId);
+    if (!model || !chunk.group) {
+      return;
+    }
+    building.originModel = model;
+    const world = convertVec3(chunk.pos).add(convertVec3(building.pos));
+    if (canInstance(model, building)) {
+      let byModel = this.instances.get(chunk.id);
+      if (!byModel) {
+        byModel = new Map();
+        this.instances.set(chunk.id, byModel);
+      }
+      let set = byModel.get(model.id);
+      if (!set) {
+        set = new ModelInstances(model, chunk.group);
+        byModel.set(model.id, set);
+      }
+      set.add(building, world);
+      return;
+    }
     const mesh = BasicMeshService.makeModel(model);
-    this.addMesh(chunk.id + '-' + building.id, mesh, convertVec3(chunk.pos).add(convertVec3(building.pos)));
+    this.addMesh(chunk.id + '-' + building.id, mesh, world);
     chunk.group.add(mesh);
+  }
+
+  /** Takes a building's drawing out of the scene (its data stays in the chunk). */
+  private removeView(chunk: SceneChunk, building: SceneBuilding) {
+    const set = this.instancesOf(chunk, building);
+    if (set) {
+      set.remove(building);
+      return;
+    }
+    const key = chunk.id + '-' + building.id;
+    this.meshes[key]?.removeFromParent();
+    delete this.meshes[key];
+  }
+
+  /** Draws a building again (e.g. after its options changed: instanced copy or its own meshes). */
+  public refreshBuilding(chunk: SceneChunk, building: SceneBuilding) {
+    this.removeView(chunk, building);
+    this.createView(chunk, building);
+  }
+
+  /** Bounds of a building in the world (collisions, editor selection), instanced or not. */
+  public buildingBounds(chunk: SceneChunk, building: SceneBuilding): THREE.Box3 | null {
+    const set = this.instancesOf(chunk, building);
+    if (set) {
+      return set.boundsAt(this.buildingWorldPos(chunk, building));
+    }
+    return this.getBounds(chunk.id + '-' + building.id);
   }
 
   /** Takes a building out of its chunk and of the scene (its data can be added back: undo). */
   public removeBuilding(chunk: SceneChunk, building: SceneBuilding) {
-    const key = chunk.id + '-' + building.id;
-    const mesh = this.meshes[key];
-    mesh?.removeFromParent();
-    delete this.meshes[key];
+    this.removeView(chunk, building);
     chunk.buildings = chunk.buildings.filter(b => b !== building);
   }
 
@@ -542,7 +601,12 @@ export class MapHelper {
       return true;
     }
     building.pos = { x: world.x - chunk.pos.x, y: world.y - chunk.pos.y, z: world.z - chunk.pos.z };
-    this.meshes[chunk.id + '-' + building.id]?.position.copy(world);
+    const set = this.instancesOf(chunk, building);
+    if (set) {
+      set.move(building, world);
+    } else {
+      this.meshes[chunk.id + '-' + building.id]?.position.copy(world);
+    }
     return true;
   }
 
@@ -552,7 +616,17 @@ export class MapHelper {
   }
 
   /** The building a scene object (one of its meshes) belongs to, if any. */
-  public findBuilding(object: THREE.Object3D): { chunk: SceneChunk, building: SceneBuilding } | null {
+  public findBuilding(object: THREE.Object3D, instanceId?: number): { chunk: SceneChunk, building: SceneBuilding } | null {
+    // An instanced copy: the copy number gives the building
+    for (const [chunkId, byModel] of this.instances) {
+      for (const set of byModel.values()) {
+        if (set.parts.includes(object as THREE.InstancedMesh)) {
+          const building = set.buildingAt(instanceId);
+          const chunk = this.sceneMap.chunks.find(c => c.id === chunkId);
+          return building && chunk ? { chunk, building } : null;
+        }
+      }
+    }
     for (const chunk of this.sceneMap.chunks) {
       for (const building of chunk.buildings) {
         const mesh = this.meshes[chunk.id + '-' + building.id];
@@ -570,10 +644,18 @@ export class MapHelper {
 
   /** Building meshes that can be clicked (visible chunks, not hidden near the camera). */
   public pickableBuildingMeshes(): THREE.Object3D[] {
-    return this.sceneMap.chunks
-      .filter(chunk => chunk.visible)
-      .flatMap(chunk => chunk.buildings.map(b => this.meshes[chunk.id + '-' + b.id]))
-      .filter((mesh): mesh is THREE.Object3D => !!mesh && mesh.visible);
+    const visible = this.sceneMap.chunks.filter(chunk => chunk.visible);
+    return [
+      ...visible.flatMap(chunk => chunk.buildings.map(b => this.meshes[chunk.id + '-' + b.id]))
+        .filter((mesh): mesh is THREE.Object3D => !!mesh && mesh.visible),
+      ...visible.flatMap(chunk => [...(this.instances.get(chunk.id)?.values() ?? [])].flatMap(set => set.parts)),
+    ];
+  }
+
+  /** Instanced copies of the visible chunks' models (diagnostics): model id, copies, its instanced meshes. */
+  public instancedSets(): { modelId: string, copies: number, parts: THREE.InstancedMesh[] }[] {
+    return [...this.instances.entries()].flatMap(([, byModel]) =>
+      [...byModel.entries()].map(([modelId, set]) => ({ modelId, copies: set.buildings.length, parts: set.parts })));
   }
 
   /** Options used by most buildings of this model on the map (a new tree behaves like the other trees). */

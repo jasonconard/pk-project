@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RENDER_DETAIL } from '../model/Quality';
 import { SurfaceHeights } from './SurfaceHeights';
-import { registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
+import { plantPositions, registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
 
 /** 'autumn' = leaves of all colors from the trees, 'cherry' = pink cherry blossom petals. */
 export type LeafMode = 'autumn' | 'cherry';
@@ -215,7 +215,7 @@ export class LeafHelper {
     this.scene.traverseVisible(o => {
       const geometry = (o as THREE.Mesh).geometry as THREE.BufferGeometry | undefined;
       if (geometry?.getAttribute?.(SWAY_ATTRIBUTE)) {
-        plants.push(o.getWorldPosition(new THREE.Vector3()));
+        plants.push(...plantPositions(o));
       }
     });
     this.plants = plants;

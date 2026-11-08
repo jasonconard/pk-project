@@ -82,6 +82,21 @@ export const WEATHER_UNIFORMS = {
 
 /** Per-vertex flexibility of the vegetation (0 = rigid / base, up to the model sway at the top). */
 export const SWAY_ATTRIBUTE = 'aSway';
+
+/** World positions of a plant mesh: its own, or each copy's for an instanced mesh (one mesh for all the trees). */
+export function plantPositions(object: THREE.Object3D): THREE.Vector3[] {
+  const instanced = object as THREE.InstancedMesh;
+  if (!instanced.isInstancedMesh) {
+    return [object.getWorldPosition(new THREE.Vector3())];
+  }
+  const matrix = new THREE.Matrix4();
+  const positions: THREE.Vector3[] = [];
+  for (let i = 0; i < instanced.count; i++) {
+    instanced.getMatrixAt(i, matrix);
+    positions.push(new THREE.Vector3().setFromMatrixPosition(matrix.premultiply(object.matrixWorld)));
+  }
+  return positions;
+}
 /** Lean of a fully flexible vertex at full wind (world units). */
 const SWAY_LEAN = 5.0;
 
@@ -147,7 +162,11 @@ varying vec3 vWeatherWorldNormal;
 // Only x moves: stays correct for the tree layers tilted around x.
 const SWAY_VERTEX = /* glsl */`
 if (${SWAY_ATTRIBUTE} > 0.0) {
-  vec3 swayWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;
+  #ifdef USE_INSTANCING
+    vec3 swayWorld = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+  #else
+    vec3 swayWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;
+  #endif
   float windAbs = abs(uWindX);
   // Slow gusts (the lean breathes) + fast flutter, both offset by position so plants don't move in sync
   float gust = 0.65 + 0.35 * sin(uBeamTime * 1.3 + swayWorld.x * 0.04 + swayWorld.z * 0.03);
@@ -157,8 +176,14 @@ if (${SWAY_ATTRIBUTE} > 0.0) {
 `;
 
 const VERTEX_BODY = /* glsl */`
-vWeatherWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
-vWeatherWorldNormal = normalize(mat3(modelMatrix) * objectNormal);
+// (instanced copies: their own position / rotation too)
+#ifdef USE_INSTANCING
+  vWeatherWorldPos = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+  vWeatherWorldNormal = normalize(mat3(modelMatrix) * mat3(instanceMatrix) * objectNormal);
+#else
+  vWeatherWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+  vWeatherWorldNormal = normalize(mat3(modelMatrix) * objectNormal);
+#endif
 `;
 
 /** Aurora light added everywhere (on top of the curtains), relative to the texture color. */
@@ -525,7 +550,7 @@ export function getSwayDepthMaterial(): THREE.MeshDepthMaterial {
       shader.vertexShader = `attribute float ${SWAY_ATTRIBUTE};\nuniform float uWindX;\nuniform float uBeamTime;\nuniform float uFlutterPhase;\n`
         + shader.vertexShader.replace('#include <project_vertex>', SWAY_VERTEX + '#include <project_vertex>');
     };
-    swayDepthMaterial.customProgramCacheKey = () => 'weather-sway-depth-v2';
+    swayDepthMaterial.customProgramCacheKey = () => 'weather-sway-depth-v3';
   }
   return swayDepthMaterial;
 }
@@ -707,6 +732,6 @@ export function applyWeatherShader<T extends THREE.MeshLambertMaterial | THREE.M
       .replace('#include <fog_fragment>', '')
       .replace('#include <colorspace_fragment>', FOG_FRAGMENT + '#include <colorspace_fragment>');
   };
-  mat.customProgramCacheKey = () => 'weather-v37';
+  mat.customProgramCacheKey = () => 'weather-v38';
   return mat;
 }

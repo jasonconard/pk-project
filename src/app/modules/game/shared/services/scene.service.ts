@@ -34,7 +34,7 @@ export class SceneService {
           if(building.passable) {
             return;
           }
-          const bounds = mapHelper.getBounds(chunk.id + '-' + building.id);
+          const bounds = mapHelper.buildingBounds(chunk, building);
           const hb = building.originModel?.hitBox;
           if (!bounds || !hb) {
             return;
