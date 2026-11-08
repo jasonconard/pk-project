@@ -33,9 +33,12 @@ export class SurfaceHeights {
       return;
     }
     this.age = 0;
+    // The surfaces of the shown chunks, hidden or not themselves: a building hidden near the camera is still
+    // there (the rain stops on it). Following their own visibility emptied the whole cache every time one was
+    // hidden / shown while walking, and thousands of raycasts started again.
     const surfaces: THREE.Object3D[] = [];
-    this.scene.traverseVisible(o => {
-      if (o.userData[RAIN_STOP_KEY]) {
+    this.scene.traverse(o => {
+      if (o.userData[RAIN_STOP_KEY] && SurfaceHeights.parentsVisible(o)) {
         surfaces.push(o);
       }
     });
@@ -44,6 +47,15 @@ export class SurfaceHeights {
       this.surfaces = surfaces;
       this.cache.clear();
     }
+  }
+
+  private static parentsVisible(object: THREE.Object3D): boolean {
+    for (let o = object.parent; o; o = o.parent) {
+      if (!o.visible) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /** Height of the highest surface at (x, z), or `fallback - 50` outside the map (falls out of sight). */
