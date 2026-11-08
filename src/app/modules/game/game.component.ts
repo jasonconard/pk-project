@@ -10,6 +10,7 @@ import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { EditorBarComponent } from './editor-bar/editor-bar.component';
 import { temperatureColor } from './shared/util/temperature-color';
 import { QUALITY_CHOICES, QualityMode } from './shared/model/Quality';
+import { version } from '../../../../package.json';
 import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
@@ -41,6 +42,8 @@ export class GameComponent {
   /** Hidden menu on the temperature / fps tile: graphics quality. */
   protected readonly qualityMenu = signal(false);
   protected readonly qualityChoices = QUALITY_CHOICES;
+  /** Version of the game (package.json): tells if the installed app (PWA) is up to date. */
+  protected readonly appVersion = version;
   protected readonly quality = this.gameService.quality;
   /** Air temperature (°C, rounded) and its color, from icy blue to red. */
   protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));

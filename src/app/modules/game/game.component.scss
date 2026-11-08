@@ -96,8 +96,19 @@
 
   h2 {
     margin: 0 0 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
     font-size: 13px;
     font-weight: 700;
+
+    // Game version, very small: tells if the installed app is up to date
+    .version {
+      font-size: 10px;
+      font-weight: normal;
+      opacity: 0.5;
+      font-variant-numeric: tabular-nums;
+    }
   }
 
   button {
