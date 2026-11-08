@@ -1,45 +1,48 @@
-name: Autodeploy First Try
+name: Deploy to GitHub Pages
 
+# Builds the game (PWA) and publishes it on the gh-pages branch at each push on main
 on:
   push:
     branches:
-      - 'main'
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Use Node 12.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: npm run gh-build
-      - name: Archive build
-        if: success()
-        uses: actions/upload-artifact@v1
-        with:
-          name: deploy_dist
-          path: docs
   deploy:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
-      - name: Download build
-        uses: actions/download-artifact@v1
+        uses: actions/checkout@v4
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
         with:
-          name: deploy_dist
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run gh-build
+
+      # Hash routing doesn't need it, but unknown URLs land on the game instead of a GitHub 404;
+      # .nojekyll: files served as they are
+      - name: Prepare the site
+        run: |
+          cp dist/gh-pages/browser/index.html dist/gh-pages/browser/404.html
+          touch dist/gh-pages/browser/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: deploy_dist
-          CLEAN: true
+          branch: gh-pages
+          folder: dist/gh-pages/browser
+          clean: true
