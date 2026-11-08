@@ -6,6 +6,7 @@ import { SceneModel } from '../model/SceneModel';
 import { Square3 } from '../model/SceneUtils';
 import { RAIN_STOP_KEY } from '../weather/SurfaceHeights';
 import { getSwayDepthMaterial, SWAY_ATTRIBUTE } from '../weather/weather-shader';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 @Service()
 export class BasicMeshService {
@@ -198,8 +199,61 @@ export class BasicMeshService {
     if (model.sway) {
       BasicMeshService.addSwayAttribute(group, model.sway);
     }
+    BasicMeshService.mergeParts(group);
 
     return group;
+  }
+
+  /**
+   * One mesh per set of identical render settings instead of one per box / plane: a model is made of up to ~10
+   * parts sharing its texture, each part was a draw call (twice with the shadows). The parts are baked into
+   * the model's space (their position / rotation applied to their vertices) and merged; the sway attribute
+   * (vegetation) and the shadow material follow. A tree goes from ~8 draw calls to 1 or 2. Parts without the
+   * depth test stay as they are (their look depends on the order they are drawn in).
+   */
+  private static mergeParts(group: THREE.Group) {
+    const sets = new Map<string, THREE.Mesh[]>();
+    for (const child of group.children) {
+      const mesh = child as THREE.Mesh;
+      const material = mesh.material as THREE.MeshLambertMaterial | THREE.MeshPhongMaterial;
+      // Parts drawn without the depth test rely on the drawing order (a sign's text over its posts): kept apart
+      if (!material.depthTest) {
+        continue;
+      }
+      const shininess = (material as THREE.MeshPhongMaterial).isMeshPhongMaterial ? (material as THREE.MeshPhongMaterial).specular.r : -1;
+      const key = [material.type, shininess, material.side, material.depthWrite, material.depthTest].join('|');
+      sets.set(key, [...(sets.get(key) ?? []), mesh]);
+    }
+    for (const meshes of sets.values()) {
+      if (meshes.length < 2) {
+        continue;
+      }
+      const geometries = meshes.map(mesh => {
+        mesh.updateMatrix();
+        return mesh.geometry.clone().applyMatrix4(mesh.matrix);
+      });
+      const merged = mergeGeometries(geometries);
+      geometries.forEach(g => g.dispose());
+      if (!merged) {
+        continue; // parts with different attributes: kept as they are
+      }
+      const first = meshes[0];
+      const mesh = new THREE.Mesh(merged, first.material);
+      mesh.castShadow = first.castShadow;
+      mesh.receiveShadow = first.receiveShadow;
+      mesh.userData = { ...first.userData };
+      if (first.customDepthMaterial) {
+        mesh.customDepthMaterial = first.customDepthMaterial;
+      }
+      meshes.forEach(part => {
+        group.remove(part);
+        part.geometry.dispose();
+        if (part !== first) {
+          (part.material as THREE.Material).dispose();
+        }
+      });
+      group.add(mesh);
+    }
   }
 
   /**

@@ -698,7 +698,9 @@ export class MapHelper {
     // Transparent only while fading: a transparent double sided material is drawn in two passes (back faces,
     // then front faces), twice the draw calls; the cut-out texels are handled by the alphaTest anyway.
     // One pass even while fading (the few overlapping faces of a fading building don't need the second one).
-    material.transparent = opacity > 0 && opacity < 1;
+    // Parts drawn without the depth test (a sign's text over its posts) stay in the transparent list: drawn from
+    // the farthest to the nearest, their order is right (the opaque list draws the nearest first).
+    material.transparent = (opacity > 0 && opacity < 1) || !material.depthTest;
     material.forceSinglePass = true;
     mesh.visible = opacity > 0 || castsShadow;
     if (material.userData['depthWrite'] === undefined) {
