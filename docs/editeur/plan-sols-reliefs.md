@@ -35,10 +35,7 @@ Une fois validé, ce plan sera copié dans `docs/editeur/plan-sols-reliefs.md`.
   - Escaliers en rampe dans les 4 sens (`chunk.stairs`), orientés automatiquement vers la case voisine un niveau plus haut.
   - Le sprite du joueur est vertical pour ne plus traverser les parois, et une copie invisible tournée vers le soleil projette son ombre.
 - **Étape 5 faite au fil des étapes** : sauvegarde et export des tuiles, hauteurs et escaliers ; conversion des anciennes tuiles.
-- **Reste l'étape 6** :
-  - palette en onglets ;
-  - taille de pinceau, pot de peinture et aperçu du pinceau à sa taille ;
-  - documentation de l'éditeur.
+- **Étape 6 faite** : palette en onglets (Objets / Sols / Reliefs), pinceau de 1 à 3 cases avec aperçu à sa taille, pot de peinture, documentation dans `docs/editeur/` (voir le [README](README.md)).
 
 ## Ce que permet le tileset (repéré sur la planche)
 
