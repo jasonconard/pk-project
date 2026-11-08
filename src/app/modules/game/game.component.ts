@@ -1,4 +1,5 @@
 import { afterNextRender, Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { GameMode } from './shared/model/Game';
 import { GameService } from './shared/services/game.service';
 import { StickComponent } from '../../core/stick/stick.component';
@@ -15,7 +16,7 @@ import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, DecimalPipe],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -108,6 +109,10 @@ export class GameComponent {
   protected toggleQualityMenu(event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.qualityMenu.update(open => !open);
+  }
+
+  protected setDiagnostics(event: Event): void {
+    this.gameService.setDiagnostics((event.target as HTMLInputElement).checked);
   }
 
   protected setQuality(mode: QualityMode): void {

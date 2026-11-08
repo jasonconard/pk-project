@@ -140,6 +140,52 @@
   }
 }
 
+// Hidden menu: diagnostic console switch
+.quality-menu .q-diag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+
+  input {
+    accent-color: #5aa8ff;
+  }
+}
+
+// Diagnostic console: under the status tile, one second of measures
+.diagnostics {
+  position: absolute;
+  left: 10px;
+  top: 56px;
+  z-index: 790;
+  max-width: min(420px, calc(100vw - 20px));
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #e8e8e8;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  pointer-events: none;
+
+  .k {
+    color: #8ab4ff;
+  }
+
+  .bad {
+    color: #ff8a70;
+  }
+
+  .hint {
+    margin-top: 4px;
+    opacity: 0.6;
+    font-family: inherit;
+  }
+}
+
 .axes-count {
   position: absolute;
   right: 0;

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RENDER_DETAIL } from '../model/Quality';
 import { SurfaceHeights } from './SurfaceHeights';
 import { registerUnlitMaterial } from './weather-shader';
 
@@ -90,7 +91,8 @@ export class SnowHelper {
     // Blown snow falls faster (else flakes would start far off screen) and streaks along the wind
     this.fallScale = 1 + (drift - 1) * 0.6;
     this.stretch = 1 + (drift - 1) * 0.5 * Math.min(Math.abs(windX), 1);
-    const count = Math.min(Math.round(FLAKES_PER_DENSITY * Math.max(density, 0)), MAX_FLAKES);
+    // (fewer flakes at a lower graphics quality)
+    const count = Math.min(Math.round(FLAKES_PER_DENSITY * RENDER_DETAIL.particles * Math.max(density, 0)), MAX_FLAKES);
     for (let i = count; i < this.activeFlakes; i++) {
       this.alive[i] = 0;
     }

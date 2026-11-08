@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
+import { Diagnostics } from "./Diagnostics";
 import { AUTO_HIGH_FPS, AUTO_HIGH_SECONDS, AUTO_LOW_FPS, AUTO_LOW_SECONDS, AUTO_MIN_RATIO, AUTO_RATIO_STEP, isTouchDevice, QUALITY_PRESETS, QualityMode, RENDER_DETAIL } from "./Quality";
 import type { EditBrush, EditSelection } from "../services/map-editor.service";
 
@@ -130,6 +131,9 @@ export class Game {
     this.weather.update(dt);
   }
 
+  /** Diagnostic console measures (only taken while it is open). */
+  readonly diagnostics = new Diagnostics();
+
   /** Graphics quality chosen, render pixel ratio and shadow texture size in use (see Quality.ts). */
   qualityMode: QualityMode = 'auto';
   pixelRatio = 1;
@@ -171,12 +175,12 @@ export class Game {
       } else if (this.shadowMapSize > minShadows) {
         this.applyQuality(this.pixelRatio, this.shadowMapSize / 2, this.detail, this.postEffects);
       } else if (this.shadowMapSize) {
-        this.applyQuality(this.pixelRatio, low.shadowMapSize, low.detail, low.postEffects);
+        this.applyQuality(Math.min(this.pixelRatio, low.maxPixelRatio), low.shadowMapSize, low.detail, low.postEffects);
       }
     } else if (this.fastSeconds >= AUTO_HIGH_SECONDS) {
       this.fastSeconds = 0;
       if (!this.shadowMapSize) {
-        this.applyQuality(this.pixelRatio, minShadows, medium.detail, medium.postEffects);
+        this.applyQuality(Math.max(this.pixelRatio, AUTO_MIN_RATIO), minShadows, medium.detail, medium.postEffects);
       } else if (this.shadowMapSize < medium.shadowMapSize) {
         this.applyQuality(this.pixelRatio, this.shadowMapSize * 2, this.detail, this.postEffects);
       } else if (this.pixelRatio < maxRatio) {
@@ -189,6 +193,8 @@ export class Game {
   private applyQuality(pixelRatio: number, shadowMapSize: number, detail: number, postEffects: boolean) {
     this.pixelRatio = pixelRatio;
     this.renderer.setPixelRatio(pixelRatio);
+    // Below 1 the picture is enlarged: keep the pixels crisp (pixel art) instead of blurring them
+    this.renderer.domElement.style.imageRendering = pixelRatio < 1 ? 'pixelated' : '';
     this.detail = detail;
     this.postEffects = postEffects;
     RENDER_DETAIL.particles = detail;

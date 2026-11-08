@@ -20,7 +20,31 @@
           }
         </div>
         <p class="q-current">Résolution ×{{ hud.pixelRatio }} · Ombres {{ hud.shadowMapSize || 'aucune' }}</p>
+        <label class="q-diag">
+          <input type="checkbox" [checked]="hud.diagnosticsOpen" (change)="setDiagnostics($event)" />
+          Console de diagnostic
+        </label>
       </section>
+    }
+    @if (hud.diagnosticsOpen && !qualityMenu()) {
+      <aside class="diagnostics" aria-label="Diagnostic">
+        @if (hud.diagnostics; as d) {
+          <div><span class="k">Images</span> <b>{{ d.fps }} fps</b> · moy. {{ d.frameAvg | number:'1.0-1' }} ms ·
+            pire <b [class.bad]="d.frameMax > 50">{{ d.frameMax | number:'1.0-0' }} ms</b></div>
+          <div><span class="k">Calcul</span> {{ d.input + d.weather + d.render | number:'1.0-0' }} ms/s
+            ({{ (d.input + d.weather + d.render) / 10 | number:'1.0-0' }} %) :
+            déplacements {{ d.input | number:'1.0-0' }} · météo {{ d.weather | number:'1.0-0' }} ·
+            envoi du rendu {{ d.render | number:'1.0-0' }}</div>
+          <div><span class="k">Rendu</span> {{ d.calls }} appels · {{ d.triangles | number }} triangles ·
+            {{ d.width }}×{{ d.height }} (×{{ d.pixelRatio }})</div>
+          <div><span class="k">Réglages</span> ombres {{ d.shadowMapSize || 'aucune' }} · particules {{ d.detail * 100 | number:'1.0-0' }} % ·
+            {{ d.geometries }} géométries · {{ d.textures }} textures</div>
+          <div class="hint">« Envoi du rendu » élevé : la carte graphique ou son pilote limite (trop d'appels de dessin, de pixels,
+            d'ombres ou de transparences). Déplacements / météo élevés : c'est le calcul du jeu.</div>
+        } @else {
+          <div>Mesure en cours…</div>
+        }
+      </aside>
     }
   }
 }

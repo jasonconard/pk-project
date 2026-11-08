@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { GameMode, Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
 import { QUALITY_CHOICES, QualityMode } from '../model/Quality';
+import { DiagnosticsReport } from '../model/Diagnostics';
 import { EditBrush, EditCommand, EditSelection, MapEditorService } from './map-editor.service';
 import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
@@ -34,6 +35,9 @@ export interface GameHud {
   /** Render pixel ratio and shadow texture size in use (graphics quality). */
   pixelRatio: number;
   shadowMapSize: number;
+  /** Diagnostic console: open, and the last second's measures. */
+  diagnostics: DiagnosticsReport | null;
+  diagnosticsOpen: boolean;
   mapHelper: MapHelper | null;
 }
 
@@ -233,6 +237,7 @@ export class GameService {
       game.framePerSec = game.frame;
       game.frame = 0;
       game.adaptQuality(game.framePerSec);
+      game.diagnostics.flush(game.renderer, { pixelRatio: game.pixelRatio, shadowMapSize: game.shadowMapSize, detail: game.detail });
     }, 1000);
 
     // Moves and inputs at a fixed 120 steps per second of real time: when the device is slow, the timer is called
@@ -304,8 +309,11 @@ export class GameService {
     this.keyService.updateGamePadKeys();
 
     if(!game.paused) {
-      game.updateLights(dt);
-      game.renderFrame();
+      const diag = game.diagnostics;
+      diag.frameStart(game.renderer);
+      diag.measure('weather', () => game.updateLights(dt));
+      diag.measure('render', () => game.renderFrame());
+      diag.frameEnd(game.renderer);
     }
 
     const pressedCodes = this.keyService.pressedCodes;
@@ -335,16 +343,20 @@ export class GameService {
       editCanRedo: game.editCanRedo,
       pixelRatio: game.pixelRatio,
       shadowMapSize: game.shadowMapSize,
+      diagnostics: game.diagnostics.report,
+      diagnosticsOpen: game.diagnostics.enabled,
       editMode: game.editMode,
       mapHelper: game.mapHelper ?? null,
     } : null);
   }
 
   private inputLoop(game: Game) {
-    switch (game.mode) {
-      case GameMode.MAP: this.gameMapService.inputLoop(game); break;
-      case GameMode.FIGHT: this.fightService.inputLoop(game); break;
-    }
+    game.diagnostics.measure('input', () => {
+      switch (game.mode) {
+        case GameMode.MAP: this.gameMapService.inputLoop(game); break;
+        case GameMode.FIGHT: this.fightService.inputLoop(game); break;
+      }
+    });
   }
 
   private animate(game: Game): void {
@@ -443,6 +455,14 @@ export class GameService {
       this.mapEditorService.enter(game);
     }
     this.syncHud();
+  }
+
+  /** Diagnostic console (hidden menu of the temperature / fps tile). */
+  setDiagnostics(open: boolean) {
+    if (this.game) {
+      this.game.diagnostics.enabled = open;
+      this.syncHud();
+    }
   }
 
   setQuality(mode: QualityMode) {

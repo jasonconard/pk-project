@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RENDER_DETAIL } from '../model/Quality';
 import { SurfaceHeights } from './SurfaceHeights';
 import { registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
 
@@ -143,7 +144,8 @@ export class LeafHelper {
    * @param windX signed wind, -1..1
    */
   update(dt: number, target: THREE.Vector3, density: number, windX = 0) {
-    const count = Math.round(MAX_LEAVES * THREE.MathUtils.clamp(density, 0, 1));
+    // (fewer leaves at a lower graphics quality)
+    const count = Math.round(MAX_LEAVES * RENDER_DETAIL.particles * THREE.MathUtils.clamp(density, 0, 1));
     for (let i = count; i < this.active; i++) {
       this.alive[i] = 0;
     }

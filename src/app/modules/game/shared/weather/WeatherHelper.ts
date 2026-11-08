@@ -851,7 +851,11 @@ export class WeatherHelper {
       this.lanternPos.project(g.camera);
       this.lanternAt.set(this.lanternPos.x * 0.5 + 0.5, this.lanternPos.y * 0.5 + 0.5);
     }
-    if (p.heatHaze >= 0.01 || p.heatWash >= 0.01 || p.invert >= 0.01 || p.oldFilm >= 0.01 || p.mirage >= 0.01 || p.moonless >= 0.01) {
+    // The heat shimmer / warm wash alone are dropped at a low graphics quality (a whole extra pass); the effects
+    // a weather is made of (negative, old film, mirage, lantern) are kept
+    const essential = p.invert >= 0.01 || p.oldFilm >= 0.01 || p.mirage >= 0.01 || p.moonless >= 0.01;
+    const shimmer = RENDER_DETAIL.postEffects && (p.heatHaze >= 0.01 || p.heatWash >= 0.01);
+    if (essential || shimmer) {
       this.heatHaze.render(g.renderer, drawFrame, {
         heat: p.heatHaze, wash: p.heatWash, time: WEATHER_UNIFORMS.uBeamTime.value, invert: p.invert, film: p.oldFilm,
         mirage: p.mirage, lantern: p.moonless, lanternAt: this.lanternAt,

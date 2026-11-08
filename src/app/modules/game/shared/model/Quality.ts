@@ -15,7 +15,8 @@ export interface QualityPreset {
 export const QUALITY_PRESETS: Record<Exclude<QualityMode, 'auto'>, QualityPreset> = {
   high: { maxPixelRatio: 2, shadowMapSize: 4096, detail: 1, postEffects: true },
   medium: { maxPixelRatio: 1.5, shadowMapSize: 2048, detail: 0.6, postEffects: true },
-  low: { maxPixelRatio: 1, shadowMapSize: 0, detail: 0.35, postEffects: false },
+  // (below 1: the picture is computed smaller and enlarged with crisp pixels, see Game.applyQuality)
+  low: { maxPixelRatio: 0.75, shadowMapSize: 0, detail: 0.35, postEffects: false },
 };
 
 /**
@@ -28,7 +29,7 @@ export const QUALITY_CHOICES: { mode: QualityMode, label: string, hint: string }
   { mode: 'auto', label: 'Auto', hint: 'S\'adapte pour rester fluide' },
   { mode: 'high', label: 'Haute', hint: 'Résolution max ×2, ombres fines, tous les effets' },
   { mode: 'medium', label: 'Moyenne', hint: 'Résolution ×1.5, moins de particules' },
-  { mode: 'low', label: 'Économie', hint: 'Résolution ×1, sans ombres ni halos' },
+  { mode: 'low', label: 'Économie', hint: 'Résolution ×0.75, sans ombres ni halos, moins de particules' },
 ];
 
 /** Auto mode: below LOW_FPS for LOW_SECONDS → one step down; above HIGH_FPS for HIGH_SECONDS → one step up. */
