@@ -153,6 +153,11 @@ const BREATH_FORWARD = 4;
 const BREATH_PUFFS = 22;
 const FROST_CLIMB_SPEED = 0.6;
 const FROST_CLIMB_MAX = 28;
+/** Earthquake debris: area scanned for wall feet (around the view), grid step, points per frame, rescan distance. */
+const WALL_AREA = { minX: -240, maxX: 240, minZ: -300, maxZ: 140 };
+const WALL_STEP = 8;
+const WALL_SCAN_PER_FRAME = 40;
+const WALL_RESCAN = 96;
 const TIME_WARP_SLOWDOWN = 0.8;
 const GEYSER_HEARING = 220;
 const QUAKE_INTERVAL = [7, 18] as const;
@@ -319,6 +324,10 @@ export class WeatherHelper {
   private readonly timeMotes: GlowParticles;
   private readonly gravityPebbles: GlowParticles;
   private readonly gravityDrops: GlowParticles;
+  /** Earthquake debris: wall feet around the view (x, z), the view center they were found around, the scan going on. */
+  private wallFeet: [number, number][] = [];
+  private wallFeetCenter: THREE.Vector2 | null = null;
+  private wallScan: { center: THREE.Vector2, index: number, found: [number, number][] } | null = null;
   private readonly strikes: StrikeHelper;
   private readonly strikeSparks: GlowParticles;
   private readonly mist: GlowParticles;
@@ -487,11 +496,13 @@ export class WeatherHelper {
       const d = Math.hypot(g.x - player.x, g.z - player.z);
       this.audio.geyserBurst(Math.max(0, 1 - d / GEYSER_HEARING), THREE.MathUtils.clamp((g.x - player.x) / 150, -1, 1));
     };
-    // Debris falls along the walls: on the ground, right next to something tall (a building)
-    this.quakeDebris.spawnFilter = (x, z) => {
-      const t = this.game.getCameraTarget();
-      const ground = this.surfaces.heightAt(x, z, t.y);
-      return ground < t.y + 2 && [[6, 0], [-6, 0], [0, 6], [0, -6]].some(([dx, dz]) => this.surfaces.heightAt(x + dx, z + dz, t.y) > ground + 15);
+    // Debris falls along the walls: at one of the wall feet found beforehand (see updateWallFeet)
+    this.quakeDebris.spawnAt = () => {
+      if (!this.wallFeet.length) {
+        return null;
+      }
+      const [x, z] = this.wallFeet[Math.floor(Math.random() * this.wallFeet.length)];
+      return [x + THREE.MathUtils.randFloatSpread(4), z + THREE.MathUtils.randFloatSpread(4)];
     };
     this.magicSnow = new GlowParticles(game.scene, this.surfaces, MAGIC_SNOW_STYLE);
     this.stardust = new GlowParticles(game.scene, this.surfaces, STARDUST_STYLE);
@@ -713,6 +724,7 @@ export class WeatherHelper {
     }
     const quakeRate = p.eruption > 0.01 ? THREE.MathUtils.lerp(ERUPTION_RATE[0], ERUPTION_RATE[1], this.eruptionTension) : 1;
     this.quakeShake = this.updateQuake(dt, p.quake * quakeRate);
+    this.updateWallFeet(target, p.quake > 0.05 || p.thunderRain > 0.05);
     this.quakeDebris.update(dt, target, this.quakeShake, this.game.camera, this.windX);
     this.quakeDust.update(dt, target, this.quakeShake, this.game.camera, this.windX);
     this.geysers.update(dt, target, p.geysers > 0.5);
@@ -1060,6 +1072,42 @@ export class WeatherHelper {
    * Reversed gravity: the player floats above the ground, slowly bobbing and swaying. Relative offset (the previous
    * one is removed first) so it never drifts, and left out while thrown in the air by a tornado / geyser.
    */
+  /**
+   * Earthquake debris spawn points: the feet of the walls (ground right next to something much higher) in the
+   * view, found a few grid points per frame while a weather with quakes is on, again after moving away.
+   * Looking for them when a quake starts (up to 40 random tries x 5 heights for hundreds of debris at once)
+   * froze the game for a moment.
+   */
+  private updateWallFeet(target: THREE.Vector3, active: boolean) {
+    if (!active) {
+      return;
+    }
+    if (!this.wallScan) {
+      const moved = !this.wallFeetCenter || this.wallFeetCenter.distanceTo(new THREE.Vector2(target.x, target.z)) > WALL_RESCAN;
+      if (!moved) {
+        return;
+      }
+      this.wallScan = { center: new THREE.Vector2(target.x, target.z), index: 0, found: [] };
+    }
+    const scan = this.wallScan;
+    const cols = Math.floor((WALL_AREA.maxX - WALL_AREA.minX) / WALL_STEP) + 1;
+    const rows = Math.floor((WALL_AREA.maxZ - WALL_AREA.minZ) / WALL_STEP) + 1;
+    const end = Math.min(scan.index + WALL_SCAN_PER_FRAME, cols * rows);
+    for (; scan.index < end; scan.index++) {
+      const x = scan.center.x + WALL_AREA.minX + (scan.index % cols) * WALL_STEP;
+      const z = scan.center.y + WALL_AREA.minZ + Math.floor(scan.index / cols) * WALL_STEP;
+      const ground = this.surfaces.heightAt(x, z, target.y);
+      if (ground < target.y + 2 && [[6, 0], [-6, 0], [0, 6], [0, -6]].some(([dx, dz]) => this.surfaces.heightAt(x + dx, z + dz, target.y) > ground + 15)) {
+        scan.found.push([x, z]);
+      }
+    }
+    if (scan.index >= cols * rows) {
+      this.wallFeet = scan.found;
+      this.wallFeetCenter = scan.center;
+      this.wallScan = null;
+    }
+  }
+
   private updateFloat(dt: number, level: number) {
     const plane = this.game.mapHelper?.scenePlayer?.mesh?.children[0];
     if (!plane) {

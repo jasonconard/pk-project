@@ -7,6 +7,8 @@ import { plantPositions, registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather
 const AREA = { minX: -240, maxX: 240, minZ: -300, maxZ: 140 };
 /** How often the plants list is refreshed (s), and how far from a plant a particle can appear. */
 const PLANTS_REFRESH = 2;
+/** Most particles appearing in one update (a burst is spread over a few frames). */
+const MAX_NEW_PER_UPDATE = 40;
 const PLANT_RADIUS = 10;
 
 /** Look and motion of glowing particles (blood moon embers, later fireflies, spores...). */
@@ -809,12 +811,16 @@ export class GlowParticles {
       this.refreshPlants(dt);
     }
 
+    let spawned = 0;
     for (let i = 0; i < count; i++) {
       if (!this.alive[i]) {
-        if (this.spawnGate && !this.spawnGate()) {
+        // At most MAX_NEW_PER_UPDATE new particles at once: a burst (quake, strike) comes over a few frames
+        // instead of all its spawn points (heights, raycasts...) computed in one
+        if ((this.spawnGate && !this.spawnGate()) || spawned >= MAX_NEW_PER_UPDATE) {
           this.hide(i);
           continue;
         }
+        spawned++;
         // (gated: a fresh puff starts at age 0, not at a random age)
         this.respawn(i, target, !this.spawnGate);
       }
