@@ -494,6 +494,83 @@ button {
   }
 }
 
+// Phones in landscape (low screens, e.g. 755 × 360): almost full screen, categories in a row above the
+// cards, details in a narrow column on the right (small preview, scrolling text, the apply button always visible)
+@media (max-height: 520px) and (orientation: landscape) {
+  .popup {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+    border-radius: 10px;
+  }
+
+  .popup-header {
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+    h2 {
+      font-size: 14px;
+    }
+  }
+
+  .popup-body {
+    grid-template-columns: 1fr 250px;
+    grid-template-rows: auto 1fr;
+  }
+
+  .categories {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    button {
+      white-space: nowrap;
+    }
+  }
+
+  .grid {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .cards {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  // Flatter pictures: more weathers on screen
+  .thumb {
+    aspect-ratio: 5 / 2;
+
+    // (out of the flow: the picture would otherwise impose its own 16/10 height)
+    img {
+      position: absolute;
+      inset: 0;
+    }
+  }
+
+  .detail {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    max-height: none;
+    border-top: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .detail-shot {
+    aspect-ratio: 2 / 1;
+  }
+
+  .detail-text {
+    padding: 8px 12px;
+  }
+
+  .detail-actions {
+    padding: 8px 12px;
+  }
+}
+
 @keyframes fade-in {
   from { opacity: 0; }
 }
