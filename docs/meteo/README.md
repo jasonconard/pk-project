@@ -69,6 +69,7 @@ Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barr
 
 ### 🌿 Nature
 - [Forêt](meteos/forest.md)
+- [Jungle](meteos/jungle.md)
 - [Feuilles](meteos/leaves.md)
 - [Bruine d'automne](meteos/autumn-drizzle.md)
 - [Vent de pétales](meteos/petal-whirl.md)
