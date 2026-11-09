@@ -300,13 +300,23 @@ export class WeatherAudio {
   private time = 0;
 
   constructor() {
+    // Browsers only let the sound start during a user gesture. Safari (iPhone, iPad) doesn't count a touch's
+    // pointerdown as one, only its end (pointerup / touchend): the sound would stay suspended. The sound can
+    // also be stopped later (iOS suspends it when the app goes to the background, a call...): every gesture
+    // starts it again if needed.
     const start = () => {
-      this.start();
-      window.removeEventListener('keydown', start);
-      window.removeEventListener('pointerdown', start);
+      if (this.ctx?.state !== 'running') {
+        this.start();
+      }
     };
-    window.addEventListener('keydown', start);
-    window.addEventListener('pointerdown', start);
+    for (const event of ['keydown', 'pointerdown', 'pointerup', 'touchend', 'click']) {
+      window.addEventListener(event, start, { capture: true, passive: true });
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && this.ctx && this.ctx.state !== 'running') {
+        void this.ctx.resume().catch(() => undefined);
+      }
+    });
   }
 
   /** Master volume 0..1, and mute. */
@@ -1697,7 +1707,7 @@ export class WeatherAudio {
 
   private start() {
     if (this.ctx) {
-      void this.ctx.resume();
+      void this.ctx.resume().catch(() => undefined);
       return;
     }
     const ctx = new AudioContext();
