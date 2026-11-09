@@ -1,7 +1,7 @@
 :host {
   position: absolute;
-  top: 10px;
-  left: 82px; // right of the status tile (temperature, fps)
+  top: calc(10px + var(--safe-top));
+  left: calc(82px + var(--safe-left)); // right of the status tile (temperature, fps)
   z-index: 800;
   color: white;
   pointer-events: none; // only the controls catch clicks
@@ -210,8 +210,8 @@
   }
 
   :host {
-    left: 10px;
-    top: 56px;
+    left: calc(10px + var(--safe-left));
+    top: calc(56px + var(--safe-top));
   }
 }
 

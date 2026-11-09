@@ -2,6 +2,10 @@
 
 html {
   box-sizing: border-box;
+  // Notch, status bar, rounded corners (iOS PWA): the game is drawn under them, the buttons are kept out
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 html,
@@ -16,6 +20,8 @@ body {
   touch-action: none;
   overscroll-behavior: none;
   font-family: 'Roboto', sans-serif;
+  // Same dark as the game around it (seen under the iOS status bar while loading)
+  background: #000;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
 
   * {

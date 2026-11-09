@@ -23,8 +23,8 @@
 // Status tile (top left): temperature (colored from icy blue to red) above the frames per second
 .status-tile {
   position: absolute;
-  left: 10px;
-  top: 10px;
+  left: calc(10px + var(--safe-left));
+  top: calc(10px + var(--safe-top));
   z-index: 800;
   width: 64px;
   height: 40px;
@@ -83,8 +83,8 @@
 
 .quality-menu {
   position: absolute;
-  left: 10px;
-  top: 56px;
+  left: calc(10px + var(--safe-left));
+  top: calc(56px + var(--safe-top));
   z-index: 860;
   width: 230px;
   padding: 10px;
@@ -169,8 +169,8 @@
 // Diagnostic console: under the status tile, one second of measures
 .diagnostics {
   position: absolute;
-  left: 10px;
-  top: 56px;
+  left: calc(10px + var(--safe-left));
+  top: calc(56px + var(--safe-top));
   z-index: 790;
   max-width: min(420px, calc(100vw - 20px));
   padding: 8px 10px;

@@ -19,8 +19,8 @@ button {
 .toolbar {
   pointer-events: auto;
   position: absolute;
-  top: 10px;
-  right: 58px;
+  top: calc(10px + var(--safe-top));
+  right: calc(58px + var(--safe-right));
   // Never under the tiles on the left (temperature / fps, edit button): the weather name gets cut instead
   max-width: calc(100% - 58px - 200px);
   display: flex;
