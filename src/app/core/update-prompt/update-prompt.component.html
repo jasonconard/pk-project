@@ -10,3 +10,16 @@
     </div>
   </div>
 }
+
+@if (webReady()) {
+  <div class="update-backdrop" (click)="later()"></div>
+  <div class="update-dialog" role="dialog" aria-labelledby="web-update-title">
+    <h2 id="web-update-title">Mise à jour prête</h2>
+    <p>Une nouvelle version du jeu est téléchargée (tu as la {{ current }}).</p>
+    <p class="hint">Le jeu redémarre pour l'utiliser.</p>
+    <div class="actions">
+      <button type="button" class="later" (click)="later()">Plus tard</button>
+      <button type="button" class="install" (click)="reload()">Redémarrer</button>
+    </div>
+  </div>
+}
