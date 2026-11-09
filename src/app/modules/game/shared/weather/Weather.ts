@@ -27,6 +27,7 @@ export enum WeatherType {
   BLIZZARD = 'blizzard',
   DARKNESS = 'darkness',
   FOREST = 'forest',
+  JUNGLE = 'jungle',
   MONSOON = 'monsoon',
   AUTUMN_DRIZZLE = 'autumn-drizzle',
   STARRY_NIGHT = 'starry-night',
@@ -185,6 +186,10 @@ export interface WeatherParams {
   mirage: number;
   /** Moonless night: pitch dark but a lantern around the player, eyes watching from the dark, 0 = none, 1 = full. */
   moonless: number;
+  /** Low mist banks lying on the ground at any hour (the morning mist ones, without its dawn fading), 0 = none, 1 = full. */
+  groundMist: number;
+  /** Eyes watching from the dark (without the moonless night darkness and lantern), 0 = none, 1 = full. */
+  watchingEyes: number;
   /** Deep freeze: frost climbing up the walls, the player's breath visible, ice cracking, 0 = none, 1 = full. */
   deepFreeze: number;
   /** Crickets chirping at night (without the forest), 0 = none, 1 = full. */
@@ -309,6 +314,8 @@ const DAY_BASE: WeatherParams = {
   morningMist: 0,
   mirage: 0,
   moonless: 0,
+  groundMist: 0,
+  watchingEyes: 0,
   deepFreeze: 0,
   crickets: 0,
   city: 0,
@@ -383,6 +390,29 @@ export const DAY_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     leaves: 0.2,
     fog: 0.2,
     fogColor: new THREE.Color(0xb8d8b0),
+  }),
+  // Jungle: the forest, darker and stifling. Light filtered by a thick canopy, a few sun rays, damp low mist,
+  // drops falling from the trees, pollen and spores, heavy air shimmering slightly
+  [WeatherType.JUNGLE]: preset(DAY_BASE, {
+    litLevel: 0.6,
+    shadowLevel: 0.26,
+    ambientColor: new THREE.Color(0x7aa468),
+    sunColor: new THREE.Color(0xf0f4c8),
+    unlitTint: new THREE.Color(0xa8c49a),
+    specular: 0.5,
+    sunGlow: 0.15,
+    godRays: 0.55,
+    cloudSpeed: 3,
+    canopy: 1,
+    pollen: 0.6,
+    spores: 0.12,
+    drizzle: 0.12,
+    dew: 0.6,
+    heatHaze: 0.25,
+    groundMist: 0.45,
+    birds: 0.6,
+    fog: 0.28,
+    fogColor: new THREE.Color(0x5a7a56),
   }),
   // Hail: dark grey sky, white pellets bouncing everywhere, ticking on the roofs
   [WeatherType.HAIL]: preset(DAY_BASE, {
@@ -1496,6 +1526,27 @@ export const NIGHT_PRESETS: Partial<Record<WeatherType, WeatherParams>> = {
     fog: 0.25,
     fogColor: new THREE.Color(0x24403c),
   }),
+  // Jungle night: almost black under the canopy, a greenish moon, the mist swallowing everything, eyes watching
+  // the player from the dark, a few fireflies, frogs and insects
+  [WeatherType.JUNGLE]: preset(NIGHT_BASE, {
+    litLevel: 0.22,
+    shadowLevel: 0.14,
+    ambientColor: new THREE.Color(0x3a5a40),
+    sunColor: new THREE.Color(0x9ac8a0),
+    unlitTint: new THREE.Color(0x4a6a50),
+    specular: 0.4,
+    windowGlow: 0.6,
+    cloudSpeed: 3,
+    canopy: 1,
+    fireflies: 0.15,
+    dew: 0.6,
+    groundMist: 1,
+    watchingEyes: 0.8,
+    frogs: 0.6,
+    crickets: 0.8,
+    fog: 0.4,
+    fogColor: new THREE.Color(0x14261c),
+  }),
   [WeatherType.HAIL]: preset(NIGHT_BASE, {
     litLevel: 0.34,
     shadowLevel: 0.24,
@@ -1859,6 +1910,7 @@ export const TEMPERATURES: Record<WeatherType, [number, number]> = {
   [WeatherType.BLIZZARD]: [-14, -19],
   [WeatherType.DARKNESS]: [9, 4],
   [WeatherType.FOREST]: [21, 14],
+  [WeatherType.JUNGLE]: [31, 26],
   [WeatherType.HAIL]: [7, 4],
   [WeatherType.SEA_MIST]: [14, 11],
   [WeatherType.SMOG]: [27, 21],
@@ -2040,6 +2092,7 @@ export const WEATHER_CHOICES: WeatherChoice[] = [
   { type: WeatherType.ERUPTION, label: 'Éruption imminente', icon: '💥' },
   { type: WeatherType.ASH, label: 'Neige de cendres', icon: '🌫️' },
   { type: WeatherType.FOREST, label: 'Forêt', icon: '🌲' },
+  { type: WeatherType.JUNGLE, label: 'Jungle', icon: '🌴' },
   { type: WeatherType.PETAL_WHIRL, label: 'Vent de pétales', icon: '🌸' },
   { type: WeatherType.GEYSERS, label: 'Geysers', icon: '♨️' },
   { type: WeatherType.LEAVES, label: 'Feuilles', icon: '🍂' },

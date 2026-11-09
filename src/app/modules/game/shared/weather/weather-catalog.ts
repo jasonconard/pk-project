@@ -255,6 +255,12 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
     description: 'Comme sous les arbres : ombres de feuillage qui bougent avec le vent, pollen doré, oiseaux le jour, grillons et hibou la nuit.',
     effects: ['Ombres de feuillage', 'Pollen', 'Oiseaux, grillons, hibou'],
   },
+  [WeatherType.JUNGLE]: {
+    category: 'nature', sound: true,
+    summary: 'Forêt sombre, moite et oppressante.',
+    description: 'La forêt en plus sombre et étouffante : lumière filtrée par une canopée épaisse, brume moite au ras du sol, gouttes qui tombent des arbres. La nuit, il fait presque noir et des yeux te regardent depuis l\'obscurité.',
+    effects: ['Canopée épaisse, rayons de soleil', 'Brume moite au sol', 'Gouttes, pollen et spores', 'Yeux dans le noir la nuit', 'Oiseaux, grenouilles, grillons'],
+  },
   [WeatherType.AUTUMN_DRIZZLE]: {
     category: 'nature', sound: true,
     summary: 'Bruine dorée et feuilles mortes.',

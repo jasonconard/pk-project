@@ -679,7 +679,7 @@ export class WeatherHelper {
     // Flutter gets faster with the wind; wrapped to keep float precision in the shader
     u.uFlutterPhase.value = (u.uFlutterPhase.value + dt * (2.5 + 5 * windAbs)) % (Math.PI * 2);
 
-    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.risingEnergy > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.morningMist > 0 || p.moonless > 0 || p.deepFreeze > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
+    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.risingEnergy > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.morningMist > 0 || p.groundMist > 0 || p.moonless > 0 || p.watchingEyes > 0 || p.deepFreeze > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
       this.surfaces.update(dt);
     }
     this.rain.update(dt, target, p.rain, this.windX);
@@ -738,8 +738,8 @@ export class WeatherHelper {
     this.gravityDrops.update(dt, target, p.antigravity, this.game.camera, this.windX);
     this.strikes.update(dt, target, this.playerPosition(), p.thunderRain, this.game.camera);
     this.strikeSparks.update(dt, target, this.strikes.sparks, this.game.camera, 0);
-    this.mist.update(dt, target, p.morningMist, this.game.camera, this.windX);
-    this.eyes.update(dt, target, this.playerPosition(), p.moonless, this.game.camera);
+    this.mist.update(dt, target, Math.max(p.morningMist, p.groundMist), this.game.camera, this.windX);
+    this.eyes.update(dt, target, this.playerPosition(), Math.max(p.moonless, p.watchingEyes), this.game.camera);
     // Breathing: a puff every BREATH_PERIOD, exhaled during the first third of it
     this.breathTime += dt;
     const breathPhase = (this.breathTime % BREATH_PERIOD) / BREATH_PERIOD;
