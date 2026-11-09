@@ -2,6 +2,7 @@ import { Component, computed, DestroyRef, effect, ElementRef, inject, input, lin
 import { WeatherCatalogComponent } from '../weather-catalog/weather-catalog.component';
 import { KeyService } from '../../../core/shared/service/key.service';
 import { weatherScreenshot } from '../shared/weather/weather-catalog';
+import { applySilentMode, ignoreSilentMode, SILENT_MODE_BYPASS_SUPPORTED } from '../shared/weather/silent-mode';
 import { formatHour, TIME_OF_DAY_LABELS, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
 
 export interface SoundSetting {
@@ -81,6 +82,14 @@ export class WeatherPanelComponent {
     return s < 0.05 ? 'Calme' : s < 0.35 ? 'Brise' : s < 0.7 ? 'Vent fort' : 'Tempête';
   });
   protected readonly soundPercent = computed(() => Math.round(this.soundVolume() * 100));
+  /** iPhone / iPad: sound even in silent mode (only where the browser allows it). */
+  protected readonly silentBypassSupported = SILENT_MODE_BYPASS_SUPPORTED;
+  protected readonly ignoreSilentMode = ignoreSilentMode;
+
+  protected toggleSilentMode(event: Event): void {
+    event.stopPropagation();
+    applySilentMode(!this.ignoreSilentMode());
+  }
   protected readonly cloudPercent = computed(() => Math.round(this.cloudDensity() * 100));
   protected readonly cloudLabel = computed(() => {
     const d = this.cloudDensity();

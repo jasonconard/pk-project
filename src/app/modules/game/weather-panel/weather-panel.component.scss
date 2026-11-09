@@ -255,6 +255,36 @@ button {
       color: #222;
     }
   }
+
+  // iPhone / iPad: sound even in silent mode
+  .silent-mode {
+    margin-top: 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 2px;
+    background: none;
+    font-size: 12px;
+    text-align: left;
+
+    .check {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      border: 1.5px solid rgba(255, 255, 255, 0.6);
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    &[aria-pressed="true"] .check {
+      background: #fafafa;
+      color: #222;
+      border-color: #fafafa;
+    }
+  }
 }
 
 // Cloud density gauge (same look as the wind gauge, grey-white fill)

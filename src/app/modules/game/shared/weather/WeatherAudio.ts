@@ -1,3 +1,5 @@
+import { applySilentMode } from './silent-mode';
+
 /**
  * Weather sounds, with the Web Audio API:
  * - rain, drizzle, wind (and sand hiss): synthesized from noise, following the weather live;
@@ -300,6 +302,8 @@ export class WeatherAudio {
   private time = 0;
 
   constructor() {
+    // Silent mode bypass chosen on this device (iPhone, iPad): before the first sound
+    applySilentMode();
     // Browsers only let the sound start during a user gesture. Safari (iPhone, iPad) doesn't count a touch's
     // pointerdown as one, only its end (pointerup / touchend): the sound would stay suspended. The sound can
     // also be stopped later (iOS suspends it when the app goes to the background, a call...): every gesture

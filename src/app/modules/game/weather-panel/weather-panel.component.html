@@ -140,6 +140,12 @@
                  [style.--fill.%]="soundMuted() ? 0 : soundPercent()"
                  (input)="setSoundVolume($event)"
                  (change)="releaseSlider($event)" />
+          @if (silentBypassSupported) {
+            <button type="button" class="silent-mode" [attr.aria-pressed]="ignoreSilentMode()" (click)="toggleSilentMode($event)">
+              <span class="check" aria-hidden="true">{{ ignoreSilentMode() ? '✓' : '' }}</span>
+              Jouer même en mode silencieux
+            </button>
+          }
         </section>
           <p class="popover-hint">← → volume · Entrée couper · Échap fermer</p>
         </div>
