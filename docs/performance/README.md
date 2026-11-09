@@ -81,6 +81,13 @@ Le fondu et le masquage des bâtiments étaient recalculés 120 fois par seconde
 
 Les gouttes et les flocons s'arrêtent sur le sol et les toits. La hauteur est trouvée par un rayon vers le bas, puis gardée en mémoire par case de 4 unités (`SurfaceHeights`). Cette mémoire était entièrement vidée dès qu'un objet changeait de visibilité, ce qui arrive sans cesse en marchant (les bâtiments près de la caméra sont masqués puis réaffichés). Toute la zone de pluie était alors recalculée, soit environ 13 000 rayons. La liste des surfaces ne suit plus que la visibilité des morceaux de carte : un bâtiment masqué près de la caméra est toujours là. En 8 secondes de marche, la mémoire est vidée une fois au lieu de quatre.
 
+## 6. Les à-coups avec Safari (iPhone, iPad)
+
+En PWA sur iOS, le jeu était fluide, mais la vitesse chutait d'un coup de temps en temps en marchant, puis se rétablissait aussitôt. Deux causes ont été corrigées (v0.0.7), et les à-coups ont disparu :
+
+- **La taille du canvas remise à chaque image** : `Game.render` appelait `renderer.setPixelRatio` à chaque image. Cette fonction réécrit la largeur et la hauteur du canvas, même identiques. Chrome l'ignore, mais Safari peut réinitialiser l'image. La résolution n'est plus appliquée que lorsque la qualité change (`Game.applyQuality`).
+- **La première apparition d'une zone de la carte** : un morceau de carte caché n'est pas préparé pour la carte graphique. La première fois qu'il entrait dans le champ, ses shaders étaient compilés et ses textures envoyées, pendant la marche. Au chargement, `Game.warmUp` rend tout visible un instant, compile tous les shaders (`renderer.compile`), envoie toutes les textures (`renderer.initTexture`), puis remet la visibilité comme avant. On le vérifie en affichant chaque morceau de carte : le nombre de shaders (`renderer.info.programs`) et de textures ne bouge plus.
+
 ## Récapitulatif (ordinateur, Économie, sans ombres)
 
 | Étape | Appels de dessin par image |
@@ -111,6 +118,11 @@ L'APK est publié à chaque version, avec une Release GitHub. Au lancement, l'ap
 - **30 FPS quand on ne touche à rien** : c'est l'écran qui baisse sa fréquence de rafraîchissement, et le navigateur suit. Dans les paramètres d'affichage, choisis une fréquence fixe (120 ou 144 Hz) au lieu du mode automatique. Dans les options pour les développeurs, active « Forcer la fréquence d'actualisation maximale » si elle existe. Désactive l'économie de batterie.
 - **Game Space (RedMagic)** : il ne reconnaît que les applications installées. Installe le jeu depuis Chrome (« Installer l'application »), puis ajoute-le dans Game Space. S'il n'y apparaît pas, ajoute Chrome lui-même.
 
+### Sur iPhone et iPad (PWA)
+
+- **Barre d'état** : le jeu est dessiné dessous (`apple-mobile-web-app-status-bar-style` à `black-translucent`, `viewport-fit=cover`), avec un fond noir. Les boutons du haut restent dans les zones de sécurité : `--safe-top`, `--safe-left` et `--safe-right` (dans `styles.scss`, d'après `env(safe-area-inset-*)`).
+- iOS garde les réglages d'une PWA au moment où on l'ajoute à l'écran d'accueil : après un changement de ces réglages, supprime l'app et rajoute-la depuis Safari.
+
 ## À retenir
 
 - **Mesurer avant d'optimiser**, sur l'appareil visé : sur ordinateur, la carte graphique ne saturait pas et cachait le problème.
@@ -118,3 +130,4 @@ L'APK est publié à chaque version, avec une Release GitHub. Au lancement, l'ap
 - **Transparence** : un matériau transparent visible des deux côtés coûte deux passes. L'`alphaTest` suffit pour découper des pixels.
 - **Un cache ne doit être vidé que lorsque ses données changent vraiment.**
 - **Le temps de jeu se compte en temps réel**, pas en nombre d'appels d'une boucle.
+- **Tout préparer au chargement** (shaders, textures) plutôt qu'à la première apparition, et ne rien refaire à chaque image qui ne change pas : Safari le fait payer plus cher que Chrome.
