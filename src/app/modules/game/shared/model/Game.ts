@@ -211,7 +211,8 @@ export class Game {
   }
 
   public render() {
-    this.renderer.setPixelRatio(this.pixelRatio);
+    // (no setPixelRatio here: it sets the canvas size again at every frame, which Safari pays for; applyQuality
+    // sets it when it changes)
     this.updateLights();
     this.renderFrame();
   }
@@ -221,6 +222,32 @@ export class Game {
     if (!this.weather.renderPostEffects()) {
       this.renderer.render(this.scene, this.camera);
     }
+  }
+
+  /**
+   * Prepares the whole map for the GPU at once, while loading: the shaders of every object are compiled and the
+   * textures sent, hidden chunks included. Otherwise it happens the first time a chunk comes into view, and the
+   * game stutters while walking (very visible with Safari).
+   */
+  public warmUp() {
+    const hidden: THREE.Object3D[] = [];
+    this.scene.traverse(object => {
+      if (!object.visible) {
+        hidden.push(object);
+        object.visible = true;
+      }
+    });
+    this.renderer.compile(this.scene, this.camera);
+    const textures = new Set<THREE.Texture>();
+    this.scene.traverse(object => {
+      const material = (object as THREE.Mesh).material;
+      (Array.isArray(material) ? material : material ? [material] : []).forEach(m => {
+        Object.values(m).forEach(value => (value as THREE.Texture)?.isTexture && textures.add(value));
+        Object.values((m as THREE.ShaderMaterial).uniforms ?? {}).forEach(u => (u.value as THREE.Texture)?.isTexture && textures.add(u.value));
+      });
+    });
+    textures.forEach(texture => this.renderer.initTexture(texture));
+    hidden.forEach(object => object.visible = false);
   }
 
   public refreshRenderer() {

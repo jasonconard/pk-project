@@ -295,7 +295,11 @@ export class GameService {
       }
       game.refreshRenderer();
 
-      setTimeout(() => game.loading = false, 300);
+      setTimeout(() => {
+        // (a little later: the textures loaded meanwhile are sent too)
+        game.warmUp();
+        game.loading = false;
+      }, 300);
     }, firstInit ? 0 : 300);
   }
 
