@@ -74,20 +74,25 @@ export class SceneService {
     const sides: [number, number][] = alongZ ? [[-FOOT_HALF_WIDTH, 0], [FOOT_HALF_WIDTH, 0]] : [[0, -FOOT_HALF_DEPTH], [0, FOOT_HALF_DEPTH]];
     const here = sides.map(([dx, dz]) => [pos.x + dx, pos.z + dz]);
     const next = sides.map(([dx, dz]) => [pos.x + move.x + ahead(move.x) + dx, pos.z + move.z + ahead(move.z) + dz]);
-    // Stairs are only used along their slope, both feet on stairs of the same direction (the player centered on a
-    // single one, anywhere across stairs set side by side): otherwise they are a wall
+    // Stairs (all in the same direction, else they are a wall):
+    // - along their slope, both feet are on them (the player centered on a single one, anywhere across stairs set
+    //   side by side): this is how a level is climbed;
+    // - across their slope, each foot stays on them or off them: the player walks across stairs set side by side,
+    //   but doesn't enter / leave them by the side.
+    const hereStairs = here.map(([x, z]) => mapHelper.stairsAt(x, z));
+    const nextStairs = next.map(([x, z]) => mapHelper.stairsAt(x, z));
+    const side = [...hereStairs, ...nextStairs].find(s => s);
     let onStairs = false;
-    for (const feet of [here, next]) {
-      const stairs = feet.map(([x, z]) => mapHelper.stairsAt(x, z));
-      const side = stairs[0];
-      if (stairs.every(s => !s)) {
-        continue;
-      }
-      onStairs = true;
-      if (!side || stairs.some(s => s !== side) || (side === 'n' || side === 's') !== alongZ) {
+    if (side) {
+      const alongSlope = (side === 'n' || side === 's') === alongZ;
+      const sameSide = [...hereStairs, ...nextStairs].every(s => !s || s === side);
+      const bothFeet = [hereStairs, nextStairs].every(feet => feet.every(s => s) || feet.every(s => !s));
+      const staysOn = hereStairs.every((s, i) => s === nextStairs[i]);
+      if (!sameSide || !(alongSlope ? bothFeet : staysOn)) {
         block();
         return;
       }
+      onStairs = alongSlope;
     }
     const levelHere = Math.max(...here.map(([x, z]) => mapHelper.levelAtWorld(x, z)));
     for (const [x, z] of next) {
