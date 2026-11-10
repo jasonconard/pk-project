@@ -14,6 +14,14 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.15',
+    date: '2026-11-10',
+    notes: [
+      'Le jeu reste fluide après avoir monté ou descendu le sol dans l\'éditeur.',
+      'La pluie et la neige tombent bien sur le sol après un changement de relief.',
+    ],
+  },
+  {
     version: '0.0.14',
     date: '2026-11-10',
     notes: [
