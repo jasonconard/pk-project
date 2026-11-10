@@ -14,6 +14,14 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.14',
+    date: '2026-11-10',
+    notes: [
+      'Clique sur le numéro de version, dans le menu de qualité, pour voir les nouveautés de chaque version.',
+      'L\'éditeur de carte est plus léger quand on déplace la vue.',
+    ],
+  },
+  {
     version: '0.0.13',
     date: '2026-11-10',
     notes: [
