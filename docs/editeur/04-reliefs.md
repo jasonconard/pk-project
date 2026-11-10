@@ -20,6 +20,8 @@ Dès qu'un morceau de carte a des hauteurs, son sol devient une **grille de 32 �
 
 La géométrie a deux groupes : le sol (texture du morceau) et les parois (planche).
 
+**Coût** : sur une ligne, les cases plates voisines au même niveau ne forment qu'un seul carré (quelques dizaines de triangles pour un morceau surtout plat, au lieu de 2 par case : 2 048). Quand plus aucune case n'a de hauteur ni d'escalier, le sol plat d'origine revient (2 triangles, un seul matériau, pas d'ombre projetée). Le rayon qui place le joueur sur le sol ne vise que le morceau de carte sous ses pieds, et le cache des hauteurs de la pluie / neige est vidé quand la géométrie d'un sol change.
+
 **Sens des triangles** : un triangle est « vu de face » quand ses points tournent dans le sens inverse des aiguilles d'une montre de ce côté-là ; sa normale, `(b − a) × (c − a)`, pointe vers ce côté. Chaque paroi est construite avec ses coins « de gauche à droite vus de dehors », pour que la normale pointe vers l'extérieur.
 
 ## Le joueur

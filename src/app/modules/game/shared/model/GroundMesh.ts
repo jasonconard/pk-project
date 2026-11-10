@@ -15,6 +15,8 @@ export const STAIRS_TILE: [number, number] = [20, 17];
  * Ground of a chunk with reliefs: one square per cell at its level (UVs into the chunk ground texture / painted
  * canvas, like the flat ground quad), and vertical rock walls where a cell is higher than its neighbor.
  * Each wall is drawn by the higher cell only (no double walls), one tile per level of height.
+ * The flat cells side by side in a row at the same level make a single quad (a mostly flat chunk is a few dozen
+ * triangles instead of 2 per cell: drawn twice, for the view and for the shadows, and hit by the ground rays).
  * Geometry groups: 0 = the ground (its texture), 1 = the walls (tileset).
  * @param levelAt level of any cell around the chunk (columns / rows out of it are in the next chunks)
  */
@@ -54,8 +56,20 @@ export function buildGroundGeometry(chunk: SceneChunk, levelAt: (col: number, ro
       const sw = h(stairs === 's' || stairs === 'w');
       const se = h(stairs === 's' || stairs === 'e');
       const ne = h(stairs === 'n' || stairs === 'e');
-      quad(top, topUv, [[x0, nw, z0], [x0, sw, z1], [x1, se, z1], [x1, ne, z0]],
-        [groundUv(x0, z0), groundUv(x0, z1), groundUv(x1, z1), groundUv(x1, z0)]);
+      if (stairs) {
+        quad(top, topUv, [[x0, nw, z0], [x0, sw, z1], [x1, se, z1], [x1, ne, z0]],
+          [groundUv(x0, z0), groundUv(x0, z1), groundUv(x1, z1), groundUv(x1, z0)]);
+      } else if (!(col > 0 && !stairsAt(col - 1, row) && levelAt(col - 1, row) === level)) {
+        // First flat cell of a run: one quad up to the last flat cell at the same level in the row
+        // (the ground texture coordinates follow the position: the same picture as one quad per cell)
+        let end = col + 1;
+        while (end < cols && !stairsAt(end, row) && levelAt(end, row) === level) {
+          end++;
+        }
+        const xe = end * TILE_SIZE - halfX;
+        quad(top, topUv, [[x0, y, z0], [x0, y, z1], [xe, y, z1], [xe, y, z0]],
+          [groundUv(x0, z0), groundUv(x0, z1), groundUv(xe, z1), groundUv(xe, z0)]);
+      }
       if (stairs) {
         // Ramp sides: triangles on the sides along the slope, where the neighbor isn't as high
         const t = tilesetPos(...WALL_TILES[0]);

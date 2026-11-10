@@ -11,6 +11,7 @@ import { KeyService } from "../../../../core/shared/service/key.service";
 import * as THREE from 'three';
 import { SequenceService } from "./sequence.service";
 import { WORLD_MAP } from "../../../../../assets/map/world/world";
+import { SceneChunk } from "../model/SceneMap";
 import { MapEditorService } from "./map-editor.service";
 import { loadMapEdits } from "./map-storage";
 import { DustPuff } from "../model/DustPuff";
@@ -194,20 +195,24 @@ export class GameMapService {
     const spriteRayOrigin = new THREE.Vector3(sprite.position.x + RAY_NUDGE, sprite.position.y + GROUND_RAY_UP, sprite.position.z + RAY_NUDGE);
     game.raycaster.ray = new THREE.Ray(spriteRayOrigin, new THREE.Vector3(0, -1, 0));
     let dist = -1;
-
-    mapHelper.sceneMap.chunks.forEach( chunk => {
-      if(chunk.visible) {
-        chunk.grounds.forEach(ground => {
-          if(!ground.passable || !ground.mesh) { return; }
-          const rayCasting = game.raycaster.intersectObject(ground.mesh)[0];
-          if(rayCasting && rayCasting.distance) {
-            if(dist === -1  || rayCasting.distance < dist) {
-              dist = rayCasting.distance
-            }
-          }
-        });
+    const rayGrounds = (chunk: SceneChunk) => chunk.grounds.forEach(ground => {
+      if(!ground.passable || !ground.mesh) { return; }
+      const rayCasting = game.raycaster.intersectObject(ground.mesh)[0];
+      if(rayCasting && rayCasting.distance) {
+        if(dist === -1  || rayCasting.distance < dist) {
+          dist = rayCasting.distance
+        }
       }
     });
+    // The ground under the player is in the chunk under them (120 times per second: not every visible chunk);
+    // the others only if it has none there
+    const under = mapHelper.chunkAt(sprite.position.x, sprite.position.z);
+    if (under?.visible) {
+      rayGrounds(under);
+    }
+    if (dist === -1) {
+      mapHelper.sceneMap.chunks.forEach(chunk => chunk.visible && chunk !== under && rayGrounds(chunk));
+    }
 
     if(dist > -1) {
       const previousY = sprite.position.y;

@@ -16,6 +16,8 @@ export class SurfaceHeights {
   private readonly cache = new Map<number, number>();
   private age = SURFACES_CHECK_INTERVAL;
   private surfaces: THREE.Object3D[] = [];
+  /** Geometry of each surface when listed: the editor swaps a ground's geometry when its reliefs change. */
+  private geometries: (THREE.BufferGeometry | undefined)[] = [];
   private readonly raycaster = new THREE.Raycaster();
   private readonly rayOrigin = new THREE.Vector3();
   private readonly down = new THREE.Vector3(0, -1, 0);
@@ -42,9 +44,12 @@ export class SurfaceHeights {
         surfaces.push(o);
       }
     });
-    const changed = surfaces.length !== this.surfaces.length || surfaces.some((o, i) => o !== this.surfaces[i]);
+    const geometries = surfaces.map(o => (o as THREE.Mesh).geometry);
+    const changed = surfaces.length !== this.surfaces.length
+      || surfaces.some((o, i) => o !== this.surfaces[i] || geometries[i] !== this.geometries[i]);
     if (changed) {
       this.surfaces = surfaces;
+      this.geometries = geometries;
       this.cache.clear();
     }
   }

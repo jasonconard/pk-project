@@ -304,17 +304,39 @@ export class MapHelper {
   }
 
   private wallMaterial?: THREE.MeshLambertMaterial;
+  /** Original flat ground of the chunks given reliefs (put back once every cell is flat again). */
+  private readonly flatGrounds = new Map<string, { geometry: THREE.BufferGeometry, castShadow: boolean }>();
 
-  /** The chunk ground becomes a grid of cells at their level, with rock walls (see buildGroundGeometry). */
+  /**
+   * The chunk ground becomes a grid of cells at their level, with rock walls (see buildGroundGeometry); without any
+   * height nor stairs left, the original flat ground (2 triangles, one material, no shadow cast) comes back.
+   */
   private rebuildGround(chunk: SceneChunk) {
     const mesh = chunk.grounds[0]?.mesh;
     if (!mesh) {
       return;
     }
-    const old = mesh.geometry;
+    const flat = this.flatGrounds.get(chunk.id);
+    const hasRelief = Object.keys(chunk.heights ?? {}).length > 0 || Object.keys(chunk.stairs ?? {}).length > 0;
+    if (!hasRelief) {
+      if (flat) {
+        mesh.geometry.dispose();
+        mesh.geometry = flat.geometry;
+        mesh.castShadow = flat.castShadow;
+        if (Array.isArray(mesh.material)) {
+          mesh.material = mesh.material[0];
+        }
+        this.flatGrounds.delete(chunk.id);
+      }
+      return;
+    }
+    if (!flat) {
+      this.flatGrounds.set(chunk.id, { geometry: mesh.geometry, castShadow: mesh.castShadow });
+    }
+    const old = flat ? mesh.geometry : null;
     mesh.geometry = buildGroundGeometry(chunk, (col, row) => this.levelAt(chunk, col, row),
       (col, row) => stairsSide(chunk.stairs?.[col + ',' + row]));
-    old.dispose();
+    old?.dispose(); // (the flat ground is kept)
     if (!this.wallMaterial) {
       const texture = new THREE.TextureLoader().load(TILESET_LINK);
       texture.colorSpace = THREE.SRGBColorSpace;
