@@ -39,6 +39,8 @@ const HISTORY_SIZE = 100;
 const SAVE_DELAY = 400;
 /** Max cells painted by one bucket fill. */
 const FILL_MAX = 4096;
+/** Buildings fading / hiding: every this many input ticks (120 Hz → 30 Hz, like in the game), when the view moved. */
+const VISIBILITY_EVERY = 4;
 
 /** The selected object, as shown by the editor UI. */
 export interface EditSelection {
@@ -132,6 +134,9 @@ export class MapEditorService {
   /** Cells grid: one set of lines per chunk (built when the chunk is seen). */
   private readonly grids = new Map<string, THREE.LineSegments>();
   private readonly gridMaterial = new THREE.LineBasicMaterial({ color: GRID_COLOR, transparent: true, opacity: GRID_OPACITY });
+  /** Buildings fading: input ticks counter, and the camera target / zoom they were last computed for (null = to do). */
+  private visibilityTick = 0;
+  private visibilityAt: { target: THREE.Vector3, zoom: number } | null = null;
 
   /** Listens to the mouse / the fingers on the game canvas (only acts in edit mode). */
   attach(game: Game) {
@@ -197,11 +202,9 @@ export class MapEditorService {
           this.setZoom(game, this.pinch.zoom * this.pinch.distance / Math.max(1, this.touchesDistance()));
         }
         if (!this.drag) { return; }
-      } else {
-        // (a finger doesn't hover: its square and its preview are shown where it taps)
-        this.moveBrush(game, ev.clientX, ev.clientY);
       }
       if (this.stroke) {
+        this.hover(game, ev.clientX, ev.clientY);
         this.paintAt(game, ev.clientX, ev.clientY);
         return;
       }
@@ -218,8 +221,9 @@ export class MapEditorService {
         drag.x = ev.clientX;
         drag.y = ev.clientY;
       }
+      // (after the view moved; a finger doesn't hover: its square and its preview are shown where it taps)
       if (!touch) {
-        this.moveGhost(game, ev.clientX, ev.clientY);
+        this.hover(game, ev.clientX, ev.clientY);
       }
     });
     const release = (ev: PointerEvent, cancelled: boolean) => {
@@ -283,6 +287,7 @@ export class MapEditorService {
     this.savedPosition.copy(game.camera.position);
     this.savedZoom = game.cameraZoom;
     game.editMode = true;
+    this.visibilityAt = null;
     // Touch screens: no stick nor buttons while editing, the fingers move the view and edit the map
     this.touchService.setGameControls(false);
     this.updateHistoryFlags(game);
@@ -406,13 +411,18 @@ export class MapEditorService {
         }
       });
     }
-    if (mapHelper) {
+    // (every building's box is computed: only 30 times per second, and only when the view moved or the map changed)
+    if (mapHelper && ++this.visibilityTick % VISIBILITY_EVERY === 0) {
       const target = game.getCameraTarget();
-      mapHelper.sceneMap.chunks.forEach(chunk => {
-        if (chunk.visible) {
-          chunk.buildings.forEach(building => mapHelper.updateVisibleMesh(chunk.id + '-' + building.id, target, building.canHide));
-        }
-      });
+      const at = this.visibilityAt;
+      if (!at || !at.target.equals(target) || at.zoom !== game.cameraZoom) {
+        this.visibilityAt = { target: target.clone(), zoom: game.cameraZoom };
+        mapHelper.sceneMap.chunks.forEach(chunk => {
+          if (chunk.visible) {
+            chunk.buildings.forEach(building => mapHelper.updateVisibleMesh(chunk.id + '-' + building.id, target, building.canHide));
+          }
+        });
+      }
     }
   }
 
@@ -654,6 +664,7 @@ export class MapEditorService {
 
   /** Also the moment the map changed (a change, an undo, a redo): it is saved in the browser. */
   private updateHistoryFlags(game: Game) {
+    this.visibilityAt = null; // (objects placed, moved, removed: their fading is computed again)
     game.editCanUndo = this.undoStack.length > 0;
     game.editCanRedo = this.redoStack.length > 0;
     this.scheduleSave(game);
@@ -674,11 +685,11 @@ export class MapEditorService {
   // --- Placing ---
 
   /** The preview follows the mouse: where its ray hits the ground, snapped to the grid. */
-  private moveGhost(game: Game, clientX: number, clientY: number) {
+  private moveGhost(game: Game, clientX: number, clientY: number, ground?: THREE.Vector3 | null) {
     if (!this.ghost) {
       return;
     }
-    const hit = this.groundAt(game, clientX, clientY);
+    const hit = ground !== undefined ? ground : this.groundAt(game, clientX, clientY);
     this.showGhostAt(hit
       ? new THREE.Vector3(Math.round(hit.x / GRID) * GRID, Math.round(hit.y * 1000) / 1000, Math.round(hit.z / GRID) * GRID)
       : null);
@@ -721,15 +732,21 @@ export class MapEditorService {
 
   // --- Ground painting ---
 
+  /** Mouse over the map: the brush square and the model preview follow it (one ray to the ground for both). */
+  private hover(game: Game, clientX: number, clientY: number) {
+    const ground = game.editTileId || this.ghost ? this.groundAt(game, clientX, clientY) : null;
+    this.moveBrush(game, ground);
+    this.moveGhost(game, clientX, clientY, ground);
+  }
+
   /** The orange square follows the cell under the mouse while a tile is selected. */
-  private moveBrush(game: Game, clientX: number, clientY: number) {
-    const ground = game.editTileId ? this.groundAt(game, clientX, clientY) : null;
-    const cell = ground && game.mapHelper?.cellAt(ground.x, ground.z);
+  private moveBrush(game: Game, ground: THREE.Vector3 | null) {
+    const cell = game.editTileId && ground ? game.mapHelper?.cellAt(ground.x, ground.z) : null;
     this.brush.visible = !!cell;
     // The square covers the brush size (one cell for the bucket)
     const size = game.editBrush === 'fill' ? 1 : game.editBrush;
     this.brush.scale.set(size, 1, size);
-    if (cell) {
+    if (cell && ground) {
       this.brush.position.set(
         cell.chunk.pos.x - cell.chunk.size.x / 2 + cell.col * TILE_SIZE,
         ground.y + 0.3,
