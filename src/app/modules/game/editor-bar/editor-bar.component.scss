@@ -43,6 +43,11 @@
     outline: 2px solid #5aa8ff;
     outline-offset: 2px;
   }
+
+  // Switch on (grid): orange outline, like the edit button
+  &.on {
+    box-shadow: 0 0 0 2px #ffb04a, 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .text-btn {
@@ -201,10 +206,31 @@
   font-size: 12px;
 }
 
-// Small screens: icon only, no hint
-@media (max-width: 640px) {
+// Narrow screens (phones, also in landscape): the weather toolbar shares the first line, so the edit button is
+// icon only and the other buttons go on a second line under it
+@media (max-width: 1100px) {
   .edit-btn .label,
-  .edit-btn kbd,
+  .edit-btn kbd {
+    display: none;
+  }
+
+  :host {
+    max-width: calc(100vw - 92px - var(--safe-left) - var(--safe-right));
+  }
+
+  .top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .history {
+    flex-wrap: wrap;
+  }
+}
+
+// Small screens: under the status tile, no hint
+@media (max-width: 640px) {
   .hint {
     display: none;
   }
@@ -212,6 +238,7 @@
   :host {
     left: calc(10px + var(--safe-left));
     top: calc(56px + var(--safe-top));
+    max-width: calc(100vw - 20px - var(--safe-left) - var(--safe-right));
   }
 }
 

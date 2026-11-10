@@ -62,6 +62,8 @@ export class Game {
   editTileId: string | null = null;
   /** Map editor: ground brush size in cells, or the bucket. */
   editBrush: EditBrush = 1;
+  /** Map editor: the cells grid is drawn on the ground. */
+  editGrid = false;
   /** Map editor: the selected object (null = none), and whether there are changes to undo / redo. */
   editSelection: EditSelection | null = null;
   editCanUndo = false;

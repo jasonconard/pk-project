@@ -1,4 +1,4 @@
-@if (isTouchDevice() && !hasMessage()) {
+@if (isTouchDevice() && gameControls() && !hasMessage()) {
   <div class="right-touch-btns" animate.enter="anim-fade-in-delayed" animate.leave="anim-fade-out">
     @for (btn of btns; track btn.label) {
       <div class="btn-container"

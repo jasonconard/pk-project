@@ -27,6 +27,8 @@ export interface GameHud {
   editTileId: string | null;
   /** Map editor: ground brush. */
   editBrush: EditBrush;
+  /** Map editor: cells grid shown. */
+  editGrid: boolean;
   /** Map editor open (free camera, player frozen). */
   editMode: boolean;
   /** Map editor: selected object, changes to undo / redo. */
@@ -344,6 +346,7 @@ export class GameService {
       editModelId: game.editModelId,
       editTileId: game.editTileId,
       editBrush: game.editBrush,
+      editGrid: game.editGrid,
       editSelection: game.editSelection,
       editCanUndo: game.editCanUndo,
       editCanRedo: game.editCanRedo,

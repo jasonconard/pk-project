@@ -74,16 +74,17 @@ export class SceneService {
     const sides: [number, number][] = alongZ ? [[-FOOT_HALF_WIDTH, 0], [FOOT_HALF_WIDTH, 0]] : [[0, -FOOT_HALF_DEPTH], [0, FOOT_HALF_DEPTH]];
     const here = sides.map(([dx, dz]) => [pos.x + dx, pos.z + dz]);
     const next = sides.map(([dx, dz]) => [pos.x + move.x + ahead(move.x) + dx, pos.z + move.z + ahead(move.z) + dz]);
-    // Stairs are only used along their slope, the player centered on them: otherwise they are a wall
-    const stairs = [...here, ...next].map(([x, z]) => mapHelper.stairsAt(x, z));
-    const onStairs = stairs.some(s => s);
-    for (const s of stairs) {
-      if (!s) {
+    // Stairs are only used along their slope, both feet on stairs of the same direction (the player centered on a
+    // single one, anywhere across stairs set side by side): otherwise they are a wall
+    let onStairs = false;
+    for (const feet of [here, next]) {
+      const stairs = feet.map(([x, z]) => mapHelper.stairsAt(x, z));
+      const side = stairs[0];
+      if (stairs.every(s => !s)) {
         continue;
       }
-      const along = (s.side === 'n' || s.side === 's') === alongZ;
-      const centered = alongZ ? Math.abs(pos.x - s.cx) < 1 : Math.abs(pos.z - s.cz) < 1;
-      if (!along || !centered) {
+      onStairs = true;
+      if (!side || stairs.some(s => s !== side) || (side === 'n' || side === 's') !== alongZ) {
         block();
         return;
       }

@@ -3,11 +3,13 @@ import * as THREE from 'three';
 import { Game, SHADE_OFFSET, TOO_FAR_LIMIT } from '../model/Game';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { KeyService } from '../../../../core/shared/service/key.service';
+import { TouchService } from '../../../../core/shared/service/touch.service';
 import { MODELS } from '../../../../../assets/models/models';
 import { BasicMeshService } from './basic-mesh.service';
 import { SceneBuilding } from '../model/SceneBuilding';
 import { SceneChunk, StairsSide, stairsSide } from '../model/SceneMap';
 import { TILE_SIZE } from '../model/Terrain';
+import { LEVEL_HEIGHT } from '../model/GroundMesh';
 import { clearMapEdits, downloadChunksFile, saveMapEdits } from './map-storage';
 
 /** Camera zoom range in the editor (1 = normal game view, lower = closer). */
@@ -21,6 +23,12 @@ const KEY_PAN_SPEED = 3;
 const GRID = 8;
 /** A press that moves less than this (pixels) is a click (place / select), more is a drag (pan / move). */
 const CLICK_TOLERANCE = 5;
+/** Same for a finger (less steady than a mouse): below is a tap, above a drag. */
+const TAP_TOLERANCE = 10;
+/** Cells grid: color, opacity, and height above the ground (world units). */
+const GRID_COLOR = 0xffffff;
+const GRID_OPACITY = 0.35;
+const GRID_LIFT = 0.4;
 /** Opacity of the preview of the model to place. */
 const GHOST_OPACITY = 0.55;
 /** Color of the box around the selected object. */
@@ -43,7 +51,7 @@ export interface EditSelection {
 /** Ground brush: size in cells, or the bucket. */
 export type EditBrush = 1 | 2 | 3 | 'fill';
 
-export type EditCommand = 'undo' | 'redo' | 'delete' | 'deselect' | 'togglePassable' | 'toggleCanHide' | 'export' | 'reset';
+export type EditCommand = 'undo' | 'redo' | 'delete' | 'deselect' | 'togglePassable' | 'toggleCanHide' | 'toggleGrid' | 'export' | 'reset';
 
 interface EditAction {
   undo(): void;
@@ -89,10 +97,12 @@ interface Drag {
  *   places the model there.
  * - Without one, a click selects an object (orange box): drag it to move it, Delete to remove it, its options
  *   (passable, fades when the player is behind) can be switched. Every change can be undone / redone.
+ * - On a touch screen: dragging always moves the view, a tap places / paints / selects, two fingers zoom.
  */
 @Service()
 export class MapEditorService {
   private readonly keyService = inject(KeyService);
+  private readonly touchService = inject(TouchService);
 
   /** Camera position and zoom when the editor was opened (restored when leaving it). */
   private readonly savedPosition = new THREE.Vector3();
@@ -116,7 +126,14 @@ export class MapEditorService {
       .map(([x, z]) => new THREE.Vector3(x, 0, z))),
     new THREE.LineBasicMaterial({ color: SELECTION_COLOR, depthTest: false }));
 
-  /** Listens to the mouse on the game canvas (only acts in edit mode). */
+  /** Fingers on the screen (pointer id → position), and the pinch of two of them (their distance and the zoom at its start). */
+  private readonly touches = new Map<number, { x: number, y: number }>();
+  private pinch: { distance: number, zoom: number } | null = null;
+  /** Cells grid: one set of lines per chunk (built when the chunk is seen). */
+  private readonly grids = new Map<string, THREE.LineSegments>();
+  private readonly gridMaterial = new THREE.LineBasicMaterial({ color: GRID_COLOR, transparent: true, opacity: GRID_OPACITY });
+
+  /** Listens to the mouse / the fingers on the game canvas (only acts in edit mode). */
   attach(game: Game) {
     const el = game.canvas;
     this.selectionHelper.visible = false;
@@ -129,6 +146,17 @@ export class MapEditorService {
     });
     el.addEventListener('pointerdown', ev => {
       if (!game.editMode) { return; }
+      const touch = ev.pointerType === 'touch';
+      if (touch) {
+        this.touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+        if (this.touches.size > 1) {
+          // A second finger: the drag / tap of the first one is dropped, the two zoom
+          this.cancelDrag(game);
+          this.pinch = this.touches.size === 2 ? { distance: this.touchesDistance(), zoom: game.cameraZoom } : this.pinch;
+          el.setPointerCapture(ev.pointerId);
+          return;
+        }
+      }
       if (ev.button === 1 || ev.button === 2) {
         // Right / middle button: always moves the view
         this.drag = { startX: ev.clientX, startY: ev.clientY, x: ev.clientX, y: ev.clientY, hit: null, dragging: true, moving: false, panOnly: true };
@@ -136,14 +164,14 @@ export class MapEditorService {
         return;
       }
       if (ev.button !== 0) { return; }
-      if (game.editTileId) {
-        // Painting the ground: the press and every move paint
+      if (game.editTileId && !touch) {
+        // Painting the ground with the mouse: the press and every move paint (a finger paints on a tap)
         this.stroke = { cells: new Map(), levels: new Map(), stairs: new Map() };
         this.paintAt(game, ev.clientX, ev.clientY);
         el.setPointerCapture(ev.pointerId);
         return;
       }
-      const hit = game.editModelId ? null : this.pick(game, ev.clientX, ev.clientY);
+      const hit = game.editModelId || game.editTileId ? null : this.pick(game, ev.clientX, ev.clientY);
       this.drag = { startX: ev.clientX, startY: ev.clientY, x: ev.clientX, y: ev.clientY, hit, dragging: false, moving: false };
       // Pressing on the selected object: dragging will move it
       if (hit && this.selected && hit.building === this.selected.building && game.mapHelper) {
@@ -157,13 +185,28 @@ export class MapEditorService {
     });
     el.addEventListener('pointermove', ev => {
       if (!game.editMode) { return; }
-      this.moveBrush(game, ev.clientX, ev.clientY);
+      const touch = ev.pointerType === 'touch';
+      if (touch) {
+        const finger = this.touches.get(ev.pointerId);
+        if (finger) {
+          finger.x = ev.clientX;
+          finger.y = ev.clientY;
+        }
+        if (this.pinch && this.touches.size === 2) {
+          // Fingers moving apart zoom in (the camera gets closer)
+          this.setZoom(game, this.pinch.zoom * this.pinch.distance / Math.max(1, this.touchesDistance()));
+        }
+        if (!this.drag) { return; }
+      } else {
+        // (a finger doesn't hover: its square and its preview are shown where it taps)
+        this.moveBrush(game, ev.clientX, ev.clientY);
+      }
       if (this.stroke) {
         this.paintAt(game, ev.clientX, ev.clientY);
         return;
       }
       const drag = this.drag;
-      if (drag && !drag.dragging && Math.hypot(ev.clientX - drag.startX, ev.clientY - drag.startY) > CLICK_TOLERANCE) {
+      if (drag && !drag.dragging && Math.hypot(ev.clientX - drag.startX, ev.clientY - drag.startY) > (touch ? TAP_TOLERANCE : CLICK_TOLERANCE)) {
         drag.dragging = true;
       }
       if (drag?.dragging && drag.moving) {
@@ -175,33 +218,48 @@ export class MapEditorService {
         drag.x = ev.clientX;
         drag.y = ev.clientY;
       }
-      this.moveGhost(game, ev.clientX, ev.clientY);
+      if (!touch) {
+        this.moveGhost(game, ev.clientX, ev.clientY);
+      }
     });
     const release = (ev: PointerEvent, cancelled: boolean) => {
-      if (this.stroke) {
-        this.endStroke(game);
-      }
-      const drag = this.drag;
-      this.drag = null;
+      const touch = ev.pointerType === 'touch';
       if (el.hasPointerCapture(ev.pointerId)) {
         el.releasePointerCapture(ev.pointerId);
       }
-      if (!drag || cancelled) {
-        if (drag?.moving && drag.from && this.selected && game.mapHelper) {
-          // Cancelled move: back where it was
-          game.mapHelper.moveBuilding(this.selected.chunk, this.selected.building, drag.from);
-          this.refreshSelection(game);
+      if (touch) {
+        this.touches.delete(ev.pointerId);
+        if (this.touches.size < 2) {
+          this.pinch = null;
         }
+      }
+      if (this.stroke) {
+        this.endStroke(game);
+      }
+      if (!this.drag || cancelled) {
+        this.cancelDrag(game);
         return;
       }
-      if (drag.panOnly) {
+      const drag = this.drag;
+      this.drag = null;
+      if (!game.editMode || drag.panOnly) {
         return;
       }
       if (drag.moving && drag.dragging) {
         this.endMove(game, drag);
       } else if (!drag.dragging) {
-        if (game.editModelId) {
+        if (game.editTileId) {
+          // Tap (finger): one press of the brush
+          this.stroke = { cells: new Map(), levels: new Map(), stairs: new Map() };
+          this.paintAt(game, ev.clientX, ev.clientY);
+          this.endStroke(game);
+        } else if (game.editModelId) {
+          // (a finger doesn't hover: the preview goes where it tapped, and doesn't stay over the placed model)
+          this.moveGhost(game, ev.clientX, ev.clientY);
           this.place(game);
+          if (touch) {
+            this.showGhostAt(null);
+          }
         } else {
           this.select(game, drag.hit);
         }
@@ -225,13 +283,20 @@ export class MapEditorService {
     this.savedPosition.copy(game.camera.position);
     this.savedZoom = game.cameraZoom;
     game.editMode = true;
+    // Touch screens: no stick nor buttons while editing, the fingers move the view and edit the map
+    this.touchService.setGameControls(false);
     this.updateHistoryFlags(game);
   }
 
   exit(game: Game) {
     if (!game.editMode) { return; }
     game.editMode = false;
-    this.drag = null;
+    this.touchService.setGameControls(true);
+    this.cancelDrag(game);
+    this.stroke = null;
+    this.pinch = null;
+    this.touches.clear();
+    this.clearGrid();
     this.showGhostAt(null);
     this.brush.visible = false;
     this.select(game, null);
@@ -300,6 +365,12 @@ export class MapEditorService {
       case 'delete': this.deleteSelected(game); break;
       case 'togglePassable': this.toggleOption(game, 'passable'); break;
       case 'toggleCanHide': this.toggleOption(game, 'canHide'); break;
+      case 'toggleGrid':
+        game.editGrid = !game.editGrid;
+        if (!game.editGrid) {
+          this.clearGrid();
+        }
+        break;
       case 'export':
         if (game.mapHelper) {
           downloadChunksFile(game.mapHelper.sceneMap);
@@ -327,6 +398,14 @@ export class MapEditorService {
     }
     // Buildings fading / hiding follow the camera target instead of the (frozen) player
     const mapHelper = game.mapHelper;
+    if (mapHelper && game.editGrid) {
+      // Grid of the chunks coming into view
+      mapHelper.sceneMap.chunks.forEach(chunk => {
+        if (chunk.visible && !this.grids.has(chunk.id)) {
+          this.buildGrid(game, chunk);
+        }
+      });
+    }
     if (mapHelper) {
       const target = game.getCameraTarget();
       mapHelper.sceneMap.chunks.forEach(chunk => {
@@ -335,6 +414,89 @@ export class MapEditorService {
         }
       });
     }
+  }
+
+  /** Drops the current press (a second finger, a cancelled pointer, leaving the editor): a moved object goes back. */
+  private cancelDrag(game: Game) {
+    const drag = this.drag;
+    this.drag = null;
+    if (drag?.moving && drag.from && this.selected && game.mapHelper) {
+      const chunk = this.chunkOf(game, this.selected.building) ?? this.selected.chunk;
+      if (game.mapHelper.moveBuilding(chunk, this.selected.building, drag.from)) {
+        this.selected.chunk = this.chunkOf(game, this.selected.building) ?? chunk;
+      }
+      this.refreshSelection(game);
+    }
+  }
+
+  /** Distance between the two fingers of a pinch (pixels). */
+  private touchesDistance(): number {
+    const [a, b] = [...this.touches.values()];
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 1;
+  }
+
+  // --- Grid ---
+
+  /**
+   * Lines around every cell of a chunk, just above its ground: at the cell level, sloped on stairs. Rebuilt when the
+   * reliefs of the chunk change.
+   */
+  private buildGrid(game: Game, chunk: SceneChunk) {
+    const mapHelper = game.mapHelper;
+    if (!mapHelper || !chunk.group) {
+      return;
+    }
+    this.removeGrid(chunk.id);
+    const cols = chunk.size.x / TILE_SIZE;
+    const rows = chunk.size.y / TILE_SIZE;
+    const points: number[] = [];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const y = mapHelper.levelAt(chunk, col, row) * LEVEL_HEIGHT + GRID_LIFT;
+        const stairs = stairsSide(chunk.stairs?.[col + ',' + row]);
+        const x0 = col * TILE_SIZE - chunk.size.x / 2;
+        const z0 = row * TILE_SIZE - chunk.size.y / 2;
+        const x1 = x0 + TILE_SIZE;
+        const z1 = z0 + TILE_SIZE;
+        const h = (high: boolean) => high ? y + LEVEL_HEIGHT : y;
+        // Corners: north-west, north-east, south-east, south-west (stairs: the side they rise towards is higher)
+        const corners = [
+          [x0, h(stairs === 'n' || stairs === 'w'), z0],
+          [x1, h(stairs === 'n' || stairs === 'e'), z0],
+          [x1, h(stairs === 's' || stairs === 'e'), z1],
+          [x0, h(stairs === 's' || stairs === 'w'), z1],
+        ];
+        corners.forEach((corner, i) => points.push(...corner, ...corners[(i + 1) % 4]));
+      }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+    const grid = new THREE.LineSegments(geometry, this.gridMaterial);
+    grid.position.set(chunk.pos.x, chunk.pos.y, chunk.pos.z);
+    chunk.group.add(grid);
+    this.grids.set(chunk.id, grid);
+  }
+
+  private removeGrid(chunkId: string) {
+    const grid = this.grids.get(chunkId);
+    if (grid) {
+      grid.removeFromParent();
+      grid.geometry.dispose();
+      this.grids.delete(chunkId);
+    }
+  }
+
+  private clearGrid() {
+    [...this.grids.keys()].forEach(id => this.removeGrid(id));
+  }
+
+  /** The reliefs of these chunks changed: their grid follows (if shown). */
+  private refreshGrid(game: Game, chunks: Iterable<SceneChunk>) {
+    new Set(chunks).forEach(chunk => {
+      if (this.grids.has(chunk.id)) {
+        this.buildGrid(game, chunk);
+      }
+    });
   }
 
   // --- Selection, move, delete, options ---
@@ -585,7 +747,7 @@ export class MapEditorService {
     if (!ground || !this.stroke || !mapHelper) {
       return;
     }
-    const terrainTool = game.editTileId !== 'raise' && game.editTileId !== 'lower' && game.editTileId !== 'stairs';
+    const terrainTool = !['raise', 'lower', 'stairs', 'unstairs'].includes(game.editTileId ?? '');
     if (game.editBrush === 'fill' && terrainTool) {
       if (!this.stroke.cells.size) {
         this.fillCells(game, ground.x, ground.z).forEach(cell => this.paintCell(game, cell));
@@ -651,18 +813,20 @@ export class MapEditorService {
         const after = before + (game.editTileId === 'raise' ? 1 : -1);
         game.mapHelper.setLevel(cell.chunk, cell.col, cell.row, after);
         this.stroke.levels.set(key, { ...cell, before, after: game.mapHelper.levelAt(cell.chunk, cell.col, cell.row) });
+        this.refreshGrid(game, [cell.chunk]);
       }
       return;
     }
-    // Stairs tool puts stairs, the eraser removes them (with the painted terrain)
-    if (game.editTileId === 'stairs' || game.editTileId === 'erase') {
+    // Stairs tool puts stairs; "no stairs" removes them, and so does the eraser (with the painted terrain)
+    if (game.editTileId === 'stairs' || game.editTileId === 'unstairs' || game.editTileId === 'erase') {
       const before = stairsSide(cell.chunk.stairs?.[cell.col + ',' + cell.row]);
       if (!this.stroke.stairs.has(key) && (before || game.editTileId === 'stairs')) {
         game.mapHelper.setStairs(cell.chunk, cell.col, cell.row, game.editTileId === 'stairs' ? 'auto' : null);
         const after = stairsSide(cell.chunk.stairs?.[cell.col + ',' + cell.row]);
         this.stroke.stairs.set(key, { ...cell, before, after });
+        this.refreshGrid(game, [cell.chunk]);
       }
-      if (game.editTileId === 'stairs') {
+      if (game.editTileId !== 'erase') {
         return;
       }
     }
@@ -687,16 +851,19 @@ export class MapEditorService {
       return;
     }
     const mapHelper = game.mapHelper;
+    const reliefChunks = [...levels, ...stairs].map(c => c.chunk);
     this.record(game, {
       undo: () => {
         cells.forEach(c => mapHelper.paintCell(c.chunk, c.col, c.row, c.before));
         levels.forEach(l => mapHelper.setLevel(l.chunk, l.col, l.row, l.before));
         stairs.forEach(s => mapHelper.setStairs(s.chunk, s.col, s.row, s.before));
+        this.refreshGrid(game, reliefChunks);
       },
       redo: () => {
         cells.forEach(c => mapHelper.paintCell(c.chunk, c.col, c.row, c.after));
         levels.forEach(l => mapHelper.setLevel(l.chunk, l.col, l.row, l.after));
         stairs.forEach(s => mapHelper.setStairs(s.chunk, s.col, s.row, s.after));
+        this.refreshGrid(game, reliefChunks);
       },
     });
   }

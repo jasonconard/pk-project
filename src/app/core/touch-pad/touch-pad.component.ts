@@ -18,7 +18,9 @@ export class TouchPadComponent {
   private readonly pushedBtns = signal<string[]>([]);
 
   protected readonly btns: TouchKey[] = TOUCH_KEYS;
-  protected readonly isTouchDevice = inject(TouchService).isTouchDevice;
+  private readonly touchService = inject(TouchService);
+  protected readonly isTouchDevice = this.touchService.isTouchDevice;
+  protected readonly gameControls = this.touchService.gameControls;
   protected readonly hasMessage = computed(() => !!this.sequenceService.message());
 
   constructor() {

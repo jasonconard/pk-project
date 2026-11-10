@@ -18,10 +18,22 @@ export class TouchService {
   private readonly stickState = signal<Stick | null>(null);
   readonly stick = this.stickState.asReadonly();
 
+  /** Game controls on touch screens (stick, buttons): off in the map editor, where touches edit the map. */
+  private readonly gameControlsState = signal(true);
+  readonly gameControls = this.gameControlsState.asReadonly();
+
   private directionTouch: Touch | null = null;
 
   constructor() {
     fromEvent(window, 'resize').subscribe(() => this.isTouchDeviceState.set(isTouchDevice()));
+  }
+
+  setGameControls(enabled: boolean): void {
+    this.gameControlsState.set(enabled);
+    if (!enabled) {
+      this.directionTouch = null;
+      this.updateStick(null);
+    }
   }
 
   private updateStick(stick: Stick | null): void {
@@ -30,6 +42,7 @@ export class TouchService {
 
   bindTouching(canvas: HTMLElement): void {
     canvas.addEventListener('touchstart', (e: TouchEvent) => {
+      if (!this.gameControls()) { return; }
       const touch = e.touches[e.touches.length - 1];
       const canvasWidth = canvas.getBoundingClientRect().width;
       if (touch.clientX < canvasWidth / 2) {

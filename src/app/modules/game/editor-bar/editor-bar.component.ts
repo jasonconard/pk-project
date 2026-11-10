@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input
 import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
 import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
+import { TouchService } from '../../../core/shared/service/touch.service';
 
 /** Keyboard shortcut opening / closing the map editor (free key: the game uses z q s d a e r f p o). */
 const EDIT_KEY = 'b';
@@ -35,6 +36,7 @@ export class EditorBarComponent {
   readonly modelId = input<string | null>(null);
   readonly tileId = input<string | null>(null);
   readonly brush = input<EditBrush>(1);
+  readonly grid = input(false);
   readonly selection = input<EditSelection | null>(null);
   readonly canUndo = input(false);
   readonly canRedo = input(false);
@@ -42,6 +44,8 @@ export class EditorBarComponent {
   readonly modelSelected = output<string | null>();
   readonly tileSelected = output<string | null>();
   readonly brushChange = output<EditBrush>();
+  /** Touch screen: the hint tells the finger gestures. */
+  protected readonly touch = inject(TouchService).isTouchDevice;
   /** Palette tab shown. */
   protected readonly tab = signal<'objects' | 'ground' | 'relief'>('objects');
   protected readonly brushes: { value: EditBrush, label: string, title: string }[] = [

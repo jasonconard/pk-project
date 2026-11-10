@@ -11,6 +11,8 @@
               [disabled]="!canUndo()" (click)="send('undo', $event)">↶</button>
       <button type="button" class="icon-btn" title="Refaire (Ctrl+Y)" aria-label="Refaire"
               [disabled]="!canRedo()" (click)="send('redo', $event)">↷</button>
+      <button type="button" class="icon-btn" [class.on]="grid()" title="Afficher / masquer la grille des cases" aria-label="Grille"
+              [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)">▦</button>
       <button type="button" class="text-btn" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
               (click)="send('export', $event)">⬇ Exporter</button>
       <button type="button" class="text-btn" [class.danger]="confirmReset()"
@@ -18,7 +20,17 @@
               (click)="reset($event)">{{ confirmReset() ? 'Confirmer ?' : '⟲ Réinitialiser' }}</button>
     </div>
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-      @if (tileId()) {
+      @if (touch()) {
+        @if (tileId()) {
+          Toucher : peindre · Glisser : déplacer la vue · Deux doigts : zoom
+        } @else if (modelId()) {
+          Toucher : poser · Glisser : déplacer la vue · Deux doigts : zoom
+        } @else if (selection()) {
+          Glisser l'objet : le déplacer · Glisser ailleurs : déplacer la vue
+        } @else {
+          Toucher un objet : le sélectionner · Glisser : déplacer la vue · Deux doigts : zoom
+        }
+      } @else if (tileId()) {
         Clic / glisser : peindre le sol · Clic droit glissé : déplacer la vue · Échap : reposer le pinceau
       } @else if (modelId()) {
         Clic : poser · Échap : reposer le modèle · Glisser : déplacer la vue · Molette : zoom
@@ -117,11 +129,17 @@
           <span class="pic" aria-hidden="true">🕳️</span>
           <span class="name">Descendre</span>
         </button>
-        <button type="button" class="entry tile" title="Escalier : monte d'un niveau vers la case voisine plus haute (la gomme l'enlève)"
+        <button type="button" class="entry tile" title="Escalier : monte d'un niveau vers la case voisine plus haute"
                 [class.selected]="tileId() === 'stairs'" [attr.aria-pressed]="tileId() === 'stairs'"
                 (click)="pickTile('stairs', $event)">
           <span class="pic" aria-hidden="true">🪜</span>
           <span class="name">Escalier</span>
+        </button>
+        <button type="button" class="entry tile" title="Enlever les escaliers (le sol et sa hauteur ne changent pas)"
+                [class.selected]="tileId() === 'unstairs'" [attr.aria-pressed]="tileId() === 'unstairs'"
+                (click)="pickTile('unstairs', $event)">
+          <span class="pic" aria-hidden="true">🧽</span>
+          <span class="name">Sans escalier</span>
         </button>
       }
     </div>
