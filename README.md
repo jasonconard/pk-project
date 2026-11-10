@@ -11,8 +11,15 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app w
 The game is published at https://jasonconard.github.io/pk-project/ (installable PWA) only when a version tag is
 pushed. The version is shown in the game (hidden menu of the temperature / fps tile, top right).
 
-1. Raise the version in `package.json` (e.g. `npm version patch --no-git-tag-version`), commit it.
+1. Raise the version in `package.json` (e.g. `npm version patch --no-git-tag-version`), add what changed to
+   `src/assets/release-notes.ts` (simple French sentences for the players), commit it.
 2. Tag and push: `git tag v0.0.2 && git push origin main v0.0.2`.
+
+With Claude Code, the `release` skill (`.claude/skills/release/SKILL.md`, "fais la release" or `/release`) does
+step 1: it writes the release notes from the commits since the last tag, asks to check them, bumps the version,
+commits and pushes; then it gives the tag command.
+
+The release notes are shown in the game: click on the version number (menu of the temperature / fps tile).
 
 The deploy workflow (`.github/workflows/main.yml`) checks that the tag matches the `package.json` version, builds
 the game and publishes it on the `gh-pages` branch. It can also be started by hand from the Actions tab.

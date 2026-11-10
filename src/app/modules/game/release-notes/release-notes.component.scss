@@ -1,0 +1,105 @@
+// Above the game menus (900) and under the update prompt (3000)
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2001;
+  width: min(420px, calc(100vw - 32px - var(--safe-left) - var(--safe-right)));
+  max-height: calc(100dvh - 32px - var(--safe-top) - env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: rgba(34, 35, 42, 0.97);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 14px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 8px 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+}
+
+.close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+  }
+}
+
+.list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 16px 16px;
+  touch-action: pan-y; // (the page blocks touch scrolling: the list scrolls under the finger)
+}
+
+article {
+  padding: 10px 0;
+
+  & + article {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  h3 {
+    margin: 0 0 6px;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .date {
+    font-weight: normal;
+    opacity: 0.6;
+    font-size: 12px;
+  }
+
+  .badge {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(255, 176, 74, 0.25);
+    box-shadow: inset 0 0 0 1px #ffb04a;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.4;
+  }
+
+  li + li {
+    margin-top: 3px;
+  }
+}

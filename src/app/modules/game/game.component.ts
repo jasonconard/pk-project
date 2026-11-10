@@ -8,6 +8,7 @@ import { MessageComponent } from '../../core/message/message.component';
 import { TeleportComponent } from './teleport/teleport.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { EditorBarComponent } from './editor-bar/editor-bar.component';
+import { ReleaseNotesComponent } from './release-notes/release-notes.component';
 import { temperatureColor } from './shared/util/temperature-color';
 import { QUALITY_CHOICES, QualityMode } from './shared/model/Quality';
 import { version } from '../../../../package.json';
@@ -17,7 +18,7 @@ import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, DecimalPipe],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, DecimalPipe],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -44,6 +45,8 @@ export class GameComponent {
   protected readonly qualityChoices = QUALITY_CHOICES;
   /** Version of the game (package.json): tells if the installed app (PWA) is up to date. */
   protected readonly appVersion = version;
+  /** "What's new" dialog, opened from the version number. */
+  protected readonly releaseNotes = signal(false);
   protected readonly quality = this.gameService.quality;
   /** Air temperature (°C, rounded) and its color, from icy blue to red. */
   protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));
@@ -112,6 +115,12 @@ export class GameComponent {
   protected toggleQualityMenu(event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.qualityMenu.update(open => !open);
+  }
+
+  protected openReleaseNotes(event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.qualityMenu.set(false);
+    this.releaseNotes.set(true);
   }
 
   protected setDiagnostics(event: Event): void {
