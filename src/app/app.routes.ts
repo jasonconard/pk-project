@@ -3,7 +3,15 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./modules/game/game.component').then(m => m.GameComponent),
+    // The models edited in the model editor (saved in the browser) replace the code's ones before the game is built
+    loadComponent: async () => {
+      const [{ GameComponent }, { applyBrowserModels }] = await Promise.all([
+        import('./modules/game/game.component'),
+        import('./modules/game/shared/model/browser-models'),
+      ]);
+      await applyBrowserModels();
+      return GameComponent;
+    },
   },
   {
     path: 'modeles',

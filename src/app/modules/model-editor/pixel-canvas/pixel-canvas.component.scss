@@ -2,6 +2,21 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
+}
+
+/* Big view: the face takes all the room */
+:host(.fill) .scroll {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  align-self: stretch;
+  display: flex;
+
+  // Centered while it fits; auto margins drop to 0 when zoomed in, so nothing is cut off
+  canvas {
+    margin: auto;
+  }
 }
 
 .zoom {

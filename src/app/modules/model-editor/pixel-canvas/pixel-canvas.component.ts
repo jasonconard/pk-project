@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { FaceTexture, LayerName, layerRgba } from '../shared/EditableModel';
 import { Px } from '../shared/pixel-tools';
 
@@ -23,12 +23,13 @@ const GRID_MIN_SCALE = 6;
         <span class="coords">{{ p.x }}, {{ p.y }}</span>
       }
     </div>
-    <div class="scroll">
+    <div class="scroll" #scroll>
       <canvas #canvas (pointerdown)="down($event)" (pointermove)="move($event)" (pointerup)="up($event)"
               (pointercancel)="up($event)" (pointerleave)="hover.set(null)"></canvas>
     </div>
   `,
   styleUrl: './pixel-canvas.component.scss',
+  host: { '[class.fill]': 'fill()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PixelCanvasComponent {
@@ -37,22 +38,39 @@ export class PixelCanvasComponent {
   readonly layer = input<LayerName>('color');
   /** Changes when the texture's pixels changed (redraw). */
   readonly version = input(0);
+  /** Fits the face in all the room the component is given (big view), instead of the panel's width. */
+  readonly fill = input(false);
   readonly strokeStart = output<Px>();
   readonly strokeMove = output<Px>();
   readonly strokeEnd = output<void>();
 
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  private readonly scroll = viewChild.required<ElementRef<HTMLElement>>('scroll');
+  /** Room to fit the face in (px). */
+  private readonly room = signal({ w: FIT_WIDTH, h: FIT_HEIGHT });
   private readonly zoom = signal(0);
   protected readonly hover = signal<Px | null>(null);
   private drawing = false;
 
   protected readonly scale = computed(() => {
     const tex = this.texture();
-    const fit = Math.max(1, Math.floor(Math.min(FIT_WIDTH / tex.w, FIT_HEIGHT / tex.h)));
+    const room = this.fill() ? this.room() : { w: FIT_WIDTH, h: FIT_HEIGHT };
+    const fit = Math.max(1, Math.floor(Math.min(room.w / tex.w, room.h / tex.h)));
     return Math.max(1, fit + this.zoom());
   });
 
   constructor() {
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const el = this.scroll().nativeElement;
+      const observer = new ResizeObserver(() => {
+        if (el.clientWidth > 0 && el.clientHeight > 0) { // not laid out yet: keep the last room
+          this.room.set({ w: el.clientWidth - 2, h: el.clientHeight - 2 });
+        }
+      });
+      observer.observe(el);
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
     // A new face: back to the fitting zoom
     effect(() => {
       this.texture();

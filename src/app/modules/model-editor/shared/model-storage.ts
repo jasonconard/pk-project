@@ -1,25 +1,127 @@
 import { EditableModel, FaceTexture } from './EditableModel';
 
-/** Browser storage key of the models edited in /modeles. */
-const STORAGE_KEY = 'pk-model-edits';
-const STORAGE_VERSION = 1;
-const RECENT_COLORS_KEY = 'pk-model-recent-colors';
+/**
+ * The edited models are kept in the browser's IndexedDB (room for hundreds of MB, where localStorage has ~5 MB
+ * shared with the map edits): database `pk-project`, store `models`, one record per model id, pixels kept as
+ * typed arrays. The models saved in localStorage by the first versions are moved there once.
+ */
+const DB_NAME = 'pk-project';
+const DB_VERSION = 1;
+const STORE = 'models';
+const MODEL_VERSION = 1;
+/** localStorage key of the first versions (moved to IndexedDB, then removed). */
+const LEGACY_KEY = 'pk-model-edits';
 
-type StoredTexture = { w: number, h: number } & Partial<Record<'color' | 'specular' | 'night' | 'bump', string>>;
-type StoredModel = Omit<EditableModel, 'textures'> & { textures: Record<string, StoredTexture> };
-
-interface Stored {
+interface ModelRecord {
+  id: string;
   version: number;
-  models: Record<string, StoredModel>;
+  model: EditableModel;
 }
 
-function toBase64(bytes: Uint8ClampedArray): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) {
-    s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  }
-  return btoa(s);
+let db: Promise<IDBDatabase> | null = null;
+
+function request<T>(req: IDBRequest<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
 }
+
+function done(tx: IDBTransaction): Promise<void> {
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = tx.onabort = () => reject(tx.error);
+  });
+}
+
+function openDb(): Promise<IDBDatabase> {
+  db ??= new Promise<IDBDatabase>((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => req.result.createObjectStore(STORE, { keyPath: 'id' });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  }).then(async database => {
+    await moveLegacyModels(database);
+    return database;
+  });
+  db.catch(() => db = null); // try again next time (blocked, private mode…)
+  return db;
+}
+
+async function store(mode: IDBTransactionMode): Promise<{ tx: IDBTransaction, models: IDBObjectStore }> {
+  const tx = (await openDb()).transaction(STORE, mode);
+  return { tx, models: tx.objectStore(STORE) };
+}
+
+/** Ids of the models saved in the browser. */
+export async function storedModelIds(): Promise<string[]> {
+  try {
+    const { models } = await store('readonly');
+    return (await request(models.getAllKeys())).map(String);
+  } catch {
+    return [];
+  }
+}
+
+export async function loadStoredModel(id: string): Promise<EditableModel | null> {
+  try {
+    const { models } = await store('readonly');
+    const record = await request(models.get(id)) as ModelRecord | undefined;
+    return record?.version === MODEL_VERSION ? record.model : null;
+  } catch {
+    return null;
+  }
+}
+
+/** All the models saved in the browser. */
+export async function loadStoredModels(): Promise<EditableModel[]> {
+  try {
+    const { models } = await store('readonly');
+    return (await request(models.getAll()) as ModelRecord[]).filter(r => r.version === MODEL_VERSION).map(r => r.model);
+  } catch {
+    return [];
+  }
+}
+
+/** Saves the model in the browser (`previousId`: its id before a rename, forgotten). Returns false if it failed. */
+export async function saveStoredModel(model: EditableModel, previousId?: string): Promise<boolean> {
+  try {
+    const { tx, models } = await store('readwrite');
+    if (previousId && previousId !== model.id) {
+      models.delete(previousId);
+    }
+    models.put({ id: model.id, version: MODEL_VERSION, model } satisfies ModelRecord);
+    await done(tx);
+    keepStorage();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function forgetStoredModel(id: string) {
+  try {
+    const { tx, models } = await store('readwrite');
+    models.delete(id);
+    await done(tx);
+  } catch {
+    // Nothing saved anyway
+  }
+}
+
+/** Asks the browser not to clear the saved models when it runs out of room (granted or not, silently). */
+let persistAsked = false;
+function keepStorage() {
+  if (!persistAsked) {
+    persistAsked = true;
+    navigator.storage?.persist?.().catch(() => {});
+  }
+}
+
+// --- Models saved in localStorage by the first versions ---
+
+type LegacyTexture = { w: number, h: number } & Partial<Record<'color' | 'specular' | 'night' | 'bump', string>>;
+type LegacyModel = Omit<EditableModel, 'textures'> & { textures: Record<string, LegacyTexture> };
 
 function fromBase64(text: string): Uint8ClampedArray {
   const s = atob(text);
@@ -30,71 +132,39 @@ function fromBase64(text: string): Uint8ClampedArray {
   return bytes;
 }
 
-function read(): Stored {
+async function moveLegacyModels(database: IDBDatabase) {
+  let legacy: { models?: Record<string, LegacyModel> } | null = null;
   try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Stored | null;
-    if (stored?.version === STORAGE_VERSION && stored.models) {
-      return stored;
-    }
+    legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? 'null');
   } catch {
-    // Unreadable or blocked: nothing saved
+    legacy = null;
   }
-  return { version: STORAGE_VERSION, models: {} };
-}
-
-function write(stored: Stored): boolean {
+  if (!legacy?.models) {
+    return;
+  }
+  const tx = database.transaction(STORE, 'readwrite');
+  const models = tx.objectStore(STORE);
+  Object.values(legacy.models).forEach(stored => {
+    const textures: Record<string, FaceTexture> = {};
+    Object.entries(stored.textures).forEach(([texId, t]) => {
+      textures[texId] = {
+        w: t.w, h: t.h, color: fromBase64(t.color ?? ''),
+        specular: t.specular ? fromBase64(t.specular) : undefined,
+        night: t.night ? fromBase64(t.night) : undefined,
+        bump: t.bump ? fromBase64(t.bump) : undefined,
+      };
+    });
+    models.put({ id: stored.id, version: MODEL_VERSION, model: { ...stored, textures } } satisfies ModelRecord);
+  });
+  await done(tx);
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-    return true;
+    localStorage.removeItem(LEGACY_KEY);
   } catch {
-    return false; // storage full or blocked: the edits only live until the page is reloaded
+    // Moved anyway; read again next time, written over with the same models
   }
 }
 
-/** Ids of the models saved in the browser. */
-export function storedModelIds(): string[] {
-  return Object.keys(read().models);
-}
-
-export function loadStoredModel(id: string): EditableModel | null {
-  const model = read().models[id];
-  if (!model) {
-    return null;
-  }
-  const textures: Record<string, FaceTexture> = {};
-  Object.entries(model.textures).forEach(([texId, t]) => {
-    textures[texId] = {
-      w: t.w, h: t.h, color: fromBase64(t.color ?? ''),
-      specular: t.specular ? fromBase64(t.specular) : undefined,
-      night: t.night ? fromBase64(t.night) : undefined,
-      bump: t.bump ? fromBase64(t.bump) : undefined,
-    };
-  });
-  return { ...model, textures };
-}
-
-/** Saves the model in the browser (`previousId`: its id before a rename, forgotten). Returns false if it failed. */
-export function saveStoredModel(model: EditableModel, previousId?: string): boolean {
-  const stored = read();
-  if (previousId && previousId !== model.id) {
-    delete stored.models[previousId];
-  }
-  const textures: Record<string, StoredTexture> = {};
-  Object.entries(model.textures).forEach(([texId, t]) => {
-    textures[texId] = {
-      w: t.w, h: t.h, color: toBase64(t.color),
-      specular: t.specular && toBase64(t.specular), night: t.night && toBase64(t.night), bump: t.bump && toBase64(t.bump),
-    };
-  });
-  stored.models[model.id] = { ...model, textures };
-  return write(stored);
-}
-
-export function forgetStoredModel(id: string) {
-  const stored = read();
-  delete stored.models[id];
-  write(stored);
-}
+const RECENT_COLORS_KEY = 'pk-model-recent-colors';
 
 export function loadRecentColors(): string[] {
   try {

@@ -10,9 +10,21 @@
   }
 </div>
 
+@if (bigView() && faceTexture(); as face) {
+  <section class="big-face" aria-label="Grande vue de la face">
+    <header>
+      <strong>{{ parts()[selection()!.partIndex] }} · {{ faceInfo()?.face }}</strong>
+      <span class="muted">{{ faceInfo()?.size }} · {{ layer() === 'color' ? 'Couleur' : layerHint() }}</span>
+      <button type="button" class="btn" title="Fermer la grande vue (G)" aria-label="Fermer la grande vue" (click)="setBigView(false)">✕</button>
+    </header>
+    <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()" [fill]="true"
+                      (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
+  </section>
+}
+
 <aside class="panel" aria-label="Éditeur de modèles">
   <header>
-    <a routerLink="/" class="back">← Jeu</a>
+    <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)">← Jeu</a>
     <h1>Modèles 3D</h1>
     <div class="history">
       <button type="button" class="btn" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()">↶</button>
@@ -20,6 +32,8 @@
     </div>
   </header>
 
+  <details class="block" [open]="sections().model" (toggle)="toggleSection('model', $any($event.target).open)">
+  <summary>Modèle{{ model() ? ' : ' + model()!.id : '' }}</summary>
   <div class="row">
     <label class="field grow">
       <span>Ouvrir</span>
@@ -61,9 +75,13 @@
         <input type="number" min="0" max="1" step="0.1" [value]="model.sway ?? 0" (change)="setSway(+$any($event.target).value)" />
       </label>
     </div>
+  }
+  </details>
 
-    <section>
-      <h2>Formes</h2>
+  @if (model(); as model) {
+
+    <details class="block" [open]="sections().parts" (toggle)="toggleSection('parts', $any($event.target).open)">
+      <summary>Formes ({{ parts().length }})</summary>
       <ul class="parts" role="listbox" aria-label="Formes du modèle">
         @for (name of parts(); track $index) {
           <li role="option" [attr.aria-selected]="selection()?.partIndex === $index"
@@ -76,11 +94,9 @@
         <button type="button" class="btn" [disabled]="!selection()" title="Ctrl+D" (click)="duplicate()">Dupliquer</button>
         <button type="button" class="btn danger" [disabled]="!selection()" title="Suppr" (click)="remove()">Supprimer</button>
       </div>
-    </section>
 
     @if (selectedPart(); as part) {
-      <section>
-        <h2>{{ parts()[selection()!.partIndex] }}</h2>
+        <h3>{{ parts()[selection()!.partIndex] }}</h3>
         <div class="vec">
           <span>Taille</span>
           @for (axis of axes; track axis) {
@@ -119,11 +135,11 @@
             <input type="checkbox" [checked]="!!part.depthWrite" (change)="setFlag('depthWrite', $any($event.target).checked)" /> Cache les autres
           </label>
         </div>
-      </section>
     }
+    </details>
 
-    <section>
-      <h2>Dessin</h2>
+    <details class="block" [open]="sections().drawing" (toggle)="toggleSection('drawing', $any($event.target).open)">
+      <summary>Dessin</summary>
       <div class="layers" role="tablist" aria-label="Calque">
         @for (l of layers; track l.id) {
           <button type="button" role="tab" [class.on]="layer() === l.id" [attr.aria-selected]="layer() === l.id" (click)="setLayer(l.id)">{{ l.label }}</button>
@@ -213,12 +229,12 @@
         }
       }
       @if (mode() === 'paint') {
-        <p class="hint">Dessine sur la face ci-dessous ou directement sur le modèle. Glisser hors du modèle : tourner la vue.</p>
+        <p class="hint">Dessine sur la face (panneau ou grande vue, G) ou directement sur le modèle. Glisser hors du modèle : tourner la vue.</p>
       }
-    </section>
+    </details>
 
-    <section>
-      <h2>Face sélectionnée</h2>
+    <details class="block" [open]="sections().face" (toggle)="toggleSection('face', $any($event.target).open)">
+      <summary>Face sélectionnée</summary>
       @if (faceInfo(); as info) {
         <dl>
           <dt>Face</dt><dd>{{ info.face }} · {{ info.size }}</dd>
@@ -227,6 +243,8 @@
           }
         </dl>
         <div class="row wrap">
+          <button type="button" class="btn" [class.on]="bigView()" (click)="setBigView(!bigView())"
+                  title="Grande vue de la face, par-dessus la gauche de la vue 3D (G)">⛶ Grande vue</button>
           <button type="button" class="btn" (click)="flip(true)" title="Retourner gauche ↔ droite">⇆</button>
           <button type="button" class="btn" (click)="flip(false)" title="Retourner haut ↕ bas">⇅</button>
           <button type="button" class="btn" [class.on]="pending()?.kind === 'link'" (click)="startFaceAction('link')"
@@ -239,14 +257,14 @@
           <label class="check"><input type="checkbox" [checked]="mirrorH()" (change)="mirrorH.set($any($event.target).checked)" /> ⇆</label>
           <label class="check"><input type="checkbox" [checked]="mirrorV()" (change)="mirrorV.set($any($event.target).checked)" /> ⇅</label>
         </div>
-        @if (faceTexture(); as face) {
+        @if (!bigView() && faceTexture(); as face) {
           <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()"
                             (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
         }
       } @else {
         <p class="hint">Clique sur une face du modèle. Flèches : déplacer la forme · Glisser : tourner · Molette : zoom · Clic droit glissé : déplacer la vue.</p>
       }
-    </section>
+    </details>
 
     <button type="button" class="primary" (click)="export()">⬇ Exporter</button>
   }

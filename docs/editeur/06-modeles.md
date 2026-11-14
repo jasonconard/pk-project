@@ -6,6 +6,8 @@ Un écran à part pour créer et modifier les modèles (bâtiments, panneaux, fl
 
 Un modèle est fait de **boxes** (6 faces) et de **planes** (1 face, visible des deux côtés si on le veut). Chaque face a sa propre grille de pixels, **de la taille de la face** : 1 unité = 1 pixel, partout. Une box de 76 × 31 × 30 a une face avant de 76 × 31 px et des côtés de 30 × 31 px. On ne touche jamais aux UV : à l'export, l'éditeur range toutes les faces dans une image (l'atlas) et calcule les UV.
 
+Le panneau est en sections repliables (**Modèle**, **Formes**, **Dessin**, **Face sélectionnée**), mémorisées dans le navigateur ; **⬇ Exporter** reste en bas.
+
 ## La vue 3D
 
 - **Glisser** : tourner autour du modèle · **Molette** : zoom · **Clic droit glissé** : déplacer la vue.
@@ -32,7 +34,7 @@ Le modèle a aussi un **nom** (son id, en minuscules avec des tirets) et un rég
 
 Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis retour au crayon), **pot de peinture** (F), **ligne** (L), **rectangle** (R, plein ou contour). On dessine :
 
-- dans la **vue 2D** de la face sélectionnée (sous le panneau : zoom − / +, grille, damier sous le transparent) ;
+- dans la **vue 2D** de la face sélectionnée (sous le panneau : zoom − / +, grille, damier sous le transparent). **⛶ Grande vue** (touche G) l'ouvre en grand par-dessus la gauche de la vue 3D ; elle reste ouverte d'une face à l'autre. Dessiner dans la vue 2D passe en mode dessin ;
 - ou **directement sur le modèle 3D** : appuyer sur le modèle peint, appuyer à côté tourne la vue.
 
 **Couleurs** : sélecteur libre, couleurs **récentes**, couleurs **du modèle** (les plus utilisées d'abord), et une **palette importée** : fichiers `.gpl`, `.pal`, `.hex` ou `.png` (Aseprite, Lospec, GIMP). **Garder seulement ces couleurs** remplace toute couleur choisie par la plus proche de la palette.
@@ -65,10 +67,12 @@ Sur un calque gris, la palette devient 9 nuances et un curseur, et un **aperçu*
 ## Annuler, sauvegarde
 
 - **↶ / ↷** (Ctrl+Z, Ctrl+Y ou Ctrl+Maj+Z) : 60 étapes.
-- Chaque changement est **enregistré dans le navigateur** (`localStorage`, clé `pk-model-edits`). Un modèle du jeu modifié apparaît « (modifié) » dans la liste ; **⟲ Revenir à la version du jeu** (deux clics) oublie les modifications. Les nouveaux modèles ont leur propre groupe.
-- Limite : environ 5 Mo par site, partagés avec les modifications de la carte (un modèle comme le labo prend ~100 Ko). Si le stockage est plein, un message demande d'exporter.
+- Chaque changement est **enregistré dans le navigateur**, dans IndexedDB (base `pk-project`, table `models`, un enregistrement par modèle, les pixels gardés tels quels). La place est large (des centaines de Mo) ; l'éditeur demande au navigateur de ne pas l'effacer quand il manque de place. Les modèles enregistrés par les premières versions dans `localStorage` (`pk-model-edits`) y sont déplacés une fois.
+- Un modèle du jeu modifié apparaît « (modifié) » dans la liste ; **⟲ Revenir à la version du jeu** (deux clics) oublie les modifications. Les nouveaux modèles ont leur propre groupe.
 
-Le jeu lit les modèles **du code** : un modèle modifié n'apparaît en jeu qu'après l'export.
+**Le jeu utilise les modèles du navigateur, sans export** (`browser-models.ts`, avant de construire le jeu) : chaque modèle enregistré est converti au format du jeu (atlas et cartes en images en mémoire) et remplace le modèle du code de même id. Un nouveau modèle est ajouté, et apparaît dans la palette de l'éditeur de carte (sous son id). **← Jeu** enregistre puis recharge le jeu. L'export reste nécessaire pour mettre les modèles dans le dépôt (et pour les autres navigateurs, le site publié).
+
+L'éditeur de modèles part toujours des modèles **du code** (`CODE_MODELS`) pour « Revenir à la version du jeu ».
 
 ## Exporter
 
@@ -94,7 +98,8 @@ Le fichier du code générait parfois des formes en boucle (l'arbre) : l'export 
 | `model-editor/shared/pixel-tools.ts` | Les outils de dessin |
 | `model-editor/shared/model-ops.ts` | Formes et faces : ajouter, redimensionner, lier, copier… |
 | `model-editor/shared/model-import.ts`, `model-export.ts` | Modèle du jeu ↔ modèle éditable (découpe et rangement de l'atlas) |
-| `model-editor/shared/model-history.ts`, `model-storage.ts` | Annuler / refaire, navigateur |
+| `model-editor/shared/model-history.ts`, `model-storage.ts` | Annuler / refaire, enregistrement IndexedDB |
+| `game/shared/model/browser-models.ts` | Le jeu prend les modèles du navigateur (appelé par la route du jeu) |
 | `model-editor/shared/palette.ts`, `palette-import.ts` | Couleurs du modèle, palettes importées |
 | `game/shared/model/model-uv.ts` | UV des faces (partagé avec le jeu) |
 | `game/shared/services/material.service.ts` | `getModelMaterial` : utilise les cartes des calques |

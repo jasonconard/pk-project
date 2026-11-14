@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MODELS } from '../../../assets/models/models';
+import { ActivatedRoute } from '@angular/router';
+import { CODE_MODELS } from '../game/shared/model/browser-models';
 import { ObjSide } from '../game/shared/model/SceneMap';
 import { Vec3 } from '../game/shared/model/SceneUtils';
 import { BoxFace } from '../game/shared/model/model-uv';
@@ -58,6 +58,27 @@ const LAYERS: { id: LayerName, label: string, hint: string }[] = [
 /** Shades of the grayscale layers' palette. */
 const GRAYS = [0, 32, 64, 96, 128, 160, 192, 224, 255];
 
+/** Sections of the panel that can be folded. */
+type PanelSection = 'model' | 'parts' | 'drawing' | 'face';
+const SECTIONS_KEY = 'pk-model-editor-sections';
+const BIG_VIEW_KEY = 'pk-model-editor-big-view';
+
+function loadJson<T>(key: string, fallback: T): T {
+  try {
+    return { ...fallback, ...JSON.parse(localStorage.getItem(key) ?? 'null') };
+  } catch {
+    return fallback;
+  }
+}
+
+function saveJson(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Only a convenience
+  }
+}
+
 /** Delay before the model is saved in the browser after a change (ms). */
 const SAVE_DELAY = 400;
 const RECENT_COLORS = 12;
@@ -88,7 +109,7 @@ interface ActiveStroke {
   templateUrl: './model-editor.component.html',
   styleUrl: './model-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, PixelCanvasComponent],
+  imports: [PixelCanvasComponent],
 })
 export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
@@ -99,13 +120,15 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private active: ActiveStroke | null = null;
   private readonly history = new ModelHistory();
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Saves one after the other (IndexedDB is asynchronous). */
+  private saving: Promise<void> = Promise.resolve();
   private confirmTimer: ReturnType<typeof setTimeout> | null = null;
   /** Id the model is saved under in the browser (changes with a rename). */
   private storedAs: string | null = null;
 
-  protected readonly modelIds = MODELS.map(m => m.id);
+  protected readonly modelIds = CODE_MODELS.map(m => m.id);
   /** Models saved in the browser (edited models of the game, and new ones). */
-  protected readonly storedIds = signal(storedModelIds());
+  protected readonly storedIds = signal<string[]>([]);
   protected readonly newIds = computed(() => this.storedIds().filter(id => !this.modelIds.includes(id)));
   /** The open model is the browser's version of a model of the game. */
   protected readonly isEditedGameModel = computed(() => {
@@ -156,6 +179,10 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   /** Preview inset (shown with a grayscale layer) by night: on with the night layer, by day with the others. */
   protected readonly previewNight = signal(false);
   protected readonly previewSize = PREVIEW_SIZE;
+  /** Folded / unfolded sections of the panel (remembered). */
+  protected readonly sections = signal(loadJson<Record<PanelSection, boolean>>(SECTIONS_KEY, { model: true, parts: true, drawing: true, face: true }));
+  /** Big 2D view of the selected face, over the left of the 3D view (remembered). */
+  protected readonly bigView = signal(loadJson(BIG_VIEW_KEY, { on: false }).on);
   protected readonly previewMargin = PREVIEW_MARGIN;
   /** Changes when face pixels changed (2D view redraw). */
   protected readonly paintVersion = signal(0);
@@ -191,13 +218,14 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     return { face: part.kind === 'box' ? FACE_LABELS[sel.face] : 'Face', size: `${tex.w} × ${tex.h} px`, linked };
   });
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
     this.scene = new ModelEditorScene(this.viewport().nativeElement);
     this.scene.onPartMoved = (partIndex, pos) => this.edit(model => model.parts[partIndex].pos = pos);
     // Capture phase: decides before the camera controls whether a press paints the model or turns the camera
     const viewport = this.viewport().nativeElement;
     viewport.addEventListener('pointerdown', e => this.paint3dDown(e), { capture: true });
     viewport.addEventListener('pointermove', e => this.paint3dMove(e));
+    await this.refreshStoredIds();
     const id = this.requestedId;
     this.open(id && (this.modelIds.includes(id) || this.storedIds().includes(id)) ? id : this.modelIds[0]);
   }
@@ -214,14 +242,14 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   /** Opens the browser's version of a model if there is one, else the game's. */
   protected async open(id: string, fromGame = false) {
-    this.flushSave();
-    const stored = fromGame ? null : loadStoredModel(id);
+    await this.flushSave();
+    const stored = fromGame ? null : await loadStoredModel(id);
     if (stored) {
       this.show(stored, id);
-      this.status.set(this.modelIds.includes(id) ? 'Version modifiée, enregistrée dans le navigateur.' : '');
+      this.status.set(this.modelIds.includes(id) ? 'Version modifiée, enregistrée dans le navigateur : c\'est elle que le jeu utilise.' : '');
       return;
     }
-    const source = MODELS.find(m => m.id === id);
+    const source = CODE_MODELS.find(m => m.id === id);
     if (!source) {
       return;
     }
@@ -248,7 +276,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   /** Forgets the browser's version: back to the model of the game (click twice). */
-  protected revert() {
+  protected async revert() {
     const id = this.model()?.id;
     if (!id) {
       return;
@@ -259,8 +287,9 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.confirmRevert.set(false);
-    forgetStoredModel(id);
-    this.storedIds.set(storedModelIds());
+    await this.flushSave();
+    await forgetStoredModel(id);
+    await this.refreshStoredIds();
     this.open(id, true);
   }
 
@@ -411,10 +440,11 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.setMode('paint');
   }
 
-  /** Press on the 2D view of the selected face. */
+  /** Press on the 2D view of the selected face (it is a drawing surface: the painting mode is on). */
   protected strokeStart(px: Px) {
     const face = this.faceTexture();
     if (face) {
+      this.setMode('paint');
       this.startStroke(face.texId, px, false);
     }
   }
@@ -539,6 +569,20 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     return palette?.locked ? nearestColor(color, palette.colors) : color;
   }
 
+  // --- Panel ---
+
+  protected toggleSection(section: PanelSection, open: boolean) {
+    if (this.sections()[section] !== open) {
+      this.sections.update(s => ({ ...s, [section]: open }));
+      saveJson(SECTIONS_KEY, this.sections());
+    }
+  }
+
+  protected setBigView(on: boolean) {
+    this.bigView.set(on);
+    saveJson(BIG_VIEW_KEY, { on });
+  }
+
   // --- Pointer / keyboard ---
 
   /** Pointer on the preview inset (not on the model of the big view). */
@@ -659,6 +703,8 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
         this.pickTool(tool.id);
       } else if (event.key === 'v') {
         this.setMode('select');
+      } else if (event.key === 'g') {
+        this.setBigView(!this.bigView());
       }
     }
   }
@@ -707,10 +753,12 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.saveTimer = setTimeout(() => this.save(), SAVE_DELAY);
   }
 
-  private flushSave() {
+  /** Saves now a change waiting to be saved; resolves when everything is written. */
+  private flushSave(): Promise<void> {
     if (this.saveTimer) {
       this.save();
     }
+    return this.saving;
   }
 
   private save() {
@@ -722,11 +770,28 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     if (!model) {
       return;
     }
-    if (!saveStoredModel(model, this.storedAs ?? undefined)) {
-      this.status.set('Enregistrement impossible dans le navigateur (stockage plein ?) : pense à exporter.');
-    }
+    const previousId = this.storedAs ?? undefined;
     this.storedAs = model.id;
-    this.storedIds.set(storedModelIds());
+    this.saving = this.saving.then(async () => {
+      if (!await saveStoredModel(model, previousId)) {
+        this.status.set('Enregistrement impossible dans le navigateur : pense à exporter.');
+      }
+      await this.refreshStoredIds();
+    });
+  }
+
+  private async refreshStoredIds() {
+    this.storedIds.set(await storedModelIds());
+  }
+
+  /** Back to the game, which then uses the models saved here (a full page load: see openModelEditor in the map editor). */
+  protected async backToGame(event: Event) {
+    event.preventDefault();
+    await this.flushSave();
+    const url = new URL(location.href);
+    url.hash = '#/';
+    location.assign(url);
+    location.reload();
   }
 
   /** `id`, or `id-2`, `id-3`… if a model already has it. */
