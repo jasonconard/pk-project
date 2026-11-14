@@ -204,6 +204,75 @@ section {
   cursor: crosshair;
 }
 
+.history {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+
+  .btn {
+    padding: 2px 8px;
+    font-size: 16px;
+  }
+}
+
+.btn.on {
+  background: #3a6ea5;
+  border-color: #5a8ec5;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+
+  span {
+    width: 100%;
+    color: #8a8d9c;
+    font-size: 12px;
+  }
+
+  button {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    cursor: pointer;
+
+    &.on {
+      outline: 2px solid #ffd34d;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.palette-head {
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.lock {
+  width: 100%;
+  margin-top: 2px;
+}
+
+.muted {
+  color: #8a8d9c;
+}
+
+.link-btn {
+  margin-left: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #9fc3ff;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
 .check {
   display: flex;
   align-items: center;

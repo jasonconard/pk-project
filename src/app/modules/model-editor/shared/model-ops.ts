@@ -153,3 +153,67 @@ function removeUnusedTextures(model: EditableModel) {
   const used = new Set(model.parts.flatMap(p => Object.values(p.faces)));
   Object.keys(model.textures).filter(id => !used.has(id)).forEach(id => delete model.textures[id]);
 }
+
+// --- Faces ---
+
+/** The face gets its own copy of its texture: painting it no longer changes the faces it was linked to. */
+export function unlinkFace(model: EditableModel, partIndex: number, face: BoxFace) {
+  const part = model.parts[partIndex];
+  const texId = part.faces[face];
+  if (texId) {
+    part.faces[face] = addTexture(model, copyTexture(model.textures[texId]));
+  }
+}
+
+/**
+ * The target face shows the texture `texId` (linked: same pixels). Only between faces of the same size.
+ * Returns false if the sizes differ.
+ */
+export function linkFace(model: EditableModel, texId: string, partIndex: number, face: BoxFace): boolean {
+  const part = model.parts[partIndex];
+  const tex = model.textures[texId];
+  const { w, h } = partFaceSize(part, face);
+  if (tex.w !== w || tex.h !== h) {
+    return false;
+  }
+  part.faces[face] = texId;
+  removeUnusedTextures(model);
+  return true;
+}
+
+/** Mirrors a texture in place: left ↔ right (horizontal) and / or top ↔ bottom (vertical). */
+export function flipTexture(tex: FaceTexture, horizontal: boolean, vertical: boolean) {
+  const flipped = sampledCopy(tex, tex.w, tex.h, horizontal, vertical);
+  tex.color.set(flipped.color);
+  (['specular', 'night', 'bump'] as const).forEach(layer => flipped[layer] && tex[layer]!.set(flipped[layer]!));
+}
+
+/**
+ * Copies the pixels of a texture onto the target face (its own texture, and the faces linked to it), mirrored if
+ * asked. A face of another size gets the pixels stretched (nearest pixel).
+ */
+export function copyFace(model: EditableModel, fromTexId: string, partIndex: number, face: BoxFace, horizontal = false, vertical = false) {
+  const targetId = model.parts[partIndex].faces[face];
+  if (!targetId) {
+    return;
+  }
+  const target = model.textures[targetId];
+  model.textures[targetId] = sampledCopy(model.textures[fromTexId], target.w, target.h, horizontal, vertical);
+}
+
+/** w × h copy of a texture, taking the nearest pixel, mirrored if asked. */
+function sampledCopy(tex: FaceTexture, w: number, h: number, horizontal: boolean, vertical: boolean): FaceTexture {
+  const out: FaceTexture = { w, h, color: new Uint8ClampedArray(w * h * 4) };
+  const layers = (['specular', 'night', 'bump'] as const).filter(layer => tex[layer]);
+  layers.forEach(layer => out[layer] = new Uint8ClampedArray(w * h));
+  for (let r = 0; r < h; r++) {
+    const sr = Math.floor((vertical ? h - 1 - r : r) * tex.h / h);
+    for (let c = 0; c < w; c++) {
+      const sc = Math.floor((horizontal ? w - 1 - c : c) * tex.w / w);
+      const from = sr * tex.w + sc, to = r * w + c;
+      out.color.set(tex.color.subarray(from * 4, from * 4 + 4), to * 4);
+      layers.forEach(layer => out[layer]![to] = tex[layer]![from]);
+    }
+  }
+  return out;
+}

@@ -9,7 +9,14 @@ import { EditableModel, EditablePart } from './shared/EditableModel';
 import { importModel, loadImagePixels } from './shared/model-import';
 import { atlasToPng, exportModel } from './shared/model-export';
 import { ModelEditorScene } from './shared/model-editor-scene';
-import { addPart, duplicatePart, newModel, removePart, resizePart } from './shared/model-ops';
+import { addPart, copyFace, duplicatePart, flipTexture, linkFace, newModel, removePart, resizePart, unlinkFace } from './shared/model-ops';
+import { ModelHistory } from './shared/model-history';
+import {
+  forgetStoredModel, loadImportedPalette, loadRecentColors, loadStoredModel, saveImportedPalette, saveRecentColors, saveStoredModel,
+  StoredPalette, storedModelIds,
+} from './shared/model-storage';
+import { modelColors } from './shared/palette';
+import { nearestColor, PALETTE_FILE_TYPES, readPaletteFile } from './shared/palette-import';
 import { hexToRgba, PaintStroke, Px, rgbaToHex, Tool } from './shared/pixel-tools';
 import { PixelCanvasComponent } from './pixel-canvas/pixel-canvas.component';
 
@@ -41,6 +48,18 @@ const TOOLS: { id: Tool, icon: string, label: string, key: string }[] = [
   { id: 'rect', icon: '▭', label: 'Rectangle', key: 'r' },
 ];
 
+/** Delay before the model is saved in the browser after a change (ms). */
+const SAVE_DELAY = 400;
+const RECENT_COLORS = 12;
+/** Time to confirm going back to the game's version (ms). */
+const CONFIRM_TIME = 3000;
+
+/** Waiting for a click on the target face: link it to the selected face, or copy the selected face's pixels on it. */
+interface PendingFaceAction {
+  kind: 'link' | 'copy';
+  texId: string;
+}
+
 /** A stroke in progress, on one face texture. */
 interface ActiveStroke {
   texId: string;
@@ -66,8 +85,38 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private scene: ModelEditorScene | null = null;
   private pressAt: { x: number, y: number } | null = null;
   private active: ActiveStroke | null = null;
+  private readonly history = new ModelHistory();
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  private confirmTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Id the model is saved under in the browser (changes with a rename). */
+  private storedAs: string | null = null;
 
   protected readonly modelIds = MODELS.map(m => m.id);
+  /** Models saved in the browser (edited models of the game, and new ones). */
+  protected readonly storedIds = signal(storedModelIds());
+  protected readonly newIds = computed(() => this.storedIds().filter(id => !this.modelIds.includes(id)));
+  /** The open model is the browser's version of a model of the game. */
+  protected readonly isEditedGameModel = computed(() => {
+    const id = this.model()?.id;
+    return !!id && this.modelIds.includes(id) && this.storedIds().includes(id);
+  });
+  protected readonly confirmRevert = signal(false);
+  protected readonly canUndo = signal(false);
+  protected readonly canRedo = signal(false);
+  protected readonly pending = signal<PendingFaceAction | null>(null);
+  protected readonly mirrorH = signal(false);
+  protected readonly mirrorV = signal(false);
+  protected readonly recentColors = signal(loadRecentColors());
+  protected readonly paletteFileTypes = PALETTE_FILE_TYPES;
+  /** Palette imported from a file (Aseprite, Lospec…); `locked`: drawing only with its colors. */
+  protected readonly importedPalette = signal<StoredPalette | null>(loadImportedPalette());
+  /** Changes at the end of each stroke (the model's colors are counted again). */
+  private readonly paletteVersion = signal(0);
+  protected readonly palette = computed(() => {
+    this.paletteVersion();
+    const model = this.model();
+    return model ? modelColors(model) : [];
+  });
   protected readonly axes: Axis[] = ['x', 'y', 'z'];
   protected readonly sides = [
     { value: ObjSide.FRONT, label: 'Devant seulement' },
@@ -128,19 +177,31 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.flushSave();
+    if (this.confirmTimer) {
+      clearTimeout(this.confirmTimer);
+    }
     this.scene?.dispose();
   }
 
   // --- Model ---
 
-  protected async open(id: string) {
+  /** Opens the browser's version of a model if there is one, else the game's. */
+  protected async open(id: string, fromGame = false) {
+    this.flushSave();
+    const stored = fromGame ? null : loadStoredModel(id);
+    if (stored) {
+      this.show(stored, id);
+      this.status.set(this.modelIds.includes(id) ? 'Version modifiée, enregistrée dans le navigateur.' : '');
+      return;
+    }
     const source = MODELS.find(m => m.id === id);
     if (!source) {
       return;
     }
     this.status.set('Chargement…');
     try {
-      this.show(importModel(source, await loadImagePixels(source.tex.link)));
+      this.show(importModel(source, await loadImagePixels(source.tex.link)), null);
       this.status.set('');
     } catch (e) {
       this.status.set((e as Error).message);
@@ -148,13 +209,48 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   protected create() {
-    this.show(newModel(NEW_MODEL_ID));
+    this.show(newModel(this.freeId(NEW_MODEL_ID)), null);
+    this.save();
     this.select({ partIndex: 0, face: null });
   }
 
   protected rename(value: string) {
-    const id = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || NEW_MODEL_ID;
+    const wanted = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || NEW_MODEL_ID;
+    const id = wanted === this.model()?.id ? wanted : this.freeId(wanted);
     this.edit(model => model.id = id, false);
+  }
+
+  /** Forgets the browser's version: back to the model of the game (click twice). */
+  protected revert() {
+    const id = this.model()?.id;
+    if (!id) {
+      return;
+    }
+    if (!this.confirmRevert()) {
+      this.confirmRevert.set(true);
+      this.confirmTimer = setTimeout(() => this.confirmRevert.set(false), CONFIRM_TIME);
+      return;
+    }
+    this.confirmRevert.set(false);
+    forgetStoredModel(id);
+    this.storedIds.set(storedModelIds());
+    this.open(id, true);
+  }
+
+  protected undo() {
+    const model = this.model();
+    const previous = model && this.history.undo(model);
+    if (previous) {
+      this.restore(previous);
+    }
+  }
+
+  protected redo() {
+    const model = this.model();
+    const next = model && this.history.redo(model);
+    if (next) {
+      this.restore(next);
+    }
   }
 
   protected setSway(value: number) {
@@ -280,10 +376,14 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   private startStroke(texId: string, px: Px, in3d: boolean) {
-    const tex = this.model()!.textures[texId];
-    const stroke = new PaintStroke(tex, this.tool(), hexToRgba(this.color()), this.rectFilled(), rgba => {
+    const model = this.model()!;
+    if (this.tool() !== 'picker') {
+      this.record(model);
+    }
+    const tex = model.textures[texId];
+    const stroke = new PaintStroke(tex, this.tool(), hexToRgba(this.snap(this.color())), this.rectFilled(), rgba => {
       if (rgba[3] > 0) {
-        this.color.set(rgbaToHex(rgba));
+        this.setColor(rgbaToHex(rgba));
         this.tool.set('pencil'); // like most pixel art tools: pick a color, then draw with it
       }
     });
@@ -299,6 +399,14 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   private endStroke() {
+    const tool = this.tool();
+    if (this.active && tool !== 'picker') {
+      if (tool !== 'eraser') {
+        this.useColor(this.color());
+      }
+      this.paletteVersion.update(v => v + 1);
+      this.scheduleSave();
+    }
     this.active = null;
     if (this.scene) {
       this.scene.orbitEnabled = true;
@@ -307,7 +415,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   /** Painting mode: a press on the model paints it (the camera does not turn), elsewhere the camera turns. */
   private paint3dDown(event: PointerEvent) {
-    if (this.mode() !== 'paint' || event.button !== 0 || !this.scene) {
+    if (this.mode() !== 'paint' || event.button !== 0 || !this.scene || this.pending()) {
       return;
     }
     const pick = this.scene.pick(event.clientX, event.clientY, true);
@@ -333,6 +441,44 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  protected async importPalette(input: HTMLInputElement) {
+    const file = input.files?.[0];
+    input.value = ''; // the same file can be chosen again
+    if (!file) {
+      return;
+    }
+    try {
+      const { name, colors } = await readPaletteFile(file);
+      this.updatePalette({ name, colors, locked: this.importedPalette()?.locked ?? false });
+      this.status.set(`Palette « ${name} » : ${colors.length} couleurs.`);
+    } catch (e) {
+      this.status.set((e as Error).message);
+    }
+  }
+
+  protected removePalette() {
+    this.updatePalette(null);
+  }
+
+  protected setPaletteLocked(locked: boolean) {
+    const palette = this.importedPalette();
+    if (palette) {
+      this.updatePalette({ ...palette, locked });
+    }
+  }
+
+  private updatePalette(palette: StoredPalette | null) {
+    this.importedPalette.set(palette);
+    saveImportedPalette(palette);
+    this.color.set(this.snap(this.color()));
+  }
+
+  /** With a locked palette: its color closest to `color`. */
+  private snap(color: string): string {
+    const palette = this.importedPalette();
+    return palette?.locked ? nearestColor(color, palette.colors) : color;
+  }
+
   // --- Pointer / keyboard ---
 
   protected onPointerDown(event: PointerEvent) {
@@ -349,8 +495,73 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     if (!press || Math.hypot(event.clientX - press.x, event.clientY - press.y) > CLICK_TOLERANCE) {
       return;
     }
-    const pick = this.scene?.pick(event.clientX, event.clientY);
+    const pick = this.scene?.pick(event.clientX, event.clientY, !!this.pending());
+    if (this.pending()) {
+      if (pick) {
+        this.applyFaceAction(pick.partIndex, pick.face);
+      }
+      return;
+    }
     this.select(pick ? { partIndex: pick.partIndex, face: pick.face } : null);
+  }
+
+  // --- Faces ---
+
+  protected unlink() {
+    const sel = this.selection();
+    if (sel?.face) {
+      this.edit(model => unlinkFace(model, sel.partIndex, sel.face!));
+    }
+  }
+
+  /** Mirrors the selected face's pixels (and the faces linked to it). */
+  protected flip(horizontal: boolean) {
+    const face = this.faceTexture();
+    if (face) {
+      this.edit(model => flipTexture(model.textures[face.texId], horizontal, !horizontal));
+      this.paintVersion.update(v => v + 1);
+    }
+  }
+
+  /** Next click on a face: link it to the selected face, or copy the selected face on it. */
+  protected startFaceAction(kind: PendingFaceAction['kind']) {
+    const face = this.faceTexture();
+    if (!face) {
+      return;
+    }
+    this.setMode('select');
+    this.pending.set({ kind, texId: face.texId });
+    this.status.set(kind === 'link' ? 'Clique sur la face à lier (même taille). Échap : annuler.' : 'Clique sur la face où copier. Échap : annuler.');
+  }
+
+  private applyFaceAction(partIndex: number, face: BoxFace) {
+    const action = this.pending()!;
+    this.pending.set(null);
+    let linked = true;
+    if (action.kind === 'link') {
+      this.edit(model => linked = linkFace(model, action.texId, partIndex, face));
+    } else {
+      this.edit(model => copyFace(model, action.texId, partIndex, face, this.mirrorH(), this.mirrorV()));
+    }
+    this.status.set(linked ? '' : 'Pas lié : les deux faces doivent avoir la même taille.');
+    this.select({ partIndex, face });
+    this.paintVersion.update(v => v + 1);
+  }
+
+  // --- Colors ---
+
+  /** Current color; with a locked palette, its closest color. */
+  protected setColor(color: string) {
+    this.color.set(this.snap(color));
+  }
+
+  /** Color used by the tools (stored in the recent ones). */
+  protected useColor(color: string) {
+    color = this.snap(color);
+    this.color.set(color);
+    const recent = [color, ...this.recentColors().filter(c => c !== color)].slice(0, RECENT_COLORS);
+    this.recentColors.set(recent);
+    saveRecentColors(recent);
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -358,10 +569,22 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     if ((event.target as HTMLElement).closest('input, select, textarea')) {
       return;
     }
-    if ((event.key === 'Delete' || event.key === 'Backspace') && this.mode() === 'select') {
+    const ctrl = event.ctrlKey || event.metaKey;
+    if (ctrl && (event.key === 'z' || event.key === 'Z')) {
+      event.preventDefault();
+      event.shiftKey ? this.redo() : this.undo();
+    } else if (ctrl && event.key === 'y') {
+      event.preventDefault();
+      this.redo();
+    } else if ((event.key === 'Delete' || event.key === 'Backspace') && this.mode() === 'select') {
       this.remove();
     } else if (event.key === 'Escape') {
-      this.select(null);
+      if (this.pending()) {
+        this.pending.set(null);
+        this.status.set('');
+      } else {
+        this.select(null);
+      }
     } else if (event.key === 'd' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       this.duplicate();
@@ -377,11 +600,78 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   // --- Helpers ---
 
-  private show(model: EditableModel) {
+  private show(model: EditableModel, storedAs: string | null) {
+    this.flushSave();
+    this.storedAs = storedAs;
+    this.history.clear();
+    this.updateHistory();
+    this.pending.set(null);
     this.model.set(model);
     this.atlasPreview.set(null);
     this.scene?.setModel(model);
     this.select(null);
+    this.paletteVersion.update(v => v + 1);
+  }
+
+  /** Back to a copy of the model from the history. */
+  private restore(model: EditableModel) {
+    this.updateHistory();
+    this.model.set(model);
+    this.scene?.refresh(model);
+    const sel = this.selection();
+    this.select(sel && model.parts[sel.partIndex] ? sel : null);
+    this.paintVersion.update(v => v + 1);
+    this.paletteVersion.update(v => v + 1);
+    this.scheduleSave();
+  }
+
+  private record(model: EditableModel) {
+    this.history.record(model);
+    this.updateHistory();
+  }
+
+  private updateHistory() {
+    this.canUndo.set(this.history.canUndo);
+    this.canRedo.set(this.history.canRedo);
+  }
+
+  private scheduleSave() {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+    }
+    this.saveTimer = setTimeout(() => this.save(), SAVE_DELAY);
+  }
+
+  private flushSave() {
+    if (this.saveTimer) {
+      this.save();
+    }
+  }
+
+  private save() {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+      this.saveTimer = null;
+    }
+    const model = this.model();
+    if (!model) {
+      return;
+    }
+    if (!saveStoredModel(model, this.storedAs ?? undefined)) {
+      this.status.set('Enregistrement impossible dans le navigateur (stockage plein ?) : pense à exporter.');
+    }
+    this.storedAs = model.id;
+    this.storedIds.set(storedModelIds());
+  }
+
+  /** `id`, or `id-2`, `id-3`… if a model already has it. */
+  private freeId(id: string): string {
+    const taken = new Set([...this.modelIds, ...this.storedIds()]);
+    let free = id;
+    for (let i = 2; taken.has(free); i++) {
+      free = `${id}-${i}`;
+    }
+    return free;
   }
 
   /** Changes the model, then shows it again (keeping the selection). */
@@ -390,8 +680,10 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     if (!model) {
       return;
     }
+    this.record(model);
     change(model);
     this.model.set({ ...model });
+    this.scheduleSave();
     if (rebuild) {
       this.scene?.refresh(this.model()!);
       const sel = this.selection();

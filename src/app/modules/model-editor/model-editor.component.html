@@ -5,17 +5,30 @@
   <header>
     <a routerLink="/" class="back">← Jeu</a>
     <h1>Modèles 3D</h1>
+    <div class="history">
+      <button type="button" class="btn" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()">↶</button>
+      <button type="button" class="btn" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()">↷</button>
+    </div>
   </header>
 
   <div class="row">
     <label class="field grow">
       <span>Ouvrir</span>
       <select (change)="open($any($event.target).value)">
-        @if (!modelIds.includes(model()?.id ?? '')) {
+        @if (!model()) {
           <option value="" selected disabled>—</option>
         }
-        @for (id of modelIds; track id) {
-          <option [value]="id" [selected]="model()?.id === id">{{ id }}</option>
+        <optgroup label="Modèles du jeu">
+          @for (id of modelIds; track id) {
+            <option [value]="id" [selected]="model()?.id === id">{{ id }}{{ storedIds().includes(id) ? ' (modifié)' : '' }}</option>
+          }
+        </optgroup>
+        @if (newIds().length) {
+          <optgroup label="Nouveaux (navigateur)">
+            @for (id of newIds(); track id) {
+              <option [value]="id" [selected]="model()?.id === id">{{ id }}</option>
+            }
+          </optgroup>
         }
       </select>
     </label>
@@ -23,6 +36,12 @@
   </div>
 
   @if (model(); as model) {
+    @if (isEditedGameModel()) {
+      <button type="button" class="btn" [class.danger]="confirmRevert()" (click)="revert()"
+              title="Oublie les modifications enregistrées dans le navigateur">
+        {{ confirmRevert() ? 'Confirmer ?' : '⟲ Revenir à la version du jeu' }}
+      </button>
+    }
     <div class="row">
       <label class="field grow">
         <span>Nom (id)</span>
@@ -109,14 +128,53 @@
         }
       </div>
       <div class="row wrap">
-        <label class="color" title="Couleur">
-          <input type="color" [value]="color()" (input)="color.set($any($event.target).value)" />
+        <label class="color" title="Couleur libre">
+          <input type="color" [value]="color()" (change)="useColor($any($event.target).value)" />
           <span>{{ color() }}</span>
         </label>
         @if (tool() === 'rect') {
           <label class="check"><input type="checkbox" [checked]="rectFilled()" (change)="rectFilled.set($any($event.target).checked)" /> Plein</label>
         }
       </div>
+      <div class="swatches" aria-label="Palette importée">
+        <span class="palette-head">
+          @if (importedPalette(); as pal) {
+            Palette : {{ pal.name }} ({{ pal.colors.length }})
+          } @else {
+            Palette
+          }
+          <label class="link-btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
+            Importer…<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
+          </label>
+          @if (importedPalette()) {
+            <button type="button" class="link-btn" (click)="removePalette()">Retirer</button>
+          }
+        </span>
+        @if (importedPalette(); as pal) {
+          @for (c of pal.colors; track c) {
+            <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+          }
+          <label class="check lock" title="Le crayon, le pot, la ligne et le rectangle prennent toujours la couleur de la palette la plus proche">
+            <input type="checkbox" [checked]="pal.locked" (change)="setPaletteLocked($any($event.target).checked)" /> Garder seulement ces couleurs
+          </label>
+        }
+      </div>
+      @if (recentColors().length) {
+        <div class="swatches" aria-label="Couleurs récentes">
+          <span>Récentes</span>
+          @for (c of recentColors(); track c) {
+            <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+          }
+        </div>
+      }
+      @if (palette().length) {
+        <div class="swatches" aria-label="Couleurs du modèle">
+          <span>Modèle</span>
+          @for (c of palette(); track c) {
+            <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+          }
+        </div>
+      }
       @if (mode() === 'paint') {
         <p class="hint">Dessine sur la face ci-dessous ou directement sur le modèle. Glisser hors du modèle : tourner la vue.</p>
       }
@@ -128,9 +186,22 @@
         <dl>
           <dt>Face</dt><dd>{{ info.face }} · {{ info.size }}</dd>
           @if (info.linked) {
-            <dt>Liée à</dt><dd>{{ info.linked }} autre(s) face(s)</dd>
+            <dt>Liée à</dt><dd>{{ info.linked }} autre(s) face(s) <button type="button" class="link-btn" (click)="unlink()" title="Cette face garde une copie de ses pixels et ne suit plus les autres">Délier</button></dd>
           }
         </dl>
+        <div class="row wrap">
+          <button type="button" class="btn" (click)="flip(true)" title="Retourner gauche ↔ droite">⇆</button>
+          <button type="button" class="btn" (click)="flip(false)" title="Retourner haut ↕ bas">⇅</button>
+          <button type="button" class="btn" [class.on]="pending()?.kind === 'link'" (click)="startFaceAction('link')"
+                  title="Puis clique une autre face de même taille : elles auront les mêmes pixels">🔗 Lier à…</button>
+          <button type="button" class="btn" [class.on]="pending()?.kind === 'copy'" (click)="startFaceAction('copy')"
+                  title="Puis clique la face où copier ce dessin">📋 Copier vers…</button>
+        </div>
+        <div class="row wrap">
+          <span class="muted">Copie en miroir :</span>
+          <label class="check"><input type="checkbox" [checked]="mirrorH()" (change)="mirrorH.set($any($event.target).checked)" /> ⇆</label>
+          <label class="check"><input type="checkbox" [checked]="mirrorV()" (change)="mirrorV.set($any($event.target).checked)" /> ⇅</label>
+        </div>
         @if (faceTexture(); as face) {
           <app-pixel-canvas [texture]="face.tex" [version]="paintVersion()"
                             (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
