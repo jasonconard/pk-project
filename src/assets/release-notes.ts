@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.16',
+    date: '2026-11-14',
+    notes: [
+      'Nouveau : l\'éditeur de modèles 3D, à ouvrir depuis l\'éditeur de carte avec le bouton Modèles.',
+      'Construis un modèle avec des blocs et des panneaux, puis peins chaque face en pixel art.',
+      'Dessine au crayon, à la gomme, au pot de peinture, en ligne ou en rectangle, et importe tes palettes d\'Aseprite ou de Lospec.',
+      'Peins aussi les reflets du soleil, les lumières de la nuit et le relief.',
+      'Tes modèles modifiés apparaissent tout de suite dans le jeu.',
+    ],
+  },
+  {
     version: '0.0.15',
     date: '2026-11-10',
     notes: [
