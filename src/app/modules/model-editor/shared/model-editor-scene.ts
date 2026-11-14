@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
+import { Vec3 } from '../../game/shared/model/SceneUtils';
 import { ObjSide } from '../../game/shared/model/SceneMap';
 import { BOX_FACES, BoxFace } from '../../game/shared/model/model-uv';
 import { EditableModel, FaceTexture } from './EditableModel';
@@ -29,7 +31,11 @@ export class ModelEditorScene {
   private group = new THREE.Group();
   /** One canvas texture per face texture (linked faces show the same one). */
   private readonly textures = new Map<string, THREE.CanvasTexture>();
-  private highlighted: THREE.MeshLambertMaterial | null = null;
+  private highlighted: THREE.MeshLambertMaterial[] = [];
+  /** Arrows moving the selected part (1-unit steps). */
+  private readonly gizmo: TransformControls;
+  /** Called when the selected part was moved with the arrows (new position). */
+  onPartMoved: ((partIndex: number, pos: Vec3) => void) | null = null;
   private readonly raycaster = new THREE.Raycaster();
 
   constructor(private readonly host: HTMLElement) {
@@ -49,6 +55,18 @@ export class ModelEditorScene {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
 
+    this.gizmo = new TransformControls(this.camera, this.renderer.domElement);
+    this.gizmo.setTranslationSnap(1);
+    this.gizmo.setSize(0.8);
+    this.gizmo.addEventListener('dragging-changed', event => {
+      this.controls.enabled = !event.value;
+      const mesh = this.gizmo.object;
+      if (!event.value && mesh) {
+        this.onPartMoved?.(mesh.userData['partIndex'], { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z });
+      }
+    });
+    this.scene.add(this.gizmo.getHelper());
+
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(host);
     this.resize();
@@ -62,7 +80,20 @@ export class ModelEditorScene {
     return this.renderer.domElement;
   }
 
+  /** True while the pointer is on the arrows (a click there is not a selection). */
+  get onGizmo(): boolean {
+    return this.gizmo.axis !== null;
+  }
+
+  /** Shows a model and frames the camera on it. */
   setModel(model: EditableModel) {
+    this.refresh(model);
+    this.frame();
+  }
+
+  /** Shows the model again after a change (the camera does not move). */
+  refresh(model: EditableModel) {
+    this.gizmo.detach();
     this.clear();
     this.model = model;
     Object.entries(model.textures).forEach(([id, tex]) => this.textures.set(id, this.makeTexture(tex)));
@@ -90,7 +121,6 @@ export class ModelEditorScene {
       mesh.userData['partIndex'] = partIndex;
       this.group.add(mesh);
     });
-    this.frame();
   }
 
   /** Face (and pixel) at a point of the screen. */
@@ -122,27 +152,30 @@ export class ModelEditorScene {
     return null;
   }
 
-  /** Lights up one face (null: none). */
+  /** Lights up a face, or all the faces of the part when `face` is null, and puts the arrows on the part. */
   highlight(partIndex: number | null, face: BoxFace | null) {
-    this.highlighted?.emissive.setHex(0x000000);
-    this.highlighted = null;
-    if (partIndex === null || !face || !this.model) {
+    this.highlighted.forEach(m => m.emissive.setHex(0x000000));
+    this.highlighted = [];
+    this.gizmo.detach();
+    if (partIndex === null || !this.model) {
       return;
     }
     const mesh = this.group.children.find(c => c.userData['partIndex'] === partIndex) as THREE.Mesh | undefined;
-    const part = this.model.parts[partIndex];
-    const materials = mesh?.material as THREE.MeshLambertMaterial[] | undefined;
-    const mat = materials?.[part.kind === 'box' ? BOX_FACES.indexOf(face) : 0];
-    if (mat) {
-      mat.emissive.copy(HIGHLIGHT);
-      this.highlighted = mat;
+    if (!mesh) {
+      return;
     }
+    const part = this.model.parts[partIndex];
+    const materials = mesh.material as THREE.MeshLambertMaterial[];
+    this.highlighted = face ? [materials[part.kind === 'box' ? BOX_FACES.indexOf(face) : 0]] : materials;
+    this.highlighted.forEach(m => m.emissive.copy(HIGHLIGHT));
+    this.gizmo.attach(mesh);
   }
 
   dispose() {
     this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
     this.clear();
+    this.gizmo.dispose();
     this.controls.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
@@ -177,7 +210,7 @@ export class ModelEditorScene {
   }
 
   private clear() {
-    this.highlighted = null;
+    this.highlighted = [];
     this.group.children.forEach(child => {
       const mesh = child as THREE.Mesh;
       mesh.geometry.dispose();

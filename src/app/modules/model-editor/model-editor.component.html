@@ -6,36 +6,114 @@
     <h1>Modèles 3D</h1>
   </header>
 
-  <label class="field">
-    <span>Modèle</span>
-    <select (change)="open($any($event.target).value)">
-      @for (id of modelIds; track id) {
-        <option [value]="id" [selected]="model()?.id === id">{{ id }}</option>
-      }
-    </select>
-  </label>
-
-  @if (stats(); as stats) {
-    <p class="stats">{{ stats.boxes }} box · {{ stats.planes }} plane · {{ stats.textures }} textures de face</p>
-  }
-
-  <section class="face">
-    <h2>Face sélectionnée</h2>
-    @if (selectionInfo(); as info) {
-      <dl>
-        <dt>Forme</dt><dd>{{ info.part }}</dd>
-        <dt>Face</dt><dd>{{ info.face }}</dd>
-        <dt>Grille</dt><dd>{{ info.size }}</dd>
-        @if (info.linked) {
-          <dt>Liée à</dt><dd>{{ info.linked }} autre(s) face(s)</dd>
+  <div class="row">
+    <label class="field grow">
+      <span>Ouvrir</span>
+      <select (change)="open($any($event.target).value)">
+        @if (!modelIds.includes(model()?.id ?? '')) {
+          <option value="" selected disabled>—</option>
         }
-      </dl>
-    } @else {
-      <p class="hint">Clique sur une face du modèle. Glisser : tourner · Molette : zoom · Clic droit glissé : déplacer.</p>
-    }
-  </section>
+        @for (id of modelIds; track id) {
+          <option [value]="id" [selected]="model()?.id === id">{{ id }}</option>
+        }
+      </select>
+    </label>
+    <button type="button" class="btn" (click)="create()">+ Nouveau</button>
+  </div>
 
-  <button type="button" class="primary" [disabled]="!model()" (click)="export()">⬇ Exporter</button>
+  @if (model(); as model) {
+    <div class="row">
+      <label class="field grow">
+        <span>Nom (id)</span>
+        <input type="text" [value]="model.id" (change)="rename($any($event.target).value)" />
+      </label>
+      <label class="field small" title="0 à 1 : plie au vent (végétation)">
+        <span>Vent</span>
+        <input type="number" min="0" max="1" step="0.1" [value]="model.sway ?? 0" (change)="setSway(+$any($event.target).value)" />
+      </label>
+    </div>
+
+    <section>
+      <h2>Formes</h2>
+      <ul class="parts" role="listbox" aria-label="Formes du modèle">
+        @for (name of parts(); track $index) {
+          <li role="option" [attr.aria-selected]="selection()?.partIndex === $index"
+              [class.on]="selection()?.partIndex === $index" (click)="selectPart($index)">{{ name }}</li>
+        }
+      </ul>
+      <div class="row wrap">
+        <button type="button" class="btn" (click)="add('box')">+ Box</button>
+        <button type="button" class="btn" (click)="add('plane')">+ Plane</button>
+        <button type="button" class="btn" [disabled]="!selection()" title="Ctrl+D" (click)="duplicate()">Dupliquer</button>
+        <button type="button" class="btn danger" [disabled]="!selection()" title="Suppr" (click)="remove()">Supprimer</button>
+      </div>
+    </section>
+
+    @if (selectedPart(); as part) {
+      <section>
+        <h2>{{ parts()[selection()!.partIndex] }}</h2>
+        <div class="vec">
+          <span>Taille</span>
+          @for (axis of axes; track axis) {
+            @if (part.kind === 'box' || axis !== 'z') {
+              <label><i>{{ axis }}</i><input type="number" min="1" step="1" [value]="part.size[axis]" (change)="setSize(axis, +$any($event.target).value)" /></label>
+            } @else {
+              <span></span>
+            }
+          }
+        </div>
+        <div class="vec">
+          <span>Position</span>
+          @for (axis of axes; track axis) {
+            <label><i>{{ axis }}</i><input type="number" step="1" [value]="part.pos[axis]" (change)="setPos(axis, +$any($event.target).value)" /></label>
+          }
+        </div>
+        <div class="vec">
+          <span>Rotation °</span>
+          @for (axis of axes; track axis) {
+            <label><i>{{ axis }}</i><input type="number" step="15" [value]="degrees(part.rot[axis])" (change)="setRot(axis, +$any($event.target).value)" /></label>
+          }
+        </div>
+        <label class="field">
+          <span>Faces visibles</span>
+          <select (change)="setSide($any($event.target).value)">
+            @for (side of sides; track side.value) {
+              <option [value]="side.value" [selected]="(part.side ?? 0) === side.value">{{ side.label }}</option>
+            }
+          </select>
+        </label>
+        <div class="row wrap">
+          <label class="check" title="Décocher pour un élément posé par-dessus (texte d'un panneau)">
+            <input type="checkbox" [checked]="!!part.depthTest" (change)="setFlag('depthTest', $any($event.target).checked)" /> Caché par les autres
+          </label>
+          <label class="check" title="Décocher pour les fleurs, herbes (ne cachent pas ce qui est derrière)">
+            <input type="checkbox" [checked]="!!part.depthWrite" (change)="setFlag('depthWrite', $any($event.target).checked)" /> Cache les autres
+          </label>
+        </div>
+        <label class="field small" title="0 à 1 : reflets du soleil">
+          <span>Brillance</span>
+          <input type="number" min="0" max="1" step="0.1" [value]="part.shininess ?? 0" (change)="setShininess(+$any($event.target).value)" />
+        </label>
+      </section>
+    }
+
+    <section>
+      <h2>Face sélectionnée</h2>
+      @if (faceInfo(); as info) {
+        <dl>
+          <dt>Face</dt><dd>{{ info.face }}</dd>
+          <dt>Grille</dt><dd>{{ info.size }}</dd>
+          @if (info.linked) {
+            <dt>Liée à</dt><dd>{{ info.linked }} autre(s) face(s)</dd>
+          }
+        </dl>
+      } @else {
+        <p class="hint">Clique sur une face du modèle. Flèches : déplacer la forme · Glisser : tourner · Molette : zoom · Clic droit glissé : déplacer la vue.</p>
+      }
+    </section>
+
+    <button type="button" class="primary" (click)="export()">⬇ Exporter</button>
+  }
 
   @if (status()) {
     <p class="status">{{ status() }}</p>

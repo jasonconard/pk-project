@@ -14,6 +14,8 @@ export interface ExportedModel {
   atlas: ImageData;
   /** Content of md-<id>.ts. */
   source: string;
+  /** Name of the constant it exports (to add to models.ts). */
+  constName: string;
 }
 
 interface Slot {
@@ -126,7 +128,7 @@ export function exportModel(model: EditableModel): ExportedModel {
     '',
   ].join('\n');
 
-  return { model: result, atlas: drawAtlas(slots.values(), width, height), source };
+  return { model: result, atlas: drawAtlas(slots.values(), width, height), source, constName: modelConstName(model.id) };
 }
 
 /** The atlas as a PNG file. */
