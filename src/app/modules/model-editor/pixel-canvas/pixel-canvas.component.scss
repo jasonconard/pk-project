@@ -1,0 +1,42 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zoom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #4a4c5a;
+    border-radius: 6px;
+    background: #33353f;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .coords {
+    margin-left: auto;
+    color: #b4b7c4;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.scroll {
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid #3a3c48;
+  border-radius: 6px;
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+canvas {
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+}

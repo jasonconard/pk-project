@@ -1,4 +1,5 @@
-<div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"></div>
+<div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"
+     (pointercancel)="onPointerUp($event)" [class.painting]="mode() === 'paint'"></div>
 
 <aside class="panel" aria-label="Éditeur de modèles">
   <header>
@@ -98,15 +99,42 @@
     }
 
     <section>
+      <h2>Dessin</h2>
+      <div class="row wrap tools" role="toolbar" aria-label="Outils">
+        <button type="button" class="btn" [class.on]="mode() === 'select'" title="Sélection : cliquer une face, déplacer la forme (V)"
+                [attr.aria-pressed]="mode() === 'select'" (click)="setMode('select')">🖱️</button>
+        @for (t of tools; track t.id) {
+          <button type="button" class="btn" [class.on]="mode() === 'paint' && tool() === t.id" [title]="t.label + ' (' + t.key.toUpperCase() + ')'"
+                  [attr.aria-label]="t.label" [attr.aria-pressed]="mode() === 'paint' && tool() === t.id" (click)="pickTool(t.id)">{{ t.icon }}</button>
+        }
+      </div>
+      <div class="row wrap">
+        <label class="color" title="Couleur">
+          <input type="color" [value]="color()" (input)="color.set($any($event.target).value)" />
+          <span>{{ color() }}</span>
+        </label>
+        @if (tool() === 'rect') {
+          <label class="check"><input type="checkbox" [checked]="rectFilled()" (change)="rectFilled.set($any($event.target).checked)" /> Plein</label>
+        }
+      </div>
+      @if (mode() === 'paint') {
+        <p class="hint">Dessine sur la face ci-dessous ou directement sur le modèle. Glisser hors du modèle : tourner la vue.</p>
+      }
+    </section>
+
+    <section>
       <h2>Face sélectionnée</h2>
       @if (faceInfo(); as info) {
         <dl>
-          <dt>Face</dt><dd>{{ info.face }}</dd>
-          <dt>Grille</dt><dd>{{ info.size }}</dd>
+          <dt>Face</dt><dd>{{ info.face }} · {{ info.size }}</dd>
           @if (info.linked) {
             <dt>Liée à</dt><dd>{{ info.linked }} autre(s) face(s)</dd>
           }
         </dl>
+        @if (faceTexture(); as face) {
+          <app-pixel-canvas [texture]="face.tex" [version]="paintVersion()"
+                            (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
+        }
       } @else {
         <p class="hint">Clique sur une face du modèle. Flèches : déplacer la forme · Glisser : tourner · Molette : zoom · Clic droit glissé : déplacer la vue.</p>
       }

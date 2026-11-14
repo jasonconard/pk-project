@@ -10,6 +10,8 @@ import { importModel, loadImagePixels } from './shared/model-import';
 import { atlasToPng, exportModel } from './shared/model-export';
 import { ModelEditorScene } from './shared/model-editor-scene';
 import { addPart, duplicatePart, newModel, removePart, resizePart } from './shared/model-ops';
+import { hexToRgba, PaintStroke, Px, rgbaToHex, Tool } from './shared/pixel-tools';
+import { PixelCanvasComponent } from './pixel-canvas/pixel-canvas.component';
 
 const FACE_LABELS: Record<BoxFace, string> = {
   front: 'Avant', back: 'Arrière', left: 'Gauche', right: 'Droite', top: 'Dessus', bottom: 'Dessous',
@@ -27,6 +29,26 @@ type Axis = 'x' | 'y' | 'z';
 const CLICK_TOLERANCE = 4;
 const NEW_MODEL_ID = 'nouveau-modele';
 
+/** Selection: click a face, move the part with the arrows. Painting: the tool draws on the faces in 3D too. */
+type Mode = 'select' | 'paint';
+
+const TOOLS: { id: Tool, icon: string, label: string, key: string }[] = [
+  { id: 'pencil', icon: '✏️', label: 'Crayon', key: 'p' },
+  { id: 'eraser', icon: '🧽', label: 'Gomme (transparent)', key: 'e' },
+  { id: 'picker', icon: '💧', label: 'Pipette', key: 'i' },
+  { id: 'fill', icon: '🪣', label: 'Pot de peinture', key: 'f' },
+  { id: 'line', icon: '📏', label: 'Ligne', key: 'l' },
+  { id: 'rect', icon: '▭', label: 'Rectangle', key: 'r' },
+];
+
+/** A stroke in progress, on one face texture. */
+interface ActiveStroke {
+  texId: string;
+  stroke: PaintStroke;
+  /** Started on the 3D view (the pointer is followed there). */
+  in3d: boolean;
+}
+
 /**
  * 3D model editor (/modeles): opens a model of the game or a new one, adds / removes / duplicates / moves its
  * boxes and planes (their pixel grids follow their size), selects a face, and exports the model back to the
@@ -37,12 +59,13 @@ const NEW_MODEL_ID = 'nouveau-modele';
   templateUrl: './model-editor.component.html',
   styleUrl: './model-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, PixelCanvasComponent],
 })
 export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
   private scene: ModelEditorScene | null = null;
   private pressAt: { x: number, y: number } | null = null;
+  private active: ActiveStroke | null = null;
 
   protected readonly modelIds = MODELS.map(m => m.id);
   protected readonly axes: Axis[] = ['x', 'y', 'z'];
@@ -55,6 +78,21 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   protected readonly selection = signal<Selection | null>(null);
   protected readonly status = signal('');
   protected readonly atlasPreview = signal<string | null>(null);
+  protected readonly tools = TOOLS;
+  protected readonly mode = signal<Mode>('select');
+  protected readonly tool = signal<Tool>('pencil');
+  protected readonly color = signal('#e04040');
+  protected readonly rectFilled = signal(false);
+  /** Changes when face pixels changed (2D view redraw). */
+  protected readonly paintVersion = signal(0);
+
+  /** Texture of the selected face. */
+  protected readonly faceTexture = computed(() => {
+    const sel = this.selection();
+    const texId = sel?.face ? this.selectedPart()?.faces[sel.face] : undefined;
+    const tex = texId ? this.model()?.textures[texId] : undefined;
+    return texId && tex ? { texId, tex } : null;
+  });
 
   protected readonly parts = computed(() => {
     const counts = { box: 0, plane: 0 };
@@ -82,6 +120,10 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.scene = new ModelEditorScene(this.viewport().nativeElement);
     this.scene.onPartMoved = (partIndex, pos) => this.edit(model => model.parts[partIndex].pos = pos);
+    // Capture phase: decides before the camera controls whether a press paints the model or turns the camera
+    const viewport = this.viewport().nativeElement;
+    viewport.addEventListener('pointerdown', e => this.paint3dDown(e), { capture: true });
+    viewport.addEventListener('pointermove', e => this.paint3dMove(e));
     this.open(this.modelIds[0]);
   }
 
@@ -205,13 +247,103 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.editPart(part => part.shininess = value > 0 ? Math.min(1, value) : undefined, Number.isFinite(value));
   }
 
+  // --- Painting ---
+
+  protected setMode(mode: Mode) {
+    this.mode.set(mode);
+    if (this.scene) {
+      this.scene.gizmoEnabled = mode === 'select';
+    }
+  }
+
+  protected pickTool(tool: Tool) {
+    this.tool.set(tool);
+    this.setMode('paint');
+  }
+
+  /** Press on the 2D view of the selected face. */
+  protected strokeStart(px: Px) {
+    const face = this.faceTexture();
+    if (face) {
+      this.startStroke(face.texId, px, false);
+    }
+  }
+
+  protected strokeMove(px: Px) {
+    if (this.active && !this.active.in3d) {
+      this.applyStroke(px);
+    }
+  }
+
+  protected strokeEnd() {
+    this.endStroke();
+  }
+
+  private startStroke(texId: string, px: Px, in3d: boolean) {
+    const tex = this.model()!.textures[texId];
+    const stroke = new PaintStroke(tex, this.tool(), hexToRgba(this.color()), this.rectFilled(), rgba => {
+      if (rgba[3] > 0) {
+        this.color.set(rgbaToHex(rgba));
+        this.tool.set('pencil'); // like most pixel art tools: pick a color, then draw with it
+      }
+    });
+    this.active = { texId, stroke, in3d };
+    this.applyStroke(px);
+  }
+
+  private applyStroke(px: Px) {
+    if (this.active?.stroke.apply(px)) {
+      this.scene?.updateTexture(this.active.texId);
+      this.paintVersion.update(v => v + 1);
+    }
+  }
+
+  private endStroke() {
+    this.active = null;
+    if (this.scene) {
+      this.scene.orbitEnabled = true;
+    }
+  }
+
+  /** Painting mode: a press on the model paints it (the camera does not turn), elsewhere the camera turns. */
+  private paint3dDown(event: PointerEvent) {
+    if (this.mode() !== 'paint' || event.button !== 0 || !this.scene) {
+      return;
+    }
+    const pick = this.scene.pick(event.clientX, event.clientY, true);
+    const texId = pick && this.model()?.parts[pick.partIndex].faces[pick.face];
+    if (!pick || !texId) {
+      return;
+    }
+    this.scene.orbitEnabled = false;
+    this.pressAt = null;
+    this.viewport().nativeElement.setPointerCapture(event.pointerId);
+    this.select({ partIndex: pick.partIndex, face: pick.face });
+    this.startStroke(texId, pick.px, true);
+  }
+
+  /** Drag while painting on the model: follows the pointer on the faces showing the same texture. */
+  private paint3dMove(event: PointerEvent) {
+    if (!this.active?.in3d || !this.scene) {
+      return;
+    }
+    const pick = this.scene.pick(event.clientX, event.clientY, true);
+    if (pick && this.model()?.parts[pick.partIndex].faces[pick.face] === this.active.texId) {
+      this.applyStroke(pick.px);
+    }
+  }
+
   // --- Pointer / keyboard ---
 
   protected onPointerDown(event: PointerEvent) {
-    this.pressAt = this.scene?.onGizmo ? null : { x: event.clientX, y: event.clientY };
+    this.pressAt = this.scene?.onGizmo || this.active ? null : { x: event.clientX, y: event.clientY };
   }
 
   protected onPointerUp(event: PointerEvent) {
+    if (this.active?.in3d) {
+      this.endStroke();
+      return;
+    }
     const press = this.pressAt;
     this.pressAt = null;
     if (!press || Math.hypot(event.clientX - press.x, event.clientY - press.y) > CLICK_TOLERANCE) {
@@ -226,13 +358,20 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     if ((event.target as HTMLElement).closest('input, select, textarea')) {
       return;
     }
-    if (event.key === 'Delete' || event.key === 'Backspace') {
+    if ((event.key === 'Delete' || event.key === 'Backspace') && this.mode() === 'select') {
       this.remove();
     } else if (event.key === 'Escape') {
       this.select(null);
     } else if (event.key === 'd' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       this.duplicate();
+    } else if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+      const tool = TOOLS.find(t => t.key === event.key);
+      if (tool) {
+        this.pickTool(tool.id);
+      } else if (event.key === 'v') {
+        this.setMode('select');
+      }
     }
   }
 

@@ -16,6 +16,8 @@ export interface FacePick {
 
 const BACKGROUND = 0x2a2b33;
 const HIGHLIGHT = new THREE.Color(0x3a6ea5);
+/** Outline of the selected face (its colors stay true while painting). */
+const OUTLINE_MATERIAL = new THREE.LineBasicMaterial({ color: 0xffd34d, depthTest: false, transparent: true });
 
 /**
  * 3D view of the edited model: camera turning around it (OrbitControls), 1-unit grid on the ground, simple
@@ -32,6 +34,7 @@ export class ModelEditorScene {
   /** One canvas texture per face texture (linked faces show the same one). */
   private readonly textures = new Map<string, THREE.CanvasTexture>();
   private highlighted: THREE.MeshLambertMaterial[] = [];
+  private outline: THREE.LineLoop | null = null;
   /** Arrows moving the selected part (1-unit steps). */
   private readonly gizmo: TransformControls;
   /** Called when the selected part was moved with the arrows (new position). */
@@ -123,14 +126,18 @@ export class ModelEditorScene {
     });
   }
 
-  /** Face (and pixel) at a point of the screen. */
-  pick(clientX: number, clientY: number): FacePick | null {
+  /**
+   * Face (and pixel) at a point of the screen. Transparent pixels let the pointer through, unless nothing
+   * opaque is behind them and `orTransparent` is set (painting on an empty face).
+   */
+  pick(clientX: number, clientY: number, orTransparent = false): FacePick | null {
     if (!this.model) {
       return null;
     }
     const rect = this.canvas.getBoundingClientRect();
     const ndc = new THREE.Vector2((clientX - rect.left) / rect.width * 2 - 1, -(clientY - rect.top) / rect.height * 2 + 1);
     this.raycaster.setFromCamera(ndc, this.camera);
+    let firstTransparent: FacePick | null = null;
     for (const hit of this.raycaster.intersectObjects(this.group.children, false)) {
       const mesh = hit.object as THREE.Mesh;
       const partIndex = mesh.userData['partIndex'] as number;
@@ -145,17 +152,42 @@ export class ModelEditorScene {
       const x = Math.min(tex.w - 1, Math.floor(hit.uv.x * tex.w));
       const y = Math.min(tex.h - 1, Math.floor((1 - hit.uv.y) * tex.h));
       if (tex.color[(y * tex.w + x) * 4 + 3] < 128) {
+        firstTransparent ??= { partIndex, face, px: { x, y } };
         continue;
       }
       return { partIndex, face, px: { x, y } };
     }
-    return null;
+    return orTransparent ? firstTransparent : null;
   }
 
-  /** Lights up a face, or all the faces of the part when `face` is null, and puts the arrows on the part. */
+  /** Shows the new pixels of a face texture (on all the faces linked to it). */
+  updateTexture(texId: string) {
+    const texture = this.textures.get(texId);
+    const tex = this.model?.textures[texId];
+    if (texture && tex) {
+      (texture.image as HTMLCanvasElement).getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(tex.color), tex.w, tex.h), 0, 0);
+      texture.needsUpdate = true;
+    }
+  }
+
+  /** Camera turning with the pointer (off while painting on the model). */
+  set orbitEnabled(enabled: boolean) {
+    this.controls.enabled = enabled;
+  }
+
+  /** Arrows moving the selected part (hidden while painting). */
+  set gizmoEnabled(enabled: boolean) {
+    this.gizmo.enabled = enabled;
+    this.gizmo.getHelper().visible = enabled;
+  }
+
+  /** Outlines a face, or lights up all the faces of the part when `face` is null; puts the arrows on the part. */
   highlight(partIndex: number | null, face: BoxFace | null) {
     this.highlighted.forEach(m => m.emissive.setHex(0x000000));
     this.highlighted = [];
+    this.outline?.removeFromParent();
+    this.outline?.geometry.dispose();
+    this.outline = null;
     this.gizmo.detach();
     if (partIndex === null || !this.model) {
       return;
@@ -165,10 +197,20 @@ export class ModelEditorScene {
       return;
     }
     const part = this.model.parts[partIndex];
-    const materials = mesh.material as THREE.MeshLambertMaterial[];
-    this.highlighted = face ? [materials[part.kind === 'box' ? BOX_FACES.indexOf(face) : 0]] : materials;
-    this.highlighted.forEach(m => m.emissive.copy(HIGHLIGHT));
+    if (face) {
+      // The 4 corners of the face in the geometry (4 vertices per face, in the order of BOX_FACES)
+      const first = part.kind === 'box' ? BOX_FACES.indexOf(face) * 4 : 0;
+      const pos = mesh.geometry.getAttribute('position');
+      const corners = [0, 1, 3, 2].map(i => new THREE.Vector3().fromBufferAttribute(pos, first + i));
+      this.outline = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(corners), OUTLINE_MATERIAL);
+      this.outline.renderOrder = 10;
+      mesh.add(this.outline);
+    } else {
+      this.highlighted = mesh.material as THREE.MeshLambertMaterial[];
+      this.highlighted.forEach(m => m.emissive.copy(HIGHLIGHT));
+    }
     this.gizmo.attach(mesh);
+    this.gizmo.getHelper().visible = this.gizmo.enabled;
   }
 
   dispose() {
@@ -211,6 +253,8 @@ export class ModelEditorScene {
 
   private clear() {
     this.highlighted = [];
+    this.outline?.geometry.dispose();
+    this.outline = null;
     this.group.children.forEach(child => {
       const mesh = child as THREE.Mesh;
       mesh.geometry.dispose();
