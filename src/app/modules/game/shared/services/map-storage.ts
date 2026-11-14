@@ -4,6 +4,7 @@ import { PlayerDirection } from '../model/ScenePlayer';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { InstructionType } from '../model/SceneEventInstruction';
 import { LEGACY_TILE_IDS } from '../model/Terrain';
+import { downloadFile, SourceEnums, toSource } from '../util/ts-source';
 
 /** Browser storage key of the map edited in the editor. */
 const STORAGE_KEY = 'pk-map-edits';
@@ -100,40 +101,11 @@ function constName(chunkId: string): string {
 }
 
 /** Enums written by name (readable source) instead of their number. */
-const ENUM_KEYS: Record<string, [string, Record<number, string>]> = {
+const ENUM_KEYS: SourceEnums = {
   direction: ['PlayerDirection', PlayerDirection],
   pressedKeys: ['KeyCode', KeyCode],
   type: ['InstructionType', InstructionType],
 };
-
-/** A value as TypeScript source, indented like the hand-written chunk files. */
-function toSource(value: unknown, indent: string, key?: string): string {
-  const inner = indent + '  ';
-  if (key && key in ENUM_KEYS && (typeof value === 'number' || Array.isArray(value))) {
-    const [enumName, values] = ENUM_KEYS[key];
-    const name = (n: unknown) => typeof n === 'number' && values[n] ? `${enumName}.${values[n]}` : JSON.stringify(n);
-    return Array.isArray(value) ? `[${value.map(name).join(', ')}]` : name(value);
-  }
-  if (Array.isArray(value)) {
-    if (!value.length) {
-      return '[]';
-    }
-    return `[\n${value.map(v => inner + toSource(v, inner)).join(',\n')}\n${indent}]`;
-  }
-  if (value && typeof value === 'object') {
-    const entries = Object.entries(value).filter(([, v]) => v !== undefined);
-    // Small flat objects (positions, sizes) on one line
-    if (entries.every(([, v]) => typeof v !== 'object' || v === null) && entries.length <= 4) {
-      return `{ ${entries.map(([k, v]) => `${propName(k)}: ${toSource(v, inner, k)}`).join(', ')} }`;
-    }
-    return `{\n${entries.map(([k, v]) => `${inner}${propName(k)}: ${toSource(v, inner, k)}`).join(',\n')}\n${indent}}`;
-  }
-  return typeof value === 'string' ? `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'` : JSON.stringify(value);
-}
-
-function propName(key: string): string {
-  return /^[A-Za-z_$][\w$]*$/.test(key) ? key : `'${key}'`;
-}
 
 /** The chunks file (same constants as the hand-written one, so world.ts doesn't change). */
 export function exportChunksFile(map: SceneMap): string {
@@ -158,18 +130,12 @@ export function exportChunksFile(map: SceneMap): string {
       heights: chunk.heights && Object.keys(chunk.heights).length ? chunk.heights : undefined,
       stairs: chunk.stairs && Object.keys(chunk.stairs).length ? chunk.stairs : undefined,
     };
-    return `export const ${constName(chunk.id)}: SceneChunk = ${toSource(data, '')};\n`;
+    return `export const ${constName(chunk.id)}: SceneChunk = ${toSource(data, '', undefined, { enums: ENUM_KEYS })};\n`;
   });
   return header + chunks.join('\n');
 }
 
 /** Hands the exported file to the browser (download). */
 export function downloadChunksFile(map: SceneMap) {
-  const blob = new Blob([exportChunksFile(map)], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = EXPORT_FILE_NAME;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  downloadFile(EXPORT_FILE_NAME, exportChunksFile(map));
 }

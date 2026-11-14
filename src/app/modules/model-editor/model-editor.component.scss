@@ -1,0 +1,123 @@
+:host {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  background: #2a2b33;
+  color: #eceef4;
+  touch-action: none;
+}
+
+.viewport {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+
+  ::ng-deep canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.panel {
+  width: 280px;
+  flex-shrink: 0;
+  padding: calc(12px + var(--safe-top)) calc(14px + var(--safe-right)) 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  background: #22232a;
+  border-left: 1px solid #3a3c48;
+  font-size: 14px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 40px; // room for the full screen button (top right)
+
+  h1 {
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+.back {
+  color: #9fc3ff;
+  text-decoration: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  select {
+    padding: 6px;
+    border-radius: 6px;
+    background: #33353f;
+    color: inherit;
+    border: 1px solid #4a4c5a;
+  }
+}
+
+.stats, .hint, .status {
+  margin: 0;
+  color: #b4b7c4;
+}
+
+.face h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+
+  dt {
+    color: #b4b7c4;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.primary {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #3a6ea5;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.atlas {
+  max-width: 100%;
+  image-rendering: pixelated;
+  background: repeating-conic-gradient(#555 0 25%, #444 0 50%) 0 0 / 8px 8px;
+}
+
+@media (max-width: 700px) {
+  :host {
+    flex-direction: column;
+  }
+
+  .panel {
+    width: auto;
+    max-height: 45%;
+    border-left: none;
+    border-top: 1px solid #3a3c48;
+  }
+}

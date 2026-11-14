@@ -4,6 +4,7 @@ import { MaterialService } from './material.service';
 import { ObjSide } from '../model/SceneMap';
 import { SceneModel } from '../model/SceneModel';
 import { Square3 } from '../model/SceneUtils';
+import { applyFaceUvs, BOX_FACES } from '../model/model-uv';
 import { RAIN_STOP_KEY } from '../weather/SurfaceHeights';
 import { getSwayDepthMaterial, SWAY_ATTRIBUTE } from '../weather/weather-shader';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -96,32 +97,7 @@ export class BasicMeshService {
     model.boxes.forEach(box => {
       const boxMat = MaterialService.getModelMaterialFromLink(model.tex.link, box.shininess);
       const geo = new THREE.BoxGeometry(box.size.x, box.size.y, box.size.z);
-      const uvAtt = geo.getAttribute('uv');
-      const uv = new THREE.Vector2();
-      for(let i = 0; i < uvAtt.count; i++) {
-        uv.fromBufferAttribute( uvAtt as THREE.BufferAttribute, i );
-        const face = Math.floor(i/4);
-        let faceUv = null;
-        switch (face) {
-          case 0: faceUv = box.uvs.right; break;
-          case 1: faceUv = box.uvs.left; break;
-          case 2: faceUv = box.uvs.top; break;
-          case 3: faceUv = box.uvs.bottom; break;
-          case 4: faceUv = box.uvs.front; break;
-          case 5: faceUv = box.uvs.back; break;
-        }
-        if(faceUv) {
-          const ax = (faceUv.min.x) / model.tex.size.x;
-          const bx = (faceUv.max.x) / model.tex.size.x;
-          const ay = (model.tex.size.y - faceUv.min.y) / model.tex.size.y;
-          const by = (model.tex.size.y - faceUv.max.y) / model.tex.size.y;
-          if( i%4 === 0 ) { uvAtt.setXY( i, ax, by ) } // 0, 1
-          if( i%4 === 1 ) { uvAtt.setXY( i, bx, by ) } // 1, 1
-          if( i%4 === 2 ) { uvAtt.setXY( i, ax, ay ) } // 0, 0
-          if( i%4 === 3 ) { uvAtt.setXY( i, bx, ay ) } // 1, 0
-        }
-      }
-
+      applyFaceUvs(geo, BOX_FACES.map(face => box.uvs[face]), model.tex.size);
 
       switch (box.side) {
         case ObjSide.FRONT: boxMat.side = THREE.FrontSide; break;
@@ -149,28 +125,7 @@ export class BasicMeshService {
     model.planes.forEach(plane => {
       const mat = MaterialService.getModelMaterialFromLink(model.tex.link, plane.shininess);
       const geo = new THREE.PlaneGeometry(plane.size.x, plane.size.y);
-      const uvAtt = geo.getAttribute('uv');
-      const uv = new THREE.Vector2();
-      // console.log(uvAtt.count);
-      for(let i = 0; i < uvAtt.count; i++) {
-        uv.fromBufferAttribute( uvAtt as THREE.BufferAttribute, i );
-        const face = Math.floor(i/4);
-        let faceUv = null;
-        switch (face) {
-          case 0: faceUv = plane.uvs.front; break;
-          case 1: faceUv = plane.uvs.back; break;
-        }
-        if(faceUv) {
-          const ax = (faceUv.min.x) / model.tex.size.x;
-          const bx = (faceUv.max.x) / model.tex.size.x;
-          const ay = (model.tex.size.y - faceUv.min.y) / model.tex.size.y;
-          const by = (model.tex.size.y - faceUv.max.y) / model.tex.size.y;
-          if( i%4 === 0 ) { uvAtt.setXY( i, ax, by ) } // 0, 1
-          if( i%4 === 1 ) { uvAtt.setXY( i, bx, by ) } // 1, 1
-          if( i%4 === 2 ) { uvAtt.setXY( i, ax, ay ) } // 0, 0
-          if( i%4 === 3 ) { uvAtt.setXY( i, bx, ay ) } // 1, 0
-        }
-      }
+      applyFaceUvs(geo, [plane.uvs.front, plane.uvs.back], model.tex.size);
 
       switch (plane.side) {
         case ObjSide.FRONT: mat.side = THREE.FrontSide; break;

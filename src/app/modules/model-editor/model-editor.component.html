@@ -1,0 +1,46 @@
+<div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"></div>
+
+<aside class="panel" aria-label="Éditeur de modèles">
+  <header>
+    <a routerLink="/" class="back">← Jeu</a>
+    <h1>Modèles 3D</h1>
+  </header>
+
+  <label class="field">
+    <span>Modèle</span>
+    <select (change)="open($any($event.target).value)">
+      @for (id of modelIds; track id) {
+        <option [value]="id" [selected]="model()?.id === id">{{ id }}</option>
+      }
+    </select>
+  </label>
+
+  @if (stats(); as stats) {
+    <p class="stats">{{ stats.boxes }} box · {{ stats.planes }} plane · {{ stats.textures }} textures de face</p>
+  }
+
+  <section class="face">
+    <h2>Face sélectionnée</h2>
+    @if (selectionInfo(); as info) {
+      <dl>
+        <dt>Forme</dt><dd>{{ info.part }}</dd>
+        <dt>Face</dt><dd>{{ info.face }}</dd>
+        <dt>Grille</dt><dd>{{ info.size }}</dd>
+        @if (info.linked) {
+          <dt>Liée à</dt><dd>{{ info.linked }} autre(s) face(s)</dd>
+        }
+      </dl>
+    } @else {
+      <p class="hint">Clique sur une face du modèle. Glisser : tourner · Molette : zoom · Clic droit glissé : déplacer.</p>
+    }
+  </section>
+
+  <button type="button" class="primary" [disabled]="!model()" (click)="export()">⬇ Exporter</button>
+
+  @if (status()) {
+    <p class="status">{{ status() }}</p>
+  }
+  @if (atlasPreview(); as src) {
+    <img class="atlas" [src]="src" alt="Atlas exporté" />
+  }
+</aside>
