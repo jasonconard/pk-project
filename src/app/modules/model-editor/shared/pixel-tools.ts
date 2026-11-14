@@ -1,19 +1,24 @@
-import { FaceTexture } from './EditableModel';
-
 export type Tool = 'pencil' | 'eraser' | 'picker' | 'fill' | 'line' | 'rect';
 export type Rgba = [number, number, number, number];
 export interface Px { x: number, y: number }
 
-export const TRANSPARENT: Rgba = [0, 0, 0, 0];
-
-export function getPixel(tex: FaceTexture, p: Px): Rgba {
-  const i = (p.y * tex.w + p.x) * 4;
-  return [tex.color[i], tex.color[i + 1], tex.color[i + 2], tex.color[i + 3]];
+/** Pixels drawn on: a face's colors (4 values per pixel, RGBA) or one of its grayscale layers (1 value). */
+export interface Grid {
+  w: number;
+  h: number;
+  data: Uint8ClampedArray;
+  channels: 1 | 4;
 }
 
-export function setPixel(tex: FaceTexture, p: Px, rgba: Rgba) {
-  if (p.x >= 0 && p.y >= 0 && p.x < tex.w && p.y < tex.h) {
-    tex.color.set(rgba, (p.y * tex.w + p.x) * 4);
+/** The pixel's values (RGBA, or [gray]). */
+export function getPixel(grid: Grid, p: Px): number[] {
+  const i = (p.y * grid.w + p.x) * grid.channels;
+  return Array.from(grid.data.subarray(i, i + grid.channels));
+}
+
+export function setPixel(grid: Grid, p: Px, value: number[]) {
+  if (p.x >= 0 && p.y >= 0 && p.x < grid.w && p.y < grid.h) {
+    grid.data.set(value, (p.y * grid.w + p.x) * grid.channels);
   }
 }
 
@@ -50,7 +55,7 @@ export function rectPixels(a: Px, b: Px, filled: boolean): Px[] {
 }
 
 /** Fills the area of the same color as the start pixel (4 neighbors). */
-export function floodFill(tex: FaceTexture, start: Px, rgba: Rgba) {
+export function floodFill(tex: Grid, start: Px, rgba: number[]) {
   const target = getPixel(tex, start).join();
   if (target === rgba.join()) {
     return;
@@ -67,7 +72,8 @@ export function floodFill(tex: FaceTexture, start: Px, rgba: Rgba) {
 }
 
 /**
- * One press-drag-release of a tool on a face texture. The pencil and the eraser draw along the pointer (no gaps
+ * One press-drag-release of a tool on a face texture (colors or a grayscale layer). The eraser makes the colors
+ * transparent, and a grayscale layer black. The pencil and the eraser draw along the pointer (no gaps
  * between moves); the line and the rectangle are redrawn from the texture as it was at the press, until the release.
  */
 export class PaintStroke {
@@ -76,14 +82,15 @@ export class PaintStroke {
   private last: Px | null = null;
 
   constructor(
-    private readonly tex: FaceTexture,
+    private readonly tex: Grid,
     private readonly tool: Tool,
-    private readonly rgba: Rgba,
+    /** RGBA, or [gray]. */
+    private readonly rgba: number[],
     private readonly filled = false,
-    /** Called with the color under the pointer (picker). */
-    private readonly onPick: (rgba: Rgba) => void = () => {},
+    /** Called with the value under the pointer (picker). */
+    private readonly onPick: (value: number[]) => void = () => {},
   ) {
-    this.snapshot = tool === 'line' || tool === 'rect' ? tex.color.slice() : null;
+    this.snapshot = tool === 'line' || tool === 'rect' ? tex.data.slice() : null;
   }
 
   /** Applies the tool at a pixel. Returns true if the texture changed. */
@@ -103,13 +110,13 @@ export class PaintStroke {
         return first;
       case 'pencil':
       case 'eraser': {
-        const color = this.tool === 'eraser' ? TRANSPARENT : this.rgba;
+        const color = this.tool === 'eraser' ? new Array(this.tex.channels).fill(0) : this.rgba;
         linePixels(last ?? p, p).forEach(px => setPixel(this.tex, px, color));
         return true;
       }
       case 'line':
       case 'rect':
-        this.tex.color.set(this.snapshot!);
+        this.tex.data.set(this.snapshot!);
         (this.tool === 'line' ? linePixels(this.start, p) : rectPixels(this.start, p, this.filled))
           .forEach(px => setPixel(this.tex, px, this.rgba));
         return true;
@@ -122,6 +129,6 @@ export function hexToRgba(hex: string): Rgba {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 255];
 }
 
-export function rgbaToHex(rgba: Rgba): string {
+export function rgbaToHex(rgba: number[]): string {
   return '#' + rgba.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join('');
 }

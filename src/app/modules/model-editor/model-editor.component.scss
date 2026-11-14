@@ -200,6 +200,39 @@ section {
   }
 }
 
+.preview {
+  position: absolute;
+  z-index: 1;
+  border: 1px solid #6a6d7e;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  cursor: default;
+
+  span {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 12px;
+    color: #d8dae4;
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+  }
+
+  button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #4a4c5a;
+    border-radius: 6px;
+    background: rgba(34, 35, 42, 0.85);
+    color: #ffd34d;
+    font-size: 16px;
+    cursor: pointer;
+  }
+}
+
 .viewport.painting {
   cursor: crosshair;
 }
@@ -256,6 +289,67 @@ section {
 .lock {
   width: 100%;
   margin-top: 2px;
+}
+
+.layers {
+  display: flex;
+  border: 1px solid #4a4c5a;
+  border-radius: 6px;
+  overflow: hidden;
+
+  button {
+    flex: 1;
+    padding: 6px 2px;
+    border: none;
+    background: #33353f;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+
+    & + button {
+      border-left: 1px solid #4a4c5a;
+    }
+
+    &.on {
+      background: #3a6ea5;
+    }
+  }
+}
+
+.grays {
+  display: flex;
+  gap: 3px;
+
+  button {
+    flex: 1;
+    height: 22px;
+    padding: 0;
+    border: 1px solid #000;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &.on {
+      outline: 2px solid #ffd34d;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.gray-slider {
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding: 0;
+  }
+
+  .gray-value {
+    width: 22px;
+    height: 22px;
+    border: 1px solid #000;
+    border-radius: 4px;
+  }
 }
 
 .muted {

@@ -1,12 +1,11 @@
 import { Service } from '@angular/core';
 import * as THREE from 'three';
 import { applyWeatherShader, registerUnlitMaterial } from '../weather/weather-shader';
+import { SceneModelTex } from '../model/SceneModel';
+import { MIN_WINDOW_PIXELS, windowGlow } from '../model/window-glow';
 
 /** Warm light color of the windows at night. */
 const WINDOW_LIGHT_COLOR = new THREE.Color(0xffc56b);
-/** Below this many glass pixels a texture is considered to have no window (avoids stray pixels). */
-const MIN_WINDOW_PIXELS = 50;
-
 /** Texels more transparent than this are discarded (no depth written). Low: fading opacities still work. */
 const TRANSPARENT_ALPHA_TEST = 0.1;
 
@@ -14,11 +13,6 @@ const TRANSPARENT_ALPHA_TEST = 0.1;
 export class MaterialService {
 
   private static readonly windowMasks = new Map<string, THREE.Texture>();
-
-  /** Window glass = saturated light blue in the pixel-art textures (walls, roofs and outlines are excluded). */
-  private static isWindowGlass(r: number, g: number, b: number, a: number): boolean {
-    return a > 0 && b >= 200 && b - r >= 60;
-  }
 
   /**
    * Emissive mask of the windows of a texture: glass pixels in grayscale (keeps the glass shading), the rest black.
@@ -47,9 +41,8 @@ export class MaterialService {
       const px = data.data;
       let glassCount = 0;
       for (let i = 0; i < px.length; i += 4) {
-        const glass = MaterialService.isWindowGlass(px[i], px[i + 1], px[i + 2], px[i + 3]);
-        const v = glass ? Math.round(140 + 115 * px[i + 1] / 255) : 0;
-        glassCount += glass ? 1 : 0;
+        const v = windowGlow(px[i], px[i + 1], px[i + 2], px[i + 3]);
+        glassCount += v ? 1 : 0;
         px[i] = px[i + 1] = px[i + 2] = v;
         px[i + 3] = 255;
       }
@@ -79,6 +72,15 @@ export class MaterialService {
     // Since three r152 the renderer outputs sRGB: color textures must be flagged as sRGB
     // to keep the same rendering as before (pixel-art colors unchanged).
     texture.colorSpace = THREE.SRGBColorSpace;
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    return texture;
+  }
+
+  /** Grayscale data map (shininess, relief): its values are used as they are, not as sRGB colors. */
+  private static loadDataTexture(link: string): THREE.Texture {
+    const texture = new THREE.TextureLoader().load(link);
+    texture.colorSpace = THREE.NoColorSpace;
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     return texture;
@@ -126,9 +128,30 @@ export class MaterialService {
     }));
   }
 
-  /** Lit material for models: shiny (sun reflections) when `shininess` > 0, windows lit at night. */
-  public static getModelMaterialFromLink(link: string, shininess?: number): THREE.MeshLambertMaterial | THREE.MeshPhongMaterial {
-    const mat = shininess ? MaterialService.getPhongMaterialFromLink(link, false, shininess) : MaterialService.getLambertMaterialFromLink(link);
-    return MaterialService.addWindowLights(mat, link);
+  /**
+   * Lit material for models. Shiny in the sun where the texture's specular map is light (or the whole part when it
+   * has no map and `shininess` > 0); lit at night where its night map is (or on the window glass); relief from its
+   * bump map.
+   */
+  public static getModelMaterial(tex: SceneModelTex, shininess?: number): THREE.MeshLambertMaterial | THREE.MeshPhongMaterial {
+    let mat: THREE.MeshLambertMaterial | THREE.MeshPhongMaterial;
+    if (tex.specular) {
+      const phong = MaterialService.getPhongMaterialFromLink(tex.link, false, 1);
+      phong.specularMap = MaterialService.loadDataTexture(tex.specular);
+      mat = phong;
+    } else {
+      mat = shininess ? MaterialService.getPhongMaterialFromLink(tex.link, false, shininess) : MaterialService.getLambertMaterialFromLink(tex.link);
+    }
+    if (tex.night) {
+      mat.emissiveMap = MaterialService.loadTexture(tex.night);
+      mat.emissive = WINDOW_LIGHT_COLOR;
+    } else {
+      MaterialService.addWindowLights(mat, tex.link);
+    }
+    if (tex.bump) {
+      mat.bumpMap = MaterialService.loadDataTexture(tex.bump);
+      mat.bumpScale = tex.bumpScale ?? 1;
+    }
+    return mat;
   }
 }

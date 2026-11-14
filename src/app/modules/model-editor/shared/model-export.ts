@@ -3,7 +3,7 @@ import { ObjSide } from '../../game/shared/model/SceneMap';
 import { VecBox2 } from '../../game/shared/model/SceneUtils';
 import { BOX_FACES } from '../../game/shared/model/model-uv';
 import { toSource } from '../../game/shared/util/ts-source';
-import { EditableModel, EditablePart, FaceTexture } from './EditableModel';
+import { EditableModel, EditablePart, FaceTexture, GRAY_LAYERS, GrayLayer } from './EditableModel';
 
 /** Transparent border around each face in the atlas, filled with the face's edge pixels (no bleeding at a distance). */
 const PADDING = 1;
@@ -12,6 +12,8 @@ export interface ExportedModel {
   model: SceneModel;
   /** Atlas of the face textures. */
   atlas: ImageData;
+  /** Grayscale maps painted on the model (same layout as the atlas). */
+  maps: Partial<Record<GrayLayer, ImageData>>;
   /** Content of md-<id>.ts. */
   source: string;
   /** Name of the constant it exports (to add to models.ts). */
@@ -30,7 +32,9 @@ function dedupe(model: EditableModel, used: Set<string>): Map<string, FaceTextur
   const result = new Map<string, FaceTexture>();
   used.forEach(texId => {
     const tex = model.textures[texId];
-    const same = unique.find(u => u.w === tex.w && u.h === tex.h && u.color.every((v, i) => v === tex.color[i]));
+    const sameBytes = (a?: Uint8ClampedArray, b?: Uint8ClampedArray) => a === b || (!!a && !!b && a.every((v, i) => v === b[i]));
+    const same = unique.find(u => u.w === tex.w && u.h === tex.h && sameBytes(u.color, tex.color)
+      && GRAY_LAYERS.every(layer => sameBytes(u[layer], tex[layer])));
     if (!same) {
       unique.push(tex);
     }
@@ -61,16 +65,33 @@ function pack(textures: FaceTexture[]): { slots: Map<FaceTexture, Slot>, width: 
   return { slots, width: usedWidth, height: y + rowHeight };
 }
 
-function drawAtlas(slots: Iterable<Slot>, width: number, height: number): ImageData {
+/** RGBA pixel `i` of a texture's colors, or of one of its grayscale layers (opaque gray). */
+type PixelReader = (tex: FaceTexture, i: number, out: Uint8ClampedArray, at: number) => void;
+
+const readColor: PixelReader = (tex, i, out, at) => out.set(tex.color.subarray(i * 4, i * 4 + 4), at);
+
+function readGray(layer: GrayLayer): PixelReader {
+  return (tex, i, out, at) => {
+    const v = tex[layer]?.[i] ?? 0;
+    out[at] = out[at + 1] = out[at + 2] = v;
+    out[at + 3] = 255;
+  };
+}
+
+function drawAtlas(slots: Iterable<Slot>, width: number, height: number, read: PixelReader = readColor): ImageData {
   const atlas = new ImageData(width, height);
+  if (read !== readColor) {
+    for (let i = 3; i < atlas.data.length; i += 4) {
+      atlas.data[i] = 255; // black map around the faces
+    }
+  }
   for (const { tex, x, y } of slots) {
     // Each pixel of the slot (face + padding) takes the nearest pixel of the face: the padding repeats the edges
     for (let r = -PADDING; r < tex.h + PADDING; r++) {
       const fr = Math.min(tex.h - 1, Math.max(0, r));
       for (let c = -PADDING; c < tex.w + PADDING; c++) {
         const fc = Math.min(tex.w - 1, Math.max(0, c));
-        const from = (fr * tex.w + fc) * 4;
-        atlas.data.set(tex.color.subarray(from, from + 4), ((y + r) * width + x + c) * 4);
+        read(tex, fr * tex.w + fc, atlas.data, ((y + r) * width + x + c) * 4);
       }
     }
   }
@@ -110,9 +131,20 @@ export function exportModel(model: EditableModel): ExportedModel {
     return { ...objData(part), uvs: { front: rect, back: rect } };
   });
 
+  // Maps with something painted on them (a black map changes nothing)
+  const textures = [...new Set(unique.values())];
+  const painted = GRAY_LAYERS.filter(layer => textures.some(tex => tex[layer]?.some(v => v > 0)));
+  const maps: ExportedModel['maps'] = {};
+  painted.forEach(layer => maps[layer] = drawAtlas(slots.values(), width, height, readGray(layer)));
+
   const result: SceneModel = {
     id: model.id,
-    tex: { link: `assets/tex/${model.id}.png`, size: { x: width, y: height } },
+    tex: {
+      link: `assets/tex/${model.id}.png`,
+      size: { x: width, y: height },
+      ...Object.fromEntries(painted.map(layer => [layer, `assets/tex/${model.id}-${layer}.png`])),
+      bumpScale: painted.includes('bump') ? model.bumpScale ?? 1 : undefined,
+    },
     sway: model.sway,
     hitBox: structuredClone(model.hitBox),
     boxes,
@@ -128,7 +160,7 @@ export function exportModel(model: EditableModel): ExportedModel {
     '',
   ].join('\n');
 
-  return { model: result, atlas: drawAtlas(slots.values(), width, height), source, constName: modelConstName(model.id) };
+  return { model: result, atlas: drawAtlas(slots.values(), width, height), maps, source, constName: modelConstName(model.id) };
 }
 
 /** The atlas as a PNG file. */

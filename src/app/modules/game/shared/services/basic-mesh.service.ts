@@ -95,7 +95,7 @@ export class BasicMeshService {
     // mat.transparent = true;
 
     model.boxes.forEach(box => {
-      const boxMat = MaterialService.getModelMaterialFromLink(model.tex.link, box.shininess);
+      const boxMat = MaterialService.getModelMaterial(model.tex, box.shininess);
       const geo = new THREE.BoxGeometry(box.size.x, box.size.y, box.size.z);
       applyFaceUvs(geo, BOX_FACES.map(face => box.uvs[face]), model.tex.size);
 
@@ -123,7 +123,7 @@ export class BasicMeshService {
     });
 
     model.planes.forEach(plane => {
-      const mat = MaterialService.getModelMaterialFromLink(model.tex.link, plane.shininess);
+      const mat = MaterialService.getModelMaterial(model.tex, plane.shininess);
       const geo = new THREE.PlaneGeometry(plane.size.x, plane.size.y);
       applyFaceUvs(geo, [plane.uvs.front, plane.uvs.back], model.tex.size);
 

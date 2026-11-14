@@ -5,10 +5,10 @@ import { ObjSide } from '../game/shared/model/SceneMap';
 import { Vec3 } from '../game/shared/model/SceneUtils';
 import { BoxFace } from '../game/shared/model/model-uv';
 import { downloadFile } from '../game/shared/util/ts-source';
-import { EditableModel, EditablePart } from './shared/EditableModel';
-import { importModel, loadImagePixels } from './shared/model-import';
+import { EditableModel, EditablePart, LayerName, layerGrid } from './shared/EditableModel';
+import { importModel, loadImagePixels, loadModelMaps } from './shared/model-import';
 import { atlasToPng, exportModel } from './shared/model-export';
-import { ModelEditorScene } from './shared/model-editor-scene';
+import { ModelEditorScene, PREVIEW_MARGIN, PREVIEW_SIZE } from './shared/model-editor-scene';
 import { addPart, copyFace, duplicatePart, flipTexture, linkFace, newModel, removePart, resizePart, unlinkFace } from './shared/model-ops';
 import { ModelHistory } from './shared/model-history';
 import {
@@ -47,6 +47,16 @@ const TOOLS: { id: Tool, icon: string, label: string, key: string }[] = [
   { id: 'line', icon: '📏', label: 'Ligne', key: 'l' },
   { id: 'rect', icon: '▭', label: 'Rectangle', key: 'r' },
 ];
+
+const LAYERS: { id: LayerName, label: string, hint: string }[] = [
+  { id: 'color', label: 'Couleur', hint: '' },
+  { id: 'specular', label: 'Brillance', hint: 'Blanc : reflets du soleil · Noir : mat' },
+  { id: 'night', label: 'Nuit', hint: 'Ce qui s\'allume la nuit (lumière chaude) · Noir : éteint' },
+  { id: 'bump', label: 'Relief', hint: 'Blanc : en relief · Noir : en creux (seules les différences comptent)' },
+];
+
+/** Shades of the grayscale layers' palette. */
+const GRAYS = [0, 32, 64, 96, 128, 160, 192, 224, 255];
 
 /** Delay before the model is saved in the browser after a change (ms). */
 const SAVE_DELAY = 400;
@@ -132,6 +142,19 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   protected readonly tool = signal<Tool>('pencil');
   protected readonly color = signal('#e04040');
   protected readonly rectFilled = signal(false);
+  protected readonly layers = LAYERS;
+  protected readonly grays = GRAYS;
+  /** Layer painted (and shown in 3D when it is a grayscale one). */
+  protected readonly layer = signal<LayerName>('color');
+  protected readonly layerHint = computed(() => LAYERS.find(l => l.id === this.layer())!.hint);
+  /** Value painted on the grayscale layers. */
+  protected readonly gray = signal(255);
+  /** 3D view by night (the night layer lights up). */
+  protected readonly night = signal(false);
+  /** Preview inset (shown with a grayscale layer) by night: on with the night layer, by day with the others. */
+  protected readonly previewNight = signal(false);
+  protected readonly previewSize = PREVIEW_SIZE;
+  protected readonly previewMargin = PREVIEW_MARGIN;
   /** Changes when face pixels changed (2D view redraw). */
   protected readonly paintVersion = signal(0);
 
@@ -201,7 +224,8 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     }
     this.status.set('Chargement…');
     try {
-      this.show(importModel(source, await loadImagePixels(source.tex.link)), null);
+      const [atlas, maps] = await Promise.all([loadImagePixels(source.tex.link), loadModelMaps(source)]);
+      this.show(importModel(source, atlas, maps), null);
       this.status.set('');
     } catch (e) {
       this.status.set((e as Error).message);
@@ -266,13 +290,18 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     const png = await atlasToPng(result.atlas);
     downloadFile(`md-${model.id}.ts`, result.source);
     downloadFile(`${model.id}.png`, png);
+    const maps = Object.entries(result.maps);
+    for (const [layer, map] of maps) {
+      downloadFile(`${model.id}-${layer}.png`, await atlasToPng(map));
+    }
     const previous = this.atlasPreview();
     if (previous) {
       URL.revokeObjectURL(previous);
     }
     this.atlasPreview.set(URL.createObjectURL(png));
     const isNew = !this.modelIds.includes(model.id);
-    this.status.set(`Exporté : md-${model.id}.ts (→ src/assets/models/) et ${model.id}.png (→ src/assets/tex/), atlas ${result.atlas.width} × ${result.atlas.height}.`
+    const pngs = [model.id, ...maps.map(([layer]) => `${model.id}-${layer}`)].map(name => `${name}.png`).join(', ');
+    this.status.set(`Exporté : md-${model.id}.ts (→ src/assets/models/) et ${pngs} (→ src/assets/tex/), atlas ${result.atlas.width} × ${result.atlas.height}.`
       + (isNew ? ` Nouveau modèle : ajoute ${result.constName} dans src/assets/models/models.ts.` : ''));
   }
 
@@ -339,8 +368,29 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.editPart(part => part[flag] = value);
   }
 
-  protected setShininess(value: number) {
-    this.editPart(part => part.shininess = value > 0 ? Math.min(1, value) : undefined, Number.isFinite(value));
+  // --- Layers ---
+
+  protected setLayer(layer: LayerName) {
+    this.layer.set(layer);
+    this.setPreviewNight(layer === 'night');
+    this.scene?.setView({ layer, night: this.night() });
+    this.paintVersion.update(v => v + 1);
+  }
+
+  protected setNight(night: boolean) {
+    this.night.set(night);
+    this.scene?.setView({ layer: this.layer(), night });
+  }
+
+  protected setPreviewNight(night: boolean) {
+    this.previewNight.set(night);
+    this.scene?.setPreviewNight(night);
+  }
+
+  protected setBumpScale(value: number) {
+    if (Number.isFinite(value) && value > 0) {
+      this.edit(model => model.bumpScale = value);
+    }
   }
 
   // --- Painting ---
@@ -380,11 +430,17 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     if (this.tool() !== 'picker') {
       this.record(model);
     }
-    const tex = model.textures[texId];
-    const stroke = new PaintStroke(tex, this.tool(), hexToRgba(this.snap(this.color())), this.rectFilled(), rgba => {
-      if (rgba[3] > 0) {
-        this.setColor(rgbaToHex(rgba));
-        this.tool.set('pencil'); // like most pixel art tools: pick a color, then draw with it
+    const layer = this.layer();
+    const grid = layerGrid(model.textures[texId], layer);
+    const value = layer === 'color' ? hexToRgba(this.snap(this.color())) : [this.gray()];
+    const stroke = new PaintStroke(grid, this.tool(), value, this.rectFilled(), picked => {
+      // Like most pixel art tools: pick a color, then draw with it
+      if (layer !== 'color') {
+        this.gray.set(picked[0]);
+        this.tool.set('pencil');
+      } else if (picked[3] > 0) {
+        this.setColor(rgbaToHex(picked));
+        this.tool.set('pencil');
       }
     });
     this.active = { texId, stroke, in3d };
@@ -401,7 +457,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private endStroke() {
     const tool = this.tool();
     if (this.active && tool !== 'picker') {
-      if (tool !== 'eraser') {
+      if (tool !== 'eraser' && this.layer() === 'color') {
         this.useColor(this.color());
       }
       this.paletteVersion.update(v => v + 1);
@@ -415,7 +471,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   /** Painting mode: a press on the model paints it (the camera does not turn), elsewhere the camera turns. */
   private paint3dDown(event: PointerEvent) {
-    if (this.mode() !== 'paint' || event.button !== 0 || !this.scene || this.pending()) {
+    if (this.fromPreview(event) || this.mode() !== 'paint' || event.button !== 0 || !this.scene || this.pending()) {
       return;
     }
     const pick = this.scene.pick(event.clientX, event.clientY, true);
@@ -481,8 +537,13 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   // --- Pointer / keyboard ---
 
+  /** Pointer on the preview inset (not on the model of the big view). */
+  private fromPreview(event: PointerEvent): boolean {
+    return !!(event.target as HTMLElement).closest('.preview');
+  }
+
   protected onPointerDown(event: PointerEvent) {
-    this.pressAt = this.scene?.onGizmo || this.active ? null : { x: event.clientX, y: event.clientY };
+    this.pressAt = this.fromPreview(event) ? null : this.scene?.onGizmo || this.active ? null : { x: event.clientX, y: event.clientY };
   }
 
   protected onPointerUp(event: PointerEvent) {

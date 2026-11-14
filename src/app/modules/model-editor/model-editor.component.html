@@ -1,5 +1,14 @@
 <div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"
-     (pointercancel)="onPointerUp($event)" [class.painting]="mode() === 'paint'"></div>
+     (pointercancel)="onPointerUp($event)" [class.painting]="mode() === 'paint'">
+  @if (layer() !== 'color') {
+    <div class="preview" [style.width.%]="previewSize * 100" [style.height.%]="previewSize * 100"
+         [style.right.px]="previewMargin" [style.bottom.px]="previewMargin">
+      <span>Aperçu {{ previewNight() ? 'de nuit' : 'de jour' }}</span>
+      <button type="button" [title]="previewNight() ? 'Voir de jour' : 'Voir de nuit'" [attr.aria-label]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
+              (click)="setPreviewNight(!previewNight())">{{ previewNight() ? '☀' : '🌙' }}</button>
+    </div>
+  }
+</div>
 
 <aside class="panel" aria-label="Éditeur de modèles">
   <header>
@@ -110,15 +119,23 @@
             <input type="checkbox" [checked]="!!part.depthWrite" (change)="setFlag('depthWrite', $any($event.target).checked)" /> Cache les autres
           </label>
         </div>
-        <label class="field small" title="0 à 1 : reflets du soleil">
-          <span>Brillance</span>
-          <input type="number" min="0" max="1" step="0.1" [value]="part.shininess ?? 0" (change)="setShininess(+$any($event.target).value)" />
-        </label>
       </section>
     }
 
     <section>
       <h2>Dessin</h2>
+      <div class="layers" role="tablist" aria-label="Calque">
+        @for (l of layers; track l.id) {
+          <button type="button" role="tab" [class.on]="layer() === l.id" [attr.aria-selected]="layer() === l.id" (click)="setLayer(l.id)">{{ l.label }}</button>
+        }
+      </div>
+      @if (layer() === 'color') {
+        <label class="check" title="Voir le modèle la nuit : le calque Nuit s'allume">
+          <input type="checkbox" [checked]="night()" (change)="setNight($any($event.target).checked)" /> Vue de nuit
+        </label>
+      } @else {
+        <p class="hint">{{ layerHint() }}</p>
+      }
       <div class="row wrap tools" role="toolbar" aria-label="Outils">
         <button type="button" class="btn" [class.on]="mode() === 'select'" title="Sélection : cliquer une face, déplacer la forme (V)"
                 [attr.aria-pressed]="mode() === 'select'" (click)="setMode('select')">🖱️</button>
@@ -127,6 +144,7 @@
                   [attr.aria-label]="t.label" [attr.aria-pressed]="mode() === 'paint' && tool() === t.id" (click)="pickTool(t.id)">{{ t.icon }}</button>
         }
       </div>
+      @if (layer() === 'color') {
       <div class="row wrap">
         <label class="color" title="Couleur libre">
           <input type="color" [value]="color()" (change)="useColor($any($event.target).value)" />
@@ -175,6 +193,25 @@
           }
         </div>
       }
+      } @else {
+        <div class="grays" aria-label="Nuances de gris">
+          @for (g of grays; track g) {
+            <button type="button" [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'" [class.on]="g === gray()"
+                    [title]="g" [attr.aria-label]="'Gris ' + g" (click)="gray.set(g)"></button>
+          }
+        </div>
+        <label class="row gray-slider">
+          <input type="range" min="0" max="255" [value]="gray()" (input)="gray.set(+$any($event.target).value)" aria-label="Valeur de gris" />
+          <span class="gray-value" [style.background]="'rgb(' + gray() + ',' + gray() + ',' + gray() + ')'"></span>
+          <span>{{ gray() }}</span>
+        </label>
+        @if (layer() === 'bump') {
+          <label class="field small" title="Force du relief (1 par défaut)">
+            <span>Force</span>
+            <input type="number" min="0.1" step="0.1" [value]="model.bumpScale ?? 1" (change)="setBumpScale(+$any($event.target).value)" />
+          </label>
+        }
+      }
       @if (mode() === 'paint') {
         <p class="hint">Dessine sur la face ci-dessous ou directement sur le modèle. Glisser hors du modèle : tourner la vue.</p>
       }
@@ -203,7 +240,7 @@
           <label class="check"><input type="checkbox" [checked]="mirrorV()" (change)="mirrorV.set($any($event.target).checked)" /> ⇅</label>
         </div>
         @if (faceTexture(); as face) {
-          <app-pixel-canvas [texture]="face.tex" [version]="paintVersion()"
+          <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()"
                             (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
         }
       } @else {

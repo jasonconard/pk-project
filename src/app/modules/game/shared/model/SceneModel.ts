@@ -13,7 +13,15 @@ export interface SceneModel {
 
 export interface SceneModelTex {
   link: string,
-  size: Vec2
+  size: Vec2,
+  /** Grayscale map, same layout as `link`: white = shiny in the sun, black = matte. Replaces the parts' `shininess`. */
+  specular?: string,
+  /** Grayscale map, same layout: what lights up at night. Omitted = the window glass is found in the colors. */
+  night?: string,
+  /** Grayscale map, same layout: relief (white = raised). */
+  bump?: string,
+  /** Strength of the relief (default 1). */
+  bumpScale?: number
 }
 
 export interface SceneModelObj {

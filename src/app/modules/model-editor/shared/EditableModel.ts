@@ -53,6 +53,33 @@ export function partFaceSize(part: EditablePart, face: BoxFace): { w: number, h:
   return { w: Math.max(1, Math.round(size.x)), h: Math.max(1, Math.round(size.y)) };
 }
 
+export type GrayLayer = Exclude<LayerName, 'color'>;
+export const GRAY_LAYERS: GrayLayer[] = ['specular', 'night', 'bump'];
+
+/** Pixels of a layer of a face, to draw on (a grayscale layer is created, black, the first time). */
+export function layerGrid(tex: FaceTexture, layer: LayerName): { w: number, h: number, data: Uint8ClampedArray, channels: 1 | 4 } {
+  if (layer === 'color') {
+    return { w: tex.w, h: tex.h, data: tex.color, channels: 4 };
+  }
+  tex[layer] ??= new Uint8ClampedArray(tex.w * tex.h);
+  return { w: tex.w, h: tex.h, data: tex[layer]!, channels: 1 };
+}
+
+/** A layer as RGBA pixels to show: gray (v, v, v), transparent where the colors are. */
+export function layerRgba(tex: FaceTexture, layer: LayerName): Uint8ClampedArray {
+  if (layer === 'color') {
+    return tex.color;
+  }
+  const gray = tex[layer];
+  const out = new Uint8ClampedArray(tex.w * tex.h * 4);
+  for (let i = 0; i < tex.w * tex.h; i++) {
+    const v = gray ? gray[i] : 0;
+    out[i * 4] = out[i * 4 + 1] = out[i * 4 + 2] = v;
+    out[i * 4 + 3] = tex.color[i * 4 + 3];
+  }
+  return out;
+}
+
 export function emptyFaceTexture(w: number, h: number): FaceTexture {
   return { w, h, color: new Uint8ClampedArray(w * h * 4) };
 }

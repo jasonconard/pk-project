@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, input, output, signal, viewChild } from '@angular/core';
-import { FaceTexture } from '../shared/EditableModel';
+import { FaceTexture, LayerName, layerRgba } from '../shared/EditableModel';
 import { Px } from '../shared/pixel-tools';
 
 /** Width the face is fitted in (px), before the zoom buttons. */
@@ -33,6 +33,8 @@ const GRID_MIN_SCALE = 6;
 })
 export class PixelCanvasComponent {
   readonly texture = input.required<FaceTexture>();
+  /** Layer shown and drawn on (a grayscale layer is shown in gray). */
+  readonly layer = input<LayerName>('color');
   /** Changes when the texture's pixels changed (redraw). */
   readonly version = input(0);
   readonly strokeStart = output<Px>();
@@ -58,7 +60,7 @@ export class PixelCanvasComponent {
     });
     effect(() => {
       this.version();
-      this.draw(this.texture(), this.scale(), this.hover());
+      this.draw(this.texture(), this.layer(), this.scale(), this.hover());
     });
   }
 
@@ -103,7 +105,7 @@ export class PixelCanvasComponent {
     };
   }
 
-  private draw(tex: FaceTexture, scale: number, hover: Px | null) {
+  private draw(tex: FaceTexture, layer: LayerName, scale: number, hover: Px | null) {
     const canvas = this.canvas().nativeElement;
     canvas.width = tex.w * scale;
     canvas.height = tex.h * scale;
@@ -119,7 +121,7 @@ export class PixelCanvasComponent {
     const pixels = document.createElement('canvas');
     pixels.width = tex.w;
     pixels.height = tex.h;
-    pixels.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(tex.color), tex.w, tex.h), 0, 0);
+    pixels.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(layerRgba(tex, layer)), tex.w, tex.h), 0, 0);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(pixels, 0, 0, canvas.width, canvas.height);
 

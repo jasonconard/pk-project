@@ -4,7 +4,7 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import { Vec3 } from '../../game/shared/model/SceneUtils';
 import { ObjSide } from '../../game/shared/model/SceneMap';
 import { BOX_FACES, BoxFace } from '../../game/shared/model/model-uv';
-import { EditableModel, FaceTexture } from './EditableModel';
+import { EditableModel, FaceTexture, LayerName, layerRgba } from './EditableModel';
 
 /** A face of the model under the pointer. */
 export interface FacePick {
@@ -14,10 +14,30 @@ export interface FacePick {
   px: { x: number, y: number };
 }
 
+/** What the 3D view shows: the model as in the game (by day or by night), or one of its layers in gray. */
+export interface SceneView {
+  layer: LayerName;
+  night: boolean;
+}
+
 const BACKGROUND = 0x2a2b33;
-const HIGHLIGHT = new THREE.Color(0x3a6ea5);
+const NIGHT_BACKGROUND = 0x11131c;
+/** Same warm light as the game's windows (MaterialService). */
+const NIGHT_LIGHT_COLOR = new THREE.Color(0xffc56b);
+const LAYERS: LayerName[] = ['color', 'specular', 'night', 'bump'];
+/** Size of the preview inset (share of the view's width and height) and its margin (px), bottom right. */
+export const PREVIEW_SIZE = 0.32;
+export const PREVIEW_MARGIN = 12;
+
+/**
+ * Textures of a face texture. The shininess and relief maps are values for the game's material (no color space),
+ * and colors to look at when shown alone (`…View`, same canvas).
+ */
+type FaceTextures = Record<LayerName | 'specularView' | 'bumpView', THREE.CanvasTexture>;
 /** Outline of the selected face (its colors stay true while painting). */
 const OUTLINE_MATERIAL = new THREE.LineBasicMaterial({ color: 0xffd34d, depthTest: false, transparent: true });
+/** Edges of the selected part. */
+const EDGES_MATERIAL = new THREE.LineBasicMaterial({ color: 0x6fb0ff, depthTest: false, transparent: true });
 
 /**
  * 3D view of the edited model: camera turning around it (OrbitControls), 1-unit grid on the ground, simple
@@ -31,10 +51,15 @@ export class ModelEditorScene {
   private readonly resizeObserver: ResizeObserver;
   private model: EditableModel | null = null;
   private group = new THREE.Group();
-  /** One canvas texture per face texture (linked faces show the same one). */
-  private readonly textures = new Map<string, THREE.CanvasTexture>();
-  private highlighted: THREE.MeshLambertMaterial[] = [];
-  private outline: THREE.LineLoop | null = null;
+  /** Canvas textures of each face texture, one per layer (linked faces show the same ones). */
+  private readonly textures = new Map<string, FaceTextures>();
+  /** Inset showing the model as in the game while a grayscale layer is shown, by day or by night. */
+  private previewNight = false;
+  private readonly size = new THREE.Vector2();
+  private outline: THREE.Line | null = null;
+  private view: SceneView = { layer: 'color', night: false };
+  private readonly hemi = new THREE.HemisphereLight(0xffffff, 0x666677, 1.6);
+  private readonly sun = new THREE.DirectionalLight(0xffffff, 1.6);
   /** Arrows moving the selected part (1-unit steps). */
   private readonly gizmo: TransformControls;
   /** Called when the selected part was moved with the arrows (new position). */
@@ -47,10 +72,8 @@ export class ModelEditorScene {
     host.appendChild(this.renderer.domElement);
 
     this.scene.background = new THREE.Color(BACKGROUND);
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x666677, 1.6));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.6);
-    sun.position.set(60, 120, 90);
-    this.scene.add(sun);
+    this.sun.position.set(60, 120, 90);
+    this.scene.add(this.hemi, this.sun);
     const grid = new THREE.GridHelper(160, 160, 0x55576a, 0x3a3c48);
     this.scene.add(grid, this.group);
 
@@ -73,10 +96,53 @@ export class ModelEditorScene {
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(host);
     this.resize();
-    this.renderer.setAnimationLoop(() => {
-      this.controls.update();
-      this.renderer.render(this.scene, this.camera);
-    });
+    this.renderer.setAnimationLoop(() => this.render());
+  }
+
+  private render() {
+    this.controls.update();
+    const { x: w, y: h } = this.renderer.getSize(this.size);
+    this.renderer.setScissorTest(false);
+    this.renderer.setViewport(0, 0, w, h);
+    this.light(this.view.night && this.view.layer === 'color');
+    this.renderer.render(this.scene, this.camera);
+    if (this.view.layer === 'color') {
+      return;
+    }
+    // The inset: same camera (same proportions), the game's materials, without the selection marks
+    const pw = Math.round(w * PREVIEW_SIZE), ph = Math.round(h * PREVIEW_SIZE);
+    const x = w - pw - PREVIEW_MARGIN, y = PREVIEW_MARGIN;
+    this.renderer.setScissorTest(true);
+    this.renderer.setScissor(x, y, pw, ph);
+    this.renderer.setViewport(x, y, pw, ph);
+    const swap = (key: 'preview' | 'main') => this.group.children.forEach(c => (c as THREE.Mesh).material = c.userData[key]);
+    swap('preview');
+    const helper = this.gizmo.getHelper(), helperVisible = helper.visible;
+    helper.visible = false;
+    if (this.outline) {
+      this.outline.visible = false;
+    }
+    this.light(this.previewNight);
+    this.renderer.render(this.scene, this.camera);
+    swap('main');
+    helper.visible = helperVisible;
+    if (this.outline) {
+      this.outline.visible = true;
+    }
+    this.renderer.setScissorTest(false);
+  }
+
+  /** Lights and background by day or by night. */
+  private light(night: boolean) {
+    (this.scene.background as THREE.Color).setHex(night ? NIGHT_BACKGROUND : BACKGROUND);
+    this.hemi.intensity = night ? 0.35 : 1.6;
+    this.sun.intensity = night ? 0.15 : 1.6;
+  }
+
+  /** Preview inset (shown with a grayscale layer) by day or by night. */
+  setPreviewNight(night: boolean) {
+    this.previewNight = night;
+    this.group.children.forEach(c => (c.userData['preview'] as THREE.MeshPhongMaterial[]).forEach(m => m.emissiveIntensity = night ? 1 : 0));
   }
 
   get canvas(): HTMLCanvasElement {
@@ -86,6 +152,14 @@ export class ModelEditorScene {
   /** True while the pointer is on the arrows (a click there is not a selection). */
   get onGizmo(): boolean {
     return this.gizmo.axis !== null;
+  }
+
+  /** Layer shown, day or night: the materials are made again. */
+  setView(view: SceneView) {
+    this.view = view;
+    if (this.model) {
+      this.refresh(this.model);
+    }
   }
 
   /** Shows a model and frames the camera on it. */
@@ -99,26 +173,46 @@ export class ModelEditorScene {
     this.gizmo.detach();
     this.clear();
     this.model = model;
-    Object.entries(model.textures).forEach(([id, tex]) => this.textures.set(id, this.makeTexture(tex)));
+    Object.entries(model.textures).forEach(([id, tex]) => this.textures.set(id, this.makeTextures(tex)));
 
     model.parts.forEach((part, partIndex) => {
-      const materialOf = (face: BoxFace) => {
-        const texId = part.faces[face];
-        const mat = new THREE.MeshLambertMaterial({
-          map: texId ? this.textures.get(texId) : null,
+      const materialOf = (face: BoxFace, preview = false): THREE.Material => {
+        const textures = this.textures.get(part.faces[face] ?? '');
+        const common = {
           side: part.side === ObjSide.BOTH ? THREE.DoubleSide : part.side === ObjSide.BACK ? THREE.BackSide : THREE.FrontSide,
           depthWrite: !!part.depthWrite,
           depthTest: !!part.depthTest,
           alphaTest: 0.5,
+        };
+        const layer = this.view.layer;
+        if (layer !== 'color' && !preview) {
+          // The layer alone, in its true grays
+          const key = layer === 'specular' ? 'specularView' : layer === 'bump' ? 'bumpView' : layer;
+          return new THREE.MeshBasicMaterial({ ...common, map: textures?.[key] ?? null });
+        }
+        const night = preview ? this.previewNight : this.view.night;
+        // As in the game (MaterialService.getModelMaterial)
+        return new THREE.MeshPhongMaterial({
+          ...common,
+          map: textures?.color ?? null,
+          specular: 0xffffff,
+          specularMap: textures?.specular ?? null,
+          shininess: 20,
+          emissive: NIGHT_LIGHT_COLOR,
+          emissiveMap: textures?.night ?? null,
+          emissiveIntensity: night ? 1 : 0,
+          bumpMap: textures?.bump ?? null,
+          bumpScale: model.bumpScale ?? 1,
         });
-        return mat;
       };
       const mesh = part.kind === 'box'
-        ? new THREE.Mesh(new THREE.BoxGeometry(part.size.x, part.size.y, part.size.z), BOX_FACES.map(materialOf))
+        ? new THREE.Mesh(new THREE.BoxGeometry(part.size.x, part.size.y, part.size.z), BOX_FACES.map(face => materialOf(face)))
         : new THREE.Mesh(new THREE.PlaneGeometry(part.size.x, part.size.y), [materialOf('front')]);
       if (part.kind === 'plane') {
         mesh.geometry.addGroup(0, Infinity, 0);
       }
+      mesh.userData['main'] = mesh.material;
+      mesh.userData['preview'] = this.view.layer === 'color' ? [] : (part.kind === 'box' ? BOX_FACES : ['front' as BoxFace]).map(f => materialOf(f, true));
       mesh.position.set(part.pos.x, part.pos.y, part.pos.z);
       mesh.rotation.set(part.rot.x, part.rot.y, part.rot.z);
       mesh.userData['partIndex'] = partIndex;
@@ -160,13 +254,17 @@ export class ModelEditorScene {
     return orTransparent ? firstTransparent : null;
   }
 
-  /** Shows the new pixels of a face texture (on all the faces linked to it). */
+  /** Shows the new pixels of a face texture, all its layers (on all the faces linked to it). */
   updateTexture(texId: string) {
-    const texture = this.textures.get(texId);
+    const textures = this.textures.get(texId);
     const tex = this.model?.textures[texId];
-    if (texture && tex) {
-      (texture.image as HTMLCanvasElement).getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(tex.color), tex.w, tex.h), 0, 0);
-      texture.needsUpdate = true;
+    if (textures && tex) {
+      LAYERS.forEach(layer => {
+        (textures[layer].image as HTMLCanvasElement).getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(layerRgba(tex, layer)), tex.w, tex.h), 0, 0);
+        textures[layer].needsUpdate = true;
+      });
+      textures.specularView.needsUpdate = true;
+      textures.bumpView.needsUpdate = true;
     }
   }
 
@@ -181,10 +279,8 @@ export class ModelEditorScene {
     this.gizmo.getHelper().visible = enabled;
   }
 
-  /** Outlines a face, or lights up all the faces of the part when `face` is null; puts the arrows on the part. */
+  /** Outlines a face, or the edges of the part when `face` is null; puts the arrows on the part. */
   highlight(partIndex: number | null, face: BoxFace | null) {
-    this.highlighted.forEach(m => m.emissive.setHex(0x000000));
-    this.highlighted = [];
     this.outline?.removeFromParent();
     this.outline?.geometry.dispose();
     this.outline = null;
@@ -206,8 +302,9 @@ export class ModelEditorScene {
       this.outline.renderOrder = 10;
       mesh.add(this.outline);
     } else {
-      this.highlighted = mesh.material as THREE.MeshLambertMaterial[];
-      this.highlighted.forEach(m => m.emissive.copy(HIGHLIGHT));
+      this.outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), EDGES_MATERIAL);
+      this.outline.renderOrder = 10;
+      mesh.add(this.outline);
     }
     this.gizmo.attach(mesh);
     this.gizmo.getHelper().visible = this.gizmo.enabled;
@@ -223,13 +320,28 @@ export class ModelEditorScene {
     this.renderer.domElement.remove();
   }
 
-  private makeTexture(tex: FaceTexture): THREE.CanvasTexture {
-    const canvas = document.createElement('canvas');
-    canvas.width = tex.w;
-    canvas.height = tex.h;
-    canvas.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(tex.color), tex.w, tex.h), 0, 0);
+  private makeTextures(tex: FaceTexture): FaceTextures {
+    const canvases = Object.fromEntries(LAYERS.map(layer => {
+      const canvas = document.createElement('canvas');
+      canvas.width = tex.w;
+      canvas.height = tex.h;
+      canvas.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(layerRgba(tex, layer)), tex.w, tex.h), 0, 0);
+      return [layer, canvas];
+    })) as Record<LayerName, HTMLCanvasElement>;
+    // Colors (and the night light, like the game) are sRGB; the shininess and relief values are used as they are
+    return {
+      color: this.makeTexture(canvases.color, true),
+      night: this.makeTexture(canvases.night, true),
+      specular: this.makeTexture(canvases.specular, false),
+      bump: this.makeTexture(canvases.bump, false),
+      specularView: this.makeTexture(canvases.specular, true),
+      bumpView: this.makeTexture(canvases.bump, true),
+    };
+  }
+
+  private makeTexture(canvas: HTMLCanvasElement, srgb: boolean): THREE.CanvasTexture {
     const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.NearestFilter;
     texture.generateMipmaps = false;
@@ -252,16 +364,16 @@ export class ModelEditorScene {
   }
 
   private clear() {
-    this.highlighted = [];
     this.outline?.geometry.dispose();
     this.outline = null;
     this.group.children.forEach(child => {
       const mesh = child as THREE.Mesh;
       mesh.geometry.dispose();
       (mesh.material as THREE.Material[]).forEach(m => m.dispose());
+      (mesh.userData['preview'] as THREE.Material[]).forEach(m => m.dispose());
     });
     this.group.clear();
-    this.textures.forEach(t => t.dispose());
+    this.textures.forEach(layers => Object.values(layers).forEach(t => t.dispose()));
     this.textures.clear();
     this.model = null;
   }
