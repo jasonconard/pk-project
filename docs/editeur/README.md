@@ -9,6 +9,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 3. [Sols et raccords](03-sols-raccords.md) : terrains, raccords automatiques, eau, plages, pinceau.
 4. [Reliefs et escaliers](04-reliefs.md) : niveaux, parois, escaliers, déplacements du joueur.
 5. [Sauvegarde et export](05-sauvegarde-export.md) : stockage navigateur, export, réinitialisation.
+6. [Éditeur de modèles 3D](06-modeles.md) : créer les modèles avec des boxes et des planes, les peindre en pixel art, calques brillance / nuit / relief, export.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 

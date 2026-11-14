@@ -115,6 +115,17 @@ export class EditorBarComponent {
     this.command.emit(command);
   }
 
+  /**
+   * Opens the 3D model editor (a model of the game, or the list). A full page load: the game keeps running in
+   * the background otherwise (it is not torn down when its page is left).
+   */
+  protected openModelEditor(modelId?: string): void {
+    const url = new URL(location.href);
+    url.hash = '#/modeles' + (modelId ? `?id=${encodeURIComponent(modelId)}` : '');
+    location.assign(url);
+    location.reload();
+  }
+
   protected reset(event: Event): void {
     if (!this.confirmReset()) {
       this.confirmReset.set(true);

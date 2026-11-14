@@ -8,7 +8,9 @@ export interface SceneModel {
   planes: SceneModelPlane[],
   hitBox: VecBox3,
   /** 0..1: how much the model bends in the wind (vegetation). Omitted = rigid. The base never moves. */
-  sway?: number
+  sway?: number,
+  /** Rectangle of the texture shown as the model's thumbnail in the map editor (pixels, min = top left). */
+  thumb?: VecBox2
 }
 
 export interface SceneModelTex {

@@ -11,7 +11,8 @@ import { MD_LETTER_BOX } from '../../../../../assets/models/md-letter-box';
 import { MD_ROCK } from '../../../../../assets/models/md-rock';
 
 export interface ModelChoice {
-  texPos: VecBox2,
+  /** Crop of the texture for the thumbnail (min = top left). Not needed when the model has a `thumb` (exported by the model editor). */
+  texPos?: VecBox2,
   model: SceneModel,
   croppedPic?: string
 }
@@ -82,18 +83,23 @@ export const MODEL_CHOICES: ModelChoice[] = [
     }
 ]
 
-/** Thumbnail of a model (its `texPos` crop of the texture), as a data URL; cached on the choice. */
+/**
+ * Thumbnail of a model (the model's `thumb` crop of the texture, else the choice's `texPos`, else the whole
+ * texture), as a data URL; cached on the choice.
+ */
 export function loadModelThumb(choice: ModelChoice): Promise<string> {
   if (choice.croppedPic) {
     return Promise.resolve(choice.croppedPic);
   }
+  const { tex } = choice.model;
+  const crop = choice.model.thumb ?? choice.texPos ?? { min: { x: 0, y: 0 }, max: { x: tex.size.x, y: tex.size.y } };
   return new Promise(resolve => {
     const canvas = document.createElement('canvas');
-    canvas.width = choice.texPos.max.x - choice.texPos.min.x;
-    canvas.height = choice.texPos.max.y - choice.texPos.min.y;
+    canvas.width = crop.max.x - crop.min.x;
+    canvas.height = crop.max.y - crop.min.y;
     const img = document.createElement('img');
     img.addEventListener('load', () => {
-      canvas.getContext('2d')?.drawImage(img, choice.texPos.min.x, choice.texPos.min.y, canvas.width, canvas.height,
+      canvas.getContext('2d')?.drawImage(img, crop.min.x, crop.min.y, canvas.width, canvas.height,
         0, 0, canvas.width, canvas.height);
       choice.croppedPic = canvas.toDataURL();
       resolve(choice.croppedPic);

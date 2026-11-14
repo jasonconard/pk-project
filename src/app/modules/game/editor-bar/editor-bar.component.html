@@ -13,6 +13,8 @@
               [disabled]="!canRedo()" (click)="send('redo', $event)">↷</button>
       <button type="button" class="icon-btn" [class.on]="grid()" title="Afficher / masquer la grille des cases" aria-label="Grille"
               [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)">▦</button>
+      <button type="button" class="text-btn" title="Éditeur de modèles 3D : créer et peindre les bâtiments, les fleurs…"
+              (click)="openModelEditor()">🧊 Modèles</button>
       <button type="button" class="text-btn" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
               (click)="send('export', $event)">⬇ Exporter</button>
       <button type="button" class="text-btn" [class.danger]="confirmReset()"
@@ -59,6 +61,7 @@
       <input type="checkbox" [checked]="selection.canHide" (change)="send('toggleCanHide', $event)" />
       Transparent quand le joueur est derrière
     </label>
+    <button type="button" class="model-btn" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)">🧊 Modifier le modèle</button>
     <button type="button" class="delete" (click)="send('delete', $event)">🗑 Supprimer <kbd>Suppr</kbd></button>
   </section>
 }

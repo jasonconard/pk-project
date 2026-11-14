@@ -1,5 +1,5 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, OnDestroy, signal, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MODELS } from '../../../assets/models/models';
 import { ObjSide } from '../game/shared/model/SceneMap';
 import { Vec3 } from '../game/shared/model/SceneUtils';
@@ -92,6 +92,8 @@ interface ActiveStroke {
 })
 export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
+  /** `/modeles?id=house`: the model to open (from the map editor). */
+  private readonly requestedId = inject(ActivatedRoute).snapshot.queryParamMap.get('id');
   private scene: ModelEditorScene | null = null;
   private pressAt: { x: number, y: number } | null = null;
   private active: ActiveStroke | null = null;
@@ -196,7 +198,8 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     const viewport = this.viewport().nativeElement;
     viewport.addEventListener('pointerdown', e => this.paint3dDown(e), { capture: true });
     viewport.addEventListener('pointermove', e => this.paint3dMove(e));
-    this.open(this.modelIds[0]);
+    const id = this.requestedId;
+    this.open(id && (this.modelIds.includes(id) || this.storedIds().includes(id)) ? id : this.modelIds[0]);
   }
 
   ngOnDestroy() {
@@ -302,7 +305,8 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     const isNew = !this.modelIds.includes(model.id);
     const pngs = [model.id, ...maps.map(([layer]) => `${model.id}-${layer}`)].map(name => `${name}.png`).join(', ');
     this.status.set(`Exporté : md-${model.id}.ts (→ src/assets/models/) et ${pngs} (→ src/assets/tex/), atlas ${result.atlas.width} × ${result.atlas.height}.`
-      + (isNew ? ` Nouveau modèle : ajoute ${result.constName} dans src/assets/models/models.ts.` : ''));
+      + (isNew ? ` Nouveau modèle : ajoute ${result.constName} dans src/assets/models/models.ts, { model: ${result.constName} } dans`
+        + ` MODEL_CHOICES (ModelChoice.ts) pour la palette de la carte, et son nom dans MODEL_LABELS (editor-bar.component.ts).` : ''));
   }
 
   // --- Parts ---

@@ -137,6 +137,11 @@ export function exportModel(model: EditableModel): ExportedModel {
   const maps: ExportedModel['maps'] = {};
   painted.forEach(layer => maps[layer] = drawAtlas(slots.values(), width, height, readGray(layer)));
 
+  // Thumbnail of the map editor: the biggest front face (else the biggest face)
+  const faces = model.parts.flatMap(part => (Object.entries(part.faces) as [string, string][]).map(([face, texId]) => ({ face, slot: slots.get(unique.get(texId)!)! })));
+  const area = (slot: Slot) => slot.tex.w * slot.tex.h;
+  const thumbSlot = [...faces].sort((a, b) => Number(b.face === 'front') - Number(a.face === 'front') || area(b.slot) - area(a.slot))[0]?.slot;
+
   const result: SceneModel = {
     id: model.id,
     tex: {
@@ -146,6 +151,7 @@ export function exportModel(model: EditableModel): ExportedModel {
       bumpScale: painted.includes('bump') ? model.bumpScale ?? 1 : undefined,
     },
     sway: model.sway,
+    thumb: thumbSlot && { min: { x: thumbSlot.x, y: thumbSlot.y }, max: { x: thumbSlot.x + thumbSlot.tex.w, y: thumbSlot.y + thumbSlot.tex.h } },
     hitBox: structuredClone(model.hitBox),
     boxes,
     planes,
