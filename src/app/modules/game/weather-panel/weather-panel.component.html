@@ -3,7 +3,7 @@
     <button type="button" class="tool-btn weather" title="Météo (M)" (click)="openCatalog($event)">
       <span class="weather-thumb">
         @if (!thumbMissing()) {
-          <img [src]="currentThumb()" alt="" (error)="thumbMissing.set(true)" />
+          <img [src]="currentThumb()" alt="" (error)="thumbError($event)" />
         } @else {
           <span aria-hidden="true">{{ current().icon }}</span>
         }

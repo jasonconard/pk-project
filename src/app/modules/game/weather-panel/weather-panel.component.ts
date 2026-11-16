@@ -4,7 +4,7 @@ import { KeyService } from '../../../core/shared/service/key.service';
 import { weatherScreenshot } from '../shared/weather/weather-catalog';
 import { applySilentMode, ignoreSilentMode, SILENT_MODE_BYPASS_SUPPORTED } from '../shared/weather/silent-mode';
 import { LucideCheck, LucideCloud, LucideDynamicIcon, LucideIcon, LucideMoon, LucideSun, LucideSunrise, LucideSunset, LucideTimer, LucideVolume2, LucideVolumeX, LucideWind, LucideWindArrowDown } from '@lucide/angular';
-import { formatHour, TIME_OF_DAY_LABELS, TimeOfDay, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
+import { formatHour, isWeatherAvailable, TIME_OF_DAY_LABELS, TimeOfDay, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
 
 export interface SoundSetting {
   volume: number;
@@ -102,15 +102,42 @@ export class WeatherPanelComponent {
   protected readonly timeOfDay = computed(() => TIME_OF_DAY_LABELS[timeOfDayAt(this.hour())]);
   protected readonly timeIcon = computed(() => TIME_ICONS[timeOfDayAt(this.hour())]);
   protected readonly hourLabel = computed(() => formatHour(this.hour()));
-  /** Current weather screenshot (matching the time of day), the emoji if it isn't there. */
-  protected readonly currentThumb = computed(() => weatherScreenshot(this.weather(), this.night()));
+  /**
+   * Time of day of the current weather's screenshot: the current one, unless the weather only exists at the other
+   * one (only one picture then: e.g. sunny-day, while the time going by brought the night).
+   */
+  private readonly thumbNight = computed(() => {
+    const type = this.weather();
+    const atNight = isWeatherAvailable(type, true);
+    const byDay = isWeatherAvailable(type, false);
+    return this.night() ? atNight || !byDay : !byDay && atNight;
+  });
+  /** The picture failed: the other time of day's one is tried, then the emoji. */
+  private readonly thumbOtherTime = signal(false);
+  protected readonly currentThumb = computed(() => weatherScreenshot(this.weather(), this.thumbNight() !== this.thumbOtherTime()));
   protected readonly thumbMissing = signal(false);
   protected readonly current = computed(() => WEATHER_CHOICES.find(c => c.type === this.weather()) ?? WEATHER_CHOICES[0]);
+
+  protected thumbError(event: Event): void {
+    // A late error of a picture no longer shown (at launch, the time of day arrives just after the weather): ignored,
+    // or the right picture would give way to the emoji until the next weather change
+    const src = (event.target as HTMLImageElement).getAttribute('src');
+    if (src !== this.currentThumb()) {
+      return;
+    }
+    if (this.thumbOtherTime()) {
+      this.thumbMissing.set(true);
+    } else {
+      this.thumbOtherTime.set(true);
+    }
+  }
 
   constructor() {
     // A new picture to try when the weather / time of day changes
     effect(() => {
-      this.currentThumb();
+      this.weather();
+      this.thumbNight();
+      this.thumbOtherTime.set(false);
       this.thumbMissing.set(false);
     });
     // Capture phase: before the game (document listener)
