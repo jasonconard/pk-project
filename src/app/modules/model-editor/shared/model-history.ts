@@ -44,6 +44,11 @@ export class ModelHistory {
     return next;
   }
 
+  /** Forgets the last change and gives the model before it (a stroke cancelled), without a redo step. */
+  drop(): EditableModel | null {
+    return this.past.pop() ?? null;
+  }
+
   clear() {
     this.past = [];
     this.future = [];

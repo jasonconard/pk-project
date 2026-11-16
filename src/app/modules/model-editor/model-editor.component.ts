@@ -118,6 +118,10 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private scene: ModelEditorScene | null = null;
   private pressAt: { x: number, y: number } | null = null;
   private active: ActiveStroke | null = null;
+  /** Fingers on the 3D view (pointer id → last position), to tell a pinch from a stroke or a tap. */
+  private readonly touches = new Map<number, { x: number, y: number }>();
+  /** A second finger touched the 3D view: the press is a pinch (zoom / pan), not a tap nor a stroke. */
+  private multiTouch = false;
   private readonly history = new ModelHistory();
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
   /** Saves one after the other (IndexedDB is asynchronous). */
@@ -225,6 +229,9 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     const viewport = this.viewport().nativeElement;
     viewport.addEventListener('pointerdown', e => this.paint3dDown(e), { capture: true });
     viewport.addEventListener('pointermove', e => this.paint3dMove(e));
+    viewport.addEventListener('pointermove', e => this.trackTouch(e), { capture: true });
+    viewport.addEventListener('pointerup', e => this.untrackTouch(e), { capture: true });
+    viewport.addEventListener('pointercancel', e => this.untrackTouch(e), { capture: true });
     await this.refreshStoredIds();
     const id = this.requestedId;
     this.open(id && (this.modelIds.includes(id) || this.storedIds().includes(id)) ? id : this.modelIds[0]);
@@ -505,6 +512,20 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   /** Painting mode: a press on the model paints it (the camera does not turn), elsewhere the camera turns. */
   private paint3dDown(event: PointerEvent) {
+    if (!event.isTrusted) { // the finger handed to the camera controls (cancelStroke3d)
+      return;
+    }
+    if (event.pointerType === 'touch') {
+      this.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (this.touches.size > 1) {
+        this.multiTouch = true;
+        this.pressAt = null;
+        if (this.active?.in3d) {
+          this.cancelStroke3d(event.pointerId);
+        }
+        return;
+      }
+    }
     if (this.fromPreview(event) || this.mode() !== 'paint' || event.button !== 0 || !this.scene || this.pending()) {
       return;
     }
@@ -518,6 +539,45 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.viewport().nativeElement.setPointerCapture(event.pointerId);
     this.select({ partIndex: pick.partIndex, face: pick.face });
     this.startStroke(texId, pick.px, true);
+  }
+
+  /**
+   * A second finger came while the first one was painting the model: it is a pinch. The stroke is undone and
+   * the first finger is handed to the camera controls (they were off when it touched), so both fingers zoom.
+   */
+  private cancelStroke3d(secondId: number) {
+    const tool = this.tool();
+    this.active = null;
+    const before = tool !== 'picker' ? this.history.drop() : null;
+    if (before) {
+      this.restore(before);
+    }
+    if (!this.scene) {
+      return;
+    }
+    this.scene.orbitEnabled = true;
+    const canvas = this.viewport().nativeElement.querySelector('canvas');
+    this.touches.forEach((pos, pointerId) => {
+      if (pointerId !== secondId) {
+        canvas?.dispatchEvent(new PointerEvent('pointerdown', {
+          pointerId, pointerType: 'touch', isPrimary: true, button: 0, buttons: 1,
+          clientX: pos.x, clientY: pos.y, bubbles: true,
+        }));
+      }
+    });
+  }
+
+  private trackTouch(event: PointerEvent) {
+    if (this.touches.has(event.pointerId)) {
+      this.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+  }
+
+  private untrackTouch(event: PointerEvent) {
+    this.touches.delete(event.pointerId);
+    if (!this.touches.size) {
+      this.multiTouch = false;
+    }
   }
 
   /** Drag while painting on the model: follows the pointer on the faces showing the same texture. */
@@ -591,6 +651,9 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   protected onPointerDown(event: PointerEvent) {
+    if (!event.isTrusted || this.multiTouch) {
+      return;
+    }
     this.pressAt = this.fromPreview(event) ? null : this.scene?.onGizmo || this.active ? null : { x: event.clientX, y: event.clientY };
   }
 

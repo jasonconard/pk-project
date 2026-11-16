@@ -514,10 +514,21 @@ dl {
     flex-direction: column;
   }
 
+  // The 3D view gives its room to the panel (without this, its canvas keeps its height and pushes the panel
+  // below the screen)
+  .viewport {
+    min-height: 0;
+  }
+
   .big-face {
     width: auto;
     right: 12px;
     bottom: 50%;
+
+    // Room for the full screen button (top right of the screen), over the close button otherwise
+    header {
+      padding-right: 44px;
+    }
   }
 
   .panel {
@@ -525,5 +536,81 @@ dl {
     max-height: 45%;
     border-left: none;
     border-top: 1px solid #3a3c48;
+  }
+}
+
+// Touch screens: targets big enough for a finger (about 40 px)
+@media (pointer: coarse) {
+  .btn, .layers button, .primary {
+    min-height: 40px;
+  }
+
+  .tools .btn {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .history .btn {
+    min-width: 44px;
+    font-size: 20px;
+  }
+
+  input, select, .field select, .field input {
+    min-height: 40px;
+  }
+
+  input[type=checkbox] {
+    width: 22px;
+    height: 22px;
+    min-height: 0;
+  }
+
+  .check {
+    min-height: 40px;
+    gap: 8px;
+  }
+
+  .parts {
+    max-height: 200px;
+
+    li {
+      padding: 10px 12px;
+    }
+  }
+
+  .swatches {
+    gap: 6px;
+
+    button {
+      width: 34px;
+      height: 34px;
+    }
+  }
+
+  .grays button {
+    height: 40px;
+  }
+
+  .gray-slider input {
+    min-height: 32px;
+  }
+
+  .color input {
+    width: 56px;
+    height: 40px;
+  }
+
+  .link-btn {
+    padding: 8px 4px;
+  }
+
+  .block > summary {
+    min-height: 40px;
+  }
+
+  .preview button {
+    width: 40px;
+    height: 40px;
   }
 }
