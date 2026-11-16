@@ -39,7 +39,8 @@
         </header>
       }
       <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()" [fill]="true"
-                        (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
+                        [faceKey]="face.texId"
+                        (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" (strokeCancel)="cancelStroke()" />
     </section>
   }
 
@@ -227,7 +228,8 @@
                     title="Grande vue de la face, par-dessus la gauche de la vue 3D (G)">⛶ Grande vue</button>
             @if (!bigView()) {
               <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()"
-                                (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
+                                [faceKey]="face.texId"
+                        (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" (strokeCancel)="cancelStroke()" />
             }
           }
         </details>

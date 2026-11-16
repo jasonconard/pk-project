@@ -552,6 +552,16 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.endStroke();
   }
 
+  /** The stroke turned out to be a two-finger gesture (zoom, pan): undo what it painted. */
+  protected cancelStroke() {
+    const tool = this.tool();
+    this.active = null;
+    const before = tool !== 'picker' ? this.history.drop() : null;
+    if (before) {
+      this.restore(before);
+    }
+  }
+
   private startStroke(texId: string, px: Px, in3d: boolean) {
     const model = this.model()!;
     if (this.tool() !== 'picker') {
@@ -632,12 +642,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
    * the first finger is handed to the camera controls (they were off when it touched), so both fingers zoom.
    */
   private cancelStroke3d(secondId: number) {
-    const tool = this.tool();
-    this.active = null;
-    const before = tool !== 'picker' ? this.history.drop() : null;
-    if (before) {
-      this.restore(before);
-    }
+    this.cancelStroke();
     if (!this.scene) {
       return;
     }

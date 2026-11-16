@@ -19,6 +19,13 @@
   }
 }
 
+/* Phone, full screen face: zoom row under the face (the face name and the 3D / Face buttons are on top) */
+@media (max-width: 700px) {
+  :host(.fill) .zoom {
+    order: 1;
+  }
+}
+
 .zoom {
   display: flex;
   align-items: center;
@@ -53,7 +60,10 @@
 canvas {
   display: block;
   cursor: crosshair;
-  touch-action: none;
+}
+
+.scroll {
+  touch-action: none; // the fingers zoom and pan the face, not the page
 }
 
 // Touch screens: zoom buttons big enough for a finger

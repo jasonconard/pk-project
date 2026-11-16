@@ -21,7 +21,7 @@ Sous 700 px de large, l'écran change :
 
 - en haut : **‹ Jeu**, le nom du modèle (il ouvre la section Modèle), annuler / refaire, puis le choix du mode ;
 - **Modélisation** : toucher une forme affiche une carte avec ses flèches (x −, x +, y +, y −, z −, z +), **Dupliquer**, **Tourner 90°**, **Supprimer** et **⚙ Réglages** ; la barre du bas ouvre **Modèle**, **Formes** et **Ajouter** ;
-- **Dessin** : **3D / Face** en haut à droite (Face : la face en grand pour dessiner) ; en bas, la couleur actuelle (la toucher : couleur libre), les couleurs récentes, **🎨** (toute la palette) et les outils ; la barre du bas ouvre **Modèle**, **Calque** et **Face** ;
+- **Dessin** : **3D / Face** en haut à droite (Face : la face en plein écran pour dessiner à un doigt ; deux doigts zooment en pinçant et déplacent la face, **⤢** revient à toute la face) ; en bas, la couleur actuelle (la toucher : couleur libre), les couleurs récentes, **🎨** (toute la palette) et les outils ; la barre du bas ouvre **Modèle**, **Calque** et **Face** ;
 - chaque section s'ouvre en volet par le bas ; la poignée le ferme. La section **Face** permet de choisir une face par son nom (Avant, Dessus…), sans viser en 3D ;
 - **Lier à…** / **Copier vers…** : un bandeau demande de toucher la face cible, avec **Annuler** ;
 - pincer à deux doigts sur le modèle zoome, même en dessinant.
@@ -52,7 +52,7 @@ Le modèle a aussi un **nom** (son id, en minuscules avec des tirets) et un rég
 
 Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis retour au crayon), **pot de peinture** (F), **ligne** (L), **rectangle** (R, plein ou contour). On dessine :
 
-- dans la **vue 2D** de la face sélectionnée (sous le panneau : zoom − / +, grille, damier sous le transparent). **⛶ Grande vue** (touche G) l'ouvre en grand par-dessus la gauche de la vue 3D ; elle reste ouverte d'une face à l'autre. Dessiner dans la vue 2D passe en mode dessin ;
+- dans la **vue 2D** de la face sélectionnée (sous le panneau : zoom − / + ou Ctrl + molette / pincement du trackpad, **⤢** pour revoir toute la face, grille, damier sous le transparent). **⛶ Grande vue** (touche G) l'ouvre en grand par-dessus la gauche de la vue 3D ; elle reste ouverte d'une face à l'autre. Dessiner dans la vue 2D passe en mode dessin ;
 - ou **directement sur le modèle 3D** : appuyer sur le modèle peint, appuyer à côté tourne la vue.
 
 **Couleurs** : sélecteur libre, couleurs **récentes**, couleurs **du modèle** (les plus utilisées d'abord), et une **palette importée** : fichiers `.gpl`, `.pal`, `.hex` ou `.png` (Aseprite, Lospec, GIMP). **Garder seulement ces couleurs** remplace toute couleur choisie par la plus proche de la palette.
