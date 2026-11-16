@@ -20,7 +20,7 @@
   <div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"
        (pointercancel)="onPointerUp($event)" [class.painting]="mode() === 'paint'">
     @if (layer() !== 'color') {
-      <div class="preview" [style.width.%]="previewSize * 100" [style.height.%]="previewSize * 100"
+      <div class="preview" animate.enter="fade-in" animate.leave="fade-out" [style.width.%]="previewSize * 100" [style.height.%]="previewSize * 100"
            [style.right.px]="previewMargin" [style.bottom.px]="previewMargin">
         <span>Aperçu {{ previewNight() ? 'de nuit' : 'de jour' }}</span>
         <button type="button" [title]="previewNight() ? 'Voir de jour' : 'Voir de nuit'" [attr.aria-label]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
@@ -30,7 +30,7 @@
   </div>
 
   @if (bigView() && mode() === 'paint' && faceTexture(); as face) {
-    <section class="big-face" aria-label="Grande vue de la face">
+    <section class="big-face" animate.enter="face-in" animate.leave="face-out" aria-label="Grande vue de la face">
       @if (!phone()) {
         <header>
           <strong>{{ parts()[selection()!.partIndex] }} · {{ faceInfo()?.face }}</strong>
@@ -47,16 +47,16 @@
   @if (phone()) {
     <div class="m-overlay">
       @if (pending(); as action) {
-        <div class="banner">
+        <div class="banner" animate.enter="drop-in" animate.leave="fade-out">
           <span>{{ action.kind === 'link' ? 'Touche la face à lier (même taille)' : 'Touche la face où copier' }}</span>
           <button type="button" class="btn" (click)="cancelFaceAction()">Annuler</button>
         </div>
       } @else if (mode() === 'select') {
         @if (!selectedPart()) {
-          <p class="chip">✋ Toucher une forme · 1 doigt : tourner · 2 doigts : zoomer</p>
+          <p class="chip" animate.enter="fade-in">✋ Toucher une forme · 1 doigt : tourner · 2 doigts : zoomer</p>
         }
       } @else {
-        <div class="m-view-top">
+        <div class="m-view-top" animate.enter="fade-in">
           @if (faceInfo(); as info) {
             <p class="chip face-chip"><strong>{{ parts()[selection()!.partIndex] }} · {{ info.face }}</strong><span>{{ info.size }} · {{ layerInfo().label }}</span></p>
           } @else {
@@ -71,7 +71,7 @@
     </div>
 
     @if (mode() === 'select' && selectedPart() && !pending() && !sheet()) {
-      <div class="selection-card">
+      <div class="selection-card" animate.enter="rise-in" animate.leave="sink-out">
         <div class="sel-head">
           <strong>{{ parts()[selection()!.partIndex] }}</strong>
           <span class="muted grow">{{ selectedPart()!.size.x }} × {{ selectedPart()!.size.y }}{{ selectedPart()!.kind === 'box' ? ' × ' + selectedPart()!.size.z : '' }}</span>
@@ -96,7 +96,7 @@
 
 @if (phone()) {
   @if (mode() === 'paint') {
-    <div class="tray">
+    <div class="tray" animate.enter="rise-in">
       <div class="tray-colors">
         @if (layer() === 'color') {
           <label class="current" [style.background]="color()" title="Couleur libre">
@@ -129,8 +129,10 @@
   </nav>
 
   @if (sheet(); as open) {
-    <section class="sheet" role="dialog" [attr.aria-label]="sheetTitles[open]"
-             [style.transform]="sheetDrag() ? 'translateY(' + sheetDrag() + 'px)' : null" [class.dragging]="sheetDrag() > 0">
+    <section class="sheet" role="dialog" [attr.aria-label]="sheetTitles[open]" animate.enter="sheet-in" animate.leave="sheet-out"
+             [style.height.px]="sheetHeight()" [style.transform]="sheetDrag() ? 'translateY(' + sheetDrag() + 'px)' : null" [class.dragging]="sheetDrag() > 0">
+      <!-- Measured: the sheet's height follows it smoothly when the content changes -->
+      <div class="sheet-inner" #sheetInner>
       <!-- Sticky top: the close button stays reachable when the sheet is scrolled; slide it down to close -->
       <div class="sheet-top" (pointerdown)="sheetDragStart($event)" (pointermove)="sheetDragMove($event)"
            (pointerup)="sheetDragEnd($event)" (pointercancel)="sheetDragEnd($event)">
@@ -159,29 +161,35 @@
           <button type="button" class="btn close" title="Fermer" aria-label="Fermer" (click)="sheet.set(null)">✕</button>
         </div>
       </div>
-      @switch (open) {
-        @case ('model') {
-          <ng-container [ngTemplateOutlet]="modelTpl" />
-        }
-        @case ('shapes') {
-          <ng-container [ngTemplateOutlet]="shapesTpl" />
-        }
-        @case ('add') {
-          <div class="add-choices">
-            <button type="button" class="btn" (click)="add('box'); sheet.set(null)"><span>🧊</span><strong>Box</strong><small>Bâtiments, murs, toits</small></button>
-            <button type="button" class="btn" (click)="add('plane'); sheet.set(null)"><span>▱</span><strong>Plane</strong><small>Fleurs, herbes, panneaux</small></button>
-          </div>
-        }
-        @case ('layer') {
-          <ng-container [ngTemplateOutlet]="layerTpl" />
-        }
-        @case ('face') {
-          <ng-container [ngTemplateOutlet]="faceTpl" />
-        }
-        @case ('palette') {
-          <ng-container [ngTemplateOutlet]="paletteTpl" />
-        }
+      <!-- Recreated for each section: its content fades in -->
+      @for (key of [open]; track key) {
+        <div class="sheet-body" animate.enter="fade-in">
+          @switch (open) {
+            @case ('model') {
+              <ng-container [ngTemplateOutlet]="modelTpl" />
+            }
+            @case ('shapes') {
+              <ng-container [ngTemplateOutlet]="shapesTpl" />
+            }
+            @case ('add') {
+              <div class="add-choices">
+                <button type="button" class="btn" (click)="add('box'); sheet.set(null)"><span>🧊</span><strong>Box</strong><small>Bâtiments, murs, toits</small></button>
+                <button type="button" class="btn" (click)="add('plane'); sheet.set(null)"><span>▱</span><strong>Plane</strong><small>Fleurs, herbes, panneaux</small></button>
+              </div>
+            }
+            @case ('layer') {
+              <ng-container [ngTemplateOutlet]="layerTpl" />
+            }
+            @case ('face') {
+              <ng-container [ngTemplateOutlet]="faceTpl" />
+            }
+            @case ('palette') {
+              <ng-container [ngTemplateOutlet]="paletteTpl" />
+            }
+          }
+        </div>
       }
+      </div>
     </section>
   }
 } @else {
@@ -246,7 +254,7 @@
         </details>
       }
       @if (pending(); as action) {
-        <div class="banner">
+        <div class="banner" animate.enter="drop-in" animate.leave="fade-out">
           <span>{{ action.kind === 'link' ? 'Clique la face à lier (même taille)' : 'Clique la face où copier' }}</span>
           <button type="button" class="btn" (click)="cancelFaceAction()">Annuler (Échap)</button>
         </div>

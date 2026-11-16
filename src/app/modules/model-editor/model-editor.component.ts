@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { CODE_MODELS } from '../game/shared/model/browser-models';
@@ -134,7 +134,7 @@ interface ActiveStroke {
 @Component({
   selector: 'app-model-editor',
   templateUrl: './model-editor.component.html',
-  styleUrls: ['./model-editor.component.scss', './model-editor.panel.scss', './model-editor.phone.scss'],
+  styleUrls: ['./model-editor.component.scss', './model-editor.panel.scss', './model-editor.phone.scss', './model-editor.motion.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PixelCanvasComponent, NgTemplateOutlet],
 })
@@ -203,6 +203,9 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   /** How far the sheet is slid down (px), while its top is dragged. */
   protected readonly sheetDrag = signal(0);
   private sheetDragFrom: { id: number; y: number; grip: boolean } | null = null;
+  private readonly sheetInner = viewChild<ElementRef<HTMLElement>>('sheetInner');
+  /** The open sheet's content height: set on the sheet so that it grows / shrinks with a transition. */
+  protected readonly sheetHeight = signal<number | null>(null);
   protected readonly trayColors = computed(() => this.recentColors().slice(0, TRAY_COLORS));
   protected readonly layerInfo = computed(() => LAYERS.find(l => l.id === this.layer())!);
   /** Faces of the selected part, to pick one without aiming at it in 3D. */
@@ -275,6 +278,16 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   });
 
   constructor() {
+    effect(onCleanup => {
+      const inner = this.sheetInner()?.nativeElement;
+      if (!inner) {
+        this.sheetHeight.set(null);
+        return;
+      }
+      const observer = new ResizeObserver(() => this.sheetHeight.set(inner.offsetHeight));
+      observer.observe(inner);
+      onCleanup(() => observer.disconnect());
+    });
     this.phone.set(this.phoneQuery.matches);
     this.phoneQuery.addEventListener('change', this.onPhoneChange);
   }

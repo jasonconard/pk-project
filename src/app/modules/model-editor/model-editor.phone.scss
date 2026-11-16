@@ -305,14 +305,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   touch-action: pan-y;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 0 16px calc(20px + var(--safe-bottom, 0px));
   background: var(--panel);
   border-radius: 18px 18px 0 0;
   box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.5);
-  transition: transform 0.15s;
+  transition: transform 0.15s, height 0.22s ease;
 
   &.dragging {
     transition: none;
@@ -379,6 +375,16 @@
   .grays button {
     height: 40px;
   }
+}
+
+.sheet-inner {
+  padding: 0 16px calc(20px + var(--safe-bottom, 0px));
+}
+
+.sheet-inner, .sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 // Sticky top of a sheet: grip, title, actions, close. Dragged down, the sheet follows and closes.

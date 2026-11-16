@@ -1,0 +1,113 @@
+// Transitions: windows, cards and banners slide / fade in and out (classes set by animate.enter / animate.leave).
+// Keyframes live here, with the classes using them (Angular scopes their names to this stylesheet).
+
+$ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+$ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+// Bottom sheet: up from the bottom, back down when closed (from where the finger left it)
+.sheet-in {
+  animation: slide-up 0.26s $ease-out;
+}
+
+.sheet-out {
+  animation: slide-down 0.2s $ease-in forwards;
+}
+
+// Selection card, tool tray: rise a little while fading in
+.rise-in {
+  animation: rise 0.2s $ease-out;
+}
+
+.sink-out {
+  animation: sink 0.14s $ease-in forwards;
+}
+
+// Banner (pick the target face): from above
+.drop-in {
+  animation: drop 0.2s $ease-out;
+}
+
+.fade-in {
+  animation: fade 0.18s ease-out;
+}
+
+.fade-out {
+  animation: fade 0.14s ease-in reverse forwards;
+}
+
+// Big view of the face: grows from a bit smaller (from the left on a computer)
+.face-in {
+  animation: grow 0.2s $ease-out;
+}
+
+.face-out {
+  animation: grow 0.14s $ease-in reverse forwards;
+}
+
+@media (min-width: 701px) {
+  .face-in {
+    animation-name: from-left;
+  }
+
+  .face-out {
+    animation-name: from-left;
+  }
+}
+
+// Panel sections (computer): open / close smoothly (browsers that can animate a <details>)
+.block {
+  interpolate-size: allow-keywords;
+
+  &::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition: block-size 0.2s ease, content-visibility 0.2s allow-discrete;
+  }
+
+  &[open]::details-content {
+    block-size: auto;
+  }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+}
+
+@keyframes slide-down {
+  to { transform: translateY(100%); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+@keyframes sink {
+  to { opacity: 0; transform: translateY(12px); }
+}
+
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@keyframes grow {
+  from { opacity: 0; transform: scale(0.96); }
+}
+
+@keyframes from-left {
+  from { opacity: 0; transform: translateX(-16px); }
+}
+
+// Who asked the system for less motion: no slides
+@media (prefers-reduced-motion: reduce) {
+  .sheet-in, .sheet-out, .rise-in, .sink-out, .drop-in, .fade-in, .fade-out, .face-in, .face-out {
+    animation: none;
+  }
+
+  .block::details-content {
+    transition: none;
+  }
+}
