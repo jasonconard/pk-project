@@ -1,0 +1,171 @@
+@let s = song();
+<header class="top">
+  <div class="title-row">
+    <a href="#/" class="back" title="Retour au jeu" (click)="backToGame($event)"><svg lucideChevronLeft></svg> Jeu</a>
+    <button type="button" class="title" title="Le morceau : nom, mesures, autres morceaux" (click)="sheet.set('song')">
+      <strong>{{ s.name }}</strong>
+      <span>Enregistré</span>
+    </button>
+    <div class="history">
+      <button type="button" class="square-btn" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()"><svg lucideUndo2></svg></button>
+      <button type="button" class="square-btn" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()"><svg lucideRedo2></svg></button>
+    </div>
+  </div>
+
+  <div class="transport">
+    <button type="button" class="play" [class.on]="playing()" [attr.aria-label]="playing() ? 'Arrêter' : 'Jouer'"
+            [title]="(playing() ? 'Arrêter' : 'Jouer en boucle') + ' (Espace)'" (click)="togglePlay()">
+      @if (playing()) { <svg lucideSquare></svg> } @else { <svg lucidePlay></svg> }
+    </button>
+    <div class="tempo" title="Tempo (temps par minute)">
+      <button type="button" aria-label="Plus lent" (click)="setBpm(s.bpm - 2)"><svg lucideMinus></svg></button>
+      <label>
+        <input type="number" inputmode="numeric" aria-label="Tempo" [value]="s.bpm" (change)="setBpm(+$any($event.target).value)" />
+        <small>BPM</small>
+      </label>
+      <button type="button" aria-label="Plus rapide" (click)="setBpm(s.bpm + 2)"><svg lucidePlus></svg></button>
+    </div>
+    <button type="button" class="scale" title="La gamme : seules ses notes sont dans la grille" (click)="sheet.set('scale')">
+      <svg lucideKeyboardMusic></svg>
+      <span class="grow"><strong>{{ scaleLabel() }}</strong><small>Gamme</small></span>
+      <svg lucideChevronDown></svg>
+    </button>
+  </div>
+
+  <nav class="bars" aria-label="Mesures">
+    @for (b of bars(); track b.bar) {
+      <button type="button" class="bar" [class.on]="b.shown" [attr.aria-pressed]="b.shown" [attr.aria-label]="'Mesure ' + (b.bar + 1)" (click)="showBar(b.bar)">
+        <strong>{{ b.bar + 1 }}</strong>
+        <span class="mini">@for (beat of b.beats; track $index) { <i [class.full]="beat"></i> }</span>
+      </button>
+    }
+    @if (s.bars < maxBars) {
+      <button type="button" class="bar add" title="Ajouter une mesure" aria-label="Ajouter une mesure" (click)="addBar()"><svg lucidePlus></svg></button>
+    }
+  </nav>
+
+  <!-- Landscape: the sections in the top bar -->
+  <div class="sections top-sections">
+    <ng-container [ngTemplateOutlet]="sectionButtons" />
+  </div>
+</header>
+
+<div class="body">
+  <div class="staff" [style.--steps]="visibleSteps().length">
+    <div class="notes">
+      @for (row of rows(); track row.degree) {
+        <div class="row" [class.tonic]="row.tonic">
+          <span class="label">{{ row.name }}<small>{{ row.octave }}</small></span>
+          @for (step of visibleSteps(); track step) {
+            <button type="button" [class]="stepClass(step)" [class.now]="step === playStep()"
+                    [attr.aria-label]="row.name + row.octave + ', temps ' + (step + 1)" (click)="toggleNote(row.degree, step)">
+              @if (noteAt().get(step + ':' + row.degree); as instrument) {
+                <span class="note" [style.background]="color(instrument)"><svg [lucideIcon]="icons[instrument]"></svg></span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+    <div class="drums">
+      @for (drum of drumRows; track drum.id) {
+        <div class="row drum">
+          <span class="label">{{ drum.label }}</span>
+          @for (step of visibleSteps(); track step) {
+            <button type="button" [class]="stepClass(step)" [class.now]="step === playStep()"
+                    [attr.aria-label]="drum.label + ', temps ' + (step + 1)" (click)="toggleDrum(drum.id, step)">
+              @if (drumAt().has(step + ':' + drum.id)) { <span class="hit" [class.small]="drum.id === 'hat'"></span> }
+            </button>
+          }
+        </div>
+      }
+    </div>
+    <div class="row ruler" aria-hidden="true">
+      <span class="label"></span>
+      @for (step of visibleSteps(); track step) {
+        <span class="tick">
+          @if (step % 4 === 0) { {{ (step % 16) / 4 + 1 }} }
+          @if (step === playStep()) { <i class="dot"></i> }
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="stamps" role="radiogroup" aria-label="Tampons">
+    @for (inst of instruments; track inst.id) {
+      <button type="button" role="radio" class="stamp" [class.on]="stamp() === inst.id" [attr.aria-checked]="stamp() === inst.id"
+              [style.--color]="inst.color" (click)="stamp.set(inst.id)">
+        <span class="dot"><svg [lucideIcon]="icons[inst.id]"></svg></span>{{ inst.label }}
+      </button>
+    }
+    <button type="button" role="radio" class="stamp eraser" [class.on]="stamp() === 'eraser'" [attr.aria-checked]="stamp() === 'eraser'"
+            style="--color: #8a8d9c" (click)="stamp.set('eraser')">
+      <span class="dot"><svg [lucideIcon]="icons.eraser"></svg></span>Gomme
+    </button>
+  </div>
+</div>
+
+<!-- Portrait: the sections at the bottom -->
+<nav class="sections bottom-sections" aria-label="Sections">
+  <ng-container [ngTemplateOutlet]="sectionButtons" />
+</nav>
+
+<ng-template #sectionButtons>
+  <button type="button" class="section" (click)="sheet.set('song')"><svg lucideFileMusic></svg><span>Morceau</span></button>
+  <button type="button" class="section" disabled title="Bientôt : volume de chaque instrument"><svg lucideSlidersHorizontal></svg><span>Mixage</span></button>
+  <button type="button" class="section" disabled title="Bientôt : filtre, souffle, vinyle, swing"><svg lucideDisc3></svg><span>Lo-fi</span></button>
+  <button type="button" class="section" disabled title="Bientôt : utiliser la musique dans le jeu"><svg lucideDownload></svg><span>Exporter</span></button>
+</ng-template>
+
+@if (sheet(); as open) {
+  <div class="sheet-backdrop" (click)="sheet.set(null)"></div>
+  <section class="sheet" role="dialog" [attr.aria-label]="open === 'scale' ? 'Gamme' : 'Morceau'" animate.enter="sheet-in" animate.leave="sheet-out">
+    <span class="grip" aria-hidden="true"></span>
+    <div class="sheet-head">
+      <h2>{{ open === 'scale' ? 'Gamme' : 'Morceau' }}</h2>
+      <button type="button" class="square-btn" aria-label="Fermer" (click)="sheet.set(null)"><svg lucideX></svg></button>
+    </div>
+    @if (open === 'scale') {
+      <h3>Note de départ</h3>
+      <div class="tonics">
+        @for (name of noteNames; track $index) {
+          <button type="button" [class.on]="s.tonic === $index" (click)="setTonic($index)">{{ name }}</button>
+        }
+      </div>
+      <h3>Couleur</h3>
+      <div class="modes">
+        @for (mode of modes; track mode.id) {
+          <button type="button" [class.on]="s.mode === mode.id" (click)="setMode(mode.id)">
+            <strong>{{ mode.label }}</strong><small>{{ mode.hint }}</small>
+          </button>
+        }
+      </div>
+      <button type="button" class="outline-btn" (click)="playScale()"><svg lucidePlay></svg> Écouter la gamme</button>
+    } @else {
+      <label class="field">
+        <span>Nom</span>
+        <input type="text" [value]="s.name" (change)="rename($any($event.target).value)" />
+      </label>
+      <div class="field-row">
+        <span>Mesures</span>
+        <div class="tempo">
+          <button type="button" aria-label="Une mesure de moins" [disabled]="s.bars <= 1" (click)="setBars(s.bars - 1)"><svg lucideMinus></svg></button>
+          <label><input type="number" aria-label="Mesures" [value]="s.bars" readonly /></label>
+          <button type="button" aria-label="Une mesure de plus" [disabled]="s.bars >= maxBars" (click)="setBars(s.bars + 1)"><svg lucidePlus></svg></button>
+        </div>
+      </div>
+      <h3>Mes morceaux</h3>
+      <div class="song-list">
+        @for (item of songs(); track item.id) {
+          <button type="button" [class.on]="item.id === s.id" (click)="openSong(item.id)">{{ item.name }}</button>
+        }
+      </div>
+      <div class="pair">
+        <button type="button" class="outline-btn" (click)="createSong()"><svg lucidePlus></svg> Nouveau</button>
+        <button type="button" class="outline-btn danger" data-haptic="warning" (click)="deleteSong()">
+          <svg lucideTrash></svg> {{ confirmDelete() ? 'Confirmer ?' : 'Supprimer' }}
+        </button>
+      </div>
+    }
+  </section>
+}

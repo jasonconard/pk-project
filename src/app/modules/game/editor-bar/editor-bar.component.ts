@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
+import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
 import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
 import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
@@ -28,7 +28,7 @@ interface PaletteEntry {
  */
 @Component({
   selector: 'game-editor-bar',
-  imports: [LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench],
+  imports: [LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench],
   templateUrl: './editor-bar.component.html',
   styleUrls: ['./editor-bar.component.scss', './editor-bar.portrait.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -124,6 +124,14 @@ export class EditorBarComponent {
   protected openModelEditor(modelId?: string): void {
     const url = new URL(location.href);
     url.hash = '#/modeles' + (modelId ? `?id=${encodeURIComponent(modelId)}` : '');
+    location.assign(url);
+    location.reload();
+  }
+
+  /** Music editor: a page of its own (the game stops meanwhile). */
+  protected openMusicEditor(): void {
+    const url = new URL(location.href);
+    url.hash = '#/musique';
     location.assign(url);
     location.reload();
   }

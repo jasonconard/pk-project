@@ -17,4 +17,8 @@ export const routes: Routes = [
     path: 'modeles',
     loadComponent: () => import('./modules/model-editor/model-editor.component').then(m => m.ModelEditorComponent),
   },
+  {
+    path: 'musique',
+    loadComponent: () => import('./modules/music-editor/music-editor.component').then(m => m.MusicEditorComponent),
+  },
 ];

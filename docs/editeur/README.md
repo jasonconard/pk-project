@@ -10,6 +10,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 4. [Reliefs et escaliers](04-reliefs.md) : niveaux, parois, escaliers, déplacements du joueur.
 5. [Sauvegarde et export](05-sauvegarde-export.md) : stockage navigateur, export, réinitialisation.
 6. [Éditeur de modèles 3D](06-modeles.md) : créer les modèles avec des boxes et des planes, les peindre en pixel art, calques brillance / nuit / relief, export.
+7. [Éditeur de musique](07-musique.md) : composer les musiques avec des tampons sur une grille (à la Mario Paint), gammes, batterie, lecture en boucle.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 

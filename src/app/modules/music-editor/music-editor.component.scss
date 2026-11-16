@@ -1,0 +1,622 @@
+/* Music editor (design/music-editor.pen): portrait = column (stamps and sections at the bottom), landscape /
+   computer = one top bar, stamps on the left. */
+
+:host {
+  --bg: #2a2b33;
+  --panel: #22232a;
+  --surface: #33353f;
+  --border: #4a4c5a;
+  --muted: #8a8d9c;
+  --accent: #3a6ea5;
+  --accent-soft: rgba(58, 110, 165, 0.2);
+  --highlight: #ffd34d;
+  --label: 34px;
+
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  color: #eceef4;
+  font-size: 14px;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.square-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 18px;
+}
+
+// --- Top ---
+
+.top {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: calc(4px + var(--safe-top)) calc(12px + var(--safe-right)) 8px calc(12px + var(--safe-left));
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 48px; // the full screen button (top right)
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 6px 8px 0;
+    color: #9fc3ff;
+    text-decoration: none;
+    font-size: 15px;
+  }
+
+  .title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    strong {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 16px;
+    }
+
+    span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+  }
+
+  .history {
+    display: flex;
+    gap: 6px;
+  }
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.play {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 22px;
+
+  &.on {
+    background: #c0504a;
+  }
+}
+
+.tempo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 4px;
+  border-radius: 12px;
+  background: var(--surface);
+
+  button {
+    width: 30px;
+    height: 100%;
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  input {
+    width: 40px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+
+  small {
+    font-size: 9px;
+    color: var(--muted);
+  }
+}
+
+.scale {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: left;
+
+  > svg {
+    color: var(--muted);
+  }
+
+  .grow {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      font-size: 10px;
+      color: var(--muted);
+    }
+  }
+}
+
+.bars {
+  display: flex;
+  gap: 6px;
+
+  .bar {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+
+    &.on {
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px #5a8ec5;
+      color: white;
+    }
+
+    &.add {
+      flex: 0 0 34px;
+      background: none;
+      box-shadow: inset 0 0 0 1px var(--border);
+    }
+  }
+
+  .mini {
+    display: flex;
+    gap: 2px;
+
+    i {
+      width: 5px;
+      height: 3px;
+      border-radius: 1px;
+      background: rgba(255, 255, 255, 0.12);
+
+      &.full {
+        background: rgba(255, 255, 255, 0.55);
+      }
+    }
+  }
+}
+
+// --- Grid ---
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 calc(12px + var(--safe-right)) 0 calc(12px + var(--safe-left));
+}
+
+.staff {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+// The notes scroll when the screen is too low; the drums stay under them
+.notes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  // The rows share the room (at least 26px each: easy to touch; below that, the notes scroll)
+  .row {
+    flex: 1 0 auto;
+    height: auto;
+    min-height: 26px;
+  }
+}
+
+.drums {
+  flex-shrink: 0;
+  border-top: 2px solid var(--border);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--label) repeat(var(--steps), minmax(0, 1fr));
+  height: 26px;
+
+  &.tonic {
+    background: rgba(255, 255, 255, 0.04);
+
+    .label {
+      color: #eceef4;
+      font-weight: 700;
+    }
+  }
+
+  &.drum {
+    height: 26px;
+
+    .label {
+      font-size: 8px;
+      line-height: 1.1;
+      white-space: normal;
+    }
+  }
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding-left: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--muted);
+
+  small {
+    font-size: 7px;
+  }
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.035);
+
+  // Every other beat (4 steps) a little darker, to read the rhythm
+  &.alt {
+    background: transparent;
+  }
+
+  &.bar-start {
+    box-shadow: inset 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  &.now {
+    background: rgba(255, 211, 77, 0.16);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+// A note: a "stamp" of its instrument's color, its icon inside
+.note {
+  width: min(21px, 92%);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #1d1e24;
+  font-size: 11px;
+  animation: stamp 120ms ease-out;
+}
+
+.hit {
+  width: min(13px, 70%);
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: #e8e8ee;
+  animation: stamp 120ms ease-out;
+
+  &.small {
+    width: min(8px, 50%);
+  }
+}
+
+@keyframes stamp {
+  from { transform: scale(0.4); }
+}
+
+.ruler {
+  height: 16px;
+
+  .tick {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    font-size: 8px;
+    color: var(--muted);
+  }
+
+  .dot {
+    position: absolute;
+    bottom: 3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--highlight);
+  }
+}
+
+// --- Stamps ---
+
+.stamps {
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+
+  .stamp {
+    flex: 1;
+    min-width: 0;
+    height: 58px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 10px;
+
+    &.on {
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 0 2px var(--color);
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  .dot {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color);
+    color: #1d1e24;
+    font-size: 16px;
+  }
+
+  .eraser .dot {
+    background: var(--surface);
+    color: #eceef4;
+  }
+}
+
+// --- Sections ---
+
+.sections {
+  display: flex;
+  gap: 4px;
+
+  .section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--muted);
+    font-size: 10px;
+
+    svg {
+      font-size: 20px;
+    }
+  }
+}
+
+.bottom-sections {
+  flex-shrink: 0;
+  height: calc(60px + var(--safe-bottom, 0px));
+  padding: 4px 8px var(--safe-bottom, 0px);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+
+  .section {
+    flex: 1;
+  }
+}
+
+.top-sections {
+  display: none;
+}
+
+// --- Landscape / computer: one top bar (it scrolls if needed), stamps on the left ---
+
+@media (orientation: landscape), (min-width: 701px) {
+  .top {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding-right: calc(56px + var(--safe-right));
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > * {
+      flex-shrink: 0;
+    }
+  }
+
+  .title-row {
+    display: contents;
+
+    > * {
+      flex-shrink: 0;
+    }
+
+    .title {
+      flex: 0 1 auto;
+      align-items: flex-start;
+      max-width: 160px;
+      order: 0;
+
+      span {
+        display: none;
+      }
+    }
+
+    .history {
+      order: 5;
+      margin-left: auto;
+    }
+  }
+
+  .transport {
+    order: 1;
+  }
+
+  .play {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .tempo, .scale {
+    height: 38px;
+  }
+
+  .scale {
+    flex: 0 0 auto;
+
+    small {
+      display: none;
+    }
+  }
+
+  .bars {
+    order: 2;
+
+    .bar {
+      flex: 0 0 32px;
+      height: 32px;
+
+      .mini {
+        display: none;
+      }
+    }
+  }
+
+  .top-sections {
+    order: 6;
+    display: flex;
+
+    .section {
+      width: 38px;
+      height: 38px;
+
+      span {
+        display: none;
+      }
+    }
+  }
+
+  .bottom-sections {
+    display: none;
+  }
+
+  .body {
+    flex-direction: row-reverse;
+    padding-bottom: calc(10px + var(--safe-bottom, 0px));
+  }
+
+  .stamps {
+    flex-direction: column;
+    width: 58px;
+
+    .stamp {
+      height: auto;
+      font-size: 8px;
+      gap: 2px;
+    }
+
+    .dot {
+      width: 26px;
+      height: 26px;
+      font-size: 14px;
+    }
+  }
+
+  .row {
+    height: 24px;
+  }
+
+  .notes .row {
+    min-height: 24px;
+  }
+}

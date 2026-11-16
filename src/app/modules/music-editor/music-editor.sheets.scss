@@ -1,0 +1,189 @@
+/* Sheets of the music editor (scale, song): from the bottom, over the editor. Colors in music-editor.component.scss. */
+
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.sheet {
+  position: absolute;
+  z-index: 11;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(520px, 100%);
+  max-height: 85%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px calc(16px + var(--safe-right)) calc(20px + var(--safe-bottom, 0px)) calc(16px + var(--safe-left));
+  border-radius: 18px 18px 0 0;
+  background: var(--panel);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.5);
+
+  .grip {
+    align-self: center;
+    width: 36px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--border);
+  }
+
+  h3 {
+    margin: 4px 0 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+}
+
+.sheet-in {
+  animation: sheet-up 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sheet-out {
+  animation: sheet-up 0.18s ease-in reverse forwards;
+}
+
+@keyframes sheet-up {
+  from { transform: translate(-50%, 100%); }
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+
+  h2 {
+    flex: 1;
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+.tonics {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+
+  button {
+    height: 40px;
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: 14px;
+
+    &.on {
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+    }
+  }
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+
+  button {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: left;
+
+    small {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    &.on {
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px #5a8ec5;
+    }
+  }
+}
+
+.outline-btn {
+  flex: 1;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px var(--border);
+
+  &.danger {
+    color: #ff9c9c;
+  }
+}
+
+.pair {
+  display: flex;
+  gap: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  input {
+    height: 44px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    font-size: 16px;
+  }
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  span {
+    font-size: 14px;
+  }
+}
+
+.song-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  button {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 10px;
+    text-align: left;
+
+    &.on {
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px #5a8ec5;
+      font-weight: 600;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-in, .sheet-out {
+    animation: none;
+  }
+}

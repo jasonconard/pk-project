@@ -15,6 +15,8 @@
               [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)"><svg lucideGrid3x3></svg></button>
       <button type="button" class="text-btn" title="Éditeur de modèles 3D : créer et peindre les bâtiments, les fleurs…"
               (click)="openModelEditor()"><svg lucideBox></svg> <span class="label">Modèles</span></button>
+      <button type="button" class="text-btn" title="Éditeur de musique : composer les musiques du jeu"
+              (click)="openMusicEditor()"><svg lucideEighthNotes></svg> <span class="label">Musique</span></button>
       <button type="button" class="text-btn" data-haptic="success" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
               (click)="send('export', $event)"><svg lucideDownload></svg> <span class="label">Exporter</span></button>
       <button type="button" class="text-btn" data-haptic="warning" [class.danger]="confirmReset()"
