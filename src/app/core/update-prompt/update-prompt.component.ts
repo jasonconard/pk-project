@@ -2,6 +2,7 @@ import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SwUpdate } from '@angular/service-worker';
 import { Capacitor } from '@capacitor/core';
+import { BundleInfo, CapacitorUpdater } from '@capgo/capacitor-updater';
 import { version } from '../../../../package.json';
 
 /** Latest release of the game on GitHub: the Android app is attached to it (see .github/workflows/main.yml). */
@@ -14,6 +15,18 @@ interface Update {
   version: string;
   apkUrl: string;
   sizeMb: number;
+}
+
+/**
+ * Game files of a release, for the live update: `pk-project-web-v0.0.19-apk0.0.19-<native fingerprint>.zip`.
+ * The `apk` part is the oldest app that can run them (its native part — Android files, plugins — is the same).
+ */
+const WEB_ZIP = /^pk-project-web-v([\d.]+)-apk([\d.]+)-[0-9a-f]+\.zip$/;
+
+interface ReleaseAsset {
+  name: string;
+  size: number;
+  browser_download_url: string;
 }
 
 /** 1.2.3 > 1.2.0? (numbers compared part by part, a missing part is 0) */
@@ -31,9 +44,13 @@ export function isNewer(candidate: string, current: string): boolean {
 
 /**
  * Offers the new versions of the game.
- * - Android app: at launch, looks for a newer release on GitHub and offers to install its APK. The link opens
- *   outside the app (Chrome downloads it, then Android installs it over the current version: same signing key).
- *   Silent when offline or when GitHub doesn't answer.
+ * - Android app: at launch, looks for a newer release on GitHub.
+ *   - Its game files can run in this app (same native part): they are downloaded in the background (live update,
+ *     @capgo/capacitor-updater) and a restart is offered; "later" uses them the next time the app leaves the screen
+ *     or starts. No APK, no installation.
+ *   - Otherwise (a new plugin, new Android files…): its APK is offered. The link opens outside the app (Chrome
+ *     downloads it, then Android installs it over the current version: same signing key).
+ *   Silent when offline or when GitHub doesn't answer. A broken update (the game doesn't start) is rolled back.
  * - Web app (PWA, iOS included): the service worker downloads a new version in the background, but it would only
  *   be used once the app is fully closed (an iOS home screen app hardly ever is). It is looked for at launch, when
  *   the app comes back to the screen and every 30 min; once downloaded, a reload is offered.
@@ -49,10 +66,14 @@ export class UpdatePromptComponent implements OnInit {
   protected readonly update = signal<Update | null>(null);
   /** Web app: a new version is downloaded, ready to be used after a reload. */
   protected readonly webReady = signal(false);
+  /** Android app: the game files of a new version are downloaded (live update), used after a restart. */
+  protected readonly bundleReady = signal<BundleInfo | null>(null);
   protected readonly current = version;
 
   ngOnInit() {
     if (Capacitor.isNativePlatform()) {
+      // These game files started fine: kept (otherwise the updater goes back to the previous ones)
+      void CapacitorUpdater.notifyAppReady().catch(() => undefined);
       this.check();
     } else if (this.swUpdate.isEnabled) {
       this.watchWebVersions();
@@ -62,6 +83,15 @@ export class UpdatePromptComponent implements OnInit {
   protected later() {
     this.update.set(null);
     this.webReady.set(false);
+    this.bundleReady.set(null);
+  }
+
+  /** Android app: restarts on the downloaded game files. */
+  protected applyBundle() {
+    const bundle = this.bundleReady();
+    if (bundle) {
+      void CapacitorUpdater.set({ id: bundle.id });
+    }
   }
 
   /** Web app: switches to the downloaded version (the page is loaded again from it). */
@@ -99,8 +129,15 @@ export class UpdatePromptComponent implements OnInit {
         return;
       }
       const release = await response.json();
-      const apk = (release.assets ?? []).find((asset: { name: string }) => asset.name.endsWith('.apk'));
-      if (apk && isNewer(release.tag_name, version)) {
+      if (!isNewer(release.tag_name, version)) {
+        return;
+      }
+      const assets: ReleaseAsset[] = release.assets ?? [];
+      if (await this.liveUpdate(assets)) {
+        return;
+      }
+      const apk = assets.find(asset => asset.name.endsWith('.apk'));
+      if (apk) {
         this.update.set({
           version: release.tag_name.replace(/^v/, ''),
           apkUrl: apk.browser_download_url,
@@ -109,6 +146,34 @@ export class UpdatePromptComponent implements OnInit {
       }
     } catch {
       // Offline, timeout: checked again at the next launch
+    }
+  }
+
+  /**
+   * Downloads the release's game files if this app can run them (its APK is recent enough), and offers to restart
+   * on them. False when the release needs a new APK (or has no game files): the APK is offered instead.
+   */
+  private async liveUpdate(assets: ReleaseAsset[]): Promise<boolean> {
+    const zip = assets.map(asset => ({ asset, match: WEB_ZIP.exec(asset.name) })).find(z => z.match);
+    if (!zip?.match) {
+      return false;
+    }
+    const [, target, minApk] = zip.match;
+    try {
+      const { version: apkVersion } = await CapacitorUpdater.getBuiltinVersion();
+      if (isNewer(minApk, apkVersion)) {
+        return false; // its native part changed: a new APK is needed
+      }
+      // Already downloaded (restart postponed last time)? Otherwise downloaded now
+      const { bundles } = await CapacitorUpdater.list();
+      const bundle = bundles.find(b => b.version === target && b.status !== 'error')
+        ?? await CapacitorUpdater.download({ url: zip.asset.browser_download_url, version: target });
+      // Used anyway the next time the app leaves the screen or starts
+      await CapacitorUpdater.next({ id: bundle.id });
+      this.bundleReady.set(bundle);
+      return true;
+    } catch {
+      return false; // download failed: the APK is offered
     }
   }
 }

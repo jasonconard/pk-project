@@ -39,7 +39,15 @@ in full screen, and shows up in the phone's game tools.
   (`base64 -i pk-release.jks | pbcopy`), `PK_KEYSTORE_PASSWORD`, `PK_KEY_ALIAS`, `PK_KEY_PASSWORD`.
   Without them, a local build is signed with the debug key.
 - Updates: at launch, the app reads the latest GitHub release (`core/update-prompt`). If its tag is newer than the
-  app version, it offers to download the APK; Android then installs it over the current version.
+  app version:
+  - **live update** (most releases): the release also has the game files, `pk-project-web-vX.Y.Z-apkA.B.C-<fingerprint>.zip`.
+    If the installed APK is at least `A.B.C` (same native part), the app downloads them itself
+    (`@capgo/capacitor-updater`, manual mode: no Capgo service, nothing sent) and offers to restart on them — no APK,
+    no installation. Later, they are used the next time the app leaves the screen or starts. If they don't start,
+    the app goes back to the previous ones;
+  - **new APK**: when the native part changed (Android files, Capacitor plugins, `capacitor.config.ts`: the
+    fingerprint of `scripts/native-fingerprint.mjs`), the release needs its own APK: the app offers to download it,
+    and Android installs it over the current version.
 
 ## Code scaffolding
 

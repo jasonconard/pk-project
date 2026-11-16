@@ -5,6 +5,16 @@ const config: CapacitorConfig = {
   appId: 'com.conardjason.pkproject',
   appName: 'PK Project',
   webDir: 'dist/android/browser',
+  plugins: {
+    // Live updates of the game files, without a new APK (see update-prompt.component.ts): manual mode, no Capgo
+    // service — no update checks, channels nor statistics sent anywhere
+    CapacitorUpdater: {
+      autoUpdate: false,
+      updateUrl: '',
+      channelUrl: '',
+      statsUrl: '',
+    },
+  },
 };
 
 export default config;

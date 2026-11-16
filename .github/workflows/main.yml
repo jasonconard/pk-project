@@ -2,7 +2,8 @@ name: Release
 
 # At each release, a tag v<version> pushed (e.g. v0.0.2, same version as package.json):
 # - the game (PWA) is built and published on the gh-pages branch;
-# - the Android app (APK) is built, signed and attached to a GitHub release of the tag.
+# - the Android app (APK) is built, signed and attached to a GitHub release of the tag, with the game files (zip) that
+#   the installed apps download themselves when their native part is the same (live update, no new APK).
 # Can also be started by hand (Actions tab): the APK is then only kept as a build artifact.
 on:
   push:
@@ -95,6 +96,25 @@ jobs:
       - name: Build the game
         run: npm run android-build
 
+      # Game files for the live update: pk-project-web-v<version>-apk<oldest app>-<native fingerprint>.zip. The apps
+      # from the oldest one that has the same native part (Android files, Capacitor plugins) download it themselves;
+      # the older ones get the APK. Same fingerprint as the previous release: its oldest app is kept.
+      - name: Game files for the live update
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          FINGERPRINT="$(node scripts/native-fingerprint.mjs)"
+          PREVIOUS="$(gh release view --json assets -q '.assets[].name' 2>/dev/null | grep '^pk-project-web-' | head -1 || true)"
+          OLDEST="$VERSION"
+          if [[ "$PREVIOUS" =~ ^pk-project-web-v[0-9.]+-apk([0-9.]+)-([0-9a-f]+)\.zip$ ]] && [ "${BASH_REMATCH[2]}" = "$FINGERPRINT" ]; then
+            OLDEST="${BASH_REMATCH[1]}"
+          fi
+          NAME="pk-project-web-v${VERSION}-apk${OLDEST}-${FINGERPRINT}.zip"
+          echo "Previous: ${PREVIOUS:-none} → $NAME"
+          (cd dist/android/browser && zip -qr "$RUNNER_TEMP/$NAME" .)
+
       # Always the same key: Android installs an update over the previous version only if signed with it
       - name: Signing key
         env:
@@ -129,5 +149,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v3
         with:
-          files: ${{ runner.temp }}/pk-project-*.apk
+          files: |
+            ${{ runner.temp }}/pk-project-*.apk
+            ${{ runner.temp }}/pk-project-web-*.zip
           generate_release_notes: true
