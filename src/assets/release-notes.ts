@@ -14,6 +14,13 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.24',
+    date: '2026-11-16',
+    notes: [
+      'Sur Android, l\'appli propose aussi la nouvelle version quand tu y reviens, sans avoir à la relancer.',
+    ],
+  },
+  {
     version: '0.0.23',
     date: '2026-11-16',
     notes: [
