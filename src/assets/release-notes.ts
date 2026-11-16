@@ -14,6 +14,13 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.20',
+    date: '2026-11-16',
+    notes: [
+      'Éditeur de modèles sur mobile en paysage : fais glisser la barre du haut pour atteindre tous les boutons, comme Exporter.',
+    ],
+  },
+  {
     version: '0.0.19',
     date: '2026-11-16',
     notes: [
