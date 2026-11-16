@@ -1,6 +1,9 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
 import { LucideX } from '@lucide/angular';
 import { RELEASE_NOTES } from '../../../../assets/release-notes';
+
+/** After an update: only the latest versions (a small dialog), the others behind "Voir toutes les nouveautés". */
+const LATEST_COUNT = 3;
 
 /** Month names for the dates of the versions (short, French). */
 const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
@@ -25,6 +28,11 @@ export class ReleaseNotesComponent {
   readonly closed = output<void>();
 
   protected readonly releases = RELEASE_NOTES.map(r => ({ ...r, dateLabel: this.dateLabel(r.date) }));
+  /** After an update, the short list was expanded. */
+  protected readonly showAll = signal(false);
+  /** Small dialog: opened by itself after an update, not expanded. */
+  protected readonly compact = computed(() => this.justUpdated() && !this.showAll());
+  protected readonly visible = computed(() => this.compact() ? this.releases.slice(0, LATEST_COUNT) : this.releases);
 
   constructor() {
     const onKeyDown = (ev: KeyboardEvent) => {

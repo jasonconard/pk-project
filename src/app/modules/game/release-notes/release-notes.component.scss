@@ -63,6 +63,48 @@ header {
   }
 }
 
+// After an update: a smaller dialog with the latest versions and an OK button
+.dialog.compact {
+  width: min(360px, calc(100vw - 32px - var(--safe-left) - var(--safe-right)));
+  font-size: 13px;
+
+  .list {
+    padding-bottom: 4px;
+  }
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  button {
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .all {
+    padding: 8px 4px;
+    background: none;
+    color: #9fc3ff;
+    font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ok {
+    margin-left: auto;
+    padding: 8px 22px;
+    background: #5aa8ff;
+    color: #0b1a2c;
+    font-weight: 700;
+  }
+}
+
 .list {
   overflow-y: auto;
   overscroll-behavior: contain;
