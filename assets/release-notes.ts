@@ -14,6 +14,13 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.21',
+    date: '2026-11-16',
+    notes: [
+      'Sur Android, la mise à jour automatique du jeu fonctionne (une dernière installation de l\'APK est nécessaire).',
+    ],
+  },
+  {
     version: '0.0.20',
     date: '2026-11-16',
     notes: [
