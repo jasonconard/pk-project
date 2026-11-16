@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.25',
+    date: '2026-11-16',
+    notes: [
+      'Nouveau : l\'éditeur de musique, à ouvrir depuis l\'éditeur de carte avec le bouton Musique.',
+      'Pose des notes comme des tampons sur une grille : elles suivent toujours la gamme choisie, impossible de jouer faux.',
+      'Cinq instruments, une batterie, et ton morceau tourne en boucle pendant que tu composes.',
+      'Le bouton météo affiche toujours l\'image de la météo, même au lancement.',
+    ],
+  },
+  {
     version: '0.0.24',
     date: '2026-11-16',
     notes: [
