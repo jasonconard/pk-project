@@ -1,5 +1,6 @@
-import { afterNextRender, Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { isFirstStartOfNewVersion } from './release-notes/whats-new';
 import { GameMode } from './shared/model/Game';
 import { GameService } from './shared/services/game.service';
 import { StickComponent } from '../../core/stick/stick.component';
@@ -46,8 +47,10 @@ export class GameComponent {
   protected readonly qualityChoices = QUALITY_CHOICES;
   /** Version of the game (package.json): tells if the installed app (PWA) is up to date. */
   protected readonly appVersion = version;
-  /** "What's new" dialog, opened from the version number. */
+  /** "What's new" dialog, opened from the version number, and by itself the first time a new version starts. */
   protected readonly releaseNotes = signal(false);
+  /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
+  protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
   protected readonly quality = this.gameService.quality;
   /** Air temperature (°C, rounded) and its color, from icy blue to red. */
   protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));
@@ -55,6 +58,18 @@ export class GameComponent {
 
   constructor() {
     afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
+    // After an update: what's new, once the loading screen is gone
+    effect(() => {
+      const hud = this.hud();
+      if (this.justUpdated() && hud && !hud.loading && !this.releaseNotes()) {
+        this.releaseNotes.set(true);
+      }
+    });
+  }
+
+  protected closeReleaseNotes(): void {
+    this.releaseNotes.set(false);
+    this.justUpdated.set(false);
   }
 
   protected togglePaused(): void {

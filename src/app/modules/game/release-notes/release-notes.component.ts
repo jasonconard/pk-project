@@ -7,8 +7,8 @@ const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'aoû
 
 /**
  * "What's new" dialog: every version of the game (latest first) with its changes in simple words, the installed
- * one marked. Opened from the version number (menu of the temperature / fps tile); closed by the ✕, the backdrop
- * or Escape. The notes are bundled with the game (src/assets/release-notes.ts): shown offline too.
+ * one marked. Opened from the version number (menu of the temperature / fps tile), and by itself the first time a
+ * new version starts (whats-new.ts); closed by the ✕, the backdrop or Escape. The notes are bundled with the game (src/assets/release-notes.ts): shown offline too.
  */
 @Component({
   selector: 'game-release-notes',
@@ -20,6 +20,8 @@ const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'aoû
 export class ReleaseNotesComponent {
   /** Installed version (package.json). */
   readonly current = input.required<string>();
+  /** Opened by itself after an update: says so above the list. */
+  readonly justUpdated = input(false);
   readonly closed = output<void>();
 
   protected readonly releases = RELEASE_NOTES.map(r => ({ ...r, dateLabel: this.dateLabel(r.date) }));

@@ -92,7 +92,7 @@
 }
 
 @if (releaseNotes()) {
-  <game-release-notes [current]="appVersion" (closed)="releaseNotes.set(false)" />
+  <game-release-notes [current]="appVersion" [justUpdated]="justUpdated()" (closed)="closeReleaseNotes()" />
 }
 
 <core-message />

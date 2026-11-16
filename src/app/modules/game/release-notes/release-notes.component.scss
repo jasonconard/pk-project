@@ -23,6 +23,15 @@
   font-size: 14px;
 }
 
+// After an update: the new version, above the list
+.updated {
+  margin: 0 16px 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(90, 168, 255, 0.16);
+  font-size: 13px;
+}
+
 header {
   display: flex;
   align-items: center;

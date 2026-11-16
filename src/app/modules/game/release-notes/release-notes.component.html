@@ -1,9 +1,12 @@
 <div class="backdrop" (click)="closed.emit()"></div>
 <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="release-notes-title">
   <header>
-    <h2 id="release-notes-title">Nouveautés</h2>
+    <h2 id="release-notes-title">{{ justUpdated() ? 'Quoi de neuf ?' : 'Nouveautés' }}</h2>
     <button type="button" class="close" aria-label="Fermer" title="Fermer (Échap)" (click)="closed.emit()"><svg lucideX></svg></button>
   </header>
+  @if (justUpdated()) {
+    <p class="updated">Le jeu est passé à la <strong>v{{ current() }}</strong>. Voici ce qui change :</p>
+  }
   <div class="list">
     @for (release of releases; track release.version) {
       <article [class.current]="release.version === current()">
