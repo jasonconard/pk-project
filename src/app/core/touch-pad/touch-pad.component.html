@@ -3,8 +3,9 @@
     @for (btn of btns; track btn.label) {
       <div class="btn-container"
            [style]="getBtnStyle(btn, true)"
-           (touchend)="touchBtn(btn, 'up')"
-           (touchstart)="touchBtn(btn, 'down')">
+           (touchstart)="touchStart(btn, $event)"
+           (touchend)="touchEnd(btn, $event)"
+           (touchcancel)="touchEnd(btn, $event)">
         <div class="btn" [style]="getBtnStyle(btn, false)">
           {{ btn.label.toUpperCase() }}
         </div>

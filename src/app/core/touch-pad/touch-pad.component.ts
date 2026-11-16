@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { TouchService } from '../shared/service/touch.service';
 import { KeyService } from '../shared/service/key.service';
 import { TOUCH_KEYS, TouchKey, TouchKeyType } from '../shared/model/TouchKey';
@@ -16,6 +16,8 @@ export class TouchPadComponent {
   private readonly sequenceService = inject(SequenceService);
 
   private readonly pushedBtns = signal<string[]>([]);
+  /** Fingers on each button: it is released when its last finger lifts (or the system cancels the touch). */
+  private readonly btnTouches = new Map<string, Set<number>>();
 
   protected readonly btns: TouchKey[] = TOUCH_KEYS;
   private readonly touchService = inject(TouchService);
@@ -28,18 +30,28 @@ export class TouchPadComponent {
     effect(() => {
       this.hasMessage();
       this.coreService.resumed();
+      this.btnTouches.clear();
       this.pushedBtns.set([]);
+    });
+    // Safety net: no finger left on the screen, no button can stay held (a lost touchend, a cancelled touch)
+    const releaseAll = (e: TouchEvent) => e.touches.length === 0 && this.releaseAll();
+    window.addEventListener('touchend', releaseAll, { capture: true, passive: true });
+    window.addEventListener('touchcancel', releaseAll, { capture: true, passive: true });
+    inject(DestroyRef).onDestroy(() => {
+      window.removeEventListener('touchend', releaseAll, { capture: true });
+      window.removeEventListener('touchcancel', releaseAll, { capture: true });
     });
   }
 
   protected getBtnStyle(btn: TouchKey, isContainer: boolean): Record<string, string | null> {
-    const fullHeight = btn.size.y + (btn.type === TouchKeyType.RECT ? 10 : 30);
-    const fullWidth = btn.size.x + (btn.type === TouchKeyType.RECT ? 20 : 30);
+    // Touch area a little bigger than the button
+    const fullHeight = btn.size.y + (btn.type === TouchKeyType.RECT ? 10 : 14);
+    const fullWidth = btn.size.x + (btn.type === TouchKeyType.RECT ? 20 : 14);
 
     if (isContainer) {
       return {
-        right: btn.position.x + 'px',
-        bottom: btn.position.y + 'px',
+        right: `calc(${btn.position.x}px + var(--safe-right, 0px))`,
+        bottom: `calc(${btn.position.y}px + var(--safe-bottom, 0px))`,
         width: fullWidth + 'px',
         height: fullHeight + 'px',
       };
@@ -59,13 +71,34 @@ export class TouchPadComponent {
     return this.pushedBtns().includes(btn.label);
   }
 
-  protected touchBtn(btn: TouchKey, action: 'up' | 'down'): void {
-    if (action === 'up') {
-      this.pushedBtns.update(btns => btns.filter(label => label !== btn.label));
-      this.keyService.setKeyUp(btn.code);
-    } else {
+  protected touchStart(btn: TouchKey, event: TouchEvent): void {
+    const touches = this.btnTouches.get(btn.label) ?? new Set<number>();
+    const wasUp = touches.size === 0;
+    Array.from(event.changedTouches).forEach(t => touches.add(t.identifier));
+    this.btnTouches.set(btn.label, touches);
+    if (wasUp) {
       this.pushedBtns.update(btns => btns.includes(btn.label) ? btns : [...btns, btn.label]);
       this.keyService.setKeyDown(btn.code);
     }
+  }
+
+  protected touchEnd(btn: TouchKey, event: TouchEvent): void {
+    const touches = this.btnTouches.get(btn.label);
+    Array.from(event.changedTouches).forEach(t => touches?.delete(t.identifier));
+    if (!touches?.size) {
+      this.release(btn);
+    }
+  }
+
+  private release(btn: TouchKey): void {
+    this.btnTouches.delete(btn.label);
+    if (this.isBtnPushed(btn)) {
+      this.pushedBtns.update(btns => btns.filter(label => label !== btn.label));
+      this.keyService.setKeyUp(btn.code);
+    }
+  }
+
+  private releaseAll(): void {
+    this.btns.forEach(btn => this.release(btn));
   }
 }

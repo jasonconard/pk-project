@@ -22,7 +22,8 @@ export class TouchService {
   private readonly gameControlsState = signal(true);
   readonly gameControls = this.gameControlsState.asReadonly();
 
-  private directionTouch: Touch | null = null;
+  /** The finger holding the stick: its id and where it started (copied, the browser may reuse Touch objects). */
+  private directionTouch: { id: number, x: number, y: number } | null = null;
 
   constructor() {
     fromEvent(window, 'resize').subscribe(() => this.isTouchDeviceState.set(isTouchDevice()));
@@ -41,39 +42,47 @@ export class TouchService {
   }
 
   bindTouching(canvas: HTMLElement): void {
+    // A finger on the left half takes the stick (if no finger holds it yet)
     canvas.addEventListener('touchstart', (e: TouchEvent) => {
-      if (!this.gameControls()) { return; }
-      const touch = e.touches[e.touches.length - 1];
-      const canvasWidth = canvas.getBoundingClientRect().width;
-      if (touch.clientX < canvasWidth / 2) {
+      if (!this.gameControls() || this.directionTouch) { return; }
+      const half = canvas.getBoundingClientRect().width / 2;
+      const touch = Array.from(e.changedTouches).find(t => t.clientX < half);
+      if (touch) {
+        this.directionTouch = { id: touch.identifier, x: touch.clientX, y: touch.clientY };
         this.updateStick({
           begin: { x: touch.clientX, y: touch.clientY },
           current: { x: touch.clientX, y: touch.clientY },
           radius: STICK_RADIUS
         });
-        this.directionTouch ??= touch;
       }
     }, false);
 
-    canvas.addEventListener('touchend', (e: TouchEvent) => {
-      this.updateStick(null);
-      const releasedTouch = e.changedTouches[0];
-      if (this.directionTouch && releasedTouch.identifier === this.directionTouch.identifier) {
-        this.directionTouch = null;
+    // Only the stick's own finger releases it: another finger lifted (or the system cancelling a touch) does not
+    const release = (e: TouchEvent) => {
+      const id = this.directionTouch?.id;
+      if (id !== undefined && Array.from(e.changedTouches).some(t => t.identifier === id)) {
+        this.releaseStick();
       }
-    }, false);
+    };
+    canvas.addEventListener('touchend', release, false);
+    canvas.addEventListener('touchcancel', release, false);
+    // Safety net: no finger left on the screen, nothing can stay held
+    for (const type of ['touchend', 'touchcancel']) {
+      window.addEventListener(type, e => (e as TouchEvent).touches.length === 0 && this.releaseStick(), { capture: true, passive: true });
+    }
 
     canvas.addEventListener('touchmove', (e: ScalableTouchEvent) => {
       if (e.scale !== undefined && e.scale !== 1) { e.preventDefault(); }
-      const movedTouch = e.changedTouches[0];
       const directionTouch = this.directionTouch;
       const stick = this.stick();
-      if (!directionTouch || !stick || movedTouch.identifier !== directionTouch.identifier) {
+      // The stick's finger among the fingers that moved (not only the first one)
+      const movedTouch = directionTouch && Array.from(e.changedTouches).find(t => t.identifier === directionTouch.id);
+      if (!directionTouch || !stick || !movedTouch) {
         return;
       }
 
-      const diffX = movedTouch.clientX - directionTouch.clientX;
-      const diffY = movedTouch.clientY - directionTouch.clientY;
+      const diffX = movedTouch.clientX - directionTouch.x;
+      const diffY = movedTouch.clientY - directionTouch.y;
       let computedAngle = Math.asin(diffY / Math.sqrt((diffX * diffX) + (diffY * diffY))) * 180 / Math.PI;
       computedAngle = diffX > 0 ? 180 - computedAngle : (360 + computedAngle) % 360;
 
@@ -86,5 +95,12 @@ export class TouchService {
         this.updateStick({ ...stick, current: { x: movedTouch.clientX, y: movedTouch.clientY } });
       }
     }, { passive: false });
+  }
+
+  private releaseStick(): void {
+    this.directionTouch = null;
+    if (this.stick()) {
+      this.updateStick(null);
+    }
   }
 }
