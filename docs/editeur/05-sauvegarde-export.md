@@ -8,7 +8,7 @@ Pour chaque morceau de carte : ses objets (sans les données d'exécution comme 
 
 ## Exporter
 
-**⬇ Exporter** télécharge `ck-pallet-town.ts`, à remplacer dans `src/assets/map/world/chunks/`. Il déclare les mêmes constantes (`PC_PALLET_TOWN`, `PC_PALLET_TOWN_N`…), donc `world.ts` ne change pas.
+**Exporter** télécharge `ck-pallet-town.ts`, à remplacer dans `src/assets/map/world/chunks/`. Il déclare les mêmes constantes (`PC_PALLET_TOWN`, `PC_PALLET_TOWN_N`…), donc `world.ts` ne change pas.
 
 Le fichier est écrit par un petit générateur de code (`toSource`) :
 
@@ -22,4 +22,4 @@ Le fichier du code générait certains objets en boucle (`[...].map(...)`) : l'e
 
 ## Réinitialiser
 
-**⟲ Réinitialiser** (deux clics : « Confirmer ? » pendant 3 secondes) oublie la copie du navigateur et recharge la carte du code. À faire après avoir exporté et commité, ou si la carte du code a été modifiée à la main (la copie du navigateur passerait par-dessus).
+**Réinitialiser** (deux clics : « Confirmer ? » pendant 3 secondes) oublie la copie du navigateur et recharge la carte du code. À faire après avoir exporté et commité, ou si la carte du code a été modifiée à la main (la copie du navigateur passerait par-dessus).

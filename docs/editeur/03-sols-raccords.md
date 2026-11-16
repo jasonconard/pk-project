@@ -5,8 +5,8 @@
 Onglet **Sols** : choisir un terrain, puis clic ou glisser. Le carré orange montre les cases touchées.
 
 - **Pinceau 1, 2, 3** : un carré de 1 à 3 cases à partir de la case sous la souris.
-- **Pot de peinture 🪣** : remplit toute la zone continue du même sol que la case cliquée (voisins haut, bas, gauche, droite ; 4096 cases au plus).
-- **Gomme 🧽** : revient au sol d'origine (et enlève les escaliers).
+- **Pot de peinture** : remplit toute la zone continue du même sol que la case cliquée (voisins haut, bas, gauche, droite ; 4096 cases au plus).
+- **Gomme** : revient au sol d'origine (et enlève les escaliers).
 
 Une case fait **16 unités** ; elle est rangée dans `chunk.tiles` : `'colonne,ligne' → terrain`, la case (0, 0) étant le coin nord-ouest du morceau de carte.
 

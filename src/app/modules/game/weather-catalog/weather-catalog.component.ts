@@ -1,5 +1,9 @@
 import { Component, computed, DestroyRef, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { DAY_ONLY_HOUR, formatHour, NIGHT_ONLY_HOUR, FIREFLY_COLORS, FireflyColor, isWeatherAvailable, LEAF_MODES, LeafMode, TEMPERATURES, WEATHER_CHOICES, WeatherChoice, WeatherType } from '../shared/weather/Weather';
+import {
+  LucideCheck, LucideClock, LucideCloudRain, LucideDynamicIcon, LucideFlame, LucideIcon, LucideLayoutGrid, LucideLeaf, LucideMoon, LucideMoonStar,
+  LucideSearch, LucideSnowflake, LucideSparkles, LucideSun, LucideThermometer, LucideVolume2, LucideX,
+} from '@lucide/angular';
 import { WEATHER_CATEGORIES, WEATHER_INFO, WeatherCategory, WeatherInfo, weatherScreenshot } from '../shared/weather/weather-catalog';
 import { KeyService } from '../../../core/shared/service/key.service';
 
@@ -34,8 +38,17 @@ function normalize(text: string): string {
  * summary, badges) in the middle, the selected weather details on the right. Keyboard: M opens / closes,
  * arrows move between the cards, Enter applies, Escape closes.
  */
+/** Icon of each category (list on the left, group titles, detail panel). */
+const CATEGORY_ICONS: Record<WeatherCategory, LucideIcon> = {
+  classic: LucideSun, rain: LucideCloudRain, cold: LucideSnowflake, heat: LucideFlame,
+  nature: LucideLeaf, magic: LucideSparkles, dark: LucideMoonStar,
+};
+
 @Component({
   selector: 'game-weather-catalog',
+  imports: [
+    LucideCheck, LucideClock, LucideDynamicIcon, LucideLayoutGrid, LucideMoon, LucideSearch, LucideSun, LucideThermometer, LucideVolume2, LucideX,
+  ],
   templateUrl: './weather-catalog.component.html',
   styleUrl: './weather-catalog.component.scss',
   host: {
@@ -54,6 +67,7 @@ export class WeatherCatalogComponent {
   readonly leafModeChange = output<LeafMode>();
 
   protected readonly categories = WEATHER_CATEGORIES;
+  protected readonly categoryIcons = CATEGORY_ICONS;
   protected readonly fireflyColors = FIREFLY_COLORS;
   protected readonly leafModes = LEAF_MODES;
   protected readonly WeatherType = WeatherType;

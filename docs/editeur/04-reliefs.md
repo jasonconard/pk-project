@@ -4,9 +4,9 @@
 
 Onglet **Reliefs**, avec le même pinceau (1, 2, 3 cases) :
 
-- **⛰️ Monter** / **🕳️ Descendre** : un niveau par case et par passage. Un niveau fait **8 unités** (le pas du joueur), de 0 à 6. Les objets posés sur une case montent ou descendent avec elle.
-- **🪜 Escalier** : une rampe qui monte d'un niveau, orientée **automatiquement** vers la case voisine exactement un niveau plus haut (nord, puis est, ouest, sud ; nord s'il n'y en a pas).
-- **🧽 Sans escalier** : enlève les escaliers, sans toucher au sol ni à sa hauteur (la gomme de l'onglet Sols les enlève aussi, avec le sol peint).
+- **Monter** / **Descendre** : un niveau par case et par passage. Un niveau fait **8 unités** (le pas du joueur), de 0 à 6. Les objets posés sur une case montent ou descendent avec elle.
+- **Escalier** : une rampe qui monte d'un niveau, orientée **automatiquement** vers la case voisine exactement un niveau plus haut (nord, puis est, ouest, sud ; nord s'il n'y en a pas).
+- **Sans escalier** : enlève les escaliers, sans toucher au sol ni à sa hauteur (la gomme de l'onglet Sols les enlève aussi, avec le sol peint).
 
 Données : `chunk.heights` (`'colonne,ligne' → niveau`) et `chunk.stairs` (`'colonne,ligne' → 'n' | 'e' | 's' | 'w'`).
 

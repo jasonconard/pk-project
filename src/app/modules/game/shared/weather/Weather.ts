@@ -2032,11 +2032,11 @@ export function timeOfDayAt(hour: number): TimeOfDay {
   return h >= DAWN[1] && h < DUSK[0] ? 'day' : 'night';
 }
 
-export const TIME_OF_DAY_LABELS: Record<TimeOfDay, { label: string, icon: string }> = {
-  night: { label: 'Nuit', icon: '🌙' },
-  dawn: { label: 'Aube', icon: '🌅' },
-  day: { label: 'Jour', icon: '🌞' },
-  dusk: { label: 'Crépuscule', icon: '🌇' },
+export const TIME_OF_DAY_LABELS: Record<TimeOfDay, { label: string }> = {
+  night: { label: 'Nuit' },
+  dawn: { label: 'Aube' },
+  day: { label: 'Jour' },
+  dusk: { label: 'Crépuscule' },
 };
 
 /** "07:30" */

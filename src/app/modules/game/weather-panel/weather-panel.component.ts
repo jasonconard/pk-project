@@ -3,7 +3,8 @@ import { WeatherCatalogComponent } from '../weather-catalog/weather-catalog.comp
 import { KeyService } from '../../../core/shared/service/key.service';
 import { weatherScreenshot } from '../shared/weather/weather-catalog';
 import { applySilentMode, ignoreSilentMode, SILENT_MODE_BYPASS_SUPPORTED } from '../shared/weather/silent-mode';
-import { formatHour, TIME_OF_DAY_LABELS, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
+import { LucideCheck, LucideCloud, LucideDynamicIcon, LucideIcon, LucideMoon, LucideSun, LucideSunrise, LucideSunset, LucideTimer, LucideVolume2, LucideVolumeX, LucideWind, LucideWindArrowDown } from '@lucide/angular';
+import { formatHour, TIME_OF_DAY_LABELS, TimeOfDay, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
 
 export interface SoundSetting {
   volume: number;
@@ -28,9 +29,12 @@ const GAUGE_STEP = 0.05;
  * Weather toolbar (top right): weather (opens the catalog), time of day, wind, clouds, sound.
  * Each setting opens a small popover; keyboard: M / H / W / N / V, then ← → to adjust, Escape to close.
  */
+/** Icon of the time of day (hour button and popover). */
+const TIME_ICONS: Record<TimeOfDay, LucideIcon> = { night: LucideMoon, dawn: LucideSunrise, day: LucideSun, dusk: LucideSunset };
+
 @Component({
   selector: 'game-weather-panel',
-  imports: [WeatherCatalogComponent],
+  imports: [WeatherCatalogComponent, LucideDynamicIcon, LucideTimer, LucideWind, LucideWindArrowDown, LucideCloud, LucideVolume2, LucideVolumeX, LucideCheck],
   templateUrl: './weather-panel.component.html',
   styleUrl: './weather-panel.component.scss',
 })
@@ -96,6 +100,7 @@ export class WeatherPanelComponent {
     return d < 0.25 ? 'Clairsemés' : d < 0.5 ? 'Épars' : d < 0.75 ? 'Nombreux' : 'Couvert';
   });
   protected readonly timeOfDay = computed(() => TIME_OF_DAY_LABELS[timeOfDayAt(this.hour())]);
+  protected readonly timeIcon = computed(() => TIME_ICONS[timeOfDayAt(this.hour())]);
   protected readonly hourLabel = computed(() => formatHour(this.hour()));
   /** Current weather screenshot (matching the time of day), the emoji if it isn't there. */
   protected readonly currentThumb = computed(() => weatherScreenshot(this.weather(), this.night()));

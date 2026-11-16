@@ -1,6 +1,6 @@
 # Éditeur de modèles 3D
 
-Un écran à part pour créer et modifier les modèles (bâtiments, panneaux, fleurs…) avec des formes simples et des textures pixel art. On l'ouvre avec **🧊 Modèles** dans la barre de l'éditeur de carte. **🧊 Modifier le modèle** dans le panneau d'un objet sélectionné ouvre directement son modèle. L'adresse est `/#/modeles` (ou `/#/modeles?id=house`).
+Un écran à part pour créer et modifier les modèles (bâtiments, panneaux, fleurs…) avec des formes simples et des textures pixel art. On l'ouvre avec **Modèles** dans la barre de l'éditeur de carte. **Modifier le modèle** dans le panneau d'un objet sélectionné ouvre directement son modèle. L'adresse est `/#/modeles` (ou `/#/modeles?id=house`).
 
 ## Le principe : une grille de pixels par face
 
@@ -27,7 +27,7 @@ Sous 700 px de large, l'écran change :
 
 - en haut : **‹ Jeu**, le nom du modèle (il ouvre la section Modèle), annuler / refaire, puis le choix du mode ;
 - **Modélisation** : toucher une forme affiche une carte avec ses flèches (x −, x +, y +, y −, z −, z +), **Dupliquer**, **Tourner 90°**, **Supprimer** et **⚙ Réglages** ; la barre du bas ouvre **Modèle**, **Formes** et **Ajouter** ;
-- **Dessin** : **3D / Face** en haut à droite (Face : la face en plein écran pour dessiner à un doigt ; deux doigts zooment en pinçant et déplacent la face, **⤢** revient à toute la face) ; en bas, la couleur actuelle (la toucher : couleur libre), les couleurs récentes, **🎨** (toute la palette) et les outils ; la barre du bas ouvre **Modèle**, **Calque** et **Face** ;
+- **Dessin** : **3D / Face** en haut à droite (Face : la face en plein écran pour dessiner à un doigt ; deux doigts zooment en pinçant et déplacent la face, le bouton agrandir revient à toute la face) ; en bas, la couleur actuelle (la toucher : couleur libre), les couleurs récentes, le bouton palette (toutes les couleurs) et les outils ; la barre du bas ouvre **Modèle**, **Calque** et **Face** ;
 - chaque section s'ouvre en volet par le bas ; **✕** (toujours visible en haut du volet), la poignée, le glisser vers le bas ou Échap le ferment. La section **Face** permet de choisir une face par son nom (Avant, Dessus…), sans viser en 3D ;
 - **Lier à…** / **Copier vers…** : un bandeau demande de toucher la face cible, avec **Annuler** ;
 - pincer à deux doigts sur le modèle zoome, même en dessinant.
@@ -58,7 +58,7 @@ Le modèle a aussi un **nom** (son id, en minuscules avec des tirets) et un rég
 
 Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis retour au crayon), **pot de peinture** (F), **ligne** (L), **rectangle** (R, plein ou contour). On dessine :
 
-- dans la **vue 2D** de la face sélectionnée (section **Face** : zoom − / + ou Ctrl + molette / pincement du trackpad, **⤢** pour revoir toute la face, grille, damier sous le transparent). **Grande vue** (touche G) l'ouvre en grand par-dessus la gauche de la vue 3D, le zoom en bas ; elle reste ouverte d'une face à l'autre. Dessiner dans la vue 2D passe en mode dessin ;
+- dans la **vue 2D** de la face sélectionnée (section **Face** : zoom − / + ou Ctrl + molette / pincement du trackpad, le bouton agrandir pour revoir toute la face, grille, damier sous le transparent). **Grande vue** (touche G) l'ouvre en grand par-dessus la gauche de la vue 3D, le zoom en bas ; elle reste ouverte d'une face à l'autre. Dessiner dans la vue 2D passe en mode dessin ;
 - ou **directement sur le modèle 3D** : appuyer sur le modèle peint, appuyer à côté tourne la vue.
 
 **Couleurs** : sélecteur libre, couleurs **récentes**, couleurs **du modèle** (les plus utilisées d'abord), et une **palette importée** : fichiers `.gpl`, `.pal`, `.hex` ou `.png` (Aseprite, Lospec, GIMP). **Garder seulement ces couleurs** remplace toute couleur choisie par la plus proche de la palette.
@@ -67,10 +67,10 @@ Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis r
 
 Des faces **liées** partagent les mêmes pixels : dessiner sur l'une change les autres (par exemple les deux côtés d'une maison). Pour la face sélectionnée :
 
-- **🔗 Lier à…** puis clic sur une autre face de même taille ;
+- **Lier à…** puis clic sur une autre face de même taille ;
 - **Délier** : la face garde une copie et ne suit plus les autres ;
-- **📋 Copier vers…** puis clic sur la face cible, en miroir ⇆ / ⇅ si coché (étiré si la taille diffère) ;
-- **⇆ / ⇅** : retourner le dessin de la face.
+- **Copier vers…** puis clic sur la face cible, en miroir (gauche-droite / haut-bas) si activé (étiré si la taille diffère) ;
+- les deux boutons flèches : retourner le dessin de la face (gauche-droite, haut-bas).
 
 Échap annule un « Lier » ou un « Copier » en attente.
 
@@ -90,9 +90,9 @@ Sur un calque gris, la palette devient 9 nuances et un curseur, et un **aperçu*
 
 ## Annuler, sauvegarde
 
-- **↶ / ↷** (Ctrl+Z, Ctrl+Y ou Ctrl+Maj+Z) : 60 étapes.
+- **Annuler / Refaire** (Ctrl+Z, Ctrl+Y ou Ctrl+Maj+Z) : 60 étapes.
 - Chaque changement est **enregistré dans le navigateur**, dans IndexedDB (base `pk-project`, table `models`, un enregistrement par modèle, les pixels gardés tels quels). La place est large (des centaines de Mo) ; l'éditeur demande au navigateur de ne pas l'effacer quand il manque de place. Les modèles enregistrés par les premières versions dans `localStorage` (`pk-model-edits`) y sont déplacés une fois.
-- Un modèle du jeu modifié apparaît « (modifié) » dans la liste ; **⟲ Revenir à la version du jeu** (deux clics) oublie les modifications. Les nouveaux modèles ont leur propre groupe.
+- Un modèle du jeu modifié apparaît « (modifié) » dans la liste ; **Version du jeu** (ordinateur) ou **Revenir à la version du jeu** (téléphone) (deux clics) oublie les modifications. Les nouveaux modèles ont leur propre groupe.
 
 **Le jeu utilise les modèles du navigateur, sans export** (`browser-models.ts`, avant de construire le jeu) : chaque modèle enregistré est converti au format du jeu (atlas et cartes en images en mémoire) et remplace le modèle du code de même id. Un nouveau modèle est ajouté, et apparaît dans la palette de l'éditeur de carte (sous son id). **← Jeu** enregistre puis recharge le jeu. L'export reste nécessaire pour mettre les modèles dans le dépôt (et pour les autres navigateurs, le site publié).
 

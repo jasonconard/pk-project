@@ -4,24 +4,24 @@
     <header class="popup-header">
       <h2 id="catalog-title">Météo</h2>
       <label class="search">
-        <span aria-hidden="true">🔍</span>
+        <span aria-hidden="true"><svg lucideSearch></svg></span>
         <input #searchInput type="text" placeholder="Rechercher une météo…" aria-label="Rechercher une météo"
                [value]="search()" (input)="setSearch($event)" />
       </label>
       <span class="shortcut" aria-hidden="true">M fermer · Tab catégories / cartes · ← → ↑ ↓ · Entrée</span>
-      <button type="button" class="close" aria-label="Fermer" (click)="close()">✕</button>
+      <button type="button" class="close" aria-label="Fermer" (click)="close()"><svg lucideX></svg></button>
     </header>
 
     <div class="popup-body">
       <nav class="categories" aria-label="Catégories" [class.keyboard]="zone() === 'categories'">
         <button type="button" [class.active]="category() === null" (click)="selectCategory(null)">
-          <span class="cat-icon" aria-hidden="true">🗂️</span>
+          <span class="cat-icon" aria-hidden="true"><svg lucideLayoutGrid></svg></span>
           <span class="cat-label">Toutes</span>
           <span class="cat-count">{{ total }}</span>
         </button>
         @for (c of categories; track c.id) {
           <button type="button" [class.active]="category() === c.id" (click)="selectCategory(c.id)">
-            <span class="cat-icon" aria-hidden="true">{{ c.icon }}</span>
+            <span class="cat-icon" aria-hidden="true"><svg [lucideIcon]="categoryIcons[c.id]"></svg></span>
             <span class="cat-label">{{ c.label }}</span>
             <span class="cat-count">{{ counts()[c.id] }}</span>
           </button>
@@ -31,7 +31,7 @@
       <div class="grid" #grid role="listbox" aria-label="Météos" [class.keyboard]="zone() === 'cards'">
         @for (group of groups(); track group.category.id) {
           @if (category() === null) {
-            <h3 class="group-title">{{ group.category.icon }} {{ group.category.label }}</h3>
+            <h3 class="group-title"><svg [lucideIcon]="categoryIcons[group.category.id]"></svg> {{ group.category.label }}</h3>
           }
           <div class="cards">
             @for (e of group.entries; track e.type) {
@@ -56,9 +56,9 @@
                   <span class="card-name">{{ e.label }}</span>
                   <span class="card-summary">{{ e.info.summary }}</span>
                   <span class="badges">
-                    @if (e.only === 'day') { <span class="badge" title="Seulement le jour">☀️ Jour</span> }
-                    @if (e.only === 'night') { <span class="badge" title="Seulement la nuit">🌙 Nuit</span> }
-                    @if (e.info.sound) { <span class="badge" title="Sons d'ambiance">🔊</span> }
+                    @if (e.only === 'day') { <span class="badge" title="Seulement le jour"><svg lucideSun></svg> Jour</span> }
+                    @if (e.only === 'night') { <span class="badge" title="Seulement la nuit"><svg lucideMoon></svg> Nuit</span> }
+                    @if (e.info.sound) { <span class="badge" title="Sons d'ambiance"><svg lucideVolume2></svg></span> }
                     <span class="badge temp">{{ e.temperature[night() && e.only !== 'day' ? 1 : 0] }}°C</span>
                   </span>
                 </span>
@@ -82,14 +82,14 @@
           @if (!d.only) {
             <div class="day-night" role="radiogroup" aria-label="Aperçu">
               <button type="button" role="radio" [class.active]="!detailNight()" [attr.aria-checked]="!detailNight()"
-                      (click)="detailNight.set(false)">☀️</button>
+                      (click)="detailNight.set(false)"><svg lucideSun></svg></button>
               <button type="button" role="radio" [class.active]="detailNight()" [attr.aria-checked]="detailNight()"
-                      (click)="detailNight.set(true)">🌙</button>
+                      (click)="detailNight.set(true)"><svg lucideMoon></svg></button>
             </div>
           }
         </div>
         <div class="detail-text">
-          <span class="detail-category">{{ detailCategory().icon }} {{ detailCategory().label }}</span>
+          <span class="detail-category"><svg [lucideIcon]="categoryIcons[detailCategory().id]"></svg> {{ detailCategory().label }}</span>
           <h3>{{ d.icon }} {{ d.label }}</h3>
           <p>{{ d.info.description }}</p>
           <ul class="effects">
@@ -98,12 +98,12 @@
             }
           </ul>
           <dl class="facts">
-            <div><dt>🌡️ Température</dt><dd>
-              @if (d.only !== 'night') { ☀️ {{ d.temperature[0] }}°C }
-              @if (d.only !== 'day') { 🌙 {{ d.temperature[1] }}°C }
+            <div><dt><svg lucideThermometer></svg> Température</dt><dd>
+              @if (d.only !== 'night') { <svg lucideSun></svg> {{ d.temperature[0] }}°C }
+              @if (d.only !== 'day') { <svg lucideMoon></svg> {{ d.temperature[1] }}°C }
             </dd></div>
-            <div><dt>🕒 Disponible</dt><dd>{{ d.only === 'day' ? 'Le jour seulement' : d.only === 'night' ? 'La nuit seulement' : 'Jour et nuit' }}</dd></div>
-            <div><dt>🔊 Sons</dt><dd>{{ d.info.sound ? 'Oui' : 'Non' }}</dd></div>
+            <div><dt><svg lucideClock></svg> Disponible</dt><dd>{{ d.only === 'day' ? 'Le jour seulement' : d.only === 'night' ? 'La nuit seulement' : 'Jour et nuit' }}</dd></div>
+            <div><dt><svg lucideVolume2></svg> Sons</dt><dd>{{ d.info.sound ? 'Oui' : 'Non' }}</dd></div>
           </dl>
 
           @if (d.type === WeatherType.FIREFLIES) {
@@ -133,7 +133,7 @@
         </div>
         <div class="detail-actions">
           @if (d.type === weather()) {
-            <button type="button" class="apply" disabled>✓ Météo actuelle</button>
+            <button type="button" class="apply" disabled><svg lucideCheck></svg> Météo actuelle</button>
           } @else if (!available(d)) {
             <button type="button" class="apply" (click)="apply(d)">Appliquer · {{ timeChangeHint(d) }}</button>
           } @else {

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output } from '@angular/core';
+import { LucideX } from '@lucide/angular';
 import { RELEASE_NOTES } from '../../../../assets/release-notes';
 
 /** Month names for the dates of the versions (short, French). */
@@ -11,6 +12,7 @@ const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'aoû
  */
 @Component({
   selector: 'game-release-notes',
+  imports: [LucideX],
   templateUrl: './release-notes.component.html',
   styleUrl: './release-notes.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -4,9 +4,9 @@
   <button type="button" class="btn-fullscreen" (click)="toggleFullscreen()"
           [attr.aria-label]="fullScreened() ? 'Quitter le plein écran' : 'Plein écran'">
     @if (fullScreened()) {
-      <img src="assets/img/ui/icon-fullscreen-exit.svg" alt="">
+      <svg lucideMinimize></svg>
     } @else {
-      <img src="assets/img/ui/icon-fullscreen.svg" alt="">
+      <svg lucideMaximize></svg>
     }
   </button>
 

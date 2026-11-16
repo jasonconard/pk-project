@@ -1,25 +1,25 @@
 <div class="top">
   <button type="button" class="edit-btn" [class.active]="editMode()" [attr.aria-pressed]="editMode()"
           [title]="editMode() ? 'Quitter l\'édition (B)' : 'Éditer la carte (B)'" (click)="toggle($event)">
-    <span class="icon" aria-hidden="true">🛠️</span>
+    <span class="icon" aria-hidden="true"><svg lucideWrench></svg></span>
     <span class="label">{{ editMode() ? 'Quitter l\'édition' : 'Éditer' }}</span>
     <kbd>B</kbd>
   </button>
   @if (editMode()) {
     <div class="history" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
       <button type="button" class="icon-btn" title="Annuler (Ctrl+Z)" aria-label="Annuler"
-              [disabled]="!canUndo()" (click)="send('undo', $event)">↶</button>
+              [disabled]="!canUndo()" (click)="send('undo', $event)"><svg lucideUndo2></svg></button>
       <button type="button" class="icon-btn" title="Refaire (Ctrl+Y)" aria-label="Refaire"
-              [disabled]="!canRedo()" (click)="send('redo', $event)">↷</button>
+              [disabled]="!canRedo()" (click)="send('redo', $event)"><svg lucideRedo2></svg></button>
       <button type="button" class="icon-btn" [class.on]="grid()" title="Afficher / masquer la grille des cases" aria-label="Grille"
-              [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)">▦</button>
+              [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)"><svg lucideGrid3x3></svg></button>
       <button type="button" class="text-btn" title="Éditeur de modèles 3D : créer et peindre les bâtiments, les fleurs…"
-              (click)="openModelEditor()">🧊 Modèles</button>
+              (click)="openModelEditor()"><svg lucideBox></svg> Modèles</button>
       <button type="button" class="text-btn" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
-              (click)="send('export', $event)">⬇ Exporter</button>
+              (click)="send('export', $event)"><svg lucideDownload></svg> Exporter</button>
       <button type="button" class="text-btn" [class.danger]="confirmReset()"
               [title]="confirmReset() ? 'Clique encore pour oublier les modifications' : 'Revenir à la carte du code (oublie les modifications enregistrées dans le navigateur)'"
-              (click)="reset($event)">{{ confirmReset() ? 'Confirmer ?' : '⟲ Réinitialiser' }}</button>
+              (click)="reset($event)">@if (confirmReset()) { Confirmer ? } @else { <svg lucideRotateCcw></svg> Réinitialiser }</button>
     </div>
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
       @if (touch()) {
@@ -61,8 +61,8 @@
       <input type="checkbox" [checked]="selection.canHide" (change)="send('toggleCanHide', $event)" />
       Transparent quand le joueur est derrière
     </label>
-    <button type="button" class="model-btn" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)">🧊 Modifier le modèle</button>
-    <button type="button" class="delete" (click)="send('delete', $event)">🗑 Supprimer <kbd>Suppr</kbd></button>
+    <button type="button" class="model-btn" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)"><svg lucideBox></svg> Modifier le modèle</button>
+    <button type="button" class="delete" (click)="send('delete', $event)"><svg lucideTrash></svg> Supprimer <kbd>Suppr</kbd></button>
   </section>
 }
 
@@ -79,7 +79,7 @@
           @for (b of brushes; track b.value) {
             @if (tab() === 'ground' || b.value !== 'fill') {
               <button type="button" role="radio" [title]="b.title" [attr.aria-checked]="brush() === b.value"
-                      (click)="setBrush(b.value, $event)">{{ b.label }}</button>
+                      (click)="setBrush(b.value, $event)">@if (b.value === 'fill') { <svg lucidePaintBucket></svg> } @else { {{ b.label }} }</button>
             }
           }
         </div>
@@ -88,7 +88,7 @@
     <div class="palette" role="toolbar" aria-label="Outils">
       <button type="button" class="entry none" title="Aucun (Échap) : la souris sélectionne et déplace la vue"
               [class.selected]="!modelId() && !tileId()" [attr.aria-pressed]="!modelId() && !tileId()" (click)="pick(null, $event); tileSelected.emit(null)">
-        <span class="pic" aria-hidden="true">✋</span>
+        <span class="pic" aria-hidden="true"><svg lucideMousePointer2></svg></span>
         <span class="name">Aucun</span>
       </button>
       @if (tab() === 'objects') {
@@ -116,32 +116,32 @@
         <button type="button" class="entry tile" title="Gomme : revenir au sol d'origine (enlève aussi les escaliers)"
                 [class.selected]="tileId() === 'erase'" [attr.aria-pressed]="tileId() === 'erase'"
                 (click)="pickTile('erase', $event)">
-          <span class="pic" aria-hidden="true">🧽</span>
+          <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
           <span class="name">Gomme</span>
         </button>
       } @else {
         <button type="button" class="entry tile" title="Monter le sol d'un niveau (clic / glisser)"
                 [class.selected]="tileId() === 'raise'" [attr.aria-pressed]="tileId() === 'raise'"
                 (click)="pickTile('raise', $event)">
-          <span class="pic" aria-hidden="true">⛰️</span>
+          <span class="pic" aria-hidden="true"><svg lucideArrowBigUp></svg></span>
           <span class="name">Monter</span>
         </button>
         <button type="button" class="entry tile" title="Descendre le sol d'un niveau (clic / glisser)"
                 [class.selected]="tileId() === 'lower'" [attr.aria-pressed]="tileId() === 'lower'"
                 (click)="pickTile('lower', $event)">
-          <span class="pic" aria-hidden="true">🕳️</span>
+          <span class="pic" aria-hidden="true"><svg lucideArrowBigDown></svg></span>
           <span class="name">Descendre</span>
         </button>
         <button type="button" class="entry tile" title="Escalier : monte d'un niveau vers la case voisine plus haute"
                 [class.selected]="tileId() === 'stairs'" [attr.aria-pressed]="tileId() === 'stairs'"
                 (click)="pickTile('stairs', $event)">
-          <span class="pic" aria-hidden="true">🪜</span>
+          <span class="pic" aria-hidden="true"><svg lucideChartNoAxesColumnIncreasing></svg></span>
           <span class="name">Escalier</span>
         </button>
         <button type="button" class="entry tile" title="Enlever les escaliers (le sol et sa hauteur ne changent pas)"
                 [class.selected]="tileId() === 'unstairs'" [attr.aria-pressed]="tileId() === 'unstairs'"
                 (click)="pickTile('unstairs', $event)">
-          <span class="pic" aria-hidden="true">🧽</span>
+          <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
           <span class="name">Sans escalier</span>
         </button>
       }

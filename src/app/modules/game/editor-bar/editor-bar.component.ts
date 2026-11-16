@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
 import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
 import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
@@ -27,6 +28,7 @@ interface PaletteEntry {
  */
 @Component({
   selector: 'game-editor-bar',
+  imports: [LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench],
   templateUrl: './editor-bar.component.html',
   styleUrl: './editor-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,7 +54,7 @@ export class EditorBarComponent {
     { value: 1, label: '1', title: 'Pinceau 1 case' },
     { value: 2, label: '2', title: 'Pinceau 2 × 2 cases' },
     { value: 3, label: '3', title: 'Pinceau 3 × 3 cases' },
-    { value: 'fill', label: '🪣', title: 'Pot de peinture : remplit toute la zone du même sol' },
+    { value: 'fill', label: 'Pot', title: 'Pot de peinture : remplit toute la zone du même sol' },
   ];
   /** Terrains of the palette, with their picture cut from the tileset (CSS background, 2× zoom). */
   protected readonly tiles = TERRAINS.map(t => {

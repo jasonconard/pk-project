@@ -16,7 +16,7 @@
   <div class="tool">
     <button type="button" class="tool-btn" title="Heure (H)" [class.active]="panel() === 'hour'"
             [attr.aria-expanded]="panel() === 'hour'" (click)="toggle('hour', $event)">
-      <span class="tool-icon" aria-hidden="true">{{ timeOfDay().icon }}</span>
+      <span class="tool-icon" aria-hidden="true"><svg [lucideIcon]="timeIcon()"></svg></span>
       <span class="tool-value">{{ hourLabel() }}</span>
       <kbd>H</kbd>
     </button>
@@ -24,7 +24,7 @@
         <div class="popover" role="dialog">
         <section class="setting time" aria-label="Heure">
           <div class="wind-header">
-            <span class="section-title">{{ timeOfDay().icon }} Heure</span>
+            <span class="section-title"><svg [lucideIcon]="timeIcon()"></svg> Heure</span>
             <span class="wind-value">{{ timeOfDay().label }} · {{ hourLabel() }}</span>
           </div>
           <input type="range" class="wind-gauge" min="0" max="23.75" step="0.25"
@@ -40,7 +40,7 @@
                   [class.active]="timeFlow()"
                   [attr.aria-checked]="timeFlow()"
                   (click)="toggleTimeFlow($event)">
-            <span class="gusts-label">⏱️ Temps qui passe</span>
+            <span class="gusts-label"><svg lucideTimer></svg> Temps qui passe</span>
             <span class="gusts-switch" aria-hidden="true"></span>
           </button>
         </section>
@@ -52,7 +52,7 @@
   <div class="tool">
     <button type="button" class="tool-btn" title="Vent (W)" [class.active]="panel() === 'wind'"
             [attr.aria-expanded]="panel() === 'wind'" (click)="toggle('wind', $event)">
-      <span class="tool-icon" aria-hidden="true">💨</span>
+      <span class="tool-icon" aria-hidden="true"><svg lucideWind></svg></span>
       <span class="tool-value">{{ windPercent() }}%</span>
       <kbd>W</kbd>
     </button>
@@ -60,7 +60,7 @@
         <div class="popover" role="dialog">
         <section class="setting" aria-label="Vent">
           <div class="wind-header">
-            <span class="section-title">💨 Vent</span>
+            <span class="section-title"><svg lucideWind></svg> Vent</span>
             <span class="wind-value">{{ windLabel() }} · {{ windPercent() }}%</span>
           </div>
           <input type="range" class="wind-gauge" min="0" max="100" step="1"
@@ -83,7 +83,7 @@
                   [class.active]="gusts()"
                   [attr.aria-checked]="gusts()"
                   (click)="toggleGusts($event)">
-            <span class="gusts-label">🌬️ Rafales</span>
+            <span class="gusts-label"><svg lucideWindArrowDown></svg> Rafales</span>
             <span class="gusts-switch" aria-hidden="true"></span>
           </button>
         </section>
@@ -95,7 +95,7 @@
   <div class="tool">
     <button type="button" class="tool-btn" title="Nuages (N)" [class.active]="panel() === 'clouds'"
             [attr.aria-expanded]="panel() === 'clouds'" (click)="toggle('clouds', $event)">
-      <span class="tool-icon" aria-hidden="true">☁️</span>
+      <span class="tool-icon" aria-hidden="true"><svg lucideCloud></svg></span>
       <span class="tool-value">{{ cloudPercent() }}%</span>
       <kbd>N</kbd>
     </button>
@@ -103,7 +103,7 @@
         <div class="popover" role="dialog">
         <section class="setting clouds" aria-label="Nuages">
           <div class="wind-header">
-            <span class="section-title">☁️ Nuages</span>
+            <span class="section-title"><svg lucideCloud></svg> Nuages</span>
             <span class="wind-value">{{ cloudLabel() }} · {{ cloudPercent() }}%</span>
           </div>
           <input type="range" class="wind-gauge" min="0" max="100" step="1"
@@ -121,7 +121,7 @@
   <div class="tool">
     <button type="button" class="tool-btn" title="Son (V)" [class.active]="panel() === 'sound'"
             [attr.aria-expanded]="panel() === 'sound'" (click)="toggle('sound', $event)">
-      <span class="tool-icon" aria-hidden="true">{{ soundMuted() || !soundPercent() ? '🔇' : '🔊' }}</span>
+      <span class="tool-icon" aria-hidden="true">@if (soundMuted() || !soundPercent()) { <svg lucideVolumeX></svg> } @else { <svg lucideVolume2></svg> }</span>
       <span class="tool-value">{{ soundMuted() ? 'Muet' : soundPercent() + '%' }}</span>
       <kbd>V</kbd>
     </button>
@@ -129,7 +129,7 @@
         <div class="popover" role="dialog">
         <section class="setting sound" aria-label="Son">
           <div class="wind-header">
-            <span class="section-title">{{ soundMuted() || !soundPercent() ? '🔇' : '🔊' }} Son</span>
+            <span class="section-title">@if (soundMuted() || !soundPercent()) { <svg lucideVolumeX></svg> } @else { <svg lucideVolume2></svg> } Son</span>
             <button type="button" class="mute" [attr.aria-pressed]="soundMuted()" (click)="toggleMute($event)">
               {{ soundMuted() ? 'Activer' : 'Couper' }}
             </button>
@@ -142,7 +142,7 @@
                  (change)="releaseSlider($event)" />
           @if (silentBypassSupported) {
             <button type="button" class="silent-mode" [attr.aria-pressed]="ignoreSilentMode()" (click)="toggleSilentMode($event)">
-              <span class="check" aria-hidden="true">{{ ignoreSilentMode() ? '✓' : '' }}</span>
+              <span class="check" aria-hidden="true">@if (ignoreSilentMode()) { <svg lucideCheck></svg> }</span>
               Jouer même en mode silencieux
             </button>
           }

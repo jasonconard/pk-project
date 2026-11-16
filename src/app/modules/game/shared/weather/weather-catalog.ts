@@ -4,14 +4,14 @@ import { WeatherType } from './Weather';
 
 export type WeatherCategory = 'classic' | 'rain' | 'cold' | 'heat' | 'nature' | 'magic' | 'dark';
 
-export const WEATHER_CATEGORIES: { id: WeatherCategory, label: string, icon: string }[] = [
-  { id: 'classic', label: 'Classiques', icon: '☀️' },
-  { id: 'rain', label: 'Pluie & tempêtes', icon: '🌧️' },
-  { id: 'cold', label: 'Froid', icon: '❄️' },
-  { id: 'heat', label: 'Chaleur & feu', icon: '🔥' },
-  { id: 'nature', label: 'Nature', icon: '🌿' },
-  { id: 'magic', label: 'Magie & ciel', icon: '✨' },
-  { id: 'dark', label: 'Sombre & surnaturel', icon: '🌑' },
+export const WEATHER_CATEGORIES: { id: WeatherCategory, label: string }[] = [
+  { id: 'classic', label: 'Classiques' },
+  { id: 'rain', label: 'Pluie & tempêtes' },
+  { id: 'cold', label: 'Froid' },
+  { id: 'heat', label: 'Chaleur & feu' },
+  { id: 'nature', label: 'Nature' },
+  { id: 'magic', label: 'Magie & ciel' },
+  { id: 'dark', label: 'Sombre & surnaturel' },
 ];
 
 export interface WeatherInfo {

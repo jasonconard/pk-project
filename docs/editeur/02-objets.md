@@ -15,7 +15,7 @@ Onglet **Objets**, choisir un modèle : un **aperçu transparent** suit la souri
 Avec « Aucun », un clic sélectionne un objet (cadre orange) ; un clic dans le vide ou Échap désélectionne.
 
 - **Glisser l'objet sélectionné** le déplace (aimanté à la grille), même d'un morceau de carte à l'autre.
-- **Suppr** ou le bouton 🗑 le supprime.
+- **Suppr** ou le bouton **Supprimer** le supprime.
 - Le panneau permet de changer **« Bloque le passage »** et **« Transparent quand le joueur est derrière »**.
 
 **Comment c'est fait** : un rayon part de la souris (`Raycaster.setFromCamera`) et touche les meshes des objets visibles ; on remonte ensuite les parents jusqu'à l'objet (`MapHelper.findBuilding`). Les objets cachés près de la caméra (couleur non écrite) sont ignorés. Un appui est un **clic** s'il bouge de moins de 5 pixels, sinon un **glisser**.

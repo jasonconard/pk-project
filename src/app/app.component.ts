@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { LucideMaximize, LucideMinimize } from '@lucide/angular';
 import { CoreService } from './core/shared/service/core.service';
 import { UpdatePromptComponent } from './core/update-prompt/update-prompt.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, UpdatePromptComponent],
+  imports: [RouterOutlet, UpdatePromptComponent, LucideMaximize, LucideMinimize],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

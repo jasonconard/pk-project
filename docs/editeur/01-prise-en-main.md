@@ -2,7 +2,7 @@
 
 ## Ouvrir l'éditeur
 
-Touche **B** ou bouton **🛠️ Éditer** en haut à gauche (sur la carte uniquement, pas en combat). En édition, le bouton a un contour orange et le joueur est figé : plus de déplacement ni d'événements. En sortant, la caméra revient exactement où elle était.
+Touche **B** ou bouton **Éditer** (icône de clé) en haut à gauche (sur la carte uniquement, pas en combat). En édition, le bouton a un contour orange et le joueur est figé : plus de déplacement ni d'événements. En sortant, la caméra revient exactement où elle était.
 
 ## La caméra libre
 
@@ -28,10 +28,10 @@ En édition, le stick et les boutons du jeu sont masqués (`TouchService.setGame
 
 ## L'interface
 
-- **En haut à gauche** : Quitter l'édition, ↶ annuler, ↷ refaire, ▦ grille, ⬇ Exporter, ⟲ Réinitialiser.
-- **▦ Grille** : trace le contour de chaque case (16 unités) au-dessus du sol, à la hauteur de la case et en pente sur les escaliers. Un jeu de lignes par morceau de carte, construit quand il entre dans la vue et refait quand ses reliefs changent (`MapEditorService.buildGrid`).
+- **En haut à gauche** : Quitter l'édition, annuler, refaire, grille, Modèles, Exporter, Réinitialiser.
+- **Grille** : trace le contour de chaque case (16 unités) au-dessus du sol, à la hauteur de la case et en pente sur les escaliers. Un jeu de lignes par morceau de carte, construit quand il entre dans la vue et refait quand ses reliefs changent (`MapEditorService.buildGrid`).
 - **Sous ces boutons** : le panneau de l'objet sélectionné (voir [Objets](02-objets.md)).
-- **En bas** : la palette, en trois onglets (Objets, Sols, Reliefs). « ✋ Aucun » reste toujours en tête : la souris sélectionne et déplace la vue. Pour Sols et Reliefs, la taille du pinceau (1, 2, 3, 🪣) est à droite des onglets.
+- **En bas** : la palette, en trois onglets (Objets, Sols, Reliefs). « Aucun » reste toujours en tête : la souris sélectionne et déplace la vue. Pour Sols et Reliefs, la taille du pinceau (1, 2, 3, pot de peinture) est à droite des onglets.
 - **Au-dessus de la palette** : un rappel des commandes, qui change avec l'outil choisi.
 
 ## Raccourcis
