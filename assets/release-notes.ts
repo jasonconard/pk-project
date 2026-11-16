@@ -14,6 +14,15 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.26',
+    date: '2026-11-16',
+    notes: [
+      'Éditeur de musique : règle le volume de chaque instrument et donne un son lo-fi à ton morceau (chaleur, grain, cassette, vinyle, swing).',
+      'Éditeur de musique : des rythmes de batterie tout faits, et copier-coller une mesure.',
+      'Éditeur de musique : glisse le doigt pour faire durer une note sur plusieurs temps.',
+    ],
+  },
+  {
     version: '0.0.25',
     date: '2026-11-16',
     notes: [
