@@ -13,11 +13,32 @@ export interface SongNote {
   /** Degree of the scale from the lowest row (0 = the tonic, 2 octaves lower than the top row). */
   degree: number;
   instrument: InstrumentId;
+  /** Steps held (1 when not set). */
+  length?: number;
 }
 
 export interface DrumHit {
   step: number;
   drum: DrumId;
+}
+
+/** A volume per channel: each melodic instrument and the drums. */
+export type Channel = InstrumentId | 'drums';
+
+/** The lo-fi sound, every value 0..1 (0 = clean). */
+export interface LofiSettings {
+  /** Warmth: a low-pass filter that closes (muffled, like an old radio). */
+  warmth: number;
+  /** Grain: fewer volume steps (bit crusher), a gritty old sampler. */
+  grain: number;
+  /** Wobble: the pitch floats, like a worn tape. */
+  wobble: number;
+  /** Hiss: a soft breath of noise. */
+  hiss: number;
+  /** Vinyl: crackles. */
+  vinyl: number;
+  /** Swing: every second sixteenth a little late (laid-back groove). */
+  swing: number;
 }
 
 export interface Song {
@@ -31,6 +52,10 @@ export interface Song {
   bars: number;
   notes: SongNote[];
   drums: DrumHit[];
+  /** Volume per channel, 0..1.5 (1 when not set). */
+  mix?: Partial<Record<Channel, number>>;
+  /** Lo-fi sound (clean when not set). */
+  lofi?: LofiSettings;
 }
 
 export const STEPS_PER_BAR = 16;
@@ -60,6 +85,57 @@ export const MODES: { id: ModeId, label: string, hint: string, intervals: number
   { id: 'dorian', label: 'Dorien', hint: 'Mystérieux, donjon', intervals: [0, 2, 3, 5, 7, 9, 10] },
   { id: 'blues', label: 'Blues', hint: 'Cool, nonchalant', intervals: [0, 3, 5, 6, 7, 10] },
 ];
+
+export const CHANNELS: { id: Channel, label: string, color: string }[] = [
+  ...INSTRUMENTS,
+  { id: 'drums', label: 'Batterie', color: '#e8e8ee' },
+];
+
+export const CLEAN: LofiSettings = { warmth: 0, grain: 0, wobble: 0, hiss: 0, vinyl: 0, swing: 0 };
+
+export const LOFI_SETTINGS: { id: keyof LofiSettings, label: string, hint: string }[] = [
+  { id: 'warmth', label: 'Chaleur', hint: 'Son étouffé, comme une vieille radio' },
+  { id: 'grain', label: 'Grain', hint: 'Son granuleux de vieil échantillonneur' },
+  { id: 'wobble', label: 'Flottement', hint: 'La note ondule, comme une cassette usée' },
+  { id: 'hiss', label: 'Souffle', hint: 'Un léger bruit de fond' },
+  { id: 'vinyl', label: 'Vinyle', hint: 'Des craquements de disque' },
+  { id: 'swing', label: 'Swing', hint: 'Le rythme se balance, plus nonchalant' },
+];
+
+export const LOFI_PRESETS: { id: string, label: string, settings: LofiSettings }[] = [
+  { id: 'clean', label: 'Propre', settings: CLEAN },
+  { id: 'soft', label: 'Lo-fi doux', settings: { warmth: 0.45, grain: 0.1, wobble: 0.25, hiss: 0.15, vinyl: 0.2, swing: 0.3 } },
+  { id: 'tape', label: 'Cassette', settings: { warmth: 0.6, grain: 0.25, wobble: 0.6, hiss: 0.35, vinyl: 0, swing: 0.2 } },
+  { id: 'vinyl', label: 'Vieux vinyle', settings: { warmth: 0.7, grain: 0.2, wobble: 0.2, hiss: 0.2, vinyl: 0.65, swing: 0.35 } },
+  { id: 'chip', label: 'Console 8 bits', settings: { warmth: 0.1, grain: 0.7, wobble: 0, hiss: 0, vinyl: 0, swing: 0 } },
+];
+
+/** Ready-made drum patterns (steps of one bar), copied on every bar. */
+export const DRUM_PATTERNS: { id: string, label: string, hint: string, kick: number[], snare: number[], hat: number[] }[] = [
+  { id: 'basic', label: 'Simple', hint: 'Grosse caisse 1 et 3, caisse claire 2 et 4',
+    kick: [0, 8], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14] },
+  { id: 'boombap', label: 'Lo-fi', hint: 'Boom bap décontracté',
+    kick: [0, 7, 10], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14, 15] },
+  { id: 'calm', label: 'Calme', hint: 'Moitié moins vite, pour la ville ou la nuit',
+    kick: [0], snare: [8], hat: [0, 4, 8, 12] },
+  { id: 'battle', label: 'Combat', hint: 'Énergique, charley sur chaque croche',
+    kick: [0, 8, 10], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14] },
+  { id: 'dance', label: 'Danse', hint: 'Grosse caisse sur chaque temps',
+    kick: [0, 4, 8, 12], snare: [4, 12], hat: [2, 6, 10, 14] },
+  { id: 'none', label: 'Aucun', hint: 'Pas de batterie', kick: [], snare: [], hat: [] },
+];
+
+export function volumeOf(song: Song, channel: Channel): number {
+  return song.mix?.[channel] ?? 1;
+}
+
+export function noteLength(note: SongNote): number {
+  return note.length ?? 1;
+}
+
+export function lofiOf(song: Song): LofiSettings {
+  return song.lofi ?? CLEAN;
+}
 
 /** French note names (with the usual sharps / flats). */
 export const NOTE_NAMES = ['Do', 'Do♯', 'Ré', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];

@@ -273,13 +273,16 @@ button {
   overflow: hidden;
 }
 
-// The notes scroll when the screen is too low; the drums stay under them
+// The notes scroll when the screen is too low; the drums stay under them. A finger sliding sideways stretches a
+// note (it doesn't scroll).
 .notes {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow-x: hidden;
+  touch-action: pan-y;
   overscroll-behavior: contain;
 
   // The rows share the room (at least 26px each: easy to touch; below that, the notes scroll)
@@ -361,8 +364,28 @@ button {
   }
 }
 
+// A held note: a bar from the stamp's middle over the next cells (above them: they come later in the page)
+.tail {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  width: calc((var(--len) - 1) * 100%);
+  height: 8px;
+  transform: translateY(-50%);
+  border-radius: 4px;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.ghost {
+  opacity: 0.55;
+}
+
 // A note: a "stamp" of its instrument's color, its icon inside
 .note {
+  position: relative;
+  z-index: 2;
   width: min(21px, 92%);
   aspect-ratio: 1;
   display: flex;
@@ -471,6 +494,10 @@ button {
     gap: 3px;
     color: var(--muted);
     font-size: 10px;
+
+    &.on {
+      color: #9fc3ff;
+    }
 
     svg {
       font-size: 20px;

@@ -187,3 +187,113 @@
     animation: none;
   }
 }
+
+.sheet-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+// Listen without closing the sheet (mix, lo-fi)
+.play.mini {
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .slider-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+
+    b {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color);
+  }
+
+  small {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  input {
+    width: 100%;
+    height: 32px;
+    margin: 0;
+    accent-color: var(--color, #5a8ec5);
+  }
+}
+
+.presets, .bar-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  button {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 18px;
+    background: var(--surface);
+    font-size: 13px;
+
+    &.on {
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+  }
+}
+
+.bar-picker button {
+  width: 40px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.patterns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+
+  button {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--surface);
+    text-align: left;
+
+    strong {
+      font-size: 13px;
+    }
+
+    small {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+
+    &:active {
+      background: var(--accent-soft);
+    }
+  }
+}

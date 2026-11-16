@@ -1,20 +1,23 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
-  LucideAudioWaveform, LucideBell, LucideChevronDown, LucideChevronLeft, LucideDisc3, LucideDownload, LucideDynamicIcon,
+  LucideAudioWaveform, LucideBell, LucideChevronDown, LucideClipboardPaste, LucideCopy, LucideChevronLeft, LucideDisc3, LucideDownload, LucideDynamicIcon,
   LucideEighthNote, LucideEraser, LucideFileMusic, LucideGuitar, LucideIcon, LucideKeyboardMusic, LucideMinus, LucidePlay,
   LucidePlus, LucideRedo2, LucideSlidersHorizontal, LucideSquare, LucideTrash, LucideUndo2, LucideWavesHorizontal, LucideX,
 } from '@lucide/angular';
 import { onAppVisibility } from '../../core/shared/app-visibility';
 import { MusicEngine } from './shared/music-engine';
 import {
-  degreeCount, degreeMidi, DRUMS, DrumId, INSTRUMENTS, InstrumentId, MAX_BARS, MAX_BPM, midiName, MIN_BPM, ModeId, MODES,
-  modeOf, newSong, NOTE_NAMES, scaleLabel, Song, songLength, STEPS_PER_BAR,
+  Channel, CHANNELS, degreeCount, degreeMidi, DRUM_PATTERNS, DRUMS, DrumHit, DrumId, INSTRUMENTS, InstrumentId, LOFI_PRESETS,
+  LOFI_SETTINGS, lofiOf, LofiSettings, MAX_BARS, MAX_BPM, midiName, MIN_BPM, ModeId, MODES, modeOf, newSong, NOTE_NAMES,
+  noteLength, scaleLabel, Song, SongNote, songLength, STEPS_PER_BAR, volumeOf,
 } from './shared/song';
 import { loadSongs, saveSongs } from './shared/song-storage';
 
 type Stamp = InstrumentId | 'eraser';
-type Sheet = 'scale' | 'song';
+type Sheet = 'scale' | 'song' | 'mix' | 'lofi';
+/** Moves of one slider closer than this (ms) are one change in the history. */
+const MERGE_TIME = 800;
 
 const ICONS: Record<Stamp, LucideIcon> = {
   lead: LucideEighthNote, bell: LucideBell, pluck: LucideGuitar, bass: LucideAudioWaveform, pad: LucideWavesHorizontal,
@@ -34,7 +37,7 @@ const WIDE = '(min-width: 1200px)';
 @Component({
   selector: 'app-music-editor',
   imports: [
-    NgTemplateOutlet, LucideDynamicIcon, LucideChevronLeft, LucideChevronDown, LucideUndo2, LucideRedo2, LucidePlay, LucideSquare, LucideMinus,
+    NgTemplateOutlet, DecimalPipe, LucideCopy, LucideClipboardPaste, LucideEraser, LucideDynamicIcon, LucideChevronLeft, LucideChevronDown, LucideUndo2, LucideRedo2, LucidePlay, LucideSquare, LucideMinus,
     LucidePlus, LucideKeyboardMusic, LucideFileMusic, LucideSlidersHorizontal, LucideDisc3, LucideDownload, LucideX, LucideTrash,
   ],
   templateUrl: './music-editor.component.html',
@@ -48,6 +51,10 @@ export class MusicEditorComponent {
   protected readonly noteNames = NOTE_NAMES;
   protected readonly icons = ICONS;
   protected readonly maxBars = MAX_BARS;
+  protected readonly channels = CHANNELS;
+  protected readonly lofiSettings = LOFI_SETTINGS;
+  protected readonly lofiPresets = LOFI_PRESETS;
+  protected readonly drumPatterns = DRUM_PATTERNS;
 
   private readonly engine = new MusicEngine();
   private readonly stored = loadSongs();
@@ -63,6 +70,9 @@ export class MusicEditorComponent {
   protected readonly viewStart = signal(0);
   private readonly viewBarsState = signal(1);
   protected readonly confirmDelete = signal(false);
+  /** Bar the bar tools act on (copy, paste, clear), and the copied bar. */
+  protected readonly toolBar = signal(0);
+  protected readonly copied = signal<{ notes: SongNote[], drums: DrumHit[], from: number } | null>(null);
 
   private readonly past: Song[] = [];
   private readonly future: Song[] = [];
@@ -93,11 +103,31 @@ export class MusicEditorComponent {
       beats: [0, 1, 2, 3].map(beat => song.notes.some(n => Math.floor(n.step / 4) === bar * 4 + beat)),
     }));
   });
-  /** "step:degree" → instrument */
-  protected readonly noteAt = computed(() => new Map(this.song().notes.map(n => [`${n.step}:${n.degree}`, n.instrument])));
+  /** "step:degree" → the note starting there */
+  protected readonly noteAt = computed(() => new Map(this.song().notes.map(n => [`${n.step}:${n.degree}`, n])));
+  /** "step:degree" → the note sounding there (its start or its held part) */
+  protected readonly coverAt = computed(() => {
+    const cover = new Map<string, SongNote>();
+    for (const note of this.song().notes) {
+      for (let i = 0; i < noteLength(note); i++) {
+        cover.set(`${note.step + i}:${note.degree}`, note);
+      }
+    }
+    return cover;
+  });
+  /** A note being stretched (press, then slide along the row): its row, start, length, and the note if it existed. */
+  protected readonly drag = signal<{ degree: number, start: number, length: number, note: SongNote | null } | null>(null);
+  private dragFrom: { pointerId: number, x: number, tapStep: number, moved: boolean } | null = null;
   protected readonly drumAt = computed(() => new Set(this.song().drums.map(d => `${d.step}:${d.drum}`)));
+  protected readonly lofi = computed(() => lofiOf(this.song()));
+  /** The preset matching the lo-fi settings (if any). */
+  protected readonly activePreset = computed(() => {
+    const lofi = this.lofi();
+    return LOFI_PRESETS.find(p => LOFI_SETTINGS.every(k => Math.abs(p.settings[k.id] - lofi[k.id]) < 0.01))?.id ?? null;
+  });
 
   private saveTimer?: ReturnType<typeof setTimeout>;
+  private lastMerge = { key: '', time: 0 };
   private frame = 0;
 
   constructor() {
@@ -173,20 +203,116 @@ export class MusicEditorComponent {
 
   // --- Editing ---
 
-  protected toggleNote(degree: number, step: number): void {
+  /**
+   * A tap on a cell: the note sounding there (even on its held part) is removed with the same stamp or the eraser,
+   * changes instrument with another stamp; an empty cell gets a one-step note.
+   */
+  protected tapNote(degree: number, step: number): void {
     const stamp = this.stamp();
-    const current = this.noteAt().get(`${step}:${degree}`);
-    if (stamp === 'eraser' || current === stamp) {
-      if (current) {
-        this.edit(song => song.notes = song.notes.filter(n => n.step !== step || n.degree !== degree));
+    const note = this.coverAt().get(`${step}:${degree}`);
+    if (stamp === 'eraser' || note?.instrument === stamp) {
+      if (note) {
+        this.edit(song => song.notes = song.notes.filter(n => !this.same(n, note)));
       }
       return;
     }
+    if (note) {
+      this.edit(song => song.notes = song.notes.map(n => this.same(n, note) ? { ...n, instrument: stamp } : n));
+      this.engine.previewNote(this.song(), stamp, note.degree);
+      return;
+    }
+    this.placeNote(degree, step, 1, stamp);
+  }
+
+  /** Keyboard (Enter / Space on a cell): a tap. Pointer clicks are handled by the press / release. */
+  protected keyNote(event: MouseEvent, degree: number, step: number): void {
+    if (event.detail === 0) {
+      this.tapNote(degree, step);
+    }
+  }
+
+  /** Press on a cell: starts stretching the note there (or a new one); a release without moving is a tap. */
+  protected pressNote(event: PointerEvent, degree: number, step: number): void {
+    if (event.button !== 0 || this.dragFrom) {
+      return;
+    }
+    const note = this.coverAt().get(`${step}:${degree}`) ?? null;
+    this.drag.set({ degree, start: note?.step ?? step, length: note ? noteLength(note) : 1, note });
+    this.dragFrom = { pointerId: event.pointerId, x: event.clientX, tapStep: step, moved: false };
+    document.addEventListener('pointermove', this.onDragMove);
+    document.addEventListener('pointerup', this.onDragEnd);
+    document.addEventListener('pointercancel', this.onDragEnd);
+  }
+
+  private readonly onDragMove = (event: PointerEvent) => {
+    const drag = this.drag();
+    const from = this.dragFrom;
+    if (!drag || !from || event.pointerId !== from.pointerId) {
+      return;
+    }
+    const cell = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest<HTMLElement>('.cell[data-step]');
+    if (!cell) {
+      return;
+    }
+    const length = Math.max(1, Math.min(+cell.dataset['step']! - drag.start + 1, songLength(this.song()) - drag.start));
+    if (Math.abs(event.clientX - from.x) > 8) {
+      from.moved = true;
+    }
+    if (length !== drag.length && from.moved) {
+      this.drag.set({ ...drag, length });
+    }
+  };
+
+  private readonly onDragEnd = (event: PointerEvent) => {
+    const drag = this.drag();
+    const from = this.dragFrom;
+    if (!from || event.pointerId !== from.pointerId) {
+      return;
+    }
+    document.removeEventListener('pointermove', this.onDragMove);
+    document.removeEventListener('pointerup', this.onDragEnd);
+    document.removeEventListener('pointercancel', this.onDragEnd);
+    this.dragFrom = null;
+    this.drag.set(null);
+    if (!drag || event.type === 'pointercancel') {
+      return;
+    }
+    if (!from.moved) {
+      this.tapNote(drag.degree, from.tapStep);
+    } else if (drag.note) {
+      const note = drag.note;
+      this.edit(song => {
+        song.notes = song.notes.map(n => this.same(n, note) ? { ...n, length: this.fit(song, note.degree, note.step, drag.length) } : n);
+      });
+    } else if (this.stamp() !== 'eraser') {
+      this.placeNote(drag.degree, drag.start, drag.length, this.stamp() as InstrumentId);
+    }
+  };
+
+  /** A new note: a note already sounding on that cell is cut just before it; the new one stops before the next. */
+  private placeNote(degree: number, step: number, length: number, instrument: InstrumentId): void {
     this.edit(song => {
-      song.notes = song.notes.filter(n => n.step !== step || n.degree !== degree);
-      song.notes.push({ step, degree, instrument: stamp });
+      song.notes = song.notes.map(n => n.degree === degree && n.step < step && n.step + noteLength(n) > step
+        ? { ...n, length: step - n.step } : n);
+      song.notes.push({ step, degree, instrument, length: this.fit(song, degree, step, length) });
     });
-    this.engine.previewNote(this.song(), stamp, degree);
+    this.engine.previewNote(this.song(), instrument, degree);
+  }
+
+  /** A length that doesn't run into the next note of the row (nor past the end). */
+  private fit(song: Song, degree: number, step: number, length: number): number {
+    const next = Math.min(songLength(song), ...song.notes.filter(n => n.degree === degree && n.step > step).map(n => n.step));
+    return Math.max(1, Math.min(length, next - step));
+  }
+
+  private same(a: SongNote, b: SongNote): boolean {
+    return a.step === b.step && a.degree === b.degree;
+  }
+
+  /** Length shown for a note (the one being stretched follows the finger). */
+  protected shownLength(note: SongNote): number {
+    const drag = this.drag();
+    return drag?.note && this.same(drag.note, note) ? drag.length : noteLength(note);
   }
 
   protected toggleDrum(drum: DrumId, step: number): void {
@@ -195,7 +321,7 @@ export class MusicEditorComponent {
       ? song.drums.filter(d => d.step !== step || d.drum !== drum)
       : [...song.drums, { step, drum }]);
     if (!on) {
-      this.engine.previewDrum(drum);
+      this.engine.previewDrum(this.song(), drum);
     }
   }
 
@@ -258,6 +384,88 @@ export class MusicEditorComponent {
     }
   }
 
+  // --- Mix, lo-fi ---
+
+  protected volume(channel: Channel): number {
+    return volumeOf(this.song(), channel);
+  }
+
+  protected setVolume(channel: Channel, volume: number): void {
+    this.edit(song => song.mix = { ...song.mix, [channel]: Math.round(volume * 100) / 100 }, `mix-${channel}`);
+  }
+
+  protected setLofi(key: keyof LofiSettings, value: number): void {
+    this.edit(song => song.lofi = { ...lofiOf(song), [key]: Math.round(value * 100) / 100 }, `lofi-${key}`);
+  }
+
+  protected applyPreset(settings: LofiSettings): void {
+    this.edit(song => song.lofi = { ...settings });
+  }
+
+  // --- Drums, bars ---
+
+  /** A ready-made drum pattern, on every bar. */
+  protected applyDrumPattern(id: string): void {
+    const pattern = DRUM_PATTERNS.find(p => p.id === id);
+    if (!pattern) {
+      return;
+    }
+    this.edit(song => song.drums = Array.from({ length: song.bars }, (_, bar) => [
+      ...pattern.kick.map(s => ({ step: bar * STEPS_PER_BAR + s, drum: 'kick' as DrumId })),
+      ...pattern.snare.map(s => ({ step: bar * STEPS_PER_BAR + s, drum: 'snare' as DrumId })),
+      ...pattern.hat.map(s => ({ step: bar * STEPS_PER_BAR + s, drum: 'hat' as DrumId })),
+    ]).flat());
+  }
+
+  private inBar(step: number, bar: number): boolean {
+    return Math.floor(step / STEPS_PER_BAR) === bar;
+  }
+
+  protected copyBar(): void {
+    const bar = this.toolBar();
+    const song = this.song();
+    const offset = bar * STEPS_PER_BAR;
+    this.copied.set({
+      from: bar,
+      notes: song.notes.filter(n => this.inBar(n.step, bar)).map(n => ({ ...n, step: n.step - offset })),
+      drums: song.drums.filter(d => this.inBar(d.step, bar)).map(d => ({ ...d, step: d.step - offset })),
+    });
+  }
+
+  /** The copied bar replaces the chosen one. */
+  protected pasteBar(): void {
+    const copied = this.copied();
+    if (!copied) {
+      return;
+    }
+    const bar = this.toolBar();
+    const offset = bar * STEPS_PER_BAR;
+    this.edit(song => {
+      song.notes = [...song.notes.filter(n => !this.inBar(n.step, bar)), ...copied.notes.map(n => ({ ...n, step: n.step + offset }))];
+      song.drums = [...song.drums.filter(d => !this.inBar(d.step, bar)), ...copied.drums.map(d => ({ ...d, step: d.step + offset }))];
+    });
+    this.showBar(bar);
+  }
+
+  protected clearBar(): void {
+    const bar = this.toolBar();
+    this.edit(song => {
+      song.notes = song.notes.filter(n => !this.inBar(n.step, bar));
+      song.drums = song.drums.filter(d => !this.inBar(d.step, bar));
+    });
+  }
+
+  protected openSheet(sheet: Sheet): void {
+    if (sheet === 'song') {
+      this.toolBar.set(Math.min(this.visibleSteps()[0] / STEPS_PER_BAR, this.song().bars - 1));
+    }
+    this.sheet.set(sheet);
+  }
+
+  protected barNumbers(): number[] {
+    return Array.from({ length: this.song().bars }, (_, i) => i);
+  }
+
   // --- Songs ---
 
   protected openSong(id: string): void {
@@ -291,13 +499,19 @@ export class MusicEditorComponent {
 
   // --- History, saving ---
 
-  private edit(change: (song: Song) => void): void {
+  /** A change of the song (undoable). Changes with the same `mergeKey` close together (a slider moving) are one step. */
+  private edit(change: (song: Song) => void, mergeKey = ''): void {
     const before = this.song();
     const song: Song = structuredClone(before);
     change(song);
-    this.past.push(before);
-    if (this.past.length > HISTORY) {
-      this.past.shift();
+    const now = Date.now();
+    const merge = mergeKey && this.lastMerge.key === mergeKey && now - this.lastMerge.time < MERGE_TIME;
+    this.lastMerge = { key: mergeKey, time: now };
+    if (!merge) {
+      this.past.push(before);
+      if (this.past.length > HISTORY) {
+        this.past.shift();
+      }
     }
     this.future.length = 0;
     this.replace(song);

@@ -2,7 +2,7 @@
 <header class="top">
   <div class="title-row">
     <a href="#/" class="back" title="Retour au jeu" (click)="backToGame($event)"><svg lucideChevronLeft></svg> Jeu</a>
-    <button type="button" class="title" title="Le morceau : nom, mesures, autres morceaux" (click)="sheet.set('song')">
+    <button type="button" class="title" title="Le morceau : nom, mesures, autres morceaux" (click)="openSheet('song')">
       <strong>{{ s.name }}</strong>
       <span>Enregistré</span>
     </button>
@@ -57,10 +57,17 @@
         <div class="row" [class.tonic]="row.tonic">
           <span class="label">{{ row.name }}<small>{{ row.octave }}</small></span>
           @for (step of visibleSteps(); track step) {
-            <button type="button" [class]="stepClass(step)" [class.now]="step === playStep()"
-                    [attr.aria-label]="row.name + row.octave + ', temps ' + (step + 1)" (click)="toggleNote(row.degree, step)">
-              @if (noteAt().get(step + ':' + row.degree); as instrument) {
-                <span class="note" [style.background]="color(instrument)"><svg [lucideIcon]="icons[instrument]"></svg></span>
+            <button type="button" [class]="stepClass(step)" [class.now]="step === playStep()" [attr.data-step]="step"
+                    [attr.aria-label]="row.name + row.octave + ', temps ' + (step + 1)"
+                    (pointerdown)="pressNote($event, row.degree, step)" (click)="keyNote($event, row.degree, step)">
+              @if (noteAt().get(step + ':' + row.degree); as note) {
+                @if (shownLength(note) > 1) { <span class="tail" [style.background]="color(note.instrument)" [style.--len]="shownLength(note)"></span> }
+                <span class="note" [style.background]="color(note.instrument)"><svg [lucideIcon]="icons[note.instrument]"></svg></span>
+              } @else if (drag(); as d) {
+                @if (!d.note && d.degree === row.degree && d.start === step && stamp() !== 'eraser') {
+                  @if (d.length > 1) { <span class="tail ghost" [style.background]="color(stamp())" [style.--len]="d.length"></span> }
+                  <span class="note ghost" [style.background]="color(stamp())"><svg [lucideIcon]="icons[stamp()]"></svg></span>
+                }
               }
             </button>
           }
@@ -111,18 +118,24 @@
 </nav>
 
 <ng-template #sectionButtons>
-  <button type="button" class="section" (click)="sheet.set('song')"><svg lucideFileMusic></svg><span>Morceau</span></button>
-  <button type="button" class="section" disabled title="Bientôt : volume de chaque instrument"><svg lucideSlidersHorizontal></svg><span>Mixage</span></button>
-  <button type="button" class="section" disabled title="Bientôt : filtre, souffle, vinyle, swing"><svg lucideDisc3></svg><span>Lo-fi</span></button>
+  <button type="button" class="section" [class.on]="sheet() === 'song'" (click)="openSheet('song')"><svg lucideFileMusic></svg><span>Morceau</span></button>
+  <button type="button" class="section" [class.on]="sheet() === 'mix'" title="Volume de chaque instrument et de la batterie" (click)="openSheet('mix')"><svg lucideSlidersHorizontal></svg><span>Mixage</span></button>
+  <button type="button" class="section" [class.on]="sheet() === 'lofi'" title="Chaleur, grain, flottement, souffle, vinyle, swing" (click)="openSheet('lofi')"><svg lucideDisc3></svg><span>Lo-fi</span></button>
   <button type="button" class="section" disabled title="Bientôt : utiliser la musique dans le jeu"><svg lucideDownload></svg><span>Exporter</span></button>
 </ng-template>
 
 @if (sheet(); as open) {
   <div class="sheet-backdrop" (click)="sheet.set(null)"></div>
-  <section class="sheet" role="dialog" [attr.aria-label]="open === 'scale' ? 'Gamme' : 'Morceau'" animate.enter="sheet-in" animate.leave="sheet-out">
+  @let sheetTitle = open === 'scale' ? 'Gamme' : open === 'mix' ? 'Mixage' : open === 'lofi' ? 'Son lo-fi' : 'Morceau';
+  <section class="sheet" role="dialog" [attr.aria-label]="sheetTitle" animate.enter="sheet-in" animate.leave="sheet-out">
     <span class="grip" aria-hidden="true"></span>
     <div class="sheet-head">
-      <h2>{{ open === 'scale' ? 'Gamme' : 'Morceau' }}</h2>
+      <h2>{{ sheetTitle }}</h2>
+      @if (open === 'mix' || open === 'lofi') {
+        <button type="button" class="play mini" [class.on]="playing()" [attr.aria-label]="playing() ? 'Arrêter' : 'Écouter'" (click)="togglePlay()">
+          @if (playing()) { <svg lucideSquare></svg> } @else { <svg lucidePlay></svg> }
+        </button>
+      }
       <button type="button" class="square-btn" aria-label="Fermer" (click)="sheet.set(null)"><svg lucideX></svg></button>
     </div>
     @if (open === 'scale') {
@@ -141,6 +154,27 @@
         }
       </div>
       <button type="button" class="outline-btn" (click)="playScale()"><svg lucidePlay></svg> Écouter la gamme</button>
+    } @else if (open === 'mix') {
+      <p class="sheet-hint">Le volume de chaque instrument ; à 0, il se tait. Ça s'entend pendant la lecture.</p>
+      @for (channel of channels; track channel.id) {
+        <label class="slider" [style.--color]="channel.color">
+          <span class="slider-head"><i class="swatch"></i>{{ channel.label }}<b>{{ volume(channel.id) * 100 | number:'1.0-0' }} %</b></span>
+          <input type="range" min="0" max="1.5" step="0.05" [value]="volume(channel.id)" (input)="setVolume(channel.id, +$any($event.target).value)" />
+        </label>
+      }
+    } @else if (open === 'lofi') {
+      <div class="presets">
+        @for (preset of lofiPresets; track preset.id) {
+          <button type="button" [class.on]="activePreset() === preset.id" (click)="applyPreset(preset.settings)">{{ preset.label }}</button>
+        }
+      </div>
+      @for (setting of lofiSettings; track setting.id) {
+        <label class="slider">
+          <span class="slider-head">{{ setting.label }}<b>{{ lofi()[setting.id] * 100 | number:'1.0-0' }} %</b></span>
+          <small>{{ setting.hint }}</small>
+          <input type="range" min="0" max="1" step="0.05" [value]="lofi()[setting.id]" (input)="setLofi(setting.id, +$any($event.target).value)" />
+        </label>
+      }
     } @else {
       <label class="field">
         <span>Nom</span>
@@ -153,6 +187,25 @@
           <label><input type="number" aria-label="Mesures" [value]="s.bars" readonly /></label>
           <button type="button" aria-label="Une mesure de plus" [disabled]="s.bars >= maxBars" (click)="setBars(s.bars + 1)"><svg lucidePlus></svg></button>
         </div>
+      </div>
+      <h3>Batterie</h3>
+      <div class="patterns">
+        @for (pattern of drumPatterns; track pattern.id) {
+          <button type="button" [title]="pattern.hint" (click)="applyDrumPattern(pattern.id)"><strong>{{ pattern.label }}</strong><small>{{ pattern.hint }}</small></button>
+        }
+      </div>
+      <h3>Mesure</h3>
+      <div class="bar-picker">
+        @for (bar of barNumbers(); track bar) {
+          <button type="button" [class.on]="toolBar() === bar" (click)="toolBar.set(bar)">{{ bar + 1 }}</button>
+        }
+      </div>
+      <div class="pair">
+        <button type="button" class="outline-btn" (click)="copyBar()"><svg lucideCopy></svg> Copier</button>
+        <button type="button" class="outline-btn" [disabled]="!copied()" (click)="pasteBar()">
+          <svg lucideClipboardPaste></svg> {{ copied() ? 'Coller la ' + (copied()!.from + 1) : 'Coller' }}
+        </button>
+        <button type="button" class="outline-btn" (click)="clearBar()"><svg lucideEraser></svg> Vider</button>
       </div>
       <h3>Mes morceaux</h3>
       <div class="song-list">
