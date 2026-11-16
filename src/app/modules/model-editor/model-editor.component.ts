@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  LucideArrowDown, LucideArrowDownLeft, LucideArrowLeft, LucideArrowLeftRight, LucideArrowRight, LucideArrowUp, LucideArrowUpDown, LucideArrowUpRight, LucideBox, LucideBrush, LucideChevronLeft, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideEraser, LucideHand, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucideMountain, LucidePackage, LucidePaintBucket, LucidePalette, LucidePencil, LucidePipette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSlash, LucideSparkles, LucideSquare, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX, LucideIcon,
+  LucideArrowDown, LucideArrowDownLeft, LucideArrowLeft, LucideArrowLeftRight, LucideArrowRight, LucideArrowUp, LucideArrowUpDown, LucideArrowUpRight, LucideBox, LucideBrush, LucideChevronDown, LucideChevronLeft, LucideCloudCheck, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideEraser, LucideHand, LucideHouse, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucideMousePointerClick, LucideMountain, LucidePackage, LucidePaintBucket, LucidePalette, LucidePencil, LucidePipette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSlash, LucideSparkles, LucideSquare, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX, LucideIcon,
 } from '@lucide/angular';
 import { ActivatedRoute } from '@angular/router';
 import { CODE_MODELS } from '../game/shared/model/browser-models';
@@ -89,7 +89,7 @@ const TRAY_COLORS = 7;
 const GRAYS = [0, 32, 64, 96, 128, 160, 192, 224, 255];
 
 /** Sections of the panel that can be folded. */
-type PanelSection = 'model' | 'parts' | 'layer' | 'drawing' | 'face';
+type PanelSection = 'model' | 'parts' | 'part' | 'layer' | 'drawing' | 'color' | 'face';
 const SECTIONS_KEY = 'pk-model-editor-sections';
 const BIG_VIEW_KEY = 'pk-model-editor-big-view';
 
@@ -141,7 +141,7 @@ interface ActiveStroke {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PixelCanvasComponent, NgTemplateOutlet,
-    LucideArrowLeftRight, LucideArrowUpDown, LucideBox, LucideBrush, LucideChevronLeft, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideHand, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucidePackage, LucidePalette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX,
+    LucideArrowLeftRight, LucideArrowUpDown, LucideBox, LucideBrush, LucideChevronDown, LucideChevronLeft, LucideCloudCheck, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideHand, LucideHouse, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucideMousePointerClick, LucidePackage, LucidePalette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSquare, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX,
   ],
 })
 export class ModelEditorComponent implements AfterViewInit, OnDestroy {
@@ -245,7 +245,10 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   protected readonly previewNight = signal(false);
   protected readonly previewSize = PREVIEW_SIZE;
   /** Folded / unfolded sections of the panel (remembered). */
-  protected readonly sections = signal(loadJson<Record<PanelSection, boolean>>(SECTIONS_KEY, { model: true, parts: true, layer: true, drawing: true, face: true }));
+  protected readonly sections = signal<Record<PanelSection, boolean>>({
+    model: true, parts: true, part: true, layer: true, drawing: true, color: true, face: true,
+    ...loadJson<Partial<Record<PanelSection, boolean>>>(SECTIONS_KEY, {}), // sections added later: open
+  });
   /** Big 2D view of the selected face, over the left of the 3D view (remembered). */
   protected readonly bigView = signal(loadJson(BIG_VIEW_KEY, { on: false }).on);
   protected readonly previewMargin = PREVIEW_MARGIN;

@@ -19,10 +19,21 @@
   }
 }
 
-/* Phone, full screen face: zoom row under the face (the face name and the 3D / Face buttons are on top) */
-@media (max-width: 700px) {
-  :host(.fill) .zoom {
+/* Big view: the zoom bar under the face (its name is on top) */
+:host(.fill) {
+  gap: 0;
+
+  .scroll {
+    border: none;
+    border-radius: 0;
+    padding: 16px;
+  }
+
+  .zoom {
     order: 1;
+    min-height: 44px;
+    padding: 0 16px 0 8px;
+    border-top: 1px solid #2f3039;
   }
 }
 
@@ -32,18 +43,33 @@
   gap: 6px;
 
   .btn {
-    width: 28px;
-    height: 28px;
-    border: 1px solid #4a4c5a;
-    border-radius: 6px;
-    background: #33353f;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: none;
     color: inherit;
+    font-size: 16px;
     cursor: pointer;
+
+    &:hover {
+      background: #33353f;
+    }
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: 600;
   }
 
   .coords {
     margin-left: auto;
-    color: #b4b7c4;
+    color: #8a8d9c;
+    font-weight: normal;
     font-variant-numeric: tabular-nums;
   }
 }

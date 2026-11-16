@@ -1,28 +1,148 @@
-/* Side panel of the model editor (computer); the colors are defined in model-editor.component.scss. */
+/* Computer layout of the model editor: top bar, 3D view, side panel (design/model-editor-mobile.pen, "Desktop" screens).
+   The colors are defined in model-editor.component.scss. Grid: 16px margins, 32px controls, 68px label column. */
 
-// --- Computer: side panel ---
+@media (min-width: 701px) {
+  :host {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
 
-.panel {
-  width: 320px;
-  flex-shrink: 0;
-  padding: calc(12px + var(--safe-top)) calc(14px + var(--safe-right)) 14px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  background: var(--panel);
-  border-left: 1px solid #3a3c48;
+  // Placed by hand: the view comes first in the page, before the top bar
+  .d-top {
+    grid-area: 1 / 1 / 2 / 3;
+  }
 
-  > header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-right: 40px; // room for the full screen button (top right)
+  .stage {
+    grid-area: 2 / 1;
+  }
 
-    h1 {
-      margin: 0;
-      font-size: 18px;
+  .panel {
+    grid-area: 2 / 2;
+  }
+
+  .big-face {
+    top: 16px;
+    left: 16px;
+    bottom: 16px;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+    background: var(--panel);
+
+    header {
+      align-items: center;
+      height: 48px;
+      flex-shrink: 0;
+      padding: 0 8px 0 16px;
+      border-bottom: 1px solid var(--line);
     }
+  }
+}
+
+:host {
+  --line: #2f3039;
+}
+
+// --- Top bar ---
+
+.d-top {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: calc(52px + var(--safe-top));
+  padding: var(--safe-top) calc(64px + var(--safe-right)) 0 calc(12px + var(--safe-left)); // right: room for the full screen button
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: 8px;
+
+    &:hover {
+      background: var(--surface);
+    }
+  }
+}
+
+.d-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+// Model picker: the select, with the icons drawn over it
+.d-model {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+
+  svg {
+    position: absolute;
+    pointer-events: none;
+
+    &:first-child {
+      left: 10px;
+    }
+
+    &:last-child {
+      right: 8px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  select {
+    appearance: none;
+    height: 36px;
+    padding: 0 30px 0 34px;
+    border: none;
+    background: var(--surface);
+    color: #eceef4;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #40424e;
+    }
+  }
+}
+
+.d-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.d-mode {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+
+  .mode-switch {
+    width: 300px;
+  }
+}
+
+// Wide screens: centered on the page (the two sides of the bar are not as wide)
+@media (min-width: 1100px) {
+  .d-top {
+    position: relative;
+  }
+
+  .d-mode {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
@@ -30,51 +150,323 @@
   margin-left: auto;
   display: flex;
   gap: 4px;
+}
 
-  .btn {
-    padding: 2px 8px;
-    font-size: 16px;
+// --- Buttons of the computer layout ---
+
+.btn.icon, .btn.small, .btn.accent, .pair .btn, .face-row .btn, .block > .btn.outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn.icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn.small {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.btn.ghost {
+  background: none;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background: var(--surface);
   }
 }
 
-// Folding sections of the panel
+.btn.outline {
+  background: none;
+}
+
+.btn.accent {
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+
+  &:hover:not(:disabled) {
+    background: #4a7eb5;
+  }
+}
+
+// --- Side panel ---
+
+.panel {
+  width: 340px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-right: var(--safe-right);
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+
+  .banner {
+    margin: 0 16px 16px;
+  }
+}
+
+// Folding section: a 44px header (chevron, title, its actions on the right), then its content
 .block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  border-top: 1px solid #3a3c48;
-  padding-top: 8px;
+  gap: 10px;
+  padding: 0 16px 16px;
 
-  &[open] {
-    display: flex;
+  & + .block {
+    border-top: 1px solid var(--line);
+  }
+
+  &:not([open]) {
+    padding-bottom: 0;
   }
 
   > summary {
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 15px;
-    list-style: none;
     display: flex;
     align-items: center;
-    gap: 6px;
-
-    &::before {
-      content: '▸';
-      color: var(--muted);
-      transition: transform 0.15s;
-    }
+    gap: 8px;
+    height: 44px;
+    flex-shrink: 0;
+    list-style: none;
+    cursor: pointer;
 
     &::-webkit-details-marker {
       display: none;
     }
+
+    .chev {
+      display: inline-flex;
+      color: var(--muted);
+      font-size: 13px;
+      transition: transform 0.15s;
+    }
+
+    .title {
+      flex: 1;
+      min-width: 0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .aside {
+      font-size: 12px;
+      color: var(--muted);
+    }
   }
 
-  &[open] > summary {
-    margin-bottom: 4px;
+  &:not([open]) > summary .chev {
+    transform: rotate(-90deg);
+  }
+}
 
-    &::before {
-      transform: rotate(90deg);
+// Browsers that open a <details> with a box around its content: the same column inside it
+.block::details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// Label column on the left, controls on the right
+.prop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+
+  > .label {
+    width: 68px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  > input, > .stepper, > .segmented, > .stepper-gap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  > input, > .stepper {
+    height: 32px;
+  }
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pair {
+  display: flex;
+  gap: 8px;
+
+  .btn {
+    flex: 1;
+    height: 32px;
+  }
+}
+
+.shape-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    svg, small {
+      color: var(--muted);
+    }
+
+    small {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &:hover {
+      background: var(--surface);
+    }
+
+    &.on {
+      background: var(--accent-soft);
+      color: white;
+      font-weight: 600;
+
+      svg {
+        color: #9fc3ff;
+      }
     }
   }
 }
 
+.segmented.faces button {
+  padding: 6px 0;
+  font-size: 11px;
+}
+
+.face-row {
+  display: flex;
+  gap: 6px;
+
+  .btn {
+    height: 32px;
+    font-size: 12px;
+    white-space: nowrap;
+
+    &:not(.icon) {
+      flex: 1;
+      padding: 0 6px;
+    }
+  }
+}
+
+.block > .btn.outline {
+  height: 32px;
+}
+
+// Shared pieces, sized for the panel
+.panel {
+  .layer-tiles button {
+    height: 64px;
+    justify-content: center;
+  }
+
+  .tools .btn {
+    height: 52px;
+    justify-content: center;
+  }
+
+  .current.big {
+    width: 40px;
+    height: 40px;
+  }
+
+  // Colors on a grid of 10
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+
+    > span {
+      grid-column: 1 / -1;
+      font-size: 11px;
+    }
+
+    button {
+      width: auto;
+      height: 24px;
+      border-radius: 5px;
+    }
+  }
+}
+
+// Keyboard shortcuts of the mode, at the bottom of the panel
+.shortcuts {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 10px 16px calc(10px + var(--safe-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 11px;
+  color: var(--muted);
+
+  kbd {
+    margin-right: 4px;
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 600;
+  }
+}
+
+// What the mouse does, over the 3D view
+.view-hint {
+  position: absolute;
+  z-index: 1;
+  top: 16px;
+  left: 16px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(34, 35, 42, 0.9);
+  color: #b4b7c4;
+  font-size: 12px;
+  pointer-events: none;
+
+  svg {
+    color: var(--muted);
+  }
+}

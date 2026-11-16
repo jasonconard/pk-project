@@ -8,12 +8,18 @@ Un modèle est fait de **boxes** (6 faces) et de **planes** (1 face, visible des
 
 ## Deux modes
 
-En haut, **🧊 Modélisation** / **🖌️ Dessin** :
+En haut, **Modélisation** / **Dessin** :
 
-- **Modélisation** : choisir, déplacer, redimensionner les formes. Sections **Modèle** et **Formes**.
-- **Dessin** : peindre les faces. Sections **Modèle**, **Calque**, **Dessin** (outils et palette) et **Face sélectionnée**.
+- **Modélisation** : choisir, déplacer, redimensionner les formes. Sections **Modèle**, **Formes** et la forme choisie.
+- **Dessin** : peindre les faces. Sections **Modèle**, **Calque**, **Outils**, **Couleur** et **Face**.
 
-Sur ordinateur, les sections sont dans le panneau de droite, repliables (mémorisées dans le navigateur). **⬇ Exporter** est dans la section **Modèle**.
+## Sur ordinateur
+
+Maquette : `design/model-editor-mobile.pen` (écrans « Desktop »).
+
+- **Barre du haut** : **‹ Jeu**, le choix du modèle, « Enregistré », le choix du mode (au centre), annuler / refaire et **Exporter**.
+- **Panneau de droite** : les sections du mode, repliables (mémorisées dans le navigateur). Leurs actions sont dans leur en-tête : **+ Box** / **+ Plane** pour Formes ; dupliquer, tourner de 90° et supprimer pour la forme choisie ; **Importer** une palette pour Couleur. En bas, les raccourcis clavier du mode.
+- Sur la vue 3D, une bulle rappelle ce que fait la souris.
 
 ## Sur téléphone
 
@@ -34,7 +40,7 @@ Sous 700 px de large, l'écran change :
 
 ## Les formes
 
-Les formes sont listées en pastilles (Box 1, Plane 1…). **+ Box**, **+ Plane** (une forme de 16, posée à droite du modèle), **Dupliquer** (Ctrl+D), **Supprimer** (Suppr, en mode Modélisation).
+Les formes sont listées (Box 1, Plane 1…, avec leur taille ; en pastilles sur téléphone). **+ Box**, **+ Plane** (une forme de 16, posée à droite du modèle), **Dupliquer** (Ctrl+D), **Supprimer** (Suppr, en mode Modélisation).
 
 Propriétés de la forme sélectionnée :
 
@@ -52,7 +58,7 @@ Le modèle a aussi un **nom** (son id, en minuscules avec des tirets) et un rég
 
 Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis retour au crayon), **pot de peinture** (F), **ligne** (L), **rectangle** (R, plein ou contour). On dessine :
 
-- dans la **vue 2D** de la face sélectionnée (sous le panneau : zoom − / + ou Ctrl + molette / pincement du trackpad, **⤢** pour revoir toute la face, grille, damier sous le transparent). **⛶ Grande vue** (touche G) l'ouvre en grand par-dessus la gauche de la vue 3D ; elle reste ouverte d'une face à l'autre. Dessiner dans la vue 2D passe en mode dessin ;
+- dans la **vue 2D** de la face sélectionnée (section **Face** : zoom − / + ou Ctrl + molette / pincement du trackpad, **⤢** pour revoir toute la face, grille, damier sous le transparent). **Grande vue** (touche G) l'ouvre en grand par-dessus la gauche de la vue 3D, le zoom en bas ; elle reste ouverte d'une face à l'autre. Dessiner dans la vue 2D passe en mode dessin ;
 - ou **directement sur le modèle 3D** : appuyer sur le modèle peint, appuyer à côté tourne la vue.
 
 **Couleurs** : sélecteur libre, couleurs **récentes**, couleurs **du modèle** (les plus utilisées d'abord), et une **palette importée** : fichiers `.gpl`, `.pal`, `.hex` ou `.png` (Aseprite, Lospec, GIMP). **Garder seulement ces couleurs** remplace toute couleur choisie par la plus proche de la palette.
@@ -94,7 +100,7 @@ L'éditeur de modèles part toujours des modèles **du code** (`CODE_MODELS`) po
 
 ## Exporter
 
-**⬇ Exporter** télécharge :
+**Exporter** télécharge :
 
 - `md-<id>.ts` → `src/assets/models/` ;
 - `<id>.png` (l'atlas), et `<id>-specular.png`, `<id>-night.png`, `<id>-bump.png` si ces calques sont peints → `src/assets/tex/`.

@@ -1,6 +1,7 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { FaceTexture, LayerName, layerRgba } from '../shared/EditableModel';
 import { Px } from '../shared/pixel-tools';
+import { LucideMaximize, LucideZoomIn, LucideZoomOut } from '@lucide/angular';
 
 /** Width the face is fitted in (px), before the zoom buttons. */
 const FIT_WIDTH = 264;
@@ -27,11 +28,11 @@ interface Gesture {
   selector: 'app-pixel-canvas',
   template: `
     <div class="zoom">
-      <button type="button" class="btn" title="Dézoomer" aria-label="Dézoomer" (click)="zoomBy(-1)">−</button>
+      <button type="button" class="btn" title="Dézoomer" aria-label="Dézoomer" (click)="zoomBy(-1)"><svg lucideZoomOut></svg></button>
       <span>× {{ scale() }}</span>
-      <button type="button" class="btn" title="Zoomer" aria-label="Zoomer" (click)="zoomBy(1)">+</button>
+      <button type="button" class="btn" title="Zoomer" aria-label="Zoomer" (click)="zoomBy(1)"><svg lucideZoomIn></svg></button>
       @if (zoom() !== 0) {
-        <button type="button" class="btn fit" title="Toute la face" aria-label="Toute la face" (click)="zoom.set(0)">⤢</button>
+        <button type="button" class="btn fit" title="Toute la face" aria-label="Toute la face" (click)="zoom.set(0)"><svg lucideMaximize></svg></button>
       }
       @if (hover(); as p) {
         <span class="coords">{{ p.x }}, {{ p.y }}</span>
@@ -42,6 +43,7 @@ interface Gesture {
       <canvas #canvas></canvas>
     </div>
   `,
+  imports: [LucideZoomIn, LucideZoomOut, LucideMaximize],
   styleUrl: './pixel-canvas.component.scss',
   host: { '[class.fill]': 'fill()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,7 +91,10 @@ export class PixelCanvasComponent {
       const el = this.scroll().nativeElement;
       const observer = new ResizeObserver(() => {
         if (el.clientWidth > 0 && el.clientHeight > 0) { // not laid out yet: keep the last room
-          this.room.set({ w: el.clientWidth - 2, h: el.clientHeight - 2 });
+          const style = getComputedStyle(el);
+          const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+          const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+          this.room.set({ w: el.clientWidth - padX - 2, h: el.clientHeight - padY - 2 });
         }
       });
       observer.observe(el);
