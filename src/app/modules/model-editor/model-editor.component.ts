@@ -23,6 +23,7 @@ import { modelColors } from './shared/palette';
 import { nearestColor, PALETTE_FILE_TYPES, readPaletteFile } from './shared/palette-import';
 import { hexToRgba, PaintStroke, Px, rgbaToHex, Tool } from './shared/pixel-tools';
 import { PixelCanvasComponent } from './pixel-canvas/pixel-canvas.component';
+import { haptic } from '../../core/shared/haptics';
 
 const FACE_LABELS: Record<BoxFace, string> = {
   front: 'Avant', back: 'Arrière', left: 'Gauche', right: 'Droite', top: 'Dessus', bottom: 'Dessous',
@@ -662,6 +663,9 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.pressAt = null;
     this.viewport().nativeElement.setPointerCapture(event.pointerId);
     this.select({ partIndex: pick.partIndex, face: pick.face });
+    if (event.pointerType === 'touch') {
+      haptic('tick');
+    }
     this.startStroke(texId, pick.px, true);
   }
 

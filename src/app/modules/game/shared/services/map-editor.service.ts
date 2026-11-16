@@ -1,4 +1,5 @@
 import { inject, Service } from '@angular/core';
+import { haptic } from "../../../../core/shared/haptics";
 import * as THREE from 'three';
 import { Game, SHADE_OFFSET, TOO_FAR_LIMIT } from '../model/Game';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
@@ -251,9 +252,11 @@ export class MapEditorService {
       }
       if (drag.moving && drag.dragging) {
         this.endMove(game, drag);
+        haptic('light');
       } else if (!drag.dragging) {
         if (game.editTileId) {
           // Tap (finger): one press of the brush
+          haptic('tick');
           this.stroke = { cells: new Map(), levels: new Map(), stairs: new Map() };
           this.paintAt(game, ev.clientX, ev.clientY);
           this.endStroke(game);
@@ -265,6 +268,9 @@ export class MapEditorService {
             this.showGhostAt(null);
           }
         } else {
+          if (drag.hit) {
+            haptic('tick');
+          }
           this.select(game, drag.hit);
         }
       }
@@ -716,6 +722,7 @@ export class MapEditorService {
     if (!building || !chunk) {
       return;
     }
+    haptic('light');
     this.record(game, {
       undo: () => {
         const current = this.chunkOf(game, building);

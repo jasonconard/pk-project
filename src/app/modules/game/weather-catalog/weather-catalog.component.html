@@ -146,12 +146,12 @@
           @if (d.type === weather()) {
             <button type="button" class="apply" disabled><svg lucideCheck></svg> Météo actuelle</button>
           } @else if (!available(d)) {
-            <button type="button" class="apply" (click)="apply(d)">
+            <button type="button" class="apply" data-haptic="success" (click)="apply(d)">
               @if (d.only === 'day') { <svg lucideSun></svg> } @else { <svg lucideMoon></svg> } Appliquer
             </button>
             <p class="apply-hint">{{ timeChangeHint(d) }}</p>
           } @else {
-            <button type="button" class="apply" (click)="apply(d)">Appliquer</button>
+            <button type="button" class="apply" data-haptic="success" (click)="apply(d)">Appliquer</button>
           }
         </div>
       </aside>

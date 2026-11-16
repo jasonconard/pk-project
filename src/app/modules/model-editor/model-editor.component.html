@@ -93,7 +93,7 @@
         <div class="sel-actions">
           <button type="button" class="btn" (click)="duplicate()"><svg lucideCopy></svg> Dupliquer</button>
           <button type="button" class="btn" (click)="turn()"><svg lucideRotateCw></svg> Tourner 90°</button>
-          <button type="button" class="btn danger" (click)="remove()"><svg lucideTrash></svg> Supprimer</button>
+          <button type="button" class="btn danger" data-haptic="warning" (click)="remove()"><svg lucideTrash></svg> Supprimer</button>
         </div>
       </div>
     }
@@ -218,7 +218,7 @@
       <button type="button" class="btn ghost icon" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()"><svg lucideUndo2></svg></button>
       <button type="button" class="btn ghost icon" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()"><svg lucideRedo2></svg></button>
     </div>
-    <button type="button" class="btn accent" [disabled]="!model()" title="Télécharge le .ts et les .png, à mettre dans le code" (click)="export()"><svg lucideDownload></svg> Exporter</button>
+    <button type="button" class="btn accent" data-haptic="success" [disabled]="!model()" title="Télécharge le .ts et les .png, à mettre dans le code" (click)="export()"><svg lucideDownload></svg> Exporter</button>
   </header>
 
   <aside class="panel" aria-label="Éditeur de modèles">
@@ -242,7 +242,7 @@
       <div class="pair">
         <button type="button" class="btn outline" (click)="create()"><svg lucidePlus></svg> Nouveau</button>
         @if (isEditedGameModel()) {
-          <button type="button" class="btn outline" [class.danger]="confirmRevert()" (click)="revert()"
+          <button type="button" class="btn outline" [class.danger]="confirmRevert()" data-haptic="warning" (click)="revert()"
                   title="Oublie les modifications enregistrées dans le navigateur">
             @if (confirmRevert()) { Confirmer ? } @else { <svg lucideRotateCcw></svg> Version du jeu }
           </button>
@@ -282,7 +282,7 @@
               <span class="chev"><svg lucideChevronDown></svg></span><span class="title">{{ parts()[selection()!.partIndex] }}</span>
               <button type="button" class="btn ghost icon" title="Dupliquer (Ctrl+D)" aria-label="Dupliquer" (click)="$event.preventDefault(); duplicate()"><svg lucideCopy></svg></button>
               <button type="button" class="btn ghost icon" title="Tourner de 90°" aria-label="Tourner de 90°" (click)="$event.preventDefault(); turn()"><svg lucideRotateCw></svg></button>
-              <button type="button" class="btn ghost icon danger" title="Supprimer (Suppr)" aria-label="Supprimer" (click)="$event.preventDefault(); remove()"><svg lucideTrash></svg></button>
+              <button type="button" class="btn ghost icon danger" data-haptic="warning" title="Supprimer (Suppr)" aria-label="Supprimer" (click)="$event.preventDefault(); remove()"><svg lucideTrash></svg></button>
             </summary>
             @for (v of vecs; track v.kind) {
               <div class="prop">
@@ -454,12 +454,12 @@
     </div>
     <p class="hint small">Vent : 0 = immobile, 1 = plie beaucoup (herbes, arbres).</p>
     @if (isEditedGameModel()) {
-      <button type="button" class="btn wide" [class.danger]="!confirmRevert()" [class.on]="confirmRevert()" (click)="revert()"
+      <button type="button" class="btn wide" [class.danger]="!confirmRevert()" [class.on]="confirmRevert()" data-haptic="warning" (click)="revert()"
               title="Oublie les modifications enregistrées dans le navigateur">
         @if (confirmRevert()) { Confirmer : revenir à la version du jeu ? } @else { <svg lucideRotateCcw></svg> Revenir à la version du jeu }
       </button>
     }
-    <button type="button" class="primary" (click)="export()"><svg lucideDownload></svg> Exporter (.ts + .png)</button>
+    <button type="button" class="primary" data-haptic="success" (click)="export()"><svg lucideDownload></svg> Exporter (.ts + .png)</button>
     <p class="hint small">Tes changements sont enregistrés dans ce navigateur et visibles dans le jeu. L'export sert à les ajouter au code.</p>
   }
   @if (status()) {

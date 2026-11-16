@@ -2,6 +2,7 @@ import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyR
 import { FaceTexture, LayerName, layerRgba } from '../shared/EditableModel';
 import { Px } from '../shared/pixel-tools';
 import { LucideMaximize, LucideZoomIn, LucideZoomOut } from '@lucide/angular';
+import { haptic } from '../../../core/shared/haptics';
 
 /** Width the face is fitted in (px), before the zoom buttons. */
 const FIT_WIDTH = 264;
@@ -162,6 +163,9 @@ export class PixelCanvasComponent {
       return;
     }
     this.drawing = true;
+    if (event.pointerType === 'touch') {
+      haptic('tick');
+    }
     this.strokeStart.emit(this.pixelAt(event));
   }
 

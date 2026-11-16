@@ -2,6 +2,7 @@ import { Service, signal } from '@angular/core';
 import * as THREE from 'three';
 import { fromEvent } from 'rxjs';
 import { Stick, STICK_RADIUS } from '../model/Stick';
+import { haptic } from '../haptics';
 
 const isTouchDevice = (): boolean => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
@@ -48,6 +49,7 @@ export class TouchService {
       const half = canvas.getBoundingClientRect().width / 2;
       const touch = Array.from(e.changedTouches).find(t => t.clientX < half);
       if (touch) {
+        haptic('tick');
         this.directionTouch = { id: touch.identifier, x: touch.clientX, y: touch.clientY };
         this.updateStick({
           begin: { x: touch.clientX, y: touch.clientY },

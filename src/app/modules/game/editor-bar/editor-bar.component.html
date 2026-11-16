@@ -15,9 +15,9 @@
               [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)"><svg lucideGrid3x3></svg></button>
       <button type="button" class="text-btn" title="Éditeur de modèles 3D : créer et peindre les bâtiments, les fleurs…"
               (click)="openModelEditor()"><svg lucideBox></svg> <span class="label">Modèles</span></button>
-      <button type="button" class="text-btn" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
+      <button type="button" class="text-btn" data-haptic="success" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
               (click)="send('export', $event)"><svg lucideDownload></svg> <span class="label">Exporter</span></button>
-      <button type="button" class="text-btn" [class.danger]="confirmReset()"
+      <button type="button" class="text-btn" data-haptic="warning" [class.danger]="confirmReset()"
               [title]="confirmReset() ? 'Clique encore pour oublier les modifications' : 'Revenir à la carte du code (oublie les modifications enregistrées dans le navigateur)'"
               (click)="reset($event)"><svg lucideRotateCcw></svg> <span class="label">{{ confirmReset() ? 'Confirmer ?' : 'Réinitialiser' }}</span></button>
     </div>
@@ -62,7 +62,7 @@
       Transparent quand le joueur est derrière
     </label>
     <button type="button" class="model-btn" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)"><svg lucideBox></svg> Modifier le modèle</button>
-    <button type="button" class="delete" (click)="send('delete', $event)"><svg lucideTrash></svg> Supprimer <kbd>Suppr</kbd></button>
+    <button type="button" class="delete" data-haptic="warning" (click)="send('delete', $event)"><svg lucideTrash></svg> Supprimer <kbd>Suppr</kbd></button>
   </section>
 }
 

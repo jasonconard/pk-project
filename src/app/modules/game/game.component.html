@@ -20,6 +20,12 @@
           }
         </div>
         <p class="q-current">Résolution ×{{ hud.pixelRatio }} · Ombres {{ hud.shadowMapSize || 'aucune' }}</p>
+        @if (hapticsSupported) {
+          <label class="q-diag">
+            <input type="checkbox" [checked]="hapticsEnabled()" (change)="setHaptics($event)" />
+            Vibrations
+          </label>
+        }
         <label class="q-diag">
           <input type="checkbox" [checked]="hud.diagnosticsOpen" (change)="setDiagnostics($event)" />
           Console de diagnostic

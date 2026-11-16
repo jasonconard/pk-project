@@ -4,6 +4,7 @@ import { KeyService } from '../shared/service/key.service';
 import { TOUCH_KEYS, TouchKey, TouchKeyType } from '../shared/model/TouchKey';
 import { CoreService } from '../shared/service/core.service';
 import { SequenceService } from '../../modules/game/shared/services/sequence.service';
+import { haptic } from '../shared/haptics';
 
 @Component({
   selector: 'core-touch-pad',
@@ -77,6 +78,7 @@ export class TouchPadComponent {
     Array.from(event.changedTouches).forEach(t => touches.add(t.identifier));
     this.btnTouches.set(btn.label, touches);
     if (wasUp) {
+      haptic('light');
       this.pushedBtns.update(btns => btns.includes(btn.label) ? btns : [...btns, btn.label]);
       this.keyService.setKeyDown(btn.code);
     }

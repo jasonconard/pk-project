@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { LucideMaximize, LucideMinimize } from '@lucide/angular';
 import { CoreService } from './core/shared/service/core.service';
 import { UpdatePromptComponent } from './core/update-prompt/update-prompt.component';
+import { initTapHaptics } from './core/shared/haptics';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,10 @@ export class AppComponent {
   protected readonly debugMode = signal(true);
   protected readonly fullScreened = this.coreService.fullScreened;
   protected readonly logs = this.coreService.logs;
+
+  constructor() {
+    initTapHaptics();
+  }
 
   protected toggleFullscreen(): void {
     this.coreService.toggleFullScreen();

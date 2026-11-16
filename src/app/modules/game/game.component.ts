@@ -15,6 +15,7 @@ import { version } from '../../../../package.json';
 import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
+import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../core/shared/haptics';
 
 @Component({
   selector: 'game-main',
@@ -121,6 +122,13 @@ export class GameComponent {
     (event.currentTarget as HTMLElement).blur();
     this.qualityMenu.set(false);
     this.releaseNotes.set(true);
+  }
+
+  protected readonly hapticsSupported = hapticsSupported;
+  protected readonly hapticsEnabled = hapticsEnabled;
+
+  protected setHaptics(event: Event): void {
+    setHapticsEnabled((event.target as HTMLInputElement).checked);
   }
 
   protected setDiagnostics(event: Event): void {
