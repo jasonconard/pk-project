@@ -1,0 +1,80 @@
+/* Side panel of the model editor (computer); the colors are defined in model-editor.component.scss. */
+
+// --- Computer: side panel ---
+
+.panel {
+  width: 320px;
+  flex-shrink: 0;
+  padding: calc(12px + var(--safe-top)) calc(14px + var(--safe-right)) 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-left: 1px solid #3a3c48;
+
+  > header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-right: 40px; // room for the full screen button (top right)
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+  }
+}
+
+.history {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+
+  .btn {
+    padding: 2px 8px;
+    font-size: 16px;
+  }
+}
+
+// Folding sections of the panel
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid #3a3c48;
+  padding-top: 8px;
+
+  &[open] {
+    display: flex;
+  }
+
+  > summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &::before {
+      content: '▸';
+      color: var(--muted);
+      transition: transform 0.15s;
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  &[open] > summary {
+    margin-bottom: 4px;
+
+    &::before {
+      transform: rotate(90deg);
+    }
+  }
+}
+

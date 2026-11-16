@@ -1,0 +1,433 @@
+/* Phone layout of the model editor (bars above and below the view, bottom sheets); the colors are defined in model-editor.component.scss. */
+
+// --- Phone: bars above and below the view, bottom sheets ---
+
+@media (max-width: 700px) {
+  :host {
+    flex-direction: column;
+    background: var(--panel);
+  }
+
+  .big-face {
+    inset: 0;
+    width: auto;
+    min-width: 0;
+    padding: 56px 8px 8px; // under the face name and the 3D / Face buttons
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--bg);
+  }
+}
+
+.m-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: calc(4px + var(--safe-top)) 56px 0 calc(8px + var(--safe-left)); // right: the full screen button
+  min-height: 48px;
+
+  .back {
+    padding: 10px 8px;
+    font-size: 16px;
+  }
+
+  .history .btn {
+    width: 44px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
+
+.m-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  strong {
+    font-size: 16px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 11px;
+  }
+}
+
+.m-mode {
+  padding: 6px 16px 10px;
+
+  .mode-switch button {
+    min-height: 40px;
+  }
+}
+
+.m-overlay {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(34, 35, 42, 0.85);
+  color: #c8cad6;
+  font-size: 12px;
+
+  span {
+    font-size: 10px;
+    color: var(--muted);
+  }
+}
+
+.m-view-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgba(34, 35, 42, 0.85);
+  border: 1px solid var(--border);
+
+  button {
+    min-width: 52px;
+    min-height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &.on {
+      background: var(--accent);
+      color: white;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+    }
+  }
+}
+
+.selection-card {
+  position: absolute;
+  z-index: 3;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(34, 35, 42, 0.94);
+  border: 1px solid var(--border);
+}
+
+.sel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  strong {
+    font-size: 15px;
+  }
+
+  .muted {
+    font-size: 12px;
+  }
+
+  .btn {
+    min-height: 36px;
+  }
+}
+
+.nudges {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+
+  .btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 44px;
+    padding: 2px 0;
+
+    span {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    small {
+      font-size: 10px;
+      color: #b4b7c4;
+    }
+  }
+}
+
+.sel-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+
+  .btn {
+    min-height: 40px;
+    padding: 4px;
+    font-size: 13px;
+  }
+}
+
+.tray {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 8px;
+  border-top: 1px solid #3a3c48;
+
+  .tools .btn {
+    min-height: 48px;
+
+    span {
+      font-size: 20px;
+    }
+  }
+}
+
+.tray-colors {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  .current {
+    width: 44px;
+    height: 44px;
+  }
+
+  .swatch {
+    flex: 1;
+    min-width: 0;
+    max-width: 40px; // a few recent colors do not stretch
+    height: 36px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    cursor: pointer;
+
+    &.on {
+      outline: 2px solid var(--highlight);
+      outline-offset: 1px;
+    }
+  }
+
+  .palette-btn {
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    font-size: 20px;
+  }
+}
+
+.m-nav {
+  display: flex;
+  gap: 6px;
+  padding: 4px 12px calc(8px + var(--safe-bottom, 0px));
+
+  button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 52px;
+    padding: 4px;
+    border: none;
+    border-radius: 12px;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+
+    span {
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    &.on {
+      background: var(--accent-soft);
+      color: #9fc3ff;
+    }
+  }
+}
+
+// Not modal: the model stays visible (and touchable) above it
+.sheet {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 72%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 16px calc(20px + var(--safe-bottom, 0px));
+  background: var(--panel);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.5);
+
+  // Bigger targets than on a computer
+  .btn, .primary, input, select {
+    min-height: 44px;
+  }
+
+  .stepper {
+    min-height: 44px;
+
+    button {
+      width: 30px;
+    }
+
+    input {
+      min-height: 0;
+    }
+  }
+
+  .switch {
+    min-height: 44px;
+
+    input {
+      width: 46px;
+      height: 28px;
+      min-height: 0;
+
+      &::after {
+        width: 22px;
+        height: 22px;
+      }
+
+      &:checked::after {
+        transform: translateX(18px);
+      }
+    }
+  }
+
+  .chips button {
+    min-height: 40px;
+  }
+
+  .segmented button {
+    min-height: 36px;
+  }
+
+  .layer-tiles button {
+    min-height: 76px;
+  }
+
+  .swatches {
+    gap: 6px;
+
+    button {
+      width: calc((100% - 7 * 6px) / 8);
+      height: 38px;
+      border-radius: 8px;
+    }
+  }
+
+  .grays button {
+    height: 40px;
+  }
+}
+
+.handle {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  margin: 0 -16px;
+  padding: 10px 0 6px;
+  border: none;
+  background: var(--panel);
+  cursor: pointer;
+
+  span {
+    width: 36px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--border);
+  }
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h2 {
+    flex: 1;
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+.add-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  .btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 8px;
+
+    span {
+      font-size: 28px;
+    }
+
+    small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+  }
+}

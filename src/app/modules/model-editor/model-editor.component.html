@@ -1,278 +1,489 @@
-<div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"
-     (pointercancel)="onPointerUp($event)" [class.painting]="mode() === 'paint'">
-  @if (layer() !== 'color') {
-    <div class="preview" [style.width.%]="previewSize * 100" [style.height.%]="previewSize * 100"
-         [style.right.px]="previewMargin" [style.bottom.px]="previewMargin">
-      <span>Aperçu {{ previewNight() ? 'de nuit' : 'de jour' }}</span>
-      <button type="button" [title]="previewNight() ? 'Voir de jour' : 'Voir de nuit'" [attr.aria-label]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
-              (click)="setPreviewNight(!previewNight())">{{ previewNight() ? '☀' : '🌙' }}</button>
+<!-- Phone layout: top bar and mode switch above the view -->
+@if (phone()) {
+  <header class="m-top">
+    <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)">‹ Jeu</a>
+    <button type="button" class="m-title" (click)="toggleSheet('model')">
+      <strong>{{ model()?.id ?? '—' }}</strong>
+      <span class="muted">{{ isEditedGameModel() ? 'Modifié · enregistré' : 'Enregistré' }}</span>
+    </button>
+    <div class="history">
+      <button type="button" class="btn" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()">↶</button>
+      <button type="button" class="btn" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()">↷</button>
     </div>
+  </header>
+  <div class="m-mode">
+    <ng-container [ngTemplateOutlet]="modeSwitch" />
+  </div>
+}
+
+<div class="stage">
+  <div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"
+       (pointercancel)="onPointerUp($event)" [class.painting]="mode() === 'paint'">
+    @if (layer() !== 'color') {
+      <div class="preview" [style.width.%]="previewSize * 100" [style.height.%]="previewSize * 100"
+           [style.right.px]="previewMargin" [style.bottom.px]="previewMargin">
+        <span>Aperçu {{ previewNight() ? 'de nuit' : 'de jour' }}</span>
+        <button type="button" [title]="previewNight() ? 'Voir de jour' : 'Voir de nuit'" [attr.aria-label]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
+                (click)="setPreviewNight(!previewNight())">{{ previewNight() ? '☀' : '🌙' }}</button>
+      </div>
+    }
+  </div>
+
+  @if (bigView() && mode() === 'paint' && faceTexture(); as face) {
+    <section class="big-face" aria-label="Grande vue de la face">
+      @if (!phone()) {
+        <header>
+          <strong>{{ parts()[selection()!.partIndex] }} · {{ faceInfo()?.face }}</strong>
+          <span class="muted">{{ faceInfo()?.size }} · {{ layerInfo().label }}</span>
+          <button type="button" class="btn" title="Fermer la grande vue (G)" aria-label="Fermer la grande vue" (click)="setBigView(false)">✕</button>
+        </header>
+      }
+      <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()" [fill]="true"
+                        (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
+    </section>
+  }
+
+  @if (phone()) {
+    <div class="m-overlay">
+      @if (pending(); as action) {
+        <div class="banner">
+          <span>{{ action.kind === 'link' ? 'Touche la face à lier (même taille)' : 'Touche la face où copier' }}</span>
+          <button type="button" class="btn" (click)="cancelFaceAction()">Annuler</button>
+        </div>
+      } @else if (mode() === 'select') {
+        @if (!selectedPart()) {
+          <p class="chip">✋ Toucher une forme · 1 doigt : tourner · 2 doigts : zoomer</p>
+        }
+      } @else {
+        <div class="m-view-top">
+          @if (faceInfo(); as info) {
+            <p class="chip face-chip"><strong>{{ parts()[selection()!.partIndex] }} · {{ info.face }}</strong><span>{{ info.size }} · {{ layerInfo().label }}</span></p>
+          } @else {
+            <p class="chip">Touche une face pour la peindre</p>
+          }
+          <div class="view-toggle" role="group" aria-label="Vue">
+            <button type="button" [class.on]="!bigView()" (click)="setBigView(false)">3D</button>
+            <button type="button" [class.on]="bigView()" [disabled]="!faceTexture()" (click)="setBigView(true)">Face</button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (mode() === 'select' && selectedPart() && !pending() && !sheet()) {
+      <div class="selection-card">
+        <div class="sel-head">
+          <strong>{{ parts()[selection()!.partIndex] }}</strong>
+          <span class="muted grow">{{ selectedPart()!.size.x }} × {{ selectedPart()!.size.y }}{{ selectedPart()!.kind === 'box' ? ' × ' + selectedPart()!.size.z : '' }}</span>
+          <button type="button" class="btn" (click)="toggleSheet('shapes')">⚙ Réglages</button>
+        </div>
+        <div class="nudges">
+          @for (n of nudges; track n.label) {
+            <button type="button" class="btn" [attr.aria-label]="'Déplacer ' + n.label" (click)="nudge(n.axis, n.delta)">
+              <span>{{ n.icon }}</span><small>{{ n.label }}</small>
+            </button>
+          }
+        </div>
+        <div class="sel-actions">
+          <button type="button" class="btn" (click)="duplicate()">⧉ Dupliquer</button>
+          <button type="button" class="btn" (click)="turn()">↻ Tourner 90°</button>
+          <button type="button" class="btn danger" (click)="remove()">🗑 Supprimer</button>
+        </div>
+      </div>
+    }
   }
 </div>
 
-@if (bigView() && faceTexture(); as face) {
-  <section class="big-face" aria-label="Grande vue de la face">
+@if (phone()) {
+  @if (mode() === 'paint') {
+    <div class="tray">
+      <div class="tray-colors">
+        @if (layer() === 'color') {
+          <label class="current" [style.background]="color()" title="Couleur libre">
+            <input type="color" [value]="color()" (change)="useColor($any($event.target).value)" aria-label="Couleur libre" />
+          </label>
+          @for (c of trayColors(); track c) {
+            <button type="button" class="swatch" [style.background]="c" [class.on]="c === color()" [attr.aria-label]="c" (click)="setColor(c)"></button>
+          }
+        } @else {
+          @for (g of grays; track g) {
+            <button type="button" class="swatch" [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'" [class.on]="g === gray()"
+                    [attr.aria-label]="'Gris ' + g" (click)="gray.set(g)"></button>
+          }
+        }
+        <button type="button" class="btn palette-btn" [class.on]="sheet() === 'palette'" aria-label="Palette" (click)="toggleSheet('palette')">🎨</button>
+      </div>
+      <ng-container [ngTemplateOutlet]="toolsTpl" />
+    </div>
+  }
+
+  <nav class="m-nav" aria-label="Sections">
+    <button type="button" [class.on]="sheet() === 'model'" (click)="toggleSheet('model')"><span>📦</span>Modèle</button>
+    @if (mode() === 'select') {
+      <button type="button" [class.on]="sheet() === 'shapes'" (click)="toggleSheet('shapes')"><span>🧱</span>Formes</button>
+      <button type="button" [class.on]="sheet() === 'add'" (click)="toggleSheet('add')"><span>＋</span>Ajouter</button>
+    } @else {
+      <button type="button" [class.on]="sheet() === 'layer'" (click)="toggleSheet('layer')"><span>{{ layerInfo().icon }}</span>Calque</button>
+      <button type="button" [class.on]="sheet() === 'face'" (click)="toggleSheet('face')"><span>⬚</span>Face</button>
+    }
+  </nav>
+
+  @if (sheet(); as open) {
+    <section class="sheet" role="dialog" [attr.aria-label]="open">
+      <button type="button" class="handle" aria-label="Fermer" (click)="sheet.set(null)"><span></span></button>
+      @switch (open) {
+        @case ('model') {
+          <div class="sheet-head"><h2>Modèle</h2><button type="button" class="btn" (click)="create()">＋ Nouveau</button></div>
+          <ng-container [ngTemplateOutlet]="modelTpl" />
+        }
+        @case ('shapes') {
+          <div class="sheet-head"><h2>Formes</h2>
+            <button type="button" class="btn" (click)="add('box')">＋ Box</button>
+            <button type="button" class="btn" (click)="add('plane')">＋ Plane</button>
+          </div>
+          <ng-container [ngTemplateOutlet]="shapesTpl" />
+        }
+        @case ('add') {
+          <div class="sheet-head"><h2>Ajouter une forme</h2></div>
+          <div class="add-choices">
+            <button type="button" class="btn" (click)="add('box'); sheet.set(null)"><span>🧊</span><strong>Box</strong><small>Bâtiments, murs, toits</small></button>
+            <button type="button" class="btn" (click)="add('plane'); sheet.set(null)"><span>▱</span><strong>Plane</strong><small>Fleurs, herbes, panneaux</small></button>
+          </div>
+        }
+        @case ('layer') {
+          <div class="sheet-head"><h2>Calque</h2></div>
+          <ng-container [ngTemplateOutlet]="layerTpl" />
+        }
+        @case ('face') {
+          <div class="sheet-head"><h2>Face</h2>
+            @if (selectedPart()) { <span class="muted">{{ parts()[selection()!.partIndex] }}</span> }
+          </div>
+          <ng-container [ngTemplateOutlet]="faceTpl" />
+        }
+        @case ('palette') {
+          <div class="sheet-head"><h2>Palette</h2>
+            @if (layer() === 'color') {
+              <label class="btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
+                ⇪ Importer<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
+              </label>
+            }
+          </div>
+          <ng-container [ngTemplateOutlet]="paletteTpl" />
+        }
+      }
+    </section>
+  }
+} @else {
+  <aside class="panel" aria-label="Éditeur de modèles">
     <header>
-      <strong>{{ parts()[selection()!.partIndex] }} · {{ faceInfo()?.face }}</strong>
-      <span class="muted">{{ faceInfo()?.size }} · {{ layer() === 'color' ? 'Couleur' : layerHint() }}</span>
-      <button type="button" class="btn" title="Fermer la grande vue (G)" aria-label="Fermer la grande vue" (click)="setBigView(false)">✕</button>
+      <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)">← Jeu</a>
+      <h1>Modèles 3D</h1>
+      <div class="history">
+        <button type="button" class="btn" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()">↶</button>
+        <button type="button" class="btn" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()">↷</button>
+      </div>
     </header>
-    <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()" [fill]="true"
-                      (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
-  </section>
+    <ng-container [ngTemplateOutlet]="modeSwitch" />
+
+    <details class="block" [open]="sections().model" (toggle)="toggleSection('model', $any($event.target).open)">
+      <summary>Modèle{{ model() ? ' : ' + model()!.id : '' }}</summary>
+      <button type="button" class="btn" (click)="create()">+ Nouveau modèle</button>
+      <ng-container [ngTemplateOutlet]="modelTpl" />
+    </details>
+
+    @if (model()) {
+      @if (mode() === 'select') {
+        <details class="block" [open]="sections().parts" (toggle)="toggleSection('parts', $any($event.target).open)">
+          <summary>Formes ({{ parts().length }})</summary>
+          <div class="row wrap">
+            <button type="button" class="btn" (click)="add('box')">+ Box</button>
+            <button type="button" class="btn" (click)="add('plane')">+ Plane</button>
+            <button type="button" class="btn" [disabled]="!selection()" title="Ctrl+D" (click)="duplicate()">Dupliquer</button>
+            <button type="button" class="btn danger" [disabled]="!selection()" title="Suppr" (click)="remove()">Supprimer</button>
+          </div>
+          <ng-container [ngTemplateOutlet]="shapesTpl" />
+        </details>
+        <p class="hint">Clique une forme. Flèches : déplacer la forme · Glisser : tourner · Molette : zoom · Clic droit glissé : déplacer la vue.</p>
+      } @else {
+        <details class="block" [open]="sections().layer" (toggle)="toggleSection('layer', $any($event.target).open)">
+          <summary>Calque : {{ layerInfo().label }}</summary>
+          <ng-container [ngTemplateOutlet]="layerTpl" />
+        </details>
+        <details class="block" [open]="sections().drawing" (toggle)="toggleSection('drawing', $any($event.target).open)">
+          <summary>Dessin</summary>
+          <ng-container [ngTemplateOutlet]="toolsTpl" />
+          @if (layer() === 'color') {
+            <label class="link-btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
+              Importer une palette…<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
+            </label>
+          }
+          <ng-container [ngTemplateOutlet]="paletteTpl" />
+          <p class="hint">Dessine sur la face (panneau ou grande vue, G) ou directement sur le modèle. Glisser hors du modèle : tourner la vue.</p>
+        </details>
+        <details class="block" [open]="sections().face" (toggle)="toggleSection('face', $any($event.target).open)">
+          <summary>Face sélectionnée</summary>
+          <ng-container [ngTemplateOutlet]="faceTpl" />
+          @if (faceTexture(); as face) {
+            <button type="button" class="btn" [class.on]="bigView()" (click)="setBigView(!bigView())"
+                    title="Grande vue de la face, par-dessus la gauche de la vue 3D (G)">⛶ Grande vue</button>
+            @if (!bigView()) {
+              <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()"
+                                (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
+            }
+          }
+        </details>
+      }
+      @if (pending(); as action) {
+        <div class="banner">
+          <span>{{ action.kind === 'link' ? 'Clique la face à lier (même taille)' : 'Clique la face où copier' }}</span>
+          <button type="button" class="btn" (click)="cancelFaceAction()">Annuler (Échap)</button>
+        </div>
+      }
+    }
+  </aside>
 }
 
-<aside class="panel" aria-label="Éditeur de modèles">
-  <header>
-    <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)">← Jeu</a>
-    <h1>Modèles 3D</h1>
-    <div class="history">
-      <button type="button" class="btn" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()">↶</button>
-      <button type="button" class="btn" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()">↷</button>
-    </div>
-  </header>
+<!-- Pieces shown in the side panel (computer) or in the bottom sheets (phone) -->
 
-  <details class="block" [open]="sections().model" (toggle)="toggleSection('model', $any($event.target).open)">
-  <summary>Modèle{{ model() ? ' : ' + model()!.id : '' }}</summary>
-  <div class="row">
-    <label class="field grow">
-      <span>Ouvrir</span>
-      <select (change)="open($any($event.target).value)">
-        @if (!model()) {
-          <option value="" selected disabled>—</option>
+<ng-template #modeSwitch>
+  <div class="mode-switch" role="tablist" aria-label="Mode">
+    <button type="button" role="tab" [class.on]="mode() === 'select'" [attr.aria-selected]="mode() === 'select'"
+            title="Modélisation : choisir, déplacer, régler les formes (V)" (click)="setEditorMode('select')">🧊 Modélisation</button>
+    <button type="button" role="tab" [class.on]="mode() === 'paint'" [attr.aria-selected]="mode() === 'paint'"
+            title="Dessin : peindre les faces" (click)="setEditorMode('paint')">🖌️ Dessin</button>
+  </div>
+</ng-template>
+
+<ng-template #modelTpl>
+  <label class="field">
+    <span>Ouvrir</span>
+    <select (change)="open($any($event.target).value)">
+      @if (!model()) {
+        <option value="" selected disabled>—</option>
+      }
+      <optgroup label="Modèles du jeu">
+        @for (id of modelIds; track id) {
+          <option [value]="id" [selected]="model()?.id === id">{{ id }}{{ storedIds().includes(id) ? ' (modifié)' : '' }}</option>
         }
-        <optgroup label="Modèles du jeu">
-          @for (id of modelIds; track id) {
-            <option [value]="id" [selected]="model()?.id === id">{{ id }}{{ storedIds().includes(id) ? ' (modifié)' : '' }}</option>
+      </optgroup>
+      @if (newIds().length) {
+        <optgroup label="Nouveaux (navigateur)">
+          @for (id of newIds(); track id) {
+            <option [value]="id" [selected]="model()?.id === id">{{ id }}</option>
           }
         </optgroup>
-        @if (newIds().length) {
-          <optgroup label="Nouveaux (navigateur)">
-            @for (id of newIds(); track id) {
-              <option [value]="id" [selected]="model()?.id === id">{{ id }}</option>
-            }
-          </optgroup>
-        }
-      </select>
-    </label>
-    <button type="button" class="btn" (click)="create()">+ Nouveau</button>
-  </div>
-
+      }
+    </select>
+  </label>
   @if (model(); as model) {
-    @if (isEditedGameModel()) {
-      <button type="button" class="btn" [class.danger]="confirmRevert()" (click)="revert()"
-              title="Oublie les modifications enregistrées dans le navigateur">
-        {{ confirmRevert() ? 'Confirmer ?' : '⟲ Revenir à la version du jeu' }}
-      </button>
-    }
     <div class="row">
       <label class="field grow">
         <span>Nom (id)</span>
         <input type="text" [value]="model.id" (change)="rename($any($event.target).value)" />
       </label>
-      <label class="field small" title="0 à 1 : plie au vent (végétation)">
+      <div class="field" title="0 à 1 : plie au vent (végétation)">
         <span>Vent</span>
-        <input type="number" min="0" max="1" step="0.1" [value]="model.sway ?? 0" (change)="setSway(+$any($event.target).value)" />
-      </label>
+        <div class="stepper">
+          <button type="button" aria-label="Moins de vent" (click)="setSway((model.sway ?? 0) - 0.1)">−</button>
+          <input type="number" min="0" max="1" step="0.1" aria-label="Vent" [value]="model.sway ?? 0" (change)="setSway(+$any($event.target).value)" />
+          <button type="button" aria-label="Plus de vent" (click)="setSway((model.sway ?? 0) + 0.1)">+</button>
+        </div>
+      </div>
     </div>
-  }
-  </details>
-
-  @if (model(); as model) {
-
-    <details class="block" [open]="sections().parts" (toggle)="toggleSection('parts', $any($event.target).open)">
-      <summary>Formes ({{ parts().length }})</summary>
-      <ul class="parts" role="listbox" aria-label="Formes du modèle">
-        @for (name of parts(); track $index) {
-          <li role="option" [attr.aria-selected]="selection()?.partIndex === $index"
-              [class.on]="selection()?.partIndex === $index" (click)="selectPart($index)">{{ name }}</li>
-        }
-      </ul>
-      <div class="row wrap">
-        <button type="button" class="btn" (click)="add('box')">+ Box</button>
-        <button type="button" class="btn" (click)="add('plane')">+ Plane</button>
-        <button type="button" class="btn" [disabled]="!selection()" title="Ctrl+D" (click)="duplicate()">Dupliquer</button>
-        <button type="button" class="btn danger" [disabled]="!selection()" title="Suppr" (click)="remove()">Supprimer</button>
-      </div>
-
-    @if (selectedPart(); as part) {
-        <h3>{{ parts()[selection()!.partIndex] }}</h3>
-        <div class="vec">
-          <span>Taille</span>
-          @for (axis of axes; track axis) {
-            @if (part.kind === 'box' || axis !== 'z') {
-              <label><i>{{ axis }}</i><input type="number" min="1" step="1" [value]="part.size[axis]" (change)="setSize(axis, +$any($event.target).value)" /></label>
-            } @else {
-              <span></span>
-            }
-          }
-        </div>
-        <div class="vec">
-          <span>Position</span>
-          @for (axis of axes; track axis) {
-            <label><i>{{ axis }}</i><input type="number" step="1" [value]="part.pos[axis]" (change)="setPos(axis, +$any($event.target).value)" /></label>
-          }
-        </div>
-        <div class="vec">
-          <span>Rotation °</span>
-          @for (axis of axes; track axis) {
-            <label><i>{{ axis }}</i><input type="number" step="15" [value]="degrees(part.rot[axis])" (change)="setRot(axis, +$any($event.target).value)" /></label>
-          }
-        </div>
-        <label class="field">
-          <span>Faces visibles</span>
-          <select (change)="setSide($any($event.target).value)">
-            @for (side of sides; track side.value) {
-              <option [value]="side.value" [selected]="(part.side ?? 0) === side.value">{{ side.label }}</option>
-            }
-          </select>
-        </label>
-        <div class="row wrap">
-          <label class="check" title="Décocher pour un élément posé par-dessus (texte d'un panneau)">
-            <input type="checkbox" [checked]="!!part.depthTest" (change)="setFlag('depthTest', $any($event.target).checked)" /> Caché par les autres
-          </label>
-          <label class="check" title="Décocher pour les fleurs, herbes (ne cachent pas ce qui est derrière)">
-            <input type="checkbox" [checked]="!!part.depthWrite" (change)="setFlag('depthWrite', $any($event.target).checked)" /> Cache les autres
-          </label>
-        </div>
+    <p class="hint small">Vent : 0 = immobile, 1 = plie beaucoup (herbes, arbres).</p>
+    @if (isEditedGameModel()) {
+      <button type="button" class="btn wide" [class.danger]="!confirmRevert()" [class.on]="confirmRevert()" (click)="revert()"
+              title="Oublie les modifications enregistrées dans le navigateur">
+        {{ confirmRevert() ? 'Confirmer : revenir à la version du jeu ?' : '⟲ Revenir à la version du jeu' }}
+      </button>
     }
-    </details>
-
-    <details class="block" [open]="sections().drawing" (toggle)="toggleSection('drawing', $any($event.target).open)">
-      <summary>Dessin</summary>
-      <div class="layers" role="tablist" aria-label="Calque">
-        @for (l of layers; track l.id) {
-          <button type="button" role="tab" [class.on]="layer() === l.id" [attr.aria-selected]="layer() === l.id" (click)="setLayer(l.id)">{{ l.label }}</button>
-        }
-      </div>
-      @if (layer() === 'color') {
-        <label class="check" title="Voir le modèle la nuit : le calque Nuit s'allume">
-          <input type="checkbox" [checked]="night()" (change)="setNight($any($event.target).checked)" /> Vue de nuit
-        </label>
-      } @else {
-        <p class="hint">{{ layerHint() }}</p>
-      }
-      <div class="row wrap tools" role="toolbar" aria-label="Outils">
-        <button type="button" class="btn" [class.on]="mode() === 'select'" title="Sélection : cliquer une face, déplacer la forme (V)"
-                [attr.aria-pressed]="mode() === 'select'" (click)="setMode('select')">🖱️</button>
-        @for (t of tools; track t.id) {
-          <button type="button" class="btn" [class.on]="mode() === 'paint' && tool() === t.id" [title]="t.label + ' (' + t.key.toUpperCase() + ')'"
-                  [attr.aria-label]="t.label" [attr.aria-pressed]="mode() === 'paint' && tool() === t.id" (click)="pickTool(t.id)">{{ t.icon }}</button>
-        }
-      </div>
-      @if (layer() === 'color') {
-      <div class="row wrap">
-        <label class="color" title="Couleur libre">
-          <input type="color" [value]="color()" (change)="useColor($any($event.target).value)" />
-          <span>{{ color() }}</span>
-        </label>
-        @if (tool() === 'rect') {
-          <label class="check"><input type="checkbox" [checked]="rectFilled()" (change)="rectFilled.set($any($event.target).checked)" /> Plein</label>
-        }
-      </div>
-      <div class="swatches" aria-label="Palette importée">
-        <span class="palette-head">
-          @if (importedPalette(); as pal) {
-            Palette : {{ pal.name }} ({{ pal.colors.length }})
-          } @else {
-            Palette
-          }
-          <label class="link-btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
-            Importer…<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
-          </label>
-          @if (importedPalette()) {
-            <button type="button" class="link-btn" (click)="removePalette()">Retirer</button>
-          }
-        </span>
-        @if (importedPalette(); as pal) {
-          @for (c of pal.colors; track c) {
-            <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
-          }
-          <label class="check lock" title="Le crayon, le pot, la ligne et le rectangle prennent toujours la couleur de la palette la plus proche">
-            <input type="checkbox" [checked]="pal.locked" (change)="setPaletteLocked($any($event.target).checked)" /> Garder seulement ces couleurs
-          </label>
-        }
-      </div>
-      @if (recentColors().length) {
-        <div class="swatches" aria-label="Couleurs récentes">
-          <span>Récentes</span>
-          @for (c of recentColors(); track c) {
-            <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
-          }
-        </div>
-      }
-      @if (palette().length) {
-        <div class="swatches" aria-label="Couleurs du modèle">
-          <span>Modèle</span>
-          @for (c of palette(); track c) {
-            <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
-          }
-        </div>
-      }
-      } @else {
-        <div class="grays" aria-label="Nuances de gris">
-          @for (g of grays; track g) {
-            <button type="button" [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'" [class.on]="g === gray()"
-                    [title]="g" [attr.aria-label]="'Gris ' + g" (click)="gray.set(g)"></button>
-          }
-        </div>
-        <label class="row gray-slider">
-          <input type="range" min="0" max="255" [value]="gray()" (input)="gray.set(+$any($event.target).value)" aria-label="Valeur de gris" />
-          <span class="gray-value" [style.background]="'rgb(' + gray() + ',' + gray() + ',' + gray() + ')'"></span>
-          <span>{{ gray() }}</span>
-        </label>
-        @if (layer() === 'bump') {
-          <label class="field small" title="Force du relief (1 par défaut)">
-            <span>Force</span>
-            <input type="number" min="0.1" step="0.1" [value]="model.bumpScale ?? 1" (change)="setBumpScale(+$any($event.target).value)" />
-          </label>
-        }
-      }
-      @if (mode() === 'paint') {
-        <p class="hint">Dessine sur la face (panneau ou grande vue, G) ou directement sur le modèle. Glisser hors du modèle : tourner la vue.</p>
-      }
-    </details>
-
-    <details class="block" [open]="sections().face" (toggle)="toggleSection('face', $any($event.target).open)">
-      <summary>Face sélectionnée</summary>
-      @if (faceInfo(); as info) {
-        <dl>
-          <dt>Face</dt><dd>{{ info.face }} · {{ info.size }}</dd>
-          @if (info.linked) {
-            <dt>Liée à</dt><dd>{{ info.linked }} autre(s) face(s) <button type="button" class="link-btn" (click)="unlink()" title="Cette face garde une copie de ses pixels et ne suit plus les autres">Délier</button></dd>
-          }
-        </dl>
-        <div class="row wrap">
-          <button type="button" class="btn" [class.on]="bigView()" (click)="setBigView(!bigView())"
-                  title="Grande vue de la face, par-dessus la gauche de la vue 3D (G)">⛶ Grande vue</button>
-          <button type="button" class="btn" (click)="flip(true)" title="Retourner gauche ↔ droite">⇆</button>
-          <button type="button" class="btn" (click)="flip(false)" title="Retourner haut ↕ bas">⇅</button>
-          <button type="button" class="btn" [class.on]="pending()?.kind === 'link'" (click)="startFaceAction('link')"
-                  title="Puis clique une autre face de même taille : elles auront les mêmes pixels">🔗 Lier à…</button>
-          <button type="button" class="btn" [class.on]="pending()?.kind === 'copy'" (click)="startFaceAction('copy')"
-                  title="Puis clique la face où copier ce dessin">📋 Copier vers…</button>
-        </div>
-        <div class="row wrap">
-          <span class="muted">Copie en miroir :</span>
-          <label class="check"><input type="checkbox" [checked]="mirrorH()" (change)="mirrorH.set($any($event.target).checked)" /> ⇆</label>
-          <label class="check"><input type="checkbox" [checked]="mirrorV()" (change)="mirrorV.set($any($event.target).checked)" /> ⇅</label>
-        </div>
-        @if (!bigView() && faceTexture(); as face) {
-          <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()"
-                            (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" />
-        }
-      } @else {
-        <p class="hint">Clique sur une face du modèle. Flèches : déplacer la forme · Glisser : tourner · Molette : zoom · Clic droit glissé : déplacer la vue.</p>
-      }
-    </details>
-
-    <button type="button" class="primary" (click)="export()">⬇ Exporter</button>
+    <button type="button" class="primary" (click)="export()">⬇ Exporter (.ts + .png)</button>
+    <p class="hint small">Tes changements sont enregistrés dans ce navigateur et visibles dans le jeu. L'export sert à les ajouter au code.</p>
   }
-
   @if (status()) {
     <p class="status">{{ status() }}</p>
   }
   @if (atlasPreview(); as src) {
     <img class="atlas" [src]="src" alt="Atlas exporté" />
   }
-</aside>
+</ng-template>
+
+<ng-template #shapesTpl>
+  <div class="chips" role="listbox" aria-label="Formes du modèle">
+    @for (name of parts(); track $index) {
+      <button type="button" role="option" [attr.aria-selected]="selection()?.partIndex === $index"
+              [class.on]="selection()?.partIndex === $index" (click)="selectPart($index)">{{ name }}</button>
+    }
+  </div>
+  @if (selectedPart(); as part) {
+    <h3>Réglages de {{ parts()[selection()!.partIndex] }}</h3>
+    @for (v of vecs; track v.kind) {
+      <div class="vec">
+        <span>{{ v.label }}</span>
+        @for (axis of axes; track axis) {
+          @if (v.kind !== 'size' || part.kind === 'box' || axis !== 'z') {
+            <div class="stepper">
+              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' moins'" (click)="stepVec(v.kind, axis, -1)">−</button>
+              <label><i>{{ axis }}</i><input type="number" [step]="v.step" [min]="v.kind === 'size' ? 1 : null" [value]="vecValue(part, v.kind, axis)"
+                                             (change)="setVec(v.kind, axis, +$any($event.target).value)" /></label>
+              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' plus'" (click)="stepVec(v.kind, axis, 1)">+</button>
+            </div>
+          } @else {
+            <span></span>
+          }
+        }
+      </div>
+    }
+    <div class="vec sides">
+      <span>Faces</span>
+      <div class="segmented">
+        @for (side of sides; track side.value) {
+          <button type="button" [class.on]="(part.side ?? 0) === side.value" (click)="setSide('' + side.value)">{{ side.label }}</button>
+        }
+      </div>
+    </div>
+    <label class="switch" title="Décocher pour un élément posé par-dessus (texte d'un panneau)">
+      <span>Caché par les autres</span>
+      <input type="checkbox" [checked]="!!part.depthTest" (change)="setFlag('depthTest', $any($event.target).checked)" />
+    </label>
+    <label class="switch" title="Décocher pour les fleurs, herbes (ne cachent pas ce qui est derrière)">
+      <span>Cache les autres</span>
+      <input type="checkbox" [checked]="!!part.depthWrite" (change)="setFlag('depthWrite', $any($event.target).checked)" />
+    </label>
+  } @else {
+    <p class="hint">Touche une forme du modèle, ou choisis-la ci-dessus.</p>
+  }
+</ng-template>
+
+<ng-template #layerTpl>
+  <div class="layer-tiles" role="tablist" aria-label="Calque">
+    @for (l of layers; track l.id) {
+      <button type="button" role="tab" [class.on]="layer() === l.id" [attr.aria-selected]="layer() === l.id" (click)="setLayer(l.id)">
+        <span>{{ l.icon }}</span><strong>{{ l.label }}</strong><small>{{ l.short }}</small>
+      </button>
+    }
+  </div>
+  <p class="hint box">{{ layerInfo().hint }}</p>
+  @if (layer() === 'color') {
+    <label class="switch" title="Voir le modèle la nuit : le calque Nuit s'allume">
+      <span>Vue de nuit</span>
+      <input type="checkbox" [checked]="night()" (change)="setNight($any($event.target).checked)" />
+    </label>
+  } @else {
+    <label class="switch" title="Le coin de la vue 3D montre le modèle en couleurs">
+      <span>Aperçu de nuit<small>Coin de la vue 3D : le modèle en couleurs, lumières allumées</small></span>
+      <input type="checkbox" [checked]="previewNight()" (change)="setPreviewNight($any($event.target).checked)" />
+    </label>
+    @if (layer() === 'bump') {
+      <div class="field" title="Force du relief (1 par défaut)">
+        <span>Force du relief</span>
+        <div class="stepper">
+          <button type="button" aria-label="Moins de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) - 0.1)">−</button>
+          <input type="number" min="0.1" step="0.1" aria-label="Force du relief" [value]="model()?.bumpScale ?? 1" (change)="setBumpScale(+$any($event.target).value)" />
+          <button type="button" aria-label="Plus de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) + 0.1)">+</button>
+        </div>
+      </div>
+    }
+  }
+</ng-template>
+
+<ng-template #toolsTpl>
+  <div class="tools" role="toolbar" aria-label="Outils">
+    @for (t of tools; track t.id) {
+      <button type="button" class="btn" [class.on]="mode() === 'paint' && tool() === t.id" [title]="t.label + ' (' + t.key.toUpperCase() + ')'"
+              [attr.aria-label]="t.label" [attr.aria-pressed]="mode() === 'paint' && tool() === t.id" (click)="pickTool(t.id)">
+        <span>{{ t.icon }}</span><small>{{ t.short }}</small>
+      </button>
+    }
+  </div>
+  @if (tool() === 'rect') {
+    <label class="switch">
+      <span>Rectangle plein</span>
+      <input type="checkbox" [checked]="rectFilled()" (change)="rectFilled.set($any($event.target).checked)" />
+    </label>
+  }
+</ng-template>
+
+<ng-template #paletteTpl>
+  @if (layer() === 'color') {
+    <div class="current-color">
+      <label class="current big" [style.background]="color()" title="Couleur libre">
+        <input type="color" [value]="color()" (change)="useColor($any($event.target).value)" aria-label="Couleur libre" />
+      </label>
+      <div class="grow"><strong>{{ color().toUpperCase() }}</strong><span class="muted">Touche le carré : couleur libre</span></div>
+    </div>
+    @if (importedPalette(); as pal) {
+      <div class="swatches" aria-label="Palette importée">
+        <span class="palette-head">{{ pal.name }} ({{ pal.colors.length }}) <button type="button" class="link-btn" (click)="removePalette()">Retirer</button></span>
+        @for (c of pal.colors; track c) {
+          <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+        }
+      </div>
+      <label class="switch" title="Le crayon, le pot, la ligne et le rectangle prennent toujours la couleur de la palette la plus proche">
+        <span>🔒 Garder seulement ces couleurs</span>
+        <input type="checkbox" [checked]="pal.locked" (change)="setPaletteLocked($any($event.target).checked)" />
+      </label>
+    }
+    @if (recentColors().length) {
+      <div class="swatches" aria-label="Couleurs récentes">
+        <span>Récentes</span>
+        @for (c of recentColors(); track c) {
+          <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+        }
+      </div>
+    }
+    @if (palette().length) {
+      <div class="swatches" aria-label="Couleurs du modèle">
+        <span>Couleurs du modèle</span>
+        @for (c of palette(); track c) {
+          <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+        }
+      </div>
+    }
+  } @else {
+    <div class="grays" aria-label="Nuances de gris">
+      @for (g of grays; track g) {
+        <button type="button" [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'" [class.on]="g === gray()"
+                [title]="g" [attr.aria-label]="'Gris ' + g" (click)="gray.set(g)"></button>
+      }
+    </div>
+    <label class="row gray-slider">
+      <input type="range" min="0" max="255" [value]="gray()" (input)="gray.set(+$any($event.target).value)" aria-label="Valeur de gris" />
+      <span class="gray-value" [style.background]="'rgb(' + gray() + ',' + gray() + ',' + gray() + ')'"></span>
+      <span>{{ gray() }}</span>
+    </label>
+  }
+</ng-template>
+
+<ng-template #faceTpl>
+  @if (partFaces().length) {
+    <div class="face-buttons" aria-label="Choisir la face">
+      @for (f of partFaces(); track f.face) {
+        <button type="button" class="btn" [class.on]="selection()?.face === f.face" (click)="selectFace(f.face)">{{ f.label }}</button>
+      }
+    </div>
+  }
+  @if (faceInfo(); as info) {
+    <p class="hint box">
+      {{ info.face }} · {{ info.size }}
+      @if (info.linked) {
+        · liée à {{ info.linked }} autre(s) face(s)
+        <button type="button" class="link-btn" (click)="unlink()" title="Cette face garde une copie de ses pixels et ne suit plus les autres">Délier</button>
+      }
+    </p>
+    <div class="face-actions">
+      <button type="button" class="btn" (click)="flip(true)" title="Retourner gauche ↔ droite">⇆ Retourner</button>
+      <button type="button" class="btn" (click)="flip(false)" title="Retourner haut ↕ bas">⇅ Retourner</button>
+      <button type="button" class="btn" [class.on]="pending()?.kind === 'link'" (click)="startFaceAction('link')"
+              title="Puis touche une autre face de même taille : elles auront les mêmes pixels">🔗 Lier à…</button>
+      <button type="button" class="btn" [class.on]="pending()?.kind === 'copy'" (click)="startFaceAction('copy')"
+              title="Puis touche la face où copier ce dessin">📋 Copier vers…</button>
+    </div>
+    <div class="row wrap mirror">
+      <span class="grow">Copie en miroir</span>
+      <button type="button" class="btn" [class.on]="mirrorH()" aria-label="Miroir gauche droite" (click)="mirrorH.set(!mirrorH())">⇆</button>
+      <button type="button" class="btn" [class.on]="mirrorV()" aria-label="Miroir haut bas" (click)="mirrorV.set(!mirrorV())">⇅</button>
+    </div>
+  } @else {
+    <p class="hint">Touche une face du modèle pour la choisir.</p>
+  }
+</ng-template>

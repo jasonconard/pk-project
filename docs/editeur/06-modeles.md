@@ -6,17 +6,35 @@ Un écran à part pour créer et modifier les modèles (bâtiments, panneaux, fl
 
 Un modèle est fait de **boxes** (6 faces) et de **planes** (1 face, visible des deux côtés si on le veut). Chaque face a sa propre grille de pixels, **de la taille de la face** : 1 unité = 1 pixel, partout. Une box de 76 × 31 × 30 a une face avant de 76 × 31 px et des côtés de 30 × 31 px. On ne touche jamais aux UV : à l'export, l'éditeur range toutes les faces dans une image (l'atlas) et calcule les UV.
 
-Le panneau est en sections repliables (**Modèle**, **Formes**, **Dessin**, **Face sélectionnée**), mémorisées dans le navigateur ; **⬇ Exporter** reste en bas.
+## Deux modes
+
+En haut, **🧊 Modélisation** / **🖌️ Dessin** :
+
+- **Modélisation** : choisir, déplacer, redimensionner les formes. Sections **Modèle** et **Formes**.
+- **Dessin** : peindre les faces. Sections **Modèle**, **Calque**, **Dessin** (outils et palette) et **Face sélectionnée**.
+
+Sur ordinateur, les sections sont dans le panneau de droite, repliables (mémorisées dans le navigateur). **⬇ Exporter** est dans la section **Modèle**.
+
+## Sur téléphone
+
+Sous 700 px de large, l'écran change :
+
+- en haut : **‹ Jeu**, le nom du modèle (il ouvre la section Modèle), annuler / refaire, puis le choix du mode ;
+- **Modélisation** : toucher une forme affiche une carte avec ses flèches (x −, x +, y +, y −, z −, z +), **Dupliquer**, **Tourner 90°**, **Supprimer** et **⚙ Réglages** ; la barre du bas ouvre **Modèle**, **Formes** et **Ajouter** ;
+- **Dessin** : **3D / Face** en haut à droite (Face : la face en grand pour dessiner) ; en bas, la couleur actuelle (la toucher : couleur libre), les couleurs récentes, **🎨** (toute la palette) et les outils ; la barre du bas ouvre **Modèle**, **Calque** et **Face** ;
+- chaque section s'ouvre en volet par le bas ; la poignée le ferme. La section **Face** permet de choisir une face par son nom (Avant, Dessus…), sans viser en 3D ;
+- **Lier à…** / **Copier vers…** : un bandeau demande de toucher la face cible, avec **Annuler** ;
+- pincer à deux doigts sur le modèle zoome, même en dessinant.
 
 ## La vue 3D
 
 - **Glisser** : tourner autour du modèle · **Molette** : zoom · **Clic droit glissé** : déplacer la vue.
-- **Clic sur une face** (mode sélection 🖱️, touche V) : la sélectionne (contour jaune). Les **flèches** déplacent la forme par pas de 1.
+- **Clic sur une face** (mode Modélisation, touche V) : la sélectionne (contour jaune). Les **flèches** déplacent la forme par pas de 1.
 - La grille au sol fait 1 unité.
 
 ## Les formes
 
-Le panneau liste les formes (Box 1, Plane 1…). **+ Box**, **+ Plane** (une forme de 16, posée à droite du modèle), **Dupliquer** (Ctrl+D), **Supprimer** (Suppr, en mode sélection).
+Les formes sont listées en pastilles (Box 1, Plane 1…). **+ Box**, **+ Plane** (une forme de 16, posée à droite du modèle), **Dupliquer** (Ctrl+D), **Supprimer** (Suppr, en mode Modélisation).
 
 Propriétés de la forme sélectionnée :
 

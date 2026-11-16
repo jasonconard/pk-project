@@ -1,4 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { CODE_MODELS } from '../game/shared/model/browser-models';
 import { ObjSide } from '../game/shared/model/SceneMap';
@@ -39,27 +40,53 @@ const NEW_MODEL_ID = 'nouveau-modele';
 /** Selection: click a face, move the part with the arrows. Painting: the tool draws on the faces in 3D too. */
 type Mode = 'select' | 'paint';
 
-const TOOLS: { id: Tool, icon: string, label: string, key: string }[] = [
-  { id: 'pencil', icon: '✏️', label: 'Crayon', key: 'p' },
-  { id: 'eraser', icon: '🧽', label: 'Gomme (transparent)', key: 'e' },
-  { id: 'picker', icon: '💧', label: 'Pipette', key: 'i' },
-  { id: 'fill', icon: '🪣', label: 'Pot de peinture', key: 'f' },
-  { id: 'line', icon: '📏', label: 'Ligne', key: 'l' },
-  { id: 'rect', icon: '▭', label: 'Rectangle', key: 'r' },
+const TOOLS: { id: Tool, icon: string, label: string, short: string, key: string }[] = [
+  { id: 'pencil', icon: '✏️', label: 'Crayon', short: 'Crayon', key: 'p' },
+  { id: 'eraser', icon: '🧽', label: 'Gomme (transparent)', short: 'Gomme', key: 'e' },
+  { id: 'picker', icon: '💧', label: 'Pipette', short: 'Pipette', key: 'i' },
+  { id: 'fill', icon: '🪣', label: 'Pot de peinture', short: 'Pot', key: 'f' },
+  { id: 'line', icon: '📏', label: 'Ligne', short: 'Ligne', key: 'l' },
+  { id: 'rect', icon: '▭', label: 'Rectangle', short: 'Rectangle', key: 'r' },
 ];
 
-const LAYERS: { id: LayerName, label: string, hint: string }[] = [
-  { id: 'color', label: 'Couleur', hint: '' },
-  { id: 'specular', label: 'Brillance', hint: 'Blanc : reflets du soleil · Noir : mat' },
-  { id: 'night', label: 'Nuit', hint: 'Ce qui s\'allume la nuit (lumière chaude) · Noir : éteint' },
-  { id: 'bump', label: 'Relief', hint: 'Blanc : en relief · Noir : en creux (seules les différences comptent)' },
+const LAYERS: { id: LayerName, label: string, icon: string, short: string, hint: string }[] = [
+  { id: 'color', label: 'Couleur', icon: '🎨', short: 'Pixels', hint: 'Les couleurs des pixels.' },
+  { id: 'specular', label: 'Brillance', icon: '✨', short: 'Reflets', hint: 'Blanc : reflets du soleil · Noir : mat' },
+  { id: 'night', label: 'Nuit', icon: '🌙', short: 'Lumières', hint: 'Ce qui s\'allume la nuit (lumière chaude) · Noir : éteint' },
+  { id: 'bump', label: 'Relief', icon: '⛰️', short: 'Bosses', hint: 'Blanc : en relief · Noir : en creux (seules les différences comptent)' },
 ];
+
+/** Bottom sheets of the phone layout (one open at a time). */
+type Sheet = 'model' | 'shapes' | 'add' | 'layer' | 'face' | 'palette';
+
+/** Rows of numbers of the selected part, changed with − / + (step) or typed. */
+type VecKind = 'size' | 'pos' | 'rot';
+const VECS: { kind: VecKind, label: string, step: number }[] = [
+  { kind: 'size', label: 'Taille', step: 1 },
+  { kind: 'pos', label: 'Position', step: 1 },
+  { kind: 'rot', label: 'Rotation °', step: 15 },
+];
+
+/** Arrows moving the selected part on a phone (no keyboard). */
+const NUDGES: { axis: 'x' | 'y' | 'z', delta: number, icon: string, label: string }[] = [
+  { axis: 'x', delta: -1, icon: '←', label: 'x −' },
+  { axis: 'x', delta: 1, icon: '→', label: 'x +' },
+  { axis: 'y', delta: 1, icon: '↑', label: 'y +' },
+  { axis: 'y', delta: -1, icon: '↓', label: 'y −' },
+  { axis: 'z', delta: -1, icon: '↗', label: 'z −' },
+  { axis: 'z', delta: 1, icon: '↙', label: 'z +' },
+];
+
+/** Width below which the editor uses the phone layout (bottom bars and sheets instead of the side panel). */
+const PHONE_QUERY = '(max-width: 700px)';
+/** Recent colors shown in the phone's tool bar. */
+const TRAY_COLORS = 7;
 
 /** Shades of the grayscale layers' palette. */
 const GRAYS = [0, 32, 64, 96, 128, 160, 192, 224, 255];
 
 /** Sections of the panel that can be folded. */
-type PanelSection = 'model' | 'parts' | 'drawing' | 'face';
+type PanelSection = 'model' | 'parts' | 'layer' | 'drawing' | 'face';
 const SECTIONS_KEY = 'pk-model-editor-sections';
 const BIG_VIEW_KEY = 'pk-model-editor-big-view';
 
@@ -107,9 +134,9 @@ interface ActiveStroke {
 @Component({
   selector: 'app-model-editor',
   templateUrl: './model-editor.component.html',
-  styleUrl: './model-editor.component.scss',
+  styleUrls: ['./model-editor.component.scss', './model-editor.panel.scss', './model-editor.phone.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PixelCanvasComponent],
+  imports: [PixelCanvasComponent, NgTemplateOutlet],
 })
 export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
@@ -158,10 +185,29 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   });
   protected readonly axes: Axis[] = ['x', 'y', 'z'];
   protected readonly sides = [
-    { value: ObjSide.FRONT, label: 'Devant seulement' },
-    { value: ObjSide.BACK, label: 'Derrière seulement' },
-    { value: ObjSide.BOTH, label: 'Les deux côtés' },
+    { value: ObjSide.FRONT, label: 'Devant' },
+    { value: ObjSide.BOTH, label: 'Deux côtés' },
+    { value: ObjSide.BACK, label: 'Derrière' },
   ];
+  protected readonly vecs = VECS;
+  protected readonly nudges = NUDGES;
+  /** Phone layout: bottom bars and sheets. */
+  protected readonly phone = signal(false);
+  private readonly phoneQuery = matchMedia(PHONE_QUERY);
+  private readonly onPhoneChange = (e: MediaQueryListEvent) => this.phone.set(e.matches);
+  /** Bottom sheet open on a phone. */
+  protected readonly sheet = signal<Sheet | null>(null);
+  protected readonly trayColors = computed(() => this.recentColors().slice(0, TRAY_COLORS));
+  protected readonly layerInfo = computed(() => LAYERS.find(l => l.id === this.layer())!);
+  /** Faces of the selected part, to pick one without aiming at it in 3D. */
+  protected readonly partFaces = computed(() => {
+    const part = this.selectedPart();
+    if (!part) {
+      return [];
+    }
+    const faces: BoxFace[] = part.kind === 'box' ? ['front', 'back', 'top', 'left', 'right', 'bottom'] : ['front'];
+    return faces.map(face => ({ face, label: part.kind === 'box' ? FACE_LABELS[face] : 'Face' }));
+  });
   protected readonly model = signal<EditableModel | null>(null);
   protected readonly selection = signal<Selection | null>(null);
   protected readonly status = signal('');
@@ -184,7 +230,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   protected readonly previewNight = signal(false);
   protected readonly previewSize = PREVIEW_SIZE;
   /** Folded / unfolded sections of the panel (remembered). */
-  protected readonly sections = signal(loadJson<Record<PanelSection, boolean>>(SECTIONS_KEY, { model: true, parts: true, drawing: true, face: true }));
+  protected readonly sections = signal(loadJson<Record<PanelSection, boolean>>(SECTIONS_KEY, { model: true, parts: true, layer: true, drawing: true, face: true }));
   /** Big 2D view of the selected face, over the left of the 3D view (remembered). */
   protected readonly bigView = signal(loadJson(BIG_VIEW_KEY, { on: false }).on);
   protected readonly previewMargin = PREVIEW_MARGIN;
@@ -222,6 +268,11 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     return { face: part.kind === 'box' ? FACE_LABELS[sel.face] : 'Face', size: `${tex.w} × ${tex.h} px`, linked };
   });
 
+  constructor() {
+    this.phone.set(this.phoneQuery.matches);
+    this.phoneQuery.addEventListener('change', this.onPhoneChange);
+  }
+
   async ngAfterViewInit() {
     this.scene = new ModelEditorScene(this.viewport().nativeElement);
     this.scene.onPartMoved = (partIndex, pos) => this.edit(model => model.parts[partIndex].pos = pos);
@@ -238,6 +289,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.phoneQuery.removeEventListener('change', this.onPhoneChange);
     this.flushSave();
     if (this.confirmTimer) {
       clearTimeout(this.confirmTimer);
@@ -317,6 +369,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   protected setSway(value: number) {
+    value = Math.round(value * 10) / 10; // the − / + steps add up without float noise
     this.edit(model => model.sway = value > 0 ? Math.min(1, value) : undefined, false);
   }
 
@@ -400,6 +453,38 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     return Math.round(radians * 180 / Math.PI * 100) / 100;
   }
 
+  protected vecValue(part: EditablePart, kind: VecKind, axis: Axis): number {
+    return kind === 'size' ? part.size[axis] : kind === 'pos' ? part.pos[axis] : this.degrees(part.rot[axis]);
+  }
+
+  protected setVec(kind: VecKind, axis: Axis, value: number) {
+    if (kind === 'size') {
+      this.setSize(axis, value);
+    } else if (kind === 'pos') {
+      this.setPos(axis, value);
+    } else {
+      this.setRot(axis, value);
+    }
+  }
+
+  /** − / + of a number of the selected part. */
+  protected stepVec(kind: VecKind, axis: Axis, steps: number) {
+    const part = this.selectedPart();
+    if (part) {
+      this.setVec(kind, axis, this.vecValue(part, kind, axis) + steps * VECS.find(v => v.kind === kind)!.step);
+    }
+  }
+
+  /** Moves the selected part by one unit (the arrows of the phone layout). */
+  protected nudge(axis: Axis, delta: number) {
+    this.stepVec('pos', axis, delta);
+  }
+
+  /** Quarter turn of the selected part around the vertical axis. */
+  protected turn() {
+    this.stepVec('rot', 'y', 6);
+  }
+
   protected setSide(value: string) {
     this.editPart(part => part.side = Number(value) as ObjSide);
   }
@@ -428,6 +513,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   protected setBumpScale(value: number) {
+    value = Math.round(value * 10) / 10;
     if (Number.isFinite(value) && value > 0) {
       this.edit(model => model.bumpScale = value);
     }
@@ -638,6 +724,21 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /** Modeling (parts) or painting (faces): the bars and sheets shown follow it. */
+  protected setEditorMode(mode: Mode) {
+    this.setMode(mode);
+    this.sheet.set(null);
+  }
+
+  protected toggleSheet(sheet: Sheet) {
+    this.sheet.update(open => open === sheet ? null : sheet);
+  }
+
+  protected cancelFaceAction() {
+    this.pending.set(null);
+    this.status.set('');
+  }
+
   protected setBigView(on: boolean) {
     this.bigView.set(on);
     saveJson(BIG_VIEW_KEY, { on });
@@ -679,6 +780,14 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   // --- Faces ---
 
+  /** Selects a face of the selected part (face buttons: no need to aim at it in 3D). */
+  protected selectFace(face: BoxFace) {
+    const sel = this.selection();
+    if (sel) {
+      this.select({ partIndex: sel.partIndex, face });
+    }
+  }
+
   protected unlink() {
     const sel = this.selection();
     if (sel?.face) {
@@ -701,9 +810,12 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     if (!face) {
       return;
     }
-    this.setMode('select');
     this.pending.set({ kind, texId: face.texId });
-    this.status.set(kind === 'link' ? 'Clique sur la face à lier (même taille). Échap : annuler.' : 'Clique sur la face où copier. Échap : annuler.');
+    this.sheet.set(null);
+    if (this.phone()) {
+      this.setBigView(false); // the target face is touched in 3D
+    }
+    this.status.set(kind === 'link' ? 'Touche la face à lier (même taille).' : 'Touche la face où copier.');
   }
 
   private applyFaceAction(partIndex: number, face: BoxFace) {

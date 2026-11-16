@@ -54,3 +54,4 @@ Thumbs.db
 # Android signing keys: never in the repo
 *.jks
 *.keystore
+design/exports/
