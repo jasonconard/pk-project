@@ -4,6 +4,8 @@ Cette documentation explique comment fonctionne la météo du jeu, pourquoi elle
 
 Le code se trouve dans `src/app/modules/game/shared/weather/`. L'interface (barre d'outils, catalogue) est dans `src/app/modules/game/weather-panel/` et `src/app/modules/game/weather-catalog/`.
 
+Le catalogue (touche **M**) montre les catégories, les cartes et la fiche de la météo choisie côte à côte. Sur téléphone en portrait (moins de 600 px de large), c'est un volet sous la barre du jeu : la liste sur 2 colonnes, puis toucher une carte ouvre sa fiche en plein volet (**‹ Météos** pour revenir), avec **Appliquer** toujours visible en bas. Maquette : `design/weather-catalog-mobile.pen`.
+
 ## Comment lire cette documentation
 
 1. Commence par les **concepts 01 à 03** : ils posent les bases (architecture, jour/nuit, comment on modifie les shaders de three.js).

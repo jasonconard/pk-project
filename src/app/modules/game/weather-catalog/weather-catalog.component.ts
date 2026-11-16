@@ -1,14 +1,16 @@
 import { Component, computed, DestroyRef, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { DAY_ONLY_HOUR, formatHour, NIGHT_ONLY_HOUR, FIREFLY_COLORS, FireflyColor, isWeatherAvailable, LEAF_MODES, LeafMode, TEMPERATURES, WEATHER_CHOICES, WeatherChoice, WeatherType } from '../shared/weather/Weather';
 import {
-  LucideCheck, LucideClock, LucideCloudRain, LucideDynamicIcon, LucideFlame, LucideIcon, LucideLayoutGrid, LucideLeaf, LucideMoon, LucideMoonStar,
-  LucideSearch, LucideSnowflake, LucideSparkles, LucideSun, LucideThermometer, LucideVolume2, LucideX,
+  LucideCheck, LucideChevronLeft, LucideClock, LucideCloudRain, LucideDynamicIcon, LucideFlame, LucideIcon, LucideLayoutGrid, LucideLeaf, LucideMoon, LucideMoonStar,
+  LucideSearch, LucideSnowflake, LucideSparkles, LucideSun, LucideThermometer, LucideVolume2, LucideVolumeX, LucideX,
 } from '@lucide/angular';
 import { WEATHER_CATEGORIES, WEATHER_INFO, WeatherCategory, WeatherInfo, weatherScreenshot } from '../shared/weather/weather-catalog';
 import { KeyService } from '../../../core/shared/service/key.service';
 
 /** Key opening / closing the catalog from the game. */
 const SHORTCUT = 'm';
+/** Phones in portrait: the list and the detail are two screens (touching a card opens its detail). */
+const PHONE_QUERY = '(max-width: 600px)';
 
 export interface CatalogEntry extends WeatherChoice {
   info: WeatherInfo;
@@ -35,7 +37,8 @@ function normalize(text: string): string {
 
 /**
  * Weather catalog: a popup in the middle of the screen. Categories on the left, cards (screenshot, name,
- * summary, badges) in the middle, the selected weather details on the right. Keyboard: M opens / closes,
+ * summary, badges) in the middle, the selected weather details on the right. On a phone in portrait: a sheet under
+ * the game bar, the list then the detail of the touched weather as a second screen (design/weather-catalog-mobile.pen). Keyboard: M opens / closes,
  * arrows move between the cards, Enter applies, Escape closes.
  */
 /** Icon of each category (list on the left, group titles, detail panel). */
@@ -47,10 +50,11 @@ const CATEGORY_ICONS: Record<WeatherCategory, LucideIcon> = {
 @Component({
   selector: 'game-weather-catalog',
   imports: [
-    LucideCheck, LucideClock, LucideDynamicIcon, LucideLayoutGrid, LucideMoon, LucideSearch, LucideSun, LucideThermometer, LucideVolume2, LucideX,
+    LucideCheck, LucideChevronLeft, LucideClock, LucideDynamicIcon, LucideLayoutGrid, LucideMoon, LucideSearch, LucideSun, LucideThermometer,
+    LucideVolume2, LucideVolumeX, LucideX,
   ],
   templateUrl: './weather-catalog.component.html',
-  styleUrl: './weather-catalog.component.scss',
+  styleUrls: ['./weather-catalog.component.scss', './weather-catalog.phone.scss'],
   host: {
     '[class.open]': 'isOpen()',
   },
@@ -77,6 +81,10 @@ export class WeatherCatalogComponent {
   protected readonly search = signal('');
   /** Weather shown in the detail panel (not applied until "Appliquer"). */
   protected readonly focused = signal<WeatherType>(WeatherType.NEUTRAL);
+  /** Phone: the detail screen is shown instead of the list. */
+  protected readonly detailOpen = signal(false);
+  private readonly phoneQuery = matchMedia(PHONE_QUERY);
+  private readonly detailPanel = viewChild<ElementRef<HTMLElement>>('detailPanel');
   /** Where the arrows act: the categories list or the cards (Tab switches). */
   protected readonly zone = signal<'categories' | 'cards'>('cards');
   /** Detail screenshot: day or night version. */
@@ -129,6 +137,7 @@ export class WeatherCatalogComponent {
     this.focused.set(this.weather());
     this.detailNight.set(this.night());
     this.zone.set('cards');
+    this.detailOpen.set(false);
     this.isOpen.set(true);
     // Held keys would stay pressed (their keyup won't reach the game)
     this.keyService.clearKeys();
@@ -147,7 +156,7 @@ export class WeatherCatalogComponent {
 
   /** Applying it changes the time of day (it only exists at the other time). */
   protected timeChangeHint(entry: CatalogEntry): string {
-    return entry.only === 'day' ? `passe au jour (${formatHour(DAY_ONLY_HOUR)})` : `passe à la nuit (${formatHour(NIGHT_ONLY_HOUR)})`;
+    return entry.only === 'day' ? `Passe au jour (${formatHour(DAY_ONLY_HOUR)})` : `Passe à la nuit (${formatHour(NIGHT_ONLY_HOUR)})`;
   }
 
   protected screenshot(entry: CatalogEntry, night: boolean): string {
@@ -187,6 +196,15 @@ export class WeatherCatalogComponent {
     this.detailNight.set(entry.only === 'night' || (entry.only !== 'day' && this.night()));
   }
 
+  /** Touch / click on a card: shows its detail (on a phone, the detail screen, from its top). */
+  protected open(entry: CatalogEntry): void {
+    this.focus(entry);
+    if (this.phoneQuery.matches) {
+      this.detailOpen.set(true);
+      this.detailPanel()?.nativeElement.scrollTo({ top: 0 });
+    }
+  }
+
   protected apply(entry: CatalogEntry = this.detail()): void {
     this.weatherSelected.emit(entry.type);
   }
@@ -204,7 +222,9 @@ export class WeatherCatalogComponent {
     // Open: the game doesn't get any key
     ev.stopPropagation();
     if (ev.key === 'Escape') {
-      if (typing && this.search()) {
+      if (this.detailOpen()) {
+        this.detailOpen.set(false);
+      } else if (typing && this.search()) {
         this.search.set('');
         (ev.target as HTMLInputElement).value = '';
       } else {

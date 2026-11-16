@@ -1,7 +1,10 @@
 @if (isOpen()) {
   <div class="backdrop" (click)="close()"></div>
-  <section class="popup" role="dialog" aria-modal="true" aria-labelledby="catalog-title">
+  <section class="popup" role="dialog" aria-modal="true" aria-labelledby="catalog-title" [class.show-detail]="detailOpen()">
     <header class="popup-header">
+      @if (detailOpen()) {
+        <button type="button" class="back" (click)="detailOpen.set(false)"><svg lucideChevronLeft></svg> Météos</button>
+      }
       <h2 id="catalog-title">Météo</h2>
       <label class="search">
         <span aria-hidden="true"><svg lucideSearch></svg></span>
@@ -40,7 +43,7 @@
                       [class.current]="e.type === weather()"
                       [class.other-time]="!available(e)"
                       [attr.aria-selected]="e.type === focused()"
-                      (click)="focus(e)" (dblclick)="apply(e)">
+                      (click)="open(e)" (dblclick)="apply(e)">
                 <span class="thumb">
                   @let src = screenshot(e, night());
                   @if (!isMissing(src)) {
@@ -53,14 +56,18 @@
                   }
                 </span>
                 <span class="card-text">
-                  <span class="card-name">{{ e.label }}</span>
-                  <span class="card-summary">{{ e.info.summary }}</span>
-                  <span class="badges">
-                    @if (e.only === 'day') { <span class="badge" title="Seulement le jour"><svg lucideSun></svg> Jour</span> }
-                    @if (e.only === 'night') { <span class="badge" title="Seulement la nuit"><svg lucideMoon></svg> Nuit</span> }
-                    @if (e.info.sound) { <span class="badge" title="Sons d'ambiance"><svg lucideVolume2></svg></span> }
-                    <span class="badge temp">{{ e.temperature[night() && e.only !== 'day' ? 1 : 0] }}°C</span>
+                  <span class="card-head">
+                    <span class="card-name">{{ e.label }}</span>
+                    <span class="card-temp">{{ e.temperature[night() && e.only !== 'day' ? 1 : 0] }}°C</span>
                   </span>
+                  <span class="card-summary">{{ e.info.summary }}</span>
+                  @if (e.only || e.info.sound) {
+                    <span class="badges">
+                      @if (e.only === 'day') { <span class="badge" title="Seulement le jour"><svg lucideSun></svg> Jour</span> }
+                      @if (e.only === 'night') { <span class="badge" title="Seulement la nuit"><svg lucideMoon></svg> Nuit</span> }
+                      @if (e.info.sound) { <span class="badge" title="Sons d'ambiance"><svg lucideVolume2></svg></span> }
+                    </span>
+                  }
                 </span>
               </button>
             }
@@ -71,7 +78,7 @@
       </div>
 
       @let d = detail();
-      <aside class="detail" aria-live="polite">
+      <aside class="detail" #detailPanel aria-live="polite">
         <div class="detail-shot">
           @let big = screenshot(d, detailNight());
           @if (!isMissing(big)) {
@@ -79,7 +86,11 @@
           } @else {
             <span class="thumb-emoji big" aria-hidden="true">{{ d.icon }}</span>
           }
-          @if (!d.only) {
+          @if (d.only) {
+            <span class="only-badge">
+              @if (d.only === 'day') { <svg lucideSun></svg> Le jour seulement } @else { <svg lucideMoon></svg> La nuit seulement }
+            </span>
+          } @else {
             <div class="day-night" role="radiogroup" aria-label="Aperçu">
               <button type="button" role="radio" [class.active]="!detailNight()" [attr.aria-checked]="!detailNight()"
                       (click)="detailNight.set(false)"><svg lucideSun></svg></button>
@@ -102,8 +113,8 @@
               @if (d.only !== 'night') { <svg lucideSun></svg> {{ d.temperature[0] }}°C }
               @if (d.only !== 'day') { <svg lucideMoon></svg> {{ d.temperature[1] }}°C }
             </dd></div>
-            <div><dt><svg lucideClock></svg> Disponible</dt><dd>{{ d.only === 'day' ? 'Le jour seulement' : d.only === 'night' ? 'La nuit seulement' : 'Jour et nuit' }}</dd></div>
-            <div><dt><svg lucideVolume2></svg> Sons</dt><dd>{{ d.info.sound ? 'Oui' : 'Non' }}</dd></div>
+            <div><dt><svg lucideClock></svg> Disponible</dt><dd>{{ d.only === 'day' ? 'Le jour' : d.only === 'night' ? 'La nuit' : 'Jour et nuit' }}</dd></div>
+            <div><dt>@if (d.info.sound) { <svg lucideVolume2></svg> } @else { <svg lucideVolumeX></svg> } Sons</dt><dd>{{ d.info.sound ? 'Oui' : 'Non' }}</dd></div>
           </dl>
 
           @if (d.type === WeatherType.FIREFLIES) {
@@ -135,7 +146,10 @@
           @if (d.type === weather()) {
             <button type="button" class="apply" disabled><svg lucideCheck></svg> Météo actuelle</button>
           } @else if (!available(d)) {
-            <button type="button" class="apply" (click)="apply(d)">Appliquer · {{ timeChangeHint(d) }}</button>
+            <button type="button" class="apply" (click)="apply(d)">
+              @if (d.only === 'day') { <svg lucideSun></svg> } @else { <svg lucideMoon></svg> } Appliquer
+            </button>
+            <p class="apply-hint">{{ timeChangeHint(d) }}</p>
           } @else {
             <button type="button" class="apply" (click)="apply(d)">Appliquer</button>
           }

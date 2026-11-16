@@ -1,0 +1,2006 @@
+{
+  "version": "2.22",
+  "children": [
+    {
+      "type": "frame",
+      "id": "TfPhb",
+      "x": 0,
+      "y": 0,
+      "name": "1 · Liste des météos",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": [
+        "#000000",
+        {
+          "type": "image",
+          "opacity": 0.35,
+          "enabled": true,
+          "url": "images/weather/fog-day.jpg",
+          "mode": "cover"
+        }
+      ],
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "pGXBm",
+          "name": "Status bar",
+          "width": "fill_container",
+          "height": 47
+        },
+        {
+          "type": "frame",
+          "id": "Nhm8D",
+          "name": "Game toolbar (dimmed)",
+          "opacity": 0.45,
+          "width": "fill_container",
+          "height": 48,
+          "gap": 6,
+          "padding": [
+            0,
+            10
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "s1HVOF",
+              "name": "Tool",
+              "width": 56,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "efQ8k",
+              "name": "Tool",
+              "width": 56,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "m21dJ",
+              "name": "Tool",
+              "width": 48,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "m3Nua0",
+              "name": "Tool",
+              "width": 48,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "V5xLjD",
+              "name": "Tool",
+              "width": 48,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "mLYnc",
+              "name": "Spacer",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "kW0Yi",
+              "name": "Fullscreen",
+              "width": 40,
+              "height": 40,
+              "fill": "#222222",
+              "cornerRadius": 4,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "aQqH9",
+                  "name": "maximize icon",
+                  "width": 20,
+                  "height": 20,
+                  "icon": "maximize",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "IsiWr",
+          "name": "Sheet",
+          "width": "fill_container",
+          "height": "fill_container",
+          "fill": "$bg",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Qg3OZ",
+              "name": "Grip",
+              "width": "fill_container",
+              "padding": [
+                8,
+                0,
+                0,
+                0
+              ],
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 3,
+                  "id": "x4UQ0T",
+                  "name": "Grip bar",
+                  "fill": "#ffffff33",
+                  "width": 36,
+                  "height": 5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wr0Fd",
+              "name": "Header",
+              "width": "fill_container",
+              "height": 52,
+              "gap": 8,
+              "padding": [
+                0,
+                8,
+                0,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PnGHA",
+                  "name": "Météo",
+                  "fill": "$text",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Météo",
+                  "fontFamily": "Inter",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "p8dy29",
+                  "name": "Close",
+                  "width": 44,
+                  "height": 44,
+                  "cornerRadius": 22,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "g97oa3",
+                      "name": "x icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "OQhut",
+              "name": "Search wrap",
+              "width": "fill_container",
+              "padding": [
+                0,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "CVnb2",
+                  "name": "Search",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$surface",
+                  "cornerRadius": 12,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "byG5M",
+                      "name": "search icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "c94nqp",
+                      "name": "Rechercher une météo",
+                      "fill": "$muted",
+                      "content": "Rechercher une météo…",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VHo2O",
+              "name": "Categories",
+              "width": "fill_container",
+              "gap": 8,
+              "padding": [
+                12,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UpH1r",
+                  "name": "Chip Toutes",
+                  "height": 36,
+                  "fill": "$accent-soft",
+                  "cornerRadius": 18,
+                  "stroke": "$accent",
+                  "strokeWidth": 1,
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "f6D3u",
+                      "name": "layout-grid icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "layout-grid",
+                      "library": "lucide",
+                      "fill": "$accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "g1e7aw",
+                      "name": "Toutes",
+                      "fill": "$text",
+                      "content": "Toutes",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Edqo6",
+                      "name": "61",
+                      "fill": "$muted",
+                      "content": "61",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "o56DW",
+                  "name": "Chip Classiques",
+                  "height": 36,
+                  "fill": "$surface",
+                  "cornerRadius": 18,
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "E8gr6",
+                      "name": "sun icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "sun",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "r2xalQ",
+                      "name": "Classiques",
+                      "fill": "$text",
+                      "content": "Classiques",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RESI9",
+                      "name": "8",
+                      "fill": "$muted",
+                      "content": "8",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "r9LCx3",
+                  "name": "Chip Pluie",
+                  "height": 36,
+                  "fill": "$surface",
+                  "cornerRadius": 18,
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "obgBI",
+                      "name": "cloud-rain icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "cloud-rain",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "PQ2tR",
+                      "name": "Pluie",
+                      "fill": "$text",
+                      "content": "Pluie",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "QUfQB",
+                      "name": "11",
+                      "fill": "$muted",
+                      "content": "11",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "i97ww",
+                  "name": "Chip Froid",
+                  "height": 36,
+                  "fill": "$surface",
+                  "cornerRadius": 18,
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "dgh8k",
+                      "name": "snowflake icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "snowflake",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gIGvj",
+                      "name": "Froid",
+                      "fill": "$text",
+                      "content": "Froid",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "NgNu3",
+                      "name": "6",
+                      "fill": "$muted",
+                      "content": "6",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "uDSd1",
+              "name": "Divider",
+              "fill": "$line",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "xPVYS",
+              "name": "Grid",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                14,
+                16,
+                0,
+                16
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "FPLb5",
+                  "name": "CLASSIQUES",
+                  "fill": "$muted",
+                  "content": "CLASSIQUES",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "sPEcH",
+                  "name": "Row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "uZTDT",
+                      "name": "Card Ensoleillé",
+                      "clip": true,
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "rvvZW",
+                          "name": "Thumb",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/weather/sunny-day.jpg",
+                            "mode": "cover"
+                          },
+                          "layout": "none"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "NfN1b",
+                          "name": "Text",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            10,
+                            10,
+                            10
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "QmKG1",
+                              "name": "Name row",
+                              "width": "fill_container",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "mht0Q",
+                                  "name": "Ensoleillé",
+                                  "fill": "$text",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Ensoleillé",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "rEfZn",
+                                  "name": "24°C",
+                                  "fill": "$muted",
+                                  "content": "24°C",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LsTmy",
+                      "name": "Card Nuageux",
+                      "clip": true,
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "dbEtO",
+                          "name": "Thumb",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/weather/cloudy-day.jpg",
+                            "mode": "cover"
+                          },
+                          "layout": "none"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "z4h7mx",
+                          "name": "Text",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            10,
+                            10,
+                            10
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "dsiKX",
+                              "name": "Name row",
+                              "width": "fill_container",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DaDD5",
+                                  "name": "Nuageux",
+                                  "fill": "$text",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Nuageux",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "LgEFd",
+                                  "name": "19°C",
+                                  "fill": "$muted",
+                                  "content": "19°C",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VjKCT",
+                  "name": "Row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "aR4DO",
+                      "name": "Card Brouillard",
+                      "clip": true,
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "stroke": "$accent",
+                      "strokeWidth": 2,
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LjuUv",
+                          "name": "Thumb",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/weather/fog-day.jpg",
+                            "mode": "cover"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Kx60Z",
+                              "x": 8,
+                              "y": 8,
+                              "name": "Badge actuelle",
+                              "height": 20,
+                              "fill": "$ok",
+                              "cornerRadius": 5,
+                              "gap": 4,
+                              "padding": [
+                                0,
+                                7
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "VvovW",
+                                  "name": "check icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "check",
+                                  "library": "lucide",
+                                  "fill": "$text"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "xQ8Xg",
+                                  "name": "Actuelle",
+                                  "fill": "$text",
+                                  "content": "Actuelle",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "oVjCH",
+                          "name": "Text",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            10,
+                            10,
+                            10
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "CzHkc",
+                              "name": "Name row",
+                              "width": "fill_container",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "dozxy",
+                                  "name": "Brouillard",
+                                  "fill": "$text",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Brouillard",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "b19W8",
+                                  "name": "14°C",
+                                  "fill": "$muted",
+                                  "content": "14°C",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mNnau",
+                      "name": "Card Forêt",
+                      "clip": true,
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "C9Idn",
+                          "name": "Thumb",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/weather/forest-day.jpg",
+                            "mode": "cover"
+                          },
+                          "layout": "none"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "EAFZL",
+                          "name": "Text",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            10,
+                            10,
+                            10
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "c3UYr",
+                              "name": "Name row",
+                              "width": "fill_container",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "e4E9N",
+                                  "name": "Forêt",
+                                  "fill": "$text",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Forêt",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "G7MgWl",
+                                  "name": "18°C",
+                                  "fill": "$muted",
+                                  "content": "18°C",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ngTRV",
+                  "name": "Row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "OJE5y",
+                      "name": "Card Bruine",
+                      "clip": true,
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ibFXD",
+                          "name": "Thumb",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/weather/drizzle-day.jpg",
+                            "mode": "cover"
+                          },
+                          "layout": "none"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ppWNc",
+                          "name": "Text",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            10,
+                            10,
+                            10
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "aF3qd",
+                              "name": "Name row",
+                              "width": "fill_container",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "D2HTe6",
+                                  "name": "Bruine",
+                                  "fill": "$text",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Bruine",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "RtJJV",
+                                  "name": "15°C",
+                                  "fill": "$muted",
+                                  "content": "15°C",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "YBO7H",
+                              "name": "Badges",
+                              "height": 18,
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "IvuaF",
+                                  "name": "volume-2 icon",
+                                  "width": 12,
+                                  "height": 12,
+                                  "icon": "volume-2",
+                                  "library": "lucide",
+                                  "fill": "$muted"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "voCaq",
+                      "name": "Card Orage",
+                      "clip": true,
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "xB4q4",
+                          "name": "Thumb",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/weather/storm-night.jpg",
+                            "mode": "cover"
+                          },
+                          "layout": "none"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ubtGd",
+                          "name": "Text",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            10,
+                            10,
+                            10
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "ilS7C",
+                              "name": "Name row",
+                              "width": "fill_container",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "LN3Qg",
+                                  "name": "Orage",
+                                  "fill": "$text",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Orage",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "c0ew4",
+                                  "name": "16°C",
+                                  "fill": "$muted",
+                                  "content": "16°C",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "X6NHXg",
+                              "name": "Badges",
+                              "height": 18,
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "PDa9h",
+                                  "name": "Nuit",
+                                  "gap": 3,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "NuHDA",
+                                      "name": "moon icon",
+                                      "width": 12,
+                                      "height": 12,
+                                      "icon": "moon",
+                                      "library": "lucide",
+                                      "fill": "$muted"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "hmXF6",
+                                      "name": "Nuit",
+                                      "fill": "$muted",
+                                      "content": "Nuit",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "icon",
+                                  "id": "s48lT",
+                                  "name": "volume-2 icon",
+                                  "width": 12,
+                                  "height": 12,
+                                  "icon": "volume-2",
+                                  "library": "lucide",
+                                  "fill": "$muted"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Hew2C",
+      "x": 450,
+      "y": 0,
+      "name": "2 · Fiche d'une météo",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": [
+        "#000000",
+        {
+          "type": "image",
+          "opacity": 0.35,
+          "enabled": true,
+          "url": "images/weather/fog-day.jpg",
+          "mode": "cover"
+        }
+      ],
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "uSrE3",
+          "name": "Status bar",
+          "width": "fill_container",
+          "height": 47
+        },
+        {
+          "type": "frame",
+          "id": "A8Qt2t",
+          "name": "Game toolbar (dimmed)",
+          "opacity": 0.45,
+          "width": "fill_container",
+          "height": 48,
+          "gap": 6,
+          "padding": [
+            0,
+            10
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "I4jue",
+              "name": "Tool",
+              "width": 56,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "D8RgT",
+              "name": "Tool",
+              "width": 56,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "uMhwz",
+              "name": "Tool",
+              "width": 48,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "sOmVv",
+              "name": "Tool",
+              "width": 48,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "OFOkt",
+              "name": "Tool",
+              "width": 48,
+              "height": 36,
+              "fill": "#22232a",
+              "cornerRadius": 8
+            },
+            {
+              "type": "frame",
+              "id": "awLIa",
+              "name": "Spacer",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "QmjrB",
+              "name": "Fullscreen",
+              "width": 40,
+              "height": 40,
+              "fill": "#222222",
+              "cornerRadius": 4,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "OmCcX",
+                  "name": "maximize icon",
+                  "width": 20,
+                  "height": 20,
+                  "icon": "maximize",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "cwuXz",
+          "name": "Sheet",
+          "width": "fill_container",
+          "height": "fill_container",
+          "fill": "$bg",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "W2Z6Os",
+              "name": "Grip",
+              "width": "fill_container",
+              "padding": [
+                8,
+                0,
+                0,
+                0
+              ],
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 3,
+                  "id": "daovG",
+                  "name": "Grip bar",
+                  "fill": "#ffffff33",
+                  "width": 36,
+                  "height": 5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MLDBN",
+              "name": "Header",
+              "width": "fill_container",
+              "height": 52,
+              "gap": 4,
+              "padding": [
+                0,
+                8
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "fHlww",
+                  "name": "Back",
+                  "height": 44,
+                  "cornerRadius": 10,
+                  "gap": 2,
+                  "padding": [
+                    0,
+                    10,
+                    0,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "MgsIG",
+                      "name": "chevron-left icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "chevron-left",
+                      "library": "lucide",
+                      "fill": "$accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "APwA0",
+                      "name": "Météos",
+                      "fill": "$accent",
+                      "content": "Météos",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ALiMp",
+                  "name": "Spacer",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "K5J38w",
+                  "name": "Close",
+                  "width": 44,
+                  "height": 44,
+                  "cornerRadius": 22,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ntdkC",
+                      "name": "x icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "cDG2G",
+              "name": "Scroll",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": [
+                4,
+                16,
+                16,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "IweT9",
+                  "name": "Shot",
+                  "clip": true,
+                  "width": "fill_container",
+                  "height": 224,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/weather/fireflies-night.jpg",
+                    "mode": "cover"
+                  },
+                  "cornerRadius": 14,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "uo3RV",
+                      "x": 10,
+                      "y": 10,
+                      "name": "Only night",
+                      "height": 26,
+                      "fill": "#000000a6",
+                      "cornerRadius": 7,
+                      "gap": 5,
+                      "padding": [
+                        0,
+                        9
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "BPVqO",
+                          "name": "moon icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "moon",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ucaul",
+                          "name": "La nuit seulement",
+                          "fill": "$text",
+                          "content": "La nuit seulement",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "H2NcMU",
+                  "name": "Title block",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "vu1nP",
+                      "name": "Category",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "EHGmr",
+                          "name": "leaf icon",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "leaf",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "text",
+                          "id": "m7ITX",
+                          "name": "Nature",
+                          "fill": "$muted",
+                          "content": "Nature",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "aMkuB",
+                      "name": "✨ Lucioles",
+                      "fill": "$text",
+                      "content": "✨ Lucioles",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "B92Eg",
+                  "name": "La nuit, des luciole",
+                  "fill": "#d8dae4",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "La nuit, des lucioles flottent autour des arbres et des fleurs en s’allumant et s’éteignant doucement.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "m0e8BJ",
+                  "name": "Effects",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "lqZKG",
+                      "name": "Effect Lucioles",
+                      "height": 30,
+                      "fill": "$surface",
+                      "cornerRadius": 15,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YHHwa",
+                          "name": "Lucioles",
+                          "fill": "$text",
+                          "content": "Lucioles",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "f1srM",
+                      "name": "Effect Couleur au choix",
+                      "height": 30,
+                      "fill": "$surface",
+                      "cornerRadius": 15,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "tLuA4",
+                          "name": "Couleur au choix",
+                          "fill": "$text",
+                          "content": "Couleur au choix",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "zvN4N",
+                  "name": "Facts",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "QjoOd",
+                      "name": "Fact Température",
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "q2cr9",
+                          "name": "Label",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "oyKRc",
+                              "name": "thermometer icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "thermometer",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "P4j8M",
+                              "name": "Température",
+                              "fill": "$muted",
+                              "content": "Température",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "r7SXX",
+                          "name": "19°C",
+                          "fill": "$text",
+                          "content": "19°C",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "OAhCw",
+                      "name": "Fact Disponible",
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "adc2r",
+                          "name": "Label",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "dAztC",
+                              "name": "clock icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "HEixG",
+                              "name": "Disponible",
+                              "fill": "$muted",
+                              "content": "Disponible",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "IF1fF",
+                          "name": "La nuit",
+                          "fill": "$text",
+                          "content": "La nuit",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "AJrWQ",
+                      "name": "Fact Sons",
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "po4bm",
+                          "name": "Label",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "j7V1kF",
+                              "name": "volume-x icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "volume-x",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "wmB9k",
+                              "name": "Sons",
+                              "fill": "$muted",
+                              "content": "Sons",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "hUzwy",
+                          "name": "Non",
+                          "fill": "$text",
+                          "content": "Non",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Uw08f",
+                  "name": "Options",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "C9Ou0",
+                      "name": "Couleur des lucioles",
+                      "fill": "$muted",
+                      "content": "Couleur des lucioles",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Z6fCTD",
+                      "name": "Swatches",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "WTSVy",
+                          "name": "Swatch Vert",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "GHBTE",
+                              "name": "Ring",
+                              "width": 48,
+                              "height": 48,
+                              "cornerRadius": 24,
+                              "stroke": "#ffffff",
+                              "strokeWidth": 2,
+                              "padding": 4,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "JydkO",
+                                  "name": "Dot",
+                                  "fill": "#c8ff4a",
+                                  "width": "fill_container",
+                                  "height": "fill_container"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "E2usBm",
+                              "name": "Vert",
+                              "fill": "$text",
+                              "content": "Vert",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "M8XRNZ",
+                          "name": "Swatch Rose",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "YcgAy",
+                              "name": "Ring",
+                              "width": 48,
+                              "height": 48,
+                              "cornerRadius": 24,
+                              "padding": 4,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "tKczL",
+                                  "name": "Dot",
+                                  "fill": "#ff6ad5",
+                                  "width": "fill_container",
+                                  "height": "fill_container"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "iS3px",
+                              "name": "Rose",
+                              "fill": "$muted",
+                              "content": "Rose",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "p6JbU0",
+                          "name": "Swatch Cyan",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "q9BRat",
+                              "name": "Ring",
+                              "width": 48,
+                              "height": 48,
+                              "cornerRadius": 24,
+                              "padding": 4,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "QPH9Y",
+                                  "name": "Dot",
+                                  "fill": "#4af0ff",
+                                  "width": "fill_container",
+                                  "height": "fill_container"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "NGp0m",
+                              "name": "Cyan",
+                              "fill": "$muted",
+                              "content": "Cyan",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "LGpi6",
+                          "name": "Swatch Mauve",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "iftp3",
+                              "name": "Ring",
+                              "width": 48,
+                              "height": 48,
+                              "cornerRadius": 24,
+                              "padding": 4,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "qd1hm",
+                                  "name": "Dot",
+                                  "fill": "#cc99ff",
+                                  "width": "fill_container",
+                                  "height": "fill_container"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "iPhEa",
+                              "name": "Mauve",
+                              "fill": "$muted",
+                              "content": "Mauve",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "imKAA",
+              "name": "Divider",
+              "fill": "$line",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "gpBBN",
+              "name": "Actions",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                12,
+                16,
+                30,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Ym5QO",
+                  "name": "Apply",
+                  "width": "fill_container",
+                  "height": 50,
+                  "fill": "$accent",
+                  "cornerRadius": 12,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "BSKnS",
+                      "name": "moon icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "moon",
+                      "library": "lucide",
+                      "fill": "$accent-ink"
+                    },
+                    {
+                      "type": "text",
+                      "id": "qFfzo",
+                      "name": "Appliquer",
+                      "fill": "$accent-ink",
+                      "content": "Appliquer",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uMlhz",
+                  "name": "Hint row",
+                  "width": "fill_container",
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RU2AB",
+                      "name": "Passe à la nuit (22:",
+                      "fill": "$muted",
+                      "content": "Passe à la nuit (22:00)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "bg": {
+      "type": "color",
+      "value": "#1e1f26"
+    },
+    "card": {
+      "type": "color",
+      "value": "#2a2b33"
+    },
+    "surface": {
+      "type": "color",
+      "value": "#33343d"
+    },
+    "line": {
+      "type": "color",
+      "value": "#ffffff14"
+    },
+    "text": {
+      "type": "color",
+      "value": "#ffffff"
+    },
+    "muted": {
+      "type": "color",
+      "value": "#a9abb8"
+    },
+    "accent": {
+      "type": "color",
+      "value": "#5aa8ff"
+    },
+    "accent-ink": {
+      "type": "color",
+      "value": "#0b1a2c"
+    },
+    "accent-soft": {
+      "type": "color",
+      "value": "#5aa8ff38"
+    },
+    "ok": {
+      "type": "color",
+      "value": "#2f9e44"
+    }
+  },
+  "fileToken": "9183f8f9-4962-4e82-82e8-3fe0c5b4a0e5"
+}

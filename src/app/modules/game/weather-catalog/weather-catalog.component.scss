@@ -255,9 +255,23 @@ button {
   padding: 8px 10px 10px;
 }
 
+.card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
 .card-name {
+  flex: 1;
+  min-width: 0;
   font-size: 13px;
   font-weight: 700;
+}
+
+.card-temp {
+  font-size: 11px;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
 }
 
 .card-summary {
@@ -278,11 +292,6 @@ button {
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.1);
   font-size: 10px;
-
-  &.temp {
-    margin-left: auto;
-    font-variant-numeric: tabular-nums;
-  }
 }
 
 .empty {
@@ -313,6 +322,21 @@ button {
     height: 100%;
     object-fit: cover;
     image-rendering: pixelated;
+  }
+
+  // Day-only / night-only weather: said on the picture (instead of the day / night switch)
+  .only-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.65);
+    font-size: 12px;
+    font-weight: 600;
   }
 
   .day-night {
@@ -463,6 +487,18 @@ button {
       cursor: default;
     }
   }
+
+  // What applying it changes (the time of day)
+  .apply-hint {
+    margin: 6px 0 0;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.6;
+  }
+}
+
+.back {
+  display: none;
 }
 
 // Small screens: details under the cards, categories as a scrolling row

@@ -1,0 +1,293 @@
+/* Weather catalog on a phone in portrait; the colors are defined in weather-catalog.component.scss. */
+
+// Phones in portrait (design/weather-catalog-mobile.pen): a sheet under the game bar (and its full screen button),
+// the list on 2 columns, then the touched weather's detail as a second screen with "‹ Météos" to come back
+@media (max-width: 600px) {
+  .popup {
+    top: calc(var(--safe-top, 0px) + 60px);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    transform: none;
+    border-radius: 18px 18px 0 0;
+    animation: slide-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .popup-header {
+    flex-wrap: wrap;
+    gap: 8px 4px;
+    padding: 8px 8px 0 16px;
+    border-bottom: none;
+
+    h2 {
+      flex: 1;
+      font-size: 20px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    // Full width under the title; 16px: phones don't zoom in on the field
+    .search {
+      order: 1;
+      flex-basis: 100%;
+      max-width: none;
+      height: 44px;
+      margin-right: 8px;
+      padding: 0 14px;
+      border-radius: 12px;
+
+      input {
+        font-size: 16px;
+      }
+    }
+
+    .close {
+      width: 44px;
+      height: 44px;
+      border-radius: 22px;
+      font-size: 20px;
+    }
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 44px;
+    padding: 0 10px 0 4px;
+    margin-right: auto;
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: 500;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .popup-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .categories {
+    flex-shrink: 0;
+    gap: 8px;
+    padding: 12px 16px;
+
+    button {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+
+      &.active {
+        background: rgba(90, 168, 255, 0.22);
+        box-shadow: inset 0 0 0 1px var(--accent);
+      }
+    }
+  }
+
+  .grid {
+    flex: 1;
+    padding: 4px 16px calc(16px + var(--safe-bottom, 0px));
+  }
+
+  .group-title {
+    margin: 14px 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  // No selection on a phone (a touch opens the detail): the outline shows the current weather
+  .card {
+    border-radius: 12px;
+
+    &.focused {
+      outline-color: transparent;
+      background: var(--card-bg);
+    }
+
+    &.current {
+      outline-color: var(--accent);
+
+      .thumb {
+        box-shadow: none;
+      }
+    }
+  }
+
+  .card-text {
+    gap: 6px;
+  }
+
+  .card-name {
+    font-size: 14px;
+  }
+
+  .card-temp {
+    font-size: 12px;
+  }
+
+  .card-summary {
+    display: none;
+  }
+
+  .badges {
+    margin-top: 0;
+  }
+
+  .badge {
+    padding: 0;
+    background: none;
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  // List screen / detail screen
+  .detail {
+    display: none;
+  }
+
+  .show-detail {
+    .popup-header h2, .search, .categories, .grid {
+      display: none;
+    }
+
+    // Column: the text grows, so the apply button stays at the bottom (and sticks there when the text is long)
+    .detail {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-height: none;
+      min-height: 0;
+      overflow-y: auto;
+      border: none;
+      background: none;
+    }
+  }
+
+  .detail-shot {
+    flex-shrink: 0;
+    margin: 4px 16px 0;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .detail-text {
+    flex: 1 0 auto;
+    overflow: visible;
+    padding: 14px 16px 16px;
+
+    .detail-category {
+      font-size: 13px;
+    }
+
+    h3 {
+      margin: 4px 0 10px;
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+  }
+
+  .effects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    list-style: none;
+
+    li {
+      padding: 5px 12px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+    }
+  }
+
+  .facts {
+    flex-direction: row;
+    gap: 8px;
+
+    div {
+      flex: 1;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 4px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--card-bg);
+    }
+
+    dt {
+      font-size: 11px;
+    }
+
+    dd {
+      font-size: 15px;
+      font-weight: 600;
+    }
+  }
+
+  .options .options-title {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .swatches {
+    justify-content: space-around;
+
+    .swatch {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  .sub-options button {
+    padding: 12px 0;
+    font-size: 14px;
+  }
+
+  // Always visible at the bottom of the detail
+  .detail-actions {
+    position: sticky;
+    bottom: 0;
+    padding: 12px 16px calc(12px + var(--safe-bottom, 0px));
+    background: #1e1f26;
+
+    .apply {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 50px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+  }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup {
+    animation: none;
+  }
+}
