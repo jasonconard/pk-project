@@ -14,6 +14,13 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.23',
+    date: '2026-11-16',
+    notes: [
+      'Après une mise à jour, les nouveautés s\'affichent dans une petite fenêtre avec les dernières versions.',
+    ],
+  },
+  {
     version: '0.0.22',
     date: '2026-11-16',
     notes: [
