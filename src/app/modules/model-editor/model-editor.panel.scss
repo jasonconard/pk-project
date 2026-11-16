@@ -52,9 +52,29 @@
   align-items: center;
   gap: 12px;
   height: calc(52px + var(--safe-top));
-  padding: var(--safe-top) calc(64px + var(--safe-right)) 0 calc(12px + var(--safe-left)); // right: room for the full screen button
+  padding: var(--safe-top) 0 0 calc(12px + var(--safe-left));
   background: var(--panel);
   border-bottom: 1px solid var(--border);
+  // Narrow screens (phones in landscape): the bar scrolls sideways, every button stays reachable
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  touch-action: pan-x;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  // End of the bar: room for the full screen button (top right), also when scrolled to the end
+  &::after {
+    content: '';
+    flex: 0 0 calc(52px + var(--safe-right));
+    align-self: stretch;
+  }
 
   .back {
     display: inline-flex;
