@@ -312,6 +312,11 @@
   background: var(--panel);
   border-radius: 18px 18px 0 0;
   box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s;
+
+  &.dragging {
+    transition: none;
+  }
 
   // Bigger targets than on a computer
   .btn, .primary, input, select {
@@ -376,20 +381,30 @@
   }
 }
 
-.handle {
+// Sticky top of a sheet: grip, title, actions, close. Dragged down, the sheet follows and closes.
+.sheet-top {
   position: sticky;
   top: 0;
   z-index: 1;
   flex-shrink: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin: 0 -16px;
-  padding: 10px 0 6px;
-  border: none;
+  padding: 0 16px 8px;
   background: var(--panel);
-  cursor: pointer;
+  touch-action: none;
+  cursor: grab;
+}
 
-  span {
+.grip {
+  align-self: stretch;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 8px;
+
+  &::before {
+    content: '';
     width: 36px;
     height: 5px;
     border-radius: 3px;
@@ -398,6 +413,7 @@
 }
 
 .sheet-head {
+  align-self: stretch;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -406,6 +422,12 @@
     flex: 1;
     margin: 0;
     font-size: 18px;
+  }
+
+  .close {
+    width: 44px;
+    padding: 0;
+    font-size: 16px;
   }
 }
 

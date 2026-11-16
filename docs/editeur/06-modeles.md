@@ -22,7 +22,7 @@ Sous 700 px de large, l'écran change :
 - en haut : **‹ Jeu**, le nom du modèle (il ouvre la section Modèle), annuler / refaire, puis le choix du mode ;
 - **Modélisation** : toucher une forme affiche une carte avec ses flèches (x −, x +, y +, y −, z −, z +), **Dupliquer**, **Tourner 90°**, **Supprimer** et **⚙ Réglages** ; la barre du bas ouvre **Modèle**, **Formes** et **Ajouter** ;
 - **Dessin** : **3D / Face** en haut à droite (Face : la face en plein écran pour dessiner à un doigt ; deux doigts zooment en pinçant et déplacent la face, **⤢** revient à toute la face) ; en bas, la couleur actuelle (la toucher : couleur libre), les couleurs récentes, **🎨** (toute la palette) et les outils ; la barre du bas ouvre **Modèle**, **Calque** et **Face** ;
-- chaque section s'ouvre en volet par le bas ; la poignée le ferme. La section **Face** permet de choisir une face par son nom (Avant, Dessus…), sans viser en 3D ;
+- chaque section s'ouvre en volet par le bas ; **✕** (toujours visible en haut du volet), la poignée, le glisser vers le bas ou Échap le ferment. La section **Face** permet de choisir une face par son nom (Avant, Dessus…), sans viser en 3D ;
 - **Lier à…** / **Copier vers…** : un bandeau demande de toucher la face cible, avec **Annuler** ;
 - pincer à deux doigts sur le modèle zoome, même en dessinant.
 

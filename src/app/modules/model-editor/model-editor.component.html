@@ -129,45 +129,56 @@
   </nav>
 
   @if (sheet(); as open) {
-    <section class="sheet" role="dialog" [attr.aria-label]="open">
-      <button type="button" class="handle" aria-label="Fermer" (click)="sheet.set(null)"><span></span></button>
+    <section class="sheet" role="dialog" [attr.aria-label]="sheetTitles[open]"
+             [style.transform]="sheetDrag() ? 'translateY(' + sheetDrag() + 'px)' : null" [class.dragging]="sheetDrag() > 0">
+      <!-- Sticky top: the close button stays reachable when the sheet is scrolled; slide it down to close -->
+      <div class="sheet-top" (pointerdown)="sheetDragStart($event)" (pointermove)="sheetDragMove($event)"
+           (pointerup)="sheetDragEnd($event)" (pointercancel)="sheetDragEnd($event)">
+        <span class="grip" aria-hidden="true"></span>
+        <div class="sheet-head">
+          <h2>{{ sheetTitles[open] }}</h2>
+          @switch (open) {
+            @case ('model') {
+              <button type="button" class="btn" (click)="create()">＋ Nouveau</button>
+            }
+            @case ('shapes') {
+              <button type="button" class="btn" (click)="add('box')">＋ Box</button>
+              <button type="button" class="btn" (click)="add('plane')">＋ Plane</button>
+            }
+            @case ('face') {
+              @if (selectedPart()) { <span class="muted">{{ parts()[selection()!.partIndex] }}</span> }
+            }
+            @case ('palette') {
+              @if (layer() === 'color') {
+                <label class="btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
+                  ⇪ Importer<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
+                </label>
+              }
+            }
+          }
+          <button type="button" class="btn close" title="Fermer" aria-label="Fermer" (click)="sheet.set(null)">✕</button>
+        </div>
+      </div>
       @switch (open) {
         @case ('model') {
-          <div class="sheet-head"><h2>Modèle</h2><button type="button" class="btn" (click)="create()">＋ Nouveau</button></div>
           <ng-container [ngTemplateOutlet]="modelTpl" />
         }
         @case ('shapes') {
-          <div class="sheet-head"><h2>Formes</h2>
-            <button type="button" class="btn" (click)="add('box')">＋ Box</button>
-            <button type="button" class="btn" (click)="add('plane')">＋ Plane</button>
-          </div>
           <ng-container [ngTemplateOutlet]="shapesTpl" />
         }
         @case ('add') {
-          <div class="sheet-head"><h2>Ajouter une forme</h2></div>
           <div class="add-choices">
             <button type="button" class="btn" (click)="add('box'); sheet.set(null)"><span>🧊</span><strong>Box</strong><small>Bâtiments, murs, toits</small></button>
             <button type="button" class="btn" (click)="add('plane'); sheet.set(null)"><span>▱</span><strong>Plane</strong><small>Fleurs, herbes, panneaux</small></button>
           </div>
         }
         @case ('layer') {
-          <div class="sheet-head"><h2>Calque</h2></div>
           <ng-container [ngTemplateOutlet]="layerTpl" />
         }
         @case ('face') {
-          <div class="sheet-head"><h2>Face</h2>
-            @if (selectedPart()) { <span class="muted">{{ parts()[selection()!.partIndex] }}</span> }
-          </div>
           <ng-container [ngTemplateOutlet]="faceTpl" />
         }
         @case ('palette') {
-          <div class="sheet-head"><h2>Palette</h2>
-            @if (layer() === 'color') {
-              <label class="btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
-                ⇪ Importer<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
-              </label>
-            }
-          </div>
           <ng-container [ngTemplateOutlet]="paletteTpl" />
         }
       }

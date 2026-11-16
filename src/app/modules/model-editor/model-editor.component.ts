@@ -197,6 +197,12 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private readonly onPhoneChange = (e: MediaQueryListEvent) => this.phone.set(e.matches);
   /** Bottom sheet open on a phone. */
   protected readonly sheet = signal<Sheet | null>(null);
+  protected readonly sheetTitles: Record<Sheet, string> = {
+    model: 'Modèle', shapes: 'Formes', add: 'Ajouter une forme', layer: 'Calque', face: 'Face', palette: 'Palette',
+  };
+  /** How far the sheet is slid down (px), while its top is dragged. */
+  protected readonly sheetDrag = signal(0);
+  private sheetDragFrom: { id: number; y: number; grip: boolean } | null = null;
   protected readonly trayColors = computed(() => this.recentColors().slice(0, TRAY_COLORS));
   protected readonly layerInfo = computed(() => LAYERS.find(l => l.id === this.layer())!);
   /** Faces of the selected part, to pick one without aiming at it in 3D. */
@@ -739,6 +745,34 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.sheet.update(open => open === sheet ? null : sheet);
   }
 
+  /** Slide the sheet down by its top to close it (not from its buttons: they are tapped). */
+  protected sheetDragStart(event: PointerEvent) {
+    if ((event.target as HTMLElement).closest('button, label, input') || this.sheetDragFrom) {
+      return;
+    }
+    this.sheetDragFrom = { id: event.pointerId, y: event.clientY, grip: (event.target as HTMLElement).classList.contains('grip') };
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+  }
+
+  protected sheetDragMove(event: PointerEvent) {
+    if (this.sheetDragFrom?.id === event.pointerId) {
+      this.sheetDrag.set(Math.max(0, event.clientY - this.sheetDragFrom.y));
+    }
+  }
+
+  protected sheetDragEnd(event: PointerEvent) {
+    const from = this.sheetDragFrom;
+    if (from?.id !== event.pointerId) {
+      return;
+    }
+    this.sheetDragFrom = null;
+    // Down far enough, or a tap on the grip: close
+    if (this.sheetDrag() > 60 || (from.grip && event.type === 'pointerup' && this.sheetDrag() < 4)) {
+      this.sheet.set(null);
+    }
+    this.sheetDrag.set(0);
+  }
+
   protected cancelFaceAction() {
     this.pending.set(null);
     this.status.set('');
@@ -868,7 +902,9 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     } else if ((event.key === 'Delete' || event.key === 'Backspace') && this.mode() === 'select') {
       this.remove();
     } else if (event.key === 'Escape') {
-      if (this.pending()) {
+      if (this.sheet()) {
+        this.sheet.set(null);
+      } else if (this.pending()) {
         this.pending.set(null);
         this.status.set('');
       } else {
