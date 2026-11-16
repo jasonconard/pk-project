@@ -33,6 +33,7 @@ En édition, le stick et les boutons du jeu sont masqués (`TouchService.setGame
 - **Sous ces boutons** : le panneau de l'objet sélectionné (voir [Objets](02-objets.md)).
 - **En bas** : la palette, en trois onglets (Objets, Sols, Reliefs). « Aucun » reste toujours en tête : la souris sélectionne et déplace la vue. Pour Sols et Reliefs, la taille du pinceau (1, 2, 3, pot de peinture) est à droite des onglets.
 - **Au-dessus de la palette** : un rappel des commandes, qui change avec l'outil choisi.
+- **Sur téléphone en portrait** : ces boutons forment une colonne d'icônes à gauche, sous la température (leur nom dans l'infobulle), et le panneau de l'objet sélectionné s'ouvre à droite de la colonne. Les réglages météo forment une colonne à droite, sous le bouton plein écran ; leurs fenêtres s'ouvrent à gauche de leur bouton.
 
 ## Raccourcis
 

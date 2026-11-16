@@ -30,7 +30,7 @@ interface PaletteEntry {
   selector: 'game-editor-bar',
   imports: [LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench],
   templateUrl: './editor-bar.component.html',
-  styleUrl: './editor-bar.component.scss',
+  styleUrls: ['./editor-bar.component.scss', './editor-bar.portrait.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorBarComponent {

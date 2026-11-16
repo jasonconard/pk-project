@@ -36,7 +36,7 @@ const TIME_ICONS: Record<TimeOfDay, LucideIcon> = { night: LucideMoon, dawn: Luc
   selector: 'game-weather-panel',
   imports: [WeatherCatalogComponent, LucideDynamicIcon, LucideTimer, LucideWind, LucideWindArrowDown, LucideCloud, LucideVolume2, LucideVolumeX, LucideCheck],
   templateUrl: './weather-panel.component.html',
-  styleUrl: './weather-panel.component.scss',
+  styleUrls: ['./weather-panel.component.scss', './weather-panel.portrait.scss'],
 })
 export class WeatherPanelComponent {
   private readonly keyService = inject(KeyService);

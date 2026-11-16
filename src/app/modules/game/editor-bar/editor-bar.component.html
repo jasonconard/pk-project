@@ -14,12 +14,12 @@
       <button type="button" class="icon-btn" [class.on]="grid()" title="Afficher / masquer la grille des cases" aria-label="Grille"
               [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)"><svg lucideGrid3x3></svg></button>
       <button type="button" class="text-btn" title="Éditeur de modèles 3D : créer et peindre les bâtiments, les fleurs…"
-              (click)="openModelEditor()"><svg lucideBox></svg> Modèles</button>
+              (click)="openModelEditor()"><svg lucideBox></svg> <span class="label">Modèles</span></button>
       <button type="button" class="text-btn" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
-              (click)="send('export', $event)"><svg lucideDownload></svg> Exporter</button>
+              (click)="send('export', $event)"><svg lucideDownload></svg> <span class="label">Exporter</span></button>
       <button type="button" class="text-btn" [class.danger]="confirmReset()"
               [title]="confirmReset() ? 'Clique encore pour oublier les modifications' : 'Revenir à la carte du code (oublie les modifications enregistrées dans le navigateur)'"
-              (click)="reset($event)">@if (confirmReset()) { Confirmer ? } @else { <svg lucideRotateCcw></svg> Réinitialiser }</button>
+              (click)="reset($event)"><svg lucideRotateCcw></svg> <span class="label">{{ confirmReset() ? 'Confirmer ?' : 'Réinitialiser' }}</span></button>
     </div>
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
       @if (touch()) {
