@@ -27,6 +27,8 @@ interface ReleaseAsset {
   name: string;
   size: number;
   browser_download_url: string;
+  /** "sha256:<hex>", given by GitHub: the updater checks the downloaded zip against it (required). */
+  digest?: string | null;
 }
 
 /** 1.2.3 > 1.2.0? (numbers compared part by part, a missing part is 0) */
@@ -68,6 +70,8 @@ export class UpdatePromptComponent implements OnInit {
   protected readonly webReady = signal(false);
   /** Android app: the game files of a new version are downloaded (live update), used after a restart. */
   protected readonly bundleReady = signal<BundleInfo | null>(null);
+  /** Android app: why the game files could not be updated without the APK (shown with the APK offer). */
+  protected readonly liveUpdateError = signal('');
   protected readonly current = version;
 
   ngOnInit() {
@@ -159,6 +163,11 @@ export class UpdatePromptComponent implements OnInit {
       return false;
     }
     const [, target, minApk] = zip.match;
+    const checksum = zip.asset.digest?.startsWith('sha256:') ? zip.asset.digest.slice('sha256:'.length) : '';
+    if (!checksum) {
+      this.liveUpdateError.set('somme de contrôle absente');
+      return false;
+    }
     try {
       const { version: apkVersion } = await CapacitorUpdater.getBuiltinVersion();
       if (isNewer(minApk, apkVersion)) {
@@ -167,13 +176,15 @@ export class UpdatePromptComponent implements OnInit {
       // Already downloaded (restart postponed last time)? Otherwise downloaded now
       const { bundles } = await CapacitorUpdater.list();
       const bundle = bundles.find(b => b.version === target && b.status !== 'error')
-        ?? await CapacitorUpdater.download({ url: zip.asset.browser_download_url, version: target });
+        ?? await CapacitorUpdater.download({ url: zip.asset.browser_download_url, version: target, checksum });
       // Used anyway the next time the app leaves the screen or starts
       await CapacitorUpdater.next({ id: bundle.id });
       this.bundleReady.set(bundle);
       return true;
-    } catch {
-      return false; // download failed: the APK is offered
+    } catch (error) {
+      // Download failed: the APK is offered, with the reason
+      this.liveUpdateError.set(error instanceof Error ? error.message : String(error));
+      return false;
     }
   }
 }

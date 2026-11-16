@@ -4,6 +4,9 @@
     <h2 id="update-title">Mise à jour disponible</h2>
     <p>La version <strong>{{ u.version }}</strong> est sortie (tu as la {{ current }}).</p>
     <p class="hint">Cette version change l'appli elle-même : le fichier ({{ u.sizeMb }} Mo) se télécharge, puis Android propose de l'installer.</p>
+    @if (liveUpdateError(); as reason) {
+      <p class="hint small">Mise à jour sans APK impossible : {{ reason }}</p>
+    }
     <div class="actions">
       <button type="button" class="later" (click)="later()">Plus tard</button>
       <a class="install" [href]="u.apkUrl" (click)="later()">Mettre à jour</a>
