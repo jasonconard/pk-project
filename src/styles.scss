@@ -111,3 +111,9 @@ body {
     animation-delay: 0ms;
   }
 }
+
+// Lucide icons (<svg lucideXxx>): on the text's line, never squeezed in a flex row
+svg.lucide {
+  flex-shrink: 0;
+  vertical-align: -0.2em;
+}

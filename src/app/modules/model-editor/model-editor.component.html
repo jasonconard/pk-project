@@ -7,8 +7,8 @@
       <span class="muted">{{ isEditedGameModel() ? 'Modifié · enregistré' : 'Enregistré' }}</span>
     </button>
     <div class="history">
-      <button type="button" class="btn" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()">↶</button>
-      <button type="button" class="btn" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()">↷</button>
+      <button type="button" class="btn" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()"><svg lucideUndo2></svg></button>
+      <button type="button" class="btn" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()"><svg lucideRedo2></svg></button>
     </div>
   </header>
   <div class="m-mode">
@@ -24,7 +24,7 @@
            [style.right.px]="previewMargin" [style.bottom.px]="previewMargin">
         <span>Aperçu {{ previewNight() ? 'de nuit' : 'de jour' }}</span>
         <button type="button" [title]="previewNight() ? 'Voir de jour' : 'Voir de nuit'" [attr.aria-label]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
-                (click)="setPreviewNight(!previewNight())">{{ previewNight() ? '☀' : '🌙' }}</button>
+                (click)="setPreviewNight(!previewNight())">@if (previewNight()) { <svg lucideSun></svg> } @else { <svg lucideMoon></svg> }</button>
       </div>
     }
   </div>
@@ -35,7 +35,7 @@
         <header>
           <strong>{{ parts()[selection()!.partIndex] }} · {{ faceInfo()?.face }}</strong>
           <span class="muted">{{ faceInfo()?.size }} · {{ layerInfo().label }}</span>
-          <button type="button" class="btn" title="Fermer la grande vue (G)" aria-label="Fermer la grande vue" (click)="setBigView(false)">✕</button>
+          <button type="button" class="btn" title="Fermer la grande vue (G)" aria-label="Fermer la grande vue" (click)="setBigView(false)"><svg lucideX></svg></button>
         </header>
       }
       <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()" [fill]="true"
@@ -53,7 +53,7 @@
         </div>
       } @else if (mode() === 'select') {
         @if (!selectedPart()) {
-          <p class="chip" animate.enter="fade-in">✋ Toucher une forme · 1 doigt : tourner · 2 doigts : zoomer</p>
+          <p class="chip" animate.enter="fade-in"><svg lucideHand></svg> Toucher une forme · 1 doigt : tourner · 2 doigts : zoomer</p>
         }
       } @else {
         <div class="m-view-top" animate.enter="fade-in">
@@ -75,19 +75,19 @@
         <div class="sel-head">
           <strong>{{ parts()[selection()!.partIndex] }}</strong>
           <span class="muted grow">{{ selectedPart()!.size.x }} × {{ selectedPart()!.size.y }}{{ selectedPart()!.kind === 'box' ? ' × ' + selectedPart()!.size.z : '' }}</span>
-          <button type="button" class="btn" (click)="toggleSheet('shapes')">⚙ Réglages</button>
+          <button type="button" class="btn" (click)="toggleSheet('shapes')"><svg lucideSettings2></svg> Réglages</button>
         </div>
         <div class="nudges">
           @for (n of nudges; track n.label) {
             <button type="button" class="btn" [attr.aria-label]="'Déplacer ' + n.label" (click)="nudge(n.axis, n.delta)">
-              <span>{{ n.icon }}</span><small>{{ n.label }}</small>
+              <span><svg [lucideIcon]="n.icon"></svg></span><small>{{ n.label }}</small>
             </button>
           }
         </div>
         <div class="sel-actions">
-          <button type="button" class="btn" (click)="duplicate()">⧉ Dupliquer</button>
-          <button type="button" class="btn" (click)="turn()">↻ Tourner 90°</button>
-          <button type="button" class="btn danger" (click)="remove()">🗑 Supprimer</button>
+          <button type="button" class="btn" (click)="duplicate()"><svg lucideCopy></svg> Dupliquer</button>
+          <button type="button" class="btn" (click)="turn()"><svg lucideRotateCw></svg> Tourner 90°</button>
+          <button type="button" class="btn danger" (click)="remove()"><svg lucideTrash></svg> Supprimer</button>
         </div>
       </div>
     }
@@ -111,20 +111,20 @@
                     [attr.aria-label]="'Gris ' + g" (click)="gray.set(g)"></button>
           }
         }
-        <button type="button" class="btn palette-btn" [class.on]="sheet() === 'palette'" aria-label="Palette" (click)="toggleSheet('palette')">🎨</button>
+        <button type="button" class="btn palette-btn" [class.on]="sheet() === 'palette'" aria-label="Palette" (click)="toggleSheet('palette')"><svg lucidePalette></svg></button>
       </div>
       <ng-container [ngTemplateOutlet]="toolsTpl" />
     </div>
   }
 
   <nav class="m-nav" aria-label="Sections">
-    <button type="button" [class.on]="sheet() === 'model'" (click)="toggleSheet('model')"><span>📦</span>Modèle</button>
+    <button type="button" [class.on]="sheet() === 'model'" (click)="toggleSheet('model')"><span><svg lucidePackage></svg></span>Modèle</button>
     @if (mode() === 'select') {
-      <button type="button" [class.on]="sheet() === 'shapes'" (click)="toggleSheet('shapes')"><span>🧱</span>Formes</button>
-      <button type="button" [class.on]="sheet() === 'add'" (click)="toggleSheet('add')"><span>＋</span>Ajouter</button>
+      <button type="button" [class.on]="sheet() === 'shapes'" (click)="toggleSheet('shapes')"><span><svg lucideShapes></svg></span>Formes</button>
+      <button type="button" [class.on]="sheet() === 'add'" (click)="toggleSheet('add')"><span><svg lucidePlus></svg></span>Ajouter</button>
     } @else {
-      <button type="button" [class.on]="sheet() === 'layer'" (click)="toggleSheet('layer')"><span>{{ layerInfo().icon }}</span>Calque</button>
-      <button type="button" [class.on]="sheet() === 'face'" (click)="toggleSheet('face')"><span>⬚</span>Face</button>
+      <button type="button" [class.on]="sheet() === 'layer'" (click)="toggleSheet('layer')"><span><svg [lucideIcon]="layerInfo().icon"></svg></span>Calque</button>
+      <button type="button" [class.on]="sheet() === 'face'" (click)="toggleSheet('face')"><span><svg lucideSquareDashed></svg></span>Face</button>
     }
   </nav>
 
@@ -141,11 +141,11 @@
           <h2>{{ sheetTitles[open] }}</h2>
           @switch (open) {
             @case ('model') {
-              <button type="button" class="btn" (click)="create()">＋ Nouveau</button>
+              <button type="button" class="btn" (click)="create()"><svg lucidePlus></svg> Nouveau</button>
             }
             @case ('shapes') {
-              <button type="button" class="btn" (click)="add('box')">＋ Box</button>
-              <button type="button" class="btn" (click)="add('plane')">＋ Plane</button>
+              <button type="button" class="btn" (click)="add('box')"><svg lucidePlus></svg> Box</button>
+              <button type="button" class="btn" (click)="add('plane')"><svg lucidePlus></svg> Plane</button>
             }
             @case ('face') {
               @if (selectedPart()) { <span class="muted">{{ parts()[selection()!.partIndex] }}</span> }
@@ -153,12 +153,12 @@
             @case ('palette') {
               @if (layer() === 'color') {
                 <label class="btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
-                  ⇪ Importer<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
+                  <svg lucideUpload></svg> Importer<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
                 </label>
               }
             }
           }
-          <button type="button" class="btn close" title="Fermer" aria-label="Fermer" (click)="sheet.set(null)">✕</button>
+          <button type="button" class="btn close" title="Fermer" aria-label="Fermer" (click)="sheet.set(null)"><svg lucideX></svg></button>
         </div>
       </div>
       <!-- Recreated for each section: its content fades in -->
@@ -173,8 +173,8 @@
             }
             @case ('add') {
               <div class="add-choices">
-                <button type="button" class="btn" (click)="add('box'); sheet.set(null)"><span>🧊</span><strong>Box</strong><small>Bâtiments, murs, toits</small></button>
-                <button type="button" class="btn" (click)="add('plane'); sheet.set(null)"><span>▱</span><strong>Plane</strong><small>Fleurs, herbes, panneaux</small></button>
+                <button type="button" class="btn" (click)="add('box'); sheet.set(null)"><span><svg lucideBox></svg></span><strong>Box</strong><small>Bâtiments, murs, toits</small></button>
+                <button type="button" class="btn" (click)="add('plane'); sheet.set(null)"><span><svg lucideRectangleHorizontal></svg></span><strong>Plane</strong><small>Fleurs, herbes, panneaux</small></button>
               </div>
             }
             @case ('layer') {
@@ -195,18 +195,18 @@
 } @else {
   <aside class="panel" aria-label="Éditeur de modèles">
     <header>
-      <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)">← Jeu</a>
+      <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)"><svg lucideChevronLeft></svg> Jeu</a>
       <h1>Modèles 3D</h1>
       <div class="history">
-        <button type="button" class="btn" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()">↶</button>
-        <button type="button" class="btn" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()">↷</button>
+        <button type="button" class="btn" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()"><svg lucideUndo2></svg></button>
+        <button type="button" class="btn" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()"><svg lucideRedo2></svg></button>
       </div>
     </header>
     <ng-container [ngTemplateOutlet]="modeSwitch" />
 
     <details class="block" [open]="sections().model" (toggle)="toggleSection('model', $any($event.target).open)">
       <summary>Modèle{{ model() ? ' : ' + model()!.id : '' }}</summary>
-      <button type="button" class="btn" (click)="create()">+ Nouveau modèle</button>
+      <button type="button" class="btn" (click)="create()"><svg lucidePlus></svg> Nouveau modèle</button>
       <ng-container [ngTemplateOutlet]="modelTpl" />
     </details>
 
@@ -244,7 +244,7 @@
           <ng-container [ngTemplateOutlet]="faceTpl" />
           @if (faceTexture(); as face) {
             <button type="button" class="btn" [class.on]="bigView()" (click)="setBigView(!bigView())"
-                    title="Grande vue de la face, par-dessus la gauche de la vue 3D (G)">⛶ Grande vue</button>
+                    title="Grande vue de la face, par-dessus la gauche de la vue 3D (G)"><svg lucideMaximize2></svg> Grande vue</button>
             @if (!bigView()) {
               <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()"
                                 [faceKey]="face.texId"
@@ -268,9 +268,9 @@
 <ng-template #modeSwitch>
   <div class="mode-switch" role="tablist" aria-label="Mode">
     <button type="button" role="tab" [class.on]="mode() === 'select'" [attr.aria-selected]="mode() === 'select'"
-            title="Modélisation : choisir, déplacer, régler les formes (V)" (click)="setEditorMode('select')">🧊 Modélisation</button>
+            title="Modélisation : choisir, déplacer, régler les formes (V)" (click)="setEditorMode('select')"><svg lucideBox></svg> Modélisation</button>
     <button type="button" role="tab" [class.on]="mode() === 'paint'" [attr.aria-selected]="mode() === 'paint'"
-            title="Dessin : peindre les faces" (click)="setEditorMode('paint')">🖌️ Dessin</button>
+            title="Dessin : peindre les faces" (click)="setEditorMode('paint')"><svg lucideBrush></svg> Dessin</button>
   </div>
 </ng-template>
 
@@ -304,9 +304,9 @@
       <div class="field" title="0 à 1 : plie au vent (végétation)">
         <span>Vent</span>
         <div class="stepper">
-          <button type="button" aria-label="Moins de vent" (click)="setSway((model.sway ?? 0) - 0.1)">−</button>
+          <button type="button" aria-label="Moins de vent" (click)="setSway((model.sway ?? 0) - 0.1)"><svg lucideMinus></svg></button>
           <input type="number" min="0" max="1" step="0.1" aria-label="Vent" [value]="model.sway ?? 0" (change)="setSway(+$any($event.target).value)" />
-          <button type="button" aria-label="Plus de vent" (click)="setSway((model.sway ?? 0) + 0.1)">+</button>
+          <button type="button" aria-label="Plus de vent" (click)="setSway((model.sway ?? 0) + 0.1)"><svg lucidePlus></svg></button>
         </div>
       </div>
     </div>
@@ -314,10 +314,10 @@
     @if (isEditedGameModel()) {
       <button type="button" class="btn wide" [class.danger]="!confirmRevert()" [class.on]="confirmRevert()" (click)="revert()"
               title="Oublie les modifications enregistrées dans le navigateur">
-        {{ confirmRevert() ? 'Confirmer : revenir à la version du jeu ?' : '⟲ Revenir à la version du jeu' }}
+        @if (confirmRevert()) { Confirmer : revenir à la version du jeu ? } @else { <svg lucideRotateCcw></svg> Revenir à la version du jeu }
       </button>
     }
-    <button type="button" class="primary" (click)="export()">⬇ Exporter (.ts + .png)</button>
+    <button type="button" class="primary" (click)="export()"><svg lucideDownload></svg> Exporter (.ts + .png)</button>
     <p class="hint small">Tes changements sont enregistrés dans ce navigateur et visibles dans le jeu. L'export sert à les ajouter au code.</p>
   }
   @if (status()) {
@@ -343,10 +343,10 @@
         @for (axis of axes; track axis) {
           @if (v.kind !== 'size' || part.kind === 'box' || axis !== 'z') {
             <div class="stepper">
-              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' moins'" (click)="stepVec(v.kind, axis, -1)">−</button>
+              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' moins'" (click)="stepVec(v.kind, axis, -1)"><svg lucideMinus></svg></button>
               <label><i>{{ axis }}</i><input type="number" [step]="v.step" [min]="v.kind === 'size' ? 1 : null" [value]="vecValue(part, v.kind, axis)"
                                              (change)="setVec(v.kind, axis, +$any($event.target).value)" /></label>
-              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' plus'" (click)="stepVec(v.kind, axis, 1)">+</button>
+              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' plus'" (click)="stepVec(v.kind, axis, 1)"><svg lucidePlus></svg></button>
             </div>
           } @else {
             <span></span>
@@ -379,7 +379,7 @@
   <div class="layer-tiles" role="tablist" aria-label="Calque">
     @for (l of layers; track l.id) {
       <button type="button" role="tab" [class.on]="layer() === l.id" [attr.aria-selected]="layer() === l.id" (click)="setLayer(l.id)">
-        <span>{{ l.icon }}</span><strong>{{ l.label }}</strong><small>{{ l.short }}</small>
+        <span><svg [lucideIcon]="l.icon"></svg></span><strong>{{ l.label }}</strong><small>{{ l.short }}</small>
       </button>
     }
   </div>
@@ -398,9 +398,9 @@
       <div class="field" title="Force du relief (1 par défaut)">
         <span>Force du relief</span>
         <div class="stepper">
-          <button type="button" aria-label="Moins de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) - 0.1)">−</button>
+          <button type="button" aria-label="Moins de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) - 0.1)"><svg lucideMinus></svg></button>
           <input type="number" min="0.1" step="0.1" aria-label="Force du relief" [value]="model()?.bumpScale ?? 1" (change)="setBumpScale(+$any($event.target).value)" />
-          <button type="button" aria-label="Plus de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) + 0.1)">+</button>
+          <button type="button" aria-label="Plus de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) + 0.1)"><svg lucidePlus></svg></button>
         </div>
       </div>
     }
@@ -412,7 +412,7 @@
     @for (t of tools; track t.id) {
       <button type="button" class="btn" [class.on]="mode() === 'paint' && tool() === t.id" [title]="t.label + ' (' + t.key.toUpperCase() + ')'"
               [attr.aria-label]="t.label" [attr.aria-pressed]="mode() === 'paint' && tool() === t.id" (click)="pickTool(t.id)">
-        <span>{{ t.icon }}</span><small>{{ t.short }}</small>
+        <span><svg [lucideIcon]="t.icon"></svg></span><small>{{ t.short }}</small>
       </button>
     }
   </div>
@@ -440,7 +440,7 @@
         }
       </div>
       <label class="switch" title="Le crayon, le pot, la ligne et le rectangle prennent toujours la couleur de la palette la plus proche">
-        <span>🔒 Garder seulement ces couleurs</span>
+        <span><svg lucideLock></svg> Garder seulement ces couleurs</span>
         <input type="checkbox" [checked]="pal.locked" (change)="setPaletteLocked($any($event.target).checked)" />
       </label>
     }
@@ -492,17 +492,17 @@
       }
     </p>
     <div class="face-actions">
-      <button type="button" class="btn" (click)="flip(true)" title="Retourner gauche ↔ droite">⇆ Retourner</button>
-      <button type="button" class="btn" (click)="flip(false)" title="Retourner haut ↕ bas">⇅ Retourner</button>
+      <button type="button" class="btn" (click)="flip(true)" title="Retourner gauche ↔ droite"><svg lucideArrowLeftRight></svg> Retourner</button>
+      <button type="button" class="btn" (click)="flip(false)" title="Retourner haut ↕ bas"><svg lucideArrowUpDown></svg> Retourner</button>
       <button type="button" class="btn" [class.on]="pending()?.kind === 'link'" (click)="startFaceAction('link')"
-              title="Puis touche une autre face de même taille : elles auront les mêmes pixels">🔗 Lier à…</button>
+              title="Puis touche une autre face de même taille : elles auront les mêmes pixels"><svg lucideLink></svg> Lier à…</button>
       <button type="button" class="btn" [class.on]="pending()?.kind === 'copy'" (click)="startFaceAction('copy')"
-              title="Puis touche la face où copier ce dessin">📋 Copier vers…</button>
+              title="Puis touche la face où copier ce dessin"><svg lucideClipboardCopy></svg> Copier vers…</button>
     </div>
     <div class="row wrap mirror">
       <span class="grow">Copie en miroir</span>
-      <button type="button" class="btn" [class.on]="mirrorH()" aria-label="Miroir gauche droite" (click)="mirrorH.set(!mirrorH())">⇆</button>
-      <button type="button" class="btn" [class.on]="mirrorV()" aria-label="Miroir haut bas" (click)="mirrorV.set(!mirrorV())">⇅</button>
+      <button type="button" class="btn" [class.on]="mirrorH()" aria-label="Miroir gauche droite" (click)="mirrorH.set(!mirrorH())"><svg lucideArrowLeftRight></svg></button>
+      <button type="button" class="btn" [class.on]="mirrorV()" aria-label="Miroir haut bas" (click)="mirrorV.set(!mirrorV())"><svg lucideArrowUpDown></svg></button>
     </div>
   } @else {
     <p class="hint">Touche une face du modèle pour la choisir.</p>

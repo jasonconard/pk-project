@@ -1,5 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import {
+  LucideArrowDown, LucideArrowDownLeft, LucideArrowLeft, LucideArrowLeftRight, LucideArrowRight, LucideArrowUp, LucideArrowUpDown, LucideArrowUpRight, LucideBox, LucideBrush, LucideChevronLeft, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideEraser, LucideHand, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucideMountain, LucidePackage, LucidePaintBucket, LucidePalette, LucidePencil, LucidePipette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSlash, LucideSparkles, LucideSquare, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX, LucideIcon,
+} from '@lucide/angular';
 import { ActivatedRoute } from '@angular/router';
 import { CODE_MODELS } from '../game/shared/model/browser-models';
 import { ObjSide } from '../game/shared/model/SceneMap';
@@ -40,20 +43,20 @@ const NEW_MODEL_ID = 'nouveau-modele';
 /** Selection: click a face, move the part with the arrows. Painting: the tool draws on the faces in 3D too. */
 type Mode = 'select' | 'paint';
 
-const TOOLS: { id: Tool, icon: string, label: string, short: string, key: string }[] = [
-  { id: 'pencil', icon: '✏️', label: 'Crayon', short: 'Crayon', key: 'p' },
-  { id: 'eraser', icon: '🧽', label: 'Gomme (transparent)', short: 'Gomme', key: 'e' },
-  { id: 'picker', icon: '💧', label: 'Pipette', short: 'Pipette', key: 'i' },
-  { id: 'fill', icon: '🪣', label: 'Pot de peinture', short: 'Pot', key: 'f' },
-  { id: 'line', icon: '📏', label: 'Ligne', short: 'Ligne', key: 'l' },
-  { id: 'rect', icon: '▭', label: 'Rectangle', short: 'Rectangle', key: 'r' },
+const TOOLS: { id: Tool, icon: LucideIcon, label: string, short: string, key: string }[] = [
+  { id: 'pencil', icon: LucidePencil, label: 'Crayon', short: 'Crayon', key: 'p' },
+  { id: 'eraser', icon: LucideEraser, label: 'Gomme (transparent)', short: 'Gomme', key: 'e' },
+  { id: 'picker', icon: LucidePipette, label: 'Pipette', short: 'Pipette', key: 'i' },
+  { id: 'fill', icon: LucidePaintBucket, label: 'Pot de peinture', short: 'Pot', key: 'f' },
+  { id: 'line', icon: LucideSlash, label: 'Ligne', short: 'Ligne', key: 'l' },
+  { id: 'rect', icon: LucideSquare, label: 'Rectangle', short: 'Rectangle', key: 'r' },
 ];
 
-const LAYERS: { id: LayerName, label: string, icon: string, short: string, hint: string }[] = [
-  { id: 'color', label: 'Couleur', icon: '🎨', short: 'Pixels', hint: 'Les couleurs des pixels.' },
-  { id: 'specular', label: 'Brillance', icon: '✨', short: 'Reflets', hint: 'Blanc : reflets du soleil · Noir : mat' },
-  { id: 'night', label: 'Nuit', icon: '🌙', short: 'Lumières', hint: 'Ce qui s\'allume la nuit (lumière chaude) · Noir : éteint' },
-  { id: 'bump', label: 'Relief', icon: '⛰️', short: 'Bosses', hint: 'Blanc : en relief · Noir : en creux (seules les différences comptent)' },
+const LAYERS: { id: LayerName, label: string, icon: LucideIcon, short: string, hint: string }[] = [
+  { id: 'color', label: 'Couleur', icon: LucidePalette, short: 'Pixels', hint: 'Les couleurs des pixels.' },
+  { id: 'specular', label: 'Brillance', icon: LucideSparkles, short: 'Reflets', hint: 'Blanc : reflets du soleil · Noir : mat' },
+  { id: 'night', label: 'Nuit', icon: LucideMoon, short: 'Lumières', hint: 'Ce qui s\'allume la nuit (lumière chaude) · Noir : éteint' },
+  { id: 'bump', label: 'Relief', icon: LucideMountain, short: 'Bosses', hint: 'Blanc : en relief · Noir : en creux (seules les différences comptent)' },
 ];
 
 /** Bottom sheets of the phone layout (one open at a time). */
@@ -68,13 +71,13 @@ const VECS: { kind: VecKind, label: string, step: number }[] = [
 ];
 
 /** Arrows moving the selected part on a phone (no keyboard). */
-const NUDGES: { axis: 'x' | 'y' | 'z', delta: number, icon: string, label: string }[] = [
-  { axis: 'x', delta: -1, icon: '←', label: 'x −' },
-  { axis: 'x', delta: 1, icon: '→', label: 'x +' },
-  { axis: 'y', delta: 1, icon: '↑', label: 'y +' },
-  { axis: 'y', delta: -1, icon: '↓', label: 'y −' },
-  { axis: 'z', delta: -1, icon: '↗', label: 'z −' },
-  { axis: 'z', delta: 1, icon: '↙', label: 'z +' },
+const NUDGES: { axis: 'x' | 'y' | 'z', delta: number, icon: LucideIcon, label: string }[] = [
+  { axis: 'x', delta: -1, icon: LucideArrowLeft, label: 'x −' },
+  { axis: 'x', delta: 1, icon: LucideArrowRight, label: 'x +' },
+  { axis: 'y', delta: 1, icon: LucideArrowUp, label: 'y +' },
+  { axis: 'y', delta: -1, icon: LucideArrowDown, label: 'y −' },
+  { axis: 'z', delta: -1, icon: LucideArrowUpRight, label: 'z −' },
+  { axis: 'z', delta: 1, icon: LucideArrowDownLeft, label: 'z +' },
 ];
 
 /** Width below which the editor uses the phone layout (bottom bars and sheets instead of the side panel). */
@@ -136,7 +139,10 @@ interface ActiveStroke {
   templateUrl: './model-editor.component.html',
   styleUrls: ['./model-editor.component.scss', './model-editor.panel.scss', './model-editor.phone.scss', './model-editor.motion.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PixelCanvasComponent, NgTemplateOutlet],
+  imports: [
+    PixelCanvasComponent, NgTemplateOutlet,
+    LucideArrowLeftRight, LucideArrowUpDown, LucideBox, LucideBrush, LucideChevronLeft, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideHand, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucidePackage, LucidePalette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX,
+  ],
 })
 export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
