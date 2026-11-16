@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.18',
+    date: '2026-11-16',
+    notes: [
+      'Le jeu et les sons se mettent en pause quand tu quittes l\'appli, et reprennent à ton retour.',
+      'Sur mobile, courir en se déplaçant ne bloque plus les boutons, et les boutons A B X Y sont plus proches.',
+      'Sur mobile en portrait, les réglages météo sont en colonne à droite et les outils de l\'éditeur à gauche.',
+      'Le téléphone vibre légèrement sur les boutons et les actions ; tu peux couper les vibrations dans le menu de qualité.',
+    ],
+  },
+  {
     version: '0.0.17',
     date: '2026-11-16',
     notes: [
