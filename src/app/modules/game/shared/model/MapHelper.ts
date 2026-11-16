@@ -11,6 +11,7 @@ import { autotile, NEIGHBORS, terrainById, TILE_SIZE, TILESET_ANIM_LINK, TILESET
 import { applyWeatherShader } from "../weather/weather-shader";
 import { buildGroundGeometry, LEVEL_HEIGHT, MAX_LEVEL, STAIRS_TILE } from "./GroundMesh";
 import { canInstance, ModelInstances } from "./ModelInstances";
+import { isAppHidden } from "../../../../core/shared/app-visibility";
 
 /** A chunk ground drawn on a canvas: its texture, then the painted tiles over it. */
 interface PaintedGround {
@@ -417,6 +418,9 @@ export class MapHelper {
 
   /** Redraws the open water cells (no border) of the visible painted chunks with the next animation frame. */
   private animateWater() {
+    if (isAppHidden()) {
+      return;
+    }
     this.waterFrame++;
     loadImage(TILESET_ANIM_LINK).then(img => this.paintedGrounds.forEach((painted, chunkId) => {
       const chunk = this.sceneMap.chunks.find(c => c.id === chunkId);

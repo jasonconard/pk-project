@@ -11,6 +11,7 @@ import { GameMapService } from "./game-map.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { FightService } from "../../../fight/shared/services/fight.service";
+import { isAppHidden, onAppVisibility } from "../../../../core/shared/app-visibility";
 import { DAY_ONLY_HOUR, NIGHT_ONLY_HOUR, MORNING_MIST_HOUR, mistAt, FIREFLY_COLORS, FireflyColor, fireflyColorHex, isNightHour, isWeatherAvailable, LeafMode, WeatherType, WindDirection, windToX } from "../weather/Weather";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
@@ -236,7 +237,19 @@ export class GameService {
     this.switchGameMode(gameMode, true);
 
     game.setQuality(this.qualityState());
+    // In the background (home screen, other app, screen locked): the game stops (see isAppHidden in the loops);
+    // keys held when leaving would stay pressed (their keyup is lost), and the time spent away is not caught up
+    onAppVisibility(hidden => {
+      this.keyService.clearKeys();
+      if (!hidden) {
+        this.lastFrameTime = performance.now();
+        game.frame = 0;
+      }
+    });
     setInterval(() => {
+      if (isAppHidden()) {
+        return; // no frames meanwhile: the quality must not drop because of it
+      }
       game.framePerSec = game.frame;
       game.frame = 0;
       game.adaptQuality(game.framePerSec);
@@ -250,6 +263,11 @@ export class GameService {
     let pending = 0;
     setInterval(() => {
       const now = performance.now();
+      if (isAppHidden()) {
+        lastInput = now;
+        pending = 0;
+        return;
+      }
       pending += Math.min(now - lastInput, MAX_INPUT_CATCH_UP);
       lastInput = now;
       let steps = 0;
@@ -265,7 +283,7 @@ export class GameService {
 
     // Time going by: small steps (the light and the sun move smoothly in between, see WeatherHelper)
     setInterval(() => {
-      if (this.timeFlowState() && !game.paused && !game.loading) {
+      if (this.timeFlowState() && !game.paused && !game.loading && !isAppHidden()) {
         this.advanceHour(TIME_STEP / 1000 * 24 / DAY_DURATION);
       }
     }, TIME_STEP);
@@ -370,7 +388,9 @@ export class GameService {
 
   private animate(game: Game): void {
     requestAnimationFrame(() => this.animate(game));
-    this.renderLoop(game);
+    if (!isAppHidden()) {
+      this.renderLoop(game);
+    }
   }
 
   private initCheckResize() {

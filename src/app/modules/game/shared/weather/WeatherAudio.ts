@@ -1,4 +1,5 @@
 import { applySilentMode } from './silent-mode';
+import { isAppHidden, onAppVisibility } from '../../../../core/shared/app-visibility';
 
 /**
  * Weather sounds, with the Web Audio API:
@@ -309,15 +310,21 @@ export class WeatherAudio {
     // also be stopped later (iOS suspends it when the app goes to the background, a call...): every gesture
     // starts it again if needed.
     const start = () => {
-      if (this.ctx?.state !== 'running') {
+      if (this.ctx?.state !== 'running' && !isAppHidden()) {
         this.start();
       }
     };
     for (const event of ['keydown', 'pointerdown', 'pointerup', 'touchend', 'click']) {
       window.addEventListener(event, start, { capture: true, passive: true });
     }
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && this.ctx && this.ctx.state !== 'running') {
+    // In the background (home screen, other app, screen locked): silent, back on return
+    onAppVisibility(hidden => {
+      if (!this.ctx) {
+        return;
+      }
+      if (hidden) {
+        void this.ctx.suspend().catch(() => undefined);
+      } else if (this.ctx.state !== 'running') {
         void this.ctx.resume().catch(() => undefined);
       }
     });
