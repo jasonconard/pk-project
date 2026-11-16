@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.17',
+    date: '2026-11-16',
+    notes: [
+      'Éditeur de modèles sur mobile : choisis le mode Modélisation ou Dessin, et ouvre chaque réglage dans un volet qui monte du bas.',
+      'Éditeur de modèles : pince à deux doigts pour zoomer sur une face et déplace-la à deux doigts.',
+      'Éditeur de modèles sur ordinateur : une barre en haut et un panneau mieux rangé.',
+      'Les icônes de l\'éditeur et de la barre météo sont plus nettes et plus lisibles.',
+      'Sur mobile, le choix de la météo prend tout l\'écran : touche une météo pour voir sa fiche, puis applique-la.',
+    ],
+  },
+  {
     version: '0.0.16',
     date: '2026-11-14',
     notes: [

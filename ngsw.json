@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1794675540871,
+  "timestamp": 1794838841784,
   "index": "/pk-project/index.html",
   "assetGroups": [
     {
@@ -11,18 +11,18 @@
         "ignoreVary": true
       },
       "urls": [
-        "/pk-project/chunk-BEmKCOr9.js",
         "/pk-project/chunk-BVZN0DCA.js",
         "/pk-project/chunk-Bm4EQqxY.js",
         "/pk-project/chunk-BwgZrr5C.js",
-        "/pk-project/chunk-CYXvU0qx.js",
+        "/pk-project/chunk-CAu74jpW.js",
+        "/pk-project/chunk-CqWVBYxb.js",
         "/pk-project/chunk-Da4-SChG.js",
         "/pk-project/chunk-Dm1hqnWw.js",
         "/pk-project/favicon.ico",
         "/pk-project/index.html",
-        "/pk-project/main-TRJ7RXO2.js",
+        "/pk-project/main-QQCPNGV3.js",
         "/pk-project/manifest.webmanifest",
-        "/pk-project/styles-M5GT4ORT.css"
+        "/pk-project/styles-ZQEH2NYF.css"
       ],
       "patterns": []
     },
@@ -39,8 +39,6 @@
         "/pk-project/assets/img/pokemons/draft-001-to-009.png",
         "/pk-project/assets/img/pokemons/draft-004-005-006.png",
         "/pk-project/assets/img/pokemons/draft-007-008-009.png",
-        "/pk-project/assets/img/ui/icon-fullscreen-exit.svg",
-        "/pk-project/assets/img/ui/icon-fullscreen.svg",
         "/pk-project/assets/sounds/steps/ground-1.m4a",
         "/pk-project/assets/sounds/steps/ground-2.m4a",
         "/pk-project/assets/sounds/steps/ground-3.m4a",
@@ -200,8 +198,6 @@
     "/pk-project/assets/img/pokemons/draft-001-to-009.png": "4306a377dc5a6f0de2d462d92bc5cf2e0ec6ddbc",
     "/pk-project/assets/img/pokemons/draft-004-005-006.png": "6ea34371ebc17e7c2b40156bbdc7e22e27d2cc9e",
     "/pk-project/assets/img/pokemons/draft-007-008-009.png": "8de254238a670d06b49bfc166d9774bfe106a83c",
-    "/pk-project/assets/img/ui/icon-fullscreen-exit.svg": "42eae02f178f94a41846f3fea54fce5304b1b076",
-    "/pk-project/assets/img/ui/icon-fullscreen.svg": "778c9c3b9988d018b7f3352033f6515df11d691e",
     "/pk-project/assets/sounds/steps/ground-1.m4a": "0dac30e7d52fb297021002da2c416a67394e4ae8",
     "/pk-project/assets/sounds/steps/ground-2.m4a": "bdcbddb94ed164741844a817d19620ef662d5bb5",
     "/pk-project/assets/sounds/steps/ground-3.m4a": "62880fb470729d8c55f12454baaa7cdce597f5e2",
@@ -342,11 +338,11 @@
     "/pk-project/assets/weather/tornado-night.webp": "6e2ffda152b6c56c7e9cfa04509f965e8fdcd397",
     "/pk-project/assets/weather/volcanic-day.webp": "33ccb3304dc9b575ecf21382fcad596d3d5ee286",
     "/pk-project/assets/weather/volcanic-night.webp": "ced2a11c42b360cc6e11d944caa279934d5755ad",
-    "/pk-project/chunk-BEmKCOr9.js": "656e0043d035baa16cdc356521748c02bb55c1fc",
     "/pk-project/chunk-BVZN0DCA.js": "79a778cae8991c95dff1df8acaa87b65ff5bd24d",
     "/pk-project/chunk-Bm4EQqxY.js": "5f2438a2aef0e656eae08ec4dc3f8d256b26eb99",
     "/pk-project/chunk-BwgZrr5C.js": "0a22f1dc400e4c8ded48dde129aa2ae6a7688154",
-    "/pk-project/chunk-CYXvU0qx.js": "434c72a4c36e0a942b01f03d17e9f01a0351c276",
+    "/pk-project/chunk-CAu74jpW.js": "448f428c9df06f423ec5307d01a0f1492e815a1c",
+    "/pk-project/chunk-CqWVBYxb.js": "df93845ca44cc5ecd71a813602ef5fa83a68ef32",
     "/pk-project/chunk-Da4-SChG.js": "7c05482f16d5ea1262c906b0f05d29c6f38bb137",
     "/pk-project/chunk-Dm1hqnWw.js": "6a172c16de3bc404371ee06ad9904f1f74a425db",
     "/pk-project/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
@@ -358,10 +354,10 @@
     "/pk-project/icons/icon-512x512.png": "1de182f76f7329dfa8f9fcdd1fdcdd695bea6a99",
     "/pk-project/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
     "/pk-project/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
-    "/pk-project/index.html": "c7cff41e26dbd1dd7cce41ec15586793b246a62a",
-    "/pk-project/main-TRJ7RXO2.js": "a7b8e06d9dde638289ed5f803369c112d7f5de2d",
+    "/pk-project/index.html": "98c3af725f0b5994c82ce0ecef83d858719fffe1",
+    "/pk-project/main-QQCPNGV3.js": "675aeafe992486289898a241ca5bf2c7faf67a08",
     "/pk-project/manifest.webmanifest": "1e3021ee53993d50b1c7676c788777521586cb74",
-    "/pk-project/styles-M5GT4ORT.css": "32d669348f97fe1506a042f098101adadd2c8d09"
+    "/pk-project/styles-ZQEH2NYF.css": "5a490b9b71ad380bcddd1be2c3daf96981246809"
   },
   "navigationUrls": [
     {
