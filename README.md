@@ -38,7 +38,8 @@ in full screen, and shows up in the phone's game tools.
   kept safe (outside the repo), and given to the workflow as repository secrets: `PK_KEYSTORE_BASE64`
   (`base64 -i pk-release.jks | pbcopy`), `PK_KEYSTORE_PASSWORD`, `PK_KEY_ALIAS`, `PK_KEY_PASSWORD`.
   Without them, a local build is signed with the debug key.
-- Updates: at launch, the app reads the latest GitHub release (`core/update-prompt`). If its tag is newer than the
+- Updates: at launch and when it comes back on the screen (at most every 5 min), the app reads the latest GitHub
+  release (`core/update-prompt`); a version put off ("Plus tard") is offered again at the next launch. If its tag is newer than the
   app version:
   - **live update** (most releases): the release also has the game files, `pk-project-web-vX.Y.Z-apkA.B.C-<fingerprint>.zip`.
     If the installed APK is at least `A.B.C` (same native part), the app downloads them itself

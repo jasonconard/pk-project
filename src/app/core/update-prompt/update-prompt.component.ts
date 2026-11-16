@@ -4,10 +4,13 @@ import { SwUpdate } from '@angular/service-worker';
 import { Capacitor } from '@capacitor/core';
 import { BundleInfo, CapacitorUpdater } from '@capgo/capacitor-updater';
 import { version } from '../../../../package.json';
+import { onAppVisibility } from '../shared/app-visibility';
 
 /** Latest release of the game on GitHub: the Android app is attached to it (see .github/workflows/main.yml). */
 const LATEST_RELEASE = 'https://api.github.com/repos/jasonconard/pk-project/releases/latest';
 const CHECK_TIMEOUT = 8000;
+/** Android app: back on the screen, a new version is looked for again, at most this often (ms). */
+const RESUME_CHECK_GAP = 5 * 60 * 1000;
 /** Installed web app (PWA): how often a new version is looked for while playing (ms). */
 const PWA_CHECK_EVERY = 30 * 60 * 1000;
 
@@ -46,7 +49,8 @@ export function isNewer(candidate: string, current: string): boolean {
 
 /**
  * Offers the new versions of the game.
- * - Android app: at launch, looks for a newer release on GitHub.
+ * - Android app: at launch and when the app comes back on the screen (at most every 5 min), looks for a newer
+ *   release on GitHub. A version put off ("Plus tard") is not offered again before the next launch.
  *   - Its game files can run in this app (same native part): they are downloaded in the background (live update,
  *     @capgo/capacitor-updater) and a restart is offered; "later" uses them the next time the app leaves the screen
  *     or starts. No APK, no installation.
@@ -72,6 +76,10 @@ export class UpdatePromptComponent implements OnInit {
   protected readonly bundleReady = signal<BundleInfo | null>(null);
   /** Android app: why the game files could not be updated without the APK (shown with the APK offer). */
   protected readonly liveUpdateError = signal('');
+  /** Android app: when the last check started (ms), whether one is running, the versions put off ("Plus tard"). */
+  private lastCheck = 0;
+  private checking = false;
+  private readonly putOff = new Set<string>();
   protected readonly current = version;
 
   ngOnInit() {
@@ -79,12 +87,23 @@ export class UpdatePromptComponent implements OnInit {
       // These game files started fine: kept (otherwise the updater goes back to the previous ones)
       void CapacitorUpdater.notifyAppReady().catch(() => undefined);
       this.check();
+      // Back on the screen (the app often stays open in the background): a version released meanwhile
+      const stop = onAppVisibility(hidden => {
+        if (!hidden && Date.now() - this.lastCheck > RESUME_CHECK_GAP) {
+          this.check();
+        }
+      });
+      this.destroyRef.onDestroy(stop);
     } else if (this.swUpdate.isEnabled) {
       this.watchWebVersions();
     }
   }
 
   protected later() {
+    const offered = this.bundleReady()?.version ?? this.update()?.version;
+    if (offered) {
+      this.putOff.add(offered);
+    }
     this.update.set(null);
     this.webReady.set(false);
     this.bundleReady.set(null);
@@ -127,13 +146,19 @@ export class UpdatePromptComponent implements OnInit {
   }
 
   private async check() {
+    // One at a time, and not while an offer is on the screen
+    if (this.checking || this.update() || this.bundleReady()) {
+      return;
+    }
+    this.checking = true;
+    this.lastCheck = Date.now();
     try {
       const response = await fetch(LATEST_RELEASE, { signal: AbortSignal.timeout(CHECK_TIMEOUT) });
       if (!response.ok) {
         return;
       }
       const release = await response.json();
-      if (!isNewer(release.tag_name, version)) {
+      if (!isNewer(release.tag_name, version) || this.putOff.has(release.tag_name.replace(/^v/, ''))) {
         return;
       }
       const assets: ReleaseAsset[] = release.assets ?? [];
@@ -149,7 +174,9 @@ export class UpdatePromptComponent implements OnInit {
         });
       }
     } catch {
-      // Offline, timeout: checked again at the next launch
+      // Offline, timeout: checked again later (back on the screen, next launch)
+    } finally {
+      this.checking = false;
     }
   }
 
