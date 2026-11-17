@@ -1,6 +1,6 @@
 {
   "name": "pk-project",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "scripts": {
     "ng": "ng",
     "gh-build": "ng build --configuration production --output-path dist/gh-pages --base-href /pk-project/",

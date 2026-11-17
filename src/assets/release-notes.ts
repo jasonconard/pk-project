@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.28',
+    date: '2026-11-17',
+    notes: [
+      'Éditeur : le jeu peut avoir plusieurs cartes (monde, ville, intérieur, donjon). Touche le nom de la carte, en haut, pour en créer, ouvrir, renommer, dupliquer ou exporter.',
+      'Éditeur : l\'onglet Morceaux agrandit ou réduit une carte, et place son point d\'arrivée.',
+      'Éditeur : un objet peut devenir une porte ou une sortie vers une autre carte, avec le point d\'arrivée de ton choix.',
+      'Le jeu reste léger sur les grandes cartes : seuls les alentours du joueur sont construits.',
+    ],
+  },
+  {
     version: '0.0.27',
     date: '2026-11-17',
     notes: [
