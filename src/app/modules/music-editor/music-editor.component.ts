@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal } from '@angular/core';
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
-  LucideAudioWaveform, LucideBell, LucideChevronDown, LucideClipboardPaste, LucideCopy, LucideChevronLeft, LucideDisc3, LucideDownload, LucideDynamicIcon,
+  LucideAudioWaveform, LucideBell, LucideChevronDown, LucideClipboardPaste, LucideCopy, LucideGamepad2, LucideChevronLeft, LucideDisc3, LucideDownload, LucideDynamicIcon,
   LucideEighthNote, LucideEraser, LucideFileMusic, LucideGuitar, LucideIcon, LucideKeyboardMusic, LucideMinus, LucidePlay,
   LucidePlus, LucideRedo2, LucideSlidersHorizontal, LucideSquare, LucideTrash, LucideUndo2, LucideWavesHorizontal, LucideX,
 } from '@lucide/angular';
@@ -9,13 +9,15 @@ import { onAppVisibility } from '../../core/shared/app-visibility';
 import { MusicEngine } from './shared/music-engine';
 import {
   Channel, CHANNELS, degreeCount, degreeMidi, DRUM_PATTERNS, DRUMS, DrumHit, DrumId, INSTRUMENTS, InstrumentId, LOFI_PRESETS,
-  LOFI_SETTINGS, lofiOf, LofiSettings, MAX_BARS, MAX_BPM, midiName, MIN_BPM, ModeId, MODES, modeOf, newSong, NOTE_NAMES,
+  LOFI_SETTINGS, lofiOf, LofiSettings, MAX_BARS, MAX_BPM, midiName, MIN_BPM, ModeId, MODES, modeOf, MUSIC_SLOTS, MusicSlot,
+  MusicUse, newSong, NOTE_NAMES,
   noteLength, scaleLabel, Song, SongNote, songLength, STEPS_PER_BAR, volumeOf,
 } from './shared/song';
 import { loadSongs, saveSongs } from './shared/song-storage';
+import { downloadFile } from '../game/shared/util/ts-source';
 
 type Stamp = InstrumentId | 'eraser';
-type Sheet = 'scale' | 'song' | 'mix' | 'lofi';
+type Sheet = 'scale' | 'song' | 'mix' | 'lofi' | 'game';
 /** Moves of one slider closer than this (ms) are one change in the history. */
 const MERGE_TIME = 800;
 
@@ -37,7 +39,7 @@ const WIDE = '(min-width: 1200px)';
 @Component({
   selector: 'app-music-editor',
   imports: [
-    NgTemplateOutlet, DecimalPipe, LucideCopy, LucideClipboardPaste, LucideEraser, LucideDynamicIcon, LucideChevronLeft, LucideChevronDown, LucideUndo2, LucideRedo2, LucidePlay, LucideSquare, LucideMinus,
+    NgTemplateOutlet, DecimalPipe, LucideGamepad2, LucideCopy, LucideClipboardPaste, LucideEraser, LucideDynamicIcon, LucideChevronLeft, LucideChevronDown, LucideUndo2, LucideRedo2, LucidePlay, LucideSquare, LucideMinus,
     LucidePlus, LucideKeyboardMusic, LucideFileMusic, LucideSlidersHorizontal, LucideDisc3, LucideDownload, LucideX, LucideTrash,
   ],
   templateUrl: './music-editor.component.html',
@@ -55,11 +57,15 @@ export class MusicEditorComponent {
   protected readonly lofiSettings = LOFI_SETTINGS;
   protected readonly lofiPresets = LOFI_PRESETS;
   protected readonly drumPatterns = DRUM_PATTERNS;
+  protected readonly musicSlots = MUSIC_SLOTS;
 
   private readonly engine = new MusicEngine();
   private readonly stored = loadSongs();
   protected readonly songs = signal<Song[]>(this.stored.songs);
   protected readonly currentId = signal(this.stored.current);
+  /** Which song plays when in the game. */
+  protected readonly use = signal<MusicUse>(this.stored.use ?? {});
+  protected readonly exported = signal('');
   protected readonly song = computed(() => this.songs().find(s => s.id === this.currentId()) ?? this.songs()[0]);
 
   protected readonly stamp = signal<Stamp>('lead');
@@ -466,6 +472,43 @@ export class MusicEditorComponent {
     return Array.from({ length: this.song().bars }, (_, i) => i);
   }
 
+  // --- In the game ---
+
+  protected setUse(slot: MusicSlot, id: string): void {
+    this.use.update(use => {
+      const next = { ...use };
+      if (id) {
+        next[slot] = id;
+      } else {
+        delete next[slot];
+      }
+      return next;
+    });
+    this.scheduleSave();
+  }
+
+  /** Slots of the current song (shown on the sheet). */
+  protected usedFor(id: string): string {
+    return MUSIC_SLOTS.filter(slot => this.use()[slot.id] === id).map(slot => slot.label).join(', ');
+  }
+
+  /** The songs and their slots, as the game's music file (src/assets/music/music.ts) for the repository. */
+  protected exportMusic(): void {
+    const songs = this.songs().map(song => ({ ...song, notes: [...song.notes].sort((a, b) => a.step - b.step || a.degree - b.degree) }));
+    const source = `import { MusicUse, Song } from '../../app/modules/music-editor/shared/song';
+
+/**
+ * Songs of the game and which one plays when (day, night, rain, fight). Written by the music editor's export
+ * (/#/musique → Jeu → Exporter); the songs saved in the browser replace these ones (same id).
+ */
+export const CODE_SONGS: Song[] = ${JSON.stringify(songs, null, 2)};
+
+export const CODE_MUSIC_USE: MusicUse = ${JSON.stringify(this.use(), null, 2)};
+`;
+    downloadFile('music.ts', source);
+    this.exported.set(`music.ts téléchargé (${songs.length} morceau${songs.length > 1 ? 'x' : ''}) : à mettre dans src/assets/music/.`);
+  }
+
   // --- Songs ---
 
   protected openSong(id: string): void {
@@ -491,6 +534,7 @@ export class MusicEditorComponent {
     }
     this.confirmDelete.set(false);
     const id = this.currentId();
+    this.use.update(use => Object.fromEntries(Object.entries(use).filter(([, songId]) => songId !== id)) as MusicUse);
     const rest = this.songs().filter(s => s.id !== id);
     const songs = rest.length ? rest : [newSong()];
     this.songs.set(songs);
@@ -555,7 +599,7 @@ export class MusicEditorComponent {
 
   private flushSave(): void {
     clearTimeout(this.saveTimer);
-    saveSongs({ songs: this.songs(), current: this.currentId() });
+    saveSongs({ songs: this.songs(), current: this.currentId(), use: this.use() });
   }
 
   // --- Helpers for the template ---

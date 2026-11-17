@@ -45,9 +45,24 @@ Le mixage et le lo-fi s'écoutent sans fermer le volet (bouton lecture dans le v
 
 Les morceaux sont enregistrés dans le navigateur (`localStorage`, clé `pk-songs`). En arrière-plan, la lecture s'arrête.
 
+## Dans le jeu
+
+Le volet **Jeu** choisit le morceau de chaque moment, sur la carte :
+
+| Moment | Quand |
+|---|---|
+| Jour | le jour |
+| Nuit | la nuit (sans morceau : celui du jour) |
+| Pluie | les météos de la catégorie Pluie & tempêtes : bruine, averse, orage, mousson… (sans morceau : jour ou nuit) |
+| Combat | pendant un combat (sans morceau : la musique en cours continue) |
+
+Le changement de moment se fait en fondu (le morceau s'éteint, l'autre monte). La musique démarre au premier toucher ou à la première touche (le navigateur bloque le son avant), s'arrête en arrière-plan. Son volume : **Son → Musique** dans la barre du jeu (coupé avec les sons). Les donjons auront leur moment quand ils existeront.
+
+**Les morceaux du navigateur jouent tout de suite dans le jeu, sur cet appareil.** Pour les mettre dans le jeu publié : **Exporter (music.ts)** télécharge tous les morceaux et les choix de moments, à mettre dans `src/assets/music/music.ts`. Le jeu part de ce fichier ; les morceaux du navigateur de même id le remplacent, et les choix du navigateur passent devant. Un navigateur sans morceaux part de ceux du fichier.
+
 **Sur téléphone** : en portrait, une mesure à la fois, les tampons en bas sous le pouce ; en paysage, deux mesures, les tampons à gauche, la barre du haut glisse sur le côté ; sur grand écran, quatre mesures.
 
-À venir : la musique dans le jeu (une par carte, variantes jour / nuit / pluie / donjon / combat, fondus) et l'export en fichier.
+À venir : une musique par carte quand il y aura plusieurs cartes, le moment Donjon.
 
 ## Les fichiers
 
@@ -56,6 +71,8 @@ Les morceaux sont enregistrés dans le navigateur (`localStorage`, clé `pk-song
 | `music-editor/music-editor.component.*` | La page : grille, tampons, transport, volets Gamme et Morceau |
 | `music-editor/shared/song.ts` | Le morceau : notes, batterie, gammes, instruments |
 | `music-editor/shared/music-engine.ts` | Le son : instruments synthétisés, volume par piste, chaîne lo-fi (flottement → grain → chaleur), souffle et vinyle, swing, séquenceur (notes planifiées un peu à l'avance) |
-| `music-editor/shared/song-storage.ts` | Enregistrement dans le navigateur |
+| `music-editor/shared/song-storage.ts` | Enregistrement dans le navigateur ; la musique du jeu (fichier + navigateur) |
+| `game/shared/services/game-music.ts` | Le morceau du moment dans le jeu, fondus, déblocage du son |
+| `src/assets/music/music.ts` (racine du dépôt) | Les morceaux du jeu publié (export de l'éditeur) |
 
 (Chemins relatifs à `src/app/modules/`.)

@@ -297,3 +297,45 @@
     }
   }
 }
+
+// In the game: a song per slot
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .slot-head {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    small {
+      font-size: 11px;
+      color: var(--muted);
+    }
+  }
+
+  select {
+    width: 45%;
+    height: 40px;
+    padding: 0 8px;
+    border: none;
+    border-radius: 10px;
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    font-size: 14px;
+  }
+}
+
+.song-list button small {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: normal;
+  color: #9fc3ff;
+}
+
+.sheet-hint code {
+  font-size: 11px;
+}

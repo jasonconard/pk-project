@@ -137,6 +137,18 @@ export function lofiOf(song: Song): LofiSettings {
   return song.lofi ?? CLEAN;
 }
 
+/** When a song plays in the game: by day, by night, under the rain, in a fight (the dungeons will come later). */
+export type MusicSlot = 'day' | 'night' | 'rain' | 'fight';
+/** Song id per slot. */
+export type MusicUse = Partial<Record<MusicSlot, string>>;
+
+export const MUSIC_SLOTS: { id: MusicSlot, label: string, hint: string }[] = [
+  { id: 'day', label: 'Jour', hint: 'Sur la carte, le jour' },
+  { id: 'night', label: 'Nuit', hint: 'Sur la carte, la nuit (sinon : celle du jour)' },
+  { id: 'rain', label: 'Pluie', hint: 'Bruine, averse, orage, mousson… (sinon : jour ou nuit)' },
+  { id: 'fight', label: 'Combat', hint: 'Pendant un combat' },
+];
+
 /** French note names (with the usual sharps / flats). */
 export const NOTE_NAMES = ['Do', 'Do♯', 'Ré', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];
 /** MIDI note of the lowest row's tonic when it is Do (Do2, French numbering: Do3 = middle C). */

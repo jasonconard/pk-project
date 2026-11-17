@@ -6,6 +6,8 @@ const TICK = 25;
 /** Flutter: a delay line whose length moves a little (the pitch floats like a worn tape). */
 const WOW_DELAY = 0.008;
 const WOW_DEPTH = 0.0035;
+/** Loudness of the whole music at full volume. */
+const MASTER = 0.55;
 
 const midiFreq = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12);
 
@@ -33,6 +35,8 @@ export class MusicEngine {
   private noise?: AudioBuffer;
   private crackles?: AudioBuffer;
   private grain = -1;
+  /** Overall volume 0..1 (the game's music volume). */
+  private output = 1;
   private timer?: ReturnType<typeof setInterval>;
   private song?: Song;
   private nextStep = 0;
@@ -60,7 +64,7 @@ export class MusicEngine {
     const ctx = new AudioContext();
     this.ctx = ctx;
     this.master = ctx.createGain();
-    this.master.gain.value = 0.55;
+    this.master.gain.value = MASTER * this.output;
     const limiter = ctx.createDynamicsCompressor();
     limiter.threshold.value = -8;
     limiter.ratio.value = 10;
@@ -114,6 +118,15 @@ export class MusicEngine {
     this.hissGain.connect(this.master);
     this.vinylGain = ctx.createGain();
     this.vinylGain.connect(this.master);
+  }
+
+  /** Overall volume 0..1, reached in about `seconds` (a fade). */
+  setOutput(volume: number, seconds = 0.05): void {
+    this.output = Math.min(Math.max(volume, 0), 1);
+    if (this.ctx && this.master) {
+      this.master.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.master.gain.setTargetAtTime(MASTER * this.output, this.ctx.currentTime, Math.max(seconds, 0.01) / 3);
+    }
   }
 
   /** Plays the song in a loop from `fromStep`; `setSong` keeps it up to date while it plays. */

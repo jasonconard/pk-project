@@ -71,11 +71,11 @@
 <game-weather-panel [weather]="weather()" [night]="night()" [hour]="hour()" [timeFlow]="timeFlow()"
                     [windStrength]="windStrength()" [windDirection]="windDirection()"
                     [fireflyColor]="fireflyColor()" [leafMode]="leafMode()" [gusts]="gusts()" [cloudDensity]="cloudDensity()"
-                    [soundVolume]="soundVolume()" [soundMuted]="soundMuted()"
+                    [soundVolume]="soundVolume()" [soundMuted]="soundMuted()" [musicVolume]="musicVolume()"
                     (weatherSelected)="setWeather($event)" (hourChange)="setHour($event)" (timeFlowChange)="setTimeFlow($event)"
                     (windChange)="setWind($event)" (fireflyColorChange)="setFireflyColor($event)"
                     (leafModeChange)="setLeafMode($event)" (gustsChange)="setGusts($event)"
-                    (cloudDensityChange)="setCloudDensity($event)" (soundChange)="setSound($event)" />
+                    (cloudDensityChange)="setCloudDensity($event)" (soundChange)="setSound($event)" (musicVolumeChange)="setMusicVolume($event)" />
 
 <core-stick />
 <core-touch-pad />

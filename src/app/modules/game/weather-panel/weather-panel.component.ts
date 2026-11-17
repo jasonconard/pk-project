@@ -3,7 +3,7 @@ import { WeatherCatalogComponent } from '../weather-catalog/weather-catalog.comp
 import { KeyService } from '../../../core/shared/service/key.service';
 import { weatherScreenshot } from '../shared/weather/weather-catalog';
 import { applySilentMode, ignoreSilentMode, SILENT_MODE_BYPASS_SUPPORTED } from '../shared/weather/silent-mode';
-import { LucideCheck, LucideCloud, LucideDynamicIcon, LucideIcon, LucideMoon, LucideSun, LucideSunrise, LucideSunset, LucideTimer, LucideVolume2, LucideVolumeX, LucideWind, LucideWindArrowDown } from '@lucide/angular';
+import { LucideCheck, LucideCloud, LucideDynamicIcon, LucideEighthNotes, LucideIcon, LucideMoon, LucideSun, LucideSunrise, LucideSunset, LucideTimer, LucideVolume2, LucideVolumeX, LucideWind, LucideWindArrowDown } from '@lucide/angular';
 import { formatHour, isWeatherAvailable, TIME_OF_DAY_LABELS, TimeOfDay, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
 
 export interface SoundSetting {
@@ -34,7 +34,7 @@ const TIME_ICONS: Record<TimeOfDay, LucideIcon> = { night: LucideMoon, dawn: Luc
 
 @Component({
   selector: 'game-weather-panel',
-  imports: [WeatherCatalogComponent, LucideDynamicIcon, LucideTimer, LucideWind, LucideWindArrowDown, LucideCloud, LucideVolume2, LucideVolumeX, LucideCheck],
+  imports: [WeatherCatalogComponent, LucideDynamicIcon, LucideTimer, LucideWind, LucideWindArrowDown, LucideCloud, LucideVolume2, LucideVolumeX, LucideCheck, LucideEighthNotes],
   templateUrl: './weather-panel.component.html',
   styleUrls: ['./weather-panel.component.scss', './weather-panel.portrait.scss'],
 })
@@ -56,6 +56,8 @@ export class WeatherPanelComponent {
   readonly cloudDensity = input(0.5);
   readonly soundVolume = input(0.7);
   readonly soundMuted = input(false);
+  /** Music volume 0..1 (the songs of the music editor). */
+  readonly musicVolume = input(0.6);
   readonly weatherSelected = output<WeatherType>();
   readonly hourChange = output<number>();
   readonly timeFlowChange = output<boolean>();
@@ -65,6 +67,7 @@ export class WeatherPanelComponent {
   readonly gustsChange = output<boolean>();
   readonly cloudDensityChange = output<number>();
   readonly soundChange = output<SoundSetting>();
+  readonly musicVolumeChange = output<number>();
 
   private readonly catalog = viewChild.required<WeatherCatalogComponent>('catalog');
   /**
@@ -86,6 +89,7 @@ export class WeatherPanelComponent {
     return s < 0.05 ? 'Calme' : s < 0.35 ? 'Brise' : s < 0.7 ? 'Vent fort' : 'Tempête';
   });
   protected readonly soundPercent = computed(() => Math.round(this.soundVolume() * 100));
+  protected readonly musicPercent = computed(() => Math.round(this.musicVolume() * 100));
   /** iPhone / iPad: sound even in silent mode (only where the browser allows it). */
   protected readonly silentBypassSupported = SILENT_MODE_BYPASS_SUPPORTED;
   protected readonly ignoreSilentMode = ignoreSilentMode;
@@ -193,6 +197,14 @@ export class WeatherPanelComponent {
   protected setSoundVolume(event: Event): void {
     // Moving the slider unmutes
     this.emitSound((event.target as HTMLInputElement).valueAsNumber / 100, false);
+  }
+
+  protected setMusicVolume(event: Event): void {
+    this.musicVolumeChange.emit((event.target as HTMLInputElement).valueAsNumber / 100);
+    // Moving the slider unmutes, like the sound one
+    if (this.soundNow().muted) {
+      this.emitSound(this.soundNow().volume, false);
+    }
   }
 
   protected toggleMute(event?: Event): void {

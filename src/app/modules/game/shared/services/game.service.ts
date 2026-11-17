@@ -12,6 +12,8 @@ import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { FightService } from "../../../fight/shared/services/fight.service";
 import { isAppHidden, onAppVisibility } from "../../../../core/shared/app-visibility";
+import { GameMusic } from "./game-music";
+import { WEATHER_INFO } from "../weather/weather-catalog";
 import { DAY_ONLY_HOUR, NIGHT_ONLY_HOUR, MORNING_MIST_HOUR, mistAt, FIREFLY_COLORS, FireflyColor, fireflyColorHex, isNightHour, isWeatherAvailable, LeafMode, WeatherType, WindDirection, windToX } from "../weather/Weather";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
@@ -59,6 +61,8 @@ interface SavedSettings {
   cloudDensity: number;
   soundVolume: number;
   soundMuted: boolean;
+  /** Music volume 0..1 (the songs of the music editor; same mute as the sounds). */
+  musicVolume: number;
   fireflyColor: FireflyColor;
   leafMode: LeafMode;
   quality: QualityMode;
@@ -103,6 +107,7 @@ function loadSettings(): Partial<SavedSettings> {
   out.windStrength = unit(raw['windStrength']);
   out.cloudDensity = unit(raw['cloudDensity']);
   out.soundVolume = unit(raw['soundVolume']);
+  out.musicVolume = unit(raw['musicVolume']);
   out.timeFlow = bool(raw['timeFlow']);
   out.gusts = bool(raw['gusts']);
   out.soundMuted = bool(raw['soundMuted']);
@@ -170,6 +175,10 @@ export class GameService {
   readonly soundVolume = this.soundVolumeState.asReadonly();
   private readonly soundMutedState = signal(this.saved.soundMuted ?? false);
   readonly soundMuted = this.soundMutedState.asReadonly();
+  private readonly musicVolumeState = signal(this.saved.musicVolume ?? 0.6);
+  readonly musicVolume = this.musicVolumeState.asReadonly();
+  /** The songs of the music editor, chosen by the moment: fight, rain, night, day. */
+  private readonly music = new GameMusic();
   /** Cloud density 0..1 (scattered .. overcast). */
   private readonly cloudDensityState = signal(this.saved.cloudDensity ?? 0.5);
   readonly cloudDensity = this.cloudDensityState.asReadonly();
@@ -186,6 +195,14 @@ export class GameService {
 
   constructor() {
     this.initCheckResize();
+    // Music: its volume (muted with the sounds), and the song of the moment
+    effect(() => this.music.setVolume(this.soundMutedState() ? 0 : this.musicVolumeState()));
+    effect(() => {
+      const fight = this.hudState()?.mode === GameMode.FIGHT;
+      const rain = WEATHER_INFO[this.weatherState()]?.category === 'rain';
+      const night = this.night();
+      this.music.setSlot(fight ? 'fight' : rain ? 'rain' : night ? 'night' : 'day', night);
+    });
     // Saved on every change (the hour changes a few times per second while the time goes by: tiny writes)
     effect(() => saveSettings({
       weather: this.weatherState(),
@@ -197,6 +214,7 @@ export class GameService {
       cloudDensity: this.cloudDensityState(),
       soundVolume: this.soundVolumeState(),
       soundMuted: this.soundMutedState(),
+      musicVolume: this.musicVolumeState(),
       fireflyColor: this.fireflyColorState(),
       leafMode: this.leafModeState(),
       quality: this.qualityState(),
@@ -433,6 +451,10 @@ export class GameService {
     this.soundVolumeState.set(volume);
     this.soundMutedState.set(muted);
     this.game?.weather.setSoundVolume(volume, muted);
+  }
+
+  setMusicVolume(volume: number) {
+    this.musicVolumeState.set(Math.min(Math.max(volume, 0), 1));
   }
 
   setCloudDensity(density: number) {

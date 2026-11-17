@@ -121,12 +121,12 @@
   <button type="button" class="section" [class.on]="sheet() === 'song'" (click)="openSheet('song')"><svg lucideFileMusic></svg><span>Morceau</span></button>
   <button type="button" class="section" [class.on]="sheet() === 'mix'" title="Volume de chaque instrument et de la batterie" (click)="openSheet('mix')"><svg lucideSlidersHorizontal></svg><span>Mixage</span></button>
   <button type="button" class="section" [class.on]="sheet() === 'lofi'" title="Chaleur, grain, flottement, souffle, vinyle, swing" (click)="openSheet('lofi')"><svg lucideDisc3></svg><span>Lo-fi</span></button>
-  <button type="button" class="section" disabled title="Bientôt : utiliser la musique dans le jeu"><svg lucideDownload></svg><span>Exporter</span></button>
+  <button type="button" class="section" [class.on]="sheet() === 'game'" title="Quelle musique joue quand, dans le jeu ; export" (click)="openSheet('game')"><svg lucideGamepad2></svg><span>Jeu</span></button>
 </ng-template>
 
 @if (sheet(); as open) {
   <div class="sheet-backdrop" (click)="sheet.set(null)"></div>
-  @let sheetTitle = open === 'scale' ? 'Gamme' : open === 'mix' ? 'Mixage' : open === 'lofi' ? 'Son lo-fi' : 'Morceau';
+  @let sheetTitle = open === 'scale' ? 'Gamme' : open === 'mix' ? 'Mixage' : open === 'lofi' ? 'Son lo-fi' : open === 'game' ? 'Dans le jeu' : 'Morceau';
   <section class="sheet" role="dialog" [attr.aria-label]="sheetTitle" animate.enter="sheet-in" animate.leave="sheet-out">
     <span class="grip" aria-hidden="true"></span>
     <div class="sheet-head">
@@ -162,6 +162,22 @@
           <input type="range" min="0" max="1.5" step="0.05" [value]="volume(channel.id)" (input)="setVolume(channel.id, +$any($event.target).value)" />
         </label>
       }
+    } @else if (open === 'game') {
+      <p class="sheet-hint">Le morceau qui joue sur la carte selon le moment, avec un fondu entre eux. Sans morceau, le plus proche joue (la nuit prend celui du jour…). Le volume se règle dans le jeu (Son → Musique).</p>
+      @for (slot of musicSlots; track slot.id) {
+        <label class="slot">
+          <span class="slot-head"><strong>{{ slot.label }}</strong><small>{{ slot.hint }}</small></span>
+          <select [value]="use()[slot.id] ?? ''" (change)="setUse(slot.id, $any($event.target).value)">
+            <option value="">Aucun</option>
+            @for (item of songs(); track item.id) {
+              <option [value]="item.id" [selected]="use()[slot.id] === item.id">{{ item.name }}</option>
+            }
+          </select>
+        </label>
+      }
+      <p class="sheet-hint">Les morceaux de ce navigateur jouent tout de suite dans le jeu (sur cet appareil). Pour les ajouter au jeu publié : exporter, puis mettre le fichier dans <code>src/assets/music/</code>.</p>
+      <button type="button" class="outline-btn" data-haptic="success" (click)="exportMusic()"><svg lucideDownload></svg> Exporter (music.ts)</button>
+      @if (exported()) { <p class="sheet-hint">{{ exported() }}</p> }
     } @else if (open === 'lofi') {
       <div class="presets">
         @for (preset of lofiPresets; track preset.id) {
@@ -210,7 +226,9 @@
       <h3>Mes morceaux</h3>
       <div class="song-list">
         @for (item of songs(); track item.id) {
-          <button type="button" [class.on]="item.id === s.id" (click)="openSong(item.id)">{{ item.name }}</button>
+          <button type="button" [class.on]="item.id === s.id" (click)="openSong(item.id)">
+            {{ item.name }}@if (usedFor(item.id); as slots) { <small>{{ slots }}</small> }
+          </button>
         }
       </div>
       <div class="pair">

@@ -41,6 +41,7 @@ export class GameComponent {
   protected readonly cloudDensity = this.gameService.cloudDensity;
   protected readonly soundVolume = this.gameService.soundVolume;
   protected readonly soundMuted = this.gameService.soundMuted;
+  protected readonly musicVolume = this.gameService.musicVolume;
   protected readonly GameMode = GameMode;
   /** Hidden menu on the temperature / fps tile: graphics quality. */
   protected readonly qualityMenu = signal(false);
@@ -102,6 +103,10 @@ export class GameComponent {
 
   protected setFireflyColor(color: FireflyColor): void {
     this.gameService.setFireflyColor(color);
+  }
+
+  protected setMusicVolume(volume: number): void {
+    this.gameService.setMusicVolume(volume);
   }
 
   protected setSound(sound: SoundSetting): void {

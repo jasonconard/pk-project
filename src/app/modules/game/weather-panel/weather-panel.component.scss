@@ -287,6 +287,17 @@ button {
   }
 }
 
+// Music volume (under the sound one): same gauge, violet fill
+.sound {
+  .music-header {
+    margin-top: 6px;
+  }
+
+  .music-gauge {
+    background: linear-gradient(to right, #d9b8ff 0%, #8a4fd6 var(--fill), rgba(255, 255, 255, 0.15) var(--fill));
+  }
+}
+
 // Cloud density gauge (same look as the wind gauge, grey-white fill)
 // Time of day: the gauge shows the sky through the day (night, dawn 6-8 h, day, dusk 18-20 h)
 .time {

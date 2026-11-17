@@ -140,6 +140,16 @@
                  [style.--fill.%]="soundMuted() ? 0 : soundPercent()"
                  (input)="setSoundVolume($event)"
                  (change)="releaseSlider($event)" />
+          <div class="wind-header music-header">
+            <span class="section-title"><svg lucideEighthNotes></svg> Musique</span>
+            <span class="wind-value">{{ musicPercent() }}%</span>
+          </div>
+          <input type="range" class="wind-gauge music-gauge" min="0" max="100" step="1"
+                 aria-label="Volume de la musique"
+                 [value]="musicPercent()"
+                 [style.--fill.%]="soundMuted() ? 0 : musicPercent()"
+                 (input)="setMusicVolume($event)"
+                 (change)="releaseSlider($event)" />
           @if (silentBypassSupported) {
             <button type="button" class="silent-mode" [attr.aria-pressed]="ignoreSilentMode()" (click)="toggleSilentMode($event)">
               <span class="check" aria-hidden="true">@if (ignoreSilentMode()) { <svg lucideCheck></svg> }</span>
