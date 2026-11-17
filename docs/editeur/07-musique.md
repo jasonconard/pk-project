@@ -12,7 +12,7 @@ Composer les musiques du jeu dans l'esprit de **Mario Paint** : on choisit un in
 
 ## Les instruments
 
-Tous sont fabriqués en direct par le navigateur (aucun fichier son) :
+Tous sont fabriqués en direct par le navigateur (aucun fichier son), décrits comme des fiches dans `instruments.ts` (couches d'oscillateurs, enveloppe ADSR, filtre, FM, vibrato retardé, souffle, numéro General MIDI) :
 
 | Tampon | Son |
 |---|---|
@@ -39,6 +39,7 @@ Tous sont fabriqués en direct par le navigateur (aucun fichier son) :
 | Souffle | un léger bruit de fond |
 | Vinyle | des craquements de disque |
 | Swing | une double croche sur deux arrive un peu en retard (rythme nonchalant) |
+| Espace | une réverbération légère, comme dans une pièce (20 % par défaut) |
 
 Le mixage et le lo-fi s'écoutent sans fermer le volet (bouton lecture dans le volet). Bouger un curseur ne compte qu'une fois dans l'historique.
 - **Annuler / refaire** (Ctrl+Z, Ctrl+Y) : 100 étapes.
@@ -68,9 +69,11 @@ Le changement de moment se fait en fondu (le morceau s'éteint, l'autre monte). 
 
 | Fichier | Rôle |
 |---|---|
+| `music-editor/shared/instruments.ts` | Les fiches des instruments |
+| `music-editor/shared/synth.ts` | Les briques : carrés à cycle variable, onde 4 bits GBA, bruit LFSR 7 / 15 bits, réverb |
 | `music-editor/music-editor.component.*` | La page : grille, tampons, transport, volets Gamme et Morceau |
 | `music-editor/shared/song.ts` | Le morceau : notes, batterie, gammes, instruments |
-| `music-editor/shared/music-engine.ts` | Le son : instruments synthétisés, volume par piste, chaîne lo-fi (flottement → grain → chaleur), souffle et vinyle, swing, séquenceur (notes planifiées un peu à l'avance) |
+| `music-editor/shared/music-engine.ts` | Le son : une voix générique qui joue les fiches (16 notes à la fois au plus, la plus ancienne coupée en douceur), batterie en bruit LFSR, volume par piste, chaîne lo-fi (flottement → grain → chaleur → espace), souffle et vinyle, swing, séquenceur (notes planifiées un peu à l'avance) |
 | `music-editor/shared/song-storage.ts` | Enregistrement dans le navigateur ; la musique du jeu (fichier + navigateur) |
 | `game/shared/services/game-music.ts` | Le morceau du moment dans le jeu, fondus, déblocage du son |
 | `src/assets/music/music.ts` (racine du dépôt) | Les morceaux du jeu publié (export de l'éditeur) |

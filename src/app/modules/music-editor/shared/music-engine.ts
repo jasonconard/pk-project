@@ -1,4 +1,6 @@
 import { Channel, CHANNELS, degreeMidi, DrumId, InstrumentId, lofiOf, LofiSettings, noteLength, Song, songLength, volumeOf } from './song';
+import { INSTRUMENT_DEFS, InstrumentDef, Wave } from './instruments';
+import { lfsrNoise, pulseWave, roomImpulse, wave4Bit, whiteNoise } from './synth';
 
 /** The sequencer looks this far ahead (s) and wakes up this often (ms): steady tempo even when the page is busy. */
 const LOOKAHEAD = 0.12;
@@ -8,16 +10,26 @@ const WOW_DELAY = 0.008;
 const WOW_DEPTH = 0.0035;
 /** Loudness of the whole music at full volume. */
 const MASTER = 0.55;
+/** Most notes sounding at once (drums apart): beyond, the oldest one is cut short (voice stealing). */
+const MAX_VOICES = 16;
+
+interface Voice {
+  gain: GainNode;
+  sources: AudioScheduledSourceNode[];
+  /** When it is silent (end of its release). */
+  until: number;
+}
 
 const midiFreq = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12);
 
 /**
  * Plays the songs of the music editor, every sound synthesized live (Web Audio, no sample files):
- * - lead: square wave (Game Boy like); bell: FM (two sines); pluck: sawtooth with a closing filter (a plucked
- *   string); bass: triangle with a sine an octave below; pad: two detuned sawtooths, soft filter, slow attack;
- * - drums: kick (sine falling in pitch), snare (filtered noise and a short tone), hi-hat (high noise).
- * Each channel has its volume (mix); all go through the lo-fi chain: flutter → grain → warmth (low-pass), with
- * hiss and vinyl crackles added while playing. Swing delays every second sixteenth.
+ * - the instruments are sheets of instruments.ts (layers, ADSR, filter, FM, delayed vibrato, breath), played by
+ *   `voice`; at most MAX_VOICES at once (the oldest is cut short);
+ * - drums: kick (sine falling in pitch), snare (15-bit LFSR noise through a band-pass, a short tone), hi-hat (7-bit
+ *   LFSR noise: metallic, high-pass).
+ * Each channel has its volume (mix); all go through the lo-fi chain: flutter → grain → warmth (low-pass) → a light
+ * reverb, with hiss and vinyl crackles added while playing. Swing delays every second sixteenth.
  * The song is read again at each step: edits are heard right away while it loops.
  */
 export class MusicEngine {
@@ -33,6 +45,11 @@ export class MusicEngine {
   private vinylGain?: GainNode;
   private beds: AudioBufferSourceNode[] = [];
   private noise?: AudioBuffer;
+  private snareNoise?: AudioBuffer;
+  private hatNoise?: AudioBuffer;
+  private reverbSend?: GainNode;
+  private readonly waves = new Map<Wave, PeriodicWave>();
+  private voices: Voice[] = [];
   private crackles?: AudioBuffer;
   private grain = -1;
   /** Overall volume 0..1 (the game's music volume). */
@@ -75,6 +92,11 @@ export class MusicEngine {
     this.warmth.type = 'lowpass';
     this.warmth.Q.value = 0.5;
     this.warmth.connect(this.master);
+    // Light reverb: a send from the end of the chain into a small room
+    const room = ctx.createConvolver();
+    room.buffer = roomImpulse(ctx);
+    this.reverbSend = ctx.createGain();
+    this.warmth.connect(this.reverbSend).connect(room).connect(this.master);
     this.crusher = ctx.createWaveShaper();
     this.crusher.connect(this.warmth);
     const wow = ctx.createDelay(0.05);
@@ -97,13 +119,11 @@ export class MusicEngine {
       return [c.id, bus];
     })) as Record<Channel, GainNode>;
 
-    // Noise (snare, hi-hat, hiss) and crackles (sparse clicks)
+    // Noises: white (hiss, breath), LFSR (snare: 15 bits, hi-hat: 7 bits), crackles (sparse clicks)
     const length = ctx.sampleRate * 2;
-    this.noise = ctx.createBuffer(1, length, ctx.sampleRate);
-    const noise = this.noise.getChannelData(0);
-    for (let i = 0; i < length; i++) {
-      noise[i] = Math.random() * 2 - 1;
-    }
+    this.noise = whiteNoise(ctx);
+    this.snareNoise = lfsrNoise(ctx, 15, 16000);
+    this.hatNoise = lfsrNoise(ctx, 7, 24000);
     this.crackles = ctx.createBuffer(1, length, ctx.sampleRate);
     const crackles = this.crackles.getChannelData(0);
     for (let i = 0; i < length; i++) {
@@ -219,6 +239,7 @@ export class MusicEngine {
     this.wowDepth!.gain.setTargetAtTime(WOW_DEPTH * lofi.wobble, now, 0.05);
     this.hissGain!.gain.setTargetAtTime(0.05 * lofi.hiss, now, 0.05);
     this.vinylGain!.gain.setTargetAtTime(0.5 * lofi.vinyl, now, 0.05);
+    this.reverbSend!.gain.setTargetAtTime(0.6 * lofi.reverb, now, 0.05);
     this.setGrain(lofi);
   }
 
@@ -298,21 +319,124 @@ export class MusicEngine {
 
   // --- Instruments ---
 
-  /** A note held `steps` steps: the lead, bass and pad sound all along; the bell and pluck ring longer. */
+  /** A note held `steps` steps (`step`: one step's duration, s). */
   private note(instrument: InstrumentId, midi: number, time: number, step: number, steps = 1): void {
-    const freq = midiFreq(midi);
-    const held = steps * step;
     this.target = this.buses![instrument];
-    switch (instrument) {
-      case 'lead': return this.lead(freq, time, steps > 1 ? held * 0.95 : step * 1.6);
-      case 'bell': return this.bell(freq, time, Math.max(1.6, held));
-      case 'pluck': return this.pluck(freq, time, Math.max(0.9, held));
-      case 'bass': return this.bass(freq, time, steps > 1 ? held * 0.95 : step * 1.8);
-      case 'pad': return this.pad(freq, time, Math.max(held, step * 4));
+    this.voice(INSTRUMENT_DEFS[instrument], midiFreq(midi), time, step, steps);
+  }
+
+  /** The wave of a layer: a Web Audio one, or a computed one (pulses, 4-bit wave), made once. */
+  private setWave(osc: OscillatorNode, wave: Wave): void {
+    if (wave === 'sine' || wave === 'triangle' || wave === 'sawtooth' || wave === 'square') {
+      osc.type = wave;
+      return;
+    }
+    let periodic = this.waves.get(wave);
+    if (!periodic) {
+      const ctx = this.ctx!;
+      periodic = wave === 'wave4' ? wave4Bit(ctx) : pulseWave(ctx, wave === 'pulse12' ? 0.125 : wave === 'pulse25' ? 0.25 : 0.75);
+      this.waves.set(wave, periodic);
+    }
+    osc.setPeriodicWave(periodic);
+  }
+
+  /**
+   * Plays one instrument sheet: its layers (through its filter), the envelope (attack, decay to the sustain, release
+   * at the end), FM, delayed vibrato, breath. 'held' notes last their length; 'ring' ones decay by themselves, slower
+   * when held longer.
+   */
+  private voice(def: InstrumentDef, freq: number, time: number, step: number, steps: number): void {
+    const ctx = this.ctx!;
+    const held = steps * step;
+    let end: number;
+    let decay = def.env.d;
+    if (def.kind === 'ring') {
+      const ring = Math.max(def.short, held);
+      decay *= Math.max(1, ring / def.short);
+      end = time + ring;
+    } else {
+      end = time + Math.max(steps > 1 ? held * 0.95 : step * def.short, (def.minSteps ?? 0) * step);
+    }
+    const stop = end + def.env.r * 1.6 + 0.1;
+    this.stealVoice(time);
+
+    const out = this.envelope(time, def.peak, def.env.a, decay / 3, def.env.s, end, def.env.r / 3);
+    let into: AudioNode = out;
+    if (def.filter) {
+      const filter = this.lowpass(def.filter.freq, out, def.filter.q ?? 0.7);
+      filter.type = def.filter.type;
+      if (def.filter.sweepTo) {
+        filter.frequency.setValueAtTime(def.filter.freq, time);
+        filter.frequency.setTargetAtTime(Math.max(freq * def.filter.sweepTo, def.filter.sweepMin ?? 0), time, def.filter.sweepTime ?? 0.06);
+      }
+      into = filter;
+    }
+    const sources: AudioScheduledSourceNode[] = [];
+    const oscs = def.layers.map(layer => {
+      const osc = ctx.createOscillator();
+      this.setWave(osc, layer.wave);
+      osc.frequency.value = freq * (layer.ratio ?? 1);
+      osc.detune.value = layer.detune ?? 0;
+      if (layer.gain !== undefined && layer.gain !== 1) {
+        const gain = ctx.createGain();
+        gain.gain.value = layer.gain;
+        osc.connect(gain).connect(into);
+      } else {
+        osc.connect(into);
+      }
+      osc.start(time);
+      osc.stop(stop);
+      sources.push(osc);
+      return osc;
+    });
+    if (def.fm) {
+      // A sine at `ratio` × the frequency moves the first layer's pitch, less and less
+      const depth = ctx.createGain();
+      depth.gain.setValueAtTime(freq * def.fm.index, time);
+      depth.gain.setTargetAtTime(0, time, def.fm.time);
+      depth.connect(oscs[0].frequency);
+      const modulator = this.osc('sine', freq * def.fm.ratio, time, stop, depth);
+      sources.push(modulator);
+    }
+    if (def.vibrato) {
+      // Delayed vibrato: the LFO's depth rises after `delay`
+      const depth = ctx.createGain();
+      depth.gain.setValueAtTime(0, time);
+      depth.gain.setValueAtTime(0, time + def.vibrato.delay);
+      depth.gain.linearRampToValueAtTime(def.vibrato.cents, time + def.vibrato.delay + 0.2);
+      oscs.forEach(osc => depth.connect(osc.detune));
+      sources.push(this.osc('sine', def.vibrato.rate, time, stop, depth));
+    }
+    if (def.breath) {
+      const breath = ctx.createBufferSource();
+      breath.buffer = this.noise!;
+      const band = ctx.createBiquadFilter();
+      band.type = 'bandpass';
+      band.frequency.value = def.breath.freq;
+      band.Q.value = 0.8;
+      const gain = ctx.createGain();
+      gain.gain.value = def.breath.gain;
+      breath.connect(band).connect(gain).connect(out);
+      breath.start(time, Math.random() * 1.5);
+      breath.stop(stop);
+      sources.push(breath);
+    }
+    this.voices.push({ gain: out, sources, until: stop });
+  }
+
+  /** Too many notes at `time`: the oldest one still sounding is cut short (a quick fade, no click). */
+  private stealVoice(time: number): void {
+    this.voices = this.voices.filter(v => v.until > time);
+    while (this.voices.length >= MAX_VOICES) {
+      const oldest = this.voices.shift()!;
+      oldest.gain.gain.cancelScheduledValues(time);
+      oldest.gain.gain.setTargetAtTime(0, time, 0.008);
+      oldest.sources.forEach(source => source.stop(time + 0.05));
     }
   }
 
-  /** Volume envelope: attack, then down to `sustain`, released at `end`; into the current channel's bus. */
+  /** Volume envelope: attack, then down to `sustain` (time constant `decay`), released at `end`; into the current
+   * channel's bus. */
   private envelope(time: number, peak: number, attack: number, decay: number, sustain: number, end: number, release: number): GainNode {
     const ctx = this.ctx!;
     const gain = ctx.createGain();
@@ -324,11 +448,10 @@ export class MusicEngine {
     return gain;
   }
 
-  private osc(type: OscillatorType, freq: number, time: number, stop: number, out: AudioNode, detune = 0): OscillatorNode {
+  private osc(type: OscillatorType, freq: number, time: number, stop: number, out: AudioNode): OscillatorNode {
     const osc = this.ctx!.createOscillator();
     osc.type = type;
     osc.frequency.value = freq;
-    osc.detune.value = detune;
     osc.connect(out);
     osc.start(time);
     osc.stop(stop);
@@ -344,68 +467,33 @@ export class MusicEngine {
     return filter;
   }
 
-  private lead(freq: number, time: number, length: number): void {
-    const out = this.envelope(time, 0.13, 0.005, 0.08, 0.55, time + length, 0.04);
-    this.osc('square', freq, time, time + length + 0.3, this.lowpass(3200, out));
-  }
-
-  private bell(freq: number, time: number, ring: number): void {
-    const ctx = this.ctx!;
-    // A held bell decays slower
-    const out = this.envelope(time, 0.22, 0.003, 0.5 * Math.max(1, ring / 1.6), 0, time + ring, 0.3);
-    const carrier = this.osc('sine', freq, time, time + ring + 0.9, out);
-    // FM: a sine at 3.5 × the frequency moves the carrier's pitch, less and less (metallic attack, pure tail)
-    const depth = ctx.createGain();
-    depth.gain.setValueAtTime(freq * 2.2, time);
-    depth.gain.setTargetAtTime(0, time, 0.25);
-    depth.connect(carrier.frequency);
-    this.osc('sine', freq * 3.5, time, time + ring + 0.9, depth);
-  }
-
-  private pluck(freq: number, time: number, ring: number): void {
-    const out = this.envelope(time, 0.2, 0.002, 0.18 * Math.max(1, ring / 0.9), 0, time + ring, 0.1);
-    const filter = this.lowpass(5000, out, 1.5);
-    filter.frequency.setValueAtTime(5000, time);
-    filter.frequency.setTargetAtTime(Math.max(freq * 1.5, 300), time, 0.06);
-    this.osc('sawtooth', freq, time, time + ring + 0.3, filter);
-  }
-
-  private bass(freq: number, time: number, length: number): void {
-    const out = this.envelope(time, 0.32, 0.006, 0.12, 0.6, time + length, 0.05);
-    this.osc('triangle', freq, time, time + length + 0.4, out);
-    this.osc('sine', freq / 2, time, time + length + 0.4, out);
-  }
-
-  private pad(freq: number, time: number, length: number): void {
-    const out = this.envelope(time, 0.07, 0.12, 0.4, 0.8, time + length, 0.35);
-    const filter = this.lowpass(1400, out);
-    this.osc('sawtooth', freq, time, time + length + 1.5, filter, -8);
-    this.osc('sawtooth', freq, time, time + length + 1.5, filter, 8);
-  }
-
+  /** Drums: kick (sine 150 → 40 Hz), snare (15-bit LFSR noise, band-pass, a short tone), hi-hat (7-bit LFSR, high). */
   private drum(drum: DrumId, time: number): void {
     const ctx = this.ctx!;
     this.target = this.buses!.drums;
     if (drum === 'kick') {
-      const out = this.envelope(time, 0.9, 0.002, 0.08, 0, time + 0.05, 0.06);
+      const out = this.envelope(time, 0.9, 0.002, 0.05, 0, time + 0.06, 0.05);
       const osc = this.osc('sine', 150, time, time + 0.4, out);
       osc.frequency.setValueAtTime(150, time);
-      osc.frequency.exponentialRampToValueAtTime(42, time + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
       return;
     }
     const source = ctx.createBufferSource();
-    source.buffer = this.noise!;
     const filter = ctx.createBiquadFilter();
-    filter.type = 'highpass';
     if (drum === 'snare') {
-      filter.frequency.value = 1200;
-      source.connect(filter).connect(this.envelope(time, 0.32, 0.001, 0.05, 0, time + 0.02, 0.05));
-      this.osc('triangle', 185, time, time + 0.15, this.envelope(time, 0.18, 0.001, 0.03, 0, time + 0.02, 0.03));
-      source.start(time, Math.random() * 1.5, 0.3);
+      source.buffer = this.snareNoise!;
+      filter.type = 'bandpass';
+      filter.frequency.value = 2200;
+      filter.Q.value = 0.7;
+      source.connect(filter).connect(this.envelope(time, 0.3, 0.001, 0.04, 0, time + 0.02, 0.04));
+      this.osc('triangle', 185, time, time + 0.15, this.envelope(time, 0.14, 0.001, 0.03, 0, time + 0.02, 0.03));
+      source.start(time, Math.random() * 0.5, 0.35);
     } else {
-      filter.frequency.value = 7500;
-      source.connect(filter).connect(this.envelope(time, 0.12, 0.001, 0.015, 0, time + 0.01, 0.015));
-      source.start(time, Math.random() * 1.5, 0.1);
+      source.buffer = this.hatNoise!;
+      filter.type = 'highpass';
+      filter.frequency.value = 6000;
+      source.connect(filter).connect(this.envelope(time, 0.1, 0.001, 0.014, 0, time + 0.01, 0.014));
+      source.start(time, Math.random() * 0.5, 0.12);
     }
   }
 }

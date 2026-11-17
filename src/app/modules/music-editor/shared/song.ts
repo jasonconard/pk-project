@@ -3,7 +3,9 @@
  * wrong note) by melodic instruments, and drum hits. Saved as JSON (browser), played by music-engine.ts.
  */
 
-export type InstrumentId = 'lead' | 'bell' | 'pluck' | 'bass' | 'pad';
+import { INSTRUMENT_DEFS } from './instruments';
+
+export type InstrumentId = keyof typeof INSTRUMENT_DEFS;
 export type DrumId = 'kick' | 'snare' | 'hat';
 export type ModeId = 'major' | 'minor' | 'pentaMajor' | 'pentaMinor' | 'dorian' | 'blues';
 
@@ -39,6 +41,8 @@ export interface LofiSettings {
   vinyl: number;
   /** Swing: every second sixteenth a little late (laid-back groove). */
   swing: number;
+  /** Space: a light reverb, like in a room. */
+  reverb: number;
 }
 
 export interface Song {
@@ -63,13 +67,8 @@ export const MAX_BARS = 8;
 export const MIN_BPM = 50;
 export const MAX_BPM = 180;
 
-export const INSTRUMENTS: { id: InstrumentId, label: string, color: string }[] = [
-  { id: 'lead', label: 'Mélodie', color: '#ff6b6b' },
-  { id: 'bell', label: 'Cloche', color: '#ffd34d' },
-  { id: 'pluck', label: 'Corde', color: '#6bcb77' },
-  { id: 'bass', label: 'Basse', color: '#4d96ff' },
-  { id: 'pad', label: 'Nappe', color: '#c77dff' },
-];
+export const INSTRUMENTS: { id: InstrumentId, label: string, color: string }[] =
+  (Object.keys(INSTRUMENT_DEFS) as InstrumentId[]).map(id => ({ id, label: INSTRUMENT_DEFS[id].label, color: INSTRUMENT_DEFS[id].color }));
 
 export const DRUMS: { id: DrumId, label: string }[] = [
   { id: 'kick', label: 'Grosse caisse' },
@@ -91,7 +90,8 @@ export const CHANNELS: { id: Channel, label: string, color: string }[] = [
   { id: 'drums', label: 'Batterie', color: '#e8e8ee' },
 ];
 
-export const CLEAN: LofiSettings = { warmth: 0, grain: 0, wobble: 0, hiss: 0, vinyl: 0, swing: 0 };
+/** No lo-fi effect; a light reverb by default. */
+export const CLEAN: LofiSettings = { warmth: 0, grain: 0, wobble: 0, hiss: 0, vinyl: 0, swing: 0, reverb: 0.2 };
 
 export const LOFI_SETTINGS: { id: keyof LofiSettings, label: string, hint: string }[] = [
   { id: 'warmth', label: 'Chaleur', hint: 'Son étouffé, comme une vieille radio' },
@@ -100,14 +100,15 @@ export const LOFI_SETTINGS: { id: keyof LofiSettings, label: string, hint: strin
   { id: 'hiss', label: 'Souffle', hint: 'Un léger bruit de fond' },
   { id: 'vinyl', label: 'Vinyle', hint: 'Des craquements de disque' },
   { id: 'swing', label: 'Swing', hint: 'Le rythme se balance, plus nonchalant' },
+  { id: 'reverb', label: 'Espace', hint: 'Un peu d\'écho, comme dans une pièce' },
 ];
 
 export const LOFI_PRESETS: { id: string, label: string, settings: LofiSettings }[] = [
   { id: 'clean', label: 'Propre', settings: CLEAN },
-  { id: 'soft', label: 'Lo-fi doux', settings: { warmth: 0.45, grain: 0.1, wobble: 0.25, hiss: 0.15, vinyl: 0.2, swing: 0.3 } },
-  { id: 'tape', label: 'Cassette', settings: { warmth: 0.6, grain: 0.25, wobble: 0.6, hiss: 0.35, vinyl: 0, swing: 0.2 } },
-  { id: 'vinyl', label: 'Vieux vinyle', settings: { warmth: 0.7, grain: 0.2, wobble: 0.2, hiss: 0.2, vinyl: 0.65, swing: 0.35 } },
-  { id: 'chip', label: 'Console 8 bits', settings: { warmth: 0.1, grain: 0.7, wobble: 0, hiss: 0, vinyl: 0, swing: 0 } },
+  { id: 'soft', label: 'Lo-fi doux', settings: { warmth: 0.45, grain: 0.1, wobble: 0.25, hiss: 0.15, vinyl: 0.2, swing: 0.3, reverb: 0.3 } },
+  { id: 'tape', label: 'Cassette', settings: { warmth: 0.6, grain: 0.25, wobble: 0.6, hiss: 0.35, vinyl: 0, swing: 0.2, reverb: 0.15 } },
+  { id: 'vinyl', label: 'Vieux vinyle', settings: { warmth: 0.7, grain: 0.2, wobble: 0.2, hiss: 0.2, vinyl: 0.65, swing: 0.35, reverb: 0.25 } },
+  { id: 'chip', label: 'Console 8 bits', settings: { warmth: 0.1, grain: 0.7, wobble: 0, hiss: 0, vinyl: 0, swing: 0, reverb: 0.1 } },
 ];
 
 /** Ready-made drum patterns (steps of one bar), copied on every bar. */
@@ -133,8 +134,9 @@ export function noteLength(note: SongNote): number {
   return note.length ?? 1;
 }
 
+/** The song's lo-fi settings (the ones added since its last save at their default). */
 export function lofiOf(song: Song): LofiSettings {
-  return song.lofi ?? CLEAN;
+  return { ...CLEAN, ...song.lofi };
 }
 
 /** When a song plays in the game: by day, by night, under the rain, in a fight (the dungeons will come later). */
