@@ -60,6 +60,8 @@ export interface Song {
   mix?: Partial<Record<Channel, number>>;
   /** Lo-fi sound (clean when not set). */
   lofi?: LofiSettings;
+  /** The stamps of the song's bar (6 to 8 instruments chosen in the library); DEFAULT_STAMPS when not set. */
+  stamps?: InstrumentId[];
 }
 
 export const STEPS_PER_BAR = 16;
@@ -84,6 +86,21 @@ export const MODES: { id: ModeId, label: string, hint: string, intervals: number
   { id: 'dorian', label: 'Dorien', hint: 'Mystérieux, donjon', intervals: [0, 2, 3, 5, 7, 9, 10] },
   { id: 'blues', label: 'Blues', hint: 'Cool, nonchalant', intervals: [0, 3, 5, 6, 7, 10] },
 ];
+
+/** Stamps of a song that hasn't chosen them (the original five). */
+export const DEFAULT_STAMPS: InstrumentId[] = ['lead', 'bell', 'pluck', 'bass', 'pad'];
+export const MAX_STAMPS = 8;
+
+/** The song's stamps, and the instruments its notes use that aren't among them (so that they can be reached). */
+export function stampsOf(song: Song): InstrumentId[] {
+  const stamps = [...(song.stamps ?? DEFAULT_STAMPS)];
+  for (const note of song.notes) {
+    if (!stamps.includes(note.instrument)) {
+      stamps.push(note.instrument);
+    }
+  }
+  return stamps;
+}
 
 export const CHANNELS: { id: Channel, label: string, color: string }[] = [
   ...INSTRUMENTS,

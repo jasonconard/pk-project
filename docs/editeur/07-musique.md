@@ -12,15 +12,32 @@ Composer les musiques du jeu dans l'esprit de **Mario Paint** : on choisit un in
 
 ## Les instruments
 
-Tous sont fabriqués en direct par le navigateur (aucun fichier son), décrits comme des fiches dans `instruments.ts` (couches d'oscillateurs, enveloppe ADSR, filtre, FM, vibrato retardé, souffle, numéro General MIDI) :
+Chaque morceau a sa **barre de tampons** (jusqu'à 8 instruments). **Appui long** sur un tampon, ou **toucher le tampon déjà choisi**, ouvre la **bibliothèque** pour le changer ; **+ Ajouter** en ajoute un. Dans la bibliothèque, **▶** fait entendre l'instrument (un petit arpège de la gamme du morceau puis une note tenue). En changeant un tampon, **Changer aussi ses notes déjà posées** (coché par défaut) passe ses notes au nouvel instrument. **Retirer ce tampon** l'enlève de la barre (ses notes restent et jouent ; il revient tant qu'elles existent). Le **Mixage** ne montre que les instruments du morceau.
 
-| Tampon | Son |
-|---|---|
-| Mélodie (rouge) | onde carrée, façon Game Boy |
-| Cloche (jaune) | deux sinusoïdes qui se modulent (son métallique qui s'adoucit) |
-| Corde (vert) | dents de scie avec un filtre qui se ferme (corde pincée) |
-| Basse (bleu) | triangle et une sinusoïde une octave en dessous |
-| Nappe (violet) | deux dents de scie légèrement désaccordées, filtre doux, attaque lente |
+Tous les sons sont fabriqués en direct par le navigateur (aucun fichier son), décrits comme des fiches dans `instruments.ts` (couches d'oscillateurs, enveloppe ADSR, filtre, FM, vibrato retardé, souffle, numéro General MIDI pour un futur import / export MIDI). Dans l'esprit GBA :
+
+| Famille | Instrument | Synthèse | Enveloppe (A / D / S / R) |
+|---|---|---|---|
+| Mélodie | Carré 50 % *(d'origine)* | carré, passe-bas 3,2 kHz | 5 ms / 240 ms / 0,55 / 120 ms |
+| | Carré 25 %, 12,5 %, 75 % | carré à cycle variable (série de Fourier) | 5 ms / 80 ms / 0,6 / 80 ms |
+| | Flûte douce | triangle + un peu d'harmonique 2, souffle filtré, vibrato retardé 0,2 s à 5 Hz | 90 ms / 100 ms / 0,7 / 150 ms |
+| | Ocarina | sinus pur, vibrato retardé 0,25 s à 5,5 Hz | 40 ms / 100 ms / 0,8 / 120 ms |
+| Harmonie | Cloche *(d'origine)* | FM 1:3,5 | 3 ms / 1,5 s / 0 / 0,9 s |
+| | Corde *(d'origine)* | dents de scie, filtre qui se ferme | 2 ms / 540 ms / 0 / 300 ms |
+| | Harpe | triangle, passe-bas 3 kHz | 2 ms / 450 ms / 0 / 100 ms |
+| | Célesta | sinus + harmonique 2 faible, FM 1:1 légère | 2 ms / 600 ms / 0,1 / 200 ms |
+| | Guitare nylon | dents de scie + triangle, passe-bas 2 kHz qui se ferme | 2 ms / 400 ms / 0,05 / 120 ms |
+| Nappes | Nappe synthé *(d'origine)* | 2 dents de scie ±8 cents, passe-bas 1,4 kHz | 120 ms / 1,2 s / 0,8 / 1 s |
+| | Cordes | 2 dents de scie ±7 cents, passe-bas 2,5 kHz | 320 ms / 300 ms / 0,8 / 400 ms |
+| | Pad doux | 2 triangles, passe-bas 1,5 kHz | 500 ms / 300 ms / 0,9 / 600 ms |
+| Basses | Basse *(d'origine)* | triangle + sinus une octave en dessous | 6 ms / 360 ms / 0,6 / 150 ms |
+| | Basse onde | onde 32 échantillons, 4 bits (canal « wave » GBA) | 5 ms / 100 ms / 0,9 / 60 ms |
+| | Basse pincée | triangle, passe-bas 800 Hz | 2 ms / 200 ms / 0,3 / 80 ms |
+| Batterie | Grosse caisse | sinus 150 → 40 Hz en 0,1 s | ~150 ms |
+| | Caisse claire | bruit LFSR 15 bits, passe-bande, petit ton | ~120 ms |
+| | Charley | bruit LFSR 7 bits (métallique), passe-haut | ~40 ms |
+
+Au plus 16 notes à la fois (la batterie à part) : au-delà, la plus ancienne s'éteint en douceur. Les valeurs sont des points de départ, à affiner à l'oreille.
 
 ## Jouer, la gamme, le morceau
 

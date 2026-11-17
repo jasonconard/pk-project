@@ -440,6 +440,16 @@ button {
   flex-shrink: 0;
   display: flex;
   gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stamp {
+    flex: 1 0 52px;
+  }
 
   .stamp {
     flex: 1;
@@ -474,9 +484,20 @@ button {
     font-size: 16px;
   }
 
-  .eraser .dot {
+  .eraser .dot, .add .dot {
     background: var(--surface);
     color: #eceef4;
+  }
+
+  .add .dot {
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  .stamp-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -625,8 +646,11 @@ button {
   .stamps {
     flex-direction: column;
     width: 58px;
+    overflow-x: hidden;
+    overflow-y: auto;
 
     .stamp {
+      flex: 1 0 46px;
       height: auto;
       font-size: 8px;
       gap: 2px;

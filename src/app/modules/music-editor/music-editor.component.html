@@ -99,10 +99,17 @@
   </div>
 
   <div class="stamps" role="radiogroup" aria-label="Tampons">
-    @for (inst of instruments; track inst.id) {
+    @for (inst of stamps(); track inst.id; let i = $index) {
       <button type="button" role="radio" class="stamp" [class.on]="stamp() === inst.id" [attr.aria-checked]="stamp() === inst.id"
-              [style.--color]="inst.color" (click)="stamp.set(inst.id)">
-        <span class="dot"><svg [lucideIcon]="icons[inst.id]"></svg></span>{{ inst.label }}
+              [style.--color]="inst.color" [title]="inst.label + ' — appui long (ou retoucher) : changer d\'instrument'"
+              (pointerdown)="pressStamp(i)" (pointerup)="releaseStamp()" (pointerleave)="releaseStamp()" (pointercancel)="releaseStamp()"
+              (contextmenu)="$event.preventDefault(); openLibrary(i)" (click)="tapStamp(i, inst.id)">
+        <span class="dot"><svg [lucideIcon]="icons[inst.id]"></svg></span><span class="stamp-label">{{ inst.label }}</span>
+      </button>
+    }
+    @if (stamps().length < maxStamps) {
+      <button type="button" class="stamp add" title="Ajouter un instrument" aria-label="Ajouter un instrument" (click)="openLibrary(null)">
+        <span class="dot"><svg lucidePlus></svg></span><span class="stamp-label">Ajouter</span>
       </button>
     }
     <button type="button" role="radio" class="stamp eraser" [class.on]="stamp() === 'eraser'" [attr.aria-checked]="stamp() === 'eraser'"
@@ -126,7 +133,7 @@
 
 @if (sheet(); as open) {
   <div class="sheet-backdrop" (click)="sheet.set(null)"></div>
-  @let sheetTitle = open === 'scale' ? 'Gamme' : open === 'mix' ? 'Mixage' : open === 'lofi' ? 'Son lo-fi' : open === 'game' ? 'Dans le jeu' : 'Morceau';
+  @let sheetTitle = open === 'scale' ? 'Gamme' : open === 'mix' ? 'Mixage' : open === 'lofi' ? 'Son lo-fi' : open === 'game' ? 'Dans le jeu' : open === 'library' ? (libraryFor() === null ? 'Ajouter un instrument' : 'Changer d\'instrument') : 'Morceau';
   <section class="sheet" role="dialog" [attr.aria-label]="sheetTitle" animate.enter="sheet-in" animate.leave="sheet-out">
     <span class="grip" aria-hidden="true"></span>
     <div class="sheet-head">
@@ -156,11 +163,34 @@
       <button type="button" class="outline-btn" (click)="playScale()"><svg lucidePlay></svg> Écouter la gamme</button>
     } @else if (open === 'mix') {
       <p class="sheet-hint">Le volume de chaque instrument ; à 0, il se tait. Ça s'entend pendant la lecture.</p>
-      @for (channel of channels; track channel.id) {
+      @for (channel of mixChannels(); track channel.id) {
         <label class="slider" [style.--color]="channel.color">
           <span class="slider-head"><i class="swatch"></i>{{ channel.label }}<b>{{ volume(channel.id) * 100 | number:'1.0-0' }} %</b></span>
           <input type="range" min="0" max="1.5" step="0.05" [value]="volume(channel.id)" (input)="setVolume(channel.id, +$any($event.target).value)" />
         </label>
+      }
+    } @else if (open === 'library') {
+      @if (libraryFor() !== null && libraryNotes() > 0) {
+        <label class="check-row">
+          <input type="checkbox" [checked]="swapNotes()" (change)="swapNotes.set($any($event.target).checked)" />
+          <span>Changer aussi ses {{ libraryNotes() }} note{{ libraryNotes() > 1 ? 's' : '' }} déjà posée{{ libraryNotes() > 1 ? 's' : '' }}</span>
+        </label>
+      }
+      @for (family of library; track family.id) {
+        <h3>{{ family.label }}</h3>
+        <div class="instrument-list">
+          @for (inst of family.instruments; track inst.id) {
+            <div class="instrument" [class.on]="libraryFor() !== null && stamps()[libraryFor()!]?.id === inst.id" [style.--color]="inst.color">
+              <button type="button" class="pick" (click)="chooseInstrument(inst.id)">
+                <span class="dot"><svg [lucideIcon]="icons[inst.id]"></svg></span>{{ inst.label }}
+              </button>
+              <button type="button" class="listen" [attr.aria-label]="'Écouter ' + inst.label" (click)="previewInstrument(inst.id)"><svg lucidePlay></svg></button>
+            </div>
+          }
+        </div>
+      }
+      @if (libraryFor() !== null && stamps().length > 1) {
+        <button type="button" class="outline-btn danger" (click)="removeStamp()"><svg lucideTrash></svg> Retirer ce tampon de la barre</button>
       }
     } @else if (open === 'game') {
       <p class="sheet-hint">Le morceau qui joue sur la carte selon le moment, avec un fondu entre eux. Sans morceau, le plus proche joue (la nuit prend celui du jour…). Le volume se règle dans le jeu (Son → Musique).</p>

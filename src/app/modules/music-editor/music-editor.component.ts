@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, HostListener, inject, signal } from '@angular/core';
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
-  LucideAudioWaveform, LucideBell, LucideChevronDown, LucideClipboardPaste, LucideCopy, LucideGamepad2, LucideChevronLeft, LucideDisc3, LucideDownload, LucideDynamicIcon,
+  LucideActivity, LucideAudioLines, LucideAudioWaveform, LucideBell, LucideBird, LucideChevronDown, LucideCloud, LucideFeather,
+  LucideOrbit, LucideSignal, LucideSparkle, LucideStar, LucideWind, LucideZap, LucideClipboardPaste, LucideCopy, LucideGamepad2, LucideChevronLeft, LucideDisc3, LucideDownload, LucideDynamicIcon,
   LucideEighthNote, LucideEraser, LucideFileMusic, LucideGuitar, LucideIcon, LucideKeyboardMusic, LucideMinus, LucidePlay,
   LucidePlus, LucideRedo2, LucideSlidersHorizontal, LucideSquare, LucideTrash, LucideUndo2, LucideWavesHorizontal, LucideX,
 } from '@lucide/angular';
@@ -9,21 +10,26 @@ import { onAppVisibility } from '../../core/shared/app-visibility';
 import { MusicEngine } from './shared/music-engine';
 import {
   Channel, CHANNELS, degreeCount, degreeMidi, DRUM_PATTERNS, DRUMS, DrumHit, DrumId, INSTRUMENTS, InstrumentId, LOFI_PRESETS,
-  LOFI_SETTINGS, lofiOf, LofiSettings, MAX_BARS, MAX_BPM, midiName, MIN_BPM, ModeId, MODES, modeOf, MUSIC_SLOTS, MusicSlot,
+  LOFI_SETTINGS, lofiOf, LofiSettings, MAX_BARS, MAX_STAMPS, stampsOf, MAX_BPM, midiName, MIN_BPM, ModeId, MODES, modeOf, MUSIC_SLOTS, MusicSlot,
   MusicUse, newSong, NOTE_NAMES,
   noteLength, scaleLabel, Song, SongNote, songLength, STEPS_PER_BAR, volumeOf,
 } from './shared/song';
 import { loadSongs, saveSongs } from './shared/song-storage';
+import { FAMILIES, INSTRUMENT_DEFS } from './shared/instruments';
 import { downloadFile } from '../game/shared/util/ts-source';
 
 type Stamp = InstrumentId | 'eraser';
-type Sheet = 'scale' | 'song' | 'mix' | 'lofi' | 'game';
+type Sheet = 'scale' | 'song' | 'mix' | 'lofi' | 'game' | 'library';
+/** Holding a stamp this long (ms) opens the library. */
+const LONG_PRESS = 450;
 /** Moves of one slider closer than this (ms) are one change in the history. */
 const MERGE_TIME = 800;
 
 const ICONS: Record<Stamp, LucideIcon> = {
-  lead: LucideEighthNote, bell: LucideBell, pluck: LucideGuitar, bass: LucideAudioWaveform, pad: LucideWavesHorizontal,
-  eraser: LucideEraser,
+  lead: LucideEighthNote, pulse25: LucideActivity, pulse12: LucideSignal, pulse75: LucideGamepad2, flute: LucideWind,
+  ocarina: LucideBird, bell: LucideBell, pluck: LucideGuitar, harp: LucideSparkle, celesta: LucideStar,
+  nylon: LucideFeather, strings: LucideOrbit, softpad: LucideCloud, pad: LucideWavesHorizontal,
+  bass: LucideAudioWaveform, wavebass: LucideAudioLines, pickbass: LucideZap, eraser: LucideEraser,
 };
 const HISTORY = 100;
 /** Bars shown at once: phones in portrait 1, landscape / computer 2, wide screens 4. */
@@ -58,6 +64,12 @@ export class MusicEditorComponent {
   protected readonly lofiPresets = LOFI_PRESETS;
   protected readonly drumPatterns = DRUM_PATTERNS;
   protected readonly musicSlots = MUSIC_SLOTS;
+  protected readonly maxStamps = MAX_STAMPS;
+  /** The library: the instruments by family. */
+  protected readonly library = FAMILIES.map(family => ({
+    ...family,
+    instruments: INSTRUMENTS.filter(i => INSTRUMENT_DEFS[i.id].family === family.id),
+  }));
 
   private readonly engine = new MusicEngine();
   private readonly stored = loadSongs();
@@ -79,6 +91,11 @@ export class MusicEditorComponent {
   /** Bar the bar tools act on (copy, paste, clear), and the copied bar. */
   protected readonly toolBar = signal(0);
   protected readonly copied = signal<{ notes: SongNote[], drums: DrumHit[], from: number } | null>(null);
+  /** Library: the stamp being changed (its index in the bar), or null to add one; swap its notes too. */
+  protected readonly libraryFor = signal<number | null>(null);
+  protected readonly swapNotes = signal(true);
+  private pressTimer?: ReturnType<typeof setTimeout>;
+  private longPressed = false;
 
   private readonly past: Song[] = [];
   private readonly future: Song[] = [];
@@ -126,6 +143,19 @@ export class MusicEditorComponent {
   private dragFrom: { pointerId: number, x: number, tapStep: number, moved: boolean } | null = null;
   protected readonly drumAt = computed(() => new Set(this.song().drums.map(d => `${d.step}:${d.drum}`)));
   protected readonly lofi = computed(() => lofiOf(this.song()));
+  /** The song's stamps (its bar of instruments). */
+  protected readonly stamps = computed(() => stampsOf(this.song()).map(id => INSTRUMENTS.find(i => i.id === id)!));
+  /** Mix: the instruments the song uses (stamps, notes) and the drums. */
+  protected readonly mixChannels = computed(() => {
+    const used = new Set<string>(stampsOf(this.song()));
+    return CHANNELS.filter(c => c.id === 'drums' || used.has(c.id));
+  });
+  /** Notes of the instrument of the stamp being changed (to swap with it). */
+  protected readonly libraryNotes = computed(() => {
+    const index = this.libraryFor();
+    const id = index === null ? null : stampsOf(this.song())[index];
+    return id ? this.song().notes.filter(n => n.instrument === id).length : 0;
+  });
   /** The preset matching the lo-fi settings (if any). */
   protected readonly activePreset = computed(() => {
     const lofi = this.lofi();
@@ -144,6 +174,14 @@ export class MusicEditorComponent {
     layout();
     landscape.addEventListener('change', layout);
     wide.addEventListener('change', layout);
+    // The stamp picked must be in the bar (another song, a stamp removed): else the first one
+    effect(() => {
+      const stamps = stampsOf(this.song());
+      const stamp = this.stamp();
+      if (stamp !== 'eraser' && !stamps.includes(stamp) && stamps.length) {
+        this.stamp.set(stamps[0]);
+      }
+    });
     // In the background: silence (the playback stops)
     const stopVisibility = onAppVisibility(hidden => {
       if (hidden) {
@@ -406,6 +444,101 @@ export class MusicEditorComponent {
 
   protected applyPreset(settings: LofiSettings): void {
     this.edit(song => song.lofi = { ...settings });
+  }
+
+  // --- Stamps, library ---
+
+  /** Press on a stamp: held long, it opens the library for it. */
+  protected pressStamp(index: number): void {
+    this.longPressed = false;
+    clearTimeout(this.pressTimer);
+    this.pressTimer = setTimeout(() => {
+      this.longPressed = true;
+      this.openLibrary(index);
+    }, LONG_PRESS);
+  }
+
+  protected releaseStamp(): void {
+    clearTimeout(this.pressTimer);
+  }
+
+  /** Tap on a stamp: picks it; on the stamp already picked, opens the library for it. */
+  protected tapStamp(index: number, id: InstrumentId): void {
+    if (this.longPressed) {
+      this.longPressed = false;
+      return;
+    }
+    if (this.stamp() === id) {
+      this.openLibrary(index);
+    } else {
+      this.stamp.set(id);
+    }
+  }
+
+  /** The library, to change the stamp `index` (null: add one). */
+  protected openLibrary(index: number | null): void {
+    this.libraryFor.set(index);
+    this.swapNotes.set(true);
+    this.sheet.set('library');
+  }
+
+  /** Library: the chosen instrument becomes the stamp (or a new one); its notes follow if asked. */
+  protected chooseInstrument(id: InstrumentId): void {
+    const index = this.libraryFor();
+    const swap = this.swapNotes();
+    this.edit(song => {
+      const stamps = stampsOf(song);
+      if (index === null) {
+        if (!stamps.includes(id)) {
+          stamps.push(id);
+        }
+      } else {
+        const old = stamps[index];
+        const existing = stamps.indexOf(id);
+        if (existing >= 0 && existing !== index) {
+          stamps.splice(index, 1); // already in the bar: just drop the old one
+        } else {
+          stamps[index] = id;
+        }
+        if (swap && old !== id) {
+          song.notes = song.notes.map(n => n.instrument === old ? { ...n, instrument: id } : n);
+        }
+      }
+      song.stamps = stamps.slice(0, MAX_STAMPS);
+    });
+    this.stamp.set(id);
+    this.sheet.set(null);
+  }
+
+  /** Library: the stamp leaves the bar (its notes stay and play; it comes back while they exist). */
+  protected removeStamp(): void {
+    const index = this.libraryFor();
+    if (index === null) {
+      return;
+    }
+    this.edit(song => {
+      const stamps = stampsOf(song);
+      stamps.splice(index, 1);
+      song.stamps = stamps;
+    });
+    const first = stampsOf(this.song())[0];
+    if (first) {
+      this.stamp.set(first);
+    }
+    this.sheet.set(null);
+  }
+
+  /** Listen to an instrument: a little arpeggio of the song's scale, then a held note. */
+  protected previewInstrument(id: InstrumentId): void {
+    const song = this.song();
+    const count = modeOf(song).intervals.length;
+    const step = 60 / song.bpm / 4;
+    [0, 2, 4, count].forEach((degree, i) => this.engine.previewNote(song, id, degree + count, i * step * 2));
+    this.engine.previewNote(song, id, count, 8 * step, 6);
+  }
+
+  protected def(id: InstrumentId) {
+    return INSTRUMENT_DEFS[id];
   }
 
   // --- Drums, bars ---

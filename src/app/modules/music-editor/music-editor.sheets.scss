@@ -339,3 +339,66 @@
 .sheet-hint code {
   font-size: 11px;
 }
+
+// Library: the instruments by family, a play button each
+.instrument-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.instrument {
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  background: var(--surface);
+
+  &.on {
+    box-shadow: inset 0 0 0 2px var(--color);
+  }
+
+  .pick {
+    flex: 1;
+    min-width: 0;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  .dot {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color);
+    color: #1d1e24;
+    font-size: 15px;
+  }
+
+  .listen {
+    width: 40px;
+    height: 48px;
+    color: var(--muted);
+    font-size: 16px;
+  }
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+
+  input {
+    width: 20px;
+    height: 20px;
+    accent-color: #5a8ec5;
+  }
+}

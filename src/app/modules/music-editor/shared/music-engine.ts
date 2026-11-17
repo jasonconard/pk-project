@@ -205,10 +205,10 @@ export class MusicEngine {
   }
 
   /** One note, now (touching the grid, trying a scale), with the song's mix and lo-fi sound. */
-  previewNote(song: Song, instrument: InstrumentId, degree: number, at = 0): void {
+  previewNote(song: Song, instrument: InstrumentId, degree: number, at = 0, steps = 1): void {
     const ctx = this.audio();
     this.applySettings(song);
-    this.note(instrument, degreeMidi(song, degree), ctx.currentTime + 0.01 + at, this.stepDuration(song));
+    this.note(instrument, degreeMidi(song, degree), ctx.currentTime + 0.01 + at, this.stepDuration(song), steps);
   }
 
   previewDrum(song: Song, drum: DrumId): void {
