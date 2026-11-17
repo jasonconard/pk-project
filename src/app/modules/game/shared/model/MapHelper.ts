@@ -180,6 +180,41 @@ export class MapHelper {
 
   }
 
+  /** Another map takes the place of the current one: its chunks are built, the old ones taken down. */
+  public setMap(map: SceneMap) {
+    this.sceneMap.chunks.forEach(chunk => this.unbuildChunk(chunk));
+    this.sceneMap = map;
+    this.buildChunks();
+    this.updateVisibleChunks();
+  }
+
+  /** Takes a chunk out of the scene and frees what was made for it (its data stays). */
+  private unbuildChunk(chunk: SceneChunk) {
+    this.instances.get(chunk.id)?.forEach(set => set.dispose());
+    this.instances.delete(chunk.id);
+    const painted = this.paintedGrounds.get(chunk.id);
+    if (painted) {
+      const material = chunk.grounds[0]?.mesh?.material;
+      (Array.isArray(material) ? material[0] : material)?.dispose();
+      painted.texture.dispose();
+      this.paintedGrounds.delete(chunk.id);
+    }
+    this.flatGrounds.get(chunk.id)?.geometry.dispose();
+    this.flatGrounds.delete(chunk.id);
+    // (materials are shared between chunks: only the geometries are the chunk's own)
+    chunk.group?.traverse(object => {
+      if ((object as THREE.Mesh).isMesh && !(object as THREE.InstancedMesh).isInstancedMesh) {
+        (object as THREE.Mesh).geometry.dispose();
+      }
+    });
+    chunk.group?.removeFromParent();
+    chunk.group = undefined;
+    chunk.grounds.forEach(ground => ground.mesh = undefined);
+    Object.keys(this.meshes)
+      .filter(key => key.startsWith(chunk.id + '-'))
+      .forEach(key => delete this.meshes[key]);
+  }
+
   private readonly paintedGrounds = new Map<string, PaintedGround>();
   /** Water animation: current frame of the animated water tiles. */
   private waterFrame = 0;

@@ -37,5 +37,8 @@ export interface InstructionMessageChoice {
 }
 
 export interface InstructionTeleport {
-  pos: Vec3
+  /** Arrival point; the map's arrival point (spawn) when missing. */
+  pos?: Vec3,
+  /** Map to go to (id); the current map when missing. */
+  map?: string
 }

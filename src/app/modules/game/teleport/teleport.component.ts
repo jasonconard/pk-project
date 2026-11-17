@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InstructionTeleport } from '../shared/model/SceneEventInstruction';
 import { SequenceService } from '../shared/services/sequence.service';
 import { MapHelper } from '../shared/model/MapHelper';
+import { GameMapService } from '../shared/services/game-map.service';
 
 @Component({
   selector: 'core-teleport',
@@ -11,6 +12,7 @@ import { MapHelper } from '../shared/model/MapHelper';
 })
 export class TeleportComponent {
   private readonly sequenceService = inject(SequenceService);
+  private readonly gameMapService = inject(GameMapService);
 
   readonly mapHelper = input.required<MapHelper>();
   protected readonly teleport = signal<InstructionTeleport | null>(null);
@@ -25,20 +27,7 @@ export class TeleportComponent {
     const mapHelper = this.mapHelper();
     this.teleport.set(teleport);
     setTimeout(() => {
-      const sprite = mapHelper.scenePlayer.mesh;
-      if (sprite) {
-        const diff = {
-          x: teleport.pos.x - sprite.position.x,
-          z: teleport.pos.z - sprite.position.z,
-        };
-        const camera = mapHelper.originGame.camera;
-        camera.position.x += diff.x;
-        camera.position.z += diff.z;
-        mapHelper.updateCameraAim();
-        sprite.position.x += diff.x;
-        sprite.position.z += diff.z;
-        mapHelper.originGame.render();
-      }
+      this.gameMapService.travel(mapHelper.originGame, teleport);
       this.teleport.set(null);
       setTimeout(() => this.sequenceService.nextSequence(), 200);
     }, 300);

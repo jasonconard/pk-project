@@ -10,10 +10,11 @@ import { EventService } from "./event.service";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import * as THREE from 'three';
 import { SequenceService } from "./sequence.service";
-import { WORLD_MAP } from "../../../../../assets/map/world/world";
+import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { SceneChunk } from "../model/SceneMap";
 import { MapEditorService } from "./map-editor.service";
-import { loadMapEdits } from "./map-storage";
+import { loadMap } from "./map-storage";
+import { InstructionTeleport } from "../model/SceneEventInstruction";
 import { DustPuff } from "../model/DustPuff";
 
 
@@ -59,11 +60,10 @@ export class GameMapService {
     if(game.mapHelper) {
       Object.values(game.mapHelper.meshes).forEach(mesh => mesh.visible = true);
     } else {
-      // The map edited in the editor (saved in the browser) replaces the one of the code
-      loadMapEdits(WORLD_MAP);
+      // (the map edited in the editor, saved in the browser, replaces the one of the code)
       const mapHelper = new MapHelper({
         originGame: game,
-        sceneMap: WORLD_MAP,
+        sceneMap: loadMap(DEFAULT_MAP_ID)!,
         scenePlayer: SCENE_PLAYER
       });
       game.mapHelper = mapHelper;
@@ -79,6 +79,42 @@ export class GameMapService {
       mapHelper.buildChunks();
       mapHelper.buildPlayer();
     }
+  }
+
+  /**
+   * Teleport, possibly to another map (built in place of the current one, at the point given, else at its arrival
+   * point). An unknown map: the player stays where they are.
+   */
+  travel(game: Game, teleport: InstructionTeleport) {
+    const mapHelper = game.mapHelper;
+    const sprite = mapHelper?.scenePlayer.mesh;
+    if (!mapHelper || !sprite) {
+      return;
+    }
+    let pos: Vec3 | undefined = teleport.pos;
+    if (teleport.map && teleport.map !== mapHelper.sceneMap.id) {
+      const map = loadMap(teleport.map);
+      if (!map) {
+        console.warn('Teleport: unknown map', teleport.map);
+        return;
+      }
+      this.mapEditorService.leaveMap(game);
+      mapHelper.setMap(map);
+      game.warmUp(); // (during the fade: no stutter on the first steps)
+      pos ??= map.spawn ?? { x: 0, y: 0, z: 0 };
+      this.hopTime = -1;
+      this.hopOffset = 0;
+      this.hopCameraOffset = 0;
+    }
+    if (pos) {
+      const camera = game.camera;
+      camera.position.x += pos.x - sprite.position.x;
+      camera.position.z += pos.z - sprite.position.z;
+      sprite.position.x = pos.x;
+      sprite.position.z = pos.z;
+      mapHelper.updateCameraAim();
+    }
+    game.render();
   }
 
   /**

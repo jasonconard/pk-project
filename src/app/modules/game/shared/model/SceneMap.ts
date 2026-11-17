@@ -6,7 +6,15 @@ export enum ObjSide {
   FRONT, BACK, BOTH
 }
 
+/** What a map is used for: the world (the default map, big), a town, an interior, a dungeon floor. */
+export type MapKind = 'world' | 'town' | 'interior' | 'dungeon';
+
 export interface SceneMap {
+  id: string,
+  name: string,
+  kind: MapKind,
+  /** Where the player arrives when nothing else is said (a passage without a point, a new game). */
+  spawn?: Vec3,
   chunks: SceneChunk[]
 }
 

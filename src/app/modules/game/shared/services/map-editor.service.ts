@@ -11,7 +11,7 @@ import { SceneBuilding } from '../model/SceneBuilding';
 import { SceneChunk, StairsSide, stairsSide } from '../model/SceneMap';
 import { TILE_SIZE } from '../model/Terrain';
 import { LEVEL_HEIGHT } from '../model/GroundMesh';
-import { clearMapEdits, downloadChunksFile, saveMapEdits } from './map-storage';
+import { downloadMapFile, resetMap, saveMap } from './map-storage';
 
 /** Camera zoom range in the editor (1 = normal game view, lower = closer). */
 const ZOOM_MIN = 0.4;
@@ -122,6 +122,7 @@ export class MapEditorService {
   private readonly undoStack: EditAction[] = [];
   private readonly redoStack: EditAction[] = [];
   private saveTimer?: ReturnType<typeof setTimeout>;
+  private savePending = false;
   /** Ground painting: the stroke being painted, and the square showing the cell under the mouse. */
   private stroke: Stroke | null = null;
   private readonly brush = new THREE.LineLoop(
@@ -384,13 +385,15 @@ export class MapEditorService {
         break;
       case 'export':
         if (game.mapHelper) {
-          downloadChunksFile(game.mapHelper.sceneMap);
+          downloadMapFile(game.mapHelper.sceneMap);
         }
         break;
       case 'reset':
         // Back to the map of the code: forget the browser copy and start again from it
         clearTimeout(this.saveTimer);
-        clearMapEdits();
+        if (game.mapHelper) {
+          resetMap(game.mapHelper.sceneMap.id);
+        }
         location.reload();
         break;
     }
@@ -681,11 +684,30 @@ export class MapEditorService {
       return; // nothing edited yet (just opened the editor)
     }
     clearTimeout(this.saveTimer);
-    this.saveTimer = setTimeout(() => {
-      if (game.mapHelper) {
-        saveMapEdits(game.mapHelper.sceneMap);
-      }
-    }, SAVE_DELAY);
+    this.savePending = true;
+    this.saveTimer = setTimeout(() => this.saveNow(game), SAVE_DELAY);
+  }
+
+  private saveNow(game: Game) {
+    clearTimeout(this.saveTimer);
+    if (this.savePending && game.mapHelper) {
+      saveMap(game.mapHelper.sceneMap);
+    }
+    this.savePending = false;
+  }
+
+  /**
+   * The current map is about to be replaced by another one: its last changes are saved, the history (about its
+   * objects) is forgotten, the grid and selection go.
+   */
+  leaveMap(game: Game) {
+    this.saveNow(game);
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.clearGrid();
+    this.select(game, null);
+    game.editCanUndo = false;
+    game.editCanRedo = false;
   }
 
   // --- Placing ---

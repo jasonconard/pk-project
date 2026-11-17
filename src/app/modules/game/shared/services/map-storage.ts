@@ -1,20 +1,29 @@
-import { SceneMap, StairsSide } from '../model/SceneMap';
+import { ChunkGround, MapKind, SceneChunk, SceneMap, StairsSide } from '../model/SceneMap';
 import { SceneBuilding } from '../model/SceneBuilding';
+import { Vec2, Vec3 } from '../model/SceneUtils';
 import { PlayerDirection } from '../model/ScenePlayer';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { InstructionType } from '../model/SceneEventInstruction';
 import { LEGACY_TILE_IDS } from '../model/Terrain';
 import { downloadFile, SourceEnums, toSource } from '../util/ts-source';
+import { CODE_MAPS, DEFAULT_MAP_ID } from '../../../../../assets/map/maps';
 
-/** Browser storage key of the map edited in the editor. */
-const STORAGE_KEY = 'pk-map-edits';
-const STORAGE_VERSION = 1;
-/** File the exported chunks go to (all the world chunks live in it), relative to src/assets/map/world/. */
-export const EXPORT_FILE_NAME = 'ck-pallet-town.ts';
+/**
+ * The maps edited in the editor, saved in the browser: one entry per map (the code's maps edited, the maps made in
+ * the browser). A map is the code's one (src/assets/map/maps.ts) with the browser's copy over it.
+ */
+const STORAGE_KEY = 'pk-maps';
+const STORAGE_VERSION = 2;
+/** Key of the first version (the world map only), moved to STORAGE_KEY once. */
+const LEGACY_KEY = 'pk-map-edits';
 
-/** What is kept of a chunk: its content (position and size never change in the editor). */
+/** A chunk as data (without its meshes, its buildings without their resolved model). */
 interface StoredChunk {
+  id: string;
+  pos: Vec3;
+  size: Vec2;
   buildings: Omit<SceneBuilding, 'originModel'>[];
+  grounds: Omit<ChunkGround, 'mesh'>[];
   /** Painted ground tiles. */
   tiles?: Record<string, string>;
   /** Ground levels (reliefs). */
@@ -24,8 +33,27 @@ interface StoredChunk {
 }
 
 interface StoredMap {
+  name: string;
+  kind: MapKind;
+  spawn?: Vec3;
+  /** Every chunk of the map, in order. */
+  chunks: StoredChunk[];
+}
+
+interface StoredMaps {
   version: number;
-  chunks: Record<string, StoredChunk>;
+  maps: Record<string, StoredMap>;
+}
+
+/** A map in the lists: where it comes from, whether the browser has changes to it. */
+export interface MapSummary {
+  id: string;
+  name: string;
+  kind: MapKind;
+  /** In the code (src/assets/map): can be reset to it. */
+  inCode: boolean;
+  /** Changed in the browser. */
+  edited: boolean;
 }
 
 /** Building data without the runtime fields (resolved model, meshes). */
@@ -34,49 +62,57 @@ function cleanBuilding(building: SceneBuilding): Omit<SceneBuilding, 'originMode
   return data;
 }
 
-/**
- * Replaces the chunks content by the one saved in the browser by the editor (before the map is built).
- * Returns true if there was a saved map.
- */
-export function loadMapEdits(map: SceneMap): boolean {
-  let stored: StoredMap | null = null;
+/** A chunk as plain data (nothing of the scene: copied safely). */
+function chunkData(chunk: SceneChunk): StoredChunk {
+  const data: StoredChunk = {
+    id: chunk.id,
+    pos: chunk.pos,
+    size: chunk.size,
+    buildings: chunk.buildings.map(cleanBuilding),
+    grounds: chunk.grounds.map(({ mesh, ...ground }) => ground),
+  };
+  if (chunk.tiles && Object.keys(chunk.tiles).length) {
+    data.tiles = chunk.tiles;
+  }
+  if (chunk.heights && Object.keys(chunk.heights).length) {
+    data.heights = chunk.heights;
+  }
+  if (chunk.stairs && Object.keys(chunk.stairs).length) {
+    data.stairs = chunk.stairs;
+  }
+  return data;
+}
+
+/** Tiles of the first versions renamed / dropped. */
+function currentTiles(tiles: Record<string, string> | undefined): Record<string, string> | undefined {
+  if (!tiles) {
+    return undefined;
+  }
+  const result: Record<string, string> = {};
+  Object.entries(tiles).forEach(([cell, id]) => {
+    const terrain = id in LEGACY_TILE_IDS ? LEGACY_TILE_IDS[id] : id;
+    if (terrain) {
+      result[cell] = terrain;
+    }
+  });
+  return result;
+}
+
+function readStored(): StoredMaps {
+  let stored: StoredMaps | null = null;
   try {
     stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
   } catch {
     stored = null;
   }
-  if (!stored || stored.version !== STORAGE_VERSION || !stored.chunks) {
-    return false;
+  if (!stored || stored.version !== STORAGE_VERSION || !stored.maps) {
+    stored = { version: STORAGE_VERSION, maps: {} };
   }
-  map.chunks.forEach(chunk => {
-    const saved = stored!.chunks[chunk.id];
-    if (saved?.buildings) {
-      chunk.buildings = saved.buildings.map(b => ({ ...b }));
-    }
-    if (saved?.heights) {
-      chunk.heights = { ...saved.heights };
-    }
-    if (saved?.stairs) {
-      chunk.stairs = { ...saved.stairs };
-    }
-    if (saved?.tiles) {
-      // (tiles of the first version renamed / dropped)
-      chunk.tiles = {};
-      Object.entries(saved.tiles).forEach(([cell, id]) => {
-        const terrain = id in LEGACY_TILE_IDS ? LEGACY_TILE_IDS[id] : id;
-        if (terrain) {
-          chunk.tiles![cell] = terrain;
-        }
-      });
-    }
-  });
-  return true;
+  migrateLegacy(stored);
+  return stored;
 }
 
-/** Saves the chunks content in the browser. */
-export function saveMapEdits(map: SceneMap) {
-  const stored: StoredMap = { version: STORAGE_VERSION, chunks: {} };
-  map.chunks.forEach(chunk => stored.chunks[chunk.id] = { buildings: chunk.buildings.map(cleanBuilding), tiles: chunk.tiles, heights: chunk.heights, stairs: chunk.stairs });
+function writeStored(stored: StoredMaps) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
   } catch {
@@ -84,13 +120,93 @@ export function saveMapEdits(map: SceneMap) {
   }
 }
 
-/** Forgets the edits saved in the browser (the map comes back to the code version). */
-export function clearMapEdits() {
+/** The world map edits of the first version ({ version: 1, chunks: { id: content } }) become the world map's entry. */
+function migrateLegacy(stored: StoredMaps) {
+  let legacy: { version: number, chunks: Record<string, Partial<StoredChunk>> } | null = null;
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? 'null');
   } catch {
-    // Nothing saved anyway
+    legacy = null;
   }
+  if (!legacy) {
+    return;
+  }
+  const world = CODE_MAPS.find(m => m.id === DEFAULT_MAP_ID);
+  if (world && legacy.version === 1 && legacy.chunks && !stored.maps[world.id]) {
+    stored.maps[world.id] = {
+      name: world.name,
+      kind: world.kind,
+      spawn: world.spawn,
+      chunks: world.chunks.map(chunk => ({ ...chunkData(chunk), ...legacy!.chunks[chunk.id] })),
+    };
+    writeStored(stored);
+  }
+  try {
+    localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    // (read again next time: the world entry exists, nothing changes)
+  }
+}
+
+/** The maps: the code's ones first, then those made in the browser. */
+export function listMaps(): MapSummary[] {
+  const stored = readStored().maps;
+  const fromCode = CODE_MAPS.map(map => ({
+    id: map.id,
+    name: stored[map.id]?.name ?? map.name,
+    kind: stored[map.id]?.kind ?? map.kind,
+    inCode: true,
+    edited: !!stored[map.id],
+  }));
+  const fromBrowser = Object.entries(stored)
+    .filter(([id]) => !CODE_MAPS.some(map => map.id === id))
+    .map(([id, map]) => ({ id, name: map.name, kind: map.kind, inCode: false, edited: true }));
+  return [...fromCode, ...fromBrowser];
+}
+
+/**
+ * A map, ready to be built (a fresh copy each time: building it adds meshes to its chunks). The browser's copy
+ * decides the chunks and their content; a chunk that is also in the code keeps the code's place and grounds.
+ */
+export function loadMap(id: string): SceneMap | null {
+  const code = CODE_MAPS.find(map => map.id === id);
+  const saved = readStored().maps[id];
+  if (!code && !saved) {
+    return null;
+  }
+  const codeChunks = new Map((code?.chunks ?? []).map(chunk => [chunk.id, chunkData(chunk)]));
+  const chunks: StoredChunk[] = saved
+    ? saved.chunks.map(chunk => {
+      const fromCode = codeChunks.get(chunk.id);
+      return fromCode ? { ...chunk, pos: fromCode.pos, size: fromCode.size, grounds: fromCode.grounds } : chunk;
+    })
+    : [...codeChunks.values()];
+  const copy: SceneChunk[] = structuredClone(chunks).map(chunk => ({
+    ...chunk,
+    buildings: chunk.buildings as SceneBuilding[],
+    tiles: currentTiles(chunk.tiles),
+  }));
+  return {
+    id,
+    name: saved?.name ?? code!.name,
+    kind: saved?.kind ?? code!.kind,
+    spawn: saved ? saved.spawn : code!.spawn,
+    chunks: copy,
+  };
+}
+
+/** Saves a map in the browser (all of it: it replaces the code's one until reset). */
+export function saveMap(map: SceneMap) {
+  const stored = readStored();
+  stored.maps[map.id] = { name: map.name, kind: map.kind, spawn: map.spawn, chunks: map.chunks.map(chunkData) };
+  writeStored(stored);
+}
+
+/** Forgets the browser's copy of a map (a code map comes back to the code version). */
+export function resetMap(id: string) {
+  const stored = readStored();
+  delete stored.maps[id];
+  writeStored(stored);
 }
 
 // --- Export as TypeScript source (to put back in the repo) ---
@@ -100,6 +216,11 @@ function constName(chunkId: string): string {
   return 'PC_' + chunkId.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
 }
 
+/** Name of the exported constant of a map: 'world' → WORLD_MAP. */
+function mapConstName(mapId: string): string {
+  return mapId.toUpperCase().replace(/[^A-Z0-9]+/g, '_') + '_MAP';
+}
+
 /** Enums written by name (readable source) instead of their number. */
 const ENUM_KEYS: SourceEnums = {
   direction: ['PlayerDirection', PlayerDirection],
@@ -107,35 +228,42 @@ const ENUM_KEYS: SourceEnums = {
   type: ['InstructionType', InstructionType],
 };
 
-/** The chunks file (same constants as the hand-written one, so world.ts doesn't change). */
-export function exportChunksFile(map: SceneMap): string {
+/** File of a map: src/assets/map/<id>/<id>.ts. */
+export function mapFileName(map: SceneMap): string {
+  return map.id + '.ts';
+}
+
+/** The map's file: a constant per chunk, then the map (the constant maps.ts imports). */
+export function exportMapFile(map: SceneMap): string {
   const header = [
-    `import { SceneChunk } from '../../../../app/modules/game/shared/model/SceneMap';`,
-    `import { PlayerDirection } from '../../../../app/modules/game/shared/model/ScenePlayer';`,
-    `import { KeyCode } from '../../../../app/core/shared/model/PressedKey';`,
-    `import { InstructionType } from '../../../../app/modules/game/shared/model/SceneEventInstruction';`,
+    `import { SceneChunk, SceneMap } from '../../../app/modules/game/shared/model/SceneMap';`,
+    `import { PlayerDirection } from '../../../app/modules/game/shared/model/ScenePlayer';`,
+    `import { KeyCode } from '../../../app/core/shared/model/PressedKey';`,
+    `import { InstructionType } from '../../../app/modules/game/shared/model/SceneEventInstruction';`,
     '',
-    '// Generated by the map editor (export). Edit the map in the game (B key), then export again.',
+    `// Generated by the map editor (export): goes to src/assets/map/${map.id}/${mapFileName(map)}, listed in`,
+    '// src/assets/map/maps.ts. Edit the map in the game (B key), then export again.',
     '',
     '',
   ].join('\n');
-  const chunks = map.chunks.map(chunk => {
-    const data = {
-      id: chunk.id,
-      pos: chunk.pos,
-      size: chunk.size,
-      buildings: chunk.buildings.map(cleanBuilding),
-      grounds: chunk.grounds.map(({ mesh, ...ground }) => ground),
-      tiles: chunk.tiles && Object.keys(chunk.tiles).length ? chunk.tiles : undefined,
-      heights: chunk.heights && Object.keys(chunk.heights).length ? chunk.heights : undefined,
-      stairs: chunk.stairs && Object.keys(chunk.stairs).length ? chunk.stairs : undefined,
-    };
-    return `export const ${constName(chunk.id)}: SceneChunk = ${toSource(data, '', undefined, { enums: ENUM_KEYS })};\n`;
-  });
-  return header + chunks.join('\n');
+  const chunks = map.chunks.map(chunk =>
+    `export const ${constName(chunk.id)}: SceneChunk = ${toSource(chunkData(chunk), '', undefined, { enums: ENUM_KEYS })};\n`);
+  const mapData = [
+    `export const ${mapConstName(map.id)}: SceneMap = {`,
+    `  id: '${map.id}',`,
+    `  name: '${map.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}',`,
+    `  kind: '${map.kind}',`,
+    ...(map.spawn ? [`  spawn: { x: ${map.spawn.x}, y: ${map.spawn.y}, z: ${map.spawn.z} },`] : []),
+    '  chunks: [',
+    ...map.chunks.map(chunk => `    ${constName(chunk.id)},`),
+    '  ],',
+    '};',
+    '',
+  ].join('\n');
+  return header + chunks.join('\n') + '\n' + mapData;
 }
 
-/** Hands the exported file to the browser (download). */
-export function downloadChunksFile(map: SceneMap) {
-  downloadFile(EXPORT_FILE_NAME, exportChunksFile(map));
+/** Hands the map's file to the browser (download). */
+export function downloadMapFile(map: SceneMap) {
+  downloadFile(mapFileName(map), exportMapFile(map));
 }
