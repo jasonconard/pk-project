@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.27',
+    date: '2026-11-17',
+    notes: [
+      'Tes musiques jouent dans le jeu : choisis-en une pour le jour, la nuit, la pluie et les combats, avec un fondu entre elles.',
+      'Un curseur Musique dans le réglage du son.',
+      'Éditeur de musique : 12 nouveaux instruments (flûte, ocarina, harpe, célesta, cordes…), à choisir pour chaque morceau et à écouter avant.',
+      'Une batterie plus douce et un léger écho sur la musique.',
+    ],
+  },
+  {
     version: '0.0.26',
     date: '2026-11-16',
     notes: [
