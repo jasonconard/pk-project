@@ -20,6 +20,18 @@ Avec « Aucun », un clic sélectionne un objet (cadre orange) ; un clic dans le
 
 **Comment c'est fait** : un rayon part de la souris (`Raycaster.setFromCamera`) et touche les meshes des objets visibles ; on remonte ensuite les parents jusqu'à l'objet (`MapHelper.findBuilding`). Les objets cachés près de la caméra (couleur non écrite) sont ignorés. Un appui est un **clic** s'il bouge de moins de 5 pixels, sinon un **glisser**.
 
+## Passage vers une carte
+
+Le panneau de l'objet sélectionné a une section **Passage vers une carte** : **Ajouter un passage** fait de l'objet une porte ou une sortie (`shared/model/Passage.ts`).
+
+- **Vers** : la carte où il mène (celle-ci comprise : un passage peut aussi téléporter sur la même carte).
+- **Porte** : on passe en avançant vers l'objet (jusqu'à 24 unités devant sa face avant, tourné vers le haut), ou avec la touche d'action devant. **Marcher dessus** : on passe en entrant dans l'objet, qui laisse alors passer le joueur.
+- **Arrivée** : par défaut, le point d'arrivée de la carte de destination. **Choisir** ouvre cette carte dans l'éditeur, avec un bandeau « Touchez le point d'arrivée » : le point touché (aligné sur la grille de 8) est enregistré, et l'éditeur revient sur l'objet. **Annuler** (ou Échap) revient sans rien changer ; la croix revient au point d'arrivée de la carte.
+- **Retirer le passage** garde les autres événements de l'objet.
+- Le passage est un événement de l'objet (une téléportation vers la carte), exporté avec la carte. En jeu, le passage se fait avec un fondu ; juste après une arrivée, les passages sont ignorés tant que le joueur n'est pas sorti de leur zone (pas de renvoi immédiat).
+
+Le **point d'arrivée de la carte** se règle avec l'outil **Arrivée** de l'onglet Morceaux (repère jaune, visible dans l'éditeur).
+
 ## Annuler / refaire
 
 Chaque changement enregistre une action `{ undo, redo }` (`MapEditorService.record`). Les actions retrouvent le morceau de carte de l'objet au moment où elles s'exécutent (`chunkOf`), car un déplacement peut l'avoir changé de morceau.

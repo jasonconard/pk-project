@@ -12,7 +12,9 @@ export interface SceneEvent {
 export interface SceneEventCondition {
   direction?: PlayerDirection, // Only use up down left right =)
   bounds?: VecBox3,
-  pressedKeys?: KeyCode[]
+  pressedKeys?: KeyCode[],
+  /** The keys also count while held (not only when just pressed): walking into a door. */
+  held?: boolean
 }
 
 export interface SceneEventHelper {

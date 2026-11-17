@@ -25,7 +25,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
-| 0 | **Plusieurs cartes** | Créer, renommer, ouvrir une carte ; chacune en chunks (la carte du monde par défaut) ; passages entre cartes | Tout |
+| 0 | **Plusieurs cartes** (fait) | Créer, renommer, ouvrir une carte ; chacune en chunks (la carte du monde par défaut) ; passages entre cartes. Voir [05](editeur/05-sauvegarde-export.md) et [02](editeur/02-objets.md) | Tout |
 | 1 | **Projet de jeu** | Toutes les créations (cartes, modèles, et la suite) rangées dans un projet : enregistrer, exporter / importer un fichier `.pk`, synchroniser entre téléphone et ordinateur | Tout |
 | 2 | **Variables et sauvegarde de partie** | Drapeaux d'histoire (« a parlé au maire »), compteurs, jour courant ; sauvegarde sur plusieurs emplacements | Tout |
 | 3 | **Personnages et événements** (éditeur de carte) | Poser un PNJ, un panneau, une zone ; déclencheurs (parler, entrer, heure, météo, drapeau) et actions | Jour et nuit |
@@ -69,6 +69,10 @@ Une musique d'ambiance par zone, qui change avec la météo et l'heure, composé
 - **Variantes** : la même musique jour / nuit / pluie (instruments ou filtre qui changent), avec un fondu entre elles.
 - Export en fichier du jeu (comme les modèles) ; plus tard, import d'un fichier MIDI.
 - Utilisable sur téléphone, comme l'éditeur de modèles.
+
+### Zones d'action sur les objets
+
+Aujourd'hui, une porte (passage) ou un événement occupe toute la largeur de l'objet. Pouvoir dessiner la zone d'action dans l'éditeur (la porte seule de la maison, le devant d'un panneau), sur la carte ou dans le modèle.
 
 ## À trier
 

@@ -15,6 +15,7 @@ import { SceneChunk } from "../model/SceneMap";
 import { MapEditorService } from "./map-editor.service";
 import { currentMapId, loadMap, setCurrentMapId } from "./map-storage";
 import { InstructionTeleport } from "../model/SceneEventInstruction";
+import { isPassageEvent } from "../model/Passage";
 import { DustPuff } from "../model/DustPuff";
 
 
@@ -51,6 +52,8 @@ export class GameMapService {
   private lastLevel = 0;
   private lastOnStairs = false;
   private isMoving = 0;
+  /** Arrived on a map: its passages wait until the player has left them (not sent straight back). */
+  private passageGuard = false;
   private moveRatio: Vec3 = { x:0, y:0, z:0 };
   private moveSpeed: number = 0;
   private moveDir: PlayerDirection = PlayerDirection.DOWN;
@@ -99,6 +102,7 @@ export class GameMapService {
     }
     let pos: Vec3 | undefined = teleport.pos;
     let switched = false;
+    this.passageGuard = true;
     if (teleport.map && (rebuild || teleport.map !== mapHelper.sceneMap.id)) {
       const map = loadMap(teleport.map);
       if (!map) {
@@ -307,8 +311,11 @@ export class GameMapService {
     });
 
     if(!this.sequenceService.isRunning) {
-      const event = EventService.checkEvents(mapHelper, sprite, this.keyService.pressedCodes);
-      if(event) {
+      const event = EventService.checkEvents(mapHelper, sprite, this.keyService.pressedCodes, this.keyService.holdedCodes);
+      // Just arrived through a passage: the passages are ignored until the player has stepped out of them
+      if (this.passageGuard && (!event || isPassageEvent(event))) {
+        this.passageGuard = !!event;
+      } else if(event) {
         this.sequenceService.launchSequence(event);
       }
     }

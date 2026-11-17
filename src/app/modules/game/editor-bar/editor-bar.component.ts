@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
+import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideDoorOpen, LucideFlag, LucideMapPin, LucidePlus, LucideX, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
 import { MapManagerComponent } from '../map-manager/map-manager.component';
+import { Passage } from '../shared/model/Passage';
+import { listMaps } from '../shared/services/map-storage';
 import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
 import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
@@ -27,9 +29,9 @@ interface PaletteEntry {
  */
 @Component({
   selector: 'game-editor-bar',
-  imports: [MapManagerComponent, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench],
+  imports: [MapManagerComponent, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideDoorOpen, LucideFlag, LucideMapPin, LucidePlus, LucideX, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench],
   templateUrl: './editor-bar.component.html',
-  styleUrls: ['./editor-bar.component.scss', './editor-bar.portrait.scss'],
+  styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss', './editor-bar.portrait.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.maps-open]': 'mapsOpen()' },
 })
@@ -45,6 +47,16 @@ export class EditorBarComponent {
   /** Map open in the editor. */
   readonly mapId = input('');
   readonly mapName = input('');
+  /** Choosing a passage's arrival point: the map's name. */
+  readonly pickMap = input<string | null>(null);
+  readonly passageChange = output<Passage | null>();
+  readonly pickArrival = output<void>();
+  readonly cancelPick = output<void>();
+  /** Maps a passage can lead to (read again when the selection changes). */
+  protected readonly maps = computed(() => {
+    this.selection();
+    return listMaps();
+  });
   /** Map manager shown. */
   protected readonly mapsOpen = signal(false);
   readonly toggled = output<void>();
@@ -138,6 +150,23 @@ export class EditorBarComponent {
     location.reload();
   }
 
+  /** A new passage: to another map (the first one), entering like a door. */
+  protected addPassage(): void {
+    const other = this.maps().find(map => map.id !== this.mapId()) ?? this.maps()[0];
+    if (other) {
+      this.passageChange.emit({ map: other.id, trigger: 'door' });
+    }
+  }
+
+  protected changePassage(passage: Passage): void {
+    this.passageChange.emit(passage);
+  }
+
+  /** Another destination: the point chosen on the old one doesn't apply. */
+  protected setPassageMap(passage: Passage, map: string): void {
+    this.passageChange.emit({ map, trigger: passage.trigger });
+  }
+
   protected openMaps(event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.mapsOpen.set(true);
@@ -161,6 +190,8 @@ export class EditorBarComponent {
       }
     } else if (!this.editMode()) {
       handled = false;
+    } else if (key === 'escape' && this.pickMap()) {
+      this.cancelPick.emit();
     } else if (ctrl && key === 'z') {
       this.command.emit(ev.shiftKey ? 'redo' : 'undo');
     } else if (ctrl && key === 'y') {

@@ -5,10 +5,10 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 ## Pages
 
 1. [Prise en main](01-prise-en-main.md) : ouvrir l'éditeur, la caméra, l'interface, les raccourcis.
-2. [Objets](02-objets.md) : poser, sélectionner, déplacer, supprimer, options.
+2. [Objets](02-objets.md) : poser, sélectionner, déplacer, supprimer, options, passages vers une carte.
 3. [Sols et raccords](03-sols-raccords.md) : terrains, raccords automatiques, eau, plages, pinceau.
 4. [Reliefs et escaliers](04-reliefs.md) : niveaux, parois, escaliers, déplacements du joueur.
-5. [Cartes, sauvegarde et export](05-sauvegarde-export.md) : gestionnaire de cartes (créer, ouvrir, renommer, dupliquer), morceaux (ajouter, retirer), stockage navigateur, export, réinitialisation.
+5. [Cartes, sauvegarde et export](05-sauvegarde-export.md) : gestionnaire de cartes (créer, ouvrir, renommer, dupliquer), morceaux (ajouter, retirer), point d'arrivée, stockage navigateur, export, réinitialisation.
 6. [Éditeur de modèles 3D](06-modeles.md) : créer les modèles avec des boxes et des planes, les peindre en pixel art, calques brillance / nuit / relief, export.
 7. [Éditeur de musique](07-musique.md) : composer les musiques avec des tampons sur une grille (à la Mario Paint), gammes, batterie, lecture en boucle.
 

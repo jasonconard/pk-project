@@ -10,6 +10,8 @@ import { EditBrush, EditCommand, EditSelection, MapEditorService } from './map-e
 import { GameMapService } from "./game-map.service";
 import { createMap, downloadMapFile, duplicateMap, listMaps, loadMap, resetMap, saveMap } from "./map-storage";
 import { MapKind } from "../model/SceneMap";
+import { Passage } from "../model/Passage";
+import { Vec3 } from "../model/SceneUtils";
 import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
@@ -44,6 +46,8 @@ export interface GameHud {
   /** Map the player is on. */
   mapId: string;
   mapName: string;
+  /** Map editor: choosing a passage's arrival point (the map's name), null otherwise. */
+  editPick: string | null;
   /** Render pixel ratio and shadow texture size in use (graphics quality). */
   pixelRatio: number;
   shadowMapSize: number;
@@ -394,6 +398,7 @@ export class GameService {
       editCanRedo: game.editCanRedo,
       mapId: game.mapHelper?.sceneMap.id ?? '',
       mapName: game.mapHelper?.sceneMap.name ?? '',
+      editPick: this.arrivalPick ? game.mapHelper?.sceneMap.name ?? '' : null,
       pixelRatio: game.pixelRatio,
       shadowMapSize: game.shadowMapSize,
       diagnostics: game.diagnostics.report,
@@ -509,6 +514,9 @@ export class GameService {
       return;
     }
     if (game.editMode) {
+      if (this.arrivalPick) {
+        this.endArrivalPick(null); // (back to the passage's object first)
+      }
       this.mapEditorService.exit(game);
     } else {
       this.mapEditorService.enter(game);
@@ -595,6 +603,63 @@ export class GameService {
     if (game && current) {
       const exists = listMaps().some(map => map.id === id);
       this.gameMapService.travel(game, { map: exists ? id : DEFAULT_MAP_ID }, true);
+    }
+    this.syncHud();
+  }
+
+  // --- Passages ---
+
+  /** Choosing the arrival point of the selected object's passage: where to come back to. */
+  private arrivalPick: { origin: string, chunkId: string, buildingId: string, back: Vec3 } | null = null;
+
+  /** The selected object's passage (null: removed). */
+  setPassage(passage: Passage | null) {
+    const game = this.game;
+    if (game) {
+      this.mapEditorService.setPassage(game, passage);
+      this.syncHud();
+    }
+  }
+
+  /**
+   * Choosing the arrival point of the selected object's passage: the editor goes to the map it leads to, the next
+   * tap on the ground gives the point, then it comes back to the object.
+   */
+  pickArrival() {
+    const game = this.game;
+    const ref = this.mapEditorService.selectedRef();
+    const mapHelper = game?.mapHelper;
+    const sprite = mapHelper?.scenePlayer.mesh;
+    if (!game || !ref?.passage || !mapHelper || !sprite) {
+      return;
+    }
+    const origin = mapHelper.sceneMap.id;
+    this.arrivalPick = { origin, ...ref, back: { x: sprite.position.x, y: 0, z: sprite.position.z } };
+    if (ref.passage.map !== origin) {
+      this.gameMapService.travel(game, { map: ref.passage.map, pos: ref.passage.pos });
+    }
+    this.mapEditorService.pickGround(point => this.endArrivalPick(point));
+    this.syncHud();
+  }
+
+  /** The arrival point chosen (null: cancelled): saved in the passage, back to its object. */
+  endArrivalPick(point: Vec3 | null) {
+    const game = this.game;
+    const pick = this.arrivalPick;
+    this.arrivalPick = null;
+    this.mapEditorService.pickGround(null);
+    if (!game || !pick) {
+      this.syncHud();
+      return;
+    }
+    const sameMap = game.mapHelper?.sceneMap.id === pick.origin;
+    if (!sameMap) {
+      this.gameMapService.travel(game, { map: pick.origin, pos: pick.back });
+    }
+    this.mapEditorService.selectById(game, pick.chunkId, pick.buildingId);
+    const passage = this.mapEditorService.selectedRef()?.passage;
+    if (point && passage) {
+      this.mapEditorService.setPassage(game, { ...passage, pos: point });
     }
     this.syncHud();
   }

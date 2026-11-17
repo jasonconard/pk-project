@@ -1,4 +1,5 @@
 import { afterNextRender, Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Passage } from './shared/model/Passage';
 import { DecimalPipe } from '@angular/common';
 import { isFirstStartOfNewVersion } from './release-notes/whats-new';
 import { GameMode } from './shared/model/Game';
@@ -157,6 +158,18 @@ export class GameComponent {
 
   protected setQuality(mode: QualityMode): void {
     this.gameService.setQuality(mode);
+  }
+
+  protected setPassage(passage: Passage | null): void {
+    this.gameService.setPassage(passage);
+  }
+
+  protected pickArrival(): void {
+    this.gameService.pickArrival();
+  }
+
+  protected cancelPick(): void {
+    this.gameService.endArrivalPick(null);
   }
 
   protected toggleEditMode(): void {

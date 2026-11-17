@@ -12,6 +12,8 @@ import { SceneChunk, StairsSide, stairsSide } from '../model/SceneMap';
 import { TILE_SIZE } from '../model/Terrain';
 import { LEVEL_HEIGHT } from '../model/GroundMesh';
 import { CHUNK_SIZE, downloadMapFile, newChunk, saveMap } from './map-storage';
+import { eventsWithPassage, Passage, passageOf } from '../model/Passage';
+import { Vec3 } from '../model/SceneUtils';
 
 /** Camera zoom range in the editor (1 = normal game view, lower = closer). */
 const ZOOM_MIN = 0.4;
@@ -50,6 +52,8 @@ export interface EditSelection {
   modelId: string;
   passable: boolean;
   canHide: boolean;
+  /** Passage to another map set on the object. */
+  passage: Passage | null;
 }
 
 /** Editor command sent by the UI (keyboard shortcuts, buttons). */
@@ -75,7 +79,9 @@ interface Stroke {
 }
 
 /** Chunk tools of the palette: add a chunk on a free place next to the map, take one away. */
-const CHUNK_TOOLS = ['chunk-add', 'chunk-remove'];
+const CHUNK_TOOLS = ['chunk-add', 'chunk-remove', 'spawn'];
+/** Arrival point marker (editor only). */
+const SPAWN_COLOR = 0xffd34d;
 /** Outlines of the chunks (white) and of the free places next to them (green) while a chunk tool is selected. */
 const CHUNK_LINE_COLOR = 0xffffff;
 const SLOT_LINE_COLOR = 0x6bcb77;
@@ -181,14 +187,14 @@ export class MapEditorService {
         return;
       }
       if (ev.button !== 0) { return; }
-      if (game.editTileId && !touch) {
+      if (game.editTileId && !touch && !this.groundPick) {
         // Painting the ground with the mouse: the press and every move paint (a finger paints on a tap)
         this.stroke = { cells: new Map(), levels: new Map(), stairs: new Map() };
         this.paintAt(game, ev.clientX, ev.clientY);
         el.setPointerCapture(ev.pointerId);
         return;
       }
-      const hit = game.editModelId || game.editTileId ? null : this.pick(game, ev.clientX, ev.clientY);
+      const hit = game.editModelId || game.editTileId || this.groundPick ? null : this.pick(game, ev.clientX, ev.clientY);
       this.drag = { startX: ev.clientX, startY: ev.clientY, x: ev.clientX, y: ev.clientY, hit, dragging: false, moving: false };
       // Pressing on the selected object: dragging will move it
       if (hit && this.selected && hit.building === this.selected.building && game.mapHelper) {
@@ -265,7 +271,13 @@ export class MapEditorService {
         this.endMove(game, drag);
         haptic('light');
       } else if (!drag.dragging) {
-        if (game.editTileId) {
+        const ground = this.groundPick ? this.groundAt(game, ev.clientX, ev.clientY) : null;
+        if (this.groundPick) {
+          if (ground) {
+            haptic('success');
+            this.groundPick({ x: Math.round(ground.x / GRID) * GRID, y: 0, z: Math.round(ground.z / GRID) * GRID });
+          }
+        } else if (game.editTileId) {
           // Tap (finger): one press of the brush
           haptic('tick');
           this.stroke = { cells: new Map(), levels: new Map(), stairs: new Map() };
@@ -306,6 +318,7 @@ export class MapEditorService {
     game.editMode = true;
     this.visibilityAt = null;
     this.refreshChunkOutlines(game);
+    this.refreshSpawnMarker(game);
     // Touch screens: no stick nor buttons while editing, the fingers move the view and edit the map
     this.touchService.setGameControls(false);
     this.updateHistoryFlags(game);
@@ -323,7 +336,9 @@ export class MapEditorService {
     this.showGhostAt(null);
     this.brush.visible = false;
     this.select(game, null);
+    this.groundPick = null;
     this.refreshChunkOutlines(game);
+    this.refreshSpawnMarker(game);
     game.cameraZoom = this.savedZoom;
     game.camera.position.copy(this.savedPosition);
     this.updateFar(game);
@@ -390,7 +405,7 @@ export class MapEditorService {
       this.chunkOutlines = undefined;
     }
     const chunks = game.mapHelper?.sceneMap.chunks;
-    if (!game.editMode || !CHUNK_TOOLS.includes(game.editTileId ?? '') || !chunks) {
+    if (!game.editMode || !['chunk-add', 'chunk-remove'].includes(game.editTileId ?? '') || !chunks) {
       return;
     }
     const taken = new Set(chunks.map(c => this.slotKey(c.pos.x, c.pos.z)));
@@ -431,6 +446,27 @@ export class MapEditorService {
     game.scene.add(group);
   }
 
+  private spawnMarker?: THREE.Group;
+
+  /** The map's arrival point while editing: a yellow ring and a post. */
+  refreshSpawnMarker(game: Game) {
+    const spawn = game.mapHelper?.sceneMap.spawn ?? { x: 0, y: 0, z: 0 };
+    if (!this.spawnMarker) {
+      const material = new THREE.MeshBasicMaterial({ color: SPAWN_COLOR, depthTest: false, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+      const ring = new THREE.Mesh(new THREE.RingGeometry(6, 9, 24), material);
+      ring.rotation.x = -Math.PI / 2;
+      const post = new THREE.Mesh(new THREE.BoxGeometry(1.5, 22, 1.5), material);
+      post.position.y = 11;
+      this.spawnMarker = new THREE.Group();
+      this.spawnMarker.add(ring, post);
+      this.spawnMarker.children.forEach(part => part.renderOrder = 21);
+      game.scene.add(this.spawnMarker);
+    }
+    const level = game.mapHelper?.levelAtWorld(spawn.x, spawn.z) ?? 0;
+    this.spawnMarker.position.set(spawn.x, level * LEVEL_HEIGHT + 0.5, spawn.z);
+    this.spawnMarker.visible = game.editMode;
+  }
+
   private slotKey(x: number, z: number): string {
     return Math.round(x / CHUNK_SIZE) + ',' + Math.round(z / CHUNK_SIZE);
   }
@@ -449,6 +485,23 @@ export class MapEditorService {
       return;
     }
     const map = mapHelper.sceneMap;
+    if (game.editTileId === 'spawn') {
+      // The map's arrival point, on its ground, snapped to the grid
+      if (!mapHelper.chunkAt(point.x, point.z)) {
+        haptic('warning');
+        return;
+      }
+      const before = map.spawn;
+      const after = { x: Math.round(point.x / GRID) * GRID, y: 0, z: Math.round(point.z / GRID) * GRID };
+      const set = (spawn: Vec3 | undefined) => {
+        map.spawn = spawn;
+        this.refreshSpawnMarker(game);
+      };
+      set(after);
+      haptic('success');
+      this.record(game, { undo: () => set(before), redo: () => set(after) });
+      return;
+    }
     const key = this.slotKey(point.x, point.z);
     const [col, row] = key.split(',').map(Number);
     const existing = map.chunks.find(c => this.slotKey(c.pos.x, c.pos.z) === key);
@@ -672,7 +725,10 @@ export class MapEditorService {
       this.selectionBox.copy(bounds);
     }
     game.editSelection = picked
-      ? { modelId: picked.building.modelId, passable: picked.building.passable, canHide: picked.building.canHide }
+      ? {
+        modelId: picked.building.modelId, passable: picked.building.passable, canHide: picked.building.canHide,
+        passage: passageOf(picked.building),
+      }
       : null;
   }
 
@@ -773,6 +829,52 @@ export class MapEditorService {
     this.record(game, { undo: () => set(!value), redo: () => set(value) });
   }
 
+  /**
+   * The selected object's passage (null: removed). A place to walk on lets the player through. Undone as one
+   * change.
+   */
+  setPassage(game: Game, passage: Passage | null) {
+    const picked = this.selected;
+    if (!picked) {
+      return;
+    }
+    const building = picked.building;
+    const before = { events: building.events, passable: building.passable };
+    const after = { events: eventsWithPassage(building, passage), passable: passage?.trigger === 'walk' ? true : building.passable };
+    const set = (state: typeof before) => {
+      building.events = state.events;
+      building.passable = state.passable;
+      const chunk = this.chunkOf(game, building);
+      if (chunk) {
+        // (an object with events has its own meshes: no more an instanced copy)
+        game.mapHelper?.refreshBuilding(chunk, building);
+        this.select(game, { chunk, building });
+      }
+    };
+    set(after);
+    this.record(game, { undo: () => set(before), redo: () => set(after) });
+  }
+
+  /** Where the selected object is (to find it again on its map later). */
+  selectedRef(): { chunkId: string, buildingId: string, passage: Passage | null } | null {
+    const picked = this.selected;
+    return picked ? { chunkId: picked.chunk.id, buildingId: picked.building.id, passage: passageOf(picked.building) } : null;
+  }
+
+  /** Selects an object of the current map by its ids (back from choosing an arrival point). */
+  selectById(game: Game, chunkId: string, buildingId: string) {
+    const chunk = game.mapHelper?.sceneMap.chunks.find(c => c.id === chunkId);
+    const building = chunk?.buildings.find(b => b.id === buildingId);
+    this.select(game, chunk && building ? { chunk, building } : null);
+  }
+
+  /** Choosing a point: the next tap on the ground gives it (snapped to the grid) instead of editing the map. */
+  private groundPick: ((point: Vec3) => void) | null = null;
+
+  pickGround(onPick: ((point: Vec3) => void) | null) {
+    this.groundPick = onPick;
+  }
+
   /** The chunk that currently holds a building (it changes when moved across a chunk border). */
   private chunkOf(game: Game, building: SceneBuilding): SceneChunk | undefined {
     return game.mapHelper?.sceneMap.chunks.find(c => c.buildings.includes(building));
@@ -852,7 +954,11 @@ export class MapEditorService {
    */
   leaveMap(game: Game) {
     this.saveNow(game);
-    setTimeout(() => this.refreshChunkOutlines(game)); // (once the new map is there)
+    setTimeout(() => {
+      // (once the new map is there)
+      this.refreshChunkOutlines(game);
+      this.refreshSpawnMarker(game);
+    });
     this.undoStack.length = 0;
     this.redoStack.length = 0;
     this.clearGrid();
@@ -921,6 +1027,15 @@ export class MapEditorService {
 
   /** The orange square follows the cell under the mouse while a tile is selected. */
   private moveBrush(game: Game, ground: THREE.Vector3 | null, clientX = 0, clientY = 0) {
+    if (game.editTileId === 'spawn') {
+      const point = this.planeAt(game, clientX, clientY);
+      this.brush.visible = !!point;
+      if (point) {
+        this.brush.scale.set(1, 1, 1);
+        this.brush.position.set(Math.round(point.x / GRID) * GRID - TILE_SIZE / 2, 0.6, Math.round(point.z / GRID) * GRID - TILE_SIZE / 2);
+      }
+      return;
+    }
     if (CHUNK_TOOLS.includes(game.editTileId ?? '')) {
       // The square covers the place of a chunk
       const point = this.planeAt(game, clientX, clientY);

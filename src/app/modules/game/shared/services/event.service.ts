@@ -10,7 +10,7 @@ import { MapHelper } from "../model/MapHelper";
 @Service()
 export class EventService {
 
-  public static checkEvents(mapHelper: MapHelper, playerMesh: THREE.Object3D, pressedCodes: KeyCode[]): SceneEvent | null {
+  public static checkEvents(mapHelper: MapHelper, playerMesh: THREE.Object3D, pressedCodes: KeyCode[], holdedCodes: KeyCode[] = []): SceneEvent | null {
     const eventsHelper: SceneEventHelper[] = [];
     mapHelper.sceneMap.chunks.forEach(chunk => {
       if(chunk.visible) {
@@ -18,7 +18,8 @@ export class EventService {
           building.events.forEach(evt => {
             const dirCond = EventService.checkDirection(evt.conditions.direction, mapHelper);
             if(!dirCond) { return; }
-            const keyCond = EventService.checkPressedKeys(evt.conditions.pressedKeys, pressedCodes);
+            const keyCond = EventService.checkPressedKeys(evt.conditions.pressedKeys,
+              evt.conditions.held ? [...pressedCodes, ...holdedCodes] : pressedCodes);
             if(!keyCond) { return; }
             const buildingKey = chunk.id + '-' + building.id;
             const bounds = mapHelper.getBounds(chunk.id + '-' + building.id);

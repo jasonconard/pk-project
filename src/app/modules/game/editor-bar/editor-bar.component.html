@@ -22,7 +22,11 @@
               (click)="openMusicEditor()"><svg lucideEighthNotes></svg> <span class="label">Musique</span></button>
     </div>
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-      @if (tileId() === 'chunk-add') {
+      @if (pickMap()) {
+        {{ touch() ? 'Toucher' : 'Clic sur' }} le sol : point d'arrivée du passage · Glisser : déplacer la vue
+      } @else if (tileId() === 'spawn') {
+        {{ touch() ? 'Toucher' : 'Clic sur' }} le sol : point d'arrivée de la carte (le repère jaune)
+      } @else if (tileId() === 'chunk-add') {
         {{ touch() ? 'Toucher' : 'Clic sur' }} une place verte : ajouter un morceau · {{ touch() ? 'Deux doigts' : 'Molette' }} : dézoomer pour voir les places
       } @else if (tileId() === 'chunk-remove') {
         {{ touch() ? 'Toucher' : 'Clic sur' }} un morceau : le retirer (pas celui du joueur ni du point d'arrivée) · Annuler le remet
@@ -65,6 +69,39 @@
       <input type="checkbox" [checked]="selection.canHide" (change)="send('toggleCanHide', $event)" />
       Transparent quand le joueur est derrière
     </label>
+    <div class="passage">
+      <h3><svg lucideDoorOpen></svg> Passage vers une carte</h3>
+      @if (selection.passage; as passage) {
+        <label class="passage-row">
+          <span>Vers</span>
+          <select aria-label="Carte de destination" (change)="setPassageMap(passage, $any($event.target).value)">
+            @for (map of maps(); track map.id) {
+              <option [value]="map.id" [selected]="map.id === passage.map">{{ map.name }}{{ map.id === mapId() ? ' (cette carte)' : '' }}</option>
+            }
+          </select>
+        </label>
+        <div class="segmented" role="radiogroup" aria-label="Déclenchement">
+          <button type="button" role="radio" [attr.aria-checked]="passage.trigger === 'door'"
+                  title="En avançant vers l'objet (comme une porte), ou avec la touche d'action devant"
+                  (click)="changePassage({ map: passage.map, pos: passage.pos, trigger: 'door' })">Porte</button>
+          <button type="button" role="radio" [attr.aria-checked]="passage.trigger === 'walk'"
+                  title="En marchant sur l'objet (il laisse alors passer le joueur)"
+                  (click)="changePassage({ map: passage.map, pos: passage.pos, trigger: 'walk' })">Marcher dessus</button>
+        </div>
+        <div class="passage-row arrival">
+          <span>Arrivée : {{ passage.pos ? 'point choisi' : 'celle de la carte' }}</span>
+          <button type="button" class="small-btn" title="Aller sur la carte de destination et toucher le point d'arrivée"
+                  (click)="pickArrival.emit()"><svg lucideMapPin></svg> Choisir</button>
+          @if (passage.pos) {
+            <button type="button" class="small-btn icon-only" aria-label="Arrivée de la carte" title="Revenir au point d'arrivée de la carte"
+                    (click)="changePassage({ map: passage.map, trigger: passage.trigger })"><svg lucideX></svg></button>
+          }
+        </div>
+        <button type="button" class="remove-passage" data-haptic="warning" (click)="passageChange.emit(null)">Retirer le passage</button>
+      } @else {
+        <button type="button" class="add-passage" (click)="addPassage()"><svg lucidePlus></svg> Ajouter un passage</button>
+      }
+    </div>
     <button type="button" class="model-btn" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)"><svg lucideBox></svg> Modifier le modèle</button>
     <button type="button" class="delete" data-haptic="warning" (click)="send('delete', $event)"><svg lucideTrash></svg> Supprimer <kbd>Suppr</kbd></button>
   </section>
@@ -131,6 +168,12 @@
           <span class="pic" aria-hidden="true"><svg lucideSquarePlus></svg></span>
           <span class="name">Ajouter</span>
         </button>
+        <button type="button" class="entry tile" title="Point d'arrivée de la carte : où l'on arrive par un passage sans point choisi"
+                [class.selected]="tileId() === 'spawn'" [attr.aria-pressed]="tileId() === 'spawn'"
+                (click)="pickTile('spawn', $event)">
+          <span class="pic" aria-hidden="true"><svg lucideFlag></svg></span>
+          <span class="name">Arrivée</span>
+        </button>
         <button type="button" class="entry tile" title="Retirer un morceau de carte (avec ce qu'il contient ; Annuler le remet)"
                 [class.selected]="tileId() === 'chunk-remove'" [attr.aria-pressed]="tileId() === 'chunk-remove'"
                 (click)="pickTile('chunk-remove', $event)">
@@ -164,6 +207,14 @@
         </button>
       }
     </div>
+  </div>
+}
+
+@if (editMode() && pickMap(); as pickName) {
+  <div class="pick-banner" role="status" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    <svg lucideMapPin></svg>
+    <span>Touchez le point d'arrivée sur <b>{{ pickName }}</b></span>
+    <button type="button" (click)="cancelPick.emit()">Annuler</button>
   </div>
 }
 

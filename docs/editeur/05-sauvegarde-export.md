@@ -15,7 +15,8 @@ Une carte est faite de **morceaux** de 512 × 512 unités (32 × 32 cases), pos�
 
 - **Ajouter** : les places libres touchant la carte sont entourées en vert (avec un « + ») ; un clic / une touche y pose un morceau d'herbe. Les morceaux existants sont entourés en blanc.
 - **Retirer** : un clic / une touche sur un morceau le retire avec ce qu'il contient. Impossible pour le dernier, celui où se tient le joueur et celui du point d'arrivée.
-- Annuler / refaire marchent pour les deux. Avec un outil de morceaux, le zoom va plus loin (jusqu'à 5) pour voir plusieurs morceaux ; il revient au zoom habituel avec un autre outil.
+- **Arrivée** : un clic / une touche sur le sol place le **point d'arrivée** de la carte (repère jaune dans l'éditeur) : là où arrive un passage sans point choisi, et où commence une carte rouverte.
+- Annuler / refaire marchent pour les trois. Avec un outil de morceaux, le zoom va plus loin (jusqu'à 5) pour voir plusieurs morceaux ; il revient au zoom habituel avec un autre outil.
 - Un morceau ajouté s'appelle `<carte>-<colonne>-<rangée>` (`m1` pour -1) : c'est aussi le nom de sa constante dans le fichier exporté.
 
 **Seuls les morceaux proches sont construits** (`MapHelper.updateVisibleChunks`) : ceux qu'on peut voir tout de suite, ceux juste autour un par un (pas d'à-coup en marchant), et ceux qui sont loin sont défaits (mémoire libérée). Une grande carte du monde reste légère.
