@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
+import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
+import { MapManagerComponent } from '../map-manager/map-manager.component';
 import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
 import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
@@ -7,8 +8,6 @@ import { TouchService } from '../../../core/shared/service/touch.service';
 
 /** Keyboard shortcut opening / closing the map editor (free key: the game uses z q s d a e r f p o). */
 const EDIT_KEY = 'b';
-/** Time to confirm the reset (ms). */
-const RESET_CONFIRM_TIME = 3000;
 
 /** French names of the models in the palette. */
 const MODEL_LABELS: Record<string, string> = {
@@ -28,10 +27,11 @@ interface PaletteEntry {
  */
 @Component({
   selector: 'game-editor-bar',
-  imports: [LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideDownload, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideRotateCcw, LucideTrash, LucideUndo2, LucideWrench],
+  imports: [MapManagerComponent, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideTrash, LucideUndo2, LucideWrench],
   templateUrl: './editor-bar.component.html',
   styleUrls: ['./editor-bar.component.scss', './editor-bar.portrait.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.maps-open]': 'mapsOpen()' },
 })
 export class EditorBarComponent {
   readonly editMode = input(false);
@@ -42,6 +42,11 @@ export class EditorBarComponent {
   readonly selection = input<EditSelection | null>(null);
   readonly canUndo = input(false);
   readonly canRedo = input(false);
+  /** Map open in the editor. */
+  readonly mapId = input('');
+  readonly mapName = input('');
+  /** Map manager shown. */
+  protected readonly mapsOpen = signal(false);
   readonly toggled = output<void>();
   readonly modelSelected = output<string | null>();
   readonly tileSelected = output<string | null>();
@@ -68,9 +73,6 @@ export class EditorBarComponent {
 
   protected readonly entries: PaletteEntry[] = MODEL_CHOICES.map(c => ({ id: c.model.id, label: this.label(c.model.id) }));
   protected readonly thumbs = signal<Record<string, string>>({});
-  /** Reset asks to click a second time (within RESET_CONFIRM_TIME) before forgetting the edits. */
-  protected readonly confirmReset = signal(false);
-  private resetTimer?: ReturnType<typeof setTimeout>;
   protected readonly selectionLabel = computed(() => {
     const selection = this.selection();
     return selection ? this.label(selection.modelId) : '';
@@ -136,15 +138,9 @@ export class EditorBarComponent {
     location.reload();
   }
 
-  protected reset(event: Event): void {
-    if (!this.confirmReset()) {
-      this.confirmReset.set(true);
-      this.resetTimer = setTimeout(() => this.confirmReset.set(false), RESET_CONFIRM_TIME);
-      return;
-    }
-    clearTimeout(this.resetTimer);
-    this.confirmReset.set(false);
-    this.send('reset', event);
+  protected openMaps(event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.mapsOpen.set(true);
   }
 
   private label(modelId: string): string {
@@ -153,7 +149,7 @@ export class EditorBarComponent {
 
   private onKeyDown(ev: KeyboardEvent): void {
     const typing = ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement;
-    if (typing || ev.altKey) {
+    if (typing || ev.altKey || this.mapsOpen()) {
       return;
     }
     const key = ev.key.toLowerCase();

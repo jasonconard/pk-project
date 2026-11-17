@@ -31,6 +31,16 @@
     }
   }
 
+  // The map's name: at the top, in the middle of the screen
+  .map-btn {
+    position: fixed;
+    top: calc(10px + var(--safe-top));
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 46vw;
+    height: 36px;
+  }
+
   .selection {
     position: absolute;
     top: 0;

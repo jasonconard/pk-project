@@ -7,6 +7,11 @@
   pointer-events: none; // only the controls catch clicks
 }
 
+// The map manager covers the other bars (weather) while open
+:host(.maps-open) {
+  z-index: 1200;
+}
+
 .top {
   display: flex;
   align-items: center;
@@ -75,6 +80,50 @@
   &.danger {
     background: rgba(200, 60, 50, 0.9);
   }
+}
+
+// Map open: its name, opens the map manager
+.map-btn {
+  height: 40px;
+  max-width: 220px;
+  padding: 0 10px;
+  gap: 6px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(74, 76, 90, 0.9);
+  border-radius: 20px;
+  background: rgba(34, 35, 42, 0.92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+
+  > svg:first-child {
+    color: #ffd34d;
+    flex-shrink: 0;
+  }
+
+  .chevron {
+    color: #8a8d9c;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: rgba(64, 66, 78, 0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+    outline-offset: 2px;
+  }
+}
+
+.map-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 // Selected object: options under the top bar

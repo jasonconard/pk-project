@@ -43,6 +43,8 @@ interface StoredMap {
 interface StoredMaps {
   version: number;
   maps: Record<string, StoredMap>;
+  /** Map the game was on (opened again at the next start). */
+  current?: string;
 }
 
 /** A map in the lists: where it comes from, whether the browser has changes to it. */
@@ -54,7 +56,15 @@ export interface MapSummary {
   inCode: boolean;
   /** Changed in the browser. */
   edited: boolean;
+  /** Size in chunks (columns × rows of the area its chunks cover). */
+  cols: number;
+  rows: number;
 }
+
+/** Side of a chunk made in the editor (world units: 32 × 32 cells). */
+export const CHUNK_SIZE = 512;
+/** Ground of a new chunk. */
+const NEW_GROUND_LINK = 'assets/tex/ground2.png';
 
 /** Building data without the runtime fields (resolved model, meshes). */
 function cleanBuilding(building: SceneBuilding): Omit<SceneBuilding, 'originModel'> {
@@ -148,6 +158,18 @@ function migrateLegacy(stored: StoredMaps) {
   }
 }
 
+/** Columns × rows of the area covered by chunks. */
+function gridSize(chunks: { pos: Vec3, size: Vec2 }[]): { cols: number, rows: number } {
+  if (!chunks.length) {
+    return { cols: 0, rows: 0 };
+  }
+  const minX = Math.min(...chunks.map(c => c.pos.x - c.size.x / 2));
+  const maxX = Math.max(...chunks.map(c => c.pos.x + c.size.x / 2));
+  const minZ = Math.min(...chunks.map(c => c.pos.z - c.size.y / 2));
+  const maxZ = Math.max(...chunks.map(c => c.pos.z + c.size.y / 2));
+  return { cols: Math.round((maxX - minX) / CHUNK_SIZE), rows: Math.round((maxZ - minZ) / CHUNK_SIZE) };
+}
+
 /** The maps: the code's ones first, then those made in the browser. */
 export function listMaps(): MapSummary[] {
   const stored = readStored().maps;
@@ -157,11 +179,80 @@ export function listMaps(): MapSummary[] {
     kind: stored[map.id]?.kind ?? map.kind,
     inCode: true,
     edited: !!stored[map.id],
+    ...gridSize(stored[map.id]?.chunks ?? map.chunks),
   }));
   const fromBrowser = Object.entries(stored)
     .filter(([id]) => !CODE_MAPS.some(map => map.id === id))
-    .map(([id, map]) => ({ id, name: map.name, kind: map.kind, inCode: false, edited: true }));
+    .map(([id, map]) => ({ id, name: map.name, kind: map.kind, inCode: false, edited: true, ...gridSize(map.chunks) }));
   return [...fromCode, ...fromBrowser];
+}
+
+/** The map the game was on last time (the default one when unknown). */
+export function currentMapId(): string {
+  const id = readStored().current;
+  return id && listMaps().some(map => map.id === id) ? id : DEFAULT_MAP_ID;
+}
+
+export function setCurrentMapId(id: string) {
+  const stored = readStored();
+  if (stored.current !== id) {
+    stored.current = id;
+    writeStored(stored);
+  }
+}
+
+/** A free id from a name: 'Grotte de cristal – étage 2' → 'grotte-de-cristal-etage-2' (-2, -3… when taken). */
+function newMapId(name: string): string {
+  const base = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'carte';
+  const taken = new Set(listMaps().map(map => map.id));
+  let id = base;
+  for (let i = 2; taken.has(id); i++) {
+    id = `${base}-${i}`;
+  }
+  return id;
+}
+
+/** A new map of cols × rows chunks of grass, saved in the browser; its arrival point in the middle. */
+export function createMap(name: string, kind: MapKind, cols: number, rows: number): string {
+  const id = newMapId(name);
+  const half = CHUNK_SIZE / 2;
+  const chunks: SceneChunk[] = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      chunks.push({
+        id: `${id}-${col}-${row}`,
+        pos: { x: col * CHUNK_SIZE, y: 0, z: row * CHUNK_SIZE },
+        size: { x: CHUNK_SIZE, y: CHUNK_SIZE },
+        buildings: [],
+        grounds: [{
+          id: 'main-ground',
+          link: NEW_GROUND_LINK,
+          points: {
+            a: { x: -half, y: 0, z: -half },
+            b: { x: half, y: 0, z: -half },
+            c: { x: half, y: 0, z: half },
+            d: { x: -half, y: 0, z: half },
+          },
+          passable: true,
+          canHide: true,
+        }],
+      });
+    }
+  }
+  saveMap({ id, name, kind, spawn: { x: (cols - 1) * half, y: 0, z: (rows - 1) * half }, chunks });
+  return id;
+}
+
+/** A copy of a map (its browser version), under a new name. */
+export function duplicateMap(id: string, name: string): string | null {
+  const map = loadMap(id);
+  if (!map) {
+    return null;
+  }
+  const copyId = newMapId(name);
+  saveMap({ ...map, id: copyId, name });
+  return copyId;
 }
 
 /**
@@ -202,7 +293,7 @@ export function saveMap(map: SceneMap) {
   writeStored(stored);
 }
 
-/** Forgets the browser's copy of a map (a code map comes back to the code version). */
+/** Forgets the browser's copy of a map: a code map comes back to the code version, a browser map is deleted. */
 export function resetMap(id: string) {
   const stored = readStored();
   delete stored.maps[id];

@@ -63,7 +63,7 @@
 @if (hud(); as hud) {
   @if (hud.mode === GameMode.MAP) {
     <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [brush]="hud.editBrush" [grid]="hud.editGrid" [selection]="hud.editSelection"
-                     [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo"
+                     [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo" [mapId]="hud.mapId" [mapName]="hud.mapName"
                      (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (brushChange)="setEditBrush($event)" (command)="editCommand($event)" />
   }
 }

@@ -11,7 +11,7 @@ import { SceneBuilding } from '../model/SceneBuilding';
 import { SceneChunk, StairsSide, stairsSide } from '../model/SceneMap';
 import { TILE_SIZE } from '../model/Terrain';
 import { LEVEL_HEIGHT } from '../model/GroundMesh';
-import { downloadMapFile, resetMap, saveMap } from './map-storage';
+import { downloadMapFile, saveMap } from './map-storage';
 
 /** Camera zoom range in the editor (1 = normal game view, lower = closer). */
 const ZOOM_MIN = 0.4;
@@ -388,14 +388,7 @@ export class MapEditorService {
           downloadMapFile(game.mapHelper.sceneMap);
         }
         break;
-      case 'reset':
-        // Back to the map of the code: forget the browser copy and start again from it
-        clearTimeout(this.saveTimer);
-        if (game.mapHelper) {
-          resetMap(game.mapHelper.sceneMap.id);
-        }
-        location.reload();
-        break;
+      // ('reset': the map comes back to the code's one, see GameService.resetMap)
     }
   }
 
@@ -688,11 +681,24 @@ export class MapEditorService {
     this.saveTimer = setTimeout(() => this.saveNow(game), SAVE_DELAY);
   }
 
-  private saveNow(game: Game) {
+  /** Saves the pending changes now (before the map is copied, exported, left). */
+  saveNow(game: Game) {
     clearTimeout(this.saveTimer);
     if (this.savePending && game.mapHelper) {
       saveMap(game.mapHelper.sceneMap);
     }
+    this.savePending = false;
+  }
+
+  /** The player was moved (teleport) while editing: leaving the editor brings the camera back next to them. */
+  followPlayer(dx: number, dz: number) {
+    this.savedPosition.x += dx;
+    this.savedPosition.z += dz;
+  }
+
+  /** Forgets the changes not saved yet (the map is reset). */
+  dropPendingSave() {
+    clearTimeout(this.saveTimer);
     this.savePending = false;
   }
 

@@ -8,6 +8,9 @@ import { DiagnosticsReport } from '../model/Diagnostics';
 import { drawCallBreakdown } from '../model/DrawCallBreakdown';
 import { EditBrush, EditCommand, EditSelection, MapEditorService } from './map-editor.service';
 import { GameMapService } from "./game-map.service";
+import { createMap, downloadMapFile, duplicateMap, listMaps, loadMap, resetMap, saveMap } from "./map-storage";
+import { MapKind } from "../model/SceneMap";
+import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { FightService } from "../../../fight/shared/services/fight.service";
@@ -38,6 +41,9 @@ export interface GameHud {
   editSelection: EditSelection | null;
   editCanUndo: boolean;
   editCanRedo: boolean;
+  /** Map the player is on. */
+  mapId: string;
+  mapName: string;
   /** Render pixel ratio and shadow texture size in use (graphics quality). */
   pixelRatio: number;
   shadowMapSize: number;
@@ -386,6 +392,8 @@ export class GameService {
       editSelection: game.editSelection,
       editCanUndo: game.editCanUndo,
       editCanRedo: game.editCanRedo,
+      mapId: game.mapHelper?.sceneMap.id ?? '',
+      mapName: game.mapHelper?.sceneMap.name ?? '',
       pixelRatio: game.pixelRatio,
       shadowMapSize: game.shadowMapSize,
       diagnostics: game.diagnostics.report,
@@ -524,9 +532,76 @@ export class GameService {
 
   /** Map editor: undo, redo, delete, options of the selected object... */
   editCommand(command: EditCommand) {
-    if (this.game) {
+    if (command === 'reset') {
+      this.resetMap(this.game?.mapHelper?.sceneMap.id ?? '');
+    } else if (this.game) {
       this.mapEditorService.command(this.game, command);
       this.syncHud();
+    }
+  }
+
+  // --- Maps (map manager) ---
+
+  /** Goes to a map (the editor stays open on it). */
+  openMap(id: string) {
+    const game = this.game;
+    if (game) {
+      this.gameMapService.travel(game, { map: id });
+      this.syncHud();
+    }
+  }
+
+  /** A new map, opened right away. */
+  createMap(name: string, kind: MapKind, cols: number, rows: number) {
+    this.openMap(createMap(name, kind, cols, rows));
+  }
+
+  renameMap(id: string, name: string) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      map.name = name;
+      saveMap(map);
+      this.syncHud();
+    }
+  }
+
+  /** Returns the copy's id. */
+  duplicateMap(id: string, name: string): string | null {
+    this.saveCurrentMap();
+    return duplicateMap(id, name);
+  }
+
+  exportMap(id: string) {
+    this.saveCurrentMap();
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      downloadMapFile(map);
+    }
+  }
+
+  /**
+   * Forgets the browser's changes to a map: a code map comes back to the code version, a browser map is deleted.
+   * The current map is built again (deleted: the game goes to the default map).
+   */
+  resetMap(id: string) {
+    const game = this.game;
+    const current = game?.mapHelper?.sceneMap.id === id;
+    if (current) {
+      this.mapEditorService.dropPendingSave();
+    }
+    resetMap(id);
+    if (game && current) {
+      const exists = listMaps().some(map => map.id === id);
+      this.gameMapService.travel(game, { map: exists ? id : DEFAULT_MAP_ID }, true);
+    }
+    this.syncHud();
+  }
+
+  private saveCurrentMap() {
+    if (this.game) {
+      this.mapEditorService.saveNow(this.game);
     }
   }
 

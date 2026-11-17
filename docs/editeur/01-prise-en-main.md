@@ -28,7 +28,7 @@ En édition, le stick et les boutons du jeu sont masqués (`TouchService.setGame
 
 ## L'interface
 
-- **En haut à gauche** : Quitter l'édition, annuler, refaire, grille, Modèles, Exporter, Réinitialiser.
+- **En haut à gauche** : Quitter l'édition, la carte ouverte (son nom : ouvre le gestionnaire de cartes, voir [05](05-sauvegarde-export.md)), annuler, refaire, grille, Modèles, Musique. Sur téléphone en portrait, le nom de la carte est en haut au milieu.
 - **Grille** : trace le contour de chaque case (16 unités) au-dessus du sol, à la hauteur de la case et en pente sur les escaliers. Un jeu de lignes par morceau de carte, construit quand il entre dans la vue et refait quand ses reliefs changent (`MapEditorService.buildGrid`).
 - **Sous ces boutons** : le panneau de l'objet sélectionné (voir [Objets](02-objets.md)).
 - **En bas** : la palette, en trois onglets (Objets, Sols, Reliefs). « Aucun » reste toujours en tête : la souris sélectionne et déplace la vue. Pour Sols et Reliefs, la taille du pinceau (1, 2, 3, pot de peinture) est à droite des onglets.

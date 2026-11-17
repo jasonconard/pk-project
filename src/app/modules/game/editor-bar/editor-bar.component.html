@@ -7,6 +7,9 @@
   </button>
   @if (editMode()) {
     <div class="history" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+      <button type="button" class="map-btn" title="Cartes : ouvrir, créer, renommer une carte" (click)="openMaps($event)">
+        <svg lucideMap></svg> <span class="map-name">{{ mapName() }}</span> <svg lucideChevronDown class="chevron"></svg>
+      </button>
       <button type="button" class="icon-btn" title="Annuler (Ctrl+Z)" aria-label="Annuler"
               [disabled]="!canUndo()" (click)="send('undo', $event)"><svg lucideUndo2></svg></button>
       <button type="button" class="icon-btn" title="Refaire (Ctrl+Y)" aria-label="Refaire"
@@ -17,11 +20,6 @@
               (click)="openModelEditor()"><svg lucideBox></svg> <span class="label">Modèles</span></button>
       <button type="button" class="text-btn" title="Éditeur de musique : composer les musiques du jeu"
               (click)="openMusicEditor()"><svg lucideEighthNotes></svg> <span class="label">Musique</span></button>
-      <button type="button" class="text-btn" data-haptic="success" title="Télécharger la carte en fichier ck-pallet-town.ts, à mettre dans src/assets/map/world/chunks/"
-              (click)="send('export', $event)"><svg lucideDownload></svg> <span class="label">Exporter</span></button>
-      <button type="button" class="text-btn" data-haptic="warning" [class.danger]="confirmReset()"
-              [title]="confirmReset() ? 'Clique encore pour oublier les modifications' : 'Revenir à la carte du code (oublie les modifications enregistrées dans le navigateur)'"
-              (click)="reset($event)"><svg lucideRotateCcw></svg> <span class="label">{{ confirmReset() ? 'Confirmer ?' : 'Réinitialiser' }}</span></button>
     </div>
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
       @if (touch()) {
@@ -149,4 +147,8 @@
       }
     </div>
   </div>
+}
+
+@if (editMode() && mapsOpen()) {
+  <game-map-manager [currentId]="mapId()" (closed)="mapsOpen.set(false)" />
 }

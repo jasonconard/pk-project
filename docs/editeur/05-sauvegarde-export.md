@@ -1,4 +1,13 @@
-# Sauvegarde et export
+# Cartes, sauvegarde et export
+
+## Les cartes
+
+Le bouton au nom de la carte ouverte (en haut, avec l'icône de carte) ouvre le **gestionnaire de cartes** : un panneau à droite, ou un panneau qui monte du bas sur téléphone en portrait (maquette : `design/map-manager.pen`).
+
+- **Toucher une carte** l'ouvre dans l'éditeur : elle remplace la carte affichée, le joueur et la caméra vont à son point d'arrivée. Le jeu se rouvre sur la dernière carte ouverte.
+- Chaque carte indique son type (Monde, Ville, Intérieur, Donjon), sa taille en morceaux, et si elle est **Ouverte**, **Modifiée** (carte du code changée dans le navigateur) ou **Navigateur** (créée ici, pas encore dans le code).
+- **…** déplie ses actions : **Renommer**, **Dupliquer** (« (copie) »), **Exporter**, et **Réinit.** pour une carte du code (oublie ses modifications) ou **Supprimer** pour une carte du navigateur. Ces deux dernières demandent un second appui (« Confirmer ? », 3 secondes) ; supprimer la carte ouverte ramène sur la carte du monde.
+- **Nouvelle carte** : un nom, un type, une taille choisie en glissant sur une grille de 6 × 4 morceaux (un morceau : 512 unités, 32 × 32 cases), en herbe. Son identifiant vient du nom (`grotte-de-cristal`), son point d'arrivée est au milieu. Elle s'ouvre aussitôt.
 
 ## Sauvegarde automatique
 
@@ -10,7 +19,7 @@ Passer d'une carte à l'autre : l'instruction **téléporter** accepte une carte
 
 ## Exporter
 
-**Exporter** télécharge le fichier de la carte ouverte, `<id>.ts`, à mettre dans `src/assets/map/<id>/` (la carte du monde : `src/assets/map/world/world.ts`). Il déclare une constante par morceau (`PC_PALLET_TOWN`…) puis la carte (`WORLD_MAP`). Une nouvelle carte s'ajoute ensuite à la liste de `src/assets/map/maps.ts`.
+**Exporter** (dans les actions de la carte) télécharge le fichier de la carte ouverte, `<id>.ts`, à mettre dans `src/assets/map/<id>/` (la carte du monde : `src/assets/map/world/world.ts`). Il déclare une constante par morceau (`PC_PALLET_TOWN`…) puis la carte (`WORLD_MAP`). Une nouvelle carte s'ajoute ensuite à la liste de `src/assets/map/maps.ts`.
 
 Le fichier est écrit par un petit générateur de code (`toSource`) :
 
@@ -24,4 +33,4 @@ Le fichier du code générait certains objets en boucle (`[...].map(...)`) : l'e
 
 ## Réinitialiser
 
-**Réinitialiser** (deux clics : « Confirmer ? » pendant 3 secondes) oublie la copie du navigateur de la carte ouverte et recharge la carte du code. À faire après avoir exporté et commité, ou si la carte du code a été modifiée à la main (la copie du navigateur passerait par-dessus).
+**Réinit.** (deux appuis : « Confirmer ? » pendant 3 secondes) oublie la copie du navigateur d'une carte du code ; ouverte, elle est reconstruite telle qu'elle est dans le code. À faire après avoir exporté et commité, ou si la carte du code a été modifiée à la main (la copie du navigateur passerait par-dessus).
