@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
+import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
 import { MapManagerComponent } from '../map-manager/map-manager.component';
 import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
@@ -27,7 +27,7 @@ interface PaletteEntry {
  */
 @Component({
   selector: 'game-editor-bar',
-  imports: [MapManagerComponent, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideTrash, LucideUndo2, LucideWrench],
+  imports: [MapManagerComponent, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench],
   templateUrl: './editor-bar.component.html',
   styleUrls: ['./editor-bar.component.scss', './editor-bar.portrait.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,7 +54,7 @@ export class EditorBarComponent {
   /** Touch screen: the hint tells the finger gestures. */
   protected readonly touch = inject(TouchService).isTouchDevice;
   /** Palette tab shown. */
-  protected readonly tab = signal<'objects' | 'ground' | 'relief'>('objects');
+  protected readonly tab = signal<'objects' | 'ground' | 'relief' | 'chunks'>('objects');
   protected readonly brushes: { value: EditBrush, label: string, title: string }[] = [
     { value: 1, label: '1', title: 'Pinceau 1 case' },
     { value: 2, label: '2', title: 'Pinceau 2 × 2 cases' },
@@ -104,7 +104,7 @@ export class EditorBarComponent {
     this.tileSelected.emit(id === this.tileId() ? null : id);
   }
 
-  protected setTab(tab: 'objects' | 'ground' | 'relief', event: Event): void {
+  protected setTab(tab: 'objects' | 'ground' | 'relief' | 'chunks', event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.tab.set(tab);
   }

@@ -213,34 +213,41 @@ function newMapId(name: string): string {
   return id;
 }
 
-/** A new map of cols × rows chunks of grass, saved in the browser; its arrival point in the middle. */
+/** A new chunk of grass at a place of the chunk grid (column, row: its middle at col × CHUNK_SIZE, row × CHUNK_SIZE). */
+export function newChunk(id: string, col: number, row: number): SceneChunk {
+  const half = CHUNK_SIZE / 2;
+  return {
+    id,
+    pos: { x: col * CHUNK_SIZE, y: 0, z: row * CHUNK_SIZE },
+    size: { x: CHUNK_SIZE, y: CHUNK_SIZE },
+    buildings: [],
+    grounds: [{
+      id: 'main-ground',
+      link: NEW_GROUND_LINK,
+      points: {
+        a: { x: -half, y: 0, z: -half },
+        b: { x: half, y: 0, z: -half },
+        c: { x: half, y: 0, z: half },
+        d: { x: -half, y: 0, z: half },
+      },
+      passable: true,
+      canHide: true,
+    }],
+  };
+}
+
+/** A new map of cols × rows chunks of grass, saved in the browser; its arrival point in the middle chunk. */
 export function createMap(name: string, kind: MapKind, cols: number, rows: number): string {
   const id = newMapId(name);
-  const half = CHUNK_SIZE / 2;
   const chunks: SceneChunk[] = [];
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
-      chunks.push({
-        id: `${id}-${col}-${row}`,
-        pos: { x: col * CHUNK_SIZE, y: 0, z: row * CHUNK_SIZE },
-        size: { x: CHUNK_SIZE, y: CHUNK_SIZE },
-        buildings: [],
-        grounds: [{
-          id: 'main-ground',
-          link: NEW_GROUND_LINK,
-          points: {
-            a: { x: -half, y: 0, z: -half },
-            b: { x: half, y: 0, z: -half },
-            c: { x: half, y: 0, z: half },
-            d: { x: -half, y: 0, z: half },
-          },
-          passable: true,
-          canHide: true,
-        }],
-      });
+      chunks.push(newChunk(`${id}-${col}-${row}`, col, row));
     }
   }
-  saveMap({ id, name, kind, spawn: { x: (cols - 1) * half, y: 0, z: (rows - 1) * half }, chunks });
+  // (in the middle of the middle chunk: not on a border between chunks)
+  const spawn = { x: Math.floor((cols - 1) / 2) * CHUNK_SIZE, y: 0, z: Math.floor((rows - 1) / 2) * CHUNK_SIZE };
+  saveMap({ id, name, kind, spawn, chunks });
   return id;
 }
 

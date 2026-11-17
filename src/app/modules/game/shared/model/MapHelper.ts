@@ -20,6 +20,10 @@ interface PaintedGround {
   base: HTMLImageElement | null;
 }
 
+/** Chunks built ahead of the view (chunk sizes around what can be seen), and kept until this far. */
+const BUILD_AHEAD = 0.6;
+const KEEP_RANGE = 1.6;
+
 /** Water animation step (ms per frame). */
 const WATER_STEP = 220;
 
@@ -114,70 +118,122 @@ export class MapHelper {
     this.updateVisibleChunks();
   }
 
-  /** @param focus point the view is centered on (the player by default; the camera target in the editor) */
-  public updateVisibleChunks(focus?: THREE.Vector3) {
+  /**
+   * Chunks around the view: those that can be seen are shown (built first if needed), those a bit further are
+   * built ahead (one per call, so walking doesn't stutter), those far away are taken down (big maps stay light).
+   * @param focus point the view is centered on (the player by default; the camera target in the editor)
+   * @param extra chunk sizes seen around (the editor zoomed out)
+   */
+  public updateVisibleChunks(focus?: THREE.Vector3, extra = 0) {
     const chunks = this.sceneMap.chunks;
     const center = focus ?? this.scenePlayer.mesh?.position;
     if (!center) { return; }
-    const comparePos = new THREE.Vector3(center.x, center.y, this.originGame.camera.position.z);
+    const comparePos = new THREE.Vector3(center.x, center.y, focus ? focus.z + CAMERA_LOOK.z : this.originGame.camera.position.z);
+    let ahead = 1;
     chunks.forEach(chunk => {
-      chunk.visible = MapHelper.isChunkVisible(chunk, comparePos);
+      const visible = MapHelper.isChunkInRange(chunk, comparePos, extra);
+      if (!chunk.group && (visible || (ahead > 0 && MapHelper.isChunkInRange(chunk, comparePos, extra + BUILD_AHEAD)))) {
+        ahead -= visible ? 0 : 1;
+        this.buildChunk(chunk);
+      } else if (chunk.group && !MapHelper.isChunkInRange(chunk, comparePos, extra + KEEP_RANGE)) {
+        this.unbuildChunk(chunk);
+      }
+      chunk.visible = visible && !!chunk.group;
       if (chunk.group) {
         chunk.group.visible = chunk.visible;
       }
     });
   }
 
-  private static isChunkVisible(chunk: SceneChunk, comparePos: THREE.Vector3): boolean {
+  /** Can the chunk be seen from this point (`extra` chunk sizes added around: built ahead, kept)? */
+  private static isChunkInRange(chunk: SceneChunk, comparePos: THREE.Vector3, extra: number): boolean {
+    const marginX = chunk.size.x * extra;
+    const marginZ = chunk.size.y * extra;
     return !(
       // HIDE BEHIND CAMERA
-      (chunk.pos.z - chunk.size.y / 2) > comparePos.z ||
+      (chunk.pos.z - chunk.size.y / 2 - marginZ) > comparePos.z ||
       // HIDE TOO FAR
-      (chunk.pos.z + (chunk.size.y * 1.4)) < comparePos.z ||
+      (chunk.pos.z + (chunk.size.y * 1.4) + marginZ) < comparePos.z ||
       // HIDE TOO FAR LEFT
-      (chunk.pos.x + (chunk.size.x * 1.2)) < comparePos.x ||
+      (chunk.pos.x + (chunk.size.x * 1.2) + marginX) < comparePos.x ||
       // HIDE TOO FAR RIGHT
-      (chunk.pos.x - (chunk.size.x * 1.2)) > comparePos.x ||
+      (chunk.pos.x - (chunk.size.x * 1.2) - marginX) > comparePos.x ||
       // HIDE TOO FAR HEIGHT
       Math.abs(chunk.pos.y - comparePos.y) > (TOO_FAR_LIMIT + SHADE_OFFSET)
     );
   }
 
-  public buildChunks() {
-    this.sceneMap.chunks.forEach(chunk => {
-      const group = new THREE.Group();
-      chunk.group = group;
+  /** Builds the chunks that can be seen from a point (the map's arrival point, else its middle). */
+  public buildChunks(focus?: THREE.Vector3) {
+    const spawn = this.sceneMap.spawn;
+    const center = focus ?? (spawn ? convertVec3(spawn) : new THREE.Vector3());
+    const comparePos = new THREE.Vector3(center.x, center.y, center.z + CAMERA_LOOK.z);
+    this.sceneMap.chunks
+      .filter(chunk => !chunk.group && MapHelper.isChunkInRange(chunk, comparePos, 0))
+      .forEach(chunk => this.buildChunk(chunk));
+  }
 
-      chunk.grounds.forEach(ground => {
-        const key = chunk.id + '-g-' + ground.id;
-        const groundMesh = BasicMeshService.makePlaneFromPoints(ground.link, ground.points);
-        this.addMesh(key, groundMesh, convertVec3(chunk.pos));
-        ground.mesh = groundMesh;
-        group.add(groundMesh);
-        if (chunk.tiles && Object.keys(chunk.tiles).length && ground === chunk.grounds[0]) {
-          this.paintedGround(chunk);
-        }
-        if (chunk.stairs && Object.keys(chunk.stairs).length && ground === chunk.grounds[0]) {
-          this.paintedGround(chunk);
-        }
-        if (((chunk.heights && Object.keys(chunk.heights).length) || (chunk.stairs && Object.keys(chunk.stairs).length))
-          && ground === chunk.grounds[0]) {
-          this.rebuildGround(chunk);
-        }
-        // ground.mesh.rotation.x = Math.PI / -2;
+  /** A chunk added to the map (editor): built if it is in view; its neighbors' borders and walls are redrawn. */
+  public addChunk(chunk: SceneChunk) {
+    this.sceneMap.chunks.push(chunk);
+    this.refreshNeighbors(chunk);
+    this.updateCameraAim();
+  }
+
+  /** A chunk taken out of the map (editor; its data is kept by the caller for undo). */
+  public removeChunk(chunk: SceneChunk) {
+    this.unbuildChunk(chunk);
+    this.sceneMap.chunks = this.sceneMap.chunks.filter(c => c !== chunk);
+    chunk.visible = false;
+    this.refreshNeighbors(chunk);
+  }
+
+  /** The built chunks touching this one are built again (their borders, walls and shores depend on it). */
+  private refreshNeighbors(chunk: SceneChunk) {
+    this.sceneMap.chunks
+      .filter(c => c !== chunk && c.group
+        && Math.abs(c.pos.x - chunk.pos.x) <= (c.size.x + chunk.size.x) / 2
+        && Math.abs(c.pos.z - chunk.pos.z) <= (c.size.y + chunk.size.y) / 2)
+      .forEach(c => {
+        const visible = c.group!.visible;
+        this.unbuildChunk(c);
+        this.buildChunk(c);
+        c.group!.visible = visible;
       });
-      // return;
+  }
 
+  private buildChunk(chunk: SceneChunk) {
+    const group = new THREE.Group();
+    chunk.group = group;
 
-      // this.meshes[chunk.id].castShadow = true;
-      // this.meshes[chunk.id].receiveShadow = true;
-
-      // (the group is needed by the views: set before)
-      chunk.buildings.forEach(building => this.createView(chunk, building));
-
-      this.originGame.scene.add(group);
+    chunk.grounds.forEach(ground => {
+      const key = chunk.id + '-g-' + ground.id;
+      const groundMesh = BasicMeshService.makePlaneFromPoints(ground.link, ground.points);
+      this.addMesh(key, groundMesh, convertVec3(chunk.pos));
+      ground.mesh = groundMesh;
+      group.add(groundMesh);
+      if (chunk.tiles && Object.keys(chunk.tiles).length && ground === chunk.grounds[0]) {
+        this.paintedGround(chunk);
+      }
+      if (chunk.stairs && Object.keys(chunk.stairs).length && ground === chunk.grounds[0]) {
+        this.paintedGround(chunk);
+      }
+      if (((chunk.heights && Object.keys(chunk.heights).length) || (chunk.stairs && Object.keys(chunk.stairs).length))
+        && ground === chunk.grounds[0]) {
+        this.rebuildGround(chunk);
+      }
+      // ground.mesh.rotation.x = Math.PI / -2;
     });
+    // return;
 
+
+    // this.meshes[chunk.id].castShadow = true;
+    // this.meshes[chunk.id].receiveShadow = true;
+
+    // (the group is needed by the views: set before)
+    chunk.buildings.forEach(building => this.createView(chunk, building));
+
+    this.originGame.scene.add(group);
   }
 
   /** Another map takes the place of the current one: its chunks are built, the old ones taken down. */
@@ -185,11 +241,11 @@ export class MapHelper {
     this.sceneMap.chunks.forEach(chunk => this.unbuildChunk(chunk));
     this.sceneMap = map;
     this.buildChunks();
-    this.updateVisibleChunks();
   }
 
   /** Takes a chunk out of the scene and frees what was made for it (its data stays). */
   private unbuildChunk(chunk: SceneChunk) {
+    chunk.visible = false;
     this.instances.get(chunk.id)?.forEach(set => set.dispose());
     this.instances.delete(chunk.id);
     const painted = this.paintedGrounds.get(chunk.id);
@@ -561,7 +617,7 @@ export class MapHelper {
   /** Puts a building (new, or removed earlier: undo) in a chunk and in the scene. */
   public addBuilding(chunk: SceneChunk, building: SceneBuilding) {
     const model = building.originModel ?? MODELS.find(m => m.id === building.modelId);
-    if (!model || !chunk.group) {
+    if (!model) {
       return;
     }
     building.originModel = model;
@@ -746,7 +802,12 @@ export class MapHelper {
   public updateCameraAim() {
     const camera = this.originGame.camera;
     camera.lookAt(this.originGame.getCameraTarget());
-    this.updateVisibleChunks(this.originGame.editMode ? this.originGame.getCameraTarget() : undefined);
+    const game = this.originGame;
+    if (game.editMode) {
+      this.updateVisibleChunks(game.getCameraTarget(), Math.max(0, game.cameraZoom - 1) * 0.8);
+    } else {
+      this.updateVisibleChunks();
+    }
   }
 
   public addMesh(key: string, mesh: THREE.Object3D, position?: THREE.Vector3) {

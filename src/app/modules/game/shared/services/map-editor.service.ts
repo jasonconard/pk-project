@@ -11,11 +11,13 @@ import { SceneBuilding } from '../model/SceneBuilding';
 import { SceneChunk, StairsSide, stairsSide } from '../model/SceneMap';
 import { TILE_SIZE } from '../model/Terrain';
 import { LEVEL_HEIGHT } from '../model/GroundMesh';
-import { downloadMapFile, saveMap } from './map-storage';
+import { CHUNK_SIZE, downloadMapFile, newChunk, saveMap } from './map-storage';
 
 /** Camera zoom range in the editor (1 = normal game view, lower = closer). */
 const ZOOM_MIN = 0.4;
 const ZOOM_MAX = 1.8;
+/** With a chunk tool: zoomed out enough to see a few chunks and the free places around. */
+const ZOOM_MAX_CHUNKS = 5;
 /** Zoom change per wheel pixel (exponential: the same wheel move zooms by the same ratio). */
 const ZOOM_SPEED = 0.0012;
 /** Keyboard panning speed (world units per input tick at zoom 1). */
@@ -68,7 +70,15 @@ interface Stroke {
   levels: Map<string, { chunk: SceneChunk, col: number, row: number, before: number, after: number }>;
   /** Stairs tool / eraser: each cell's stairs before / after. */
   stairs: Map<string, { chunk: SceneChunk, col: number, row: number, before: StairsSide | null, after: StairsSide | null }>;
+  /** Chunk tools: done once per stroke. */
+  chunkDone?: boolean;
 }
+
+/** Chunk tools of the palette: add a chunk on a free place next to the map, take one away. */
+const CHUNK_TOOLS = ['chunk-add', 'chunk-remove'];
+/** Outlines of the chunks (white) and of the free places next to them (green) while a chunk tool is selected. */
+const CHUNK_LINE_COLOR = 0xffffff;
+const SLOT_LINE_COLOR = 0x6bcb77;
 
 interface Picked {
   chunk: SceneChunk;
@@ -295,6 +305,7 @@ export class MapEditorService {
     this.savedZoom = game.cameraZoom;
     game.editMode = true;
     this.visibilityAt = null;
+    this.refreshChunkOutlines(game);
     // Touch screens: no stick nor buttons while editing, the fingers move the view and edit the map
     this.touchService.setGameControls(false);
     this.updateHistoryFlags(game);
@@ -312,6 +323,7 @@ export class MapEditorService {
     this.showGhostAt(null);
     this.brush.visible = false;
     this.select(game, null);
+    this.refreshChunkOutlines(game);
     game.cameraZoom = this.savedZoom;
     game.camera.position.copy(this.savedPosition);
     this.updateFar(game);
@@ -352,7 +364,7 @@ export class MapEditorService {
     this.ghostAt = null;
   }
 
-  /** Ground tile to paint ('erase' = back to the original ground, null = no painting). */
+  /** Ground tile to paint ('erase' = back to the original ground, null = no painting), or a chunk tool. */
   selectTile(game: Game, tileId: string | null) {
     if (tileId) {
       this.selectModel(game, null);
@@ -360,6 +372,134 @@ export class MapEditorService {
     }
     game.editTileId = tileId;
     this.brush.visible = false;
+    this.refreshChunkOutlines(game);
+    if (game.editMode && game.cameraZoom > ZOOM_MAX && !CHUNK_TOOLS.includes(tileId ?? '')) {
+      this.setZoom(game, ZOOM_MAX); // (zoomed out for the chunks: back to the usual view)
+    }
+  }
+
+  // --- Chunks ---
+
+  private chunkOutlines?: THREE.Group;
+
+  /** With a chunk tool: the chunks' outlines, and the free places around them where one can be added. */
+  private refreshChunkOutlines(game: Game) {
+    if (this.chunkOutlines) {
+      this.chunkOutlines.removeFromParent();
+      this.chunkOutlines.children.forEach(line => (line as THREE.LineSegments).geometry.dispose());
+      this.chunkOutlines = undefined;
+    }
+    const chunks = game.mapHelper?.sceneMap.chunks;
+    if (!game.editMode || !CHUNK_TOOLS.includes(game.editTileId ?? '') || !chunks) {
+      return;
+    }
+    const taken = new Set(chunks.map(c => this.slotKey(c.pos.x, c.pos.z)));
+    const free = new Map<string, [number, number]>();
+    chunks.forEach(c => {
+      const col = Math.round(c.pos.x / CHUNK_SIZE);
+      const row = Math.round(c.pos.z / CHUNK_SIZE);
+      for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const key = (col + dc) + ',' + (row + dr);
+        if (!taken.has(key)) {
+          free.set(key, [col + dc, row + dr]);
+        }
+      }
+    });
+    const squares = (centers: [number, number][], inset: number) => {
+      const points: THREE.Vector3[] = [];
+      centers.forEach(([x, z]) => {
+        const h = CHUNK_SIZE / 2 - inset;
+        const corners = [[-h, -h], [h, -h], [h, h], [-h, h]].map(([dx, dz]) => new THREE.Vector3(x + dx, 0.5, z + dz));
+        corners.forEach((corner, i) => points.push(corner, corners[(i + 1) % 4]));
+        if (inset) {
+          // A plus in the middle of a free place
+          points.push(new THREE.Vector3(x - 24, 0.5, z), new THREE.Vector3(x + 24, 0.5, z),
+            new THREE.Vector3(x, 0.5, z - 24), new THREE.Vector3(x, 0.5, z + 24));
+        }
+      });
+      return new THREE.BufferGeometry().setFromPoints(points);
+    };
+    const group = new THREE.Group();
+    group.add(new THREE.LineSegments(squares(chunks.map(c => [c.pos.x, c.pos.z]), 0),
+      new THREE.LineBasicMaterial({ color: CHUNK_LINE_COLOR, transparent: true, opacity: 0.6, depthTest: false })));
+    if (game.editTileId === 'chunk-add') {
+      group.add(new THREE.LineSegments(squares([...free.values()].map(([c, r]) => [c * CHUNK_SIZE, r * CHUNK_SIZE]), 8),
+        new THREE.LineBasicMaterial({ color: SLOT_LINE_COLOR, depthTest: false })));
+    }
+    group.children.forEach(line => line.renderOrder = 19);
+    this.chunkOutlines = group;
+    game.scene.add(group);
+  }
+
+  private slotKey(x: number, z: number): string {
+    return Math.round(x / CHUNK_SIZE) + ',' + Math.round(z / CHUNK_SIZE);
+  }
+
+  /** Point of the ground level 0 under the mouse (also where there is no ground: free places). */
+  private planeAt(game: Game, clientX: number, clientY: number): THREE.Vector3 | null {
+    this.setRay(game, clientX, clientY);
+    return game.raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3());
+  }
+
+  /** The chunk tool on the place under the mouse: a new chunk on a free place next to the map, or one taken away. */
+  private chunkToolAt(game: Game, clientX: number, clientY: number) {
+    const mapHelper = game.mapHelper;
+    const point = this.planeAt(game, clientX, clientY);
+    if (!mapHelper || !point) {
+      return;
+    }
+    const map = mapHelper.sceneMap;
+    const key = this.slotKey(point.x, point.z);
+    const [col, row] = key.split(',').map(Number);
+    const existing = map.chunks.find(c => this.slotKey(c.pos.x, c.pos.z) === key);
+    if (game.editTileId === 'chunk-add') {
+      const touches = map.chunks.some(c => Math.abs(Math.round(c.pos.x / CHUNK_SIZE) - col) + Math.abs(Math.round(c.pos.z / CHUNK_SIZE) - row) === 1);
+      if (existing || !touches) {
+        return;
+      }
+      // (negative places written m1, m2…: the ids become constant names in the exported file)
+      const place = (n: number) => n < 0 ? 'm' + -n : String(n);
+      let id = `${map.id}-${place(col)}-${place(row)}`;
+      for (let i = 2; map.chunks.some(c => c.id === id); i++) {
+        id = `${map.id}-${place(col)}-${place(row)}-${i}`;
+      }
+      const chunk = newChunk(id, col, row);
+      mapHelper.addChunk(chunk);
+      haptic('success');
+      this.record(game, {
+        undo: () => this.takeChunk(game, chunk),
+        redo: () => this.putChunk(game, chunk),
+      });
+    } else if (existing) {
+      // Not the last one, nor the one under the player or the arrival point (they would stand in the void)
+      const player = mapHelper.scenePlayer.mesh?.position;
+      const spawn = map.spawn ?? { x: 0, y: 0, z: 0 };
+      const holds = (x: number, z: number) => Math.abs(x - existing.pos.x) <= existing.size.x / 2 && Math.abs(z - existing.pos.z) <= existing.size.y / 2;
+      if (map.chunks.length === 1 || (player && holds(player.x, player.z)) || holds(spawn.x, spawn.z)) {
+        haptic('warning');
+        return;
+      }
+      if (this.selected?.chunk === existing) {
+        this.select(game, null);
+      }
+      this.takeChunk(game, existing);
+      haptic('warning');
+      this.record(game, {
+        undo: () => this.putChunk(game, existing),
+        redo: () => this.takeChunk(game, existing),
+      });
+    }
+  }
+
+  private putChunk(game: Game, chunk: SceneChunk) {
+    game.mapHelper?.addChunk(chunk);
+    this.refreshChunkOutlines(game);
+  }
+
+  private takeChunk(game: Game, chunk: SceneChunk) {
+    this.removeGrid(chunk.id);
+    game.mapHelper?.removeChunk(chunk);
+    this.refreshChunkOutlines(game);
   }
 
   /** Brush size in cells (1 to 3), or 'fill' (bucket). */
@@ -408,6 +548,10 @@ export class MapEditorService {
     if (mapHelper && game.editGrid) {
       // Grid of the chunks coming into view
       mapHelper.sceneMap.chunks.forEach(chunk => {
+        const grid = this.grids.get(chunk.id);
+        if (grid && grid.parent !== chunk.group) {
+          this.removeGrid(chunk.id); // (its chunk was taken down: far away)
+        }
         if (chunk.visible && !this.grids.has(chunk.id)) {
           this.buildGrid(game, chunk);
         }
@@ -708,6 +852,7 @@ export class MapEditorService {
    */
   leaveMap(game: Game) {
     this.saveNow(game);
+    setTimeout(() => this.refreshChunkOutlines(game)); // (once the new map is there)
     this.undoStack.length = 0;
     this.redoStack.length = 0;
     this.clearGrid();
@@ -770,12 +915,24 @@ export class MapEditorService {
   /** Mouse over the map: the brush square and the model preview follow it (one ray to the ground for both). */
   private hover(game: Game, clientX: number, clientY: number) {
     const ground = game.editTileId || this.ghost ? this.groundAt(game, clientX, clientY) : null;
-    this.moveBrush(game, ground);
+    this.moveBrush(game, ground, clientX, clientY);
     this.moveGhost(game, clientX, clientY, ground);
   }
 
   /** The orange square follows the cell under the mouse while a tile is selected. */
-  private moveBrush(game: Game, ground: THREE.Vector3 | null) {
+  private moveBrush(game: Game, ground: THREE.Vector3 | null, clientX = 0, clientY = 0) {
+    if (CHUNK_TOOLS.includes(game.editTileId ?? '')) {
+      // The square covers the place of a chunk
+      const point = this.planeAt(game, clientX, clientY);
+      this.brush.visible = !!point;
+      if (point) {
+        const [col, row] = this.slotKey(point.x, point.z).split(',').map(Number);
+        const scale = CHUNK_SIZE / TILE_SIZE;
+        this.brush.scale.set(scale, 1, scale);
+        this.brush.position.set((col - 0.5) * CHUNK_SIZE, 0.6, (row - 0.5) * CHUNK_SIZE);
+      }
+      return;
+    }
     const cell = game.editTileId && ground ? game.mapHelper?.cellAt(ground.x, ground.z) : null;
     this.brush.visible = !!cell;
     // The square covers the brush size (one cell for the bucket)
@@ -794,6 +951,13 @@ export class MapEditorService {
    * bucket ('fill', terrains only), the whole area of the same terrain around it (once per stroke).
    */
   private paintAt(game: Game, clientX: number, clientY: number) {
+    if (CHUNK_TOOLS.includes(game.editTileId ?? '')) {
+      if (this.stroke && !this.stroke.chunkDone) {
+        this.stroke.chunkDone = true;
+        this.chunkToolAt(game, clientX, clientY);
+      }
+      return;
+    }
     const ground = this.groundAt(game, clientX, clientY);
     const mapHelper = game.mapHelper;
     if (!ground || !this.stroke || !mapHelper) {
@@ -958,7 +1122,8 @@ export class MapEditorService {
   /** Zooms around the point the camera looks at (it stays at the same place on screen). */
   private setZoom(game: Game, zoom: number) {
     const target = game.getCameraTarget();
-    game.cameraZoom = THREE.MathUtils.clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+    const max = CHUNK_TOOLS.includes(game.editTileId ?? '') ? ZOOM_MAX_CHUNKS : ZOOM_MAX;
+    game.cameraZoom = THREE.MathUtils.clamp(zoom, ZOOM_MIN, max);
     game.camera.position.copy(target).add(game.cameraOffset());
     this.updateFar(game);
     game.mapHelper?.updateCameraAim();

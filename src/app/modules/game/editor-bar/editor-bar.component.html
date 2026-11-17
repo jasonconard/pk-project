@@ -22,7 +22,11 @@
               (click)="openMusicEditor()"><svg lucideEighthNotes></svg> <span class="label">Musique</span></button>
     </div>
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-      @if (touch()) {
+      @if (tileId() === 'chunk-add') {
+        {{ touch() ? 'Toucher' : 'Clic sur' }} une place verte : ajouter un morceau · {{ touch() ? 'Deux doigts' : 'Molette' }} : dézoomer pour voir les places
+      } @else if (tileId() === 'chunk-remove') {
+        {{ touch() ? 'Toucher' : 'Clic sur' }} un morceau : le retirer (pas celui du joueur ni du point d'arrivée) · Annuler le remet
+      } @else if (touch()) {
         @if (tileId()) {
           Toucher : peindre · Glisser : déplacer la vue · Deux doigts : zoom
         } @else if (modelId()) {
@@ -73,8 +77,9 @@
         <button type="button" role="tab" [attr.aria-selected]="tab() === 'objects'" (click)="setTab('objects', $event)">Objets</button>
         <button type="button" role="tab" [attr.aria-selected]="tab() === 'ground'" (click)="setTab('ground', $event)">Sols</button>
         <button type="button" role="tab" [attr.aria-selected]="tab() === 'relief'" (click)="setTab('relief', $event)">Reliefs</button>
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'chunks'" (click)="setTab('chunks', $event)">Morceaux</button>
       </div>
-      @if (tab() !== 'objects') {
+      @if (tab() === 'ground' || tab() === 'relief') {
         <div class="brushes" role="radiogroup" aria-label="Pinceau">
           @for (b of brushes; track b.value) {
             @if (tab() === 'ground' || b.value !== 'fill') {
@@ -118,6 +123,19 @@
                 (click)="pickTile('erase', $event)">
           <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
           <span class="name">Gomme</span>
+        </button>
+      } @else if (tab() === 'chunks') {
+        <button type="button" class="entry tile" title="Ajouter un morceau de carte (32 × 32 cases d'herbe) sur une place libre, à côté de la carte"
+                [class.selected]="tileId() === 'chunk-add'" [attr.aria-pressed]="tileId() === 'chunk-add'"
+                (click)="pickTile('chunk-add', $event)">
+          <span class="pic" aria-hidden="true"><svg lucideSquarePlus></svg></span>
+          <span class="name">Ajouter</span>
+        </button>
+        <button type="button" class="entry tile" title="Retirer un morceau de carte (avec ce qu'il contient ; Annuler le remet)"
+                [class.selected]="tileId() === 'chunk-remove'" [attr.aria-pressed]="tileId() === 'chunk-remove'"
+                (click)="pickTile('chunk-remove', $event)">
+          <span class="pic" aria-hidden="true"><svg lucideSquareMinus></svg></span>
+          <span class="name">Retirer</span>
         </button>
       } @else {
         <button type="button" class="entry tile" title="Monter le sol d'un niveau (clic / glisser)"

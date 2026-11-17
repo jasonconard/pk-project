@@ -98,6 +98,7 @@ export class GameMapService {
       return;
     }
     let pos: Vec3 | undefined = teleport.pos;
+    let switched = false;
     if (teleport.map && (rebuild || teleport.map !== mapHelper.sceneMap.id)) {
       const map = loadMap(teleport.map);
       if (!map) {
@@ -107,7 +108,7 @@ export class GameMapService {
       this.mapEditorService.leaveMap(game);
       mapHelper.setMap(map);
       setCurrentMapId(map.id);
-      game.warmUp(); // (during the fade: no stutter on the first steps)
+      switched = true;
       pos ??= map.spawn ?? { x: 0, y: 0, z: 0 };
       this.hopTime = -1;
       this.hopOffset = 0;
@@ -123,6 +124,9 @@ export class GameMapService {
       sprite.position.x = pos.x;
       sprite.position.z = pos.z;
       mapHelper.updateCameraAim();
+    }
+    if (switched) {
+      game.warmUp(); // (the chunks around the arrival, during the fade: no stutter on the first steps)
     }
     game.render();
   }

@@ -9,6 +9,17 @@ Le bouton au nom de la carte ouverte (en haut, avec l'icône de carte) ouvre le 
 - **…** déplie ses actions : **Renommer**, **Dupliquer** (« (copie) »), **Exporter**, et **Réinit.** pour une carte du code (oublie ses modifications) ou **Supprimer** pour une carte du navigateur. Ces deux dernières demandent un second appui (« Confirmer ? », 3 secondes) ; supprimer la carte ouverte ramène sur la carte du monde.
 - **Nouvelle carte** : un nom, un type, une taille choisie en glissant sur une grille de 6 × 4 morceaux (un morceau : 512 unités, 32 × 32 cases), en herbe. Son identifiant vient du nom (`grotte-de-cristal`), son point d'arrivée est au milieu. Elle s'ouvre aussitôt.
 
+## Les morceaux
+
+Une carte est faite de **morceaux** de 512 × 512 unités (32 × 32 cases), posés sur une grille. L'onglet **Morceaux** de la palette :
+
+- **Ajouter** : les places libres touchant la carte sont entourées en vert (avec un « + ») ; un clic / une touche y pose un morceau d'herbe. Les morceaux existants sont entourés en blanc.
+- **Retirer** : un clic / une touche sur un morceau le retire avec ce qu'il contient. Impossible pour le dernier, celui où se tient le joueur et celui du point d'arrivée.
+- Annuler / refaire marchent pour les deux. Avec un outil de morceaux, le zoom va plus loin (jusqu'à 5) pour voir plusieurs morceaux ; il revient au zoom habituel avec un autre outil.
+- Un morceau ajouté s'appelle `<carte>-<colonne>-<rangée>` (`m1` pour -1) : c'est aussi le nom de sa constante dans le fichier exporté.
+
+**Seuls les morceaux proches sont construits** (`MapHelper.updateVisibleChunks`) : ceux qu'on peut voir tout de suite, ceux juste autour un par un (pas d'à-coup en marchant), et ceux qui sont loin sont défaits (mémoire libérée). Une grande carte du monde reste légère.
+
 ## Sauvegarde automatique
 
 Chaque changement (et chaque annuler / refaire) est enregistré dans le navigateur, 400 ms plus tard pour regrouper une série (`map-storage.ts`, clé `pk-maps`). Le jeu a **plusieurs cartes** (liste du code : `src/assets/map/maps.ts`, la carte du monde par défaut) ; le navigateur garde une entrée par carte modifiée ou créée. Au chargement d'une carte (`loadMap`), sa copie du navigateur **remplace** celle du code ; un morceau présent dans le code garde sa place et ses sols du code.
