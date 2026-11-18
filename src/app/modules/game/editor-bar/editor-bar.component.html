@@ -1,10 +1,13 @@
 <div class="top">
-  <button type="button" class="edit-btn" [class.active]="editMode()" [attr.aria-pressed]="editMode()"
-          [title]="editMode() ? 'Quitter l\'édition (B)' : 'Éditer la carte (B)'" (click)="toggle($event)">
-    <span class="icon" aria-hidden="true"><svg lucideWrench></svg></span>
-    <span class="label">{{ editMode() ? 'Quitter l\'édition' : 'Éditer' }}</span>
-    <kbd>B</kbd>
-  </button>
+  <!-- In the game mode, the Créer button (top right of the game) opens the editor -->
+  @if (editMode()) {
+    <button type="button" class="edit-btn" [class.active]="editMode()" [attr.aria-pressed]="editMode()"
+            [title]="editMode() ? 'Quitter l\'édition (B)' : 'Éditer la carte (B)'" (click)="toggle($event)">
+      <span class="icon" aria-hidden="true"><svg lucideWrench></svg></span>
+      <span class="label">{{ editMode() ? 'Quitter l\'édition' : 'Éditer' }}</span>
+      <kbd>B</kbd>
+    </button>
+  }
   @if (editMode()) {
     <div class="history" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
       <button type="button" class="map-btn" title="Cartes : ouvrir, créer, renommer une carte" (click)="openMaps($event)">

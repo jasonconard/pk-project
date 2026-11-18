@@ -1,0 +1,124 @@
+/* Game mode: the clock (top left) and, under it, the ambiance tools in a column when it is touched; each popover
+   opens to the right of its button. Last style file: it wins over the toolbar's places (top right). */
+
+.clock {
+  pointer-events: auto;
+  position: absolute;
+  left: calc(10px + var(--safe-left));
+  top: calc(10px + var(--safe-top));
+  max-width: calc(100vw - 140px - var(--safe-left) - var(--safe-right)); // the Créer / Menu buttons on the right
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 26px;
+  background: var(--panel-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  text-align: left;
+  transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out;
+
+  &:hover {
+    background: rgba(64, 66, 78, 0.95);
+  }
+
+  &.open {
+    box-shadow: 0 0 0 2px #5aa8ff, 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.clock-thumb {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  // Its edge stays visible over a dark picture (night, darkness…)
+  outline: 1px solid rgba(255, 255, 255, 0.3);
+  outline-offset: -1px;
+  font-size: 20px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
+  }
+}
+
+.clock-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.clock-main {
+  font-size: 15px;
+  font-weight: 600;
+
+  svg {
+    vertical-align: -2px;
+  }
+}
+
+.clock-sub {
+  font-size: 12px;
+  opacity: 0.75;
+
+  .temperature {
+    font-weight: 600;
+    transition: color 600ms ease-in-out;
+  }
+}
+
+:host(.game-mode) {
+  .toolbar {
+    top: calc(68px + var(--safe-top));
+    left: calc(10px + var(--safe-left));
+    right: auto;
+    max-width: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    animation: tools-in 150ms ease-out;
+  }
+
+  .tool:first-child {
+    flex: none;
+    max-width: calc(100vw - 20px - var(--safe-left) - var(--safe-right));
+  }
+
+  .popover {
+    top: 0;
+    left: calc(100% + 8px);
+    right: auto;
+    width: min(250px, calc(100vw - 80px - var(--safe-left) - var(--safe-right)));
+    animation-name: popover-right-in;
+  }
+}
+
+@keyframes tools-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes popover-right-in {
+  from { opacity: 0; transform: translateX(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.game-mode) .toolbar {
+    animation: none;
+  }
+}

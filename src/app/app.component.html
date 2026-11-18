@@ -1,14 +1,17 @@
 <div class="app-container">
   <router-outlet />
 
-  <button type="button" class="btn-fullscreen" (click)="toggleFullscreen()"
-          [attr.aria-label]="fullScreened() ? 'Quitter le plein écran' : 'Plein écran'">
-    @if (fullScreened()) {
-      <svg lucideMinimize></svg>
-    } @else {
-      <svg lucideMaximize></svg>
-    }
-  </button>
+  <!-- Hidden in the game mode: full screen is in its menu -->
+  @if (!fullScreenButtonHidden()) {
+    <button type="button" class="btn-fullscreen" (click)="toggleFullscreen()"
+            [attr.aria-label]="fullScreened() ? 'Quitter le plein écran' : 'Plein écran'">
+      @if (fullScreened()) {
+        <svg lucideMinimize></svg>
+      } @else {
+        <svg lucideMaximize></svg>
+      }
+    </button>
+  }
 
   <app-update-prompt />
 

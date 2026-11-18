@@ -17,6 +17,7 @@ export class AppComponent {
   protected readonly debugMode = signal(true);
   protected readonly fullScreened = this.coreService.fullScreened;
   protected readonly logs = this.coreService.logs;
+  protected readonly fullScreenButtonHidden = this.coreService.fullScreenButtonHidden;
 
   constructor() {
     initTapHaptics();

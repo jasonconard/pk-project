@@ -1,0 +1,79 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section class="sheet" role="dialog" aria-modal="true" aria-labelledby="game-menu-title">
+  <span class="grip" aria-hidden="true"></span>
+  <header>
+    <h2 id="game-menu-title">Menu</h2>
+    <button type="button" class="close" aria-label="Fermer" title="Fermer (Échap)" (click)="closed.emit()"><svg lucideX></svg></button>
+  </header>
+
+  <div class="entries">
+    @for (entry of entries; track entry.label) {
+      <button type="button" class="entry" disabled [title]="entry.soon + ' : bientôt'">
+        <svg [lucideIcon]="entry.icon"></svg>
+        <span>{{ entry.label }}</span>
+      </button>
+    }
+  </div>
+  <p class="soon">Grisé : arrive avec les prochains outils</p>
+
+  <div class="switches">
+    @if (fullScreenSupported) {
+      <button type="button" class="switch" [attr.aria-pressed]="fullScreened()" (click)="toggleFullScreen()">
+        @if (fullScreened()) { <svg lucideMinimize></svg> } @else { <svg lucideMaximize></svg> }
+        Plein écran
+      </button>
+    }
+    <button type="button" class="switch" [attr.aria-pressed]="!soundMuted()" title="Couper / remettre le son" (click)="toggleMute()">
+      @if (soundMuted()) { <svg lucideVolumeX></svg> Muet } @else { <svg lucideVolume2></svg> Son {{ soundPercent() }} % }
+    </button>
+    <button type="button" class="switch" disabled title="Mode photo : bientôt">
+      <svg lucideCamera></svg> Photo
+    </button>
+  </div>
+
+  <div class="settings">
+    <button type="button" class="row" (click)="ambiance.emit()">
+      <svg lucideCloudSun class="row-icon"></svg>
+      <span class="row-text"><b>Ambiance</b><small>Météo, heure, vent, nuages, son</small></span>
+      <svg lucideChevronRight class="chevron"></svg>
+    </button>
+    <button type="button" class="row" [attr.aria-expanded]="qualityOpen()" (click)="qualityOpen.set(!qualityOpen())">
+      <svg lucideGauge class="row-icon"></svg>
+      <span class="row-text">
+        <b>Qualité graphique</b>
+        <small>{{ qualityLabel() }}@if (hud()?.framePerSec; as fps) { · {{ fps }} fps }</small>
+      </span>
+      @if (qualityOpen()) { <svg lucideChevronDown class="chevron"></svg> } @else { <svg lucideChevronRight class="chevron"></svg> }
+    </button>
+    @if (qualityOpen()) {
+      <div class="quality">
+        <div role="radiogroup" aria-label="Qualité">
+          @for (q of qualityChoices; track q.mode) {
+            <button type="button" role="radio" [attr.aria-checked]="quality() === q.mode" (click)="setQuality(q.mode)">
+              <b>{{ q.label }}</b>
+              <small>{{ q.hint }}</small>
+            </button>
+          }
+        </div>
+        @if (hud(); as hud) {
+          <p class="current">Résolution ×{{ hud.pixelRatio }} · Ombres {{ hud.shadowMapSize || 'aucune' }}</p>
+          @if (hapticsSupported) {
+            <label class="check">
+              <input type="checkbox" [checked]="hapticsEnabled()" (change)="setHaptics($event)" />
+              Vibrations
+            </label>
+          }
+          <label class="check">
+            <input type="checkbox" [checked]="hud.diagnosticsOpen" (change)="setDiagnostics($event)" />
+            Console de diagnostic (images par seconde, rendu)
+          </label>
+        }
+      </div>
+    }
+    <button type="button" class="row" (click)="releaseNotes.emit()">
+      <svg lucideSparkles class="row-icon"></svg>
+      <span class="row-text"><b>Nouveautés</b><small>v{{ version() }}</small></span>
+      <svg lucideChevronRight class="chevron"></svg>
+    </button>
+  </div>
+</section>

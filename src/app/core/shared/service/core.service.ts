@@ -12,6 +12,10 @@ export class CoreService {
 
   private readonly fullScreenedState = signal(!!document.fullscreenElement);
   readonly fullScreened = this.fullScreenedState.asReadonly();
+  /** The browser can go full screen (not the iPhone's Safari). */
+  readonly fullScreenSupported = !!document.fullscreenEnabled;
+  /** The floating full screen button is hidden (the game mode has it in its menu). */
+  readonly fullScreenButtonHidden = signal(false);
 
   constructor() {
     fromEvent(document, 'fullscreenchange').subscribe(() => {

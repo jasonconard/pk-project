@@ -1,7 +1,8 @@
 <div class="canvas-container" #canvas></div>
 
 @if (hud(); as hud) {
-  @if (hud.framePerSec) {
+  <!-- Editor: the temperature / fps tile and its graphics menu (in the game mode, they are in the menu) -->
+  @if (hud.framePerSec && hud.editMode) {
     <button type="button" class="status-tile" [class.open]="qualityMenu()" [attr.aria-expanded]="qualityMenu()"
             title="Température et images par seconde" (click)="toggleQualityMenu($event)">
       <span class="temperature" [style.color]="temperatureColor()">{{ temperatureLabel() }} °C</span>
@@ -32,8 +33,10 @@
         </label>
       </section>
     }
-    @if (hud.diagnosticsOpen && !qualityMenu()) {
-      <aside class="diagnostics" aria-label="Diagnostic">
+  }
+  @if (hud.framePerSec) {
+    @if (hud.diagnosticsOpen && !(qualityMenu() && hud.editMode)) {
+      <aside class="diagnostics" [class.under-clock]="playing()" aria-label="Diagnostic">
         @if (hud.diagnostics; as d) {
           <div><span class="k">Images</span> <b>{{ d.fps }} fps</b> · moy. {{ d.frameAvg | number:'1.0-1' }} ms ·
             pire <b [class.bad]="d.frameMax > 50">{{ d.frameMax | number:'1.0-0' }} ms</b></div>
@@ -69,7 +72,20 @@
   }
 }
 
-<game-weather-panel [weather]="weather()" [night]="night()" [hour]="hour()" [timeFlow]="timeFlow()"
+<!-- Game mode: Créer (map editor) and Menu, top right -->
+@if (playing()) {
+  <div class="hud-corner" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    <button type="button" class="hud-btn create" title="Créer : éditer la carte (B)" (click)="create($event)">
+      <svg lucidePencilRuler></svg><span class="label">Créer</span><kbd>B</kbd>
+    </button>
+    <button type="button" class="hud-btn" title="Menu (Échap)" [attr.aria-expanded]="menuOpen()" (click)="openMenu($event)">
+      <svg lucideMenu></svg><span class="label">Menu</span><kbd>Échap</kbd>
+    </button>
+  </div>
+}
+
+<game-weather-panel #weatherPanel [gameMode]="playing()" [temperature]="temperatureLabel()" [temperatureColor]="temperatureColor()"
+                    [weather]="weather()" [night]="night()" [hour]="hour()" [timeFlow]="timeFlow()"
                     [windStrength]="windStrength()" [windDirection]="windDirection()"
                     [fireflyColor]="fireflyColor()" [leafMode]="leafMode()" [gusts]="gusts()" [cloudDensity]="cloudDensity()"
                     [soundVolume]="soundVolume()" [soundMuted]="soundMuted()" [musicVolume]="musicVolume()"
@@ -90,6 +106,10 @@
   <div class="pause-screen" animate.enter="anim-fade-in" animate.leave="anim-fade-out" (touchend)="togglePaused()">
     Pause
   </div>
+}
+
+@if (menuOpen() && playing()) {
+  <game-menu [version]="appVersion" (closed)="menuOpen.set(false)" (ambiance)="openAmbiance()" (releaseNotes)="openReleaseNotes()" />
 }
 
 @if (releaseNotes()) {

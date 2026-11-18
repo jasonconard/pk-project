@@ -1,4 +1,4 @@
-import { afterNextRender, Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Passage } from './shared/model/Passage';
 import { DecimalPipe } from '@angular/common';
 import { isFirstStartOfNewVersion } from './release-notes/whats-new';
@@ -18,16 +18,23 @@ import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
 import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../core/shared/haptics';
+import { GameMenuComponent } from './game-menu/game-menu.component';
+import { CoreService } from '../../core/shared/service/core.service';
+import { SequenceService } from './shared/services/sequence.service';
+import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, DecimalPipe],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
 export class GameComponent {
   private readonly gameService = inject(GameService);
+  private readonly coreService = inject(CoreService);
+  private readonly sequenceService = inject(SequenceService);
   private readonly canvasRef = viewChild.required<ElementRef<HTMLElement>>('canvas');
+  private readonly weatherPanel = viewChild.required<WeatherPanelComponent>('weatherPanel');
 
   protected readonly hud = this.gameService.hud;
   protected readonly weather = this.gameService.weather;
@@ -46,6 +53,13 @@ export class GameComponent {
   protected readonly GameMode = GameMode;
   /** Hidden menu on the temperature / fps tile: graphics quality. */
   protected readonly qualityMenu = signal(false);
+  /** Playing on the map (not editing, not fighting, loaded): the game mode's own interface (clock, Créer, Menu). */
+  protected readonly playing = computed(() => {
+    const hud = this.hud();
+    return !!hud && hud.mode === GameMode.MAP && !hud.editMode && !hud.loading;
+  });
+  /** Game menu (button top right, or Escape). */
+  protected readonly menuOpen = signal(false);
   protected readonly qualityChoices = QUALITY_CHOICES;
   /** Version of the game (package.json): tells if the installed app (PWA) is up to date. */
   protected readonly appVersion = version;
@@ -60,6 +74,19 @@ export class GameComponent {
 
   constructor() {
     afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
+    // The floating full screen button gives way to the menu in the game mode
+    effect(() => this.coreService.fullScreenButtonHidden.set(this.playing()));
+    inject(DestroyRef).onDestroy(() => this.coreService.fullScreenButtonHidden.set(false));
+    // Escape opens the game menu, when the game doesn't need it (a message, a fight, a dialog open). The game marks the
+    // key as handled (its "cancel" key): defaultPrevented can't tell; the dialogs stop it before it gets here
+    const onKeyDown = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape' && !ev.repeat && this.playing() && !this.menuOpen()
+        && !this.releaseNotes() && !this.sequenceService.message() && !(ev.target instanceof HTMLInputElement)) {
+        this.menuOpen.set(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    inject(DestroyRef).onDestroy(() => window.removeEventListener('keydown', onKeyDown));
     // After an update: what's new, once the loading screen is gone
     effect(() => {
       const hud = this.hud();
@@ -139,10 +166,28 @@ export class GameComponent {
     this.qualityMenu.update(open => !open);
   }
 
-  protected openReleaseNotes(event: Event): void {
-    (event.currentTarget as HTMLElement).blur();
+  protected openReleaseNotes(event?: Event): void {
+    (event?.currentTarget as HTMLElement | undefined)?.blur();
     this.qualityMenu.set(false);
+    this.menuOpen.set(false);
     this.releaseNotes.set(true);
+  }
+
+  protected openMenu(event: Event): void {
+    // The button must not keep the focus (Space / Enter would click it again instead of reaching the game)
+    (event.currentTarget as HTMLElement).blur();
+    this.menuOpen.set(true);
+  }
+
+  /** From the menu: the ambiance tools unfold under the clock. */
+  protected openAmbiance(): void {
+    this.menuOpen.set(false);
+    this.weatherPanel().openAmbiance();
+  }
+
+  protected create(event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.toggleEditMode();
   }
 
   protected readonly hapticsSupported = hapticsSupported;

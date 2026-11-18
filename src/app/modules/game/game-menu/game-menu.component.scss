@@ -1,0 +1,299 @@
+:host {
+  --panel: #22232a;
+  --chip: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.12);
+  --play: #5aa8ff;
+
+  position: absolute;
+  inset: 0;
+  z-index: 1100;
+  color: #fafafa;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  animation: fade 200ms both;
+}
+
+// A panel on the right (landscape, computer)…
+.sheet {
+  position: absolute;
+  top: calc(10px + var(--safe-top));
+  right: calc(10px + var(--safe-right));
+  bottom: calc(10px + var(--safe-bottom));
+  width: min(380px, calc(100vw - 20px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px 20px;
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: slide-left 220ms ease-out both;
+}
+
+.grip {
+  display: none;
+}
+
+// …a sheet from the bottom on phones in portrait
+@media (max-width: 600px) and (orientation: portrait) {
+  .sheet {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 85%;
+    padding-top: 10px;
+    padding-bottom: calc(20px + var(--safe-bottom));
+    border-radius: 24px 24px 0 0;
+    animation-name: slide-up;
+  }
+
+  .grip {
+    display: block;
+    align-self: center;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+  }
+}
+
+.close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--chip);
+  font-size: 18px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+}
+
+// The game's menus, 3 per row
+.entries {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.entry {
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 16px;
+  background: var(--chip);
+  font-size: 13px;
+  font-weight: 500;
+
+  svg {
+    font-size: 24px;
+    color: var(--play);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.45;
+
+    svg {
+      color: inherit;
+    }
+  }
+}
+
+.soon {
+  margin: -6px 0 0;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+// Quick switches: full screen, sound, photo
+.switches {
+  display: flex;
+  gap: 8px;
+}
+
+.switch {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  border-radius: 22px;
+  background: var(--chip);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 13px;
+  white-space: nowrap;
+
+  &[aria-pressed='true'] {
+    background: rgba(90, 168, 255, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(90, 168, 255, 0.5);
+    color: var(--play);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+}
+
+// Settings: one row each
+.settings {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: var(--chip);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: transparent;
+  text-align: left;
+
+  & + .row, .quality + & {
+    border-top: 1px solid var(--line);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .row-icon {
+    flex: none;
+    font-size: 20px;
+    opacity: 0.7;
+  }
+
+  .row-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    b {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    small {
+      font-size: 12px;
+      opacity: 0.65;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .chevron {
+    flex: none;
+    opacity: 0.5;
+  }
+}
+
+// Graphics settings, unfolded under their row
+.quality {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 14px 12px 46px;
+  font-size: 13px;
+
+  [role='radio'] {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: transparent;
+    text-align: left;
+
+    small {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    &[aria-checked='true'] {
+      background: rgba(90, 168, 255, 0.2);
+      box-shadow: inset 0 0 0 1px var(--play);
+    }
+  }
+
+  .current {
+    margin: 6px 0 2px;
+    font-size: 11px;
+    opacity: 0.65;
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 6px;
+    cursor: pointer;
+
+    input {
+      accent-color: var(--play);
+    }
+  }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@keyframes slide-left {
+  from { opacity: 0; transform: translateX(24px); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop, .sheet {
+    animation: none;
+  }
+}

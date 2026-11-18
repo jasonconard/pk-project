@@ -36,7 +36,10 @@ const TIME_ICONS: Record<TimeOfDay, LucideIcon> = { night: LucideMoon, dawn: Luc
   selector: 'game-weather-panel',
   imports: [WeatherCatalogComponent, LucideDynamicIcon, LucideTimer, LucideWind, LucideWindArrowDown, LucideCloud, LucideVolume2, LucideVolumeX, LucideCheck, LucideEighthNotes],
   templateUrl: './weather-panel.component.html',
-  styleUrls: ['./weather-panel.component.scss', './weather-panel.portrait.scss'],
+  styleUrls: ['./weather-panel.component.scss', './weather-panel.portrait.scss', './weather-panel.game.scss'],
+  host: {
+    '[class.game-mode]': 'gameMode()',
+  },
 })
 export class WeatherPanelComponent {
   private readonly keyService = inject(KeyService);
@@ -58,6 +61,14 @@ export class WeatherPanelComponent {
   readonly soundMuted = input(false);
   /** Music volume 0..1 (the songs of the music editor). */
   readonly musicVolume = input(0.6);
+  /**
+   * Game mode: only the clock (time of day, weather, temperature) shows, top left; touching it unfolds the
+   * ambiance tools under it. Otherwise (map editor) the tools stay on the toolbar, top right.
+   */
+  readonly gameMode = input(false);
+  /** Air temperature (°C, rounded) and its color, shown on the clock. */
+  readonly temperature = input(20);
+  readonly temperatureColor = input('inherit');
   readonly weatherSelected = output<WeatherType>();
   readonly hourChange = output<number>();
   readonly timeFlowChange = output<boolean>();
@@ -81,6 +92,10 @@ export class WeatherPanelComponent {
   private readonly soundNow = linkedSignal(() => ({ volume: this.soundVolume(), muted: this.soundMuted() }));
   /** Popover currently open (null = none). */
   protected readonly panel = signal<SettingPanel | null>(null);
+  /** Game mode: the ambiance tools are unfolded under the clock. */
+  protected readonly ambianceOpen = signal(false);
+  /** The tools are on screen: always in the editor, when unfolded in the game mode. */
+  protected readonly toolsShown = computed(() => !this.gameMode() || this.ambianceOpen());
   protected readonly windDirections = WIND_DIRECTIONS;
   protected readonly windPercent = computed(() => Math.round(this.windStrength() * 100));
   /** Rough wind description shown next to the gauge. */
@@ -148,9 +163,14 @@ export class WeatherPanelComponent {
     const onKeyDown = (ev: KeyboardEvent) => this.onKeyDown(ev);
     const onKeyUp = (ev: KeyboardEvent) => this.panel() && ev.stopPropagation();
     const onPointerDown = (ev: PointerEvent) => {
+      const target = ev.target as Node;
       // Click outside the toolbar closes the popover
-      if (this.panel() && !this.host.nativeElement.querySelector('.toolbar')?.contains(ev.target as Node)) {
+      if (this.panel() && !this.host.nativeElement.querySelector('.toolbar')?.contains(target)) {
         this.panel.set(null);
+      }
+      // Click outside the panel (the catalog is inside it) folds the ambiance tools back
+      if (this.ambianceOpen() && !this.host.nativeElement.contains(target)) {
+        this.ambianceOpen.set(false);
       }
     };
     window.addEventListener('keydown', onKeyDown, true);
@@ -161,6 +181,17 @@ export class WeatherPanelComponent {
       window.removeEventListener('keyup', onKeyUp, true);
       window.removeEventListener('pointerdown', onPointerDown, true);
     });
+  }
+
+  /** Game mode: unfolds the ambiance tools under the clock (also from the game menu). */
+  openAmbiance(): void {
+    this.ambianceOpen.set(true);
+  }
+
+  protected toggleAmbiance(event: Event): void {
+    this.dropFocus(event);
+    this.panel.set(null);
+    this.ambianceOpen.update(open => !open);
   }
 
   protected openCatalog(event?: Event): void {
@@ -266,12 +297,19 @@ export class WeatherPanelComponent {
     if (shortcut && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
       ev.stopPropagation();
       if (!ev.repeat) {
+        // Game mode: the tools unfold so the popover has its button
+        this.ambianceOpen.set(true);
         this.toggle(shortcut);
       }
       return;
     }
     const panel = this.panel();
     if (!panel) {
+      // Escape folds the ambiance tools back (before the game menu opens with it)
+      if (ev.key === 'Escape' && this.gameMode() && this.ambianceOpen()) {
+        ev.stopPropagation();
+        this.ambianceOpen.set(false);
+      }
       return;
     }
     // A popover is open: arrows / Enter / Escape act on it, not on the game
