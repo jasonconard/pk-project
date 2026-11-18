@@ -1,20 +1,25 @@
 /* Selected object: its passage to a map. Choosing its arrival point: the banner at the top. */
 
 .passage {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  font-size: 13px;
 
   h3 {
     margin: 0;
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
+
+    svg {
+      color: #ffb04a;
+    }
   }
 
   button {
@@ -115,7 +120,7 @@
 .pick-banner {
   pointer-events: auto;
   position: fixed;
-  top: calc(60px + var(--safe-top));
+  top: calc(72px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   max-width: calc(100vw - 32px);

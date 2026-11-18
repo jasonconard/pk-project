@@ -1,42 +1,9 @@
 <div class="canvas-container" #canvas></div>
 
 @if (hud(); as hud) {
-  <!-- Editor: the temperature / fps tile and its graphics menu (in the game mode, they are in the menu) -->
-  @if (hud.framePerSec && hud.editMode) {
-    <button type="button" class="status-tile" [class.open]="qualityMenu()" [attr.aria-expanded]="qualityMenu()"
-            title="Température et images par seconde" (click)="toggleQualityMenu($event)">
-      <span class="temperature" [style.color]="temperatureColor()">{{ temperatureLabel() }} °C</span>
-      <span class="fps" [class.ok]="hud.framePerSec >= 50" [class.slow]="hud.framePerSec < 30">{{ hud.framePerSec }} <small>fps</small></span>
-    </button>
-    @if (qualityMenu()) {
-      <div class="quality-backdrop" (click)="qualityMenu.set(false)"></div>
-      <section class="quality-menu" role="dialog" aria-label="Qualité graphique" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-        <h2>Qualité graphique <button type="button" class="version" title="Voir les nouveautés" (click)="openReleaseNotes($event)">v{{ appVersion }}</button></h2>
-        <div role="radiogroup" aria-label="Qualité">
-          @for (q of qualityChoices; track q.mode) {
-            <button type="button" role="radio" [attr.aria-checked]="quality() === q.mode" (click)="setQuality(q.mode)">
-              <span class="q-label">{{ q.label }}</span>
-              <span class="q-hint">{{ q.hint }}</span>
-            </button>
-          }
-        </div>
-        <p class="q-current">Résolution ×{{ hud.pixelRatio }} · Ombres {{ hud.shadowMapSize || 'aucune' }}</p>
-        @if (hapticsSupported) {
-          <label class="q-diag">
-            <input type="checkbox" [checked]="hapticsEnabled()" (change)="setHaptics($event)" />
-            Vibrations
-          </label>
-        }
-        <label class="q-diag">
-          <input type="checkbox" [checked]="hud.diagnosticsOpen" (change)="setDiagnostics($event)" />
-          Console de diagnostic
-        </label>
-      </section>
-    }
-  }
   @if (hud.framePerSec) {
-    @if (hud.diagnosticsOpen && !(qualityMenu() && hud.editMode)) {
-      <aside class="diagnostics" [class.under-clock]="playing()" aria-label="Diagnostic">
+    @if (hud.diagnosticsOpen) {
+      <aside class="diagnostics" aria-label="Diagnostic">
         @if (hud.diagnostics; as d) {
           <div><span class="k">Images</span> <b>{{ d.fps }} fps</b> · moy. {{ d.frameAvg | number:'1.0-1' }} ms ·
             pire <b [class.bad]="d.frameMax > 50">{{ d.frameMax | number:'1.0-0' }} ms</b></div>
@@ -68,7 +35,8 @@
     <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [brush]="hud.editBrush" [grid]="hud.editGrid" [selection]="hud.editSelection"
                      [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo" [mapId]="hud.mapId" [mapName]="hud.mapName" [pickMap]="hud.editPick"
                      (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (brushChange)="setEditBrush($event)" (command)="editCommand($event)"
-                     (passageChange)="setPassage($event)" (pickArrival)="pickArrival()" (cancelPick)="cancelPick()" />
+                     (passageChange)="setPassage($event)" (pickArrival)="pickArrival()" (cancelPick)="cancelPick()"
+                     (ambiance)="openAmbiance()" (settings)="menuOpen.set(true)" />
   }
 }
 
@@ -108,7 +76,7 @@
   </div>
 }
 
-@if (menuOpen() && playing()) {
+@if (menuOpen() && hud()?.mode === GameMode.MAP) {
   <game-menu [version]="appVersion" (closed)="menuOpen.set(false)" (ambiance)="openAmbiance()" (releaseNotes)="openReleaseNotes()" />
 }
 

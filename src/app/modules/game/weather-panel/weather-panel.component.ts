@@ -26,7 +26,7 @@ const HOUR_STEP = 0.25;
 const GAUGE_STEP = 0.05;
 
 /**
- * Weather toolbar (top right): weather (opens the catalog), time of day, wind, clouds, sound.
+ * Ambiance tools (top left, folded): weather (opens the catalog), time of day, wind, clouds, sound.
  * Each setting opens a small popover; keyboard: M / H / W / N / V, then ← → to adjust, Escape to close.
  */
 /** Icon of the time of day (hour button and popover). */
@@ -62,8 +62,8 @@ export class WeatherPanelComponent {
   /** Music volume 0..1 (the songs of the music editor). */
   readonly musicVolume = input(0.6);
   /**
-   * Game mode: only the clock (time of day, weather, temperature) shows, top left; touching it unfolds the
-   * ambiance tools under it. Otherwise (map editor) the tools stay on the toolbar, top right.
+   * Game mode: the clock (time of day, weather, temperature) shows, top left; touching it unfolds the ambiance tools
+   * under it. In the map editor, its more menu unfolds them (openAmbiance).
    */
   readonly gameMode = input(false);
   /** Air temperature (°C, rounded) and its color, shown on the clock. */
@@ -92,10 +92,8 @@ export class WeatherPanelComponent {
   private readonly soundNow = linkedSignal(() => ({ volume: this.soundVolume(), muted: this.soundMuted() }));
   /** Popover currently open (null = none). */
   protected readonly panel = signal<SettingPanel | null>(null);
-  /** Game mode: the ambiance tools are unfolded under the clock. */
+  /** The ambiance tools are unfolded (top left, in a column). */
   protected readonly ambianceOpen = signal(false);
-  /** The tools are on screen: always in the editor, when unfolded in the game mode. */
-  protected readonly toolsShown = computed(() => !this.gameMode() || this.ambianceOpen());
   protected readonly windDirections = WIND_DIRECTIONS;
   protected readonly windPercent = computed(() => Math.round(this.windStrength() * 100));
   /** Rough wind description shown next to the gauge. */
@@ -183,7 +181,7 @@ export class WeatherPanelComponent {
     });
   }
 
-  /** Game mode: unfolds the ambiance tools under the clock (also from the game menu). */
+  /** Unfolds the ambiance tools (the game menu, the editor's more menu). */
   openAmbiance(): void {
     this.ambianceOpen.set(true);
   }
@@ -297,7 +295,7 @@ export class WeatherPanelComponent {
     if (shortcut && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
       ev.stopPropagation();
       if (!ev.repeat) {
-        // Game mode: the tools unfold so the popover has its button
+        // The tools unfold so the popover has its button
         this.ambianceOpen.set(true);
         this.toggle(shortcut);
       }
@@ -306,7 +304,7 @@ export class WeatherPanelComponent {
     const panel = this.panel();
     if (!panel) {
       // Escape folds the ambiance tools back (before the game menu opens with it)
-      if (ev.key === 'Escape' && this.gameMode() && this.ambianceOpen()) {
+      if (ev.key === 'Escape' && this.ambianceOpen()) {
         ev.stopPropagation();
         this.ambianceOpen.set(false);
       }

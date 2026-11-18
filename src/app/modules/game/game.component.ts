@@ -12,12 +12,10 @@ import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { EditorBarComponent } from './editor-bar/editor-bar.component';
 import { ReleaseNotesComponent } from './release-notes/release-notes.component';
 import { temperatureColor } from './shared/util/temperature-color';
-import { QUALITY_CHOICES, QualityMode } from './shared/model/Quality';
 import { version } from '../../../../package.json';
 import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
-import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../core/shared/haptics';
 import { GameMenuComponent } from './game-menu/game-menu.component';
 import { CoreService } from '../../core/shared/service/core.service';
 import { SequenceService } from './shared/services/sequence.service';
@@ -51,31 +49,30 @@ export class GameComponent {
   protected readonly soundMuted = this.gameService.soundMuted;
   protected readonly musicVolume = this.gameService.musicVolume;
   protected readonly GameMode = GameMode;
-  /** Hidden menu on the temperature / fps tile: graphics quality. */
-  protected readonly qualityMenu = signal(false);
   /** Playing on the map (not editing, not fighting, loaded): the game mode's own interface (clock, Créer, Menu). */
   protected readonly playing = computed(() => {
     const hud = this.hud();
     return !!hud && hud.mode === GameMode.MAP && !hud.editMode && !hud.loading;
   });
-  /** Game menu (button top right, or Escape). */
+  /** Game menu (button top right, or Escape; the editor's Réglages). */
   protected readonly menuOpen = signal(false);
-  protected readonly qualityChoices = QUALITY_CHOICES;
   /** Version of the game (package.json): tells if the installed app (PWA) is up to date. */
   protected readonly appVersion = version;
   /** "What's new" dialog, opened from the version number, and by itself the first time a new version starts. */
   protected readonly releaseNotes = signal(false);
   /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
   protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
-  protected readonly quality = this.gameService.quality;
   /** Air temperature (°C, rounded) and its color, from icy blue to red. */
   protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));
   protected readonly temperatureColor = computed(() => temperatureColor(this.hud()?.temperature ?? 20));
 
   constructor() {
     afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
-    // The floating full screen button gives way to the menu in the game mode
-    effect(() => this.coreService.fullScreenButtonHidden.set(this.playing()));
+    // On the map, the floating full screen button gives way to the menu (the game's Menu, the editor's Réglages)
+    effect(() => {
+      const hud = this.hud();
+      this.coreService.fullScreenButtonHidden.set(!!hud && hud.mode === GameMode.MAP && !hud.loading);
+    });
     inject(DestroyRef).onDestroy(() => this.coreService.fullScreenButtonHidden.set(false));
     // Escape opens the game menu, when the game doesn't need it (a message, a fight, a dialog open). The game marks the
     // key as handled (its "cancel" key): defaultPrevented can't tell; the dialogs stop it before it gets here
@@ -161,14 +158,8 @@ export class GameComponent {
     this.gameService.setTimeFlow(flowing);
   }
 
-  protected toggleQualityMenu(event: Event): void {
-    (event.currentTarget as HTMLElement).blur();
-    this.qualityMenu.update(open => !open);
-  }
-
   protected openReleaseNotes(event?: Event): void {
     (event?.currentTarget as HTMLElement | undefined)?.blur();
-    this.qualityMenu.set(false);
     this.menuOpen.set(false);
     this.releaseNotes.set(true);
   }
@@ -179,7 +170,7 @@ export class GameComponent {
     this.menuOpen.set(true);
   }
 
-  /** From the menu: the ambiance tools unfold under the clock. */
+  /** From the game menu or the editor's more menu: the ambiance tools unfold (top left). */
   protected openAmbiance(): void {
     this.menuOpen.set(false);
     this.weatherPanel().openAmbiance();
@@ -188,21 +179,6 @@ export class GameComponent {
   protected create(event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.toggleEditMode();
-  }
-
-  protected readonly hapticsSupported = hapticsSupported;
-  protected readonly hapticsEnabled = hapticsEnabled;
-
-  protected setHaptics(event: Event): void {
-    setHapticsEnabled((event.target as HTMLInputElement).checked);
-  }
-
-  protected setDiagnostics(event: Event): void {
-    this.gameService.setDiagnostics((event.target as HTMLInputElement).checked);
-  }
-
-  protected setQuality(mode: QualityMode): void {
-    this.gameService.setQuality(mode);
   }
 
   protected setPassage(passage: Passage | null): void {

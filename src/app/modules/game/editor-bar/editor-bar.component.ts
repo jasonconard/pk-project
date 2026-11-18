@@ -1,5 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideDoorOpen, LucideFlag, LucideMapPin, LucidePlus, LucideX, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench } from '@lucide/angular';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, linkedSignal, output, signal } from '@angular/core';
+import {
+  LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideCheck, LucideChevronDown, LucideCloudSun,
+  LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
+  LucideLayoutGrid, LucideMap, LucideMapPin, LucideMountain, LucideMousePointer2, LucidePaintBucket, LucidePaintbrush, LucidePlay,
+  LucidePlus, LucideRedo2, LucideSettings, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap,
+} from '@lucide/angular';
 import { MapManagerComponent } from '../map-manager/map-manager.component';
 import { Passage } from '../shared/model/Passage';
 import { listMaps } from '../shared/services/map-storage';
@@ -17,21 +22,34 @@ const MODEL_LABELS: Record<string, string> = {
   pannel: 'Panneau', 'wood-pannel': 'Pancarte', 'letter-box': 'Boîte aux lettres', rock: 'Rocher',
 };
 
+type PaletteTab = 'objects' | 'ground' | 'relief' | 'chunks';
+
+const TABS: { id: PaletteTab, label: string, icon: LucideIcon }[] = [
+  { id: 'objects', label: 'Objets', icon: LucideBox },
+  { id: 'ground', label: 'Sols', icon: LucidePaintbrush },
+  { id: 'relief', label: 'Reliefs', icon: LucideMountain },
+  { id: 'chunks', label: 'Morceaux', icon: LucideLayoutGrid },
+];
+
 interface PaletteEntry {
   id: string;
   label: string;
 }
 
 /**
- * Map editor UI: a switch button (top left, B shortcut), undo / redo, the selected object's panel, the hint of
- * the controls, and the models palette (bottom). Shortcuts while editing: Escape (put the model back / deselect),
- * Delete (remove the selection), Ctrl+Z / Ctrl+Y (undo / redo).
+ * Map editor UI (the game's Créer button or B opens it): one bar at the top (Jouer, the open map, undo / redo, more:
+ * grid, ambiance, settings, the other editors), the hint of the current tool under it, and at the bottom the tools
+ * dock (tabs, brush sizes, palette) or, when an object is selected, its sheet. Shortcuts while editing: Escape (put
+ * the model back / deselect), Delete (remove the selection), Ctrl+Z / Ctrl+Y (undo / redo).
  */
 @Component({
   selector: 'game-editor-bar',
-  imports: [MapManagerComponent, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideChevronDown, LucideDoorOpen, LucideFlag, LucideMapPin, LucidePlus, LucideX, LucideEighthNotes, LucideEraser, LucideGrid3x3, LucideMap, LucideMousePointer2, LucidePaintBucket, LucideRedo2, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideWrench],
+  imports: [MapManagerComponent, LucideDynamicIcon, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing,
+    LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
+    LucideGrid3x3, LucideMap, LucideMapPin, LucideMousePointer2, LucidePaintBucket, LucidePlay, LucidePlus, LucideRedo2, LucideSettings,
+    LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap],
   templateUrl: './editor-bar.component.html',
-  styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss', './editor-bar.portrait.scss'],
+  styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.maps-open]': 'mapsOpen()' },
 })
@@ -63,10 +81,23 @@ export class EditorBarComponent {
   readonly modelSelected = output<string | null>();
   readonly tileSelected = output<string | null>();
   readonly brushChange = output<EditBrush>();
+  /** More → Ambiance: the weather tools unfold (top left). */
+  readonly ambiance = output<void>();
+  /** More → Réglages: the game menu (full screen, sound, graphics quality, what's new). */
+  readonly settings = output<void>();
+  /** The "more" menu of the bar is open. */
+  protected readonly moreOpen = signal(false);
+  /** The hint was closed: it comes back with the next tool. */
+  protected readonly hintClosed = linkedSignal(() => {
+    this.modelId();
+    this.tileId();
+    return false;
+  });
+  protected readonly tabs = TABS;
   /** Touch screen: the hint tells the finger gestures. */
   protected readonly touch = inject(TouchService).isTouchDevice;
   /** Palette tab shown. */
-  protected readonly tab = signal<'objects' | 'ground' | 'relief' | 'chunks'>('objects');
+  protected readonly tab = signal<PaletteTab>('objects');
   protected readonly brushes: { value: EditBrush, label: string, title: string }[] = [
     { value: 1, label: '1', title: 'Pinceau 1 case' },
     { value: 2, label: '2', title: 'Pinceau 2 × 2 cases' },
@@ -116,7 +147,7 @@ export class EditorBarComponent {
     this.tileSelected.emit(id === this.tileId() ? null : id);
   }
 
-  protected setTab(tab: 'objects' | 'ground' | 'relief' | 'chunks', event: Event): void {
+  protected setTab(tab: PaletteTab, event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.tab.set(tab);
   }
@@ -128,7 +159,23 @@ export class EditorBarComponent {
 
   protected send(command: EditCommand, event: Event): void {
     (event.currentTarget as HTMLElement).blur();
+    this.moreOpen.set(false);
     this.command.emit(command);
+  }
+
+  protected toggleMore(event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.moreOpen.update(open => !open);
+  }
+
+  protected openAmbiance(): void {
+    this.moreOpen.set(false);
+    this.ambiance.emit();
+  }
+
+  protected openSettings(): void {
+    this.moreOpen.set(false);
+    this.settings.emit();
   }
 
   /**
@@ -186,10 +233,13 @@ export class EditorBarComponent {
     let handled = true;
     if (key === EDIT_KEY && !ctrl) {
       if (!ev.repeat) {
+        this.moreOpen.set(false);
         this.toggled.emit();
       }
     } else if (!this.editMode()) {
       handled = false;
+    } else if (key === 'escape' && this.moreOpen()) {
+      this.moreOpen.set(false);
     } else if (key === 'escape' && this.pickMap()) {
       this.cancelPick.emit();
     } else if (ctrl && key === 'z') {

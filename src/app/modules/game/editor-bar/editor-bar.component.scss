@@ -1,7 +1,15 @@
+/* Map editor: the bar at the top, the hint under it, the tools dock (or the selected object's sheet) at the bottom.
+   Orange: the editor's color (the game's is blue). */
+
 :host {
+  --panel: rgba(34, 35, 42, 0.92);
+  --panel-solid: #22232a;
+  --chip: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.12);
+  --edit: #ffb04a;
+
   position: absolute;
-  top: calc(10px + var(--safe-top));
-  left: calc(82px + var(--safe-left)); // right of the status tile (temperature, fps)
+  inset: 0;
   z-index: 800;
   color: white;
   pointer-events: none; // only the controls catch clicks
@@ -12,31 +20,77 @@
   z-index: 1200;
 }
 
-.top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+    outline-offset: 2px;
+  }
 }
 
-.history {
+kbd {
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+  font: inherit;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+// ---------- The bar ----------
+
+.bar {
   pointer-events: auto;
+  position: absolute;
+  top: calc(10px + var(--safe-top));
+  left: calc(10px + var(--safe-left));
+  right: calc(10px + var(--safe-right));
+  max-width: 640px;
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 0 0 1.5px rgba(255, 176, 74, 0.45), 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.play-btn {
+  flex: none;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--edit);
+  color: #2a1a00;
+  font-size: 14px;
+  font-weight: 700;
+
+  &:hover {
+    background: #ffc06e;
+  }
 }
 
 .icon-btn {
+  flex: none;
   width: 40px;
   height: 40px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(34, 35, 42, 0.9);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  color: inherit;
-  font-size: 20px;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--chip);
+  font-size: 18px;
 
   &:hover:not(:disabled) {
-    background: rgba(64, 66, 78, 0.95);
+    background: rgba(255, 255, 255, 0.16);
   }
 
   &:disabled {
@@ -44,354 +98,311 @@
     cursor: default;
   }
 
-  &:focus-visible {
-    outline: 2px solid #5aa8ff;
-    outline-offset: 2px;
-  }
-
-  // Switch on (grid): orange outline, like the edit button
   &.on {
-    box-shadow: 0 0 0 2px #ffb04a, 0 1px 4px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 176, 74, 0.25);
+    color: var(--edit);
   }
 }
 
-.text-btn {
-  height: 40px;
-  padding: 0 10px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(34, 35, 42, 0.9);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  color: inherit;
-  font: inherit;
-  font-size: 13px;
-  white-space: nowrap;
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(64, 66, 78, 0.95);
-  }
-
-  &:focus-visible {
-    outline: 2px solid #5aa8ff;
-    outline-offset: 2px;
-  }
-
-  &.danger {
-    background: rgba(200, 60, 50, 0.9);
-  }
-}
-
-// Map open: its name, opens the map manager
+// The open map: its name, opens the map manager
 .map-btn {
+  flex: 1;
+  min-width: 0;
   height: 40px;
-  max-width: 220px;
-  padding: 0 10px;
-  gap: 6px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  border: 1px solid rgba(74, 76, 90, 0.9);
-  border-radius: 20px;
-  background: rgba(34, 35, 42, 0.92);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  color: inherit;
-  font: inherit;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: var(--chip);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
-  cursor: pointer;
 
   > svg:first-child {
+    flex: none;
     color: #ffd34d;
-    flex-shrink: 0;
+  }
+
+  .map-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
   }
 
   .chevron {
-    color: #8a8d9c;
-    flex-shrink: 0;
+    flex: none;
+    opacity: 0.6;
   }
 
   &:hover {
-    background: rgba(64, 66, 78, 0.95);
-  }
-
-  &:focus-visible {
-    outline: 2px solid #5aa8ff;
-    outline-offset: 2px;
+    background: rgba(255, 255, 255, 0.16);
   }
 }
 
-.map-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
+// More: grid, ambiance, settings, the other editors
+.more {
+  position: relative;
+  flex: none;
 }
 
-// Selected object: options under the top bar
-.selection {
-  pointer-events: auto;
-  width: 250px;
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: rgba(34, 35, 42, 0.9);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  font-size: 13px;
+.more-backdrop {
+  position: fixed;
+  inset: 0;
+}
 
-  h2 {
-    margin: 0 0 8px;
+.more-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -6px;
+  z-index: 1;
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--panel-solid);
+  box-shadow: 0 0 0 1px var(--line), 0 10px 30px rgba(0, 0, 0, 0.5);
+
+  button {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background: transparent;
     font-size: 14px;
+    text-align: left;
 
-    img {
-      max-width: 40px;
-      max-height: 32px;
-      image-rendering: pixelated;
+    > svg:first-child {
+      flex: none;
+      color: var(--edit);
+      font-size: 18px;
     }
-  }
-
-  .option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 0;
-    cursor: pointer;
-
-    input {
-      accent-color: #ffb04a;
-    }
-  }
-
-  .model-btn {
-    width: 100%;
-    margin-top: 8px;
-    padding: 6px 8px;
-    border: none;
-    border-radius: 6px;
-    background: rgba(90, 140, 220, 0.25);
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
 
     &:hover {
-      background: rgba(90, 140, 220, 0.45);
+      background: var(--chip);
     }
   }
 
-  .delete {
+  .check {
+    margin-left: auto;
+    color: var(--edit);
+  }
+
+  hr {
     width: 100%;
-    margin-top: 8px;
-    padding: 6px 8px;
+    margin: 4px 0;
+    border: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .more-title {
+    margin: 4px 10px 2px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+}
+
+// ---------- The hint ----------
+
+.hint {
+  pointer-events: auto;
+  position: absolute;
+  top: calc(70px + var(--safe-top));
+  left: calc(10px + var(--safe-left));
+  max-width: min(640px, calc(100vw - 20px - var(--safe-left) - var(--safe-right)));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 6px 6px 12px;
+  border-radius: 12px;
+  background: rgba(34, 35, 42, 0.72);
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.85);
+
+  button {
+    flex: none;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    border: none;
-    border-radius: 6px;
-    background: rgba(220, 70, 60, 0.25);
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
+    border-radius: 8px;
+    background: transparent;
+    font-size: 14px;
+    opacity: 0.7;
 
     &:hover {
-      background: rgba(220, 70, 60, 0.45);
-    }
-
-    kbd {
-      padding: 0 4px;
-      border-radius: 3px;
-      background: rgba(255, 255, 255, 0.14);
-      font: inherit;
-      font-size: 10px;
-      opacity: 0.7;
+      opacity: 1;
+      background: var(--chip);
     }
   }
 }
 
-.edit-btn {
+// ---------- The bottom sheet: tools dock or selected object ----------
+
+.sheet {
   pointer-events: auto;
-  height: 40px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 10px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(34, 35, 42, 0.9);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  color: inherit;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out;
+  flex-direction: column;
+  padding: 12px calc(12px + var(--safe-right)) calc(14px + var(--safe-bottom)) calc(12px + var(--safe-left));
+  border-radius: 22px 22px 0 0;
+  background: var(--panel-solid);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+}
 
-  .icon {
-    font-size: 17px;
-    line-height: 1;
+// Wide screens (landscape, computer): a floating panel in the middle, at the bottom
+@media (min-width: 601px), (orientation: landscape) {
+  .sheet {
+    left: 50%;
+    right: auto;
+    bottom: calc(10px + var(--safe-bottom));
+    width: min(760px, calc(100vw - 20px - var(--safe-left) - var(--safe-right)));
+    transform: translateX(-50%);
+    padding: 10px 12px 12px;
+    border-radius: 18px;
   }
 
-  kbd {
-    padding: 0 4px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.14);
-    font: inherit;
-    font-size: 10px;
-    opacity: 0.7;
-  }
-
-  &:hover {
-    background: rgba(64, 66, 78, 0.95);
-  }
-
-  &:focus-visible {
-    outline: 2px solid #5aa8ff;
-    outline-offset: 2px;
-  }
-
-  // Edit mode on: orange outline, like a "recording" state
-  &.active {
-    box-shadow: 0 0 0 2px #ffb04a, 0 1px 4px rgba(0, 0, 0, 0.3);
+  .sheet.selection {
+    width: min(420px, calc(100vw - 20px));
   }
 }
 
-// Controls reminder: centered just above the palette
-.hint {
-  position: fixed;
-  left: 50%;
-  bottom: 136px;
-  transform: translateX(-50%);
-  max-width: calc(100vw - 32px);
-  text-align: center;
-  white-space: normal;
-  margin: 0;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(34, 35, 42, 0.75);
-  font-size: 12px;
+.dock {
+  gap: 10px;
 }
 
-// Narrow screens (phones, also in landscape): the weather toolbar shares the first line, so the edit button is
-// icon only and the other buttons go on a second line under it
-@media (max-width: 1100px) {
-  .edit-btn .label,
-  .edit-btn kbd {
-    display: none;
-  }
-
-  :host {
-    max-width: calc(100vw - 92px - var(--safe-left) - var(--safe-right));
-  }
-
-  .top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .history {
-    flex-wrap: wrap;
-  }
-}
-
-// Small screens: under the status tile, no hint
-@media (max-width: 640px) {
-  .hint {
-    display: none;
-  }
-
-  :host {
-    left: calc(10px + var(--safe-left));
-    top: calc(56px + var(--safe-top));
-    max-width: calc(100vw - 20px - var(--safe-left) - var(--safe-right));
-  }
-}
-
-// Palette: bottom center, tabs (and brush sizes) above the tools
-.palette-box {
-  pointer-events: auto;
-  position: fixed;
-  left: 50%;
-  bottom: 14px;
-  transform: translateX(-50%);
-  max-width: calc(100vw - 32px);
-  border-radius: 10px;
-  background: rgba(34, 35, 42, 0.9);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-.palette-head {
+.dock-head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
-  padding: 6px 6px 0;
+  align-items: center;
+  gap: 8px;
+}
 
-  .tabs, .brushes {
-    display: flex;
-    gap: 4px;
-  }
+.tabs, .brushes {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
 
   button {
-    padding: 4px 10px;
-    border: none;
-    border-radius: 6px;
+    flex: none;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    border-radius: 17px;
     background: transparent;
-    color: inherit;
-    font: inherit;
-    font-size: 12px;
-    cursor: pointer;
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-size: 13px;
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.08);
+    svg {
+      font-size: 15px;
     }
 
-    &[aria-selected='true'], &[aria-checked='true'] {
-      background: rgba(255, 176, 74, 0.25);
-      box-shadow: inset 0 0 0 1px #ffb04a;
+    // Phones: the selected tab only shows its name
+    .label {
+      display: none;
     }
 
-    &:focus-visible {
-      outline: 2px solid #5aa8ff;
-      outline-offset: -2px;
+    &[aria-selected='true'] {
+      background: rgba(255, 176, 74, 0.2);
+      box-shadow: inset 0 0 0 1px rgba(255, 176, 74, 0.6);
+      color: var(--edit);
+      font-weight: 600;
+
+      .label {
+        display: inline;
+      }
     }
+
+    &:hover:not(:disabled) {
+      background: var(--chip);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+}
+
+@media (min-width: 601px) {
+  .tabs button .label {
+    display: inline;
+  }
+}
+
+.brushes button {
+  min-width: 34px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--chip);
+  font-size: 12px;
+
+  &[aria-checked='true'] {
+    background: rgba(255, 176, 74, 0.25);
+    box-shadow: inset 0 0 0 1px var(--edit);
   }
 }
 
 .palette {
   display: flex;
-  gap: 6px;
-  padding: 6px;
+  gap: 8px;
   overflow-x: auto;
+  scrollbar-width: thin;
+  // The entries scroll right to the edge on phones
+  margin: 0 -12px;
+  padding: 2px 12px 4px;
 }
 
 .entry {
   flex: none;
-  width: 76px;
+  width: 70px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 6px 4px;
-  border: none;
-  border-radius: 8px;
+  padding: 0;
   background: transparent;
-  color: inherit;
-  font: inherit;
   font-size: 11px;
-  cursor: pointer;
-  transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out;
+  color: rgba(255, 255, 255, 0.75);
 
   .pic {
-    width: 56px;
-    height: 44px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.07);
     font-size: 24px;
+    transition: box-shadow 150ms ease-in-out, background 150ms ease-in-out;
 
+    // The thumbnails are small pixel art: enlarged, kept sharp
     img {
-      max-width: 100%;
-      max-height: 100%;
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
       image-rendering: pixelated;
     }
   }
@@ -403,35 +414,223 @@
     white-space: nowrap;
   }
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  &:focus-visible {
-    outline: 2px solid #5aa8ff;
-    outline-offset: -2px;
+  &:hover .pic {
+    background: rgba(255, 255, 255, 0.12);
   }
 
   &.selected {
-    background: rgba(255, 176, 74, 0.18);
-    box-shadow: inset 0 0 0 2px #ffb04a;
+    color: var(--edit);
+    font-weight: 600;
+
+    .pic {
+      background: rgba(255, 176, 74, 0.15);
+      box-shadow: inset 0 0 0 2.5px var(--edit);
+    }
+  }
+
+  // Ground tiles: their picture fills the square
+  &.tile .tile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    image-rendering: pixelated;
   }
 }
 
-.separator {
-  flex: none;
-  width: 1px;
-  margin: 4px 2px;
-  background: rgba(255, 255, 255, 0.2);
+// ---------- The selected object ----------
+
+.selection {
+  gap: 12px;
+  max-height: 62%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 14px;
 }
 
-// Ground tiles: square pictures, a bit smaller than the models
-.entry.tile {
-  width: 64px;
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-  .tile-pic {
-    width: 32px;
-    height: 32px;
-    image-rendering: pixelated;
+  .thumb {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+
+    img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+  }
+
+  .title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    small {
+      font-size: 12px;
+      opacity: 0.65;
+    }
+  }
+
+  .close {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--chip);
+    font-size: 18px;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+
+  button {
+    flex: 1;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 12px;
+    background: var(--chip);
+    font-size: 13px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    &.danger {
+      background: rgba(255, 107, 107, 0.14);
+      color: #ff8a80;
+
+      &:hover {
+        background: rgba(255, 107, 107, 0.24);
+      }
+    }
+  }
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: var(--chip);
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+
+  & + & {
+    border-top: 1px solid var(--line);
+  }
+
+  span {
+    flex: 1;
+  }
+
+  // A switch: a pill and its knob
+  input {
+    flex: none;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    width: 40px;
+    height: 24px;
+    margin: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: background 150ms ease-in-out;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 150ms ease-in-out;
+    }
+
+    &:checked {
+      background: var(--edit);
+
+      &::after {
+        transform: translateX(16px);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid #5aa8ff;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.soon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 13px;
+  opacity: 0.45;
+  cursor: default;
+}
+
+// Entering sheets slide up from the bottom
+.anim-sheet-in {
+  animation: sheet-in 200ms ease-out both;
+}
+
+@keyframes sheet-in {
+  from { opacity: 0; translate: 0 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-sheet-in {
+    animation: none;
+  }
+}
+
+// Phones: no keyboard shortcut shown
+@media (max-width: 600px), (hover: none) {
+  .play-btn kbd {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .play-btn .label {
+    display: none;
   }
 }

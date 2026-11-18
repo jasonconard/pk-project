@@ -1,5 +1,6 @@
-/* Game mode: the clock (top left) and, under it, the ambiance tools in a column when it is touched; each popover
-   opens to the right of its button. Last style file: it wins over the toolbar's places (top right). */
+/* The clock (game mode, top left) and the ambiance tools, folded: unfolded in a column top left (under the clock, or
+   under the editor's bar), each popover to the right of its button. Last style file: it wins over the toolbar's
+   former places (top right). */
 
 .clock {
   pointer-events: auto;
@@ -83,7 +84,7 @@
   }
 }
 
-:host(.game-mode) {
+:host {
   .toolbar {
     top: calc(68px + var(--safe-top));
     left: calc(10px + var(--safe-left));
@@ -118,7 +119,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :host(.game-mode) .toolbar {
+  :host .toolbar {
     animation: none;
   }
 }
