@@ -1038,15 +1038,21 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
    */
   protected async backToGame(event: Event) {
     event.preventDefault();
-    await this.flushSave();
     if (this.embedded()) {
-      this.closed.emit();
+      await this.requestClose();
       return;
     }
+    await this.flushSave();
     const url = new URL(location.href);
     url.hash = '#/';
     location.assign(url);
     location.reload();
+  }
+
+  /** Over the game (Jeu, the back button): the model is saved, then the panel closes (the game reads it). */
+  async requestClose(): Promise<void> {
+    await this.flushSave();
+    this.closed.emit();
   }
 
   /** `id`, or `id-2`, `id-3`… if a model already has it. */

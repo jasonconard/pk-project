@@ -16,12 +16,35 @@ const typing = (target: EventTarget | null): boolean =>
  * in hand…) is kept in the order it was opened or last changed, and Escape closes the latest one, only that one.
  * Nothing open: Escape goes on to the game (its cancel key, the game menu).
  * One listener on the window, capture phase, added before any other (the app starts with it): it runs first.
+ *
+ * The back button (Android, the browser's) does the same: while something is open, an extra history entry is kept;
+ * going back pops it, and the latest thing open is closed (the entry comes back if others are still open). Closed
+ * otherwise (Escape, a click), the entry is taken back silently. Nothing open: back does what it always did (leaves
+ * the app on Android).
  */
 @Service()
 export class EscapeService {
   private readonly layers: EscapeLayer[] = [];
+  /** The extra history entry is there (something is open). */
+  private armed = false;
+  /** History moves made here: their popstate is not a back press. */
+  private ownPops = 0;
+  private syncTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
+    window.addEventListener('popstate', () => {
+      if (this.ownPops) {
+        this.ownPops--;
+        return;
+      }
+      if (!this.armed) {
+        return;
+      }
+      // Back pressed: like Escape (also over an editor: it closes, saved)
+      this.armed = false;
+      this.layers[this.layers.length - 1]?.close();
+      this.syncHistory();
+    });
     window.addEventListener('keydown', ev => {
       // (an editor over the game: Escape is its own)
       if (ev.key !== 'Escape' || typing(ev.target) || !this.layers.length || isGameCovered()) {
@@ -38,6 +61,7 @@ export class EscapeService {
   open(layer: EscapeLayer): void {
     this.close(layer);
     this.layers.push(layer);
+    this.syncHistory();
   }
 
   /** Takes a layer out (closed). */
@@ -45,7 +69,26 @@ export class EscapeService {
     const index = this.layers.indexOf(layer);
     if (index >= 0) {
       this.layers.splice(index, 1);
+      this.syncHistory();
     }
+  }
+
+  /**
+   * The extra history entry follows what is open: added when something opens, taken back when all is closed. A bit
+   * later: a closing layer leaves the stack once its state has changed (see track).
+   */
+  private syncHistory(): void {
+    clearTimeout(this.syncTimer);
+    this.syncTimer = setTimeout(() => {
+      if (this.layers.length && !this.armed) {
+        history.pushState(history.state, '');
+        this.armed = true;
+      } else if (!this.layers.length && this.armed) {
+        this.armed = false;
+        this.ownPops++;
+        history.back();
+      }
+    }, 50);
   }
 
   /**

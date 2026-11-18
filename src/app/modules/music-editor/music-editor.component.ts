@@ -209,14 +209,21 @@ export class MusicEditorComponent {
    */
   protected backToGame(event: Event): void {
     event.preventDefault();
-    this.stop();
-    this.flushSave();
     if (this.embedded()) {
-      this.closed.emit();
+      this.requestClose();
       return;
     }
+    this.stop();
+    this.flushSave();
     location.hash = '#/';
     location.reload();
+  }
+
+  /** Over the game (Jeu, the back button): playback stops, the songs are saved, the panel closes. */
+  requestClose(): void {
+    this.stop();
+    this.flushSave();
+    this.closed.emit();
   }
 
   // --- Playback ---

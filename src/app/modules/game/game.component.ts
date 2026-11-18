@@ -21,6 +21,7 @@ import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-pane
 import { FireflyColor, formatHour, LeafMode, WEATHER_CHOICES, WeatherType } from './shared/weather/Weather';
 import { GameMenuComponent } from './game-menu/game-menu.component';
 import { MapControlsComponent } from './map-controls/map-controls.component';
+import { EscapeService } from '../../core/shared/service/escape.service';
 import { CoreService } from '../../core/shared/service/core.service';
 import { SequenceService } from './shared/services/sequence.service';
 import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
@@ -37,6 +38,8 @@ export class GameComponent {
   private readonly sequenceService = inject(SequenceService);
   private readonly canvasRef = viewChild.required<ElementRef<HTMLElement>>('canvas');
   private readonly weatherPanel = viewChild.required<WeatherPanelComponent>('weatherPanel');
+  private readonly musicEditor = viewChild(MusicEditorComponent);
+  private readonly modelEditor = viewChild(ModelEditorComponent);
 
   protected readonly hud = this.gameService.hud;
   protected readonly weather = this.gameService.weather;
@@ -81,6 +84,15 @@ export class GameComponent {
     afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
     // An editor over the game: the game sleeps (no frames, moves, time, sounds, music, keys) until it is closed
     effect(() => setGameCovered(!!this.editorPanel()));
+    // The back button closes the editor like its Jeu (saved first); the Escape key stays the editor's own
+    inject(EscapeService).track(() => this.editorPanel(), () => {
+      const editor = this.musicEditor() ?? this.modelEditor();
+      if (editor) {
+        void editor.requestClose();
+      } else {
+        this.editorPanel.set(null); // still loading
+      }
+    });
     inject(DestroyRef).onDestroy(() => setGameCovered(false));
     // On the map, the floating full screen button gives way to the menu (the game's Menu, the editor's Réglages)
     effect(() => {
