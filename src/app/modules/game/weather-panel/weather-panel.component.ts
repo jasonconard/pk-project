@@ -1,4 +1,5 @@
 import { Component, computed, DestroyRef, effect, ElementRef, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { isGameCovered } from '../../../core/shared/app-visibility';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import { WeatherCatalogComponent } from '../weather-catalog/weather-catalog.component';
 import { KeyService } from '../../../core/shared/service/key.service';
@@ -163,9 +164,13 @@ export class WeatherPanelComponent {
     escape.track(() => this.ambianceOpen(), () => this.ambianceOpen.set(false));
     escape.track(() => this.panel(), () => this.panel.set(null));
     // Capture phase: before the game (document listener)
-    const onKeyDown = (ev: KeyboardEvent) => this.onKeyDown(ev);
-    const onKeyUp = (ev: KeyboardEvent) => this.panel() && ev.stopPropagation();
+    // (an editor over the game: its keys and clicks are its own)
+    const onKeyDown = (ev: KeyboardEvent) => !isGameCovered() && this.onKeyDown(ev);
+    const onKeyUp = (ev: KeyboardEvent) => !isGameCovered() && this.panel() && ev.stopPropagation();
     const onPointerDown = (ev: PointerEvent) => {
+      if (isGameCovered()) {
+        return;
+      }
       const target = ev.target as Node;
       // Click outside the toolbar closes the popover
       if (this.panel() && !this.host.nativeElement.querySelector('.toolbar')?.contains(target)) {

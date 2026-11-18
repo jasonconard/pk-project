@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { isGameCovered } from '../../../core/shared/app-visibility';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideCheck, LucideChevronDown, LucideCloudSun,
@@ -36,6 +37,9 @@ const EDITORS: { id: 'models' | 'music' | null, label: string, sub: string, icon
   { id: null, label: 'Portraits et sprites', sub: 'Pixel art · bientôt', icon: LucideUserRound },
   { id: null, label: 'Cinématiques', sub: 'Caméra, scènes · bientôt', icon: LucideClapperboard },
 ];
+
+/** The editors opened over the game (a full screen panel): the music editor. */
+export type EditorPanel = 'music';
 
 /** Layouts of the editor: phone held upright (bar + bottom dock), phone on its side (side panels, height is short), computer. */
 export type EditorLayout = 'portrait' | 'landscape' | 'desktop';
@@ -106,6 +110,8 @@ export class EditorBarComponent {
   readonly brushChange = output<EditBrush>();
   /** More → Ambiance: the weather tools unfold (top left). */
   readonly ambiance = output<void>();
+  /** An editor opened over the game, as a full screen panel. */
+  readonly editorPanel = output<EditorPanel>();
   /** More → Réglages: the game menu (full screen, sound, graphics quality, what's new). */
   readonly settings = output<void>();
   /** The "more" menu of the bar is open. */
@@ -167,7 +173,8 @@ export class EditorBarComponent {
     escape.track(() => this.editMode() && this.modelId(), () => this.modelSelected.emit(null));
     escape.track(() => this.editMode() && this.tileId(), () => this.tileSelected.emit(null));
     escape.track(() => this.editMode() && this.selection(), () => this.command.emit('deselect'));
-    const onKeyDown = (ev: KeyboardEvent) => this.onKeyDown(ev);
+    // (an editor over the game: its keys are its own)
+    const onKeyDown = (ev: KeyboardEvent) => !isGameCovered() && this.onKeyDown(ev);
     window.addEventListener('keydown', onKeyDown, true);
     inject(DestroyRef).onDestroy(() => window.removeEventListener('keydown', onKeyDown, true));
     const desktop = matchMedia(DESKTOP_QUERY);
@@ -276,12 +283,11 @@ export class EditorBarComponent {
     location.reload();
   }
 
-  /** Music editor: a page of its own (the game stops meanwhile). */
+  /** Music editor: a full screen panel over the game (the game sleeps meanwhile, see GameComponent). */
   protected openMusicEditor(): void {
-    const url = new URL(location.href);
-    url.hash = '#/musique';
-    location.assign(url);
-    location.reload();
+    this.moreOpen.set(false);
+    this.editorsOpen.set(false);
+    this.editorPanel.emit('music');
   }
 
   /** A new passage: to another map (the first one), entering like a door. */

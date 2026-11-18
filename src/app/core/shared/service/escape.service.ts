@@ -1,4 +1,5 @@
 import { DestroyRef, effect, inject, Injector, Service } from '@angular/core';
+import { isGameCovered } from '../app-visibility';
 
 /** Something Escape closes (or steps back in): a menu, a popover, a selection, a tool in hand… */
 export interface EscapeLayer {
@@ -22,7 +23,8 @@ export class EscapeService {
 
   constructor() {
     window.addEventListener('keydown', ev => {
-      if (ev.key !== 'Escape' || typing(ev.target) || !this.layers.length) {
+      // (an editor over the game: Escape is its own)
+      if (ev.key !== 'Escape' || typing(ev.target) || !this.layers.length || isGameCovered()) {
         return;
       }
       ev.preventDefault();

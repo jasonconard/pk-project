@@ -17,7 +17,7 @@ import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { FightService } from "../../../fight/shared/services/fight.service";
-import { isAppHidden, onAppVisibility } from "../../../../core/shared/app-visibility";
+import { isGameAsleep, onGameAsleep } from "../../../../core/shared/app-visibility";
 import { GameMusic } from "./game-music";
 import { WEATHER_INFO } from "../weather/weather-catalog";
 import { DAY_ONLY_HOUR, NIGHT_ONLY_HOUR, MORNING_MIST_HOUR, mistAt, FIREFLY_COLORS, FireflyColor, fireflyColorHex, isNightHour, isWeatherAvailable, LeafMode, WeatherType, WindDirection, windToX } from "../weather/Weather";
@@ -268,9 +268,9 @@ export class GameService {
     this.switchGameMode(gameMode, true);
 
     game.setQuality(this.qualityState());
-    // In the background (home screen, other app, screen locked): the game stops (see isAppHidden in the loops);
+    // In the background (home screen, other app, screen locked): the game stops (see isGameAsleep in the loops);
     // keys held when leaving would stay pressed (their keyup is lost), and the time spent away is not caught up
-    onAppVisibility(hidden => {
+    onGameAsleep(hidden => {
       this.keyService.clearKeys();
       if (!hidden) {
         this.lastFrameTime = performance.now();
@@ -278,7 +278,7 @@ export class GameService {
       }
     });
     setInterval(() => {
-      if (isAppHidden()) {
+      if (isGameAsleep()) {
         return; // no frames meanwhile: the quality must not drop because of it
       }
       game.framePerSec = game.frame;
@@ -294,7 +294,7 @@ export class GameService {
     let pending = 0;
     setInterval(() => {
       const now = performance.now();
-      if (isAppHidden()) {
+      if (isGameAsleep()) {
         lastInput = now;
         pending = 0;
         return;
@@ -319,7 +319,7 @@ export class GameService {
 
     // Time going by: small steps (the light and the sun move smoothly in between, see WeatherHelper)
     setInterval(() => {
-      if (this.timeFlowState() && !game.paused && !game.loading && !isAppHidden()) {
+      if (this.timeFlowState() && !game.paused && !game.loading && !isGameAsleep()) {
         this.advanceHour(TIME_STEP / 1000 * 24 / DAY_DURATION);
       }
     }, TIME_STEP);
@@ -433,7 +433,7 @@ export class GameService {
 
   private animate(game: Game): void {
     requestAnimationFrame(() => this.animate(game));
-    if (!isAppHidden()) {
+    if (!isGameAsleep()) {
       this.renderLoop(game);
     }
   }
@@ -443,6 +443,11 @@ export class GameService {
       () => this.game?.refreshRenderer())
   }
 
+
+  /** Back from the music editor: the game plays the songs as they are now. */
+  reloadMusic() {
+    this.music.reload();
+  }
 
   togglePaused() {
     if (this.game) {

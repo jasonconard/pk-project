@@ -36,7 +36,7 @@
                      [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo" [mapId]="hud.mapId" [mapName]="hud.mapName" [pickMap]="hud.editPick" [ambianceLabel]="ambianceLabel()"
                      (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (brushChange)="setEditBrush($event)" (command)="editCommand($event)"
                      (passageChange)="setPassage($event)" (pickArrival)="pickArrival()" (cancelPick)="cancelPick()"
-                     (ambiance)="openAmbiance()" (settings)="menuOpen.set(true)" />
+                     (ambiance)="openAmbiance()" (settings)="menuOpen.set(true)" (editorPanel)="editorPanel.set($event)" />
   }
 }
 
@@ -86,6 +86,21 @@
 
 @if (releaseNotes()) {
   <game-release-notes [current]="appVersion" [justUpdated]="justUpdated()" (closed)="closeReleaseNotes()" />
+}
+
+<!-- An editor over the game: a full screen panel coming from the side; the game sleeps behind it -->
+@if (editorPanel(); as panel) {
+  <section class="editor-panel" aria-label="Éditeur" animate.enter="editor-panel-in" animate.leave="editor-panel-out">
+    @defer (on immediate) {
+      @switch (panel) {
+        @case ('music') {
+          <app-music-editor [embedded]="true" (closed)="closeEditorPanel()" />
+        }
+      }
+    } @loading (after 150ms) {
+      <p class="editor-loading">Chargement…</p>
+    }
+  </section>
 }
 
 <core-message />

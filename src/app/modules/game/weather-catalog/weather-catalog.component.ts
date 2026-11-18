@@ -1,4 +1,5 @@
 import { Component, computed, DestroyRef, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { isGameCovered } from '../../../core/shared/app-visibility';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import { DAY_ONLY_HOUR, formatHour, NIGHT_ONLY_HOUR, FIREFLY_COLORS, FireflyColor, isWeatherAvailable, LEAF_MODES, LeafMode, TEMPERATURES, WEATHER_CHOICES, WeatherChoice, WeatherType } from '../shared/weather/Weather';
 import {
@@ -123,8 +124,9 @@ export class WeatherCatalogComponent {
     // Escape: the detail, then the catalog (typing in the search: its own handling, see onKeyDown)
     inject(EscapeService).track(() => this.isOpen(), () => this.detailOpen() ? this.detailOpen.set(false) : this.close());
     // Capture phase: the catalog sees the keys before the game (which listens on the document)
-    const onKeyDown = (ev: KeyboardEvent) => this.onKeyDown(ev);
-    const onKeyUp = (ev: KeyboardEvent) => this.isOpen() && ev.stopPropagation();
+    // (an editor over the game: its keys are its own)
+    const onKeyDown = (ev: KeyboardEvent) => !isGameCovered() && this.onKeyDown(ev);
+    const onKeyUp = (ev: KeyboardEvent) => !isGameCovered() && this.isOpen() && ev.stopPropagation();
     window.addEventListener('keydown', onKeyDown, true);
     window.addEventListener('keyup', onKeyUp, true);
     inject(DestroyRef).onDestroy(() => {

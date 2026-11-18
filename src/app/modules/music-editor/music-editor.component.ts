@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, HostListener, inject, input, output, signal } from '@angular/core';
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
   LucideActivity, LucideAudioLines, LucideAudioWaveform, LucideBell, LucideBird, LucideChevronDown, LucideCloud, LucideFeather,
@@ -53,6 +53,10 @@ const WIDE = '(min-width: 1200px)';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MusicEditorComponent {
+  /** Opened over the game (a full screen panel): Jeu closes it instead of loading the game page. */
+  readonly embedded = input(false);
+  /** Jeu, when opened over the game. */
+  readonly closed = output<void>();
   protected readonly instruments = INSTRUMENTS;
   protected readonly drumRows = DRUMS;
   protected readonly modes = MODES;
@@ -199,11 +203,18 @@ export class MusicEditorComponent {
     });
   }
 
-  /** Back to the game: the page is loaded again (the game starts from scratch, like after the model editor). */
+  /**
+   * Back to the game: over the game, the panel closes (the game plays the songs as saved now); on its own page, the
+   * game page is loaded.
+   */
   protected backToGame(event: Event): void {
     event.preventDefault();
     this.stop();
     this.flushSave();
+    if (this.embedded()) {
+      this.closed.emit();
+      return;
+    }
     location.hash = '#/';
     location.reload();
   }

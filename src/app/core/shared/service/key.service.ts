@@ -1,4 +1,5 @@
 import { effect, inject, Service } from '@angular/core';
+import { isGameCovered } from '../app-visibility';
 import { BehaviorSubject, fromEvent } from 'rxjs';
 import { getKeyFromAxes, KeyCode, PressedKey } from '../model/PressedKey';
 import { GamepadService } from './gamepad.service';
@@ -49,7 +50,8 @@ export class KeyService {
   holdedCodes: KeyCode[] = [];
 
   constructor() {
-    fromEvent<KeyboardEvent>(document, 'keydown').subscribe(ev => this.setKeyDown(KeyService.getKeyCodeFromKeyboard(ev)));
+    // (an editor over the game: the keys are its own)
+    fromEvent<KeyboardEvent>(document, 'keydown').subscribe(ev => !isGameCovered() && this.setKeyDown(KeyService.getKeyCodeFromKeyboard(ev)));
     fromEvent<KeyboardEvent>(document, 'keyup').subscribe(ev => this.setKeyUp(KeyService.getKeyCodeFromKeyboard(ev)));
 
     effect(() => this.updateStick(this.touchService.stick()));

@@ -1,4 +1,5 @@
 import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { isGameCovered, setGameCovered } from '../../core/shared/app-visibility';
 import { Passage } from './shared/model/Passage';
 import { DecimalPipe } from '@angular/common';
 import { isFirstStartOfNewVersion } from './release-notes/whats-new';
@@ -9,7 +10,8 @@ import { TouchPadComponent } from '../../core/touch-pad/touch-pad.component';
 import { MessageComponent } from '../../core/message/message.component';
 import { TeleportComponent } from './teleport/teleport.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
-import { EditorBarComponent } from './editor-bar/editor-bar.component';
+import { EditorBarComponent, EditorPanel } from './editor-bar/editor-bar.component';
+import { MusicEditorComponent } from '../music-editor/music-editor.component';
 import { ReleaseNotesComponent } from './release-notes/release-notes.component';
 import { temperatureColor } from './shared/util/temperature-color';
 import { version } from '../../../../package.json';
@@ -24,7 +26,7 @@ import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, MapControlsComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, MapControlsComponent, MusicEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -55,6 +57,8 @@ export class GameComponent {
     const hud = this.hud();
     return !!hud && hud.mode === GameMode.MAP && !hud.editMode && !hud.loading;
   });
+  /** An editor opened over the game (a full screen panel), null: none. */
+  protected readonly editorPanel = signal<EditorPanel | null>(null);
   /** Game menu (button top right, or Escape; the editor's Réglages). */
   protected readonly menuOpen = signal(false);
   /** Version of the game (package.json): tells if the installed app (PWA) is up to date. */
@@ -72,6 +76,9 @@ export class GameComponent {
 
   constructor() {
     afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
+    // An editor over the game: the game sleeps (no frames, moves, time, sounds, music, keys) until it is closed
+    effect(() => setGameCovered(!!this.editorPanel()));
+    inject(DestroyRef).onDestroy(() => setGameCovered(false));
     // On the map, the floating full screen button gives way to the menu (the game's Menu, the editor's Réglages)
     effect(() => {
       const hud = this.hud();
@@ -81,7 +88,7 @@ export class GameComponent {
     // Escape opens the game menu, when the game doesn't need it (a message, a fight, a dialog open). The game marks the
     // key as handled (its "cancel" key): defaultPrevented can't tell; the dialogs stop it before it gets here
     const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape' && !ev.repeat && this.playing() && !this.menuOpen()
+      if (ev.key === 'Escape' && !ev.repeat && !isGameCovered() && this.playing() && !this.menuOpen()
         && !this.releaseNotes() && !this.sequenceService.message() && !(ev.target instanceof HTMLInputElement)) {
         this.menuOpen.set(true);
       }
@@ -166,6 +173,14 @@ export class GameComponent {
     (event?.currentTarget as HTMLElement | undefined)?.blur();
     this.menuOpen.set(false);
     this.releaseNotes.set(true);
+  }
+
+  /** The editor's Jeu: back to the game, which takes the editor's changes (the songs). */
+  protected closeEditorPanel(): void {
+    if (this.editorPanel() === 'music') {
+      this.gameService.reloadMusic();
+    }
+    this.editorPanel.set(null);
   }
 
   protected openMenu(event: Event): void {

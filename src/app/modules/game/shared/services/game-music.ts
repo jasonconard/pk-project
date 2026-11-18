@@ -1,7 +1,7 @@
 import { MusicEngine } from '../../../music-editor/shared/music-engine';
 import { MusicSlot, MusicUse, Song } from '../../../music-editor/shared/song';
 import { loadGameMusic } from '../../../music-editor/shared/song-storage';
-import { onAppVisibility } from '../../../../core/shared/app-visibility';
+import { onGameAsleep } from '../../../../core/shared/app-visibility';
 
 /** Fade out of the song that stops, fade in of the next one (s). */
 const FADE_OUT = 0.9;
@@ -15,8 +15,10 @@ const FADE_IN = 1.4;
  */
 export class GameMusic {
   private readonly engine = new MusicEngine();
-  private readonly songs: Song[];
-  private readonly use: MusicUse;
+  private songs: Song[];
+  private use: MusicUse;
+  /** The last moment asked for (the song is chosen again when the songs change). */
+  private slot: { slot: MusicSlot, night: boolean } = { slot: 'day', night: false };
   private unlocked = false;
   private volume = 0;
   /** Song heard now (null during a fade out), song asked for, song being switched to (playing or after the fade). */
@@ -38,7 +40,7 @@ export class GameMusic {
     for (const event of ['pointerup', 'keydown', 'touchend']) {
       window.addEventListener(event, unlock, { capture: true, passive: true });
     }
-    onAppVisibility(hidden => this.engine.setSuspended(hidden));
+    onGameAsleep(hidden => this.engine.setSuspended(hidden));
   }
 
   /** Volume 0..1 (0: no music). */
@@ -52,12 +54,25 @@ export class GameMusic {
 
   /** The moment of the game: its song (or the closest one) plays. */
   setSlot(slot: MusicSlot, night: boolean): void {
+    this.slot = { slot, night };
     const song = this.songFor(slot, night);
     if (song === null && slot === 'fight') {
       return; // no fight music: the current one goes on
     }
     this.wanted = song;
     this.apply();
+  }
+
+  /**
+   * The songs and the choices of moments read again (back from the music editor): the song of the moment starts
+   * again, with the changes.
+   */
+  reload(): void {
+    const music = loadGameMusic();
+    this.songs = music.songs;
+    this.use = music.use;
+    this.target = null;
+    this.setSlot(this.slot.slot, this.slot.night);
   }
 
   private songFor(slot: MusicSlot, night: boolean): Song | null {
