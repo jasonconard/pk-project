@@ -14,6 +14,14 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.31',
+    date: '2026-11-18',
+    notes: [
+      'Sur Android : le bouton retour ne met plus le jeu en arrière-plan. Il ferme la dernière chose ouverte, et ouvre le menu quand rien n\'est ouvert.',
+      'Le bouton retour ferme aussi les volets des éditeurs de musique et de modèles.',
+    ],
+  },
+  {
     version: '0.0.30',
     date: '2026-11-18',
     notes: [
