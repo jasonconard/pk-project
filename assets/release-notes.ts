@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.29',
+    date: '2026-11-18',
+    notes: [
+      'Nouvelle interface : l\'horloge en haut à gauche montre le moment, la météo et la température, et ouvre l\'ambiance quand on la touche.',
+      'Le bouton Menu (ou Échap) réunit le plein écran, le son, la qualité graphique et les nouveautés.',
+      'Sur mobile : un bouton pour courir, et un bouton d\'action qui montre quoi faire devant un objet (Entrer, Parler, Lire). Au clavier, la touche E fait l\'action et Maj fait courir.',
+      'Éditeur : une nouvelle interface, adaptée au téléphone en portrait, au téléphone en paysage et à l\'ordinateur, avec une recherche d\'objets sur ordinateur. L\'onglet Morceaux s\'appelle maintenant Zones.',
+      'Éditeur : on peut tourner un objet (R) et le dupliquer (Ctrl D). Échap ferme d\'abord la dernière chose ouverte.',
+    ],
+  },
+  {
     version: '0.0.28',
     date: '2026-11-17',
     notes: [
