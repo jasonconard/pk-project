@@ -17,6 +17,11 @@ interface Template {
 
 const templates = new Map<string, Template>();
 
+/** A model changed (the model editor): its template is built again next time. */
+export function forgetTemplate(modelId: string): void {
+  templates.delete(modelId);
+}
+
 /** The model built once (merged parts), shared by all the copies of every chunk. */
 function templateOf(model: SceneModel): Template {
   let template = templates.get(model.id);

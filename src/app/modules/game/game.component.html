@@ -36,7 +36,7 @@
                      [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo" [mapId]="hud.mapId" [mapName]="hud.mapName" [pickMap]="hud.editPick" [ambianceLabel]="ambianceLabel()"
                      (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (brushChange)="setEditBrush($event)" (command)="editCommand($event)"
                      (passageChange)="setPassage($event)" (pickArrival)="pickArrival()" (cancelPick)="cancelPick()"
-                     (ambiance)="openAmbiance()" (settings)="menuOpen.set(true)" (editorPanel)="editorPanel.set($event)" />
+                     (ambiance)="openAmbiance()" (settings)="menuOpen.set(true)" (editorPanel)="editorPanel.set($event)" [modelsVersion]="modelsVersion()" />
   }
 }
 
@@ -92,9 +92,12 @@
 @if (editorPanel(); as panel) {
   <section class="editor-panel" aria-label="Éditeur" animate.enter="editor-panel-in" animate.leave="editor-panel-out">
     @defer (on immediate) {
-      @switch (panel) {
+      @switch (panel.kind) {
         @case ('music') {
           <app-music-editor [embedded]="true" (closed)="closeEditorPanel()" />
+        }
+        @case ('models') {
+          <app-model-editor [embedded]="true" [modelId]="panel.kind === 'models' ? panel.modelId ?? null : null" (closed)="closeEditorPanel()" />
         }
       }
     } @loading (after 150ms) {

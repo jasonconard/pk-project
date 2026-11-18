@@ -10,7 +10,7 @@ import { MathService } from "../services/math.service";
 import { autotile, NEIGHBORS, terrainById, TILE_SIZE, TILESET_ANIM_LINK, TILESET_LINK, tilesetPos, waterFramePos } from "./Terrain";
 import { applyWeatherShader } from "../weather/weather-shader";
 import { buildGroundGeometry, LEVEL_HEIGHT, MAX_LEVEL, STAIRS_TILE } from "./GroundMesh";
-import { canInstance, ModelInstances } from "./ModelInstances";
+import { canInstance, forgetTemplate, ModelInstances } from "./ModelInstances";
 import { isGameAsleep } from "../../../../core/shared/app-visibility";
 
 /** A chunk ground drawn on a canvas: its texture, then the painted tiles over it. */
@@ -189,6 +189,26 @@ export class MapHelper {
     this.sceneMap.chunks = this.sceneMap.chunks.filter(c => c !== chunk);
     chunk.visible = false;
     this.refreshNeighbors(chunk);
+  }
+
+  /**
+   * Models changed (back from the model editor): the buildings take the new versions (a model that left: not drawn),
+   * and the built chunks holding them are built again.
+   */
+  public refreshModels(ids: string[]) {
+    ids.forEach(forgetTemplate);
+    this.sceneMap.chunks.forEach(chunk => {
+      const changed = chunk.buildings.filter(b => ids.includes(b.modelId));
+      changed.forEach(b => b.originModel = MODELS.find(m => m.id === b.modelId));
+      if (changed.length && chunk.group) {
+        const shown = chunk.group.visible;
+        const visible = chunk.visible;
+        this.unbuildChunk(chunk);
+        this.buildChunk(chunk);
+        chunk.group!.visible = shown;
+        chunk.visible = visible;
+      }
+    });
   }
 
   /** The built chunks touching this one are built again (their borders, walls and shores depend on it). */

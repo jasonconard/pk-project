@@ -1,4 +1,6 @@
 import { computed, effect, inject, Service, signal } from '@angular/core';
+import { MODELS } from '../../../../../assets/models/models';
+import { reloadBrowserModels } from '../model/browser-models';
 import { GameAction } from '../model/GameAction';
 import { MapHelper } from "../model/MapHelper";
 import * as THREE from 'three';
@@ -188,6 +190,9 @@ export class GameService {
   readonly soundVolume = this.soundVolumeState.asReadonly();
   private readonly soundMutedState = signal(this.saved.soundMuted ?? false);
   readonly soundMuted = this.soundMutedState.asReadonly();
+  private readonly modelsVersionState = signal(0);
+  /** Goes up when the models change (back from the model editor): the palette reads them again. */
+  readonly modelsVersion = this.modelsVersionState.asReadonly();
   private readonly musicVolumeState = signal(this.saved.musicVolume ?? 0.6);
   readonly musicVolume = this.musicVolumeState.asReadonly();
   /** The songs of the music editor, chosen by the moment: fight, rain, night, day. */
@@ -443,6 +448,31 @@ export class GameService {
       () => this.game?.refreshRenderer())
   }
 
+
+  /**
+   * Back from the model editor: the models saved there replace the game's, the map draws them again, and the map
+   * editor's palette shows them (modelsVersion). The selection and the model in hand are taken again.
+   */
+  async reloadModels(): Promise<void> {
+    const ids = await reloadBrowserModels();
+    const game = this.game;
+    if (!game?.mapHelper || !ids.length) {
+      return;
+    }
+    const inHand = game.editModelId;
+    if (game.editMode) {
+      this.mapEditorService.command(game, 'deselect');
+      if (inHand && ids.includes(inHand)) {
+        this.mapEditorService.selectModel(game, null);
+      }
+    }
+    game.mapHelper.refreshModels(ids);
+    if (game.editMode && inHand && ids.includes(inHand) && MODELS.some(m => m.id === inHand)) {
+      this.mapEditorService.selectModel(game, inHand);
+    }
+    this.modelsVersionState.update(v => v + 1);
+    this.syncHud();
+  }
 
   /** Back from the music editor: the game plays the songs as they are now. */
   reloadMusic() {

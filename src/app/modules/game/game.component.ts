@@ -12,6 +12,7 @@ import { TeleportComponent } from './teleport/teleport.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { EditorBarComponent, EditorPanel } from './editor-bar/editor-bar.component';
 import { MusicEditorComponent } from '../music-editor/music-editor.component';
+import { ModelEditorComponent } from '../model-editor/model-editor.component';
 import { ReleaseNotesComponent } from './release-notes/release-notes.component';
 import { temperatureColor } from './shared/util/temperature-color';
 import { version } from '../../../../package.json';
@@ -26,7 +27,7 @@ import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, MapControlsComponent, MusicEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -52,6 +53,8 @@ export class GameComponent {
   protected readonly soundMuted = this.gameService.soundMuted;
   protected readonly musicVolume = this.gameService.musicVolume;
   protected readonly GameMode = GameMode;
+  /** Goes up when the models change (back from the model editor). */
+  protected readonly modelsVersion = this.gameService.modelsVersion;
   /** Playing on the map (not editing, not fighting, loaded): the game mode's own interface (clock, Créer, Menu). */
   protected readonly playing = computed(() => {
     const hud = this.hud();
@@ -175,10 +178,13 @@ export class GameComponent {
     this.releaseNotes.set(true);
   }
 
-  /** The editor's Jeu: back to the game, which takes the editor's changes (the songs). */
+  /** The editor's Jeu: back to the game, which takes the editor's changes (the songs, the models). */
   protected closeEditorPanel(): void {
-    if (this.editorPanel() === 'music') {
+    const kind = this.editorPanel()?.kind;
+    if (kind === 'music') {
       this.gameService.reloadMusic();
+    } else if (kind === 'models') {
+      void this.gameService.reloadModels();
     }
     this.editorPanel.set(null);
   }

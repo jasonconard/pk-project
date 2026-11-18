@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, input, OnDestroy, output, signal, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   LucideArrowDown, LucideArrowDownLeft, LucideArrowLeft, LucideArrowLeftRight, LucideArrowRight, LucideArrowUp, LucideArrowUpDown, LucideArrowUpRight, LucideBox, LucideBrush, LucideChevronDown, LucideChevronLeft, LucideCloudCheck, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideEraser, LucideHand, LucideHouse, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucideMousePointerClick, LucideMountain, LucidePackage, LucidePaintBucket, LucidePalette, LucidePencil, LucidePipette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSlash, LucideSparkles, LucideSquare, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX, LucideIcon,
@@ -147,8 +147,14 @@ interface ActiveStroke {
 })
 export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
-  /** `/modeles?id=house`: the model to open (from the map editor). */
-  private readonly requestedId = inject(ActivatedRoute).snapshot.queryParamMap.get('id');
+  /** Opened over the game (a full screen panel): Jeu closes it instead of loading the game page. */
+  readonly embedded = input(false);
+  /** Over the game: the model to open (the map editor's selected object). */
+  readonly modelId = input<string | null>(null);
+  /** Jeu, when opened over the game. */
+  readonly closed = output<void>();
+  /** `/modeles?id=house` (its own page): the model to open. */
+  private readonly routeId = inject(ActivatedRoute).snapshot.queryParamMap.get('id');
   private scene: ModelEditorScene | null = null;
   private pressAt: { x: number, y: number } | null = null;
   private active: ActiveStroke | null = null;
@@ -313,7 +319,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     viewport.addEventListener('pointerup', e => this.untrackTouch(e), { capture: true });
     viewport.addEventListener('pointercancel', e => this.untrackTouch(e), { capture: true });
     await this.refreshStoredIds();
-    const id = this.requestedId;
+    const id = this.modelId() ?? this.routeId;
     this.open(id && (this.modelIds.includes(id) || this.storedIds().includes(id)) ? id : this.modelIds[0]);
   }
 
@@ -1026,10 +1032,17 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.storedIds.set(await storedModelIds());
   }
 
-  /** Back to the game, which then uses the models saved here (a full page load: see openModelEditor in the map editor). */
+  /**
+   * Back to the game, which then uses the models saved here: over the game, the panel closes (the game draws the
+   * models again); on its own page, the game page is loaded.
+   */
   protected async backToGame(event: Event) {
     event.preventDefault();
     await this.flushSave();
+    if (this.embedded()) {
+      this.closed.emit();
+      return;
+    }
     const url = new URL(location.href);
     url.hash = '#/';
     location.assign(url);

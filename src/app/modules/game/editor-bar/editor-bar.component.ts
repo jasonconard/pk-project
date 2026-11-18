@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, linkedSignal, output, signal } from '@angular/core';
 import { isGameCovered } from '../../../core/shared/app-visibility';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
@@ -38,8 +38,8 @@ const EDITORS: { id: 'models' | 'music' | null, label: string, sub: string, icon
   { id: null, label: 'Cinématiques', sub: 'Caméra, scènes · bientôt', icon: LucideClapperboard },
 ];
 
-/** The editors opened over the game (a full screen panel): the music editor. */
-export type EditorPanel = 'music';
+/** The editors opened over the game (a full screen panel): music, models (one of them, or the list). */
+export type EditorPanel = { kind: 'music' } | { kind: 'models', modelId?: string };
 
 /** Layouts of the editor: phone held upright (bar + bottom dock), phone on its side (side panels, height is short), computer. */
 export type EditorLayout = 'portrait' | 'landscape' | 'desktop';
@@ -149,13 +149,18 @@ export class EditorBarComponent {
   });
   readonly command = output<EditCommand>();
 
-  protected readonly entries: PaletteEntry[] = MODEL_CHOICES.map(c => ({ id: c.model.id, label: this.label(c.model.id) }));
+  /** Models changed (back from the model editor): the palette is read again, with new thumbnails. */
+  readonly modelsVersion = input(0);
+  protected readonly entries = computed<PaletteEntry[]>(() => {
+    this.modelsVersion();
+    return MODEL_CHOICES.map(c => ({ id: c.model.id, label: this.label(c.model.id) }));
+  });
   /** The objects by family, the search applied (computer only: elsewhere the palette scrolls without titles). */
   protected readonly families = computed(() => {
     const query = this.layout() === 'desktop' ? normalize(this.query().trim()) : '';
     const matches = (entry: PaletteEntry) => !query || normalize(entry.label).includes(query);
-    const grouped = MODEL_FAMILIES.map(f => ({ label: f.label, entries: this.entries.filter(e => f.ids.includes(e.id) && matches(e)) }));
-    const others = this.entries.filter(e => !MODEL_FAMILIES.some(f => f.ids.includes(e.id)) && matches(e));
+    const grouped = MODEL_FAMILIES.map(f => ({ label: f.label, entries: this.entries().filter(e => f.ids.includes(e.id) && matches(e)) }));
+    const others = this.entries().filter(e => !MODEL_FAMILIES.some(f => f.ids.includes(e.id)) && matches(e));
     return [...grouped, { label: 'Autres', entries: others }].filter(f => f.entries.length);
   });
   protected readonly thumbs = signal<Record<string, string>>({});
@@ -191,8 +196,11 @@ export class EditorBarComponent {
       desktop.removeEventListener('change', onLayout);
       landscape.removeEventListener('change', onLayout);
     });
-    MODEL_CHOICES.forEach(choice => loadModelThumb(choice).then(pic =>
-      this.thumbs.update(thumbs => ({ ...thumbs, [choice.model.id]: pic }))));
+    effect(() => {
+      this.modelsVersion();
+      MODEL_CHOICES.forEach(choice => loadModelThumb(choice).then(pic =>
+        this.thumbs.update(thumbs => ({ ...thumbs, [choice.model.id]: pic }))));
+    });
   }
 
   protected toggle(event: Event): void {
@@ -272,22 +280,18 @@ export class EditorBarComponent {
     this.settings.emit();
   }
 
-  /**
-   * Opens the 3D model editor (a model of the game, or the list). A full page load: the game keeps running in
-   * the background otherwise (it is not torn down when its page is left).
-   */
+  /** The 3D model editor (a model of the game, or the list): a full screen panel over the game, like the music. */
   protected openModelEditor(modelId?: string): void {
-    const url = new URL(location.href);
-    url.hash = '#/modeles' + (modelId ? `?id=${encodeURIComponent(modelId)}` : '');
-    location.assign(url);
-    location.reload();
+    this.moreOpen.set(false);
+    this.editorsOpen.set(false);
+    this.editorPanel.emit({ kind: 'models', modelId });
   }
 
   /** Music editor: a full screen panel over the game (the game sleeps meanwhile, see GameComponent). */
   protected openMusicEditor(): void {
     this.moreOpen.set(false);
     this.editorsOpen.set(false);
-    this.editorPanel.emit('music');
+    this.editorPanel.emit({ kind: 'music' });
   }
 
   /** A new passage: to another map (the first one), entering like a door. */
