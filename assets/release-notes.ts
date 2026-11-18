@@ -14,6 +14,15 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.30',
+    date: '2026-11-18',
+    notes: [
+      'Éditeur : les éditeurs de musique et de modèles s\'ouvrent par-dessus le jeu, sans le recharger. Le jeu s\'arrête derrière et reprend avec tes changements.',
+      'Éditeur : le bouton « Modèle » d\'un objet ouvre directement son modèle.',
+      'Sur Android : le bouton retour ferme la dernière chose ouverte, comme Échap.',
+    ],
+  },
+  {
     version: '0.0.29',
     date: '2026-11-18',
     notes: [
