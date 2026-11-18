@@ -30,7 +30,7 @@ Le panneau de l'objet sélectionné a une section **Passage vers une carte** : *
 - **Retirer le passage** garde les autres événements de l'objet.
 - Le passage est un événement de l'objet (une téléportation vers la carte), exporté avec la carte. En jeu, le passage se fait avec un fondu ; juste après une arrivée, les passages sont ignorés tant que le joueur n'est pas sorti de leur zone (pas de renvoi immédiat).
 
-Le **point d'arrivée de la carte** se règle avec l'outil **Arrivée** de l'onglet Morceaux (repère jaune, visible dans l'éditeur).
+Le **point d'arrivée de la carte** se règle avec l'outil **Arrivée** de l'onglet Zones (repère jaune, visible dans l'éditeur).
 
 ## Annuler / refaire
 

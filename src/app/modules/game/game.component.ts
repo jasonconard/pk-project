@@ -15,7 +15,7 @@ import { temperatureColor } from './shared/util/temperature-color';
 import { version } from '../../../../package.json';
 import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
-import { FireflyColor, LeafMode, WeatherType } from './shared/weather/Weather';
+import { FireflyColor, formatHour, LeafMode, WEATHER_CHOICES, WeatherType } from './shared/weather/Weather';
 import { GameMenuComponent } from './game-menu/game-menu.component';
 import { CoreService } from '../../core/shared/service/core.service';
 import { SequenceService } from './shared/services/sequence.service';
@@ -62,6 +62,9 @@ export class GameComponent {
   protected readonly releaseNotes = signal(false);
   /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
   protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
+  /** Weather and hour, for the editor's Ambiance button (computer). */
+  protected readonly ambianceLabel = computed(() =>
+    `${WEATHER_CHOICES.find(c => c.type === this.weather())?.label ?? ''} · ${formatHour(this.hour())}`);
   /** Air temperature (°C, rounded) and its color, from icy blue to red. */
   protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));
   protected readonly temperatureColor = computed(() => temperatureColor(this.hud()?.temperature ?? 20));

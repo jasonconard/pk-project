@@ -3,7 +3,7 @@
 @if (hud(); as hud) {
   @if (hud.framePerSec) {
     @if (hud.diagnosticsOpen) {
-      <aside class="diagnostics" aria-label="Diagnostic">
+      <aside class="diagnostics" aria-label="Diagnostic" [class.editing]="hud.editMode">
         @if (hud.diagnostics; as d) {
           <div><span class="k">Images</span> <b>{{ d.fps }} fps</b> · moy. {{ d.frameAvg | number:'1.0-1' }} ms ·
             pire <b [class.bad]="d.frameMax > 50">{{ d.frameMax | number:'1.0-0' }} ms</b></div>
@@ -33,7 +33,7 @@
 @if (hud(); as hud) {
   @if (hud.mode === GameMode.MAP) {
     <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [brush]="hud.editBrush" [grid]="hud.editGrid" [selection]="hud.editSelection"
-                     [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo" [mapId]="hud.mapId" [mapName]="hud.mapName" [pickMap]="hud.editPick"
+                     [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo" [mapId]="hud.mapId" [mapName]="hud.mapName" [pickMap]="hud.editPick" [ambianceLabel]="ambianceLabel()"
                      (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (brushChange)="setEditBrush($event)" (command)="editCommand($event)"
                      (passageChange)="setPassage($event)" (pickArrival)="pickArrival()" (cancelPick)="cancelPick()"
                      (ambiance)="openAmbiance()" (settings)="menuOpen.set(true)" />

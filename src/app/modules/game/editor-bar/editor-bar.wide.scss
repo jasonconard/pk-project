@@ -1,0 +1,333 @@
+/* Map editor on a phone held on its side (the height is short: side panels) and on a computer (full width bar, side
+   panels, keyboard help at the bottom). The layout comes from the component (data-layout), see EditorLayout. */
+
+// ---------- Phone on its side: tools on the left, object on the right, the bar between ----------
+
+:host([data-layout='landscape']) {
+  .bar,
+  .hint {
+    left: calc(220px + var(--safe-left));
+  }
+
+  .bar {
+    max-width: none;
+  }
+
+  .hint {
+    max-width: calc(100vw - 230px - var(--safe-left) - var(--safe-right));
+  }
+
+  .sheet {
+    transform: none;
+    border-radius: 18px;
+  }
+
+  // Tabs in a rail, the brush sizes on top of the palette, the palette in 2 columns
+  .sheet.dock {
+    top: calc(10px + var(--safe-top));
+    bottom: calc(10px + var(--safe-bottom));
+    left: calc(10px + var(--safe-left));
+    right: auto;
+    width: 200px;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: 'tabs brushes' 'tabs palette';
+    align-items: start;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .tabs {
+    grid-area: tabs;
+    flex-direction: column;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    button {
+      width: 40px;
+      height: 40px;
+      justify-content: center;
+      padding: 0;
+      border-radius: 12px;
+      font-size: 17px;
+
+      .label {
+        display: none;
+      }
+    }
+  }
+
+  .brushes {
+    grid-area: brushes;
+
+    button {
+      flex: 1;
+      min-width: 0;
+      padding: 0;
+    }
+  }
+
+  .palette {
+    grid-area: palette;
+    max-height: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 8px 4px;
+    margin: 0;
+    padding: 2px 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .entry {
+    width: auto;
+  }
+
+  .sheet.selection {
+    top: calc(66px + var(--safe-top));
+    bottom: calc(10px + var(--safe-bottom));
+    left: auto;
+    right: calc(10px + var(--safe-right));
+    width: min(290px, calc(100vw - 240px - var(--safe-left) - var(--safe-right)));
+    max-height: none;
+    padding: 12px;
+  }
+}
+
+// ---------- Computer ----------
+
+:host([data-layout='desktop']) {
+  // The bar runs along the top; ambiance, settings and the editors on the right
+  .bar {
+    top: 0;
+    left: 0;
+    right: 0;
+    max-width: none;
+    padding: 8px calc(12px + var(--safe-right)) 8px calc(12px + var(--safe-left));
+    border-radius: 0;
+    box-shadow: 0 1.5px 0 rgba(255, 176, 74, 0.45), 0 2px 8px rgba(0, 0, 0, 0.35);
+  }
+
+  .map-btn {
+    flex: 0 1 auto;
+    max-width: 260px;
+  }
+
+  .sheet {
+    transform: none;
+    border-radius: 18px;
+  }
+
+  // Tabs, brush sizes, search and the palette by family, in a column on the left
+  .sheet.dock {
+    top: calc(68px + var(--safe-top));
+    bottom: calc(12px + var(--safe-bottom));
+    left: calc(12px + var(--safe-left));
+    right: auto;
+    width: 300px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+
+    button {
+      height: 54px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: none;
+      font-size: 11px;
+
+      svg {
+        font-size: 18px;
+      }
+
+      .label {
+        display: inline;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .brushes button {
+    flex: 1;
+  }
+
+  .search {
+    flex: none;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border-radius: 10px;
+    background: var(--chip);
+    font-size: 15px;
+    opacity: 0.9;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    &:focus-within {
+      box-shadow: inset 0 0 0 1.5px var(--edit);
+    }
+  }
+
+  .palette {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    gap: 10px 6px;
+    margin: 0 -4px;
+    padding: 2px 4px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .entry {
+    width: auto;
+  }
+
+  .family {
+    display: block;
+    grid-column: 1 / -1;
+    margin: 6px 2px 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+
+  .no-result {
+    grid-column: 1 / -1;
+  }
+
+  // The object's sheet on the right, above the help
+  .sheet.selection {
+    top: calc(68px + var(--safe-top));
+    bottom: auto;
+    left: auto;
+    right: calc(12px + var(--safe-right));
+    width: 320px;
+    max-height: calc(100% - 120px - var(--safe-top) - var(--safe-bottom));
+    padding: 14px;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.chip-btn {
+  flex: none;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--chip);
+  font-size: 13px;
+  white-space: nowrap;
+
+  > svg:first-child {
+    font-size: 17px;
+    color: var(--edit);
+  }
+
+  .chevron {
+    opacity: 0.6;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  &.on {
+    background: rgba(255, 176, 74, 0.25);
+    color: var(--edit);
+  }
+}
+
+// The editors' launcher: the ones to come greyed
+.more-menu.editors-menu {
+  width: 300px;
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: default;
+    background: transparent;
+  }
+
+  .editor-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    b {
+      font-weight: 600;
+    }
+
+    small {
+      font-size: 11px;
+      opacity: 0.65;
+    }
+  }
+}
+
+// The keyboard and mouse of the current tool, at the bottom right of the tools
+.keys {
+  position: absolute;
+  left: calc(324px + var(--safe-left));
+  right: calc(12px + var(--safe-right));
+  bottom: calc(12px + var(--safe-bottom));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(34, 35, 42, 0.72);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+
+  span {
+    white-space: nowrap;
+  }
+
+  kbd {
+    margin-right: 4px;
+    padding: 1px 6px;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+    font-size: 11px;
+    opacity: 1;
+  }
+}

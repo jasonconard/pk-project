@@ -123,3 +123,16 @@
     animation: none;
   }
 }
+
+// The editor on a phone on its side, or on a computer: the tools panel takes the left, the ambiance unfolds beside it
+@media (orientation: landscape) and (max-height: 600px) {
+  :host(:not(.game-mode)) .toolbar {
+    left: calc(220px + var(--safe-left));
+  }
+}
+
+@media (min-width: 1000px) and (min-height: 601px) {
+  :host(:not(.game-mode)) .toolbar {
+    left: calc(324px + var(--safe-left));
+  }
+}

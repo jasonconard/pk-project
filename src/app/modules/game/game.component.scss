@@ -56,6 +56,19 @@
   }
 }
 
+// The editor's tools panel takes the left on a phone on its side and on a computer
+@media (orientation: landscape) and (max-height: 600px) {
+  .diagnostics.editing {
+    left: calc(220px + var(--safe-left));
+  }
+}
+
+@media (min-width: 1000px) and (min-height: 601px) {
+  .diagnostics.editing {
+    left: calc(324px + var(--safe-left));
+  }
+}
+
 .axes-count {
   position: absolute;
   right: 0;

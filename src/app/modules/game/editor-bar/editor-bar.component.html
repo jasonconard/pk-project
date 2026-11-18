@@ -11,6 +11,34 @@
             [disabled]="!canUndo()" (click)="send('undo', $event)"><svg lucideUndo2></svg></button>
     <button type="button" class="icon-btn" title="Refaire (Ctrl+Y)" aria-label="Refaire"
             [disabled]="!canRedo()" (click)="send('redo', $event)"><svg lucideRedo2></svg></button>
+    @if (layout() === 'desktop') {
+      <button type="button" class="icon-btn" title="Grille des cases" aria-label="Grille des cases" [class.on]="grid()"
+              [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)"><svg lucideGrid2x2></svg></button>
+      <span class="spacer"></span>
+      <button type="button" class="chip-btn" title="Ambiance : météo, heure, vent, nuages, son (M, H, W, N, V)" (click)="openAmbiance($event)">
+        <svg lucideCloudSun></svg> {{ ambianceLabel() }}
+      </button>
+      <button type="button" class="icon-btn" title="Réglages : plein écran, son, qualité graphique, nouveautés" aria-label="Réglages"
+              (click)="openSettings($event)"><svg lucideSettings></svg></button>
+      <div class="more">
+        <button type="button" class="chip-btn" title="Ouvrir un autre éditeur du jeu" [class.on]="editorsOpen()"
+                [attr.aria-expanded]="editorsOpen()" (click)="toggleEditors($event)">
+          <svg lucideGrid3x3></svg> Éditeurs <svg lucideChevronDown class="chevron"></svg>
+        </button>
+        @if (editorsOpen()) {
+          <div class="more-backdrop" (click)="editorsOpen.set(false)"></div>
+          <div class="more-menu editors-menu" role="menu" animate.enter="anim-fade-in">
+            <p class="more-title">Ouvrir un éditeur</p>
+            @for (editor of editors; track editor.label) {
+              <button type="button" role="menuitem" [disabled]="!editor.id" (click)="openEditor(editor.id)">
+                <svg [lucideIcon]="editor.icon"></svg>
+                <span class="editor-text"><b>{{ editor.label }}</b><small>{{ editor.sub }}</small></span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    } @else {
     <div class="more">
       <button type="button" class="icon-btn" title="Plus : grille, ambiance, réglages, éditeurs" aria-label="Plus"
               [class.on]="moreOpen()" [attr.aria-expanded]="moreOpen()" (click)="toggleMore($event)"><svg lucideEllipsisVertical></svg></button>
@@ -38,18 +66,44 @@
         </div>
       }
     </div>
+    }
   </header>
 
   <!-- How the current tool works (closed by its ✕ until the tool changes) -->
-  @if (!hintClosed() && !selection() && !pickMap()) {
+  @if (layout() === 'desktop') {
+    <!-- The computer: the keyboard and mouse of the current tool, at the bottom -->
+    @if (!pickMap()) {
+      <footer class="keys" aria-label="Aide">
+        @if (selection()) {
+          <span><kbd>Glisser</kbd> déplacer l'objet</span><span><kbd>Suppr</kbd> supprimer</span>
+          <span><kbd>Échap</kbd> désélectionner</span>
+        } @else if (tileId() === 'spawn') {
+          <span><kbd>Clic</kbd> point d'arrivée de la carte</span>
+        } @else if (tileId() === 'chunk-add') {
+          <span><kbd>Clic</kbd> sur une place verte : ajouter une zone</span>
+        } @else if (tileId() === 'chunk-remove') {
+          <span><kbd>Clic</kbd> sur une zone : la retirer</span>
+        } @else if (tileId()) {
+          <span><kbd>Clic</kbd> / <kbd>Glisser</kbd> peindre</span><span><kbd>Clic droit glissé</kbd> déplacer la vue</span>
+          <span><kbd>Échap</kbd> reposer le pinceau</span>
+        } @else if (modelId()) {
+          <span><kbd>Clic</kbd> poser</span><span><kbd>Glisser</kbd> déplacer la vue</span><span><kbd>Échap</kbd> reposer le modèle</span>
+        } @else {
+          <span><kbd>Clic</kbd> sélectionner un objet</span><span><kbd>Glisser</kbd> déplacer la vue</span>
+        }
+        <span><kbd>Molette</kbd> zoom</span><span><kbd>Ctrl Z</kbd> / <kbd>Ctrl Y</kbd> annuler, refaire</span>
+        <span><kbd>B</kbd> jouer</span>
+      </footer>
+    }
+  } @else if (!hintClosed() && !selection() && !pickMap()) {
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
       <span>
         @if (tileId() === 'spawn') {
           {{ touch() ? 'Toucher' : 'Clic sur' }} le sol : point d'arrivée de la carte (le repère jaune)
         } @else if (tileId() === 'chunk-add') {
-          {{ touch() ? 'Toucher' : 'Clic sur' }} une place verte : ajouter un morceau · {{ touch() ? 'Deux doigts' : 'Molette' }} : dézoomer pour voir les places
+          {{ touch() ? 'Toucher' : 'Clic sur' }} une place verte : ajouter une zone · {{ touch() ? 'Deux doigts' : 'Molette' }} : dézoomer pour voir les places
         } @else if (tileId() === 'chunk-remove') {
-          {{ touch() ? 'Toucher' : 'Clic sur' }} un morceau : le retirer (pas celui du joueur ni du point d'arrivée) · Annuler le remet
+          {{ touch() ? 'Toucher' : 'Clic sur' }} une zone : la retirer (pas celle du joueur ni du point d'arrivée) · Annuler la remet
         } @else if (touch()) {
           @if (tileId()) {
             Toucher : peindre · Glisser : déplacer la vue · Deux doigts : zoom
@@ -63,7 +117,7 @@
         } @else if (modelId()) {
           Clic : poser · Échap : reposer le modèle · Glisser : déplacer la vue · Molette : zoom
         } @else {
-          Clic sur un objet : le sélectionner · Glisser : déplacer la vue · Molette : zoom · Choisis un modèle en bas pour le poser
+          Clic sur un objet : le sélectionner · Glisser : déplacer la vue · Molette : zoom · Choisis un modèle {{ layout() === 'portrait' ? 'en bas' : 'à gauche' }} pour le poser
         }
       </span>
       <button type="button" aria-label="Masquer l'aide" title="Masquer l'aide" (click)="hintClosed.set(true)"><svg lucideX></svg></button>
@@ -71,7 +125,7 @@
   }
 
   @if (selection(); as selection) {
-    <!-- The selected object: its sheet takes the dock's place -->
+    <!-- The selected object: its sheet takes the dock's place (phone upright), or opens on the right -->
     <section class="sheet selection" aria-label="Objet sélectionné" animate.enter="anim-sheet-in" animate.leave="anim-fade-out">
       <header class="sheet-head">
         <span class="thumb">
@@ -140,31 +194,37 @@
         <svg lucideZap></svg> Ajouter un événement · bientôt
       </button>
     </section>
-  } @else {
-    <!-- The tools: tabs, brush sizes, the palette -->
+  }
+  @if (!selection() || layout() !== 'portrait') {
+    <!-- The tools: tabs, brush sizes, (search,) the palette -->
     <div class="sheet dock" animate.enter="anim-sheet-in" animate.leave="anim-fade-out">
-      <div class="dock-head">
-        <div class="tabs" role="tablist" aria-label="Catégories">
-          @for (t of tabs; track t.id) {
-            <button type="button" role="tab" [title]="t.label" [attr.aria-selected]="tab() === t.id" (click)="setTab(t.id, $event)">
-              <svg [lucideIcon]="t.icon"></svg><span class="label">{{ t.label }}</span>
-            </button>
-          }
-          <button type="button" role="tab" class="soon-tab" disabled title="Événements (personnages, panneaux, zones) : bientôt">
-            <svg lucideZap></svg><span class="label">Événements</span>
+      <div class="tabs" role="tablist" aria-label="Catégories">
+        @for (t of tabs; track t.id) {
+          <button type="button" role="tab" [title]="t.label" [attr.aria-selected]="tab() === t.id" (click)="setTab(t.id, $event)">
+            <svg [lucideIcon]="t.icon"></svg><span class="label">{{ t.label }}</span>
           </button>
-        </div>
-        @if (tab() === 'ground' || tab() === 'relief') {
-          <div class="brushes" role="radiogroup" aria-label="Pinceau">
-            @for (b of brushes; track b.value) {
-              @if (tab() === 'ground' || b.value !== 'fill') {
-                <button type="button" role="radio" [title]="b.title" [attr.aria-checked]="brush() === b.value"
-                        (click)="setBrush(b.value, $event)">@if (b.value === 'fill') { <svg lucidePaintBucket></svg> } @else { {{ b.label }} }</button>
-              }
-            }
-          </div>
         }
+        <button type="button" role="tab" class="soon-tab" disabled title="Événements (personnages, panneaux, zones) : bientôt">
+          <svg lucideZap></svg><span class="label">Événements</span>
+        </button>
       </div>
+      @if (tab() === 'ground' || tab() === 'relief') {
+        <div class="brushes" role="radiogroup" aria-label="Pinceau">
+          @for (b of brushes; track b.value) {
+            @if (tab() === 'ground' || b.value !== 'fill') {
+              <button type="button" role="radio" [title]="b.title" [attr.aria-checked]="brush() === b.value"
+                      (click)="setBrush(b.value, $event)">@if (b.value === 'fill') { <svg lucidePaintBucket></svg> } @else { {{ b.label }} }</button>
+            }
+          }
+        </div>
+      }
+      @if (layout() === 'desktop' && tab() === 'objects') {
+        <label class="search">
+          <svg lucideSearch></svg>
+          <input type="text" placeholder="Chercher un objet…" aria-label="Chercher un objet" [value]="query()"
+                 (input)="query.set($any($event.target).value)" (keydown)="searchKey($event)" />
+        </label>
+      }
       <div class="palette" role="toolbar" aria-label="Outils">
         <button type="button" class="entry none" title="Aucun (Échap) : toucher sélectionne et déplace la vue"
                 [class.selected]="!modelId() && !tileId()" [attr.aria-pressed]="!modelId() && !tileId()" (click)="pick(null, $event); tileSelected.emit(null)">
@@ -172,17 +232,22 @@
           <span class="name">Aucun</span>
         </button>
         @if (tab() === 'objects') {
-          @for (entry of entries; track entry.id) {
-            <button type="button" class="entry" [title]="entry.label"
-                    [class.selected]="entry.id === modelId()" [attr.aria-pressed]="entry.id === modelId()"
-                    (click)="pick(entry.id, $event)">
-              <span class="pic">
-                @if (thumbs()[entry.id]; as thumb) {
-                  <img [src]="thumb" alt="" />
-                }
-              </span>
-              <span class="name">{{ entry.label }}</span>
-            </button>
+          @for (family of families(); track family.label) {
+            <h3 class="family">{{ family.label }}</h3>
+            @for (entry of family.entries; track entry.id) {
+              <button type="button" class="entry" [title]="entry.label"
+                      [class.selected]="entry.id === modelId()" [attr.aria-pressed]="entry.id === modelId()"
+                      (click)="pick(entry.id, $event)">
+                <span class="pic">
+                  @if (thumbs()[entry.id]; as thumb) {
+                    <img [src]="thumb" alt="" />
+                  }
+                </span>
+                <span class="name">{{ entry.label }}</span>
+              </button>
+            }
+          } @empty {
+            <p class="no-result">Aucun objet pour « {{ query() }} »</p>
           }
         } @else if (tab() === 'ground') {
           @for (tile of tiles; track tile.id) {
@@ -200,7 +265,7 @@
             <span class="name">Gomme</span>
           </button>
         } @else if (tab() === 'chunks') {
-          <button type="button" class="entry tile" title="Ajouter un morceau de carte (32 × 32 cases d'herbe) sur une place libre, à côté de la carte"
+          <button type="button" class="entry tile" title="Ajouter une zone de carte (32 × 32 cases d'herbe) sur une place libre, à côté de la carte"
                   [class.selected]="tileId() === 'chunk-add'" [attr.aria-pressed]="tileId() === 'chunk-add'"
                   (click)="pickTile('chunk-add', $event)">
             <span class="pic" aria-hidden="true"><svg lucideSquarePlus></svg></span>
@@ -212,7 +277,7 @@
             <span class="pic" aria-hidden="true"><svg lucideFlag></svg></span>
             <span class="name">Arrivée</span>
           </button>
-          <button type="button" class="entry tile" title="Retirer un morceau de carte (avec ce qu'il contient ; Annuler le remet)"
+          <button type="button" class="entry tile" title="Retirer une zone de carte (avec ce qu'elle contient ; Annuler la remet)"
                   [class.selected]="tileId() === 'chunk-remove'" [attr.aria-pressed]="tileId() === 'chunk-remove'"
                   (click)="pickTile('chunk-remove', $event)">
             <span class="pic" aria-hidden="true"><svg lucideSquareMinus></svg></span>

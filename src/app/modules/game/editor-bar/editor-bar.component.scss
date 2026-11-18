@@ -47,6 +47,7 @@ kbd {
 .bar {
   pointer-events: auto;
   position: absolute;
+  z-index: 1; // its menus open over the sheets
   top: calc(10px + var(--safe-top));
   left: calc(10px + var(--safe-left));
   right: calc(10px + var(--safe-right));
@@ -263,9 +264,9 @@ kbd {
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
 }
 
-// Wide screens (landscape, computer): a floating panel in the middle, at the bottom
-@media (min-width: 601px), (orientation: landscape) {
-  .sheet {
+// Tablets: a floating panel in the middle, at the bottom (phones on their side and computers: editor-bar.wide.scss)
+@media (min-width: 601px) {
+  :host([data-layout='portrait']) .sheet {
     left: 50%;
     right: auto;
     bottom: calc(10px + var(--safe-bottom));
@@ -275,21 +276,18 @@ kbd {
     border-radius: 18px;
   }
 
-  .sheet.selection {
+  :host([data-layout='portrait']) .sheet.selection {
     width: min(420px, calc(100vw - 20px));
   }
 }
 
+// The tabs and the brush sizes side by side (one under the other when too narrow), the palette under them
 .dock {
-  gap: 10px;
-}
-
-.dock-head {
-  display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 10px 8px;
 }
 
 .tabs, .brushes {
@@ -366,6 +364,7 @@ kbd {
 }
 
 .palette {
+  flex-basis: calc(100% + 24px); // its own line, to the edges (the negative margins)
   display: flex;
   gap: 8px;
   overflow-x: auto;
@@ -435,6 +434,17 @@ kbd {
     border-radius: 6px;
     image-rendering: pixelated;
   }
+}
+
+// The families of objects: titled on the computer only
+.family {
+  display: none;
+}
+
+.no-result {
+  margin: 8px 4px;
+  font-size: 13px;
+  opacity: 0.6;
 }
 
 // ---------- The selected object ----------

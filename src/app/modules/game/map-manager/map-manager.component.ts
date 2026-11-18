@@ -79,7 +79,7 @@ export class MapManagerComponent implements OnInit {
   }
 
   protected sizeLabel(cols: number, rows: number): string {
-    return `${cols} × ${rows} morceau${cols * rows > 1 ? 'x' : ''}`;
+    return `${cols} × ${rows} zone${cols * rows > 1 ? 's' : ''}`;
   }
 
   /** Escape / back: the list from the new map form, else closes. */

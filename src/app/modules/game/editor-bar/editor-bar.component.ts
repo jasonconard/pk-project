@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, linkedSignal, output, signal } from '@angular/core';
 import {
   LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideCheck, LucideChevronDown, LucideCloudSun,
-  LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
+  LucideClapperboard, LucideDatabase, LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideGrid2x2, LucideMessagesSquare, LucideSearch,
+  LucideUserRound, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
   LucideLayoutGrid, LucideMap, LucideMapPin, LucideMountain, LucideMousePointer2, LucidePaintBucket, LucidePaintbrush, LucidePlay,
   LucidePlus, LucideRedo2, LucideSettings, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap,
 } from '@lucide/angular';
@@ -24,11 +25,33 @@ const MODEL_LABELS: Record<string, string> = {
 
 type PaletteTab = 'objects' | 'ground' | 'relief' | 'chunks';
 
+/** Families of the palette (computer: the objects are grouped, with a search). */
+const MODEL_FAMILIES: { label: string, ids: string[] }[] = [
+  { label: 'Nature', ids: ['tree', 'flowers', 'rock'] },
+  { label: 'Bâtiments', ids: ['house', 'labo', 'letter-box'] },
+  { label: 'Décor', ids: ['barrier', 'pannel', 'wood-pannel'] },
+];
+
+/** The game's editors (the launcher); the ones to come (docs/idees.md) greyed. */
+const EDITORS: { id: 'models' | 'music' | null, label: string, sub: string, icon: LucideIcon }[] = [
+  { id: 'models', label: 'Modèles 3D', sub: 'Bâtiments, plantes, décors', icon: LucideBox },
+  { id: 'music', label: 'Musique', sub: 'Boucles lo-fi par lieu', icon: LucideEighthNotes },
+  { id: null, label: 'Dialogues', sub: 'Répliques et choix · bientôt', icon: LucideMessagesSquare },
+  { id: null, label: 'Base de données', sub: 'Objets, compétences, ennemis · bientôt', icon: LucideDatabase },
+  { id: null, label: 'Portraits et sprites', sub: 'Pixel art · bientôt', icon: LucideUserRound },
+  { id: null, label: 'Cinématiques', sub: 'Caméra, scènes · bientôt', icon: LucideClapperboard },
+];
+
+/** Layouts of the editor: phone held upright (bar + bottom dock), phone on its side (side panels, height is short), computer. */
+export type EditorLayout = 'portrait' | 'landscape' | 'desktop';
+const DESKTOP_QUERY = '(min-width: 1000px) and (min-height: 601px)';
+const LANDSCAPE_QUERY = '(orientation: landscape) and (max-height: 600px)';
+
 const TABS: { id: PaletteTab, label: string, icon: LucideIcon }[] = [
   { id: 'objects', label: 'Objets', icon: LucideBox },
   { id: 'ground', label: 'Sols', icon: LucidePaintbrush },
   { id: 'relief', label: 'Reliefs', icon: LucideMountain },
-  { id: 'chunks', label: 'Morceaux', icon: LucideLayoutGrid },
+  { id: 'chunks', label: 'Zones', icon: LucideLayoutGrid },
 ];
 
 interface PaletteEntry {
@@ -37,21 +60,24 @@ interface PaletteEntry {
 }
 
 /**
- * Map editor UI (the game's Créer button or B opens it): one bar at the top (Jouer, the open map, undo / redo, more:
- * grid, ambiance, settings, the other editors), the hint of the current tool under it, and at the bottom the tools
- * dock (tabs, brush sizes, palette) or, when an object is selected, its sheet. Shortcuts while editing: Escape (put
+ * Map editor UI (the game's Créer button or B opens it). Phone upright: one bar at the top (Jouer, the open map,
+ * undo / redo, more: grid, ambiance, settings, the other editors), the hint of the current tool under it, and at the
+ * bottom the tools dock (tabs, brush sizes, palette) or, when an object is selected, its sheet. Phone on its side:
+ * the tools on the left (tabs in a rail, palette in 2 columns), the object's sheet on the right, the bar between.
+ * Computer: a full width bar (ambiance and the editors' launcher on the right), the tools on the left (search, the
+ * objects by family), the sheet on the right, the keyboard help at the bottom. Shortcuts while editing: Escape (put
  * the model back / deselect), Delete (remove the selection), Ctrl+Z / Ctrl+Y (undo / redo).
  */
 @Component({
   selector: 'game-editor-bar',
   imports: [MapManagerComponent, LucideDynamicIcon, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing,
-    LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
+    LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideGrid2x2, LucideSearch, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
     LucideGrid3x3, LucideMap, LucideMapPin, LucideMousePointer2, LucidePaintBucket, LucidePlay, LucidePlus, LucideRedo2, LucideSettings,
     LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap],
   templateUrl: './editor-bar.component.html',
-  styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss'],
+  styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss', './editor-bar.wide.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class.maps-open]': 'mapsOpen()' },
+  host: { '[class.maps-open]': 'mapsOpen()', '[attr.data-layout]': 'layout()' },
 })
 export class EditorBarComponent {
   readonly editMode = input(false);
@@ -67,6 +93,8 @@ export class EditorBarComponent {
   readonly mapName = input('');
   /** Choosing a passage's arrival point: the map's name. */
   readonly pickMap = input<string | null>(null);
+  /** Weather and hour (the computer's bar: its Ambiance button). */
+  readonly ambianceLabel = input('');
   readonly passageChange = output<Passage | null>();
   readonly pickArrival = output<void>();
   readonly cancelPick = output<void>();
@@ -87,6 +115,12 @@ export class EditorBarComponent {
   readonly settings = output<void>();
   /** The "more" menu of the bar is open. */
   protected readonly moreOpen = signal(false);
+  /** The editors' launcher (computer) is open. */
+  protected readonly editorsOpen = signal(false);
+  protected readonly editors = EDITORS;
+  protected readonly layout = signal<EditorLayout>('portrait');
+  /** Search in the objects (computer). */
+  protected readonly query = signal('');
   /** The hint was closed: it comes back with the next tool. */
   protected readonly hintClosed = linkedSignal(() => {
     this.modelId();
@@ -115,6 +149,14 @@ export class EditorBarComponent {
   readonly command = output<EditCommand>();
 
   protected readonly entries: PaletteEntry[] = MODEL_CHOICES.map(c => ({ id: c.model.id, label: this.label(c.model.id) }));
+  /** The objects by family, the search applied (computer only: elsewhere the palette scrolls without titles). */
+  protected readonly families = computed(() => {
+    const query = this.layout() === 'desktop' ? normalize(this.query().trim()) : '';
+    const matches = (entry: PaletteEntry) => !query || normalize(entry.label).includes(query);
+    const grouped = MODEL_FAMILIES.map(f => ({ label: f.label, entries: this.entries.filter(e => f.ids.includes(e.id) && matches(e)) }));
+    const others = this.entries.filter(e => !MODEL_FAMILIES.some(f => f.ids.includes(e.id)) && matches(e));
+    return [...grouped, { label: 'Autres', entries: others }].filter(f => f.entries.length);
+  });
   protected readonly thumbs = signal<Record<string, string>>({});
   protected readonly selectionLabel = computed(() => {
     const selection = this.selection();
@@ -125,6 +167,20 @@ export class EditorBarComponent {
     const onKeyDown = (ev: KeyboardEvent) => this.onKeyDown(ev);
     window.addEventListener('keydown', onKeyDown, true);
     inject(DestroyRef).onDestroy(() => window.removeEventListener('keydown', onKeyDown, true));
+    const desktop = matchMedia(DESKTOP_QUERY);
+    const landscape = matchMedia(LANDSCAPE_QUERY);
+    const onLayout = () => {
+      this.layout.set(desktop.matches ? 'desktop' : landscape.matches ? 'landscape' : 'portrait');
+      this.moreOpen.set(false);
+      this.editorsOpen.set(false);
+    };
+    onLayout();
+    desktop.addEventListener('change', onLayout);
+    landscape.addEventListener('change', onLayout);
+    inject(DestroyRef).onDestroy(() => {
+      desktop.removeEventListener('change', onLayout);
+      landscape.removeEventListener('change', onLayout);
+    });
     MODEL_CHOICES.forEach(choice => loadModelThumb(choice).then(pic =>
       this.thumbs.update(thumbs => ({ ...thumbs, [choice.model.id]: pic }))));
   }
@@ -168,12 +224,40 @@ export class EditorBarComponent {
     this.moreOpen.update(open => !open);
   }
 
-  protected openAmbiance(): void {
+  /** Typing a search: the game doesn't get the keys; Escape empties it, then leaves it. */
+  protected searchKey(ev: KeyboardEvent): void {
+    ev.stopPropagation();
+    if (ev.key === 'Escape') {
+      if (this.query()) {
+        this.query.set('');
+      } else {
+        (ev.currentTarget as HTMLElement).blur();
+      }
+    }
+  }
+
+  protected toggleEditors(event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.editorsOpen.update(open => !open);
+  }
+
+  protected openEditor(id: 'models' | 'music' | null): void {
+    this.editorsOpen.set(false);
+    if (id === 'models') {
+      this.openModelEditor();
+    } else if (id === 'music') {
+      this.openMusicEditor();
+    }
+  }
+
+  protected openAmbiance(event?: Event): void {
+    (event?.currentTarget as HTMLElement | undefined)?.blur();
     this.moreOpen.set(false);
     this.ambiance.emit();
   }
 
-  protected openSettings(): void {
+  protected openSettings(event?: Event): void {
+    (event?.currentTarget as HTMLElement | undefined)?.blur();
     this.moreOpen.set(false);
     this.settings.emit();
   }
@@ -238,8 +322,9 @@ export class EditorBarComponent {
       }
     } else if (!this.editMode()) {
       handled = false;
-    } else if (key === 'escape' && this.moreOpen()) {
+    } else if (key === 'escape' && (this.moreOpen() || this.editorsOpen())) {
       this.moreOpen.set(false);
+      this.editorsOpen.set(false);
     } else if (key === 'escape' && this.pickMap()) {
       this.cancelPick.emit();
     } else if (ctrl && key === 'z') {
@@ -262,4 +347,9 @@ export class EditorBarComponent {
       ev.stopPropagation();
     }
   }
+}
+
+/** Lower case, without accents: the search finds « bâtiment » with « batiment ». */
+function normalize(text: string): string {
+  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
