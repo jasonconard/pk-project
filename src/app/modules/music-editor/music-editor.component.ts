@@ -6,6 +6,7 @@ import {
   LucideEighthNote, LucideEraser, LucideFileMusic, LucideGuitar, LucideIcon, LucideKeyboardMusic, LucideMinus, LucidePlay,
   LucidePlus, LucideRedo2, LucideSlidersHorizontal, LucideSquare, LucideTrash, LucideUndo2, LucideWavesHorizontal, LucideX,
 } from '@lucide/angular';
+import { EscapeService } from '../../core/shared/service/escape.service';
 import { onAppVisibility } from '../../core/shared/app-visibility';
 import { MusicEngine } from './shared/music-engine';
 import {
@@ -172,6 +173,8 @@ export class MusicEditorComponent {
 
   constructor() {
     const destroyRef = inject(DestroyRef);
+    // The open sheet (its ✕): closed by Escape and by the back button, before the editor itself
+    inject(EscapeService).track(() => this.sheet(), () => this.sheet.set(null));
     const landscape = matchMedia(LANDSCAPE);
     const wide = matchMedia(WIDE);
     const layout = () => this.viewBarsState.set(wide.matches ? 4 : landscape.matches ? 2 : 1);

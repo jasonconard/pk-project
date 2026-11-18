@@ -1,4 +1,6 @@
 import { DestroyRef, effect, inject, Injector, Service } from '@angular/core';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { isGameCovered } from '../app-visibility';
 
 /** Something Escape closes (or steps back in): a menu, a popover, a selection, a tool in hand… */
@@ -17,10 +19,11 @@ const typing = (target: EventTarget | null): boolean =>
  * Nothing open: Escape goes on to the game (its cancel key, the game menu).
  * One listener on the window, capture phase, added before any other (the app starts with it): it runs first.
  *
- * The back button (Android, the browser's) does the same: while something is open, an extra history entry is kept;
- * going back pops it, and the latest thing open is closed (the entry comes back if others are still open). Closed
- * otherwise (Escape, a click), the entry is taken back silently. Nothing open: back does what it always did (leaves
- * the app on Android).
+ * The back button does the same. In the Android app it is caught (see initBackButton): the latest thing open is
+ * closed, and with nothing open it acts as Escape (the game menu): the app is never sent to the background. In a
+ * browser, while something is open, an extra history entry is kept; going back pops it, and the latest thing open
+ * is closed (the entry comes back if others are still open). Closed otherwise (Escape, a click), the entry is taken
+ * back silently.
  */
 @Service()
 export class EscapeService {
@@ -30,6 +33,8 @@ export class EscapeService {
   /** History moves made here: their popstate is not a back press. */
   private ownPops = 0;
   private syncTimer?: ReturnType<typeof setTimeout>;
+  /** The Android app catches its back button itself: no history entries. */
+  private readonly native = Capacitor.isNativePlatform();
 
   constructor() {
     window.addEventListener('popstate', () => {
@@ -57,6 +62,13 @@ export class EscapeService {
     }, true);
   }
 
+  /** The back button: the latest thing open is closed. False: nothing was open. */
+  back(): boolean {
+    const top = this.layers[this.layers.length - 1];
+    top?.close();
+    return !!top;
+  }
+
   /** Puts a layer on top (opened, or changed: the latest action). */
   open(layer: EscapeLayer): void {
     this.close(layer);
@@ -78,6 +90,9 @@ export class EscapeService {
    * later: a closing layer leaves the stack once its state has changed (see track).
    */
   private syncHistory(): void {
+    if (this.native) {
+      return;
+    }
     clearTimeout(this.syncTimer);
     this.syncTimer = setTimeout(() => {
       if (this.layers.length && !this.armed) {
@@ -113,4 +128,22 @@ export class EscapeService {
     this.open(layer);
     inject(DestroyRef).onDestroy(() => this.close(layer));
   }
+}
+
+/**
+ * The Android app's back button (the App plugin): the latest thing open is closed (a menu, a sheet, the selection,
+ * an editor…); nothing open, it acts as Escape (the game menu while playing). The app is never sent to the
+ * background by it.
+ */
+export function initBackButton(escape: EscapeService): void {
+  if (!Capacitor.isNativePlatform()) {
+    return;
+  }
+  void App.addListener('backButton', () => {
+    if (!escape.back()) {
+      for (const type of ['keydown', 'keyup']) {
+        document.body.dispatchEvent(new KeyboardEvent(type, { key: 'Escape', bubbles: true, cancelable: true }));
+      }
+    }
+  });
 }

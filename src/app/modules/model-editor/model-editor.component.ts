@@ -4,6 +4,7 @@ import {
   LucideArrowDown, LucideArrowDownLeft, LucideArrowLeft, LucideArrowLeftRight, LucideArrowRight, LucideArrowUp, LucideArrowUpDown, LucideArrowUpRight, LucideBox, LucideBrush, LucideChevronDown, LucideChevronLeft, LucideCloudCheck, LucideClipboardCopy, LucideCopy, LucideDownload, LucideDynamicIcon, LucideEraser, LucideHand, LucideHouse, LucideLink, LucideLock, LucideMaximize2, LucideMinus, LucideMoon, LucideMousePointerClick, LucideMountain, LucidePackage, LucidePaintBucket, LucidePalette, LucidePencil, LucidePipette, LucidePlus, LucideRectangleHorizontal, LucideRedo2, LucideRotateCcw, LucideRotateCw, LucideSettings2, LucideShapes, LucideSlash, LucideSparkles, LucideSquare, LucideSquareDashed, LucideSun, LucideTrash, LucideUndo2, LucideUpload, LucideX, LucideIcon,
 } from '@lucide/angular';
 import { ActivatedRoute } from '@angular/router';
+import { EscapeService } from '../../core/shared/service/escape.service';
 import { CODE_MODELS } from '../game/shared/model/browser-models';
 import { ObjSide } from '../game/shared/model/SceneMap';
 import { Vec3 } from '../game/shared/model/SceneUtils';
@@ -294,6 +295,8 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   });
 
   constructor() {
+    // The open section sheet (its ✕): closed by Escape and by the back button, before the editor
+    inject(EscapeService).track(() => this.sheet(), () => this.sheet.set(null));
     effect(onCleanup => {
       const inner = this.sheetInner()?.nativeElement;
       if (!inner) {

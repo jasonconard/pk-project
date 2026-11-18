@@ -4,7 +4,7 @@ import { LucideMaximize, LucideMinimize } from '@lucide/angular';
 import { CoreService } from './core/shared/service/core.service';
 import { UpdatePromptComponent } from './core/update-prompt/update-prompt.component';
 import { initTapHaptics } from './core/shared/haptics';
-import { EscapeService } from './core/shared/service/escape.service';
+import { EscapeService, initBackButton } from './core/shared/service/escape.service';
 
 @Component({
   selector: 'app-root',
@@ -21,8 +21,8 @@ export class AppComponent {
   protected readonly fullScreenButtonHidden = this.coreService.fullScreenButtonHidden;
 
   constructor() {
-    // Escape listens before anything else (closes the last thing opened)
-    inject(EscapeService);
+    // Escape listens before anything else (closes the last thing opened); so does Android's back button
+    initBackButton(inject(EscapeService));
     initTapHaptics();
   }
 
