@@ -1,4 +1,5 @@
 import { inject, Service } from '@angular/core';
+import { describeAction, sameAction } from '../model/GameAction';
 import { CAMERA_LOOK, Game, SHADE_OFFSET, TOO_FAR_LIMIT } from "../model/Game";
 import { SCENE_PLAYER } from "../../../../../assets/characters/player";
 import { MapHelper } from "../model/MapHelper";
@@ -29,6 +30,8 @@ const RAY_NUDGE = 0.013;
 const HOP_BODY = 7;
 /** Buildings visibility updated every this many input steps (120 per second). */
 const VISIBILITY_EVERY = 4;
+/** The action in front of the player is looked for every this many input frames (120 Hz). */
+const ACTION_EVERY = 4;
 
 @Service()
 export class GameMapService {
@@ -42,6 +45,7 @@ export class GameMapService {
   private hopTime = -1;
   private hopOffset = 0;
   private visibilityTick = 0;
+  private actionTick = 0;
   /** Ledge hop: height dropped, camera offset, push forward still to apply (x, z). */
   private hopDrop = 0;
   private hopCameraOffset = 0;
@@ -195,6 +199,7 @@ export class GameMapService {
     if(game.paused) { return; }
     // Map editor: the player is frozen, the camera moves instead
     if(game.editMode) {
+      game.action = null;
       this.mapEditorService.update(game);
       return;
     }
@@ -309,6 +314,15 @@ export class GameMapService {
       currentFrame: game.frame,
       framePerSecond: game.framePerSec
     });
+
+    // What the action key would do (the action button, the prompt): 30 times per second is plenty
+    if (++this.actionTick % ACTION_EVERY === 0) {
+      const found = this.sequenceService.isRunning || game.weather.playerFlying ? null : EventService.actionAt(mapHelper, sprite);
+      const action = found ? describeAction(found.evt, found.building) : null;
+      if (!sameAction(action, game.action)) {
+        game.action = action;
+      }
+    }
 
     if(!this.sequenceService.isRunning) {
       const event = EventService.checkEvents(mapHelper, sprite, this.keyService.pressedCodes, this.keyService.holdedCodes);

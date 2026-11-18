@@ -1,4 +1,5 @@
 import { Component, computed, DestroyRef, effect, ElementRef, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { EscapeService } from '../../../core/shared/service/escape.service';
 import { WeatherCatalogComponent } from '../weather-catalog/weather-catalog.component';
 import { KeyService } from '../../../core/shared/service/key.service';
 import { weatherScreenshot } from '../shared/weather/weather-catalog';
@@ -157,6 +158,10 @@ export class WeatherPanelComponent {
       this.thumbOtherTime.set(false);
       this.thumbMissing.set(false);
     });
+    // Escape: the popover, then the ambiance tools (in the order they were opened, among the other things open)
+    const escape = inject(EscapeService);
+    escape.track(() => this.ambianceOpen(), () => this.ambianceOpen.set(false));
+    escape.track(() => this.panel(), () => this.panel.set(null));
     // Capture phase: before the game (document listener)
     const onKeyDown = (ev: KeyboardEvent) => this.onKeyDown(ev);
     const onKeyUp = (ev: KeyboardEvent) => this.panel() && ev.stopPropagation();
@@ -303,19 +308,12 @@ export class WeatherPanelComponent {
     }
     const panel = this.panel();
     if (!panel) {
-      // Escape folds the ambiance tools back (before the game menu opens with it)
-      if (ev.key === 'Escape' && this.ambianceOpen()) {
-        ev.stopPropagation();
-        this.ambianceOpen.set(false);
-      }
       return;
     }
-    // A popover is open: arrows / Enter / Escape act on it, not on the game
+    // A popover is open: arrows / Enter act on it, not on the game (Escape: see EscapeService)
     const sign = ev.key === 'ArrowLeft' ? -1 : ev.key === 'ArrowRight' ? 1 : 0;
     let handled = true;
-    if (ev.key === 'Escape') {
-      this.panel.set(null);
-    } else if (sign) {
+    if (sign) {
       switch (panel) {
         case 'hour': this.emitHour(this.hourNow() + sign * HOUR_STEP); break;
         case 'wind': this.emitWind(this.windNow().strength + sign * GAUGE_STEP, this.windNow().direction); break;

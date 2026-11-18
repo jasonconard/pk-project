@@ -60,7 +60,7 @@ export interface EditSelection {
 /** Ground brush: size in cells, or the bucket. */
 export type EditBrush = 1 | 2 | 3 | 'fill';
 
-export type EditCommand = 'undo' | 'redo' | 'delete' | 'deselect' | 'togglePassable' | 'toggleCanHide' | 'toggleGrid' | 'export' | 'reset';
+export type EditCommand = 'undo' | 'redo' | 'delete' | 'rotate' | 'duplicate' | 'deselect' | 'togglePassable' | 'toggleCanHide' | 'toggleGrid' | 'export' | 'reset';
 
 interface EditAction {
   undo(): void;
@@ -568,6 +568,8 @@ export class MapEditorService {
       case 'redo': this.redo(game); break;
       case 'deselect': this.select(game, null); break;
       case 'delete': this.deleteSelected(game); break;
+      case 'rotate': this.rotateSelected(game); break;
+      case 'duplicate': this.duplicateSelected(game); break;
       case 'togglePassable': this.toggleOption(game, 'passable'); break;
       case 'toggleCanHide': this.toggleOption(game, 'canHide'); break;
       case 'toggleGrid':
@@ -806,6 +808,76 @@ export class MapEditorService {
         this.select(game, { chunk, building });
       },
       redo: remove,
+    });
+  }
+
+  /** A quarter turn (clockwise seen from above), around the middle of the object. */
+  private rotateSelected(game: Game) {
+    const picked = this.selected;
+    if (!picked) {
+      return;
+    }
+    const building = picked.building;
+    const before = building.rot ?? 0;
+    const after = (before + 1) % 4;
+    const set = (rot: number) => {
+      building.rot = rot || undefined;
+      const chunk = this.chunkOf(game, building);
+      if (chunk) {
+        // (a turned object has its own meshes: no more an instanced copy)
+        game.mapHelper?.refreshBuilding(chunk, building);
+        this.select(game, { chunk, building });
+      }
+    };
+    set(after);
+    haptic('light');
+    this.record(game, { undo: () => set(before), redo: () => set(after) });
+  }
+
+  /**
+   * A copy of the selected object (options, turn, events and passage included) just to its right, past its width;
+   * the copy is selected (drag it where it goes).
+   */
+  private duplicateSelected(game: Game) {
+    const picked = this.selected;
+    const mapHelper = game.mapHelper;
+    if (!picked || !mapHelper) {
+      return;
+    }
+    const building = picked.building;
+    const bounds = mapHelper.buildingBounds(picked.chunk, building);
+    const width = bounds ? bounds.max.x - bounds.min.x : GRID;
+    const world = mapHelper.buildingWorldPos(picked.chunk, building);
+    world.x += Math.max(1, Math.ceil(width / GRID)) * GRID;
+    const chunk = mapHelper.chunkAt(world.x, world.z);
+    if (!chunk) {
+      haptic('warning');
+      return;
+    }
+    const { originModel, ...data } = building;
+    const copy: SceneBuilding = {
+      ...JSON.parse(JSON.stringify(data)) as Omit<SceneBuilding, 'originModel'>,
+      id: `${building.modelId}-${Date.now().toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`,
+      pos: { x: world.x - chunk.pos.x, y: world.y - chunk.pos.y, z: world.z - chunk.pos.z },
+      originModel,
+    };
+    mapHelper.addBuilding(chunk, copy);
+    this.select(game, { chunk, building: copy });
+    haptic('success');
+    this.record(game, {
+      undo: () => {
+        const current = this.chunkOf(game, copy);
+        if (current) {
+          mapHelper.removeBuilding(current, copy);
+        }
+        if (this.selected?.building === copy) {
+          this.select(game, { chunk: this.chunkOf(game, building) ?? picked.chunk, building });
+        }
+      },
+      redo: () => {
+        mapHelper.addBuilding(chunk, copy);
+        this.select(game, { chunk, building: copy });
+      },
     });
   }
 

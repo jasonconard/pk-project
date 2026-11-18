@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
+import { EscapeService } from '../../../core/shared/service/escape.service';
 import { LucideCastle, LucideCheck, LucideChevronLeft, LucideCopy, LucideDoorOpen, LucideDownload, LucideDynamicIcon, LucideEllipsis, LucideGlobe, LucideIcon, LucidePencil, LucidePlus, LucideRotateCcw, LucideSkull, LucideTrash, LucideX } from '@lucide/angular';
 import { GameService } from '../shared/services/game.service';
 import { listMaps, MapSummary } from '../shared/services/map-storage';
@@ -57,17 +58,9 @@ export class MapManagerComponent implements OnInit {
   private readonly grid = viewChild<ElementRef<HTMLElement>>('grid');
 
   constructor() {
-    const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape' && !(ev.target instanceof HTMLInputElement)) {
-        ev.stopPropagation();
-        this.back();
-      }
-    };
-    window.addEventListener('keydown', onKey, true);
-    inject(DestroyRef).onDestroy(() => {
-      window.removeEventListener('keydown', onKey, true);
-      clearTimeout(this.confirmTimer);
-    });
+    // Escape: back to the list from the new map form, else closes (not while typing a name)
+    inject(EscapeService).whileAlive(() => this.back());
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.confirmTimer));
   }
 
   ngOnInit(): void {

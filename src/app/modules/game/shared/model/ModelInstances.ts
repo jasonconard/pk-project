@@ -41,7 +41,7 @@ function templateOf(model: SceneModel): Template {
  * (its own opacity), has events (they need its own mesh), or its look depends on the drawing order of its parts.
  */
 export function canInstance(model: SceneModel, building: SceneBuilding): boolean {
-  return !building.canHide && !building.events.length && templateOf(model).instanceable;
+  return !building.canHide && !building.events.length && !building.rot && templateOf(model).instanceable;
 }
 
 /**

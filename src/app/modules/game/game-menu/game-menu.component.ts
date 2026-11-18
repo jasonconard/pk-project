@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideBackpack, LucideCalendarDays, LucideCamera, LucideChevronDown, LucideChevronRight, LucideCloudSun, LucideDynamicIcon,
   LucideGauge, LucideHeartHandshake, LucideIcon, LucideMap, LucideMaximize, LucideMinimize, LucideSave, LucideSparkles,
@@ -70,12 +71,9 @@ export class GameMenuComponent {
     // Held keys would stay pressed (their keyup won't reach the game while the menu is open)
     inject(KeyService).clearKeys();
     // Capture phase: before the game, which also uses Escape; the game's keys don't reach it while the menu is open
+    inject(EscapeService).whileAlive(() => this.closed.emit());
     const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape') {
-        ev.preventDefault();
-        ev.stopPropagation();
-        this.closed.emit();
-      } else if (!(ev.target instanceof HTMLButtonElement || ev.target instanceof HTMLInputElement)) {
+      if (!(ev.target instanceof HTMLButtonElement || ev.target instanceof HTMLInputElement)) {
         ev.stopPropagation();
       }
     };

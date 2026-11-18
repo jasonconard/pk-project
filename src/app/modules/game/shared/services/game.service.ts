@@ -1,4 +1,5 @@
 import { computed, effect, inject, Service, signal } from '@angular/core';
+import { GameAction } from '../model/GameAction';
 import { MapHelper } from "../model/MapHelper";
 import * as THREE from 'three';
 import { GameMode, Game } from "../model/Game";
@@ -43,6 +44,8 @@ export interface GameHud {
   editSelection: EditSelection | null;
   editCanUndo: boolean;
   editCanRedo: boolean;
+  /** What the action key would do in front of the player (null: nothing). */
+  action: GameAction | null;
   /** Map the player is on. */
   mapId: string;
   mapName: string;
@@ -303,6 +306,11 @@ export class GameService {
         this.inputLoop(game);
         pending -= INPUT_STEP;
         steps++;
+        if (steps === 1) {
+          // The keys just pressed are seen by one input step, then forgotten. Here, not in the render loop: on a
+          // 120 Hz screen the frames would often come first and a press (E: the action) would never be seen
+          this.consumePressedKeys(game);
+        }
       }
       if (steps === MAX_INPUT_STEPS) {
         pending = 0; // far behind (tab in background...): don't try to catch up
@@ -370,15 +378,20 @@ export class GameService {
       diag.frameEnd(game.renderer);
     }
 
+    this.syncHud();
+  }
+
+  /** After an input step: pause / resume, then the pressed keys are forgotten (the held ones stay). */
+  private consumePressedKeys(game: Game): void {
     const pressedCodes = this.keyService.pressedCodes;
     if(pressedCodes.includes(KeyCode.pause)) {
       this.togglePaused();
     } else if(pressedCodes.includes(KeyCode.cancel)) {
       game.paused = false;
     }
-
-    this.keyService.clearPressedKey();
-    this.syncHud();
+    if (pressedCodes.length) {
+      this.keyService.clearPressedKey();
+    }
   }
 
   private syncHud(): void {
@@ -396,6 +409,7 @@ export class GameService {
       editSelection: game.editSelection,
       editCanUndo: game.editCanUndo,
       editCanRedo: game.editCanRedo,
+      action: game.mode === GameMode.MAP ? game.action : null,
       mapId: game.mapHelper?.sceneMap.id ?? '',
       mapName: game.mapHelper?.sceneMap.name ?? '',
       editPick: this.arrivalPick ? game.mapHelper?.sceneMap.name ?? '' : null,

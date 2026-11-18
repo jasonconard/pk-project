@@ -75,7 +75,8 @@
     @if (!pickMap()) {
       <footer class="keys" aria-label="Aide">
         @if (selection()) {
-          <span><kbd>Glisser</kbd> déplacer l'objet</span><span><kbd>Suppr</kbd> supprimer</span>
+          <span><kbd>Glisser</kbd> déplacer l'objet</span><span><kbd>R</kbd> tourner</span><span><kbd>Ctrl D</kbd> dupliquer</span>
+          <span><kbd>Suppr</kbd> supprimer</span>
           <span><kbd>Échap</kbd> désélectionner</span>
         } @else if (tileId() === 'spawn') {
           <span><kbd>Clic</kbd> point d'arrivée de la carte</span>
@@ -140,8 +141,14 @@
         <button type="button" class="close" aria-label="Désélectionner" title="Désélectionner (Échap)" (click)="send('deselect', $event)"><svg lucideX></svg></button>
       </header>
       <div class="actions">
+        <button type="button" title="Tourner d'un quart de tour (R)" (click)="send('rotate', $event)">
+          <svg lucideRotateCw></svg> Tourner
+        </button>
+        <button type="button" title="Dupliquer : une copie à côté (Ctrl D)" (click)="send('duplicate', $event)">
+          <svg lucideCopy></svg> Dupliquer
+        </button>
         <button type="button" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)">
-          <svg lucideBox></svg> Modifier le modèle
+          <svg lucideBox></svg> Modèle
         </button>
         <button type="button" class="danger" data-haptic="warning" title="Supprimer (Suppr)" (click)="send('delete', $event)">
           <svg lucideTrash></svg> Supprimer

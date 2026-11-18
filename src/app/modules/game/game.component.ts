@@ -17,13 +17,14 @@ import { EditBrush, EditCommand } from './shared/services/map-editor.service';
 import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
 import { FireflyColor, formatHour, LeafMode, WEATHER_CHOICES, WeatherType } from './shared/weather/Weather';
 import { GameMenuComponent } from './game-menu/game-menu.component';
+import { MapControlsComponent } from './map-controls/map-controls.component';
 import { CoreService } from '../../core/shared/service/core.service';
 import { SequenceService } from './shared/services/sequence.service';
 import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, MapControlsComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })

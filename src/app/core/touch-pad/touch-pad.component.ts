@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { TouchService } from '../shared/service/touch.service';
 import { KeyService } from '../shared/service/key.service';
 import { TOUCH_KEYS, TouchKey, TouchKeyType } from '../shared/model/TouchKey';
@@ -15,6 +15,9 @@ export class TouchPadComponent {
   private readonly keyService = inject(KeyService);
   private readonly coreService = inject(CoreService);
   private readonly sequenceService = inject(SequenceService);
+
+  /** The buttons are shown (the fights; on the map: the Courir and action buttons instead). */
+  readonly visible = input(true);
 
   private readonly pushedBtns = signal<string[]>([]);
   /** Fingers on each button: it is released when its last finger lifts (or the system cancels the touch). */

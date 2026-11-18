@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { EscapeService } from '../../../core/shared/service/escape.service';
 import { LucideX } from '@lucide/angular';
 import { RELEASE_NOTES } from '../../../../assets/release-notes';
 
@@ -35,16 +36,8 @@ export class ReleaseNotesComponent {
   protected readonly visible = computed(() => this.compact() ? this.releases.slice(0, LATEST_COUNT) : this.releases);
 
   constructor() {
-    const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape') {
-        // (before the editor / the game, which also use Escape)
-        ev.preventDefault();
-        ev.stopPropagation();
-        this.closed.emit();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown, true);
-    inject(DestroyRef).onDestroy(() => window.removeEventListener('keydown', onKeyDown, true));
+    // Escape closes it (it was opened last)
+    inject(EscapeService).whileAlive(() => this.closed.emit());
   }
 
   /** 2026-11-10 → 10 nov. 2026 */

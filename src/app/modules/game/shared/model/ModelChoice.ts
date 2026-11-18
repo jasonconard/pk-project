@@ -107,3 +107,13 @@ export function loadModelThumb(choice: ModelChoice): Promise<string> {
     img.src = choice.model.tex.link;
   });
 }
+
+/** French names of the models (editor palette, the action prompt « Entrer au Labo »). */
+const MODEL_LABELS: Record<string, string> = {
+  labo: 'Labo', house: 'Maison', tree: 'Arbre', flowers: 'Fleurs', barrier: 'Barrière',
+  pannel: 'Panneau', 'wood-pannel': 'Pancarte', 'letter-box': 'Boîte aux lettres', rock: 'Rocher',
+};
+
+export function modelLabel(modelId: string): string {
+  return MODEL_LABELS[modelId] ?? modelId;
+}

@@ -24,6 +24,7 @@ const KEYBOARD_MAPPING: Readonly<Record<string, KeyCode>> = {
   f: KeyCode.y,
   p: KeyCode.pause,
   o: KeyCode.select,
+  Shift: KeyCode.run,
 };
 
 /**
@@ -124,6 +125,7 @@ export class KeyService {
   }
 
   private static getKeyCodeFromKeyboard(ev: KeyboardEvent): KeyCode | null {
-    return KEYBOARD_MAPPING[ev.key] ?? null;
+    // (Shift held for running: the letters come in capitals)
+    return KEYBOARD_MAPPING[ev.key] ?? KEYBOARD_MAPPING[ev.key.toLowerCase()] ?? null;
   }
 }

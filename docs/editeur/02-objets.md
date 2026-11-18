@@ -15,6 +15,8 @@ Onglet **Objets**, choisir un modèle : un **aperçu transparent** suit la souri
 Avec « Aucun », un clic sélectionne un objet (cadre orange) ; un clic dans le vide ou Échap désélectionne.
 
 - **Glisser l'objet sélectionné** le déplace (aimanté à la grille), même d'un morceau de carte à l'autre.
+- **Tourner** (R) le tourne d'un quart de tour, autour du milieu de son emprise (`SceneBuilding.rot`, 0 à 3 ; un objet tourné a ses propres meshes, pas une copie instanciée). Les événements gardent leur direction.
+- **Dupliquer** (Ctrl+D) pose une copie juste à droite, au-delà de sa largeur (options, rotation, événements et passage compris) ; la copie est sélectionnée.
 - **Suppr** ou le bouton **Supprimer** le supprime.
 - Le panneau permet de changer **« Bloque le passage »** et **« Transparent quand le joueur est derrière »**.
 

@@ -48,6 +48,9 @@ export interface MapHelperInit {
   scenePlayer: ScenePlayer;
 }
 
+/** userData key of a turned building's mesh: its shift (see MapHelper.turn). */
+const TURN_SHIFT = 'turnShift';
+
 export class MapHelper {
   originGame: Game;
   meshes: Record<string, THREE.Object3D> = {};
@@ -660,8 +663,29 @@ export class MapHelper {
       return;
     }
     const mesh = BasicMeshService.makeModel(model);
-    this.addMesh(chunk.id + '-' + building.id, mesh, world);
+    MapHelper.turn(mesh, building.rot ?? 0);
+    this.addMesh(chunk.id + '-' + building.id, mesh, MapHelper.viewPos(mesh, world));
     chunk.group.add(mesh);
+  }
+
+  /**
+   * A turned building (quarter turns): turned around the middle of its footprint, which stays in place (the
+   * model's origin may be anywhere); the shift that keeps it there is kept with the mesh (see viewPos).
+   */
+  private static turn(mesh: THREE.Object3D, rot: number) {
+    if (!rot) {
+      return;
+    }
+    const angle = -rot * Math.PI / 2;
+    const middle = new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3()).setY(0);
+    mesh.rotation.y = angle;
+    mesh.userData[TURN_SHIFT] = middle.clone().sub(middle.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), angle));
+  }
+
+  /** Where a building's mesh goes for the building to be at a world position (the shift of a turned one). */
+  private static viewPos(mesh: THREE.Object3D, world: THREE.Vector3): THREE.Vector3 {
+    const shift = mesh.userData[TURN_SHIFT] as THREE.Vector3 | undefined;
+    return shift ? world.clone().add(shift) : world;
   }
 
   /** Takes a building's drawing out of the scene (its data stays in the chunk). */
@@ -714,7 +738,8 @@ export class MapHelper {
     if (set) {
       set.move(building, world);
     } else {
-      this.meshes[chunk.id + '-' + building.id]?.position.copy(world);
+      const mesh = this.meshes[chunk.id + '-' + building.id];
+      mesh?.position.copy(MapHelper.viewPos(mesh, world));
     }
     return true;
   }

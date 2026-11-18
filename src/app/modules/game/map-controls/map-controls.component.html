@@ -1,0 +1,20 @@
+@if (!message()) {
+  @if (touch()) {
+    <button type="button" class="run" aria-label="Courir (maintenir)" [class.pushed]="pushed().includes('run')"
+            (touchstart)="press('run', $event)" (touchend)="release('run', $event)" (touchcancel)="release('run', $event)">
+      <svg lucideFootprints></svg>
+    </button>
+    @if (action(); as action) {
+      <button type="button" class="action" [class.pushed]="pushed().includes('action')" animate.enter="anim-fade-in" animate.leave="anim-fade-out"
+              (touchstart)="press('action', $event)" (touchend)="release('action', $event)" (touchcancel)="release('action', $event)">
+        <svg [lucideIcon]="actionIcon()"></svg>
+        <span class="verb">{{ action.verb }}</span>
+        <small>{{ action.target }}</small>
+      </button>
+    }
+  } @else if (action(); as action) {
+    <p class="prompt" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+      <kbd>E</kbd> <svg [lucideIcon]="actionIcon()"></svg> {{ action.verb }} · {{ action.target }}
+    </p>
+  }
+}

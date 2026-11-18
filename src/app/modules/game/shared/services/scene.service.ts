@@ -109,7 +109,7 @@ export class SceneService {
   public static getMove(mapHelper: MapHelper, holdedCodes: KeyCode[]): { move: THREE.Vector3, speed: number, status: PlayerMoveStatus } {
     const move = new THREE.Vector3(0, 0, 0);
 
-    const runPressed = holdedCodes.indexOf(KeyCode.confirm) >= 0;
+    const runPressed = holdedCodes.includes(KeyCode.confirm) || holdedCodes.includes(KeyCode.run);
     let status = runPressed ? PlayerMoveStatus.RUNNING : PlayerMoveStatus.WALKING;
     let speed = (runPressed ? 2 : 1)
 

@@ -1,7 +1,9 @@
 import { Vec2 } from "../../../modules/game/shared/model/SceneUtils";
 
 export enum KeyCode {
-  confirm, cancel, left, right, down, up, x, y, pause, select
+  confirm, cancel, left, right, down, up, x, y, pause, select,
+  /** Running only (the touch Courir button, Shift): the confirm key also runs while held, but acts when pressed. */
+  run,
 }
 
 export interface PressedKey {

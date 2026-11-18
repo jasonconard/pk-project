@@ -63,7 +63,11 @@
                     (cloudDensityChange)="setCloudDensity($event)" (soundChange)="setSound($event)" (musicVolumeChange)="setMusicVolume($event)" />
 
 <core-stick />
-<core-touch-pad />
+<!-- On the map: Courir and the action button (the A B X Y buttons are for the fights) -->
+<core-touch-pad [visible]="hud()?.mode !== GameMode.MAP" />
+@if (playing()) {
+  <game-map-controls [action]="hud()?.action ?? null" />
+}
 
 @if (hud()?.loading) {
   <div class="loading-screen" animate.enter="anim-fade-in" animate.leave="anim-loading-out">

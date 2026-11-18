@@ -7,6 +7,8 @@ export interface SceneBuilding {
   modelId: string
   originModel?: SceneModel,
   pos: Vec3,
+  /** Quarter turns around the vertical axis (0 to 3, clockwise seen from above): the editor's Tourner. */
+  rot?: number,
   passable: boolean,
   canHide: boolean,
   events: SceneEvent[]

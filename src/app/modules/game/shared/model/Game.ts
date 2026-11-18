@@ -1,3 +1,4 @@
+import { GameAction } from './GameAction';
 import * as THREE from 'three';
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
@@ -54,6 +55,8 @@ export class Game {
   framePerSec = 0;
   paused = false;
 
+  /** What the action key would do in front of the player (null: nothing), see GameMapService.updateAction. */
+  action: GameAction | null = null;
   /** Map editor: the player is frozen and the camera moves freely (see MapEditorService). */
   editMode = false;
   /** Map editor: model being placed (null = none selected: the mouse only moves the camera). */

@@ -6,44 +6,52 @@ import { SceneEvent, SceneEventHelper } from '../model/SceneEvent';
 import { VecBox3 } from '../model/SceneUtils';
 import { MathService } from './math.service';
 import { MapHelper } from "../model/MapHelper";
+import { SceneBuilding } from "../model/SceneBuilding";
 
 @Service()
 export class EventService {
 
   public static checkEvents(mapHelper: MapHelper, playerMesh: THREE.Object3D, pressedCodes: KeyCode[], holdedCodes: KeyCode[] = []): SceneEvent | null {
-    const eventsHelper: SceneEventHelper[] = [];
+    return EventService.nearest(mapHelper, playerMesh, evt => EventService.checkPressedKeys(evt.conditions.pressedKeys,
+      evt.conditions.held ? [...pressedCodes, ...holdedCodes] : pressedCodes))?.evt ?? null;
+  }
+
+  /**
+   * What the action key would do right now (the touch action button, the computer's prompt): the nearest event
+   * waiting for it whose place and direction fit, and its object. Events that happen by walking are left out.
+   */
+  public static actionAt(mapHelper: MapHelper, playerMesh: THREE.Object3D): { evt: SceneEvent, building: SceneBuilding } | null {
+    return EventService.nearest(mapHelper, playerMesh, evt => !!evt.conditions.pressedKeys?.includes(KeyCode.confirm));
+  }
+
+  /** The nearest event of the visible objects whose direction and place fit, among those `keep` accepts. */
+  private static nearest(mapHelper: MapHelper, playerMesh: THREE.Object3D, keep: (evt: SceneEvent) => boolean): { evt: SceneEvent, building: SceneBuilding } | null {
+    const found: (SceneEventHelper & { building: SceneBuilding })[] = [];
     mapHelper.sceneMap.chunks.forEach(chunk => {
       if(chunk.visible) {
         chunk.buildings.forEach(building => {
           building.events.forEach(evt => {
-            const dirCond = EventService.checkDirection(evt.conditions.direction, mapHelper);
-            if(!dirCond) { return; }
-            const keyCond = EventService.checkPressedKeys(evt.conditions.pressedKeys,
-              evt.conditions.held ? [...pressedCodes, ...holdedCodes] : pressedCodes);
-            if(!keyCond) { return; }
+            if(!EventService.checkDirection(evt.conditions.direction, mapHelper) || !keep(evt)) { return; }
             const buildingKey = chunk.id + '-' + building.id;
-            const bounds = mapHelper.getBounds(chunk.id + '-' + building.id);
-            const boundsCond = EventService.checkBounds(evt.conditions.bounds, bounds, playerMesh);
-            if(!boundsCond) { return; }
+            const bounds = mapHelper.getBounds(buildingKey);
+            if(!EventService.checkBounds(evt.conditions.bounds, bounds, playerMesh)) { return; }
             const buildingMesh = mapHelper.meshes[buildingKey];
             if (buildingMesh) {
-              eventsHelper.push({ evt, buildingMesh });
+              found.push({ evt, buildingMesh, building });
             }
           });
         });
       }
     });
-    if(!eventsHelper.length) {
+    if(!found.length) {
       return null;
-    } else if(eventsHelper.length === 1) {
-      return eventsHelper[0].evt;
-    } else {
-      return eventsHelper.sort( (eh1, eh2) => {
-        const d1 = MathService.getDist(playerMesh.position, eh1.buildingMesh.position);
-        const d2 = MathService.getDist(playerMesh.position, eh2.buildingMesh.position);
-        return d1 > d2 ? 1 : -1;
-      })[0].evt;
     }
+    const best = found.length === 1 ? found[0] : found.sort((eh1, eh2) => {
+      const d1 = MathService.getDist(playerMesh.position, eh1.buildingMesh.position);
+      const d2 = MathService.getDist(playerMesh.position, eh2.buildingMesh.position);
+      return d1 > d2 ? 1 : -1;
+    })[0];
+    return { evt: best.evt, building: best.building };
   }
 
   private static checkDirection(dir: PlayerDirection | undefined, mh: MapHelper): boolean {

@@ -40,7 +40,9 @@ En édition, le stick et les boutons du jeu sont masqués (`TouchService.setGame
 | Touche | Effet |
 |---|---|
 | B | Ouvrir / fermer l'éditeur |
-| Échap | Reposer l'outil, sinon désélectionner |
+| Échap | Défait la dernière chose faite : ferme le dernier menu ou réglage ouvert, repose l'outil, désélectionne (`EscapeService` : une pile, la dernière action en haut) |
+| R | Tourner l'objet sélectionné d'un quart de tour |
+| Ctrl+D (Cmd+D) | Dupliquer l'objet sélectionné |
 | Suppr / Retour arrière | Supprimer l'objet sélectionné |
 | Ctrl+Z (Cmd+Z) | Annuler |
 | Ctrl+Y, Ctrl+Maj+Z | Refaire |

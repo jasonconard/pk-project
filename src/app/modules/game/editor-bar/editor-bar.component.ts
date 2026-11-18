@@ -1,27 +1,22 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideCheck, LucideChevronDown, LucideCloudSun,
   LucideClapperboard, LucideDatabase, LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideGrid2x2, LucideMessagesSquare, LucideSearch,
-  LucideUserRound, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
+  LucideUserRound, LucideRotateCw, LucideCopy, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
   LucideLayoutGrid, LucideMap, LucideMapPin, LucideMountain, LucideMousePointer2, LucidePaintBucket, LucidePaintbrush, LucidePlay,
   LucidePlus, LucideRedo2, LucideSettings, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap,
 } from '@lucide/angular';
 import { MapManagerComponent } from '../map-manager/map-manager.component';
 import { Passage } from '../shared/model/Passage';
 import { listMaps } from '../shared/services/map-storage';
-import { loadModelThumb, MODEL_CHOICES } from '../shared/model/ModelChoice';
+import { loadModelThumb, MODEL_CHOICES, modelLabel } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
 import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
 import { TouchService } from '../../../core/shared/service/touch.service';
 
 /** Keyboard shortcut opening / closing the map editor (free key: the game uses z q s d a e r f p o). */
 const EDIT_KEY = 'b';
-
-/** French names of the models in the palette. */
-const MODEL_LABELS: Record<string, string> = {
-  labo: 'Labo', house: 'Maison', tree: 'Arbre', flowers: 'Fleurs', barrier: 'Barrière',
-  pannel: 'Panneau', 'wood-pannel': 'Pancarte', 'letter-box': 'Boîte aux lettres', rock: 'Rocher',
-};
 
 type PaletteTab = 'objects' | 'ground' | 'relief' | 'chunks';
 
@@ -71,7 +66,7 @@ interface PaletteEntry {
 @Component({
   selector: 'game-editor-bar',
   imports: [MapManagerComponent, LucideDynamicIcon, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing,
-    LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideGrid2x2, LucideSearch, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
+    LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideGrid2x2, LucideSearch, LucideRotateCw, LucideCopy, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
     LucideGrid3x3, LucideMap, LucideMapPin, LucideMousePointer2, LucidePaintBucket, LucidePlay, LucidePlus, LucideRedo2, LucideSettings,
     LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap],
   templateUrl: './editor-bar.component.html',
@@ -164,6 +159,14 @@ export class EditorBarComponent {
   });
 
   constructor() {
+    // Escape steps back from the last thing done: a menu, the arrival pick, the tool in hand, the selection
+    const escape = inject(EscapeService);
+    escape.track(() => this.moreOpen(), () => this.moreOpen.set(false));
+    escape.track(() => this.editorsOpen(), () => this.editorsOpen.set(false));
+    escape.track(() => this.editMode() && this.pickMap(), () => this.cancelPick.emit());
+    escape.track(() => this.editMode() && this.modelId(), () => this.modelSelected.emit(null));
+    escape.track(() => this.editMode() && this.tileId(), () => this.tileSelected.emit(null));
+    escape.track(() => this.editMode() && this.selection(), () => this.command.emit('deselect'));
     const onKeyDown = (ev: KeyboardEvent) => this.onKeyDown(ev);
     window.addEventListener('keydown', onKeyDown, true);
     inject(DestroyRef).onDestroy(() => window.removeEventListener('keydown', onKeyDown, true));
@@ -304,7 +307,7 @@ export class EditorBarComponent {
   }
 
   private label(modelId: string): string {
-    return MODEL_LABELS[modelId] ?? modelId;
+    return modelLabel(modelId);
   }
 
   private onKeyDown(ev: KeyboardEvent): void {
@@ -322,23 +325,16 @@ export class EditorBarComponent {
       }
     } else if (!this.editMode()) {
       handled = false;
-    } else if (key === 'escape' && (this.moreOpen() || this.editorsOpen())) {
-      this.moreOpen.set(false);
-      this.editorsOpen.set(false);
-    } else if (key === 'escape' && this.pickMap()) {
-      this.cancelPick.emit();
     } else if (ctrl && key === 'z') {
       this.command.emit(ev.shiftKey ? 'redo' : 'undo');
     } else if (ctrl && key === 'y') {
       this.command.emit('redo');
+    } else if (key === 'r' && !ctrl && this.selection()) {
+      this.command.emit('rotate');
+    } else if (ctrl && key === 'd' && this.selection()) {
+      this.command.emit('duplicate');
     } else if ((key === 'delete' || key === 'backspace') && this.selection()) {
       this.command.emit('delete');
-    } else if (key === 'escape' && this.modelId()) {
-      this.modelSelected.emit(null);
-    } else if (key === 'escape' && this.tileId()) {
-      this.tileSelected.emit(null);
-    } else if (key === 'escape' && this.selection()) {
-      this.command.emit('deselect');
     } else {
       handled = false;
     }
