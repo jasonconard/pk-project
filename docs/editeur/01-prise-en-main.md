@@ -2,7 +2,7 @@
 
 ## Ouvrir l'éditeur
 
-Touche **B** ou bouton **Éditer** (icône de clé) en haut à gauche (sur la carte uniquement, pas en combat). En édition, le bouton a un contour orange et le joueur est figé : plus de déplacement ni d'événements. En sortant, la caméra revient exactement où elle était.
+Touche **B** ou bouton **Créer** (crayon et règle) en haut à droite du jeu (sur la carte uniquement, pas en combat). **Jouer** (ou B) en sort. En édition, un liseré orange entoure la barre et le joueur est figé : plus de déplacement ni d'événements. En sortant, la caméra revient exactement où elle était.
 
 ## La caméra libre
 
@@ -28,12 +28,42 @@ En édition, le stick et les boutons du jeu sont masqués (`TouchService.setGame
 
 ## L'interface
 
-- **En haut à gauche** : Quitter l'édition, la carte ouverte (son nom : ouvre le gestionnaire de cartes, voir [05](05-sauvegarde-export.md)), annuler, refaire, grille, Modèles, Musique. Sur téléphone en portrait, le nom de la carte est en haut au milieu.
-- **Grille** : trace le contour de chaque case (16 unités) au-dessus du sol, à la hauteur de la case et en pente sur les escaliers. Un jeu de lignes par morceau de carte, construit quand il entre dans la vue et refait quand ses reliefs changent (`MapEditorService.buildGrid`).
-- **Sous ces boutons** : le panneau de l'objet sélectionné (voir [Objets](02-objets.md)).
-- **En bas** : la palette, en trois onglets (Objets, Sols, Reliefs). « Aucun » reste toujours en tête : la souris sélectionne et déplace la vue. Pour Sols et Reliefs, la taille du pinceau (1, 2, 3, pot de peinture) est à droite des onglets.
-- **Au-dessus de la palette** : un rappel des commandes, qui change avec l'outil choisi.
-- **Sur téléphone en portrait** : ces boutons forment une colonne d'icônes à gauche, sous la température (leur nom dans l'infobulle), et le panneau de l'objet sélectionné s'ouvre à droite de la colonne. Les réglages météo forment une colonne à droite, sous le bouton plein écran ; leurs fenêtres s'ouvrent à gauche de leur bouton.
+La mise en page dépend de l'écran (`EditorBarComponent.layout`, attribut `data-layout` ; styles dans `editor-bar.component.scss` et `editor-bar.wide.scss`) :
+
+| Mise en page | Quand |
+|---|---|
+| Téléphone en portrait | par défaut (et tablette en portrait : le dock flotte au milieu en bas) |
+| Téléphone en paysage | paysage et hauteur ≤ 600 px |
+| Ordinateur | largeur ≥ 1000 px et hauteur ≥ 601 px |
+
+### Téléphone en portrait
+
+- **La barre, en haut** : **Jouer** (quitter l'édition), la **carte ouverte** (son nom : ouvre le gestionnaire de cartes, voir [05](05-sauvegarde-export.md)), **annuler**, **refaire**, et **⋮** : Grille des cases, Ambiance, Réglages (le menu du jeu : plein écran, son, qualité, nouveautés), et les éditeurs Modèles 3D et Musique.
+- **Sous la barre** : un rappel des gestes de l'outil choisi. Sa croix le masque jusqu'au prochain changement d'outil.
+- **Le dock, en bas** : les onglets en icônes (Objets, Sols, Reliefs, Zones ; Événements grisé, à venir), seul l'onglet choisi montre son nom ; pour Sols et Reliefs, la taille du pinceau (1, 2, 3, pot de peinture) ; puis la palette, qui défile de côté. « Aucun » reste toujours en tête : le doigt sélectionne et déplace la vue.
+- **Un objet touché** : sa fiche remplace le dock (voir [Objets](02-objets.md)). La croix, ou Échap, le désélectionne.
+- **L'ambiance** (⋮ → Ambiance, ou M / H / W / N / V) se déplie en colonne sous la barre, à gauche ; chaque réglage s'ouvre à droite de son bouton.
+
+### Téléphone en paysage
+
+La hauteur manque : les panneaux passent sur les côtés.
+
+- **À gauche**, sur toute la hauteur : les onglets en rail d'icônes, la taille du pinceau au-dessus de la palette, et la palette sur 2 colonnes qui défile.
+- **En haut**, entre le panneau d'outils et le bord droit : la même barre qu'en portrait, et le rappel des gestes dessous.
+- **À droite** : la fiche de l'objet sélectionné, sur toute la hauteur (elle défile).
+- L'ambiance se déplie à droite du panneau d'outils.
+
+### Ordinateur
+
+- **La barre, sur toute la largeur** : Jouer (B), la carte ouverte, annuler, refaire, Grille ; à droite **l'ambiance** (la météo et l'heure, ouvre les réglages d'ambiance), **Réglages**, et le lanceur **Éditeurs** (Modèles 3D, Musique ; Dialogues, Base de données, Portraits et sprites, Cinématiques grisés, à venir).
+- **À gauche** : les onglets avec leur nom, la taille du pinceau, une **recherche** d'objet (sans accents : « batiment » trouve « Bâtiment » ; Échap la vide) et la palette **par familles** (Nature, Bâtiments, Décor ; `MODEL_FAMILIES`).
+- **À droite** : la fiche de l'objet sélectionné.
+- **En bas** : l'aide clavier et souris de l'outil choisi (Clic, Glisser, R, Ctrl D, Suppr, Échap, Molette…), à la place du rappel des gestes.
+
+### Commun
+
+- **Grille** : trace le contour de chaque case (16 unités) au-dessus du sol, à la hauteur de la case et en pente sur les escaliers. Un jeu de lignes par zone de carte, construit quand elle entre dans la vue et refait quand ses reliefs changent (`MapEditorService.buildGrid`).
+- La console de diagnostic (Réglages → Qualité graphique) s'affiche sous la barre, à droite du panneau d'outils en paysage et sur ordinateur.
 
 ## Raccourcis
 
