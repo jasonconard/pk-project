@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.33',
+    date: '2026-11-19',
+    notes: [
+      'Nouveau dans le menu : Projet de jeu. Il met toutes vos créations (cartes, modèles, musiques) dans un seul fichier .pk.',
+      'Importer un fichier .pk remplace les créations de l\'appareil par celles du fichier, après confirmation.',
+      'Vous pouvez ainsi passer vos créations du téléphone à l\'ordinateur, et inversement.',
+      'Sur l\'application Android, le bouton Envoyer… partage le fichier par Drive, mail, Bluetooth ou dans Fichiers.',
+    ],
+  },
+  {
     version: '0.0.32',
     date: '2026-11-19',
     notes: [
