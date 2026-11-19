@@ -118,6 +118,11 @@ Aujourd'hui, une porte (passage) ou un événement occupe toute la largeur de l'
 
 - **Captures automatiques des météos** comparées d'une version à l'autre (voir si un effet casse) ; elles serviraient aussi d'images pour le catalogue.
 
+### Travailler avec Claude
+
+- **Skill `add-model`** (`.claude/skills/add-model/`, comme `release`) : la recette pour ajouter un modèle 3D au jeu en une fois (fichier `md-xxx.ts` et sa texture exportés par l'éditeur de modèles, inscription dans `src/assets/models/models.ts` et dans la palette de l'éditeur de carte `MODEL_CHOICES`, vignette, vérification dans le jeu, doc). À écrire la première fois qu'on ajoute un modèle, à partir de ce qu'on aura vraiment fait.
+- **Skill `add-weather`** : la même chose pour une météo (la recette est déjà dans `CLAUDE.md`).
+
 ## Écartées
 
 (rien pour l'instant)

@@ -1,0 +1,79 @@
+# pk-project
+
+3D pixel-art game (Three.js) that is becoming a **game engine** for a Persona-like game: daily life in a town by
+day, dungeons + Grandia-style combat by night. Every feature should be an editor / data-driven tool so the game is
+built without coding. Direction, ordered tool roadmap and statuses: `docs/idees.md` (keep statuses there).
+Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Pages) and an Android APK (Capacitor 8).
+
+## Stack and commands
+
+- Angular 22 standalone, zoneless, signals (`signal`/`computed`/`input()`/`viewChild`), `inject()`; Three.js 0.187;
+  TypeScript 6. Router uses hash URLs (`/#/modeles`, `/#/musique`).
+- `npm start` → dev server on port 7777 (`--host 0.0.0.0`, reachable from the phone). `npx ng serve` → 4200.
+- Check a change compiles: `npx ng build --configuration development`. **No unit tests** (no `.spec.ts`): verify in
+  a browser (headless Chrome via a small CDP script in the scratchpad is more reliable than pen.dev browser nodes
+  for multi-step tests).
+- `npm run android-build` (native), `scripts/native-fingerprint.mjs` decides live update vs new APK (see README).
+- Release: `/release` skill (`.claude/skills/release/`). Deploy = pushing tag `vX.Y.Z` (`.github/workflows/main.yml`).
+
+## Map of the code
+
+- `src/app/app.routes.ts`: `''` game (applies browser-saved models first), `modeles`, `musique`.
+- `core/`: app-wide UI and input. `shared/service/`: `core.service` (fullscreen…), `escape.service` (Escape /
+  browser back / Android back close the last opened layer — register every closable layer there), `key`, `touch`,
+  `gamepad`. `shared/app-visibility.ts` (`setGameCovered`/`isGameCovered`/`isGameAsleep`: game loops, sounds and
+  input listeners must respect it). `stick`, `touch-pad`, `message`, `update-prompt` (GitHub release check, live update).
+- `modules/game/`: `game.component` (main view, game mode / edit mode, editor panels opened over the game via
+  `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
+  landscape/desktop), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
+  `release-notes`, `teleport`.
+  - `shared/services/`: `game.service` (settings, music, reload of models), `map-editor.service` (map editor logic),
+    `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
+    `event` (`actionAt`), `sequence`, `game-music`.
+  - `shared/model/`: `MapHelper` (chunks, bounds, `refreshModels`), `Terrain`, `GroundMesh`, `SceneMap`,
+    `SceneBuilding`, `SceneModel`, `ModelChoice` (`MODEL_CHOICES`, palette thumbnails), `ModelInstances`,
+    `browser-models`, `Passage` (links between maps), `Quality`.
+  - `shared/weather/`: `Weather.ts` (enum, params, presets, temperature, `WEATHER_CHOICES`), `WeatherHelper.ts`
+    (wiring), `GlowParticles.ts`, `weather-shader.ts`, `WeatherAudio.ts`, one `XxxHelper.ts` per effect, post passes
+    (`BloomPass`, `GodRaysPass`, `HeatHazePass`), `weather-catalog.ts` (catalog texts). Details in `shared/weather/CLAUDE.md`.
+- `modules/model-editor/`: 3D model editor (one pixel grid per face, grayscale layers specular / night / bump).
+  `shared/`: `EditableModel`, `model-ops`, `model-history`, `model-storage` (IndexedDB), `model-export` (→ `md-xxx.ts` + png).
+- `modules/music-editor/`: lo-fi music editor. `shared/`: `song`, `instruments` (data sheets), `synth`, `music-engine`, `song-storage`.
+- `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be replaced by the Grandia-style combat.
+- `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
+  (catalog images), `release-notes.ts` (player-facing notes, French).
+
+**Big files — never read whole, grep the symbol then read a range:** `Weather.ts` (~2200 lines), `WeatherAudio.ts`
+(~1950), `WeatherHelper.ts` (~1400), `map-editor.service.ts` (~1300), `model-editor.component.ts` (~1100),
+`GlowParticles.ts`, `MapHelper.ts`, `assets/map/world/world.ts`, `music-editor.component.ts`, `game.service.ts`.
+
+## Conventions
+
+- Code, comments and commit messages in English; UI text, docs (`docs/`) and release notes in simple French.
+- Commits: `[Feature] …`, `[Fix] …`, `[Docs] …`, `[Design] …` + a sentence saying what changed for the player.
+  Commit only when asked; code, then docs, then release as separate commits.
+- UI icons: Lucide via `@lucide/angular` (`<svg lucideXxx>`, `<svg [lucideIcon]="Comp">`), never emojis (weather
+  emojis in `Weather.ts` are content). Check the icon name exists in `node_modules/@lucide/angular` (e.g. no `Trash2`).
+- Never attach decorative meshes (halos, decals, particles) under a model group from `BasicMeshService.makeModel`:
+  collisions use `Box3.setFromObject(group)` (`MapHelper.getBounds`), so children enlarge the hitbox.
+- `design-resources/` (git-ignored): inputs the user drops for Claude; copy what the game needs into `src/assets/`.
+
+## Design mockups (`design/*.pen`)
+
+- Only through the pencil MCP tools (encrypted files). UI-heavy features get a mockup first.
+- Show the real game: captures of the running game with the UI hidden by injected CSS (`game-editor-bar,
+  game-weather-panel, core-stick, core-touch-pad, .status-tile, .btn-fullscreen`), real model thumbnails
+  (`design/images/models/`), catalog weather images (`design/images/weather/`). No AI images, no Lucide stand-ins
+  for content; notes never over the screens.
+
+## Recipe: add a weather
+
+Preset in `Weather.ts` (enum, param, preset, temperature, `WEATHER_CHOICES`) → style in `GlowParticles.ts` → wiring in
+`WeatherHelper.ts` → text in `weather-catalog.ts` → user tries it and asks tweaks → catalog image: hide UI, screenshot,
+`magick` crop to 1.61 and resize to 800x497 webp `src/assets/weather/<id>-<day|night>.webp`, restore the
+`pk-weather-settings` localStorage → after validation: `docs/meteo/meteos/<id>.md` + link in `docs/meteo/README.md`.
+
+## Docs
+
+`docs/editeur/` (map, model and music editors user guide, README = index), `docs/meteo/` (weathers),
+`docs/performance/`, `docs/idees.md` (roadmap). Update the matching page when a feature changes.
