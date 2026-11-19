@@ -5,9 +5,10 @@ import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { replaceStoredSongs, StoredSongs, storedSongsData } from '../../../music-editor/shared/song-storage';
+import { replaceStoredVariables, StoredVariables, storedVariablesData } from '../../../variables-editor/shared/variable-storage';
 
 /**
- * The game project file (`.pk`): every creation saved in the browser (maps, models, songs) in one file, to move them
+ * The game project file (`.pk`): every creation saved in the browser (maps, models, songs, variables) in one file, to move them
  * between the phone and the computer. Gzipped JSON; the models' pixels in base64. Importing replaces every creation.
  */
 const FORMAT = 'pk-project';
@@ -27,6 +28,8 @@ export interface ProjectFile {
   maps: StoredMaps;
   models: FileModel[];
   songs: StoredSongs | null;
+  /** Missing in the files written before the variables editor (same format version: nothing to forget). */
+  variables?: StoredVariables | null;
 }
 
 /** What a project holds, shown before importing. */
@@ -34,6 +37,7 @@ export interface ProjectSummary {
   maps: number;
   models: number;
   songs: number;
+  variables: number;
   savedAt: string;
   appVersion: string;
 }
@@ -43,6 +47,7 @@ export function summarize(project: ProjectFile): ProjectSummary {
     maps: Object.keys(project.maps.maps).length,
     models: project.models.length,
     songs: project.songs?.songs.length ?? 0,
+    variables: project.variables?.variables.length ?? 0,
     savedAt: project.savedAt,
     appVersion: project.appVersion,
   };
@@ -90,6 +95,7 @@ export async function collectProject(appVersion: string): Promise<ProjectFile> {
     maps: storedMapsData(),
     models: (await loadStoredModels()).map(toFileModel),
     songs: storedSongsData(),
+    variables: storedVariablesData(),
   };
 }
 
@@ -156,4 +162,5 @@ export async function applyProject(project: ProjectFile): Promise<void> {
     throw new Error('Les modèles n\'ont pas pu être enregistrés (plus de place ?).');
   }
   replaceStoredSongs(project.songs);
+  replaceStoredVariables(project.variables);
 }

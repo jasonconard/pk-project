@@ -1,0 +1,270 @@
+/* Variables editor: same look as the music editor (dark panel, rounded surfaces); one card per variable. */
+
+:host {
+  --panel: #22232a;
+  --surface: #33353f;
+  --field: #2a2b33;
+  --border: #4a4c5a;
+  --muted: #8a8d9c;
+  --accent: #3a6ea5;
+  --danger: #b0413e;
+  --warning: #ffb84d;
+
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  color: #eceef4;
+  font-size: 14px;
+  touch-action: manipulation;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+input {
+  font: inherit;
+  color: inherit;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--field);
+  padding: 8px 10px;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+}
+
+.square-btn {
+  flex-shrink: 0;
+  min-width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 18px;
+}
+
+.top {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(4px + var(--safe-top)) calc(60px + var(--safe-right)) 8px calc(12px + var(--safe-left));
+  border-bottom: 1px solid var(--surface);
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 6px 8px 0;
+    color: #9fc3ff;
+    text-decoration: none;
+    font-size: 15px;
+  }
+
+  .title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    span {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 12px calc(12px + var(--safe-right)) 12px calc(12px + var(--safe-left));
+}
+
+.message {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.variable {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid transparent;
+
+  &.bad {
+    border-color: var(--warning);
+  }
+
+  .line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .kind-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    color: var(--muted);
+    font-size: 18px;
+  }
+
+  .name {
+    flex: 1;
+    font-weight: 600;
+  }
+
+  .delete {
+    background: var(--field);
+    font-size: 16px;
+    padding: 0 10px;
+
+    &.armed {
+      background: var(--danger);
+      font-size: 13px;
+    }
+  }
+
+  .warning {
+    margin: -2px 0 0 26px;
+    font-size: 12px;
+    color: var(--warning);
+  }
+
+  .settings {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 8px;
+  }
+
+  .initial {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    small {
+      color: var(--muted);
+    }
+  }
+
+  .note {
+    font-size: 13px;
+  }
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--field);
+
+  button {
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--muted);
+
+    &.on {
+      background: var(--accent);
+      color: #fff;
+    }
+  }
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9px;
+  background: var(--field);
+
+  button {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  input {
+    width: 56px;
+    padding: 6px 2px;
+    text-align: center;
+    background: transparent;
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+}
+
+.empty {
+  margin: auto 0;
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.5;
+
+  svg {
+    font-size: 36px;
+    color: #eceef4;
+  }
+
+  b {
+    color: #eceef4;
+  }
+}
+
+.add {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px calc(12px + var(--safe-right)) calc(10px + var(--safe-bottom)) calc(12px + var(--safe-left));
+  border-top: 1px solid var(--surface);
+
+  button {
+    flex: 1;
+    max-width: 200px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+}

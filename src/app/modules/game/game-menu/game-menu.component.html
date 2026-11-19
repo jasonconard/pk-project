@@ -72,7 +72,7 @@
     }
     <button type="button" class="row" [attr.aria-expanded]="projectOpen()" (click)="toggleProject()">
       <svg lucideFolderArchive class="row-icon"></svg>
-      <span class="row-text"><b>Projet de jeu</b><small>Cartes, modèles, musiques : fichier .pk</small></span>
+      <span class="row-text"><b>Projet de jeu</b><small>Cartes, modèles, musiques, variables : fichier .pk</small></span>
       @if (projectOpen()) { <svg lucideChevronDown class="chevron"></svg> } @else { <svg lucideChevronRight class="chevron"></svg> }
     </button>
     @if (projectOpen()) {

@@ -6,7 +6,7 @@ import {
   LucideClapperboard, LucideDatabase, LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideGrid2x2, LucideMessagesSquare, LucideSearch,
   LucideUserRound, LucideRotateCw, LucideCopy, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
   LucideLayoutGrid, LucideMap, LucideMapPin, LucideMountain, LucideMousePointer2, LucidePaintBucket, LucidePaintbrush, LucidePlay,
-  LucidePlus, LucideRedo2, LucideSettings, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap,
+  LucidePlus, LucideRedo2, LucideSettings, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap,
 } from '@lucide/angular';
 import { MapManagerComponent } from '../map-manager/map-manager.component';
 import { Passage } from '../shared/model/Passage';
@@ -29,17 +29,19 @@ const MODEL_FAMILIES: { label: string, ids: string[] }[] = [
 ];
 
 /** The game's editors (the launcher); the ones to come (docs/idees.md) greyed. */
-const EDITORS: { id: 'models' | 'music' | null, label: string, sub: string, icon: LucideIcon }[] = [
+type EditorId = EditorPanel['kind'];
+const EDITORS: { id: EditorId | null, label: string, sub: string, icon: LucideIcon }[] = [
   { id: 'models', label: 'Modèles 3D', sub: 'Bâtiments, plantes, décors', icon: LucideBox },
   { id: 'music', label: 'Musique', sub: 'Boucles lo-fi par lieu', icon: LucideEighthNotes },
+  { id: 'variables', label: 'Variables', sub: 'Drapeaux et compteurs de l\'histoire', icon: LucideVariable },
   { id: null, label: 'Dialogues', sub: 'Répliques et choix · bientôt', icon: LucideMessagesSquare },
   { id: null, label: 'Base de données', sub: 'Objets, compétences, ennemis · bientôt', icon: LucideDatabase },
   { id: null, label: 'Portraits et sprites', sub: 'Pixel art · bientôt', icon: LucideUserRound },
   { id: null, label: 'Cinématiques', sub: 'Caméra, scènes · bientôt', icon: LucideClapperboard },
 ];
 
-/** The editors opened over the game (a full screen panel): music, models (one of them, or the list). */
-export type EditorPanel = { kind: 'music' } | { kind: 'models', modelId?: string };
+/** The editors opened over the game (a full screen panel): music, variables, models (one of them, or the list). */
+export type EditorPanel = { kind: 'music' } | { kind: 'variables' } | { kind: 'models', modelId?: string };
 
 /** Layouts of the editor: phone held upright (bar + bottom dock), phone on its side (side panels, height is short), computer. */
 export type EditorLayout = 'portrait' | 'landscape' | 'desktop';
@@ -72,7 +74,7 @@ interface PaletteEntry {
   imports: [MapManagerComponent, LucideDynamicIcon, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing,
     LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideGrid2x2, LucideSearch, LucideRotateCw, LucideCopy, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
     LucideGrid3x3, LucideMap, LucideMapPin, LucideMousePointer2, LucidePaintBucket, LucidePlay, LucidePlus, LucideRedo2, LucideSettings,
-    LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideX, LucideZap],
+    LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap],
   templateUrl: './editor-bar.component.html',
   styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss', './editor-bar.wide.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -259,12 +261,12 @@ export class EditorBarComponent {
     this.editorsOpen.update(open => !open);
   }
 
-  protected openEditor(id: 'models' | 'music' | null): void {
+  protected openEditor(id: EditorId | null): void {
     this.editorsOpen.set(false);
     if (id === 'models') {
       this.openModelEditor();
-    } else if (id === 'music') {
-      this.openMusicEditor();
+    } else if (id) {
+      this.openPanel(id);
     }
   }
 
@@ -287,11 +289,11 @@ export class EditorBarComponent {
     this.editorPanel.emit({ kind: 'models', modelId });
   }
 
-  /** Music editor: a full screen panel over the game (the game sleeps meanwhile, see GameComponent). */
-  protected openMusicEditor(): void {
+  /** Music or variables editor: a full screen panel over the game (the game sleeps meanwhile, see GameComponent). */
+  protected openPanel(kind: 'music' | 'variables'): void {
     this.moreOpen.set(false);
     this.editorsOpen.set(false);
-    this.editorPanel.emit({ kind: 'music' });
+    this.editorPanel.emit({ kind });
   }
 
   /** A new passage: to another map (the first one), entering like a door. */

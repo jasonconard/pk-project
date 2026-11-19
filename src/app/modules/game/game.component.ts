@@ -12,6 +12,7 @@ import { TeleportComponent } from './teleport/teleport.component';
 import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { EditorBarComponent, EditorPanel } from './editor-bar/editor-bar.component';
 import { MusicEditorComponent } from '../music-editor/music-editor.component';
+import { VariablesEditorComponent } from '../variables-editor/variables-editor.component';
 import { ModelEditorComponent } from '../model-editor/model-editor.component';
 import { ReleaseNotesComponent } from './release-notes/release-notes.component';
 import { temperatureColor } from './shared/util/temperature-color';
@@ -28,7 +29,7 @@ import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, VariablesEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -90,7 +91,7 @@ export class GameComponent {
       if (editor) {
         void editor.requestClose();
       } else {
-        this.editorPanel.set(null); // still loading
+        this.editorPanel.set(null); // still loading, or saved at every change (variables)
       }
     });
     inject(DestroyRef).onDestroy(() => setGameCovered(false));

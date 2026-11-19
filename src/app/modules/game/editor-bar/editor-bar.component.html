@@ -60,8 +60,11 @@
           <button type="button" role="menuitem" title="Créer et peindre les bâtiments, les fleurs…" (click)="openModelEditor()">
             <svg lucideBox></svg> Modèles 3D
           </button>
-          <button type="button" role="menuitem" title="Composer les musiques du jeu" (click)="openMusicEditor()">
+          <button type="button" role="menuitem" title="Composer les musiques du jeu" (click)="openPanel('music')">
             <svg lucideEighthNotes></svg> Musique
+          </button>
+          <button type="button" role="menuitem" title="Les drapeaux et compteurs de l'histoire" (click)="openPanel('variables')">
+            <svg lucideVariable></svg> Variables
           </button>
         </div>
       }
