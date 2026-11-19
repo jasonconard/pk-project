@@ -194,13 +194,22 @@
       }
     } @else if (open === 'game') {
       <p class="sheet-hint">Le morceau qui joue sur la carte selon le moment, avec un fondu entre eux. Sans morceau, le plus proche joue (la nuit prend celui du jour…). Le volume se règle dans le jeu (Son → Musique).</p>
+      <label class="slot">
+        <span class="slot-head"><strong>Carte</strong><small>Une carte peut avoir ses propres morceaux ; un moment laissé vide prend celui de toutes les cartes</small></span>
+        <select [value]="useMap()" (change)="useMap.set($any($event.target).value)">
+          <option value="" [selected]="useMap() === ''">Toutes les cartes</option>
+          @for (map of maps; track map.id) {
+            <option [value]="map.id" [selected]="useMap() === map.id">{{ map.name }}{{ hasOwnSongs(map.id) ? ' (ses morceaux)' : '' }}</option>
+          }
+        </select>
+      </label>
       @for (slot of musicSlots; track slot.id) {
         <label class="slot">
           <span class="slot-head"><strong>{{ slot.label }}</strong><small>{{ slot.hint }}</small></span>
-          <select [value]="use()[slot.id] ?? ''" (change)="setUse(slot.id, $any($event.target).value)">
-            <option value="">Aucun</option>
+          <select [value]="shownUse()[slot.id] ?? ''" (change)="setUse(slot.id, $any($event.target).value)">
+            <option value="">{{ useMap() ? 'Comme toutes les cartes' : 'Aucun' }}</option>
             @for (item of songs(); track item.id) {
-              <option [value]="item.id" [selected]="use()[slot.id] === item.id">{{ item.name }}</option>
+              <option [value]="item.id" [selected]="shownUse()[slot.id] === item.id">{{ item.name }}</option>
             }
           </select>
         </label>

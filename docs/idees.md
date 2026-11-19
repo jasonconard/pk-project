@@ -59,7 +59,7 @@ Poser un PNJ ou un panneau, écrire son dialogue dans l'éditeur, choisir ce qui
 - Actions : dialogue (avec choix), téléporter, donner un objet, changer la météo, jouer un son, lancer un combat.
 - Les briques existent déjà (messages, téléporteurs, `sequence.service`) : il manque l'outil pour les placer.
 
-### Éditeur de musique (MIDI lo-fi) — en cours (étapes 1 et 2 faites : composer et écouter, mixage et son lo-fi, voir [07-musique](editeur/07-musique.md))
+### Éditeur de musique (MIDI lo-fi) — en cours (faits : composer et écouter, mixage et son lo-fi, un morceau par moment et par carte ; restent le moment Donjon et l'import MIDI, voir [07-musique](editeur/07-musique.md))
 
 Une musique d'ambiance par zone, qui change avec la météo et l'heure, composée dans un éditeur simple, dans l'esprit de **Mario Paint** (on pose des notes-tampons sur une portée, et ça joue en boucle).
 

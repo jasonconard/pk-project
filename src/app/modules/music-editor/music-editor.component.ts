@@ -12,12 +12,13 @@ import { MusicEngine } from './shared/music-engine';
 import {
   Channel, CHANNELS, degreeCount, degreeMidi, DRUM_PATTERNS, DRUMS, DrumHit, DrumId, INSTRUMENTS, InstrumentId, LOFI_PRESETS,
   LOFI_SETTINGS, lofiOf, LofiSettings, MAX_BARS, MAX_STAMPS, stampsOf, MAX_BPM, midiName, MIN_BPM, ModeId, MODES, modeOf, MUSIC_SLOTS, MusicSlot,
-  MusicUse, newSong, NOTE_NAMES,
+  MapMusicUse, MusicUse, newSong, NOTE_NAMES,
   noteLength, scaleLabel, Song, SongNote, songLength, STEPS_PER_BAR, volumeOf,
 } from './shared/song';
 import { loadSongs, saveSongs } from './shared/song-storage';
 import { FAMILIES, INSTRUMENT_DEFS } from './shared/instruments';
 import { downloadFile } from '../game/shared/util/ts-source';
+import { listMaps } from '../game/shared/services/map-storage';
 
 type Stamp = InstrumentId | 'eraser';
 type Sheet = 'scale' | 'song' | 'mix' | 'lofi' | 'game' | 'library';
@@ -82,6 +83,13 @@ export class MusicEditorComponent {
   protected readonly currentId = signal(this.stored.current);
   /** Which song plays when in the game. */
   protected readonly use = signal<MusicUse>(this.stored.use ?? {});
+  /** Which song plays when on given maps (over `use`). */
+  protected readonly mapUse = signal<MapMusicUse>(this.stored.mapUse ?? {});
+  /** The game's maps (Jeu sheet), and the one whose songs are shown there ('' = every map). */
+  protected readonly maps = listMaps();
+  protected readonly useMap = signal('');
+  /** The slots shown in the Jeu sheet: every map's, or the chosen map's own. */
+  protected readonly shownUse = computed(() => this.useMap() ? this.mapUse()[this.useMap()] ?? {} : this.use());
   protected readonly exported = signal('');
   protected readonly song = computed(() => this.songs().find(s => s.id === this.currentId()) ?? this.songs()[0]);
 
@@ -629,7 +637,7 @@ export class MusicEditorComponent {
   // --- In the game ---
 
   protected setUse(slot: MusicSlot, id: string): void {
-    this.use.update(use => {
+    const change = (use: MusicUse): MusicUse => {
       const next = { ...use };
       if (id) {
         next[slot] = id;
@@ -637,27 +645,55 @@ export class MusicEditorComponent {
         delete next[slot];
       }
       return next;
-    });
+    };
+    const mapId = this.useMap();
+    if (mapId) {
+      this.mapUse.update(all => {
+        const next = { ...all, [mapId]: change(all[mapId] ?? {}) };
+        if (!Object.keys(next[mapId]).length) {
+          delete next[mapId];
+        }
+        return next;
+      });
+    } else {
+      this.use.update(change);
+    }
     this.scheduleSave();
   }
 
-  /** Slots of the current song (shown on the sheet). */
+  /** Slots of a song (shown in the list of songs): on every map, then per map (« Labo : Jour »). */
   protected usedFor(id: string): string {
-    return MUSIC_SLOTS.filter(slot => this.use()[slot.id] === id).map(slot => slot.label).join(', ');
+    const labels = (use: MusicUse) => MUSIC_SLOTS.filter(slot => use[slot.id] === id).map(slot => slot.label).join(', ');
+    const parts = [labels(this.use())];
+    for (const [mapId, use] of Object.entries(this.mapUse())) {
+      const slots = labels(use);
+      if (slots) {
+        parts.push(`${this.maps.find(m => m.id === mapId)?.name ?? mapId} : ${slots}`);
+      }
+    }
+    return parts.filter(Boolean).join(' · ');
+  }
+
+  /** Maps with their own songs (marked in the map choice). */
+  protected hasOwnSongs(mapId: string): boolean {
+    return !!this.mapUse()[mapId];
   }
 
   /** The songs and their slots, as the game's music file (src/assets/music/music.ts) for the repository. */
   protected exportMusic(): void {
     const songs = this.songs().map(song => ({ ...song, notes: [...song.notes].sort((a, b) => a.step - b.step || a.degree - b.degree) }));
-    const source = `import { MusicUse, Song } from '../../app/modules/music-editor/shared/song';
+    const source = `import { MapMusicUse, MusicUse, Song } from '../../app/modules/music-editor/shared/song';
 
 /**
- * Songs of the game and which one plays when (day, night, rain, fight). Written by the music editor's export
+ * Songs of the game and which one plays when (day, night, rain, fight), on every map and
+ * on given maps (map id → its slots, over the general ones). Written by the music editor's export
  * (/#/musique → Jeu → Exporter); the songs saved in the browser replace these ones (same id).
  */
 export const CODE_SONGS: Song[] = ${JSON.stringify(songs, null, 2)};
 
 export const CODE_MUSIC_USE: MusicUse = ${JSON.stringify(this.use(), null, 2)};
+
+export const CODE_MAP_MUSIC_USE: MapMusicUse = ${JSON.stringify(this.mapUse(), null, 2)};
 `;
     downloadFile('music.ts', source);
     this.exported.set(`music.ts téléchargé (${songs.length} morceau${songs.length > 1 ? 'x' : ''}) : à mettre dans src/assets/music/.`);
@@ -688,7 +724,11 @@ export const CODE_MUSIC_USE: MusicUse = ${JSON.stringify(this.use(), null, 2)};
     }
     this.confirmDelete.set(false);
     const id = this.currentId();
-    this.use.update(use => Object.fromEntries(Object.entries(use).filter(([, songId]) => songId !== id)) as MusicUse);
+    const without = (use: MusicUse) => Object.fromEntries(Object.entries(use).filter(([, songId]) => songId !== id)) as MusicUse;
+    this.use.update(without);
+    this.mapUse.update(all => Object.fromEntries(Object.entries(all)
+      .map(([mapId, use]) => [mapId, without(use)] as const)
+      .filter(([, use]) => Object.keys(use).length)));
     const rest = this.songs().filter(s => s.id !== id);
     const songs = rest.length ? rest : [newSong()];
     this.songs.set(songs);
@@ -753,7 +793,7 @@ export const CODE_MUSIC_USE: MusicUse = ${JSON.stringify(this.use(), null, 2)};
 
   private flushSave(): void {
     clearTimeout(this.saveTimer);
-    saveSongs({ songs: this.songs(), current: this.currentId(), use: this.use() });
+    saveSongs({ songs: this.songs(), current: this.currentId(), use: this.use(), mapUse: this.mapUse() });
   }
 
   // --- Helpers for the template ---

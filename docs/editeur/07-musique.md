@@ -74,13 +74,15 @@ Le volet **Jeu** choisit le morceau de chaque moment, sur la carte :
 | Pluie | les météos de la catégorie Pluie & tempêtes : bruine, averse, orage, mousson… (sans morceau : jour ou nuit) |
 | Combat | pendant un combat (sans morceau : la musique en cours continue) |
 
+**Une musique par carte** : le choix **Carte** en haut du volet passe de « Toutes les cartes » à une carte précise (le Labo, une maison…). Les moments choisis pour cette carte passent devant ceux de toutes les cartes ; un moment laissé sur « Comme toutes les cartes » prend celui de toutes les cartes. Une carte qui a ses propres morceaux est marquée « (ses morceaux) » dans la liste, et la liste des morceaux (volet Morceau) dit où chacun joue (« Jour · Labo : Nuit »). En passant d'une carte à l'autre, la musique change en fondu si le morceau n'est pas le même.
+
 Le changement de moment se fait en fondu (le morceau s'éteint, l'autre monte). La musique démarre au premier toucher ou à la première touche (le navigateur bloque le son avant), s'arrête en arrière-plan. Son volume : **Son → Musique** dans la barre du jeu (coupé avec les sons). Les donjons auront leur moment quand ils existeront.
 
-**Les morceaux du navigateur jouent tout de suite dans le jeu, sur cet appareil.** Pour les mettre dans le jeu publié : **Exporter (music.ts)** télécharge tous les morceaux et les choix de moments, à mettre dans `src/assets/music/music.ts`. Le jeu part de ce fichier ; les morceaux du navigateur de même id le remplacent, et les choix du navigateur passent devant. Un navigateur sans morceaux part de ceux du fichier.
+**Les morceaux du navigateur jouent tout de suite dans le jeu, sur cet appareil.** Pour les mettre dans le jeu publié : **Exporter (music.ts)** télécharge tous les morceaux et les choix de moments (toutes les cartes et chaque carte), à mettre dans `src/assets/music/music.ts`. Le jeu part de ce fichier ; les morceaux du navigateur de même id le remplacent, et les choix du navigateur passent devant. Un navigateur sans morceaux part de ceux du fichier.
 
 **Sur téléphone** : en portrait, une mesure à la fois, les tampons en bas sous le pouce ; en paysage, deux mesures, les tampons à gauche, la barre du haut glisse sur le côté ; sur grand écran, quatre mesures.
 
-À venir : une musique par carte quand il y aura plusieurs cartes, le moment Donjon.
+À venir : le moment Donjon (quand les donjons existeront), l'import d'un fichier MIDI.
 
 ## Les fichiers
 
@@ -92,7 +94,7 @@ Le changement de moment se fait en fondu (le morceau s'éteint, l'autre monte). 
 | `music-editor/shared/song.ts` | Le morceau : notes, batterie, gammes, instruments |
 | `music-editor/shared/music-engine.ts` | Le son : une voix générique qui joue les fiches (16 notes à la fois au plus, la plus ancienne coupée en douceur), batterie en bruit LFSR, volume par piste, chaîne lo-fi (flottement → grain → chaleur → espace), souffle et vinyle, swing, séquenceur (notes planifiées un peu à l'avance) |
 | `music-editor/shared/song-storage.ts` | Enregistrement dans le navigateur ; la musique du jeu (fichier + navigateur) |
-| `game/shared/services/game-music.ts` | Le morceau du moment dans le jeu, fondus, déblocage du son |
+| `game/shared/services/game-music.ts` | Le morceau du moment dans le jeu, sur la carte en cours, fondus, déblocage du son |
 | `src/assets/music/music.ts` (racine du dépôt) | Les morceaux du jeu publié (export de l'éditeur) |
 
 (Chemins relatifs à `src/app/modules/`.)

@@ -160,6 +160,13 @@ export function lofiOf(song: Song): LofiSettings {
 export type MusicSlot = 'day' | 'night' | 'rain' | 'fight';
 /** Song id per slot. */
 export type MusicUse = Partial<Record<MusicSlot, string>>;
+/** Songs of one map (map id → its slots), over the songs of every map: a slot left empty takes theirs. */
+export type MapMusicUse = Record<string, MusicUse>;
+
+/** The slots of a map: its own choices over the ones of every map. */
+export function mapSlots(use: MusicUse, mapUse: MapMusicUse, mapId: string): MusicUse {
+  return { ...use, ...mapUse[mapId] };
+}
 
 export const MUSIC_SLOTS: { id: MusicSlot, label: string, hint: string }[] = [
   { id: 'day', label: 'Jour', hint: 'Sur la carte, le jour' },

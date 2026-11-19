@@ -195,7 +195,7 @@ export class GameService {
   readonly modelsVersion = this.modelsVersionState.asReadonly();
   private readonly musicVolumeState = signal(this.saved.musicVolume ?? 0.6);
   readonly musicVolume = this.musicVolumeState.asReadonly();
-  /** The songs of the music editor, chosen by the moment: fight, rain, night, day. */
+  /** The songs of the music editor, chosen by the map and the moment: fight, rain, night, day. */
   private readonly music = new GameMusic();
   /** Cloud density 0..1 (scattered .. overcast). */
   private readonly cloudDensityState = signal(this.saved.cloudDensity ?? 0.5);
@@ -220,6 +220,13 @@ export class GameService {
       const rain = WEATHER_INFO[this.weatherState()]?.category === 'rain';
       const night = this.night();
       this.music.setSlot(fight ? 'fight' : rain ? 'rain' : night ? 'night' : 'day', night);
+    });
+    // The map's own songs (an empty id while loading: no change)
+    effect(() => {
+      const mapId = this.hudState()?.mapId;
+      if (mapId) {
+        this.music.setMap(mapId);
+      }
     });
     // Saved on every change (the hour changes a few times per second while the time goes by: tiny writes)
     effect(() => saveSettings({

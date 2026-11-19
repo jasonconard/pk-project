@@ -1,7 +1,7 @@
-import { CODE_MUSIC_USE, CODE_SONGS } from '../../../../assets/music/music';
-import { MusicUse, newSong, Song } from './song';
+import { CODE_MAP_MUSIC_USE, CODE_MUSIC_USE, CODE_SONGS } from '../../../../assets/music/music';
+import { MapMusicUse, MusicUse, newSong, Song } from './song';
 
-/** The songs, saved in the browser (a few kB of JSON each): { songs, current, use }. */
+/** The songs, saved in the browser (a few kB of JSON each): { songs, current, use, mapUse }. */
 const STORAGE_KEY = 'pk-songs';
 
 export interface StoredSongs {
@@ -9,6 +9,8 @@ export interface StoredSongs {
   current: string;
   /** Which song plays when in the game. */
   use?: MusicUse;
+  /** Which song plays when on given maps (over `use`). */
+  mapUse?: MapMusicUse;
 }
 
 function readStored(): StoredSongs | null {
@@ -28,7 +30,7 @@ export function loadSongs(): StoredSongs {
     return stored;
   }
   if (CODE_SONGS.length) {
-    return { songs: structuredClone(CODE_SONGS), current: CODE_SONGS[0].id, use: { ...CODE_MUSIC_USE } };
+    return { songs: structuredClone(CODE_SONGS), current: CODE_SONGS[0].id, use: { ...CODE_MUSIC_USE }, mapUse: structuredClone(CODE_MAP_MUSIC_USE) };
   }
   const song = newSong('Ville le jour');
   return { songs: [song], current: song.id };
@@ -44,11 +46,15 @@ export function saveSongs(stored: StoredSongs): void {
 
 /**
  * The game's music: the code's songs (src/assets/music/music.ts), replaced by the browser's with the same id, and the
- * browser's choices of songs per slot over the code's.
+ * browser's choices of songs per slot (every map, and per map) over the code's.
  */
-export function loadGameMusic(): { songs: Song[], use: MusicUse } {
+export function loadGameMusic(): { songs: Song[], use: MusicUse, mapUse: MapMusicUse } {
   const stored = readStored();
   const songs = new Map(CODE_SONGS.map(s => [s.id, s]));
   stored?.songs.forEach(s => songs.set(s.id, s));
-  return { songs: [...songs.values()], use: { ...CODE_MUSIC_USE, ...stored?.use } };
+  const mapUse: MapMusicUse = {};
+  for (const id of new Set([...Object.keys(CODE_MAP_MUSIC_USE), ...Object.keys(stored?.mapUse ?? {})])) {
+    mapUse[id] = { ...CODE_MAP_MUSIC_USE[id], ...stored?.mapUse?.[id] };
+  }
+  return { songs: [...songs.values()], use: { ...CODE_MUSIC_USE, ...stored?.use }, mapUse };
 }

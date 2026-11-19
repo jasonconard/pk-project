@@ -1,5 +1,5 @@
 import { MusicEngine } from '../../../music-editor/shared/music-engine';
-import { MusicSlot, MusicUse, Song } from '../../../music-editor/shared/song';
+import { MapMusicUse, mapSlots, MusicSlot, MusicUse, Song } from '../../../music-editor/shared/song';
 import { loadGameMusic } from '../../../music-editor/shared/song-storage';
 import { onGameAsleep } from '../../../../core/shared/app-visibility';
 
@@ -8,8 +8,8 @@ const FADE_OUT = 0.9;
 const FADE_IN = 1.4;
 
 /**
- * The game's music: the song chosen in the music editor for the moment (fight, rain, night, day), changed with a
- * fade. A slot without a song falls back to the closest one (night → day, rain → night or day, day → night); a
+ * The game's music: the song chosen in the music editor for the moment (fight, rain, night, day) on the current map
+ * (its own choices, else the ones of every map), changed with a fade. A slot without a song falls back to the closest one (night → day, rain → night or day, day → night); a
  * fight without its song keeps the current one. Starts at the first touch / key (browsers block sound before),
  * silent in the background.
  */
@@ -17,6 +17,9 @@ export class GameMusic {
   private readonly engine = new MusicEngine();
   private songs: Song[];
   private use: MusicUse;
+  private mapUse: MapMusicUse;
+  /** The map the player is on. */
+  private mapId = '';
   /** The last moment asked for (the song is chosen again when the songs change). */
   private slot: { slot: MusicSlot, night: boolean } = { slot: 'day', night: false };
   private unlocked = false;
@@ -31,6 +34,7 @@ export class GameMusic {
     const music = loadGameMusic();
     this.songs = music.songs;
     this.use = music.use;
+    this.mapUse = music.mapUse;
     const unlock = () => {
       if (!this.unlocked) {
         this.unlocked = true;
@@ -63,6 +67,14 @@ export class GameMusic {
     this.apply();
   }
 
+  /** The map the player is on: its songs (changed with a fade when they differ). */
+  setMap(mapId: string): void {
+    if (mapId !== this.mapId) {
+      this.mapId = mapId;
+      this.setSlot(this.slot.slot, this.slot.night);
+    }
+  }
+
   /**
    * The songs and the choices of moments read again (back from the music editor): the song of the moment starts
    * again, with the changes.
@@ -71,6 +83,7 @@ export class GameMusic {
     const music = loadGameMusic();
     this.songs = music.songs;
     this.use = music.use;
+    this.mapUse = music.mapUse;
     this.target = null;
     this.setSlot(this.slot.slot, this.slot.night);
   }
@@ -79,8 +92,9 @@ export class GameMusic {
     const order: MusicSlot[] = slot === 'fight' ? ['fight']
       : slot === 'rain' ? ['rain', night ? 'night' : 'day', 'day', 'night']
       : slot === 'night' ? ['night', 'day'] : ['day', 'night'];
+    const use = mapSlots(this.use, this.mapUse, this.mapId);
     for (const s of order) {
-      const song = this.songs.find(x => x.id === this.use[s]);
+      const song = this.songs.find(x => x.id === use[s]);
       if (song) {
         return song;
       }
