@@ -26,6 +26,14 @@ Renommer une variable ne casse rien : ce qui l'utilisera la retrouve par un iden
 
 La valeur **Au début** est celle d'une nouvelle partie. Pendant le jeu, chaque variable a sa valeur du moment (gardée dans le navigateur, même après avoir fermé le jeu) ; une [sauvegarde de partie](05-sauvegarde-export.md#sauvegarde-de-partie) en garde une copie et la remet en la chargeant. Une variable créée après le début de la partie prend sa valeur au début.
 
+## Test des variables
+
+Pour essayer ce qui dépend d'une variable : **Menu → Test des variables**, pendant la partie.
+
+- Chaque variable montre sa valeur du moment, à changer à la main (Non / Oui, ou − / + et le nombre), et sa valeur au début.
+- Une variable qui n'est plus à sa valeur au début a un trait jaune à gauche ; le bas de la fenêtre dit combien ont changé.
+- **Tout remettre au début** (deux appuis) remet toutes les variables à leur valeur au début, comme une nouvelle partie.
+
 ## Sauvegarde et export
 
 - Chaque changement est enregistré dans le navigateur (« Enregistré » sous le titre).
@@ -40,4 +48,5 @@ La valeur **Au début** est celle d'une nouvelle partie. Pendant le jeu, chaque 
 | `src/app/modules/variables-editor/shared/variables.ts` | `GameVariable` (id, nom, note, `flag` ou `counter`, valeur au début) |
 | `src/app/modules/variables-editor/shared/variable-storage.ts` | Le navigateur (`pk-variables`), sinon le code |
 | `src/app/modules/variables-editor/shared/variable-values.ts` | La valeur des variables dans la partie (`pk-variable-values`) |
+| `src/app/modules/game/variables-test/` | Le test des variables (menu) |
 | `src/assets/variables/variables.ts` | Les variables du jeu (`CODE_VARIABLES`), écrites par l'export |

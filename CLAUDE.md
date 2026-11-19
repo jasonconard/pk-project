@@ -26,7 +26,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - `modules/game/`: `game.component` (main view, game mode / edit mode, editor panels opened over the game via
   `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
   landscape/desktop), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
-  `release-notes`, `game-saves` (saved games dialog), `teleport`.
+  `release-notes`, `game-saves` (saved games dialog), `variables-test` (change the variables' values while playing),
+  `teleport`; small windows over the game share `shared/_dialog.scss`.
   - `shared/services/`: `game.service` (settings, music, reload of models), `map-editor.service` (map editor logic),
     `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
     `event` (`actionAt`), `sequence`, `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
