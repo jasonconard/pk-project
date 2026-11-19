@@ -22,6 +22,7 @@ import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-pane
 import { FireflyColor, formatHour, LeafMode, WEATHER_CHOICES, WeatherType } from './shared/weather/Weather';
 import { GameMenuComponent } from './game-menu/game-menu.component';
 import { GameSavesComponent } from './game-saves/game-saves.component';
+import { VariablesTestComponent } from './variables-test/variables-test.component';
 import { MapControlsComponent } from './map-controls/map-controls.component';
 import { EscapeService } from '../../core/shared/service/escape.service';
 import { CoreService } from '../../core/shared/service/core.service';
@@ -30,7 +31,7 @@ import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, GameSavesComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, VariablesEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, GameSavesComponent, VariablesTestComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, VariablesEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -75,6 +76,8 @@ export class GameComponent {
   protected readonly releaseNotes = signal(false);
   /** The saved games dialog (menu → Sauver). */
   protected readonly savesOpen = signal(false);
+  /** The variables test panel (menu → Test des variables). */
+  protected readonly variablesTestOpen = signal(false);
   /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
   protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
   /** Weather and hour, for the editor's Ambiance button (computer). */
@@ -108,7 +111,7 @@ export class GameComponent {
     // key as handled (its "cancel" key): defaultPrevented can't tell; the dialogs stop it before it gets here
     const onKeyDown = (ev: KeyboardEvent) => {
       if (ev.key === 'Escape' && !ev.repeat && !isGameCovered() && this.playing() && !this.menuOpen()
-        && !this.releaseNotes() && !this.savesOpen() && !this.sequenceService.message() && !(ev.target instanceof HTMLInputElement)) {
+        && !this.releaseNotes() && !this.savesOpen() && !this.variablesTestOpen() && !this.sequenceService.message() && !(ev.target instanceof HTMLInputElement)) {
         this.menuOpen.set(true);
       }
     };
@@ -186,6 +189,11 @@ export class GameComponent {
 
   protected setTimeFlow(flowing: boolean): void {
     this.gameService.setTimeFlow(flowing);
+  }
+
+  protected openVariablesTest(): void {
+    this.menuOpen.set(false);
+    this.variablesTestOpen.set(true);
   }
 
   protected openSaves(): void {

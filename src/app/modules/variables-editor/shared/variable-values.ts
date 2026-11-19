@@ -47,3 +47,13 @@ export function currentVariableValues(): VariableValues {
 export function restoreVariableValues(values: VariableValues): void {
   writeValues({ ...values });
 }
+
+/** Changes one variable's value now (the variables test panel; the events, later). */
+export function setVariableValue(id: string, value: VariableValue): void {
+  writeValues({ ...readValues(), [id]: value });
+}
+
+/** Every variable back to its starting value (a new game). */
+export function resetVariableValues(): void {
+  writeValues({});
+}

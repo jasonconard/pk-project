@@ -81,11 +81,15 @@
 }
 
 @if (menuOpen() && hud()?.mode === GameMode.MAP) {
-  <game-menu [version]="appVersion" (closed)="menuOpen.set(false)" (ambiance)="openAmbiance()" (releaseNotes)="openReleaseNotes()" (saves)="openSaves()" />
+  <game-menu [version]="appVersion" (closed)="menuOpen.set(false)" (ambiance)="openAmbiance()" (releaseNotes)="openReleaseNotes()" (saves)="openSaves()" (variablesTest)="openVariablesTest()" />
 }
 
 @if (savesOpen()) {
   <game-saves [version]="appVersion" (closed)="savesOpen.set(false)" (loaded)="savesOpen.set(false)" />
+}
+
+@if (variablesTestOpen()) {
+  <game-variables-test (closed)="variablesTestOpen.set(false)" />
 }
 
 @if (releaseNotes()) {

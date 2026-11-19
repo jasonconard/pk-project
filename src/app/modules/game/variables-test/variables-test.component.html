@@ -1,0 +1,42 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section class="dialog" role="dialog" aria-modal="true" aria-labelledby="variables-test-title">
+  <header>
+    <h2 id="variables-test-title">Test des variables</h2>
+    <button type="button" class="close" aria-label="Fermer" title="Fermer (Échap)" (click)="closed.emit()"><svg lucideX></svg></button>
+  </header>
+  <div class="list">
+    @for (v of variables; track v.id) {
+      @let value = values()[v.id];
+      <article [class.changed]="value !== v.initial">
+        <span class="kind" aria-hidden="true">@if (v.kind === 'flag') { <svg lucideFlag></svg> } @else { <svg lucideHash></svg> }</span>
+        <div class="text">
+          <b>{{ v.name }}</b>
+          <small>Au début : {{ v.kind === 'flag' ? (v.initial ? 'Oui' : 'Non') : v.initial }}</small>
+        </div>
+        @if (v.kind === 'flag') {
+          <div class="segmented" role="group" [attr.aria-label]="v.name">
+            <button type="button" [class.on]="!value" [attr.aria-pressed]="!value" (click)="set(v.id, false)">Non</button>
+            <button type="button" [class.on]="value" [attr.aria-pressed]="value" (click)="set(v.id, true)">Oui</button>
+          </div>
+        } @else {
+          <div class="stepper">
+            <button type="button" aria-label="Moins" (click)="set(v.id, counter(v.id) - 1)"><svg lucideMinus></svg></button>
+            <input type="number" inputmode="numeric" [attr.aria-label]="v.name" [value]="value"
+                   (change)="set(v.id, +$any($event.target).value); $any($event.target).value = counter(v.id)" />
+            <button type="button" aria-label="Plus" (click)="set(v.id, counter(v.id) + 1)"><svg lucidePlus></svg></button>
+          </div>
+        }
+      </article>
+    } @empty {
+      <p class="empty">Aucune variable. Créez-en dans l'éditeur : Créer → Éditeurs → Variables.</p>
+    }
+  </div>
+  @if (variables.length) {
+    <footer>
+      <small>{{ changedCount() ? changedCount() + ' changée' + (changedCount() > 1 ? 's' : '') + ' depuis le début' : 'Toutes à leur valeur au début' }}</small>
+      <button type="button" class="reset" [class.armed]="resetArmed()" [disabled]="!changedCount()" (click)="reset()">
+        <svg lucideRotateCcw></svg> {{ resetArmed() ? 'Tout remettre ?' : 'Tout remettre au début' }}
+      </button>
+    </footer>
+  }
+</section>

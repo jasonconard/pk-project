@@ -3,7 +3,7 @@ import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideBackpack, LucideCalendarDays, LucideCamera, LucideChevronDown, LucideChevronRight, LucideCloudSun, LucideDownload, LucideDynamicIcon, LucideFolderArchive,
   LucideGauge, LucideHeartHandshake, LucideIcon, LucideMap, LucideMaximize, LucideMinimize, LucideSave, LucideShare2, LucideSparkles,
-  LucideUpload, LucideUsers, LucideVolume2, LucideVolumeX, LucideX,
+  LucideUpload, LucideUsers, LucideVariable, LucideVolume2, LucideVolumeX, LucideX,
 } from '@lucide/angular';
 import { GameService } from '../shared/services/game.service';
 import { CoreService } from '../../../core/shared/service/core.service';
@@ -36,14 +36,14 @@ const ENTRIES: MenuEntry[] = [
 /**
  * Game menu (button top right, or Escape): the game's menus to come (greyed), the quick switches (full screen,
  * sound), and the settings: ambiance (unfolds the tools under the clock), graphics quality, the game project (export /
- * import every creation as a `.pk` file), what's new.
+ * import every creation as a `.pk` file), the variables test, what's new.
  * A sheet from the bottom on phones in portrait, a panel on the right otherwise.
  */
 @Component({
   selector: 'game-menu',
   imports: [LucideDynamicIcon, LucideX, LucideMaximize, LucideMinimize, LucideVolume2, LucideVolumeX, LucideCamera,
     LucideCloudSun, LucideGauge, LucideSparkles, LucideChevronRight, LucideChevronDown, LucideFolderArchive,
-    LucideDownload, LucideShare2, LucideUpload],
+    LucideDownload, LucideShare2, LucideUpload, LucideVariable],
   templateUrl: './game-menu.component.html',
   styleUrl: './game-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,6 +60,8 @@ export class GameMenuComponent {
   readonly releaseNotes = output<void>();
   /** The saved games (Sauver): the menu closes, the dialog opens. */
   readonly saves = output<void>();
+  /** The variables test panel: the menu closes, the panel opens. */
+  readonly variablesTest = output<void>();
 
   protected readonly entries = ENTRIES;
   protected readonly hud = this.gameService.hud;

@@ -1,0 +1,157 @@
+@use '../shared/dialog';
+
+button {
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 16px 12px;
+}
+
+article {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 3px solid transparent;
+
+  // Not at its starting value
+  &.changed {
+    border-left-color: #ffd34d;
+  }
+}
+
+.kind {
+  display: inline-flex;
+  opacity: 0.6;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+
+  b {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    font-size: 11px;
+    opacity: 0.6;
+  }
+}
+
+.segmented {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.3);
+
+  button {
+    padding: 6px 10px;
+    border-radius: 7px;
+    background: none;
+    font-size: 13px;
+    opacity: 0.65;
+
+    &.on {
+      background: #5aa8ff;
+      color: #0b1a2c;
+      font-weight: 700;
+      opacity: 1;
+    }
+  }
+}
+
+.stepper {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.3);
+
+  button {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+  }
+
+  input {
+    width: 48px;
+    padding: 4px 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+
+    &:focus {
+      outline: 1px solid #5aa8ff;
+      border-radius: 4px;
+    }
+  }
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  small {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+
+    &.armed {
+      background: #b0413e;
+    }
+  }
+}
