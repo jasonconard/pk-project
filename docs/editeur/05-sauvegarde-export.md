@@ -43,6 +43,17 @@ Le fichier du code générait certains objets en boucle (`[...].map(...)`) : l'e
 
 **Vérification** : générer l'export avec Node depuis les données du dépôt (bundle esbuild), le placer dans un fichier temporaire, et le compiler avec `tsc`.
 
+## Projet de jeu (fichier `.pk`)
+
+Pour passer **toutes les créations** d'un appareil à l'autre (téléphone ↔ ordinateur) : **Menu → Projet de jeu**.
+
+- **Exporter** télécharge `pk-projet-<date>.pk` : les cartes modifiées ou créées, les modèles de l'éditeur de modèles et les musiques (avec leurs choix par moment et par carte), tels qu'ils sont enregistrés dans le navigateur. Le message donne ce qu'il contient et sa taille.
+- **Importer…** : on choisit un fichier `.pk`, le jeu montre ce qu'il contient (« 3 cartes · 12 modèles · 4 musiques · du 19/11/2026 ») et demande de confirmer. **Remplacer** efface les créations de l'appareil, met celles du fichier à la place et relance le jeu. **Annuler** ne change rien.
+- Un fichier qui n'est pas un projet, ou fait avec une version plus récente du jeu, est refusé avec un message.
+- Les réglages (ambiance, qualité, son) ne sont pas dans le projet : ils restent propres à chaque appareil.
+
+Dans le code : `project-file.ts` (format `pk-project` version 1 : JSON compressé en gzip, les pixels des modèles en base64). Il s'appuie sur `map-storage.ts` (`storedMapsData` / `replaceStoredMaps`), `model-storage.ts` (`replaceStoredModels`) et `song-storage.ts` (`storedSongsData` / `replaceStoredSongs`).
+
 ## Réinitialiser
 
 **Réinit.** (deux appuis : « Confirmer ? » pendant 3 secondes) oublie la copie du navigateur d'une carte du code ; ouverte, elle est reconstruite telle qu'elle est dans le code. À faire après avoir exporté et commité, ou si la carte du code a été modifiée à la main (la copie du navigateur passerait par-dessus).

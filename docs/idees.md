@@ -26,7 +26,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
 | 0 | **Plusieurs cartes** (fait) | Créer, renommer, ouvrir une carte ; chacune en chunks (la carte du monde par défaut) ; passages entre cartes. Voir [05](editeur/05-sauvegarde-export.md) et [02](editeur/02-objets.md) | Tout |
-| 1 | **Projet de jeu** | Toutes les créations (cartes, modèles, et la suite) rangées dans un projet : enregistrer, exporter / importer un fichier `.pk`, synchroniser entre téléphone et ordinateur | Tout |
+| 1 | **Projet de jeu** (en cours : fait, exporter / importer le fichier `.pk` depuis le menu ; restent le partage depuis le téléphone et le résumé du projet, voir [05](editeur/05-sauvegarde-export.md#projet-de-jeu-fichier-pk)) | Toutes les créations (cartes, modèles, musiques) dans un seul projet : exporter / importer un fichier `.pk`, synchroniser entre téléphone et ordinateur | Tout |
 | 2 | **Variables et sauvegarde de partie** | Drapeaux d'histoire (« a parlé au maire »), compteurs, jour courant ; sauvegarde sur plusieurs emplacements | Tout |
 | 3 | **Personnages et événements** (éditeur de carte) | Poser un PNJ, un panneau, une zone ; déclencheurs (parler, entrer, heure, météo, drapeau) et actions | Jour et nuit |
 | 4 | **Dialogues** | Répliques, choix, conditions (drapeaux, liens), effets ; portrait et nom de qui parle | Jour |
