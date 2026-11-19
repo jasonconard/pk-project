@@ -14,6 +14,14 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.32',
+    date: '2026-11-19',
+    notes: [
+      'Éditeur de musique : chaque carte peut avoir ses propres morceaux (jour, nuit, pluie, combat), choisis dans le volet Jeu.',
+      'En changeant de carte, la musique passe en fondu à celle de la nouvelle carte.',
+    ],
+  },
+  {
     version: '0.0.31',
     date: '2026-11-18',
     notes: [
