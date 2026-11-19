@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.34',
+    date: '2026-11-19',
+    notes: [
+      'Nouveau dans le menu : Sauver. Trois emplacements pour sauver la partie et la reprendre plus tard, au même endroit, à la même heure et avec la même météo.',
+      'Éditeur : nouvel éditeur Variables. Il crée les drapeaux (oui ou non) et les compteurs qui retiendront ce qui se passe dans l\'histoire.',
+      'Nouveau dans le menu : Test des variables, pour voir et changer leur valeur pendant la partie.',
+      'Projet de jeu : le menu montre ce que contient l\'appareil, et l\'import compare le fichier avec ce qu\'il va remplacer.',
+    ],
+  },
+  {
     version: '0.0.33',
     date: '2026-11-19',
     notes: [
