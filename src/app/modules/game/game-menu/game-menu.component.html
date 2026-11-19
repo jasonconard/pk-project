@@ -8,7 +8,7 @@
 
   <div class="entries">
     @for (entry of entries; track entry.label) {
-      <button type="button" class="entry" disabled [title]="entry.soon + ' : bientôt'">
+      <button type="button" class="entry" [disabled]="!entry.action || editing()" [title]="entryTitle(entry)" (click)="openEntry(entry)">
         <svg [lucideIcon]="entry.icon"></svg>
         <span>{{ entry.label }}</span>
       </button>

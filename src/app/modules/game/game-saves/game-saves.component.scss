@@ -1,0 +1,140 @@
+// Same window as the release notes: above the game menus (900) and under the update prompt (3000)
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2001;
+  width: min(420px, calc(100vw - 32px - var(--safe-left) - var(--safe-right)));
+  max-height: calc(100dvh - 32px - var(--safe-top) - env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: rgba(34, 35, 42, 0.97);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 14px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 8px 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+}
+
+button {
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #5aa8ff;
+  }
+}
+
+.close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 16px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+article {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+
+  &.empty {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.slot-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  span {
+    font-size: 13px;
+  }
+
+  small {
+    font-size: 11px;
+    opacity: 0.65;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+
+    &.primary {
+      background: #5aa8ff;
+      color: #0b1a2c;
+      font-weight: 700;
+    }
+
+    &.icon {
+      margin-left: auto;
+      padding: 0 10px;
+    }
+
+    &.armed {
+      background: #b0413e;
+      color: white;
+    }
+  }
+}
+
+.hint {
+  margin: 0;
+  padding: 10px 16px 14px;
+  font-size: 12px;
+  opacity: 0.75;
+}

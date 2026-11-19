@@ -14,12 +14,14 @@ import { applyProject, collectProject, projectFileBlob, ProjectFile, readProject
 import { downloadFile } from '../shared/util/ts-source';
 import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../../core/shared/haptics';
 
-/** An entry of the game's own menus: none exists yet, each one comes with its tool (docs/idees.md). */
+/** An entry of the game's own menus: each one comes with its tool (docs/idees.md), greyed until then. */
 interface MenuEntry {
   icon: LucideIcon;
   label: string;
-  /** What the tool will bring, shown in the tooltip. */
+  /** What the tool brings, shown in the tooltip. */
   soon: string;
+  /** What it opens; none yet: greyed. */
+  action?: 'saves';
 }
 
 const ENTRIES: MenuEntry[] = [
@@ -28,7 +30,7 @@ const ENTRIES: MenuEntry[] = [
   { icon: LucideHeartHandshake, label: 'Liens', soon: 'Les liens avec les habitants et l\'équipe' },
   { icon: LucideCalendarDays, label: 'Agenda', soon: 'Les jours, les activités, les donjons ouverts' },
   { icon: LucideMap, label: 'Carte', soon: 'La carte du monde' },
-  { icon: LucideSave, label: 'Sauver', soon: 'La sauvegarde de partie sur plusieurs emplacements' },
+  { icon: LucideSave, label: 'Sauver', soon: 'Sauver ou charger la partie', action: 'saves' },
 ];
 
 /**
@@ -56,9 +58,13 @@ export class GameMenuComponent {
   /** Ambiance: the menu closes, the tools unfold under the clock. */
   readonly ambiance = output<void>();
   readonly releaseNotes = output<void>();
+  /** The saved games (Sauver): the menu closes, the dialog opens. */
+  readonly saves = output<void>();
 
   protected readonly entries = ENTRIES;
   protected readonly hud = this.gameService.hud;
+  /** Opened from the editor (Réglages): the game's entries wait for the game. */
+  protected readonly editing = computed(() => !!this.hud()?.editMode);
   protected readonly fullScreened = this.coreService.fullScreened;
   protected readonly fullScreenSupported = this.coreService.fullScreenSupported;
   protected readonly soundVolume = this.gameService.soundVolume;
@@ -119,6 +125,19 @@ export class GameMenuComponent {
 
   protected setDiagnostics(event: Event): void {
     this.gameService.setDiagnostics((event.target as HTMLInputElement).checked);
+  }
+
+  protected openEntry(entry: MenuEntry): void {
+    if (entry.action === 'saves') {
+      this.saves.emit();
+    }
+  }
+
+  protected entryTitle(entry: MenuEntry): string {
+    if (!entry.action) {
+      return `${entry.soon} : bientôt`;
+    }
+    return this.editing() ? `${entry.soon} : depuis le jeu` : entry.soon;
   }
 
   protected toggleProject(): void {

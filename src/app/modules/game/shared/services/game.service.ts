@@ -663,6 +663,35 @@ export class GameService {
     this.syncHud();
   }
 
+  // --- Saved games ---
+
+  /** Where the player is (a saved game), null: no map yet. */
+  playerSpot(): { map: string, mapName: string, pos: Vec3 } | null {
+    const mapHelper = this.game?.mapHelper;
+    const sprite = mapHelper?.scenePlayer.mesh;
+    if (!mapHelper || !sprite) {
+      return null;
+    }
+    const pos = { x: sprite.position.x, y: sprite.position.y, z: sprite.position.z };
+    return { map: mapHelper.sceneMap.id, mapName: mapHelper.sceneMap.name, pos };
+  }
+
+  /**
+   * Back to a saved place, at that time and weather. A map that no longer exists: the default map's arrival point
+   * (returns false).
+   */
+  restoreSpot(map: string, pos: Vec3, hour: number, weather: WeatherType): boolean {
+    const game = this.game;
+    const exists = listMaps().some(m => m.id === map);
+    this.setHour(hour);
+    this.setWeather(weather);
+    if (game) {
+      this.gameMapService.travel(game, exists ? { map, pos } : { map: DEFAULT_MAP_ID });
+      this.syncHud();
+    }
+    return exists;
+  }
+
   // --- Passages ---
 
   /** Choosing the arrival point of the selected object's passage: where to come back to. */

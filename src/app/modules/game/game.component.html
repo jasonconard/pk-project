@@ -81,7 +81,11 @@
 }
 
 @if (menuOpen() && hud()?.mode === GameMode.MAP) {
-  <game-menu [version]="appVersion" (closed)="menuOpen.set(false)" (ambiance)="openAmbiance()" (releaseNotes)="openReleaseNotes()" />
+  <game-menu [version]="appVersion" (closed)="menuOpen.set(false)" (ambiance)="openAmbiance()" (releaseNotes)="openReleaseNotes()" (saves)="openSaves()" />
+}
+
+@if (savesOpen()) {
+  <game-saves [version]="appVersion" (closed)="savesOpen.set(false)" (loaded)="savesOpen.set(false)" />
 }
 
 @if (releaseNotes()) {
