@@ -70,7 +70,7 @@
         }
       </div>
     }
-    <button type="button" class="row" [attr.aria-expanded]="projectOpen()" (click)="projectOpen.set(!projectOpen())">
+    <button type="button" class="row" [attr.aria-expanded]="projectOpen()" (click)="toggleProject()">
       <svg lucideFolderArchive class="row-icon"></svg>
       <span class="row-text"><b>Projet de jeu</b><small>Cartes, modèles, musiques : fichier .pk</small></span>
       @if (projectOpen()) { <svg lucideChevronDown class="chevron"></svg> } @else { <svg lucideChevronRight class="chevron"></svg> }
@@ -79,13 +79,19 @@
       <div class="project">
         @if (pendingImport(); as pending) {
           <p>Remplacer toutes les créations de cet appareil par ce projet ?</p>
-          <p class="current">{{ pending.label }}</p>
+          <p class="current"><b>Ce fichier :</b> {{ pending.label }}</p>
+          @if (deviceSummary(); as device) {
+            <p class="current"><b>Sera remplacé :</b> {{ device }}</p>
+          }
           <div class="actions">
             <button type="button" class="danger" [disabled]="projectBusy()" (click)="confirmImport()">Remplacer</button>
             <button type="button" [disabled]="projectBusy()" (click)="pendingImport.set(null)">Annuler</button>
           </div>
         } @else {
           <p class="current">Toutes vos créations dans un fichier, pour les passer du téléphone à l'ordinateur (et inversement).</p>
+          @if (deviceSummary(); as device) {
+            <p class="summary">Sur cet appareil : {{ device }}</p>
+          }
           <div class="actions">
             <button type="button" [disabled]="projectBusy()" (click)="exportProject()">
               @if (sharesProject) { <svg lucideShare2></svg> Envoyer… } @else { <svg lucideDownload></svg> Exporter }

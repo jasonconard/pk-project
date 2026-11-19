@@ -77,6 +77,8 @@ export class GameMenuComponent {
   protected readonly projectMessage = signal('');
   /** A project file read, waiting for the player to confirm it replaces every creation. */
   protected readonly pendingImport = signal<{ project: ProjectFile, label: string } | null>(null);
+  /** What this device holds (« 3 cartes · 12 modèles · 4 musiques · 85 ko »), read when the project unfolds. */
+  protected readonly deviceSummary = signal('');
   protected readonly hapticsSupported = hapticsSupported;
   protected readonly hapticsEnabled = hapticsEnabled;
 
@@ -119,6 +121,23 @@ export class GameMenuComponent {
     this.gameService.setDiagnostics((event.target as HTMLInputElement).checked);
   }
 
+  protected toggleProject(): void {
+    this.projectOpen.set(!this.projectOpen());
+    if (this.projectOpen()) {
+      void this.readDeviceSummary();
+    }
+  }
+
+  private async readDeviceSummary(): Promise<void> {
+    try {
+      const project = await collectProject(this.version());
+      const { blob } = await projectFileBlob(project);
+      this.deviceSummary.set(`${projectLabel(project, false)} · ${sizeLabel(blob)}`);
+    } catch {
+      this.deviceSummary.set('');
+    }
+  }
+
   protected async exportProject(): Promise<void> {
     this.projectBusy.set(true);
     this.projectMessage.set('');
@@ -133,7 +152,7 @@ export class GameMenuComponent {
       } else {
         downloadFile(name, blob);
       }
-      this.projectMessage.set(`${SHARES_PROJECT ? 'Envoyé' : 'Exporté'} : ${name} (${projectLabel(project)}, ${Math.max(1, Math.round(blob.size / 1024))} ko)`);
+      this.projectMessage.set(`${SHARES_PROJECT ? 'Envoyé' : 'Exporté'} : ${name} (${projectLabel(project, false)}, ${sizeLabel(blob)})`);
     } catch {
       this.projectMessage.set('L\'export a échoué.');
     } finally {
@@ -151,7 +170,7 @@ export class GameMenuComponent {
     this.projectMessage.set('');
     try {
       const project = await readProjectFile(file);
-      this.pendingImport.set({ project, label: projectLabel(project) });
+      this.pendingImport.set({ project, label: `${projectLabel(project)} · ${sizeLabel(file)}` });
     } catch (e) {
       this.projectMessage.set((e as Error).message);
     }
@@ -175,10 +194,17 @@ export class GameMenuComponent {
   }
 }
 
-/** « 3 cartes · 12 modèles · 4 musiques · du 19/11/2026 ». */
-function projectLabel(project: ProjectFile): string {
+/** « 3 cartes · 12 modèles · 4 musiques » (+ « · du 19/11/2026 »). */
+function projectLabel(project: ProjectFile, withDate = true): string {
   const s = summarize(project);
   const count = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
   const date = new Date(s.savedAt).toLocaleDateString('fr-FR');
-  return `${count(s.maps, 'carte')} · ${count(s.models, 'modèle')} · ${count(s.songs, 'musique')} · du ${date}`;
+  const label = `${count(s.maps, 'carte')} · ${count(s.models, 'modèle')} · ${count(s.songs, 'musique')}`;
+  return withDate ? `${label} · du ${date}` : label;
+}
+
+/** Size of a `.pk` file: « 85 ko », « 1,2 Mo ». */
+function sizeLabel(blob: Blob): string {
+  const ko = blob.size / 1024;
+  return ko < 1000 ? `${Math.max(1, Math.round(ko))} ko` : `${(ko / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} Mo`;
 }
