@@ -26,10 +26,10 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - `modules/game/`: `game.component` (main view, game mode / edit mode, editor panels opened over the game via
   `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
   landscape/desktop), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
-  `release-notes`, `teleport`.
+  `release-notes`, `game-saves` (saved games dialog), `teleport`.
   - `shared/services/`: `game.service` (settings, music, reload of models), `map-editor.service` (map editor logic),
     `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
-    `event` (`actionAt`), `sequence`, `game-music`.
+    `event` (`actionAt`), `sequence`, `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
   - `shared/model/`: `MapHelper` (chunks, bounds, `refreshModels`), `Terrain`, `GroundMesh`, `SceneMap`,
     `SceneBuilding`, `SceneModel`, `ModelChoice` (`MODEL_CHOICES`, palette thumbnails), `ModelInstances`,
     `browser-models`, `Passage` (links between maps), `Quality`.
@@ -40,7 +40,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `shared/`: `EditableModel`, `model-ops`, `model-history`, `model-storage` (IndexedDB), `model-export` (→ `md-xxx.ts` + png).
 - `modules/music-editor/`: lo-fi music editor. `shared/`: `song`, `instruments` (data sheets), `synth`, `music-engine`, `song-storage`.
 - `modules/variables-editor/`: story flags and counters (`GameVariable`). `shared/`: `variables`, `variable-storage`
-  (browser `pk-variables`, else `assets/variables/variables.ts`).
+  (browser `pk-variables`, else `assets/variables/variables.ts`), `variable-values` (values in the game being played).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be replaced by the Grandia-style combat.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

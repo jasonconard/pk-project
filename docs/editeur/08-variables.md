@@ -22,6 +22,10 @@ En mode Créer : **Éditeurs → Variables** (ordinateur, téléphone en paysage
 
 Renommer une variable ne casse rien : ce qui l'utilisera la retrouve par un identifiant qui ne change jamais.
 
+## Pendant la partie
+
+La valeur **Au début** est celle d'une nouvelle partie. Pendant le jeu, chaque variable a sa valeur du moment (gardée dans le navigateur, même après avoir fermé le jeu) ; une [sauvegarde de partie](05-sauvegarde-export.md#sauvegarde-de-partie) en garde une copie et la remet en la chargeant. Une variable créée après le début de la partie prend sa valeur au début.
+
 ## Sauvegarde et export
 
 - Chaque changement est enregistré dans le navigateur (« Enregistré » sous le titre).
@@ -35,4 +39,5 @@ Renommer une variable ne casse rien : ce qui l'utilisera la retrouve par un iden
 | `src/app/modules/variables-editor/variables-editor.component.*` | L'éditeur |
 | `src/app/modules/variables-editor/shared/variables.ts` | `GameVariable` (id, nom, note, `flag` ou `counter`, valeur au début) |
 | `src/app/modules/variables-editor/shared/variable-storage.ts` | Le navigateur (`pk-variables`), sinon le code |
+| `src/app/modules/variables-editor/shared/variable-values.ts` | La valeur des variables dans la partie (`pk-variable-values`) |
 | `src/assets/variables/variables.ts` | Les variables du jeu (`CODE_VARIABLES`), écrites par l'export |

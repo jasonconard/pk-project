@@ -56,6 +56,19 @@ Pour passer **toutes les créations** d'un appareil à l'autre (téléphone ↔ 
 
 Dans le code : `project-file.ts` (format `pk-project` version 1 : JSON compressé en gzip, les pixels des modèles en base64). Sur Android, `shareProjectFile` écrit le fichier dans le cache de l'application (`@capacitor/filesystem`) puis le partage (`@capacitor/share`). Le sélecteur de fichiers d'Android plante sur une extension qu'il ne connaît pas : l'import n'y filtre donc pas sur `.pk`. Il s'appuie sur `map-storage.ts` (`storedMapsData` / `replaceStoredMaps`), `model-storage.ts` (`replaceStoredModels`) `song-storage.ts` (`storedSongsData` / `replaceStoredSongs`) et `variable-storage.ts` (`storedVariablesData` / `replaceStoredVariables` ; absent des fichiers plus anciens, qui s'importent toujours).
 
+## Sauvegarde de partie
+
+Pour garder où en est la partie : **Menu → Sauver** (pendant le jeu ; grisé depuis l'éditeur). Trois emplacements.
+
+- Un emplacement montre la carte, l'heure du jeu, la météo et quand il a été sauvé (« Carte du monde · 07:38 · Neutre », « Sauvée le 19 nov. à 16:02 »).
+- **Sauver ici** remplit un emplacement vide. **Écraser** remplace une sauvegarde par la partie en cours.
+- **Charger** ramène à la sauvegarde : la carte, la position du joueur, l'heure, la météo et la valeur des [variables](08-variables.md). La partie en cours est perdue si elle n'a pas été sauvée.
+- **Écraser**, **Charger** et la corbeille demandent deux appuis (pendant 3 secondes ; le texte sous les emplacements dit ce qui va se passer).
+- Si la carte d'une sauvegarde n'existe plus, le joueur revient à la carte de départ.
+- Les sauvegardes restent sur l'appareil : elles ne sont pas dans le projet de jeu (ce sont les parties, pas les créations).
+
+Dans le code : `game-saves/` (la fenêtre), `shared/services/game-saves.ts` (les emplacements, `pk-saves`), `GameService.playerSpot` / `restoreSpot`, et `variables-editor/shared/variable-values.ts` (la valeur des variables dans la partie, `pk-variable-values`).
+
 ## Réinitialiser
 
 **Réinit.** (deux appuis : « Confirmer ? » pendant 3 secondes) oublie la copie du navigateur d'une carte du code ; ouverte, elle est reconstruite telle qu'elle est dans le code. À faire après avoir exporté et commité, ou si la carte du code a été modifiée à la main (la copie du navigateur passerait par-dessus).
