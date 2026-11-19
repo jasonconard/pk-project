@@ -1,6 +1,9 @@
 import { replaceStoredMaps, StoredMaps, storedMapsData } from './map-storage';
 import { fromBase64, loadStoredModels, replaceStoredModels, toBase64 } from '../../../model-editor/shared/model-storage';
 import { EditableModel, FaceTexture } from '../../../model-editor/shared/EditableModel';
+import { Capacitor } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { replaceStoredSongs, StoredSongs, storedSongsData } from '../../../music-editor/shared/song-storage';
 
 /**
@@ -95,6 +98,30 @@ export async function projectFileBlob(project: ProjectFile): Promise<{ name: str
   const json = new Blob([JSON.stringify(project)], { type: 'application/json' });
   const blob = await pipe(json, new CompressionStream('gzip'));
   return { name: `pk-projet-${project.savedAt.slice(0, 10)}.pk`, blob: new Blob([blob], { type: 'application/octet-stream' }) };
+}
+
+/** The Android app can't download a file: it shares it instead (Drive, mail, Bluetooth, Files…). */
+export const SHARES_PROJECT = Capacitor.isNativePlatform();
+
+/**
+ * Android app: writes the `.pk` file in the app cache and opens the Android share sheet with it. Resolves false if
+ * the player closed the share sheet without choosing an app.
+ */
+export async function shareProjectFile(name: string, blob: Blob): Promise<boolean> {
+  const { uri } = await Filesystem.writeFile({
+    path: name,
+    data: toBase64(new Uint8Array(await blob.arrayBuffer())),
+    directory: Directory.Cache,
+  });
+  try {
+    await Share.share({ title: name, dialogTitle: 'Envoyer le projet de jeu', files: [uri] });
+    return true;
+  } catch (e) {
+    if (/cancel/i.test((e as Error)?.message ?? '')) {
+      return false;
+    }
+    throw e;
+  }
 }
 
 /** Reads a `.pk` file (gzipped or plain JSON). Throws an Error with a message for the player if it isn't one. */

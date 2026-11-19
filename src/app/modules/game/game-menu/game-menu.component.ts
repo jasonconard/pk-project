@@ -2,14 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideBackpack, LucideCalendarDays, LucideCamera, LucideChevronDown, LucideChevronRight, LucideCloudSun, LucideDownload, LucideDynamicIcon, LucideFolderArchive,
-  LucideGauge, LucideHeartHandshake, LucideIcon, LucideMap, LucideMaximize, LucideMinimize, LucideSave, LucideSparkles,
+  LucideGauge, LucideHeartHandshake, LucideIcon, LucideMap, LucideMaximize, LucideMinimize, LucideSave, LucideShare2, LucideSparkles,
   LucideUpload, LucideUsers, LucideVolume2, LucideVolumeX, LucideX,
 } from '@lucide/angular';
 import { GameService } from '../shared/services/game.service';
 import { CoreService } from '../../../core/shared/service/core.service';
 import { KeyService } from '../../../core/shared/service/key.service';
 import { QUALITY_CHOICES, QualityMode } from '../shared/model/Quality';
-import { applyProject, collectProject, projectFileBlob, ProjectFile, readProjectFile, summarize } from '../shared/services/project-file';
+import { applyProject, collectProject, projectFileBlob, ProjectFile, readProjectFile, SHARES_PROJECT, shareProjectFile,
+  summarize } from '../shared/services/project-file';
 import { downloadFile } from '../shared/util/ts-source';
 import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../../core/shared/haptics';
 
@@ -40,7 +41,7 @@ const ENTRIES: MenuEntry[] = [
   selector: 'game-menu',
   imports: [LucideDynamicIcon, LucideX, LucideMaximize, LucideMinimize, LucideVolume2, LucideVolumeX, LucideCamera,
     LucideCloudSun, LucideGauge, LucideSparkles, LucideChevronRight, LucideChevronDown, LucideFolderArchive,
-    LucideDownload, LucideUpload],
+    LucideDownload, LucideShare2, LucideUpload],
   templateUrl: './game-menu.component.html',
   styleUrl: './game-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +71,8 @@ export class GameMenuComponent {
   protected readonly qualityOpen = signal(false);
   /** The game project's actions are unfolded. */
   protected readonly projectOpen = signal(false);
+  /** Android app: the project is sent with the share sheet instead of downloaded. */
+  protected readonly sharesProject = SHARES_PROJECT;
   protected readonly projectBusy = signal(false);
   protected readonly projectMessage = signal('');
   /** A project file read, waiting for the player to confirm it replaces every creation. */
@@ -122,8 +125,15 @@ export class GameMenuComponent {
     try {
       const project = await collectProject(this.version());
       const { name, blob } = await projectFileBlob(project);
-      downloadFile(name, blob);
-      this.projectMessage.set(`Exporté : ${name} (${projectLabel(project)}, ${Math.max(1, Math.round(blob.size / 1024))} ko)`);
+      if (SHARES_PROJECT) {
+        if (!await shareProjectFile(name, blob)) {
+          this.projectMessage.set('Envoi annulé.');
+          return;
+        }
+      } else {
+        downloadFile(name, blob);
+      }
+      this.projectMessage.set(`${SHARES_PROJECT ? 'Envoyé' : 'Exporté'} : ${name} (${projectLabel(project)}, ${Math.max(1, Math.round(blob.size / 1024))} ko)`);
     } catch {
       this.projectMessage.set('L\'export a échoué.');
     } finally {

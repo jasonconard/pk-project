@@ -87,9 +87,12 @@
         } @else {
           <p class="current">Toutes vos créations dans un fichier, pour les passer du téléphone à l'ordinateur (et inversement).</p>
           <div class="actions">
-            <button type="button" [disabled]="projectBusy()" (click)="exportProject()"><svg lucideDownload></svg> Exporter</button>
+            <button type="button" [disabled]="projectBusy()" (click)="exportProject()">
+              @if (sharesProject) { <svg lucideShare2></svg> Envoyer… } @else { <svg lucideDownload></svg> Exporter }
+            </button>
             <button type="button" [disabled]="projectBusy()" (click)="fileInput.click()"><svg lucideUpload></svg> Importer…</button>
-            <input #fileInput type="file" accept=".pk" hidden (change)="pickProject($event)" />
+            <!-- Android's file picker crashes on an extension it doesn't know (.pk): no filter there -->
+            <input #fileInput type="file" [attr.accept]="sharesProject ? null : '.pk'" hidden (change)="pickProject($event)" />
           </div>
         }
         @if (projectMessage(); as message) {
