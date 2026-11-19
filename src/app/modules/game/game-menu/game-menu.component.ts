@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
-  LucideBackpack, LucideCalendarDays, LucideCamera, LucideChevronDown, LucideChevronRight, LucideCloudSun, LucideDynamicIcon,
+  LucideBackpack, LucideCalendarDays, LucideCamera, LucideChevronDown, LucideChevronRight, LucideCloudSun, LucideDownload, LucideDynamicIcon, LucideFolderArchive,
   LucideGauge, LucideHeartHandshake, LucideIcon, LucideMap, LucideMaximize, LucideMinimize, LucideSave, LucideSparkles,
-  LucideUsers, LucideVolume2, LucideVolumeX, LucideX,
+  LucideUpload, LucideUsers, LucideVolume2, LucideVolumeX, LucideX,
 } from '@lucide/angular';
 import { GameService } from '../shared/services/game.service';
 import { CoreService } from '../../../core/shared/service/core.service';
 import { KeyService } from '../../../core/shared/service/key.service';
 import { QUALITY_CHOICES, QualityMode } from '../shared/model/Quality';
+import { applyProject, collectProject, projectFileBlob, ProjectFile, readProjectFile, summarize } from '../shared/services/project-file';
+import { downloadFile } from '../shared/util/ts-source';
 import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../../core/shared/haptics';
 
 /** An entry of the game's own menus: none exists yet, each one comes with its tool (docs/idees.md). */
@@ -30,13 +32,15 @@ const ENTRIES: MenuEntry[] = [
 
 /**
  * Game menu (button top right, or Escape): the game's menus to come (greyed), the quick switches (full screen,
- * sound), and the settings: ambiance (unfolds the tools under the clock), graphics quality, what's new.
+ * sound), and the settings: ambiance (unfolds the tools under the clock), graphics quality, the game project (export /
+ * import every creation as a `.pk` file), what's new.
  * A sheet from the bottom on phones in portrait, a panel on the right otherwise.
  */
 @Component({
   selector: 'game-menu',
   imports: [LucideDynamicIcon, LucideX, LucideMaximize, LucideMinimize, LucideVolume2, LucideVolumeX, LucideCamera,
-    LucideCloudSun, LucideGauge, LucideSparkles, LucideChevronRight, LucideChevronDown],
+    LucideCloudSun, LucideGauge, LucideSparkles, LucideChevronRight, LucideChevronDown, LucideFolderArchive,
+    LucideDownload, LucideUpload],
   templateUrl: './game-menu.component.html',
   styleUrl: './game-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +68,12 @@ export class GameMenuComponent {
   protected readonly qualityLabel = computed(() => QUALITY_CHOICES.find(q => q.mode === this.quality())?.label ?? '');
   /** The graphics settings are unfolded. */
   protected readonly qualityOpen = signal(false);
+  /** The game project's actions are unfolded. */
+  protected readonly projectOpen = signal(false);
+  protected readonly projectBusy = signal(false);
+  protected readonly projectMessage = signal('');
+  /** A project file read, waiting for the player to confirm it replaces every creation. */
+  protected readonly pendingImport = signal<{ project: ProjectFile, label: string } | null>(null);
   protected readonly hapticsSupported = hapticsSupported;
   protected readonly hapticsEnabled = hapticsEnabled;
 
@@ -105,4 +115,60 @@ export class GameMenuComponent {
   protected setDiagnostics(event: Event): void {
     this.gameService.setDiagnostics((event.target as HTMLInputElement).checked);
   }
+
+  protected async exportProject(): Promise<void> {
+    this.projectBusy.set(true);
+    this.projectMessage.set('');
+    try {
+      const project = await collectProject(this.version());
+      const { name, blob } = await projectFileBlob(project);
+      downloadFile(name, blob);
+      this.projectMessage.set(`Exporté : ${name} (${projectLabel(project)}, ${Math.max(1, Math.round(blob.size / 1024))} ko)`);
+    } catch {
+      this.projectMessage.set('L\'export a échoué.');
+    } finally {
+      this.projectBusy.set(false);
+    }
+  }
+
+  protected async pickProject(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; // the same file can be picked again
+    if (!file) {
+      return;
+    }
+    this.projectMessage.set('');
+    try {
+      const project = await readProjectFile(file);
+      this.pendingImport.set({ project, label: projectLabel(project) });
+    } catch (e) {
+      this.projectMessage.set((e as Error).message);
+    }
+  }
+
+  protected async confirmImport(): Promise<void> {
+    const pending = this.pendingImport();
+    if (!pending) {
+      return;
+    }
+    this.projectBusy.set(true);
+    try {
+      await applyProject(pending.project);
+      this.projectMessage.set('Projet importé, le jeu redémarre…');
+      location.reload(); // every service holds the old project
+    } catch (e) {
+      this.projectMessage.set((e as Error).message);
+      this.pendingImport.set(null);
+      this.projectBusy.set(false);
+    }
+  }
+}
+
+/** « 3 cartes · 12 modèles · 4 musiques · du 19/11/2026 ». */
+function projectLabel(project: ProjectFile): string {
+  const s = summarize(project);
+  const count = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
+  const date = new Date(s.savedAt).toLocaleDateString('fr-FR');
+  return `${count(s.maps, 'carte')} · ${count(s.models, 'modèle')} · ${count(s.songs, 'musique')} · du ${date}`;
 }

@@ -109,6 +109,20 @@ export async function forgetStoredModel(id: string) {
   }
 }
 
+/** Replaces every model saved in the browser (project file import). Returns false if it failed. */
+export async function replaceStoredModels(list: EditableModel[]): Promise<boolean> {
+  try {
+    const { tx, models } = await store('readwrite');
+    models.clear();
+    list.forEach(model => models.put({ id: model.id, version: MODEL_VERSION, model } satisfies ModelRecord));
+    await done(tx);
+    keepStorage();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Asks the browser not to clear the saved models when it runs out of room (granted or not, silently). */
 let persistAsked = false;
 function keepStorage() {
@@ -118,12 +132,20 @@ function keepStorage() {
   }
 }
 
+export function toBase64(bytes: Uint8Array | Uint8ClampedArray): string {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(s);
+}
+
 // --- Models saved in localStorage by the first versions ---
 
 type LegacyTexture = { w: number, h: number } & Partial<Record<'color' | 'specular' | 'night' | 'bump', string>>;
 type LegacyModel = Omit<EditableModel, 'textures'> & { textures: Record<string, LegacyTexture> };
 
-function fromBase64(text: string): Uint8ClampedArray {
+export function fromBase64(text: string): Uint8ClampedArray {
   const s = atob(text);
   const bytes = new Uint8ClampedArray(s.length);
   for (let i = 0; i < s.length; i++) {

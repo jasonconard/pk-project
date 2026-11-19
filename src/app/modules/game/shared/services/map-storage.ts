@@ -40,7 +40,7 @@ interface StoredMap {
   chunks: StoredChunk[];
 }
 
-interface StoredMaps {
+export interface StoredMaps {
   version: number;
   maps: Record<string, StoredMap>;
   /** Map the game was on (opened again at the next start). */
@@ -171,6 +171,21 @@ function gridSize(chunks: { pos: Vec3, size: Vec2 }[]): { cols: number, rows: nu
 }
 
 /** The maps: the code's ones first, then those made in the browser. */
+/** Every map saved in the browser, as data (for the project file). */
+export function storedMapsData(): StoredMaps {
+  return readStored();
+}
+
+/** Replaces every map saved in the browser (project file import); false if the data isn't maps of this version. */
+export function replaceStoredMaps(data: unknown): boolean {
+  const stored = data as StoredMaps | null;
+  if (!stored || stored.version !== STORAGE_VERSION || typeof stored.maps !== 'object') {
+    return false;
+  }
+  writeStored(stored);
+  return true;
+}
+
 export function listMaps(): MapSummary[] {
   const stored = readStored().maps;
   const fromCode = CODE_MAPS.map(map => ({

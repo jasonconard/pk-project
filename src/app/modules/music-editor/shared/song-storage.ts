@@ -13,6 +13,24 @@ export interface StoredSongs {
   mapUse?: MapMusicUse;
 }
 
+/** The songs saved in the browser, null if none (for the project file). */
+export function storedSongsData(): StoredSongs | null {
+  return readStored();
+}
+
+/** Replaces the songs saved in the browser (project file import); null forgets them (the code's play again). */
+export function replaceStoredSongs(stored: StoredSongs | null): void {
+  if (stored?.songs?.length) {
+    saveSongs(stored);
+  } else {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Nothing to forget
+    }
+  }
+}
+
 function readStored(): StoredSongs | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
