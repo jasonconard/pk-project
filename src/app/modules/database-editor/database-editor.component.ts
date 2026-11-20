@@ -1,14 +1,15 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, output, signal } from '@angular/core';
 import {
-  LucideActivity, LucideSparkles, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideFlame, LucideIcon, LucideInfo, LucidePencil,
+  LucideActivity, LucideBackpack, LucideSparkles, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideFlame, LucideIcon, LucideInfo, LucidePencil,
   LucidePlus, LucideSearch, LucideSword, LucideTrash, LucideX, LucideDynamicIcon, LucideArrowUp, LucideArrowDown, LucideSigma,
 } from '@lucide/angular';
 import { downloadFile } from '../game/shared/util/ts-source';
 import { WEATHER_CHOICES, WeatherType } from '../game/shared/weather/Weather';
 import { weatherScreenshot } from '../game/shared/weather/weather-catalog';
 import {
-  CAST_MAX, castLabel, clampInt, composableElements, DbElement, DbSkill, DbState, DbTable, DbWeapon, defaultLearn, ELEMENT_COLORS,
+  BONUS_MAX, CAST_MAX, castLabel, clampInt, composableElements, DbElement, DbItem, DbSkill, DbState, DbTable, DbWeapon, defaultLearn,
+  ELEMENT_COLORS, EQUIP_SLOTS, EquipSlot, ITEM_KINDS, ItemKind, newItem, PRICE_MAX, RESIST_LEVELS, ResistLevel, withItemKind, XP_MAX,
   formulaProblem, GameDatabase, LEARN_MAX, learnChoices, LEVEL_MAX, MP_MAX, newElement, newId, newSkill, newSkillEffect, newState,
   newStateEffect, newWeapon, partsLabel, PERCENT_MAX, POWER_MAX, SKILL_TARGETS, SKILL_USES, SkillEffect, SkillEffectKind, SkillTarget,
   SkillUse, StateEffect, StateEffectKind, StatId, STATS, TURNS_MAX, withoutRow,
@@ -18,11 +19,14 @@ import { PixelEditorComponent } from './pixel-editor/pixel-editor.component';
 import { StepperComponent } from './stepper/stepper.component';
 import { WeatherPickerComponent } from '../game/weather-picker/weather-picker.component';
 
-type Row = DbElement | DbWeapon | DbState | DbSkill;
+type Row = DbElement | DbWeapon | DbState | DbSkill | DbItem;
+/** What has effects: skills and items. */
+type HasEffects = DbSkill | DbItem;
 
 /** In the mockup's order (characters, enemies and items will come before). */
 const TABLES: { id: DbTable, label: string, one: string, icon: LucideIcon }[] = [
   { id: 'skills', label: 'Compétences', one: 'Compétence', icon: LucideSparkles },
+  { id: 'items', label: 'Objets', one: 'Objet', icon: LucideBackpack },
   { id: 'states', label: 'États', one: 'État', icon: LucideActivity },
   { id: 'elements', label: 'Éléments', one: 'Élément', icon: LucideFlame },
   { id: 'weapons', label: 'Armes', one: 'Type d\'arme', icon: LucideSword },
@@ -30,6 +34,7 @@ const TABLES: { id: DbTable, label: string, one: string, icon: LucideIcon }[] = 
 
 const SKILL_EFFECT_LABELS: Record<SkillEffectKind, string> = {
   damage: 'Dégâts', heal: 'Soin', addState: 'Donner un état', removeState: 'Guérir un état', stat: 'Stat',
+  statUp: 'Stat pour toujours', xp: 'Expérience',
 };
 
 const EFFECT_LABELS: Record<StateEffectKind, string> = { hp: 'PV par tour', mp: 'PM par tour', stat: 'Stat', skip: 'Passe son tour' };
@@ -40,8 +45,8 @@ const SIDE_BY_SIDE = '(min-width: 760px)';
 /**
  * Database editor (docs/idees.md, point 5): one tab per table, the list then the row's sheet (side by side on wide
  * screens). Saved in the browser at every change; Exporter writes the game's file (src/assets/database/database.ts).
- * Tables so far: skills (cost, cast time, effects, the levels they are learned with), states, elements (with their
- * weathers, simple or composed), weapon types.
+ * Tables so far: skills (cost, cast time, effects, the levels they are learned with), items (consumables, equipment,
+ * key items, gifts), states, elements (with their weathers, simple or composed), weapon types.
  */
 @Component({
   selector: 'app-database-editor',
@@ -75,8 +80,16 @@ export class DatabaseEditorComponent {
   protected readonly targets = SKILL_TARGETS;
   protected readonly uses = SKILL_USES;
   protected readonly skillEffectKinds: SkillEffectKind[] = ['damage', 'heal', 'addState', 'removeState', 'stat'];
-  protected readonly skillEffectLabels = SKILL_EFFECT_LABELS;
   protected readonly castLabel = castLabel;
+  protected readonly itemEffectKinds: SkillEffectKind[] = ['heal', 'addState', 'removeState', 'stat', 'statUp', 'xp'];
+  protected readonly itemKinds = ITEM_KINDS;
+  protected readonly slots = EQUIP_SLOTS;
+  protected readonly resistLevels = RESIST_LEVELS;
+  protected readonly priceMax = PRICE_MAX;
+  protected readonly bonusMax = BONUS_MAX;
+  protected readonly xpMax = XP_MAX;
+  /** Items list: only one kind (null: all). */
+  protected readonly itemFilter = signal<ItemKind | null>(null);
 
   protected readonly db = signal<GameDatabase>(loadDatabase());
   protected readonly table = signal<DbTable>('skills');
@@ -102,7 +115,8 @@ export class DatabaseEditorComponent {
   protected readonly rows = computed<Row[]>(() => this.db()[this.table()]);
   protected readonly shownRows = computed(() => {
     const q = norm(this.search());
-    return q ? this.rows().filter(r => norm(r.name).includes(q)) : this.rows();
+    const kind = this.table() === 'items' ? this.itemFilter() : null;
+    return this.rows().filter(r => (!q || norm(r.name).includes(q)) && (!kind || (r as DbItem).kind === kind));
   });
   /** The open sheet: the chosen row; side by side, the first one when none is chosen. */
   protected readonly current = computed<Row | null>(() => {
@@ -114,6 +128,7 @@ export class DatabaseEditorComponent {
   protected readonly weapon = computed(() => this.table() === 'weapons' ? this.current() as DbWeapon | null : null);
   protected readonly state = computed(() => this.table() === 'states' ? this.current() as DbState | null : null);
   protected readonly skill = computed(() => this.table() === 'skills' ? this.current() as DbSkill | null : null);
+  protected readonly item = computed(() => this.table() === 'items' ? this.current() as DbItem | null : null);
   protected readonly learnChoices = computed(() => learnChoices(this.db()));
   /** The formula's problem, if any (shown under it). */
   protected readonly formulaProblem = computed(() => formulaProblem(this.skill()?.formula ?? ''));
@@ -171,6 +186,7 @@ export class DatabaseEditorComponent {
   protected openTable(table: DbTable): void {
     this.table.set(table);
     this.selectedId.set(null);
+    this.itemFilter.set(null);
     this.search.set('');
     this.message.set('');
   }
@@ -186,14 +202,17 @@ export class DatabaseEditorComponent {
 
   protected add(): void {
     const table = this.table();
-    const base = { elements: 'Nouvel élément', weapons: 'Nouveau type d\'arme', states: 'Nouvel état', skills: 'Nouvelle compétence' }[table];
+    const base = {
+      elements: 'Nouvel élément', weapons: 'Nouveau type d\'arme', states: 'Nouvel état', skills: 'Nouvelle compétence', items: 'Nouvel objet',
+    }[table];
     const names = new Set(this.rows().map(r => norm(r.name)));
     let name = base;
     for (let i = 2; names.has(norm(name)); i++) {
       name = `${base} ${i}`;
     }
     const row = table === 'elements' ? newElement(name) : table === 'weapons' ? newWeapon(name)
-      : table === 'states' ? newState(name) : newSkill(name, this.db());
+      : table === 'states' ? newState(name) : table === 'skills' ? newSkill(name, this.db())
+        : withItemKind(newItem(name), this.itemFilter() ?? 'consumable');
     this.commit({ ...this.db(), [table]: [...this.rows(), row] });
     this.search.set('');
     this.selectedId.set(row.id);
@@ -236,7 +255,7 @@ export class DatabaseEditorComponent {
     this.edit(row.id, r => ({ ...r, color }));
   }
 
-  protected setNote(row: DbWeapon | DbSkill, note: string): void {
+  protected setNote(row: DbWeapon | DbSkill | DbItem, note: string): void {
     this.edit(row.id, r => {
       const next = { ...r, note: note.trim() ? note : undefined } as DbWeapon;
       if (!next.note) {
@@ -413,23 +432,28 @@ export class DatabaseEditorComponent {
     return 70 + cast / CAST_MAX * 22;
   }
 
-  protected addSkillEffect(skill: DbSkill, kind: SkillEffectKind): void {
-    this.edit(skill.id, s => ({ ...s, effects: [...(s as DbSkill).effects, newSkillEffect(kind, this.db())] }));
+  protected addSkillEffect(row: HasEffects, kind: SkillEffectKind): void {
+    this.edit(row.id, s => ({ ...s, effects: [...(s as HasEffects).effects ?? [], newSkillEffect(kind, this.db())] }));
   }
 
-  protected setSkillEffect(skill: DbSkill, index: number, change: Partial<SkillEffect> | Record<string, unknown>): void {
-    this.edit(skill.id, s => ({
-      ...s, effects: (s as DbSkill).effects.map((e, i) => i === index ? { ...e, ...change } as SkillEffect : e),
+  protected setSkillEffect(row: HasEffects, index: number, change: Partial<SkillEffect> | Record<string, unknown>): void {
+    this.edit(row.id, s => ({
+      ...s, effects: ((s as HasEffects).effects ?? []).map((e, i) => i === index ? { ...e, ...change } as SkillEffect : e),
     }));
   }
 
-  protected removeSkillEffect(skill: DbSkill, index: number): void {
-    this.edit(skill.id, s => ({ ...s, effects: (s as DbSkill).effects.filter((_, i) => i !== index) }));
+  /** For the « Expérience » effect's element or weapon select. */
+  protected xpPicker(row: HasEffects, index: number): (id: string) => void {
+    return id => this.setSkillEffect(row, index, { id });
   }
 
-  protected moveSkillEffect(skill: DbSkill, index: number, by: -1 | 1): void {
-    this.edit(skill.id, s => {
-      const effects = [...(s as DbSkill).effects];
+  protected removeSkillEffect(row: HasEffects, index: number): void {
+    this.edit(row.id, s => ({ ...s, effects: ((s as HasEffects).effects ?? []).filter((_, i) => i !== index) }));
+  }
+
+  protected moveSkillEffect(row: HasEffects, index: number, by: -1 | 1): void {
+    this.edit(row.id, s => {
+      const effects = [...(s as HasEffects).effects ?? []];
       const to = index + by;
       if (to < 0 || to >= effects.length) {
         return s;
@@ -493,6 +517,73 @@ export class DatabaseEditorComponent {
     return skill.learn.map(l => `${[...db.elements, ...db.weapons].find(r => r.id === l.id)?.name ?? '?'} ${l.level}`).join(' + ');
   }
 
+  // --- Items ---
+
+  protected setItemKind(item: DbItem, kind: ItemKind): void {
+    this.edit(item.id, i => withItemKind(i as DbItem, kind));
+  }
+
+  protected setItem(item: DbItem, change: Partial<DbItem>): void {
+    this.edit(item.id, i => {
+      const next = { ...i, ...change } as DbItem;
+      for (const key of ['weapon', 'attackElement'] as const) {
+        if (!next[key]) {
+          delete next[key];
+        }
+      }
+      return next;
+    });
+  }
+
+  protected setSlot(item: DbItem, slot: EquipSlot): void {
+    this.edit(item.id, i => {
+      const next = { ...i, slot } as DbItem;
+      if (slot !== 'weapon') {
+        delete next.weapon;
+        delete next.attackElement;
+      }
+      return next;
+    });
+  }
+
+  protected setItemUse(item: DbItem, use: string): void {
+    this.setItem(item, { use: use as SkillUse });
+  }
+
+  protected setItemTarget(item: DbItem, target: string): void {
+    this.setItem(item, { target: target as SkillTarget });
+  }
+
+  /** Equipment lists: stat bonuses, resistances, faster growth. */
+  protected addTo(item: DbItem, list: 'bonuses' | 'resists' | 'growth'): void {
+    const db = this.db();
+    const used = new Set((item[list] ?? []).map(e => 'stat' in e ? e.stat : 'element' in e ? e.element : e.id));
+    const value = list === 'bonuses' ? { stat: STATS.find(st => !used.has(st.id))?.id ?? 'str', amount: 5 }
+      : list === 'resists' ? { element: db.elements.find(e => !used.has(e.id))?.id ?? '', level: 'resist' as ResistLevel }
+        : { id: this.learnChoices().find(c => !used.has(c.id))?.id ?? '', percent: 50 };
+    this.edit(item.id, i => ({ ...i, [list]: [...((i as DbItem)[list] ?? []), value] }));
+  }
+
+  protected setIn(item: DbItem, list: 'bonuses' | 'resists' | 'growth', index: number, change: Record<string, unknown>): void {
+    this.edit(item.id, i => ({ ...i, [list]: ((i as DbItem)[list] ?? []).map((e, k) => k === index ? { ...e, ...change } : e) }));
+  }
+
+  protected removeFrom(item: DbItem, list: 'bonuses' | 'resists' | 'growth', index: number): void {
+    this.edit(item.id, i => ({ ...i, [list]: ((i as DbItem)[list] ?? []).filter((_, k) => k !== index) }));
+  }
+
+  protected growthPicker(item: DbItem, index: number): (id: string) => void {
+    return id => this.setIn(item, 'growth', index, { id });
+  }
+
+  protected effectLabel(kind: string): string {
+    return SKILL_EFFECT_LABELS[kind as SkillEffectKind] ?? kind;
+  }
+
+  protected itemKindLabel(kind: ItemKind): string {
+    return ITEM_KINDS.find(k => k.id === kind)?.label ?? kind;
+  }
+
   // --- List texts ---
 
   protected rowMeta(row: Row): string {
@@ -507,6 +598,12 @@ export class DatabaseEditorComponent {
       }
       case 'weapons':
         return (row as DbWeapon).note || 'Type d\'arme';
+      case 'items': {
+        const it = row as DbItem;
+        const kind = it.kind === 'equipment' ? EQUIP_SLOTS.find(sl => sl.id === it.slot)?.label ?? 'Équipement' : this.itemKindLabel(it.kind);
+        const bonuses = (it.bonuses ?? []).map(b => `${STATS.find(st => st.id === b.stat)?.label} ${b.amount > 0 ? '+' : ''}${b.amount}`).join(', ');
+        return [kind, bonuses, it.kind === 'key' ? '' : it.price ? `${it.price} pièces` : 'ne se vend pas'].filter(Boolean).join(' · ');
+      }
       case 'skills': {
         const s = row as DbSkill;
         return [this.elementOf(s.element)?.name ?? '?', `${s.mp} PM`, castLabel(s.cast), this.learnLabel(s)].filter(Boolean).join(' · ');
@@ -540,7 +637,7 @@ export class DatabaseEditorComponent {
     const source = `import { GameDatabase } from '../../app/modules/database-editor/shared/database';
 
 /**
- * The game's database (elements, weapon types, states, skills…). Written by the database editor's export (editor →
+ * The game's database (elements, weapon types, states, skills, items…). Written by the database editor's export (editor →
  * Éditeurs → Base de données → Exporter); the database saved in the browser replaces this one.
  */
 export const CODE_DATABASE: GameDatabase = ${JSON.stringify(this.db(), null, 2)};

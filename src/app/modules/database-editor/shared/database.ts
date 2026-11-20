@@ -2,7 +2,7 @@ import { WeatherType } from '../../game/shared/weather/Weather';
 
 /**
  * The game's database (docs/idees.md, point 5): what the combat, the events and the menus read. Built table by
- * table: elements, weapon types, states and skills so far; items, characters, enemies and groups come next.
+ * table: elements, weapon types, states, skills and items so far; characters, enemies and groups come next.
  * Every row has an id that never changes (what refers to it keeps working when it is renamed).
  */
 
@@ -96,7 +96,10 @@ export const SKILL_USES: { id: SkillUse, label: string }[] = [
   { id: 'both', label: 'Les deux' },
 ];
 
-/** What a skill does, in order. Damage and heal are worked out from a stat of the one who uses it and the power. */
+/**
+ * What a skill or an item does, in order. Damage and heal are worked out from a stat of the one who uses it and the
+ * power. Skills don't offer the item-only ones (a stat raised for good, element experience) and items don't deal damage.
+ */
 export type SkillEffect =
   /** Damage of the skill's element. */
   | { kind: 'damage', stat: 'str' | 'mag', power: number }
@@ -107,9 +110,65 @@ export type SkillEffect =
   /** A state cured. */
   | { kind: 'removeState', state: string }
   /** A stat raised (+) or lowered (−) in %, for some turns. */
-  | { kind: 'stat', stat: StatId, percent: number, turns: number };
+  | { kind: 'stat', stat: StatId, percent: number, turns: number }
+  /** Items: a stat raised for good (a seed). */
+  | { kind: 'statUp', stat: StatId, amount: number }
+  /** Items: experience in a simple element or a weapon type (Grandia's mana eggs). */
+  | { kind: 'xp', id: string, amount: number };
 
 export type SkillEffectKind = SkillEffect['kind'];
+
+export type ItemKind = 'consumable' | 'equipment' | 'key' | 'gift';
+export const ITEM_KINDS: { id: ItemKind, label: string, many: string }[] = [
+  { id: 'consumable', label: 'Consommable', many: 'Consommables' },
+  { id: 'equipment', label: 'Équipement', many: 'Équipement' },
+  { id: 'key', label: 'Objet clé', many: 'Objets clés' },
+  { id: 'gift', label: 'Cadeau', many: 'Cadeaux' },
+];
+
+export type EquipSlot = 'weapon' | 'armor' | 'accessory';
+export const EQUIP_SLOTS: { id: EquipSlot, label: string }[] = [
+  { id: 'weapon', label: 'Arme' },
+  { id: 'armor', label: 'Armure' },
+  { id: 'accessory', label: 'Accessoire' },
+];
+
+/** How one takes an element's damage (normal: not listed). The enemies will use it too. */
+export type ResistLevel = 'weak' | 'resist' | 'null' | 'absorb';
+export const RESIST_LEVELS: { id: ResistLevel, label: string }[] = [
+  { id: 'weak', label: 'Faible ×2' },
+  { id: 'resist', label: 'Résiste ×½' },
+  { id: 'null', label: 'Annule' },
+  { id: 'absorb', label: 'Absorbe' },
+];
+
+/**
+ * An item. Consumables are used (effects, target, where); equipment is worn (slot, stat bonuses, resistances, and the
+ * element or weapon levels it makes grow faster); key items are for the story; gifts are given to the inhabitants
+ * (what each one likes comes with the social links). Price 0: can't be bought nor sold.
+ */
+export interface DbItem {
+  id: string;
+  name: string;
+  icon?: string;
+  note?: string;
+  kind: ItemKind;
+  price: number;
+  /** Consumable. */
+  use?: SkillUse;
+  target?: SkillTarget;
+  effects?: SkillEffect[];
+  /** Equipment. */
+  slot?: EquipSlot;
+  /** Weapon: its type (hitting with it makes that level grow). */
+  weapon?: string;
+  /** Weapon: the element of its attacks (none: physical). */
+  attackElement?: string;
+  bonuses?: { stat: StatId, amount: number }[];
+  resists?: { element: string, level: ResistLevel }[];
+  /** An element's or weapon type's experience gained faster while worn, in %. */
+  growth?: { id: string, percent: number }[];
+}
 
 /**
  * A level needed to learn a skill, Grandia style: in a simple element or a weapon type (the characters' levels grow
@@ -147,6 +206,7 @@ export interface GameDatabase {
   weapons: DbWeapon[];
   states: DbState[];
   skills: DbSkill[];
+  items: DbItem[];
 }
 
 export type DbTable = keyof GameDatabase;
@@ -160,6 +220,9 @@ export const POWER_MAX = 999;
 export const LEVEL_MAX = 99;
 export const CAST_MAX = 5;
 export const LEARN_MAX = 2;
+export const PRICE_MAX = 99999;
+export const BONUS_MAX = 999;
+export const XP_MAX = 9999;
 
 export function newId(prefix: string): string {
   return `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -202,7 +265,33 @@ export function newSkillEffect(kind: SkillEffectKind, db: GameDatabase): SkillEf
     case 'addState': return { kind, state, chance: 30 };
     case 'removeState': return { kind, state };
     case 'stat': return { kind, stat: 'str', percent: 25, turns: 3 };
+    case 'statUp': return { kind, stat: 'str', amount: 1 };
+    case 'xp': return { kind, id: learnChoices(db)[0]?.id ?? '', amount: 50 };
   }
+}
+
+export function newItem(name: string): DbItem {
+  return { id: newId('it'), name, kind: 'consumable', price: 50, use: 'both', target: 'ally', effects: [{ kind: 'heal', resource: 'hp', power: 50 }] };
+}
+
+/** The item with what its kind needs (and without what it doesn't), keeping what it already had. */
+export function withItemKind(item: DbItem, kind: ItemKind): DbItem {
+  const { use, target, effects, slot, weapon, attackElement, bonuses, resists, growth, ...base } = item;
+  const next: DbItem = { ...base, kind };
+  if (kind === 'consumable') {
+    Object.assign(next, { use: use ?? 'both', target: target ?? 'ally', effects: effects ?? [] });
+  } else if (kind === 'equipment') {
+    Object.assign(next, { slot: slot ?? 'weapon', bonuses: bonuses ?? [], resists: resists ?? [], growth: growth ?? [] });
+    if (weapon) {
+      next.weapon = weapon;
+    }
+    if (attackElement) {
+      next.attackElement = attackElement;
+    }
+  } else if (kind === 'key') {
+    next.price = 0;
+  }
+  return next;
 }
 
 /** « Rapide » for a cast time in seconds. */
@@ -298,10 +387,29 @@ export function withoutRow(db: GameDatabase, table: DbTable, id: string): GameDa
   if (table === 'elements' || table === 'weapons') {
     next.skills = next.skills.map(s => s.learn.some(l => l.id === id) ? { ...s, learn: s.learn.filter(l => l.id !== id) } : s);
   }
-  if (table === 'states') {
-    next.skills = next.skills.map(s => ({
-      ...s, effects: s.effects.filter(e => !((e.kind === 'addState' || e.kind === 'removeState') && e.state === id)),
-    }));
+  const effectNames = (e: SkillEffect) => (e.kind === 'addState' || e.kind === 'removeState') && e.state === id
+    || e.kind === 'xp' && e.id === id;
+  if (table === 'states' || table === 'elements' || table === 'weapons') {
+    next.skills = next.skills.map(s => ({ ...s, effects: s.effects.filter(e => !effectNames(e)) }));
+    next.items = next.items.map(it => {
+      const fixed = { ...it };
+      if (fixed.effects) {
+        fixed.effects = fixed.effects.filter(e => !effectNames(e));
+      }
+      if (fixed.resists) {
+        fixed.resists = fixed.resists.filter(r => r.element !== id);
+      }
+      if (fixed.growth) {
+        fixed.growth = fixed.growth.filter(g => g.id !== id);
+      }
+      if (fixed.weapon === id) {
+        delete fixed.weapon;
+      }
+      if (fixed.attackElement === id) {
+        delete fixed.attackElement;
+      }
+      return fixed;
+    });
   }
   return next;
 }

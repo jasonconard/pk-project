@@ -16,6 +16,7 @@ function complete(database: Partial<GameDatabase>): GameDatabase {
     weapons: Array.isArray(database.weapons) ? database.weapons : code.weapons,
     states: Array.isArray(database.states) ? database.states : code.states,
     skills: Array.isArray(database.skills) ? database.skills : code.skills,
+    items: Array.isArray(database.items) ? database.items : code.items,
   };
 }
 

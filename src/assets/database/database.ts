@@ -1,7 +1,7 @@
 import { GameDatabase } from '../../app/modules/database-editor/shared/database';
 
 /**
- * The game's database (elements, weapon types, states, skills…). Written by the database editor's export (editor →
+ * The game's database (elements, weapon types, states, skills, items…). Written by the database editor's export (editor →
  * Éditeurs → Base de données → Exporter); the database saved in the browser replaces this one.
  */
 export const CODE_DATABASE: GameDatabase = {
@@ -415,6 +415,151 @@ export const CODE_DATABASE: GameDatabase = {
           "level": 4
         }
       ]
+    }
+  ],
+  "items": [
+    {
+      "id": "it-potion",
+      "name": "Potion",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAxklEQVR42mNkwAFEhGT+I/PfvHvCiE0dEwMe0BSkwNAUpIBPCQMLPkmN+GkQxjovBpKAiJDM/32HL/3/8OHF/w8fXvzfd/jSf3QvEeWCc5dfMZAM0G0n5ApGdM2rNm5jkKjNw2r4i+ZJDGH+XigxwoRLs9SGFRgGSNTmMazauA0lirFGo9SGFQzPAiKI8jJWA3Bp3nbvBWkJiZBmrAZgU4hLM85YOBcdhlWx0dJVGLHAiC0drNq4DasB6JqxGoAtJxLKkRQBACP0azKCeXhmAAAAAElFTkSuQmCC",
+      "note": "Rend un peu de PV.",
+      "kind": "consumable",
+      "price": 50,
+      "use": "both",
+      "target": "ally",
+      "effects": [
+        {
+          "kind": "heal",
+          "resource": "hp",
+          "power": 50
+        }
+      ]
+    },
+    {
+      "id": "it-remedy",
+      "name": "Remède",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAtElEQVR42mNgoBAwInNEhGT+w9hv3j0hSo4RWUHUtiC4hmVe6+AK8cmhKGjSqGJgYGBgqLvRBlfIwMDAgKwZ3RAWdAmYZlwaGRgYGI5sOAdnM+HSTCxgwSUBcz4h1zDBQhVdAwMDA8Ode2cY7tw7g+H8R7MewAORCTlqsBmCTzPedABzAQMDA4OKkgmKQcgGsGBzNj4xdMMwDEBWgMsFOA1ATnnYFKMnb4JAREjmPy7DBg8AAPIqYzz2395TAAAAAElFTkSuQmCC",
+      "note": "Guérit le poison.",
+      "kind": "consumable",
+      "price": 30,
+      "use": "both",
+      "target": "ally",
+      "effects": [
+        {
+          "kind": "removeState",
+          "state": "st-poison"
+        }
+      ]
+    },
+    {
+      "id": "it-strength-seed",
+      "name": "Graine de force",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAk0lEQVR42mNgoCUQEZL5LyIk8x+fGhZ8ml8fMWFgYGBgELVh+P/m3RNGbOqYKHUlI7KNyBIw22FA1OYMCh/mIhZ8mtDlPkrNYOB/loFiGCMuf+MCojZnGJDDgwndWehOxaeZKoHIhM8LojZnUPz7+ogJRmAzEXIuIW+h2P7/WsD//9cCsKY+XPJY0wGuVEeMmiEIAHoYUTTGvTIdAAAAAElFTkSuQmCC",
+      "note": "Fait monter la Force pour toujours.",
+      "kind": "consumable",
+      "price": 0,
+      "use": "field",
+      "target": "ally",
+      "effects": [
+        {
+          "kind": "statUp",
+          "stat": "str",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "it-fire-crystal",
+      "name": "Cristal de feu",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAqUlEQVR42mNgwANEhGT+MxAATPg036kSI2gIEyEbCBnChM92fi85gt5iwqWZWG8x4dKMbDtM05t3TxhV2l6heAurF5A1w9gwTeiuY8Ln9I9SMzAMIRiIMMUwzeiGkByNhAzBaQD/swysbHTASCgGUFyy7REDAwMDg0rbK4Y3754worgAFkXICglpZmBgYGBBVgQxhOE/AwMDwx0sLoBZgNULxOREZJupBgCxP1aciFf8igAAAABJRU5ErkJggg==",
+      "note": "Fait progresser dans le Feu.",
+      "kind": "consumable",
+      "price": 200,
+      "use": "field",
+      "target": "ally",
+      "effects": [
+        {
+          "kind": "xp",
+          "id": "el-fire",
+          "amount": 100
+        }
+      ]
+    },
+    {
+      "id": "it-short-sword",
+      "name": "Épée courte",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAbElEQVR42mNkIBOICMn8Z2BgYGAiV/Ode2cYyDIApvnc5Vfk2fzhw4v/+w5f+g/zwqhmNMXIiki2WURI5v+JaRr/YQaR5WxkQ8jyM7ohZGmelmLznyxDkDWT7BIRIZn/UTaYitFjhugoJAUAALvxgEVzTYQuAAAAAElFTkSuQmCC",
+      "kind": "equipment",
+      "price": 120,
+      "slot": "weapon",
+      "weapon": "wp-sword",
+      "bonuses": [
+        {
+          "stat": "str",
+          "amount": 5
+        }
+      ],
+      "resists": [],
+      "growth": []
+    },
+    {
+      "id": "it-wood-shield",
+      "name": "Bouclier de bois",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAmUlEQVR42mNgoBAwwhgiQjL/SdH45t0TRgYGBgYWZEERuz5URYeKGBgYGBhsWq6giB+p0YGzmQjZ9PqICV55JpqGAcx2UZszxIUBLueiiyMbiGJA4IEFGIH1+ogJg2ZVFJqRZ6gXBkzIfkKOHpzxf6gI7n/quoAYV6DbjtUFuAzBphkvEBGS+S8iJPP//7WA/6TmEwxDGGgJANNlQzOwlpsWAAAAAElFTkSuQmCC",
+      "kind": "equipment",
+      "price": 100,
+      "slot": "armor",
+      "bonuses": [
+        {
+          "stat": "end",
+          "amount": 4
+        }
+      ],
+      "resists": [
+        {
+          "element": "el-fire",
+          "level": "weak"
+        }
+      ],
+      "growth": []
+    },
+    {
+      "id": "it-ice-amulet",
+      "name": "Amulette de glace",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAtUlEQVR42mNgwANEhGT+iwjJ/GcgB4gIyfxf9ez//1XP/uM1hAldEzLfjeslVoOxGiAiJPN/2pXHKAp2fRPH0IyuBquzYX7/8OEFCp+Qd1AMgWmG0bg0s2DzF7Fh8ObdE0ZGmL+wKcYGkMMlS0eWgRGbC6ZdeYziApimLB1ZFMPevHvCyAJjYHPirm/iGC5DVkswFmCBSFQsoCvAlhKJMgRbdKKL40zK2PyHnhrxhgFVcyOxAACfpazfE0O7wAAAAABJRU5ErkJggg==",
+      "note": "Protège du froid.",
+      "kind": "equipment",
+      "price": 400,
+      "slot": "accessory",
+      "bonuses": [],
+      "resists": [
+        {
+          "element": "el-ice",
+          "level": "resist"
+        }
+      ],
+      "growth": [
+        {
+          "id": "el-ice",
+          "percent": 50
+        }
+      ]
+    },
+    {
+      "id": "it-rusty-key",
+      "name": "Clé rouillée",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAqklEQVR42qVSsQ0DIRAzLyZA0DFABqBkiEyXeVJQJBJ1lAHoQKxwKSKUPE948riCEzY+3wGTYHVBCk3f95QD6wnwmhydWT1QFtQTWVpkZT2U9QCA6MzGVVPg86NHyoGlHFgR6WGZDZHXhegMlAWV87DA2zIoOrMi3q/P/yxJoUkKTfQ40+1yol6AzQz25n4oxOLqkECdye4UWnvRa42POOitNPvV82y4w3gByqZLHVlQDd0AAAAASUVORK5CYII=",
+      "note": "Elle ouvre sûrement quelque chose.",
+      "kind": "key",
+      "price": 0
+    },
+    {
+      "id": "it-music-box",
+      "name": "Boîte à musique",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAqUlEQVR42mNgoDYQEZL5LyIk859YcRZ0RYf0VBgYGBgY7C4x/H/z7gkjPnEGBgYGRmw2IRTfYWBgYGBA5iNrRjEA3XkwTTAAMwwGYAaheGFa0AGEhnUOKDYjy2Wtc4CzmSgNdJxeQPc7OoB5gQldIEChiiFAoQpDA7I4ckBieMHNyI3BzciNgVhxisOAYgNY0AV2ndsFZ2+79wKrONZYwBUT2AB6ahxYAACaX0tXuMm9iQAAAABJRU5ErkJggg==",
+      "note": "Un joli cadeau.",
+      "kind": "gift",
+      "price": 300
     }
   ]
 };

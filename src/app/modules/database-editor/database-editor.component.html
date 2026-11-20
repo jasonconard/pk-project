@@ -25,6 +25,14 @@
       <svg lucideSearch></svg>
       <input type="search" placeholder="Chercher" aria-label="Chercher" [value]="search()" (input)="search.set($any($event.target).value)" />
     </label>
+    @if (table() === 'items') {
+      <div class="filters" role="group" aria-label="Sorte d'objet">
+        <button type="button" class="filter" [class.on]="!itemFilter()" (click)="itemFilter.set(null)">Tous</button>
+        @for (k of itemKinds; track k.id) {
+          <button type="button" class="filter" [class.on]="itemFilter() === k.id" (click)="itemFilter.set(k.id)">{{ k.many }}</button>
+        }
+      </div>
+    }
     @if (message()) {
       <p class="message" role="status">{{ message() }}</p>
     }
@@ -252,88 +260,7 @@
             </div>
           </div>
 
-          <div class="block">
-            <div class="block-head">
-              <h3>Effets</h3>
-              <small>dans l'ordre</small>
-            </div>
-            @for (fx of sk.effects; track $index; let i = $index; let last = $last) {
-              <div class="fx">
-                <div class="fx-head">
-                  <b>{{ skillEffectLabels[fx.kind] }}{{ fx.kind === 'damage' ? ' · ' + (elementOf(sk.element)?.name ?? '?') : '' }}</b>
-                  <button type="button" class="remove" title="Monter" aria-label="Monter" [disabled]="i === 0" (click)="moveSkillEffect(sk, i, -1)"><svg lucideArrowUp></svg></button>
-                  <button type="button" class="remove" title="Descendre" aria-label="Descendre" [disabled]="last" (click)="moveSkillEffect(sk, i, 1)"><svg lucideArrowDown></svg></button>
-                  <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeSkillEffect(sk, i)"><svg lucideX></svg></button>
-                </div>
-                <div class="fx-fields">
-                  @switch (fx.kind) {
-                    @case ('damage') {
-                      <label class="field"><small>Selon</small>
-                        <select (change)="setSkillEffect(sk, i, { stat: $any($event.target).value })">
-                          <option value="str" [selected]="fx.stat === 'str'">la Force</option>
-                          <option value="mag" [selected]="fx.stat === 'mag'">la Magie</option>
-                        </select>
-                      </label>
-                      <label class="field"><small>Puissance</small>
-                        <db-stepper [value]="fx.power" [min]="1" [max]="powerMax" [step]="5" [label]="'Puissance'" (changed)="setSkillEffect(sk, i, { power: $event })" />
-                      </label>
-                    }
-                    @case ('heal') {
-                      <label class="field"><small>Rend des</small>
-                        <select (change)="setSkillEffect(sk, i, { resource: $any($event.target).value })">
-                          <option value="hp" [selected]="fx.resource === 'hp'">PV</option>
-                          <option value="mp" [selected]="fx.resource === 'mp'">PM</option>
-                        </select>
-                      </label>
-                      <label class="field"><small>Puissance</small>
-                        <db-stepper [value]="fx.power" [min]="1" [max]="powerMax" [step]="5" [label]="'Puissance'" (changed)="setSkillEffect(sk, i, { power: $event })" />
-                      </label>
-                    }
-                    @case ('addState') {
-                      <label class="field grow"><small>État</small>
-                        <select (change)="setSkillEffect(sk, i, { state: $any($event.target).value })">
-                          @if (!hasState(fx.state)) { <option value="" selected>—</option> }
-                          @for (st of db().states; track st.id) { <option [value]="st.id" [selected]="st.id === fx.state">{{ st.name }}</option> }
-                        </select>
-                      </label>
-                      <label class="field"><small>Chance</small>
-                        <db-stepper [value]="fx.chance" [min]="1" [max]="100" [step]="5" [suffix]="'%'" [label]="'Chance'" (changed)="setSkillEffect(sk, i, { chance: $event })" />
-                      </label>
-                    }
-                    @case ('removeState') {
-                      <label class="field grow"><small>État</small>
-                        <select (change)="setSkillEffect(sk, i, { state: $any($event.target).value })">
-                          @if (!hasState(fx.state)) { <option value="" selected>—</option> }
-                          @for (st of db().states; track st.id) { <option [value]="st.id" [selected]="st.id === fx.state">{{ st.name }}</option> }
-                        </select>
-                      </label>
-                    }
-                    @case ('stat') {
-                      <label class="field"><small>Stat</small>
-                        <select (change)="setSkillEffect(sk, i, { stat: $any($event.target).value })">
-                          @for (st of stats; track st.id) { <option [value]="st.id" [selected]="st.id === fx.stat">{{ st.label }}</option> }
-                        </select>
-                      </label>
-                      <label class="field"><small>Change</small>
-                        <db-stepper [class]="fx.percent < 0 ? 'minus' : 'plus'" [value]="fx.percent" [min]="-percentMax" [max]="percentMax" [step]="5"
-                                    [signed]="true" [suffix]="'%'" [label]="'Pourcentage'" (changed)="setSkillEffect(sk, i, { percent: $event })" />
-                      </label>
-                      <label class="field"><small>Tours</small>
-                        <db-stepper [value]="fx.turns" [min]="1" [max]="turnsMax" [label]="'Tours'" (changed)="setSkillEffect(sk, i, { turns: $event })" />
-                      </label>
-                    }
-                  }
-                </div>
-              </div>
-            } @empty {
-              <p class="note">Aucun effet : la compétence ne fait rien pour l'instant.</p>
-            }
-            <div class="add-effects">
-              @for (k of skillEffectKinds; track k) {
-                <button type="button" (click)="addSkillEffect(sk, k)"><svg lucidePlus></svg> {{ skillEffectLabels[k] }}</button>
-              }
-            </div>
-          </div>
+          <ng-container [ngTemplateOutlet]="effectsBlock" [ngTemplateOutletContext]="{ $implicit: sk, kinds: skillEffectKinds }" />
 
           <div class="block">
             <button type="button" class="fold" [attr.aria-expanded]="formulaOpen() || !!sk.formula" (click)="formulaOpen.set(!formulaOpen())">
@@ -347,6 +274,138 @@
               <p class="note">a = celui qui l'utilise, b = la cible. Remplace la puissance des dégâts et des soins. Stats : hp, mp, str (Force), mag (Magie), end, agi, luck, level.</p>
             }
           </div>
+        }
+
+        <!-- Item -->
+        @if (item(); as it) {
+          <div class="block">
+            <h3>Sorte d'objet</h3>
+            <div class="chips" role="group" aria-label="Sorte d'objet">
+              @for (k of itemKinds; track k.id) {
+                <button type="button" class="chip plain" [class.on]="it.kind === k.id" [attr.aria-pressed]="it.kind === k.id" (click)="setItemKind(it, k.id)">{{ k.label }}</button>
+              }
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>Description</h3>
+            <input type="text" maxlength="120" placeholder="Facultatif" aria-label="Description" [value]="it.note ?? ''" (input)="setNote(it, $any($event.target).value)" />
+          </div>
+
+          @if (it.kind !== 'key') {
+            <div class="block">
+              <h3>Prix</h3>
+              <div class="line">
+                <db-stepper [value]="it.price" [min]="0" [max]="priceMax" [step]="10" [label]="'Prix'" (changed)="setItem(it, { price: $event })" />
+                <span class="muted">{{ it.price ? 'pièces (se revend moitié prix)' : 'Ne s\'achète pas et ne se vend pas' }}</span>
+              </div>
+            </div>
+          }
+
+          @switch (it.kind) {
+            @case ('consumable') {
+              <div class="two">
+                <div class="block grow">
+                  <h3>Utilisable</h3>
+                  <select aria-label="Utilisable" (change)="setItemUse(it, $any($event.target).value)">
+                    @for (u of uses; track u.id) { <option [value]="u.id" [selected]="u.id === it.use">{{ u.label }}</option> }
+                  </select>
+                </div>
+                <div class="block grow">
+                  <h3>Cible</h3>
+                  <select aria-label="Cible" (change)="setItemTarget(it, $any($event.target).value)">
+                    @for (t of targets; track t.id) { <option [value]="t.id" [selected]="t.id === it.target">{{ t.label }}</option> }
+                  </select>
+                </div>
+              </div>
+              <ng-container [ngTemplateOutlet]="effectsBlock" [ngTemplateOutletContext]="{ $implicit: it, kinds: itemEffectKinds }" />
+            }
+            @case ('equipment') {
+              <div class="block">
+                <h3>Emplacement</h3>
+                <div class="segmented wide" role="group" aria-label="Emplacement">
+                  @for (sl of slots; track sl.id) {
+                    <button type="button" [class.on]="it.slot === sl.id" [attr.aria-pressed]="it.slot === sl.id" (click)="setSlot(it, sl.id)">{{ sl.label }}</button>
+                  }
+                </div>
+              </div>
+              @if (it.slot === 'weapon') {
+                <div class="two">
+                  <div class="block grow">
+                    <h3>Type d'arme</h3>
+                    <select aria-label="Type d'arme" (change)="setItem(it, { weapon: $any($event.target).value })">
+                      <option value="" [selected]="!it.weapon">—</option>
+                      @for (w of db().weapons; track w.id) { <option [value]="w.id" [selected]="w.id === it.weapon">{{ w.name }}</option> }
+                    </select>
+                  </div>
+                  <div class="block grow">
+                    <h3>Ses attaques</h3>
+                    <select aria-label="Élément de ses attaques" (change)="setItem(it, { attackElement: $any($event.target).value })">
+                      <option value="" [selected]="!it.attackElement">Physique</option>
+                      @for (e of db().elements; track e.id) {
+                        @if (!e.physical) { <option [value]="e.id" [selected]="e.id === it.attackElement">{{ e.name }}</option> }
+                      }
+                    </select>
+                  </div>
+                </div>
+                <p class="note">Frapper avec cette arme fait monter le niveau de son type d'arme.</p>
+              }
+
+              <div class="block">
+                <h3>Bonus de stats</h3>
+                @for (b of it.bonuses ?? []; track $index; let i = $index) {
+                  <div class="learn">
+                    <select aria-label="Stat" (change)="setIn(it, 'bonuses', i, { stat: $any($event.target).value })">
+                      @for (st of stats; track st.id) { <option [value]="st.id" [selected]="st.id === b.stat">{{ st.label }}</option> }
+                    </select>
+                    <db-stepper [class]="b.amount < 0 ? 'minus' : 'plus'" [value]="b.amount" [min]="-bonusMax" [max]="bonusMax" [signed]="true" [label]="'Bonus'"
+                                (changed)="setIn(it, 'bonuses', i, { amount: $event })" />
+                    <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeFrom(it, 'bonuses', i)"><svg lucideX></svg></button>
+                  </div>
+                }
+                <button type="button" class="add-select" (click)="addTo(it, 'bonuses')"><svg lucidePlus></svg> Bonus</button>
+              </div>
+
+              <div class="block">
+                <h3>Face aux éléments</h3>
+                @for (r of it.resists ?? []; track $index; let i = $index) {
+                  <div class="learn">
+                    <select aria-label="Élément" (change)="setIn(it, 'resists', i, { element: $any($event.target).value })">
+                      @for (e of db().elements; track e.id) { <option [value]="e.id" [selected]="e.id === r.element">{{ e.name }}</option> }
+                    </select>
+                    <select aria-label="Réaction" (change)="setIn(it, 'resists', i, { level: $any($event.target).value })">
+                      @for (l of resistLevels; track l.id) { <option [value]="l.id" [selected]="l.id === r.level">{{ l.label }}</option> }
+                    </select>
+                    <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeFrom(it, 'resists', i)"><svg lucideX></svg></button>
+                  </div>
+                }
+                <button type="button" class="add-select" (click)="addTo(it, 'resists')"><svg lucidePlus></svg> Élément</button>
+              </div>
+
+              <div class="block">
+                <div class="block-head">
+                  <h3>Progresse plus vite</h3>
+                  <small>tant qu'on le porte</small>
+                </div>
+                @for (g of it.growth ?? []; track $index; let i = $index) {
+                  <div class="learn">
+                    <ng-container [ngTemplateOutlet]="learnSelect" [ngTemplateOutletContext]="{ $implicit: g.id, pick: growthPicker(it, i) }" />
+                    <db-stepper class="plus" [value]="g.percent" [min]="5" [max]="percentMax" [step]="5" [signed]="true" [suffix]="'%'" [label]="'Pourcentage'"
+                                (changed)="setIn(it, 'growth', i, { percent: $event })" />
+                    <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeFrom(it, 'growth', i)"><svg lucideX></svg></button>
+                  </div>
+                }
+                <button type="button" class="add-select" (click)="addTo(it, 'growth')"><svg lucidePlus></svg> Élément ou arme</button>
+              </div>
+              <p class="hint"><svg lucideInfo></svg> Qui peut le porter : avec les personnages (bientôt).</p>
+            }
+            @case ('key') {
+              <p class="hint"><svg lucideInfo></svg> Un objet clé sert à l'histoire : il ne se vend pas et ne s'utilise pas. Les événements pourront le donner et vérifier qu'on l'a (bientôt).</p>
+            }
+            @case ('gift') {
+              <p class="hint"><svg lucideInfo></svg> Un cadeau s'offre aux habitants. Ce que chacun aime ou déteste arrivera avec les liens sociaux.</p>
+            }
+          }
         }
 
         <!-- Weapon type -->
@@ -427,3 +486,124 @@
 @if (iconEdit(); as target) {
   <db-pixel-editor [title]="target.title" [value]="target.value" (done)="iconDone($event)" (cancel)="iconEdit.set(null)" />
 }
+
+<!-- The effects of a skill or a consumable item -->
+<ng-template #effectsBlock let-row let-kinds="kinds">
+  <div class="block">
+    <div class="block-head">
+      <h3>Effets</h3>
+      <small>dans l'ordre</small>
+    </div>
+    @for (fx of row.effects ?? []; track $index; let i = $index; let last = $last) {
+      <div class="fx">
+        <div class="fx-head">
+          <b>{{ effectLabel(fx.kind) }}{{ fx.kind === 'damage' ? ' · ' + (elementOf(row.element)?.name ?? '?') : '' }}</b>
+          <button type="button" class="remove" title="Monter" aria-label="Monter" [disabled]="i === 0" (click)="moveSkillEffect(row, i, -1)"><svg lucideArrowUp></svg></button>
+          <button type="button" class="remove" title="Descendre" aria-label="Descendre" [disabled]="last" (click)="moveSkillEffect(row, i, 1)"><svg lucideArrowDown></svg></button>
+          <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeSkillEffect(row, i)"><svg lucideX></svg></button>
+        </div>
+        <div class="fx-fields">
+          @switch (fx.kind) {
+            @case ('damage') {
+              <label class="field"><small>Selon</small>
+                <select (change)="setSkillEffect(row, i, { stat: $any($event.target).value })">
+                  <option value="str" [selected]="fx.stat === 'str'">la Force</option>
+                  <option value="mag" [selected]="fx.stat === 'mag'">la Magie</option>
+                </select>
+              </label>
+              <label class="field"><small>Puissance</small>
+                <db-stepper [value]="fx.power" [min]="1" [max]="powerMax" [step]="5" [label]="'Puissance'" (changed)="setSkillEffect(row, i, { power: $event })" />
+              </label>
+            }
+            @case ('heal') {
+              <label class="field"><small>Rend des</small>
+                <select (change)="setSkillEffect(row, i, { resource: $any($event.target).value })">
+                  <option value="hp" [selected]="fx.resource === 'hp'">PV</option>
+                  <option value="mp" [selected]="fx.resource === 'mp'">PM</option>
+                </select>
+              </label>
+              <label class="field"><small>Puissance</small>
+                <db-stepper [value]="fx.power" [min]="1" [max]="powerMax" [step]="5" [label]="'Puissance'" (changed)="setSkillEffect(row, i, { power: $event })" />
+              </label>
+            }
+            @case ('addState') {
+              <label class="field grow"><small>État</small>
+                <select (change)="setSkillEffect(row, i, { state: $any($event.target).value })">
+                  @if (!hasState(fx.state)) { <option value="" selected>—</option> }
+                  @for (st of db().states; track st.id) { <option [value]="st.id" [selected]="st.id === fx.state">{{ st.name }}</option> }
+                </select>
+              </label>
+              <label class="field"><small>Chance</small>
+                <db-stepper [value]="fx.chance" [min]="1" [max]="100" [step]="5" [suffix]="'%'" [label]="'Chance'" (changed)="setSkillEffect(row, i, { chance: $event })" />
+              </label>
+            }
+            @case ('removeState') {
+              <label class="field grow"><small>État</small>
+                <select (change)="setSkillEffect(row, i, { state: $any($event.target).value })">
+                  @if (!hasState(fx.state)) { <option value="" selected>—</option> }
+                  @for (st of db().states; track st.id) { <option [value]="st.id" [selected]="st.id === fx.state">{{ st.name }}</option> }
+                </select>
+              </label>
+            }
+            @case ('statUp') {
+              <label class="field"><small>Stat</small>
+                <select (change)="setSkillEffect(row, i, { stat: $any($event.target).value })">
+                  @for (st of stats; track st.id) { <option [value]="st.id" [selected]="st.id === fx.stat">{{ st.label }}</option> }
+                </select>
+              </label>
+              <label class="field"><small>Pour toujours</small>
+                <db-stepper class="plus" [value]="fx.amount" [min]="1" [max]="bonusMax" [signed]="true" [label]="'Points'" (changed)="setSkillEffect(row, i, { amount: $event })" />
+              </label>
+            }
+            @case ('xp') {
+              <label class="field grow"><small>Progresse dans</small>
+                <ng-container [ngTemplateOutlet]="learnSelect" [ngTemplateOutletContext]="{ $implicit: fx.id, pick: xpPicker(row, i) }" />
+              </label>
+              <label class="field"><small>Expérience</small>
+                <db-stepper [value]="fx.amount" [min]="1" [max]="xpMax" [step]="10" [label]="'Expérience'" (changed)="setSkillEffect(row, i, { amount: $event })" />
+              </label>
+            }
+            @case ('stat') {
+              <label class="field"><small>Stat</small>
+                <select (change)="setSkillEffect(row, i, { stat: $any($event.target).value })">
+                  @for (st of stats; track st.id) { <option [value]="st.id" [selected]="st.id === fx.stat">{{ st.label }}</option> }
+                </select>
+              </label>
+              <label class="field"><small>Change</small>
+                <db-stepper [class]="fx.percent < 0 ? 'minus' : 'plus'" [value]="fx.percent" [min]="-percentMax" [max]="percentMax" [step]="5"
+                            [signed]="true" [suffix]="'%'" [label]="'Pourcentage'" (changed)="setSkillEffect(row, i, { percent: $event })" />
+              </label>
+              <label class="field"><small>Tours</small>
+                <db-stepper [value]="fx.turns" [min]="1" [max]="turnsMax" [label]="'Tours'" (changed)="setSkillEffect(row, i, { turns: $event })" />
+              </label>
+            }
+          }
+        </div>
+      </div>
+    } @empty {
+      <p class="note">Aucun effet : {{ table() === 'items' ? 'l\'objet' : 'la compétence' }} ne fait rien pour l'instant.</p>
+    }
+    <div class="add-effects">
+      @for (k of kinds; track k) {
+        <button type="button" (click)="addSkillEffect(row, k)"><svg lucidePlus></svg> {{ effectLabel(k) }}</button>
+      }
+    </div>
+  </div>
+</ng-template>
+
+<!-- A simple element or a weapon type (what is learned with levels) -->
+<ng-template #learnSelect let-value let-pick="pick">
+  <select aria-label="Élément ou arme" (change)="pick($any($event.target).value)">
+    @if (!isLearnChoice(value)) { <option [value]="value" selected>(supprimé)</option> }
+    <optgroup label="Éléments">
+      @for (c of learnChoices(); track c.id) {
+        @if (!c.weapon) { <option [value]="c.id" [selected]="c.id === value">{{ c.name }}</option> }
+      }
+    </optgroup>
+    <optgroup label="Armes">
+      @for (c of learnChoices(); track c.id) {
+        @if (c.weapon) { <option [value]="c.id" [selected]="c.id === value">{{ c.name }}</option> }
+      }
+    </optgroup>
+  </select>
+</ng-template>
