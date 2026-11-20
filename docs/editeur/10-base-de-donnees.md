@@ -1,12 +1,12 @@
 # Base de données
 
-La base de données rassemble ce que le combat, les événements et les menus vont lire : les personnages, les compétences, les objets, les états, les éléments, les types d'armes. Les ennemis et les groupes arrivent ensuite (voir la [feuille de route](../idees.md)).
+La base de données rassemble ce que le combat, les événements et les menus vont lire : les personnages, les ennemis et leurs groupes, les compétences, les objets, les états, les éléments, les types d'armes (voir la [feuille de route](../idees.md)).
 
 ## Ouvrir l'éditeur
 
 En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en paysage) ou **⋮ → Base de données** (téléphone en portrait). L'éditeur s'ouvre par-dessus le jeu ; **Jeu** le ferme.
 
-- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
+- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
 - Sur les écrans larges, **Dupliquer** et **Supprimer** sont à droite du nom.
@@ -15,7 +15,7 @@ En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en 
 ## La liste
 
 - **Chercher** filtre par nom (les accents et les majuscules ne comptent pas).
-- **+ Personnage** (ou + Compétence, + Objet, + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
+- **+ Personnage** (ou + Ennemi, + Groupe, + Compétence, + Objet, + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
 - Dans la fiche : **Dupliquer** (copie juste en dessous) et **Supprimer** (la corbeille : appuyer deux fois, « Supprimer ? » pendant 3 secondes).
 
 Renommer ne casse rien : ce qui utilise une ligne la retrouve par un identifiant qui ne change jamais.
@@ -46,6 +46,24 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
     - **Ce qu'il apprendra** : les compétences qu'il connaît dès le départ, celles qu'il apprendra (ce qui manque : « Feu 2/5 · Vent 1/3 ») et celles qu'il n'apprendra jamais.
     - le bouton **Exclure** (⊘) d'une compétence la réserve aux autres personnages : celui-ci ne l'apprendra jamais, même avec les niveaux. Elle passe en bas, marquée « exclue » ; la flèche la rend de nouveau possible.
 
+## Ennemis
+
+- **Apparence** : sa petite image dans la jauge d'action (l'icône à côté du nom), son **sprite de combat** (48 × 48) et son **modèle 3D** (vu sur la carte du donjon).
+- **Stats** : le niveau, puis PV, PM, Force, Magie, Endurance, Agilité, Chance.
+- **Face aux éléments** : pour chaque élément, Faible (dégâts ×2), Normal, Résiste (×½), Annule (aucun dégât) ou Absorbe (le soigne).
+- **Butin** : l'expérience, l'argent, et des objets avec leur chance (%).
+- **Comportement** : ses compétences, chacune utilisée rarement, parfois ou souvent, toujours ou seulement **si ses PV sont sous** un pourcentage ou **pendant une météo**. Sans compétence, il attaque simplement.
+- **Météo et heure** : des météos où il **apparaît** (seulement pendant celles-là) ou est **plus fort**, et les moments de la journée où il apparaît (aucun : toute la journée).
+
+## Groupes
+
+Un groupe, ce sont les ennemis qu'on rencontre ensemble (un événement « lancer un combat » choisira un groupe).
+
+- **Terrain de combat**, vu de dessus : les ennemis se placent dans la moitié du haut ; on les **fait glisser** pour les déplacer. Toucher un ennemi propose **Dupliquer** et la corbeille. La moitié du bas montre les places de l'équipe.
+- **Ennemis du groupe** : combien de chaque (− et +), **+ Ennemi** en ajoute un autre ; 8 au plus.
+- **Combat** : la **musique** (une musique de l'éditeur de musique, sinon la musique de combat), **On peut fuir**, **Il peut attaquer par surprise**.
+- Sans icône, la liste montre son premier ennemi.
+
 ## Compétences
 
 - **Description** : facultative.
@@ -61,7 +79,7 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
   - **Stat** : une stat montée ou baissée en %, pendant quelques tours.
 - **Formule (pour les cas spéciaux)** : remplace la puissance des dégâts et des soins, par exemple `a.mag * 2 - b.end` (a = celui qui l'utilise, b = la cible ; stats : hp, mp, str, mag, end, agi, luck, level). Une formule mal écrite est signalée en orange.
 
-Supprimer un élément fait passer ses compétences en Physique ; supprimer un élément, un type d'arme ou un état retire les niveaux, les effets, les résistances et les bonus qui le nommaient (dans les compétences, les objets et les personnages). Supprimer un objet le retire de l'équipement de départ ; supprimer un personnage le retire de « Qui peut le porter » ; supprimer une compétence la retire des compétences exclues.
+Supprimer un élément fait passer ses compétences en Physique ; supprimer un élément, un type d'arme ou un état retire les niveaux, les effets, les résistances et les bonus qui le nommaient (dans les compétences, les objets et les personnages). Supprimer un objet le retire de l'équipement de départ ; supprimer un personnage le retire de « Qui peut le porter » ; supprimer une compétence la retire des compétences exclues et du comportement des ennemis ; supprimer un objet le retire aussi de leur butin ; supprimer un ennemi le retire des groupes.
 
 ## Objets
 
@@ -104,7 +122,7 @@ Supprimer un élément fait passer ses compétences en Physique ; supprimer un �
 
 ## Au départ
 
-Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 9 objets (Potion, Remède, Graine de force, Cristal de feu, Épée courte, Bouclier de bois, Amulette de glace, Clé rouillée, Boîte à musique), 2 personnages (Hugo et Jason), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
+Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 9 objets (Potion, Remède, Graine de force, Cristal de feu, Épée courte, Bouclier de bois, Amulette de glace, Clé rouillée, Boîte à musique), 2 personnages (Hugo et Jason), 3 ennemis (Gluant, Chauve-souris, Gluant des neiges), 3 groupes (Gluants de la forêt, Nuée, Gluants des neiges), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
 
 ## Sauvegarde et export
 
@@ -119,6 +137,6 @@ Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace
 | `src/app/modules/database-editor/database-editor.component.*` | L'éditeur (onglets, liste, fiches) |
 | `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel (icônes 16 × 16, portraits, sprites) |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
-| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
+| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbEnemy`, `DbGroup`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |
 | `src/assets/database/database.ts` | La base du jeu (`CODE_DATABASE`), écrite par l'export |
