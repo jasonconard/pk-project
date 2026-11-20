@@ -2,6 +2,7 @@ import { Component, computed, inject, linkedSignal } from '@angular/core';
 import { FightMenu } from '../shared/models/FightMenu';
 import { FightMenuService } from '../shared/services/fight-menu.service';
 import { FightSequenceService } from '../shared/services/fight-sequence.service';
+import { isTyping } from '../../../core/shared/typing';
 
 @Component({
   selector: 'fight-ui',
@@ -26,6 +27,9 @@ export class FightUiComponent {
   protected readonly description = computed(() => (this.currentSubMenu() ?? this.currentMenu())?.desc ?? '');
 
   protected onKeyDown(event: KeyboardEvent): void {
+    if (isTyping(event)) {
+      return;
+    }
     if (this.selectedMenu()) {
       this.bindSubMenuCode(event.code);
     } else {

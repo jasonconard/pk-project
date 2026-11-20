@@ -29,6 +29,7 @@ import { EscapeService } from '../../core/shared/service/escape.service';
 import { CoreService } from '../../core/shared/service/core.service';
 import { SequenceService } from './shared/services/sequence.service';
 import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
+import { isTyping } from '../../core/shared/typing';
 
 @Component({
   selector: 'game-main',
@@ -112,7 +113,7 @@ export class GameComponent {
     // key as handled (its "cancel" key): defaultPrevented can't tell; the dialogs stop it before it gets here
     const onKeyDown = (ev: KeyboardEvent) => {
       if (ev.key === 'Escape' && !ev.repeat && !isGameCovered() && this.playing() && !this.menuOpen()
-        && !this.releaseNotes() && !this.savesOpen() && !this.variablesTestOpen() && !this.sequenceService.message() && !(ev.target instanceof HTMLInputElement)) {
+        && !this.releaseNotes() && !this.savesOpen() && !this.variablesTestOpen() && !this.sequenceService.message() && !isTyping(ev)) {
         this.menuOpen.set(true);
       }
     };

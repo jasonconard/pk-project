@@ -8,6 +8,7 @@ import {
 } from '@lucide/angular';
 import { WEATHER_CATEGORIES, WEATHER_INFO, WeatherCategory, WeatherInfo, weatherScreenshot } from '../shared/weather/weather-catalog';
 import { KeyService } from '../../../core/shared/service/key.service';
+import { isTyping } from '../../../core/shared/typing';
 
 /** Key opening / closing the catalog from the game. */
 const SHORTCUT = 'm';
@@ -215,10 +216,10 @@ export class WeatherCatalogComponent {
   }
 
   private onKeyDown(ev: KeyboardEvent): void {
-    const typing = ev.target instanceof HTMLInputElement && ev.target.type === 'text';
+    const typing = isTyping(ev);
     if (!this.isOpen()) {
       // Shortcut from the game (not while typing somewhere else)
-      if (ev.key.toLowerCase() === SHORTCUT && !(ev.target instanceof HTMLInputElement) && !ev.repeat) {
+      if (ev.key.toLowerCase() === SHORTCUT && !typing && !ev.repeat) {
         ev.stopPropagation();
         this.show();
       }

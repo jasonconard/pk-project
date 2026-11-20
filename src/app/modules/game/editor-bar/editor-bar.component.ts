@@ -20,6 +20,7 @@ import { loadModelThumb, MODEL_CHOICES, modelLabel } from '../shared/model/Model
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
 import { EditBrush, EditCommand, EditSelection } from '../shared/services/map-editor.service';
 import { TouchService } from '../../../core/shared/service/touch.service';
+import { isTyping } from '../../../core/shared/typing';
 
 /** Keyboard shortcut opening / closing the map editor (free key: the game uses z q s d a e r f p o). */
 const EDIT_KEY = 'b';
@@ -400,8 +401,7 @@ export class EditorBarComponent {
   }
 
   private onKeyDown(ev: KeyboardEvent): void {
-    const typing = ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement || ev.target instanceof HTMLSelectElement;
-    if (typing || ev.altKey || this.mapsOpen() || this.editingEvent()) {
+    if (isTyping(ev) || ev.altKey || this.mapsOpen() || this.editingEvent()) {
       return;
     }
     const key = ev.key.toLowerCase();

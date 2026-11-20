@@ -13,6 +13,7 @@ import { applyProject, collectProject, projectFileBlob, ProjectFile, readProject
   summarize } from '../shared/services/project-file';
 import { downloadFile } from '../shared/util/ts-source';
 import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../../core/shared/haptics';
+import { isTyping } from '../../../core/shared/typing';
 
 /** An entry of the game's own menus: each one comes with its tool (docs/idees.md), greyed until then. */
 interface MenuEntry {
@@ -96,7 +97,7 @@ export class GameMenuComponent {
     // Capture phase: before the game, which also uses Escape; the game's keys don't reach it while the menu is open
     inject(EscapeService).whileAlive(() => this.closed.emit());
     const onKeyDown = (ev: KeyboardEvent) => {
-      if (!(ev.target instanceof HTMLButtonElement || ev.target instanceof HTMLInputElement)) {
+      if (!(ev.target instanceof HTMLButtonElement || isTyping(ev))) {
         ev.stopPropagation();
       }
     };

@@ -7,6 +7,7 @@ import { weatherScreenshot } from '../shared/weather/weather-catalog';
 import { applySilentMode, ignoreSilentMode, SILENT_MODE_BYPASS_SUPPORTED } from '../shared/weather/silent-mode';
 import { LucideCheck, LucideCloud, LucideDynamicIcon, LucideEighthNotes, LucideIcon, LucideMoon, LucideSun, LucideSunrise, LucideSunset, LucideTimer, LucideVolume2, LucideVolumeX, LucideWind, LucideWindArrowDown } from '@lucide/angular';
 import { formatHour, isWeatherAvailable, TIME_OF_DAY_LABELS, TimeOfDay, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
+import { isTyping } from '../../../core/shared/typing';
 
 export interface SoundSetting {
   volume: number;
@@ -297,7 +298,7 @@ export class WeatherPanelComponent {
   }
 
   private onKeyDown(ev: KeyboardEvent): void {
-    if (this.catalog().isOpen() || ev.target instanceof HTMLInputElement && ev.target.type === 'text') {
+    if (this.catalog().isOpen() || isTyping(ev)) {
       return;
     }
     const key = ev.key.toLowerCase();

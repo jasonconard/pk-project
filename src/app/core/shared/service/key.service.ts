@@ -6,6 +6,7 @@ import { GamepadService } from './gamepad.service';
 import { TouchService } from './touch.service';
 import { Stick, STICK_RADIUS } from '../model/Stick';
 import { CoreService } from './core.service';
+import { isTyping } from '../typing';
 
 const KEYBOARD_MAPPING: Readonly<Record<string, KeyCode>> = {
   Enter: KeyCode.confirm,
@@ -51,7 +52,7 @@ export class KeyService {
 
   constructor() {
     // (an editor over the game: the keys are its own)
-    fromEvent<KeyboardEvent>(document, 'keydown').subscribe(ev => !isGameCovered() && this.setKeyDown(KeyService.getKeyCodeFromKeyboard(ev)));
+    fromEvent<KeyboardEvent>(document, 'keydown').subscribe(ev => !isGameCovered() && !isTyping(ev) && this.setKeyDown(KeyService.getKeyCodeFromKeyboard(ev)));
     fromEvent<KeyboardEvent>(document, 'keyup').subscribe(ev => this.setKeyUp(KeyService.getKeyCodeFromKeyboard(ev)));
 
     effect(() => this.updateStick(this.touchService.stick()));
