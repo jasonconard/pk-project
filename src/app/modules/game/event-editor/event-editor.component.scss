@@ -1,5 +1,10 @@
 @use '../shared/dialog';
 
+// (inside the editor bar, which lets the clicks through to the map: the window catches them)
+:host {
+  pointer-events: auto;
+}
+
 // Bigger than the small windows: the whole screen on a phone held upright, a tall window elsewhere
 .event-editor {
   width: min(520px, calc(100vw - 32px - var(--safe-left) - var(--safe-right)));

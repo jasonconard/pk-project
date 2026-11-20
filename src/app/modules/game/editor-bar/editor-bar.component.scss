@@ -15,7 +15,7 @@
   pointer-events: none; // only the controls catch clicks
 }
 
-// The map manager covers the other bars (weather) while open
+// The map manager and the event window cover the other bars (weather) while open
 :host(.maps-open) {
   z-index: 1200;
 }

@@ -84,7 +84,7 @@ interface PaletteEntry {
   templateUrl: './editor-bar.component.html',
   styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss', './editor-bar.wide.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class.maps-open]': 'mapsOpen()', '[attr.data-layout]': 'layout()' },
+  host: { '[class.maps-open]': 'mapsOpen() || !!editingEvent()', '[attr.data-layout]': 'layout()' },
 })
 export class EditorBarComponent {
   readonly editMode = input(false);
