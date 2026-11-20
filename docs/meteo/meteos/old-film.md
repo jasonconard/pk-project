@@ -60,7 +60,7 @@ float frame = floor(uTime * 18.0);
 - `FILM_FPS = 6` dans `HeatHazePass.ts` : une pellicule qui saccade.
 - Remplace `vec3(1.06, 1.0, 0.88)` par `vec3(1.0)` : un noir et blanc pur.
 - Remplace `0.9993` par `0.995` : une pellicule très abîmée.
-- `SHUTTER_RATE = 6` dans `WeatherAudio.ts` : un projecteur fatigué.
+- `SHUTTER_RATE = 6` dans `audio/mix.ts` : un projecteur fatigué.
 
 ## Voir aussi
 

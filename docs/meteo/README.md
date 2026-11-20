@@ -116,7 +116,8 @@ Le catalogue (touche **M**) montre les catégories, les cartes et la fiche de la
 | `WeatherHelper.ts` | Le chef d'orchestre : chaque image, mélange les paramètres, règle les lumières et les uniforms, fait vivre les particules, les états accumulés (neige, flaques…) et le son |
 | `weather-shader.ts` | Tout le GLSL injecté dans les matériaux de three.js, et les uniforms partagés |
 | `cloud-texture.ts` | Texture de bruit fractal (nuages, flaques, feuillage) et sa lecture côté CPU |
-| `WeatherAudio.ts` | Tous les sons (synthétisés ou échantillons) |
+| `WeatherAudio.ts` | Tous les sons (synthétisés ou échantillons) : les ambiances de chaque météo, les pas |
+| `audio/` | Les sons ponctuels (animaux, sons inquiétants, effets, tonnerre), leur boîte à outils (`audio-kit.ts`) et tous les niveaux sonores (`mix.ts`) |
 | `GodRaysPass.ts`, `BloomPass.ts`, `HeatHazePass.ts` | Post-effets plein écran |
 | `RainHelper.ts`, `SnowHelper.ts`, `GlowParticles.ts`, `LeafHelper.ts`, `SandHelper.ts` | Systèmes de particules |
 | `ElectricHelper.ts`, `WispHelper.ts`, `WhirlHelper.ts`, `TornadoHelper.ts`, `GhostHelper.ts`, `FloodHelper.ts` | Effets spéciaux |

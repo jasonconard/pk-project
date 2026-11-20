@@ -61,7 +61,7 @@ Les bases (bruit brun, filtres, enveloppes, LFO) sont dans [audio](../concepts/1
 
 - `heatWash: 1` et `fogColor: new THREE.Color(0x9a8a5a)` : un smog bien plus étouffant.
 - `heatHaze: 0.4` dans le preset : l'air pollué se met à onduler, comme une chaleur urbaine.
-- `SIREN_CHANCE = 0.6` dans `WeatherAudio.ts` : une ville en alerte.
+- `SIREN_CHANCE = 0.6` dans `audio/mix.ts` : une ville en alerte.
 - Dans `horn`, remplace `1.26` par `1.5` : un klaxon accordé en quinte, plus « gentil ».
 
 ## Voir aussi

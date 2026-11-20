@@ -59,7 +59,7 @@ Avec `minDistance = 0.65`, une distance tirée de 0 devient 0.65, et 1 reste 1 :
 
 - `soak: 10` dans `MONSOON` : flaques pleines en 2-3 secondes.
 - `lightningFar: 0` : l'orage se rapproche, avec des éclairs proches et le claquement sec.
-- `FROG_INTERVAL = [0.3, 1]` dans `WeatherAudio.ts` : un marais très bruyant.
+- `FROG_INTERVAL = [0.3, 1]` dans `audio/mix.ts` : un marais très bruyant.
 - Dans `croak`, remplace `pitch * 3.5` par `pitch * 2` : des coassements plus graves et plus ronds.
 
 ## Voir aussi

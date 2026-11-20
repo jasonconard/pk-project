@@ -71,7 +71,7 @@ Mesuré sur un cycle : l'opacité totale monte de 1.1 à 6.8 pendant l'expiratio
 - `BREATH_PERIOD = 1` : le joueur est essoufflé.
 - `BREATH_PUFFS = 200` : toutes les bouffées sortent d'un coup, et on voit l'intérêt des jetons.
 - Remplace `** 2` par `** 4` dans la courbe `puff` de `GlowParticles.ts` : l'haleine s'attarde encore plus.
-- `ICE_CRACK_RATE = 3` dans `WeatherAudio.ts` : la glace est sur le point de céder.
+- `ICE_CRACK_RATE = 3` dans `audio/mix.ts` : la glace est sur le point de céder.
 
 ## Voir aussi
 

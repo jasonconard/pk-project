@@ -67,7 +67,7 @@ On relit l'image avec un léger décalage qui suit deux sinusoïdes lentes de fr
 - `MIRAGE_NEAR = 20` et `MIRAGE_FAR = 40` dans `weather-shader.ts` : les flaques arrivent presque aux pieds du joueur.
 - Remplace `0.52, 0.62` par `0.3, 0.4` : le sol devient un lac.
 - Remplace `0.25 * uMirage` par `0.5 * uMirage` dans `HeatHazePass.ts` : une vision vraiment double.
-- `MIRAGE_GAIN = 0.06` dans `WeatherAudio.ts` : un acouphène pénible.
+- `MIRAGE_GAIN = 0.06` dans `audio/mix.ts` : un acouphène pénible.
 
 ## Voir aussi
 

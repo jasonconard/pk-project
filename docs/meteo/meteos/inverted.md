@@ -57,7 +57,7 @@ Chaque son est placé au hasard entre la gauche et la droite (`panned`).
 
 - Remplace le calcul par `c = mix(c, 1.0 - c, uInvert);` dans `HeatHazePass.ts` : le négatif devient délavé, et on voit l'intérêt du passage en gamma.
 - `invert: 0.5` dans le preset : l'image entière devient grise, avec juste des contours colorés.
-- `REVERSE_INTERVAL = [0.5, 1]` dans `WeatherAudio.ts` : un monde très bavard.
+- `REVERSE_INTERVAL = [0.5, 1]` dans `audio/mix.ts` : un monde très bavard.
 
 ## Voir aussi
 
