@@ -1,0 +1,19 @@
+# Compiled output and dependencies
+/dist
+/tmp
+/out-tsc
+/node_modules
+/.angular/cache
+/coverage
+
+# Data files written by the editors' exports (maps, models, songs, variables, database), in their own format
+/src/assets
+
+# Native projects
+/android
+/ios
+
+# IDEs and system files
+.idea/
+.vscode/
+.DS_Store

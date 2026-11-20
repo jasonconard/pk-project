@@ -25,18 +25,39 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              { "glob": "**/*", "input": "src/assets", "output": "assets" },
-              { "glob": "favicon.ico", "input": "src", "output": "/" },
-              { "glob": "**/*", "input": "public" }
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "favicon.ico",
+                "input": "src",
+                "output": "/"
+              },
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {
               "outputHashing": "all",
               "budgets": [
-                { "type": "initial", "maximumWarning": "2mb", "maximumError": "5mb" },
-                { "type": "anyComponentStyle", "maximumWarning": "12kb", "maximumError": "24kb" }
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "12kb",
+                  "maximumError": "24kb"
+                }
               ],
               "serviceWorker": "ngsw-config.json"
             },
@@ -56,10 +77,23 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
-            "production": { "buildTarget": "pk-project:build:production" },
-            "development": { "buildTarget": "pk-project:build:development" }
+            "production": {
+              "buildTarget": "pk-project:build:production"
+            },
+            "development": {
+              "buildTarget": "pk-project:build:development"
+            }
           },
           "defaultConfiguration": "development"
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }

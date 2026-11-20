@@ -9,7 +9,8 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 [*.ts]
-quote_type = single
+# (Prettier writes double quotes, see eslint.config.mjs)
+quote_type = double
 
 [*.md]
 max_line_length = off
