@@ -24,10 +24,10 @@ Résultat : `daylightAt(6) = 0`, `daylightAt(7) = 0,5`, `daylightAt(8) = 1`, `da
 
 ## 2. Mélange des presets : `targetParams`
 
-Chaque météo existe en version jour et nuit. `targetParams` (WeatherHelper) fait, pour chaque clé de `WeatherParams` :
+Chaque météo existe en version jour et nuit. `weatherAt` (`weather-blend.ts`, appelée par `WeatherHelper.targetParams`) fait, pour chaque clé de `WeatherParams` :
 
 ```ts
-// WeatherHelper.ts, targetParams
+// weather-blend.ts, weatherAt
 const d = daylightAt(this.hour);
 to[key] = night[key] + (day[key] - night[key]) * d;     // NUMBER_KEYS
 to[key].copy(night[key]).lerp(day[key], d);              // COLOR_KEYS
@@ -65,7 +65,7 @@ Lecture de la formule : `k` vaut au plus `TWILIGHT_STRENGTH = 0,9` ; sous un cie
 Le soleil (jour) et la lune (nuit) suivent un **arc** défini par les constantes `SUN_EAST_X = 900`, `SUN_WEST_X = -900`, `SUN_HEIGHT = 900`, `SUN_Z = 900`, `SUN_LOW = 0.55`.
 
 ```ts
-// sunWorldPos
+// weather-blend.ts, sunWorldPos
 t = (h - DAWN[0]) / dayLength;            // jour : 0 à 6h, 1 à 20h (dayLength = DUSK[1] - DAWN[0] = 14)
 fromX = SUN_EAST_X;  toX = SUN_WEST_X;    // le soleil va de l'est (x=900) à l'ouest (x=-900)
 const arc = Math.sin(Math.PI * t);

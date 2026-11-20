@@ -33,7 +33,7 @@ Les deux sont en mélange normal avec `followLight` : ce ne sont pas des lumièr
 **Piège rencontré** : au premier essai, avec des cailloux petits et de couleur proche du sol, on ne voyait presque rien sur les captures. Une particule doit **contraster** avec ce qu'il y a derrière : plus sombre, plus grosse et plus nombreuse.
 
 ### 2. Le joueur qui flotte
-`WeatherHelper.updateFloat` déplace le plan du joueur (`scenePlayer.mesh.children[0]`) avec un **décalage relatif**, comme le tremblement du [Séisme](earthquake.md) :
+`WeatherMotion.updateFloat` déplace le plan du joueur (`scenePlayer.mesh.children[0]`) avec un **décalage relatif**, comme le tremblement du [Séisme](earthquake.md) :
 
 ```ts
 plane.position.y -= this.floatOffset;  // retire le décalage de l'image précédente

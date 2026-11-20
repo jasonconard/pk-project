@@ -37,7 +37,7 @@ Les deux utilisent la fumée en mélange normal avec opacité par bouffée (voir
 Pour le jet, `spawnPoint(true)` choisit une bouche **au hasard pondéré par sa force**. La somme des forces est tirée au hasard, puis on soustrait la force de chaque geyser jusqu'à tomber sous 0. Un geyser en pleine éruption reçoit donc plus de vapeur qu'un geyser qui s'éteint. La densité du jet suit le total des éruptions (`eruptions / 2`).
 
 ### 3. Le joueur projeté
-L'envol de la [Tornade](tornado.md) (`updateFlight` dans `WeatherHelper.ts`) a maintenant deux déclencheurs : la tornade, ou un geyser en éruption (`power > 0.3`) à moins de `GEYSER_CATCH` (10 unités). L'animation, la caméra qui suit et le délai de protection sont partagés.
+L'envol de la [Tornade](tornado.md) (`updateFlight` dans `weather-motion.ts`) a maintenant deux déclencheurs : la tornade, ou un geyser en éruption (`power > 0.3`) à moins de `GEYSER_CATCH` (10 unités). L'animation, la caméra qui suit et le délai de protection sont partagés.
 
 ### 4. Les sons
 Voir [audio](../concepts/10-audio.md) :

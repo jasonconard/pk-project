@@ -17,7 +17,7 @@ Game  (shared/model/Game.ts)       possède  ambientLight, sun, weather: Weather
         │  renderFrame()     ──►  weather.renderPostEffects()
         ▼
 WeatherHelper (shared/weather/WeatherHelper.ts)   le « chef d'orchestre »
-        ├─ blendParams / targetParams  : calcule les paramètres courants
+        ├─ blendParams / targetParams  : calcule les paramètres courants (weather-blend.ts)
         ├─ pousse les valeurs dans les lumières three.js et les uniforms GLSL
         └─ met à jour les helpers (RainHelper, SnowHelper, GlowParticles…)
 ```
@@ -63,7 +63,7 @@ Le commentaire du code explique la copie : certains presets sont les objets de b
 Quand on change de météo, rien ne saute : `this.current` rejoint `this.target` progressivement.
 
 ```ts
-// WeatherHelper.ts, blendParams
+// weather-blend.ts, blendTowards
 const k = 1 - Math.exp(-dt * TRANSITION_SPEED);   // TRANSITION_SPEED = 1.5
 for (const key of NUMBER_KEYS) c[key] += (to[key] - c[key]) * k;
 for (const key of COLOR_KEYS)  c[key].lerp(to[key], k);
@@ -96,14 +96,13 @@ const COLOR_KEYS  = Object.keys(SAMPLE).filter(k => SAMPLE[k] instanceof THREE.C
 
 ### `SNAP_KEYS` : finir à zéro
 
-Une exponentielle n'atteint jamais sa cible : après 10 s il resterait `0,0003` de pluie, donc des particules invisibles encore mises à jour. D'où ces clamps dans `blendParams` :
+Une exponentielle n'atteint jamais sa cible : après 10 s il resterait `0,0003` de pluie, donc des particules invisibles encore mises à jour. D'où ce clamp dans `blendTowards` (`weather-blend.ts`) :
 
 ```ts
-if (to.rain === 0 && c.rain < 0.005) { c.rain = 0; }   // idem snow, drizzle, embers…
 for (const key of SNAP_KEYS) if (to[key] === 0 && c[key] < 0.005) c[key] = 0;
 ```
 
-`SNAP_KEYS` regroupe les densités de particules traitées en boucle (`hail`, `sunRain`, `ash`, `magicSnow`, `stardust`, `curse`, `petalWhirl`, `haunt`). Les autres ont leur `if` écrit à la main. Un helper qui reçoit exactement `0` peut alors s'arrêter complètement.
+`SNAP_KEYS` regroupe toutes ces densités (`rain`, `snow`, `drizzle`, `embers`, `hail`, `ash`, `magicSnow`, `curse`, `haunt`…) : une nouvelle densité de particules s'y ajoute en une ligne. Un helper qui reçoit exactement `0` peut alors s'arrêter complètement.
 
 ### `snapToTarget`
 

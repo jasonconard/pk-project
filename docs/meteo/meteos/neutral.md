@@ -34,7 +34,7 @@ Neutre **ne modifie rien** : `DAY_PRESETS[NEUTRAL] = DAY_BASE` et `NIGHT_PRESETS
 Il n'y a rien de spécifique, et c'est justement l'intérêt de cette fiche : elle montre le « squelette » que toutes les météos partagent.
 
 - **Presets** : `preset(base, overrides)` fait un simple `{ ...base, ...overrides }`. Une météo = une base + quelques valeurs changées. Voir [01 · Architecture](../concepts/01-architecture.md).
-- **Mélange jour/nuit** : `WeatherHelper.targetParams()` mélange les presets jour et nuit selon `daylightAt(hour)`, puis ajoute les teintes d'aube/crépuscule. Voir [02 · Jour et nuit](../concepts/02-jour-nuit.md).
+- **Mélange jour/nuit** : `weatherAt()` (`weather-blend.ts`) mélange les presets jour et nuit selon `daylightAt(hour)`, puis ajoute les teintes d'aube/crépuscule. Voir [02 · Jour et nuit](../concepts/02-jour-nuit.md).
 - **Lumière** : `litLevel` et `shadowLevel` sont convertis en intensités three.js dans `WeatherHelper.update()`. Voir [03 · Éclairage et shaders](../concepts/03-eclairage-et-shaders.md).
 - **Fenêtres de nuit** : `windowGlow = 1` active le bloom dans `renderPostEffects()`. Voir [06 · Post-effets](../concepts/06-post-effets.md).
 - **Repli** : `getWeatherParams(type, night)` renvoie `presets[type] ?? presets[NEUTRAL]`. Une météo sans version de nuit (ensoleillé, canicule, tempête de sable, pluie de printemps) devient donc une **nuit neutre** après le crépuscule.

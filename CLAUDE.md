@@ -46,7 +46,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
     `Zone` (invisible zones, camera layer 1 shown only in the editor; `findModel`), `Quality`.
   - `shared/weather/`: `Weather.ts` (entry: re-exports `weather-types` (enum, params), `day-presets`, `night-presets`,
     `time-of-day`; temperature, `WEATHER_CHOICES`), `WeatherHelper.ts`
-    (wiring), `GlowParticles.ts`, `weather-shader.ts`, `WeatherAudio.ts` (+ `audio/`: kit, mix levels, one-shot sounds), one `XxxHelper.ts` per effect, post passes
+    (wiring; `weather-blend` the day / night blending and sun, `weather-motion` the player thrown, floating, shaken), `GlowParticles.ts`, `weather-shader.ts`, `WeatherAudio.ts` (+ `audio/`: kit, mix levels, one-shot sounds), one `XxxHelper.ts` per effect, post passes
     (`BloomPass`, `GodRaysPass`, `HeatHazePass`), `weather-catalog.ts` (catalog texts). Details in `shared/weather/CLAUDE.md`.
 - `modules/model-editor/`: 3D model editor (one pixel grid per face, grayscale layers specular / night / bump).
   `shared/`: `EditableModel`, `model-ops`, `model-history`, `model-storage` (IndexedDB), `model-export` (→ `md-xxx.ts` + png).
@@ -66,7 +66,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
 **Big files — never read whole, grep the symbol then read a range:** `day-presets.ts` (~900 lines), `night-presets.ts` (~750), `WeatherAudio.ts`
-(~1350), `WeatherHelper.ts` (~1400), `map-editor.service.ts` (~1300), `model-editor.component.ts` (~1100),
+(~1350), `WeatherHelper.ts` (~1700), `map-editor.service.ts` (~1300), `model-editor.component.ts` (~1100),
 `GlowParticles.ts`, `MapHelper.ts`, `assets/map/world/world.ts`, `music-editor.component.ts`, `game.service.ts`.
 
 ## Conventions

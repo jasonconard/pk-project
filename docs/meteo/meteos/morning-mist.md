@@ -31,7 +31,7 @@ if (h < 7) return 1;                      // épaisse jusqu'au lever du soleil
 return 1 - smoothstep(h, 7, 10);          // elle se dissipe, disparue à 10 h
 ```
 
-Dans `WeatherHelper.targetParams`, après le mélange jour/nuit et la teinte de l'aube (voir [jour et nuit](../concepts/02-jour-nuit.md)) :
+Dans `weatherAt` (`weather-blend.ts`), après le mélange jour/nuit et la teinte de l'aube (voir [jour et nuit](../concepts/02-jour-nuit.md)) :
 
 ```ts
 to.morningMist *= mistAt(this.hour);

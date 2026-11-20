@@ -84,7 +84,7 @@ Chaque terrain se présente sous forme de blocs 3×3 (centre, 4 bords, 4 coins e
 - **Données** : `chunk.heights?: Record<'col,ligne', niveau>`, avec un niveau de 8 unités, comme le pas du joueur.
 - **Sol** : le quad unique (`BasicMeshService.makePlaneFromPoints`) est remplacé par une **grille de 32×32 cases** par morceau. Chaque case est à sa hauteur, et des **parois verticales** apparaissent quand deux cases voisines n'ont pas le même niveau. Les coordonnées de texture renvoient vers le canvas peint, donc on garde le même canvas et `applyWeatherShader`.
 - **Texture des parois** : les tuiles de rebord (6–8, 4–9) pour un niveau, les parois de montagne (partie droite) au-delà.
-- **Joueur** : il suit déjà la hauteur du sol grâce au rayon vertical de `GameMapService.inputLoop` (`shared/services/game-map.service.ts`). On bloque les montées de plus d'un niveau et on autorise le **saut vers le bas** sur un rebord, en réutilisant l'animation d'envol de la météo (`WeatherHelper.updateFlight`) en plus petit.
+- **Joueur** : il suit déjà la hauteur du sol grâce au rayon vertical de `GameMapService.inputLoop` (`shared/services/game-map.service.ts`). On bloque les montées de plus d'un niveau et on autorise le **saut vers le bas** sur un rebord, en réutilisant l'animation d'envol de la météo (`WeatherMotion.updateFlight`) en plus petit.
 - **Éditeur** : un outil « Hauteur » (clic pour monter d'un niveau, clic droit pour descendre, pinceau 1 à 3 cases) et un outil « Escalier » qui pose les tuiles d'escalier et autorise le passage entre deux niveaux.
 
 ### 5. Sauvegarde, export, migration

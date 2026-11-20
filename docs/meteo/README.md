@@ -114,6 +114,8 @@ Le catalogue (touche **M**) montre les catégories, les cartes et la fiche de la
 | `day-presets.ts`, `night-presets.ts` | Presets de jour et de nuit |
 | `time-of-day.ts` | Heures : aube, crépuscule, brume du matin |
 | `WeatherHelper.ts` | Le chef d'orchestre : chaque image, mélange les paramètres, règle les lumières et les uniforms, fait vivre les particules, les états accumulés (neige, flaques…) et le son |
+| `weather-blend.ts` | Le mélange jour / nuit d'une météo (aube, crépuscule, brume du matin), le passage en douceur d'une météo à l'autre, la position du soleil |
+| `weather-motion.ts` | Ce que la météo fait au joueur et à la caméra : emporté par une tornade ou un geyser, en apesanteur, secoué par un séisme ou la foudre |
 | `weather-shader.ts` | Tout le GLSL injecté dans les matériaux de three.js, et les uniforms partagés |
 | `cloud-texture.ts` | Texture de bruit fractal (nuages, flaques, feuillage) et sa lecture côté CPU |
 | `WeatherAudio.ts` | Tous les sons (synthétisés ou échantillons) : les ambiances de chaque météo, les pas |

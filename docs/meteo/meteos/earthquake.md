@@ -20,7 +20,7 @@ Preset `EARTHQUAKE` dans `src/app/modules/game/shared/weather/day-presets.ts` et
 
 ## Comment c'est fait
 
-Le séisme est un **événement** : une machine à états dans `WeatherHelper.updateQuake`, sur le même principe que les éclairs de l'[Orage](storm.md).
+Le séisme est un **événement** : une machine à états dans `WeatherMotion.updateQuake`, sur le même principe que les éclairs de l'[Orage](storm.md).
 
 ### 1. La machine à états
 - **Au calme** : un minuteur (`quakeTimer`) décompte, au rythme de `quake`. À 0, une secousse démarre avec une durée (`QUAKE_LENGTH`) et une force (0.5 à 1) tirées au hasard.

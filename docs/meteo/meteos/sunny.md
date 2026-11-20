@@ -33,7 +33,7 @@ Ensoleillé ne crée aucun objet : tout passe par des uniforms et un post-effet.
   - dans l'air, le post-effet `GodRaysPass` (ray-marching dans la shadow map), voir [06 · Post-effets](../concepts/06-post-effets.md) ;
   - sur les surfaces, `uBeamLight` éclaircit ou assombrit `directDiffuse` selon qu'on est dans un rayon ou entre deux, voir [03 · Éclairage et shaders](../concepts/03-eclairage-et-shaders.md).
 - **Choix du post-effet** : dans `WeatherHelper.renderPostEffects()`, `godRays ≥ 0.01` est testé **avant** le bloom des fenêtres. Au crépuscule, quand le jour ensoleillé se mélange à la nuit neutre, les rayons restent prioritaires jusqu'à ce qu'ils s'éteignent, puis le bloom prend le relais.
-- **Aube/crépuscule** : `targetParams()` ajoute `TWILIGHT_SUN_GLOW` (0.35) à `sunGlow` au pic de l'aube ou du crépuscule : les façades sont encore plus dorées quand le soleil est bas. Voir [02 · Jour et nuit](../concepts/02-jour-nuit.md).
+- **Aube/crépuscule** : `weatherAt()` (`weather-blend.ts`) ajoute `TWILIGHT_SUN_GLOW` (0.35) à `sunGlow` au pic de l'aube ou du crépuscule : les façades sont encore plus dorées quand le soleil est bas. Voir [02 · Jour et nuit](../concepts/02-jour-nuit.md).
 - **Flaques** : si des flaques restent d'une pluie précédente, `specular = 1` rend le reflet du soleil (`glint`) bien visible, et elles sèchent vite parce que `litLevel` est élevé. Voir [04 · Surfaces météo](../concepts/04-surfaces-meteo.md).
 
 ## Maths et code à retenir

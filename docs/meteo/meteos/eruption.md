@@ -37,7 +37,7 @@ La machine à états du [Séisme](earthquake.md) (`updateQuake`) fait décompter
 
 ```ts
 const quakeRate = lerp(ERUPTION_RATE[0], ERUPTION_RATE[1], this.eruptionTension); // 0.5 → 2.5
-this.quakeShake = this.updateQuake(dt, p.quake * quakeRate);
+this.quakeShake = this.motion.updateQuake(dt, p.quake * quakeRate);
 ```
 
 Le délai entre deux secousses (7 à 18 s) est divisé par cette vitesse : environ 25 s au calme, environ 5 s à pleine tension. On ne touche pas à la machine à états, on change seulement **la vitesse de son horloge**, comme le ralenti de la [Distorsion temporelle](time-warp.md).
