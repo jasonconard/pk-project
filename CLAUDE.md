@@ -23,7 +23,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 ## Map of the code
 
 - `src/app/app.routes.ts`: `''` game (applies browser-saved models first), `modeles`, `musique`.
-- `core/`: app-wide UI and input. `shared/service/`: `core.service` (fullscreen…), `escape.service` (Escape /
+- `core/`: app-wide UI and input. `shared/local-store.ts` (the browser's storage, never throwing: `readJson`, `writeJson`,
+  `cachedFromStorage`… use it rather than `localStorage`), `text.ts` (`nameKey`, `searchKey` without accents), `omit.ts`. `shared/service/`: `core.service` (fullscreen…), `escape.service` (Escape /
   browser back / Android back close the last opened layer — register every closable layer there), `key`, `touch`,
   `gamepad`. `shared/app-visibility.ts` (`setGameCovered`/`isGameCovered`/`isGameAsleep`: game loops, sounds and
   input listeners must respect it). `stick`, `touch-pad`, `message`, `update-prompt` (GitHub release check, live update).
