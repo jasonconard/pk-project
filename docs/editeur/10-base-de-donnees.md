@@ -1,12 +1,12 @@
 # Base de données
 
-La base de données rassemble ce que le combat, les événements et les menus vont lire : les compétences, les états, les éléments, les types d'armes. Les objets, les personnages, les ennemis et les groupes arrivent ensuite (voir la [feuille de route](../idees.md)).
+La base de données rassemble ce que le combat, les événements et les menus vont lire : les compétences, les objets, les états, les éléments, les types d'armes. Les personnages, les ennemis et les groupes arrivent ensuite (voir la [feuille de route](../idees.md)).
 
 ## Ouvrir l'éditeur
 
 En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en paysage) ou **⋮ → Base de données** (téléphone en portrait). L'éditeur s'ouvre par-dessus le jeu ; **Jeu** le ferme.
 
-- **Sur téléphone en portrait** : les tables en onglets en haut (Compétences, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
+- **Sur téléphone en portrait** : les tables en onglets en haut (Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
 - Sur les écrans larges, **Dupliquer** et **Supprimer** sont à droite du nom.
@@ -15,7 +15,7 @@ En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en 
 ## La liste
 
 - **Chercher** filtre par nom (les accents et les majuscules ne comptent pas).
-- **+ Compétence** (ou + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
+- **+ Compétence** (ou + Objet, + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
 - Dans la fiche : **Dupliquer** (copie juste en dessous) et **Supprimer** (la corbeille : appuyer deux fois, « Supprimer ? » pendant 3 secondes).
 
 Renommer ne casse rien : ce qui utilise une ligne la retrouve par un identifiant qui ne change jamais.
@@ -47,7 +47,25 @@ Chaque ligne a une icône de 16 × 16 pixels. Toucher l'icône de la fiche ouvre
   - **Stat** : une stat montée ou baissée en %, pendant quelques tours.
 - **Formule (pour les cas spéciaux)** : remplace la puissance des dégâts et des soins, par exemple `a.mag * 2 - b.end` (a = celui qui l'utilise, b = la cible ; stats : hp, mp, str, mag, end, agi, luck, level). Une formule mal écrite est signalée en orange.
 
-Supprimer un élément fait passer ses compétences en Physique ; supprimer un élément, un type d'arme ou un état retire les niveaux et les effets qui le nommaient.
+Supprimer un élément fait passer ses compétences en Physique ; supprimer un élément, un type d'arme ou un état retire les niveaux, les effets, les résistances et les bonus qui le nommaient (dans les compétences et les objets).
+
+## Objets
+
+- **Dans la liste**, les filtres **Tous**, **Consommables**, **Équipement**, **Objets clés**, **Cadeaux** n'affichent qu'une sorte d'objet ; **+ Objet** crée alors un objet de cette sorte.
+- **Sorte d'objet** : Consommable, Équipement, Objet clé ou Cadeau. Changer de sorte garde ce qui a déjà été réglé (on peut revenir en arrière).
+- **Prix** : en pièces ; l'objet se revend moitié prix. 0 : il ne s'achète pas et ne se vend pas. Un objet clé n'a pas de prix.
+- **Consommable** : **Utilisable** (en combat, hors combat, les deux), **Cible**, et des **effets** comme une compétence (sans les dégâts), plus deux qui sont propres aux objets :
+  - **Stat pour toujours** : une stat montée pour de bon (une graine) ;
+  - **Expérience** : de l'expérience dans un élément simple ou un type d'arme, comme les œufs de mana de Grandia.
+- **Équipement** :
+  - **Emplacement** : Arme, Armure ou Accessoire ;
+  - une arme a un **type d'arme** (frapper avec fait monter ce niveau) et l'élément de **ses attaques** (Physique sinon) ;
+  - **Bonus de stats** (+ ou −) ;
+  - **Face aux éléments** : Faible ×2, Résiste ×½, Annule ou Absorbe ;
+  - **Progresse plus vite** : un élément ou un type d'arme qui gagne plus d'expérience tant qu'on porte l'objet (en %).
+  - Qui peut le porter arrivera avec les personnages.
+- **Objet clé** : pour l'histoire, il ne se vend pas et ne s'utilise pas ; les événements pourront le donner et vérifier qu'on l'a.
+- **Cadeau** : à offrir aux habitants ; ce que chacun aime arrivera avec les liens sociaux.
 
 ## Éléments
 
@@ -72,7 +90,7 @@ Supprimer un élément fait passer ses compétences en Physique ; supprimer un �
 
 ## Au départ
 
-Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
+Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 9 objets (Potion, Remède, Graine de force, Cristal de feu, Épée courte, Bouclier de bois, Amulette de glace, Clé rouillée, Boîte à musique), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
 
 ## Sauvegarde et export
 
@@ -87,6 +105,6 @@ Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace
 | `src/app/modules/database-editor/database-editor.component.*` | L'éditeur (onglets, liste, fiches) |
 | `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel 16 × 16 |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
-| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbSkill`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
+| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |
 | `src/assets/database/database.ts` | La base du jeu (`CODE_DATABASE`), écrite par l'export |
