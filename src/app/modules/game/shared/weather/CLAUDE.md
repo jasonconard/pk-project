@@ -15,10 +15,12 @@ Big files: grep the symbol, then read only that range. Never read `day-presets.t
 - `WeatherHelper.ts` = **the engine**, one instance owned by `Game` (`model/Game.ts`: `weather.update(dt)` each frame,
   `renderPostEffects()` for the passes). Setters called by `GameService` (`setWeather`, `setHour`, `setWind`,
   `setCloudDensity`…). Each frame `update()`:
-  1. `targetParams()` blends day/night presets by daylight, adds twilight tints and morning mist;
-     `blendParams()` eases `current` towards it (every number / `THREE.Color` key of `WeatherParams` is blended
-     automatically: `NUMBER_KEYS` / `COLOR_KEYS` at the end of the file — a new param needs no blending code).
-  2. sun/moon position (`sunWorldPos`), lights, fog, puddles, gusts, lightning, quake, flight…
+  1. `weatherAt()` (`weather-blend.ts`) blends day/night presets by daylight, adds twilight tints and morning mist;
+     `blendTowards()` eases `current` towards it (every number / `THREE.Color` key of `WeatherParams` is blended
+     automatically: `NUMBER_KEYS` / `COLOR_KEYS`; a density that must stop for good goes in `SNAP_KEYS` — a new
+     param needs no blending code). `sunWorldPos` is there too.
+  2. sun/moon position, lights, fog, puddles, gusts, lightning… `weather-motion.ts` (`WeatherMotion`): how the
+     weather moves the player and the camera (tornado / geyser flight, reversed gravity, quake shake, strike jolt).
   3. drives every effect helper with the matching `current` param, and pushes values into `WEATHER_UNIFORMS`.
   4. `this.audio.update(dt, levels)` (~line 782) feeds `WeatherAudio`.
 - `weather-shader.ts`: `WEATHER_UNIFORMS` shared by every lit material (`applyWeatherShader` patches
