@@ -5,7 +5,6 @@ import { Game, SHADE_OFFSET, TOO_FAR_LIMIT } from '../model/Game';
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { KeyService } from '../../../../core/shared/service/key.service';
 import { TouchService } from '../../../../core/shared/service/touch.service';
-import { MODELS } from '../../../../../assets/models/models';
 import { BasicMeshService } from './basic-mesh.service';
 import { SceneBuilding } from '../model/SceneBuilding';
 import { SceneChunk, StairsSide, stairsSide } from '../model/SceneMap';
@@ -13,7 +12,8 @@ import { TILE_SIZE } from '../model/Terrain';
 import { LEVEL_HEIGHT } from '../model/GroundMesh';
 import { CHUNK_SIZE, downloadMapFile, newChunk, saveMap } from './map-storage';
 import { eventsWithPassage, Passage, passageOf } from '../model/Passage';
-import { eventsWithTalk, ObjectTalk, talkOf } from '../model/ObjectTalk';
+import { eventsWithObjectEvents, ObjectEvent, objectEventsOf } from '../model/ObjectEvent';
+import { findModel, isZone, makeZoneMesh, ZONE_LAYER, ZONE_MAX_CELLS } from '../model/Zone';
 import { Vec3 } from '../model/SceneUtils';
 import { SceneEvent } from '../model/SceneEvent';
 
@@ -56,8 +56,10 @@ export interface EditSelection {
   canHide: boolean;
   /** Passage to another map set on the object. */
   passage: Passage | null;
-  /** What the object says when the player talks to it. */
-  talk: ObjectTalk | null;
+  /** The events made in the editor's event window, in order. */
+  events: ObjectEvent[];
+  /** An invisible zone's size in cells (null: not a zone). */
+  zoneSize: { x: number, z: number } | null;
 }
 
 /** Editor command sent by the UI (keyboard shortcuts, buttons). */
@@ -320,6 +322,10 @@ export class MapEditorService {
     this.savedPosition.copy(game.camera.position);
     this.savedZoom = game.cameraZoom;
     game.editMode = true;
+    // The invisible zones show (their own layer), the objects turned towards the player turn back
+    game.camera.layers.enable(ZONE_LAYER);
+    game.raycaster.layers.enable(ZONE_LAYER);
+    game.mapHelper?.resetFacing();
     this.visibilityAt = null;
     this.refreshChunkOutlines(game);
     this.refreshSpawnMarker(game);
@@ -331,6 +337,8 @@ export class MapEditorService {
   exit(game: Game) {
     if (!game.editMode) { return; }
     game.editMode = false;
+    game.camera.layers.disable(ZONE_LAYER);
+    game.raycaster.layers.disable(ZONE_LAYER);
     this.touchService.setGameControls(true);
     this.cancelDrag(game);
     this.stroke = null;
@@ -361,8 +369,12 @@ export class MapEditorService {
       game.scene.remove(this.ghost);
       this.ghost = null;
     }
-    const model = modelId ? MODELS.find(m => m.id === modelId) : undefined;
-    if (model) {
+    const model = modelId ? findModel(modelId) : undefined;
+    if (model && isZone(model)) {
+      this.ghost = makeZoneMesh(undefined, 0.12);
+      this.ghost.visible = false;
+      game.scene.add(this.ghost);
+    } else if (model) {
       this.ghost = BasicMeshService.makeModel(model);
       // Own see-through materials (the model ones are shared with the placed buildings), no shadow
       this.ghost.traverse(o => {
@@ -733,7 +745,8 @@ export class MapEditorService {
     game.editSelection = picked
       ? {
         modelId: picked.building.modelId, passable: picked.building.passable, canHide: picked.building.canHide,
-        passage: passageOf(picked.building), talk: talkOf(picked.building),
+        passage: passageOf(picked.building), events: objectEventsOf(picked.building),
+        zoneSize: isZone(picked.building) ? { x: picked.building.size?.x ?? 2, z: picked.building.size?.z ?? 2 } : null,
       }
       : null;
   }
@@ -918,12 +931,34 @@ export class MapEditorService {
     this.changeEvents(game, picked, eventsWithPassage(building, passage), passage?.trigger === 'walk' ? true : building.passable);
   }
 
-  /** What the selected object says when the player talks to it (null: removed). Undone as one change. */
-  setTalk(game: Game, talk: ObjectTalk | null) {
+  /** The selected object's events made in the event window (all of them, in order). Undone as one change. */
+  setObjectEvents(game: Game, events: ObjectEvent[]) {
     const picked = this.selected;
     if (picked) {
-      this.changeEvents(game, picked, eventsWithTalk(picked.building, talk), picked.building.passable);
+      this.changeEvents(game, picked, eventsWithObjectEvents(picked.building, events), picked.building.passable);
     }
+  }
+
+  /** The selected zone's size in cells. Undone as one change. */
+  setZoneSize(game: Game, size: { x: number, z: number }) {
+    const picked = this.selected;
+    if (!picked || !isZone(picked.building)) {
+      return;
+    }
+    const building = picked.building;
+    const clamp = (n: number) => Math.min(ZONE_MAX_CELLS, Math.max(1, Math.round(n)));
+    const before = { ...(building.size ?? { x: 2, z: 2 }) };
+    const after = { x: clamp(size.x), z: clamp(size.z) };
+    const set = (value: { x: number, z: number }) => {
+      building.size = { ...value };
+      const chunk = this.chunkOf(game, building);
+      if (chunk) {
+        game.mapHelper?.refreshBuilding(chunk, building);
+        this.select(game, { chunk, building });
+      }
+    };
+    set(after);
+    this.record(game, { undo: () => set(before), redo: () => set(after) });
   }
 
   /** New events (and passable option) for an object, undone as one change. */

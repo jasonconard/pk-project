@@ -133,7 +133,9 @@
     <section class="sheet selection" aria-label="Objet sélectionné" animate.enter="anim-sheet-in" animate.leave="anim-fade-out">
       <header class="sheet-head">
         <span class="thumb">
-          @if (thumbs()[selection.modelId]; as thumb) {
+          @if (selection.zoneSize) {
+            <svg lucideSquareDashed class="zone-thumb"></svg>
+          } @else if (thumbs()[selection.modelId]; as thumb) {
             <img [src]="thumb" alt="" />
           }
         </span>
@@ -144,15 +146,19 @@
         <button type="button" class="close" aria-label="Désélectionner" title="Désélectionner (Échap)" (click)="send('deselect', $event)"><svg lucideX></svg></button>
       </header>
       <div class="actions">
-        <button type="button" title="Tourner d'un quart de tour (R)" (click)="send('rotate', $event)">
-          <svg lucideRotateCw></svg> Tourner
-        </button>
+        @if (!selection.zoneSize) {
+          <button type="button" title="Tourner d'un quart de tour (R)" (click)="send('rotate', $event)">
+            <svg lucideRotateCw></svg> Tourner
+          </button>
+        }
         <button type="button" title="Dupliquer : une copie à côté (Ctrl D)" (click)="send('duplicate', $event)">
           <svg lucideCopy></svg> Dupliquer
         </button>
-        <button type="button" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)">
-          <svg lucideBox></svg> Modèle
-        </button>
+        @if (!selection.zoneSize) {
+          <button type="button" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)">
+            <svg lucideBox></svg> Modèle
+          </button>
+        }
         <button type="button" class="danger" data-haptic="warning" title="Supprimer (Suppr)" (click)="send('delete', $event)">
           <svg lucideTrash></svg> Supprimer
         </button>
@@ -162,10 +168,12 @@
           <span>Bloque le passage</span>
           <input type="checkbox" role="switch" [checked]="!selection.passable" (change)="send('togglePassable', $event)" />
         </label>
-        <label class="switch-row">
-          <span>Transparent quand le joueur est derrière</span>
-          <input type="checkbox" role="switch" [checked]="selection.canHide" (change)="send('toggleCanHide', $event)" />
-        </label>
+        @if (!selection.zoneSize) {
+          <label class="switch-row">
+            <span>Transparent quand le joueur est derrière</span>
+            <input type="checkbox" role="switch" [checked]="selection.canHide" (change)="send('toggleCanHide', $event)" />
+          </label>
+        }
       </div>
       <div class="passage">
         <h3><svg lucideDoorOpen></svg> Passage vers une carte</h3>
@@ -200,29 +208,40 @@
           <button type="button" class="add-passage" (click)="addPassage()"><svg lucidePlus></svg> Ajouter un passage</button>
         }
       </div>
-      <div class="passage talk">
-        <h3><svg lucideMessageSquareText></svg> Parler, examiner</h3>
-        @if (selection.talk; as talk) {
-          <small class="talk-hint">Le joueur appuie sur la touche d'action à côté de l'objet : les répliques s'affichent l'une après l'autre.</small>
-          @for (line of talk.lines; track $index; let i = $index) {
-            <div class="talk-line">
-              <div class="passage-row">
-                <input type="text" aria-label="Qui parle" placeholder="Qui parle (facultatif)" maxlength="40" [value]="line.name ?? ''"
-                       (change)="setTalkLine(talk, i, { name: $any($event.target).value, text: line.text })" />
-                @if (talk.lines.length > 1) {
-                  <button type="button" class="small-btn icon-only" aria-label="Retirer cette réplique" title="Retirer cette réplique"
-                          (click)="removeTalkLine(talk, i)"><svg lucideX></svg></button>
-                }
-              </div>
-              <textarea aria-label="Ce qui est dit" placeholder="Ce qui est dit…" rows="2" maxlength="400" [value]="line.text"
-                        (change)="setTalkLine(talk, i, { name: line.name, text: $any($event.target).value })"></textarea>
+      @if (selection.zoneSize; as size) {
+        <div class="passage zone-size">
+          <h3><svg lucideSquareDashed></svg> Zone invisible</h3>
+          <small class="talk-hint">Invisible dans le jeu : elle sert à ses événements (entrer dessus, examiner un endroit).</small>
+          @for (axis of zoneAxes; track axis.id) {
+            <div class="passage-row">
+              <span>{{ axis.label }}</span>
+              <button type="button" class="small-btn icon-only" [attr.aria-label]="axis.label + ' : moins'" [disabled]="size[axis.id] <= 1"
+                      (click)="resizeZone(size, axis.id, -1)"><svg lucideMinus></svg></button>
+              <b class="zone-count">{{ size[axis.id] }} {{ size[axis.id] > 1 ? 'cases' : 'case' }}</b>
+              <button type="button" class="small-btn icon-only" [attr.aria-label]="axis.label + ' : plus'" [disabled]="size[axis.id] >= zoneMax"
+                      (click)="resizeZone(size, axis.id, 1)"><svg lucidePlus></svg></button>
             </div>
           }
-          <button type="button" class="add-passage" (click)="addTalkLine(talk)"><svg lucidePlus></svg> Ajouter une réplique</button>
-          <button type="button" class="remove-passage" data-haptic="warning" (click)="talkChange.emit(null)">Retirer l'événement</button>
-        } @else {
-          <button type="button" class="add-passage" (click)="talkChange.emit({ lines: [{ text: '' }] })"><svg lucidePlus></svg> Ajouter un événement</button>
+        </div>
+      }
+      <div class="passage events">
+        <h3><svg lucideZap></svg> Événements</h3>
+        @for (evt of selection.events; track $index; let i = $index) {
+          <div class="event-card">
+            <button type="button" class="event-open" title="Modifier l'événement" (click)="editingEvent.set({ index: i })">
+              <b>{{ i + 1 }}. {{ triggerLabel(evt) }}</b>
+              <small>{{ eventSummary(evt) }}</small>
+            </button>
+            @if (i > 0) {
+              <button type="button" class="small-btn icon-only" aria-label="Passer avant" title="Passer avant (joué en priorité)"
+                      (click)="moveEvent(selection.events, i)"><svg lucideArrowUp></svg></button>
+            }
+          </div>
         }
+        @if (selection.events.length > 1) {
+          <small class="talk-hint">Le jeu joue le premier événement dont le déclencheur et les conditions conviennent.</small>
+        }
+        <button type="button" class="add-passage" (click)="addEvent(selection.events)"><svg lucidePlus></svg> Ajouter un événement</button>
       </div>
     </section>
   }
@@ -235,9 +254,6 @@
             <svg [lucideIcon]="t.icon"></svg><span class="label">{{ t.label }}</span>
           </button>
         }
-        <button type="button" role="tab" class="soon-tab" disabled title="Événements (personnages, panneaux, zones) : bientôt">
-          <svg lucideZap></svg><span class="label">Événements</span>
-        </button>
       </div>
       @if (tab() === 'ground' || tab() === 'relief') {
         <div class="brushes" role="radiogroup" aria-label="Pinceau">
@@ -294,6 +310,13 @@
                   (click)="pickTile('erase', $event)">
             <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
             <span class="name">Gomme</span>
+          </button>
+        } @else if (tab() === 'events') {
+          <button type="button" class="entry tile" title="Zone invisible : poser une zone qui déclenche des événements (entrer dessus, examiner un endroit)"
+                  [class.selected]="modelId() === zoneId" [attr.aria-pressed]="modelId() === zoneId"
+                  (click)="pick(zoneId, $event)">
+            <span class="pic" aria-hidden="true"><svg lucideSquareDashed></svg></span>
+            <span class="name">Zone invisible</span>
           </button>
         } @else if (tab() === 'chunks') {
           <button type="button" class="entry tile" title="Ajouter une zone de carte (32 × 32 cases d'herbe) sur une place libre, à côté de la carte"
@@ -352,6 +375,14 @@
     </div>
   }
 
+  @if (selection(); as selection) {
+    @if (editingEvent(); as editing) {
+      @if (selection.events[editing.index]; as evt) {
+        <game-event-editor [event]="evt" [number]="editing.index + 1" [objectName]="selectionLabel()" [maps]="maps()" [currentMap]="mapId()"
+                           (closed)="saveEvent(selection.events, editing.index, $event)" (removed)="removeEvent(selection.events, editing.index)" />
+      }
+    }
+  }
   @if (mapsOpen()) {
     <game-map-manager [currentId]="mapId()" (closed)="mapsOpen.set(false)" />
   }

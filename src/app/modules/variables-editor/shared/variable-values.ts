@@ -1,4 +1,4 @@
-import { loadVariables } from './variable-storage';
+import { loadVariables, VARIABLES_KEY } from './variable-storage';
 import { GameVariable } from './variables';
 
 /**
@@ -37,10 +37,24 @@ function valueOf(variable: GameVariable, values: VariableValues): VariableValue 
     : (typeof value === 'number' ? value : variable.initial);
 }
 
-/** Every variable of the game with its value now (id → value). */
+/** Last answer of currentVariableValues, with what it was read from (the game asks many times a second). */
+let cache: { raw: string, values: VariableValues } | null = null;
+
+/** Every variable of the game with its value now (id → value). Don't change the object returned. */
 export function currentVariableValues(): VariableValues {
+  let raw = '';
+  try {
+    raw = `${localStorage.getItem(STORAGE_KEY)}|${localStorage.getItem(VARIABLES_KEY)}`;
+  } catch {
+    // (no storage: read every time)
+  }
+  if (cache && raw && cache.raw === raw) {
+    return cache.values;
+  }
   const values = readValues();
-  return Object.fromEntries(loadVariables().map(v => [v.id, valueOf(v, values)]));
+  const current = Object.fromEntries(loadVariables().map(v => [v.id, valueOf(v, values)]));
+  cache = { raw, values: current };
+  return current;
 }
 
 /** A saved game's values replace the current ones (the variables it doesn't know get their starting value). */

@@ -1,7 +1,7 @@
 import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { isGameCovered, setGameCovered } from '../../core/shared/app-visibility';
 import { Passage } from './shared/model/Passage';
-import { ObjectTalk } from './shared/model/ObjectTalk';
+import { ObjectEvent } from './shared/model/ObjectEvent';
 import { DecimalPipe } from '@angular/common';
 import { isFirstStartOfNewVersion } from './release-notes/whats-new';
 import { GameMode } from './shared/model/Game';
@@ -240,8 +240,12 @@ export class GameComponent {
     this.gameService.setPassage(passage);
   }
 
-  protected setTalk(talk: ObjectTalk | null): void {
-    this.gameService.setTalk(talk);
+  protected setObjectEvents(events: ObjectEvent[]): void {
+    this.gameService.setObjectEvents(events);
+  }
+
+  protected setZoneSize(size: { x: number, z: number }): void {
+    this.gameService.setZoneSize(size);
   }
 
   protected pickArrival(): void {

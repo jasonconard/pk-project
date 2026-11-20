@@ -14,7 +14,9 @@ import { GameMapService } from "./game-map.service";
 import { createMap, downloadMapFile, duplicateMap, listMaps, loadMap, resetMap, saveMap } from "./map-storage";
 import { MapKind } from "../model/SceneMap";
 import { Passage } from "../model/Passage";
-import { ObjectTalk } from "../model/ObjectTalk";
+import { ObjectEvent } from "../model/ObjectEvent";
+import { SequenceService } from "./sequence.service";
+import { setSfxVolume } from "./sfx";
 import { Vec3 } from "../model/SceneUtils";
 import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { KeyService } from "../../../../core/shared/service/key.service";
@@ -162,6 +164,7 @@ export class GameService {
   private readonly fightService = inject(FightService);
   private readonly gameMapService = inject(GameMapService);
   private readonly mapEditorService = inject(MapEditorService);
+  private readonly sequenceService = inject(SequenceService);
 
   private game: Game | null = null;
 
@@ -214,6 +217,13 @@ export class GameService {
 
   constructor() {
     this.initCheckResize();
+    // The sound effects of the events follow the sound settings; an event may change the weather
+    effect(() => setSfxVolume(this.soundVolumeState(), this.soundMutedState()));
+    this.sequenceService.weather$.subscribe(type => {
+      if (Object.values(WeatherType).includes(type as WeatherType)) {
+        this.setWeather(type as WeatherType);
+      }
+    });
     // Music: its volume (muted with the sounds), and the song of the moment
     effect(() => this.music.setVolume(this.soundMutedState() ? 0 : this.musicVolumeState()));
     effect(() => {
@@ -576,6 +586,7 @@ export class GameService {
       }
       this.mapEditorService.exit(game);
     } else {
+      this.sequenceService.stop();
       this.mapEditorService.enter(game);
     }
     this.syncHud();
@@ -707,11 +718,20 @@ export class GameService {
     }
   }
 
-  /** What the selected object says when the player talks to it (null: removed). */
-  setTalk(talk: ObjectTalk | null) {
+  /** The selected object's events made in the event window (all of them, in order). */
+  setObjectEvents(events: ObjectEvent[]) {
     const game = this.game;
     if (game) {
-      this.mapEditorService.setTalk(game, talk);
+      this.mapEditorService.setObjectEvents(game, events);
+      this.syncHud();
+    }
+  }
+
+  /** The selected invisible zone's size in cells. */
+  setZoneSize(size: { x: number, z: number }) {
+    const game = this.game;
+    if (game) {
+      this.mapEditorService.setZoneSize(game, size);
       this.syncHud();
     }
   }

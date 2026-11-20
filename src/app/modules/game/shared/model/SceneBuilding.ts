@@ -10,6 +10,8 @@ export interface SceneBuilding {
   /** Quarter turns around the vertical axis (0 to 3, clockwise seen from above): the editor's Tourner. */
   rot?: number,
   passable: boolean,
+  /** An invisible zone's size in cells (x wide, z deep; see Zone.ts). */
+  size?: { x: number, z: number },
   canHide: boolean,
   events: SceneEvent[]
 }

@@ -2,7 +2,9 @@ import { CODE_VARIABLES } from '../../../../assets/variables/variables';
 import { GameVariable } from './variables';
 
 /** The variables, saved in the browser: { variables }. */
-const STORAGE_KEY = 'pk-variables';
+/** Where the variables editor keeps the variables in the browser. */
+export const VARIABLES_KEY = 'pk-variables';
+const STORAGE_KEY = VARIABLES_KEY;
 
 export interface StoredVariables {
   variables: GameVariable[];

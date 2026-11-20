@@ -187,3 +187,55 @@
     line-height: 1.35;
   }
 }
+
+/* Selected object: its events (a card each, opening the event window), an invisible zone's size */
+
+.event-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.event-open {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border-radius: 8px;
+  background: rgba(255, 176, 74, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 176, 74, 0.35);
+  text-align: left;
+
+  b {
+    font-size: 13px;
+  }
+
+  small {
+    max-width: 100%;
+    overflow: hidden;
+    color: #b8bbc8;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: rgba(255, 176, 74, 0.2);
+  }
+}
+
+.zone-count {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+}
+
+.zone-thumb {
+  width: 60%;
+  height: 60%;
+  margin: auto;
+  color: #ffb04a;
+}

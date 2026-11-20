@@ -111,7 +111,7 @@ export function loadModelThumb(choice: ModelChoice): Promise<string> {
 /** French names of the models (editor palette, the action prompt « Entrer au Labo »). */
 const MODEL_LABELS: Record<string, string> = {
   labo: 'Labo', house: 'Maison', tree: 'Arbre', flowers: 'Fleurs', barrier: 'Barrière',
-  pannel: 'Panneau', 'wood-pannel': 'Pancarte', 'letter-box': 'Boîte aux lettres', rock: 'Rocher',
+  pannel: 'Panneau', 'wood-pannel': 'Pancarte', 'letter-box': 'Boîte aux lettres', rock: 'Rocher', zone: 'Zone invisible',
 };
 
 export function modelLabel(modelId: string): string {

@@ -556,6 +556,11 @@ export class WeatherHelper {
     return this.weatherType;
   }
 
+  /** Hour of the day now (0 to 24, with the minutes as a fraction). */
+  get hourOfDay(): number {
+    return this.hour;
+  }
+
   /** Current air temperature (°C), following the weather transitions. */
   get temperature(): number {
     return this.current.temperature;

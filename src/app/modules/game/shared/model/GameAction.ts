@@ -20,7 +20,8 @@ const VERBS: Record<GameAction['kind'], string> = { enter: 'Entrer', talk: 'Parl
  */
 export function describeAction(evt: SceneEvent, building: SceneBuilding): GameAction {
   const first = evt.instructions[0];
-  const message = first?.type === InstructionType.MESSAGE ? first.message : undefined;
+  // (an event of the editor may change a variable or play a sound before talking)
+  const message = evt.instructions.find(i => i.type === InstructionType.MESSAGE)?.message;
   const kind: GameAction['kind'] = first?.type === InstructionType.TELEPORT ? 'enter'
     : message ? (message.name ? 'talk' : 'read')
     : 'look';

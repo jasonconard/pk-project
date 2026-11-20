@@ -1,7 +1,7 @@
 import { Vec3 } from './SceneUtils';
 
 export enum InstructionType {
-  LOG, MESSAGE, WAIT, TELEPORT
+  LOG, MESSAGE, WAIT, TELEPORT, VARIABLE, WEATHER, SOUND
 }
 
 export interface SceneEventInstruction {
@@ -10,6 +10,9 @@ export interface SceneEventInstruction {
   message?: InstructionMessage,
   wait?: InstructionWait,
   teleport?: InstructionTeleport,
+  variable?: InstructionVariable,
+  weather?: InstructionWeather,
+  sound?: InstructionSound,
   subInstructions?: SceneEventSubInstruction[]
 }
 
@@ -41,4 +44,21 @@ export interface InstructionTeleport {
   pos?: Vec3,
   /** Map to go to (id); the current map when missing. */
   map?: string
+}
+
+/** A story variable changes: a flag set to true / false, a counter set to or increased by a number. */
+export interface InstructionVariable {
+  id: string,
+  op: 'set' | 'add',
+  value: boolean | number
+}
+
+export interface InstructionWeather {
+  /** WeatherType. */
+  type: string
+}
+
+export interface InstructionSound {
+  /** SoundId (see sfx.ts). */
+  id: string
 }

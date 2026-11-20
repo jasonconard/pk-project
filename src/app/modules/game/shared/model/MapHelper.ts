@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { findModel, isZone, makeZoneMesh, ZONE_DEFAULT_SIZE, ZONE_ID } from './Zone';
 import { SceneChunk, SceneMap, StairsSide, stairsSide } from './SceneMap';
 import { ScenePlayer } from './ScenePlayer';
 import { CAMERA_LOOK, Game, SHADE_OFFSET, SHADOW_AREA, TOO_CLOSE_LIMIT, TOO_FAR_LIMIT } from "./Game";
@@ -50,6 +51,8 @@ export interface MapHelperInit {
 
 /** userData key of a turned building's mesh: its shift (see MapHelper.turn). */
 const TURN_SHIFT = 'turnShift';
+/** userData key: the quarter turns an object is drawn with when it turned towards the player (faceTowards). */
+const FACING = 'facing';
 
 export class MapHelper {
   originGame: Game;
@@ -621,7 +624,7 @@ export class MapHelper {
    */
   public addBuildingAt(modelId: string, world: THREE.Vector3): SceneBuilding | null {
     const chunk = this.chunkAt(world.x, world.z);
-    const model = MODELS.find(m => m.id === modelId);
+    const model = findModel(modelId);
     if (!chunk || !model || !chunk.group) {
       return null;
     }
@@ -630,6 +633,7 @@ export class MapHelper {
       modelId,
       pos: { x: world.x - chunk.pos.x, y: world.y - chunk.pos.y, z: world.z - chunk.pos.z },
       ...this.defaultOptions(modelId),
+      ...(modelId === ZONE_ID ? { size: { ...ZONE_DEFAULT_SIZE } } : {}),
       originModel: model,
       events: [],
     };
@@ -639,7 +643,7 @@ export class MapHelper {
 
   /** Puts a building (new, or removed earlier: undo) in a chunk and in the scene. */
   public addBuilding(chunk: SceneChunk, building: SceneBuilding) {
-    const model = building.originModel ?? MODELS.find(m => m.id === building.modelId);
+    const model = building.originModel ?? findModel(building.modelId);
     if (!model) {
       return;
     }
@@ -661,14 +665,20 @@ export class MapHelper {
    * What draws a building: a copy of its model (instancing: repeated objects that don't fade, e.g. trees,
    * barriers) or its own meshes (houses, the lab, objects with events).
    */
-  private createView(chunk: SceneChunk, building: SceneBuilding) {
-    const model = building.originModel ?? MODELS.find(m => m.id === building.modelId);
+  private createView(chunk: SceneChunk, building: SceneBuilding, rot = building.rot ?? 0) {
+    const model = building.originModel ?? findModel(building.modelId);
     if (!model || !chunk.group) {
       return;
     }
     building.originModel = model;
     const world = convertVec3(chunk.pos).add(convertVec3(building.pos));
-    if (canInstance(model, building)) {
+    if (isZone(building)) {
+      const zone = makeZoneMesh(building.size);
+      this.addMesh(chunk.id + '-' + building.id, zone, world);
+      chunk.group.add(zone);
+      return;
+    }
+    if (rot === (building.rot ?? 0) && canInstance(model, building)) {
       let byModel = this.instances.get(chunk.id);
       if (!byModel) {
         byModel = new Map();
@@ -683,7 +693,7 @@ export class MapHelper {
       return;
     }
     const mesh = BasicMeshService.makeModel(model);
-    MapHelper.turn(mesh, building.rot ?? 0);
+    MapHelper.turn(mesh, rot);
     this.addMesh(chunk.id + '-' + building.id, mesh, MapHelper.viewPos(mesh, world));
     chunk.group.add(mesh);
   }
@@ -724,6 +734,41 @@ export class MapHelper {
   public refreshBuilding(chunk: SceneChunk, building: SceneBuilding) {
     this.removeView(chunk, building);
     this.createView(chunk, building);
+  }
+
+  /**
+   * In the game, an object turns its front towards a point (a character towards the player): drawn turned by
+   * quarter turns, its map data unchanged (the editor shows it as it was set).
+   */
+  public faceTowards(chunk: SceneChunk, building: SceneBuilding, point: THREE.Vector3) {
+    const bounds = this.buildingBounds(chunk, building);
+    if (!bounds || isZone(building)) {
+      return;
+    }
+    const center = bounds.getCenter(new THREE.Vector3());
+    const dx = point.x - center.x;
+    const dz = point.z - center.z;
+    // The front (rot 0) faces +z; each quarter turn is clockwise seen from above: west, back, east
+    const rot = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 3 : 1) : (dz > 0 ? 0 : 2);
+    const key = chunk.id + '-' + building.id;
+    if (this.meshes[key]?.userData[FACING] === rot || (this.meshes[key]?.userData[FACING] === undefined && rot === (building.rot ?? 0))) {
+      return;
+    }
+    this.removeView(chunk, building);
+    this.createView(chunk, building, rot);
+    const mesh = this.meshes[key];
+    if (mesh) {
+      mesh.userData[FACING] = rot;
+    }
+  }
+
+  /** The objects turned towards the player are drawn again as they were set (opening the editor). */
+  public resetFacing() {
+    this.sceneMap.chunks.forEach(chunk => chunk.buildings.forEach(building => {
+      if (this.meshes[chunk.id + '-' + building.id]?.userData[FACING] !== undefined) {
+        this.refreshBuilding(chunk, building);
+      }
+    }));
   }
 
   /** Bounds of a building in the world (collisions, editor selection), instanced or not. */
@@ -814,6 +859,9 @@ export class MapHelper {
 
   /** Options used by most buildings of this model on the map (a new tree behaves like the other trees). */
   private defaultOptions(modelId: string): { passable: boolean, canHide: boolean } {
+    if (modelId === ZONE_ID) {
+      return { passable: true, canHide: false };
+    }
     const votes = new Map<string, number>();
     this.sceneMap.chunks.forEach(c => c.buildings.forEach(b => {
       if (b.modelId === modelId) {

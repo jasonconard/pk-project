@@ -7,7 +7,10 @@ import { PlayerDirection, PlayerMoveStatus } from "../model/ScenePlayer";
 import { SceneService } from "./scene.service";
 import { Vec3 } from "../model/SceneUtils";
 import { PlayerService } from "./player.service";
-import { EventService } from "./event.service";
+import { EventService, FoundEvent } from "./event.service";
+import { EventContext } from "../model/ObjectEvent";
+import { SceneEvent } from "../model/SceneEvent";
+import { currentVariableValues } from "../../../variables-editor/shared/variable-values";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import * as THREE from 'three';
 import { SequenceService } from "./sequence.service";
@@ -58,6 +61,8 @@ export class GameMapService {
   private isMoving = 0;
   /** Arrived on a map: its passages wait until the player has left them (not sent straight back). */
   private passageGuard = false;
+  /** The events starting on their own that could play at the last check (see EventService.armed). */
+  private armedBefore = new Set<SceneEvent>();
   private moveRatio: Vec3 = { x:0, y:0, z:0 };
   private moveSpeed: number = 0;
   private moveDir: PlayerDirection = PlayerDirection.DOWN;
@@ -192,6 +197,19 @@ export class GameMapService {
     }
   }
 
+  /** What the events' conditions read: the hour, the weather, the story variables. */
+  private eventContext(game: Game): EventContext {
+    return { hour: game.weather.hourOfDay, weather: game.weather.type, values: currentVariableValues() };
+  }
+
+  /** Plays an event (its object turns towards the player first if asked). */
+  private launch(mapHelper: MapHelper, sprite: THREE.Object3D, found: FoundEvent) {
+    if (found.evt.face) {
+      mapHelper.faceTowards(found.chunk, found.building, sprite.position);
+    }
+    this.sequenceService.launchSequence(found.evt);
+  }
+
   inputLoop(game: Game) {
     const mapHelper = game.mapHelper;
     const sprite = mapHelper?.scenePlayer.mesh;
@@ -315,26 +333,37 @@ export class GameMapService {
       framePerSecond: game.framePerSec
     });
 
-    // What the action key would do (the action button, the prompt): 30 times per second is plenty
+    // What the action key would do (the action button, the prompt), the events starting on their own: 30 times per
+    // second is plenty
     if (++this.actionTick % ACTION_EVERY === 0) {
-      const found = this.sequenceService.isRunning || game.weather.playerFlying ? null : EventService.actionAt(mapHelper, sprite);
+      const ctx = this.eventContext(game);
+      const found = this.sequenceService.isRunning || game.weather.playerFlying ? null : EventService.actionAt(mapHelper, sprite, ctx);
       const action = found ? describeAction(found.evt, found.building) : null;
       if (!sameAction(action, game.action)) {
         game.action = action;
       }
-    }
-
-    if(!this.sequenceService.isRunning) {
-      const event = EventService.checkEvents(mapHelper, sprite, this.keyService.pressedCodes, this.keyService.holdedCodes);
-      // Just arrived through a passage: the passages are ignored until the player has stepped out of them
-      if (this.passageGuard && (!event || isPassageEvent(event))) {
-        this.passageGuard = !!event;
-      } else if(event) {
-        this.sequenceService.launchSequence(event);
+      if (!this.sequenceService.isRunning && !game.weather.playerFlying) {
+        // An event that just became possible (stepped in, conditions now true) plays, one at a time; it plays again
+        // only after having been impossible
+        const armed = EventService.armed(mapHelper, sprite, ctx);
+        const fresh = armed.find(f => !this.armedBefore.has(f.evt));
+        this.armedBefore = new Set(armed.filter(f => this.armedBefore.has(f.evt) || f === fresh).map(f => f.evt));
+        if (fresh) {
+          this.launch(mapHelper, sprite, fresh);
+        }
       }
     }
 
-
+    if(!this.sequenceService.isRunning) {
+      const found = EventService.checkEvents(mapHelper, sprite, this.eventContext(game), this.keyService.pressedCodes, this.keyService.holdedCodes);
+      const event = found?.evt;
+      // Just arrived through a passage: the passages are ignored until the player has stepped out of them
+      if (this.passageGuard && (!event || isPassageEvent(event))) {
+        this.passageGuard = !!event;
+      } else if(found) {
+        this.launch(mapHelper, sprite, found);
+      }
+    }
 
     // Buildings fading / hiding: 30 times per second is plenty (every building's box is computed)
     if (++this.visibilityTick % VISIBILITY_EVERY === 0) {

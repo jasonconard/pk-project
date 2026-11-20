@@ -3,14 +3,18 @@ import { isGameCovered } from '../../../core/shared/app-visibility';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideCheck, LucideChevronDown, LucideCloudSun,
-  LucideClapperboard, LucideDatabase, LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideGrid2x2, LucideMessagesSquare, LucideMessageSquareText, LucideSearch,
+  LucideClapperboard, LucideDatabase, LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideGrid2x2, LucideMessagesSquare, LucideMinus, LucideSearch, LucideSquareDashed, LucideArrowUp,
   LucideUserRound, LucideRotateCw, LucideCopy, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
   LucideLayoutGrid, LucideMap, LucideMapPin, LucideMountain, LucideMousePointer2, LucidePaintBucket, LucidePaintbrush, LucidePlay,
   LucidePlus, LucideRedo2, LucideSettings, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap,
 } from '@lucide/angular';
 import { MapManagerComponent } from '../map-manager/map-manager.component';
 import { Passage } from '../shared/model/Passage';
-import { ObjectTalk, TalkLine } from '../shared/model/ObjectTalk';
+import { newObjectEvent, ObjectEvent } from '../shared/model/ObjectEvent';
+import { ZONE_ID, ZONE_MAX_CELLS } from '../shared/model/Zone';
+import { WEATHER_CHOICES } from '../shared/weather/Weather';
+import { loadVariables } from '../../variables-editor/shared/variable-storage';
+import { EventEditorComponent } from '../event-editor/event-editor.component';
 import { listMaps } from '../shared/services/map-storage';
 import { loadModelThumb, MODEL_CHOICES, modelLabel } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
@@ -20,7 +24,7 @@ import { TouchService } from '../../../core/shared/service/touch.service';
 /** Keyboard shortcut opening / closing the map editor (free key: the game uses z q s d a e r f p o). */
 const EDIT_KEY = 'b';
 
-type PaletteTab = 'objects' | 'ground' | 'relief' | 'chunks';
+type PaletteTab = 'objects' | 'ground' | 'relief' | 'chunks' | 'events';
 
 /** Families of the palette (computer: the objects are grouped, with a search). */
 const MODEL_FAMILIES: { label: string, ids: string[] }[] = [
@@ -54,6 +58,7 @@ const TABS: { id: PaletteTab, label: string, icon: LucideIcon }[] = [
   { id: 'ground', label: 'Sols', icon: LucidePaintbrush },
   { id: 'relief', label: 'Reliefs', icon: LucideMountain },
   { id: 'chunks', label: 'Zones', icon: LucideLayoutGrid },
+  { id: 'events', label: 'Événements', icon: LucideZap },
 ];
 
 interface PaletteEntry {
@@ -75,7 +80,7 @@ interface PaletteEntry {
   imports: [MapManagerComponent, LucideDynamicIcon, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing,
     LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideGrid2x2, LucideSearch, LucideRotateCw, LucideCopy, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
     LucideGrid3x3, LucideMap, LucideMapPin, LucideMousePointer2, LucidePaintBucket, LucidePlay, LucidePlus, LucideRedo2, LucideSettings,
-    LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap, LucideMessageSquareText],
+    LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap, LucideMinus, LucideSquareDashed, LucideArrowUp, EventEditorComponent],
   templateUrl: './editor-bar.component.html',
   styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss', './editor-bar.wide.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -98,7 +103,18 @@ export class EditorBarComponent {
   /** Weather and hour (the computer's bar: its Ambiance button). */
   readonly ambianceLabel = input('');
   readonly passageChange = output<Passage | null>();
-  readonly talkChange = output<ObjectTalk | null>();
+  /** The selected object's events (all of them, in order). */
+  readonly eventsChange = output<ObjectEvent[]>();
+  /** The selected zone's size in cells. */
+  readonly zoneSizeChange = output<{ x: number, z: number }>();
+  /** The event open in the event window (its place in the selected object's list). */
+  protected readonly editingEvent = linkedSignal<EditSelection | null, { index: number } | null>({
+    source: () => this.selection(),
+    computation: (selection, previous) => selection && previous?.value && previous.source?.modelId === selection.modelId ? previous.value : null,
+  });
+  protected readonly zoneId = ZONE_ID;
+  protected readonly zoneMax = ZONE_MAX_CELLS;
+  protected readonly zoneAxes: { id: 'x' | 'z', label: string }[] = [{ id: 'x', label: 'Largeur' }, { id: 'z', label: 'Profondeur' }];
   readonly pickArrival = output<void>();
   readonly cancelPick = output<void>();
   /** Maps a passage can lead to (read again when the selection changes). */
@@ -315,19 +331,63 @@ export class EditorBarComponent {
     this.passageChange.emit({ map, trigger: passage.trigger });
   }
 
-  /** A line changed (when leaving the field: one undo step per line edited). */
-  protected setTalkLine(talk: ObjectTalk, index: number, line: TalkLine): void {
-    this.talkChange.emit({ lines: talk.lines.map((l, i) => i === index ? line : l) });
+  // --- Events of the selected object ---
+
+  protected addEvent(events: ObjectEvent[]): void {
+    this.eventsChange.emit([...events, newObjectEvent()]);
+    this.editingEvent.set({ index: events.length });
   }
 
-  /** A new line, said by the same one as the last line. */
-  protected addTalkLine(talk: ObjectTalk): void {
-    const last = talk.lines[talk.lines.length - 1];
-    this.talkChange.emit({ lines: [...talk.lines, { ...(last?.name ? { name: last.name } : {}), text: '' }] });
+  /** The event window closed: its event as edited (nothing changed: no undo step). */
+  protected saveEvent(events: ObjectEvent[], index: number, event: ObjectEvent): void {
+    this.editingEvent.set(null);
+    if (JSON.stringify(events[index]) !== JSON.stringify(event)) {
+      this.eventsChange.emit(events.map((e, i) => i === index ? event : e));
+    }
   }
 
-  protected removeTalkLine(talk: ObjectTalk, index: number): void {
-    this.talkChange.emit({ lines: talk.lines.filter((_, i) => i !== index) });
+  protected removeEvent(events: ObjectEvent[], index: number): void {
+    this.editingEvent.set(null);
+    this.eventsChange.emit(events.filter((_, i) => i !== index));
+  }
+
+  /** One place up: played before the one above (the first that fits plays). */
+  protected moveEvent(events: ObjectEvent[], index: number): void {
+    const list = [...events];
+    [list[index - 1], list[index]] = [list[index], list[index - 1]];
+    this.eventsChange.emit(list);
+  }
+
+  protected resizeZone(size: { x: number, z: number }, axis: 'x' | 'z', by: number): void {
+    this.zoneSizeChange.emit({ ...size, [axis]: size[axis] + by });
+  }
+
+  protected triggerLabel(event: ObjectEvent): string {
+    return { action: 'Parler', enter: 'Entrer dessus', auto: 'Automatique' }[event.trigger];
+  }
+
+  /** « si A parlé au maire · de 8 h à 18 h · 2 actions : « Bonjour… » ». */
+  protected eventSummary(event: ObjectEvent): string {
+    const c = event.conditions;
+    const variables = loadVariables();
+    const parts: string[] = [];
+    c.variables.forEach(test => {
+      const name = variables.find(v => v.id === test.id)?.name ?? '(variable supprimée)';
+      const ops = { is: '', eq: '=', ne: '≠', gte: '≥', lte: '≤' };
+      parts.push(test.op === 'is' ? `si ${name}${test.value ? '' : ' est faux'}` : `si ${name} ${ops[test.op]} ${test.value}`);
+    });
+    if (c.hours) {
+      parts.push(`de ${c.hours.from} h à ${c.hours.to} h`);
+    }
+    if (c.weathers?.length) {
+      parts.push(c.weathers.map(w => WEATHER_CHOICES.find(choice => choice.type === w)?.label ?? w).join(' ou '));
+    }
+    const count = event.actions.length;
+    const message = event.actions.find(a => a.type === 'message');
+    const text = message?.type === 'message' && message.text.trim()
+      ? ` : « ${message.text.trim().slice(0, 30)}${message.text.trim().length > 30 ? '…' : ''} »` : '';
+    parts.push(`${count} action${count > 1 ? 's' : ''}${text}`);
+    return parts.join(' · ');
   }
 
   protected openMaps(event: Event): void {
@@ -340,8 +400,8 @@ export class EditorBarComponent {
   }
 
   private onKeyDown(ev: KeyboardEvent): void {
-    const typing = ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement;
-    if (typing || ev.altKey || this.mapsOpen()) {
+    const typing = ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement || ev.target instanceof HTMLSelectElement;
+    if (typing || ev.altKey || this.mapsOpen() || this.editingEvent()) {
       return;
     }
     const key = ev.key.toLowerCase();

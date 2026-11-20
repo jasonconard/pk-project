@@ -27,7 +27,7 @@ const STEP_TOLERANCE = 4;
 
 /** Is this event a passage (a lone teleport to a map)? */
 export function isPassageEvent(event: SceneEvent): boolean {
-  return event.instructions.length === 1 && event.instructions[0].type === InstructionType.TELEPORT
+  return !event.edited && event.instructions.length === 1 && event.instructions[0].type === InstructionType.TELEPORT
     && !!event.instructions[0].teleport?.map;
 }
 
