@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.36',
+    date: '2026-11-20',
+    notes: [
+      'Éditeur : dans un événement, un choix propose 2 à 4 réponses, et chaque réponse a ses propres actions.',
+      'Une condition joue des actions si elle est vraie, et d\'autres sinon. Nouvelle action « Arrêter », et un portrait peut s\'afficher à côté d\'un message.',
+      'En jeu, on peut aussi choisir une réponse à la souris.',
+      'Nouvel éditeur : la base de données. On y crée les éléments (feu, glace…), les types d\'armes et les états (poison, sommeil…), chacun avec une icône à dessiner en pixel art.',
+      'Éditeur : les météos se choisissent dans une liste avec leur image et une recherche.',
+    ],
+  },
+  {
     version: '0.0.35',
     date: '2026-11-20',
     notes: [
