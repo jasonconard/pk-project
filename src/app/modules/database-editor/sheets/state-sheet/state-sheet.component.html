@@ -1,0 +1,109 @@
+@let st = state();
+<div class="block">
+  <h3>Durée</h3>
+  <div class="line">
+    <db-stepper
+      [value]="st.turns"
+      [min]="0"
+      [max]="turnsMax"
+      [label]="'Tours'"
+      (changed)="setTurns(st, $event)"
+    />
+    <span class="muted">{{ turnsLabel(st.turns) }}</span>
+  </div>
+  <label class="switch">
+    <input
+      type="checkbox"
+      [checked]="st.staysAfterFight"
+      (change)="setFlag(st, 'staysAfterFight', $any($event.target).checked)"
+    />
+    <span>Reste après le combat (jusqu'à être soigné)</span>
+  </label>
+  <label class="switch">
+    <input
+      type="checkbox"
+      [checked]="st.endsOnHit"
+      (change)="setFlag(st, 'endsOnHit', $any($event.target).checked)"
+    />
+    <span>Se termine quand on est touché</span>
+  </label>
+</div>
+
+<div class="block">
+  <h3>Effets</h3>
+  @for (fx of st.effects; track $index; let i = $index) {
+    <div class="effect">
+      <b>{{ effectLabels[fx.kind] }}</b>
+      @switch (fx.kind) {
+        @case ("stat") {
+          <select
+            aria-label="Stat"
+            (change)="setEffectStat(st, i, $any($event.target).value)"
+          >
+            @for (s of stats; track s.id) {
+              <option [value]="s.id" [selected]="s.id === fx.stat">
+                {{ s.label }}
+              </option>
+            }
+          </select>
+          <db-stepper
+            [class]="fx.percent < 0 ? 'minus' : 'plus'"
+            [value]="fx.percent"
+            [min]="-percentMax"
+            [max]="percentMax"
+            [step]="5"
+            [signed]="true"
+            [suffix]="'%'"
+            [label]="'Pourcentage'"
+            (changed)="setEffect(st, i, { percent: $event })"
+          />
+        }
+        @case ("skip") {
+          <db-stepper
+            [value]="fx.chance"
+            [min]="0"
+            [max]="100"
+            [step]="5"
+            [suffix]="'%'"
+            [label]="'Chance'"
+            (changed)="setEffect(st, i, { chance: $event })"
+          />
+        }
+        @default {
+          <db-stepper
+            [class]="fx.percent < 0 ? 'minus' : 'plus'"
+            [value]="fx.percent"
+            [min]="-percentMax"
+            [max]="percentMax"
+            [step]="5"
+            [signed]="true"
+            [suffix]="'%'"
+            [label]="'Pourcentage'"
+            (changed)="setEffect(st, i, { percent: $event })"
+          />
+        }
+      }
+      <button
+        type="button"
+        class="remove"
+        title="Retirer"
+        aria-label="Retirer"
+        (click)="removeEffect(st, i)"
+      >
+        <svg lucideX></svg>
+      </button>
+    </div>
+  } @empty {
+    <p class="note">Aucun effet : l'état ne fait rien pour l'instant.</p>
+  }
+  <div class="add-effects">
+    @for (k of effectKinds; track k) {
+      <button type="button" (click)="addEffect(st, k)">
+        <svg lucidePlus></svg> {{ effectLabels[k] }}
+      </button>
+    }
+  </div>
+  <p class="note">
+    PV et PM : en % du maximum, perdus (−) ou gagnés (+) à chaque tour.
+  </p>
+</div>

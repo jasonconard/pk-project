@@ -1,3 +1,5 @@
+@use "app/modules/database-editor/sheets" as database-editor;
+
 /* You can add global styles to this file, and also import other style files */
 
 html {
@@ -117,4 +119,9 @@ body {
 svg.lucide {
   flex-shrink: 0;
   vertical-align: -0.2em;
+}
+
+// The database editor's sheets: their shared fields (see that file)
+app-database-editor {
+  @include database-editor.sheets;
 }

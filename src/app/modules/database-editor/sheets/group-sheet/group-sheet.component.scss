@@ -1,0 +1,149 @@
+// Group sheet: the battlefield and its enemies. The shared fields: ../../_sheets.scss.
+
+:host {
+  display: contents;
+}
+
+.battlefield {
+  position: relative;
+  aspect-ratio: 1 / 0.9;
+  max-height: 440px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  touch-action: none;
+  background:
+    linear-gradient(#ffffff10 1px, transparent 1px) 0 0 / 10% 10%,
+    linear-gradient(90deg, #ffffff10 1px, transparent 1px) 0 0 / 10% 10%,
+    #2f4a37;
+}
+
+.enemy-zone, .team-zone {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  border-radius: 10px;
+}
+
+.enemy-zone {
+  top: 3%;
+  height: 48%;
+  background: #ff6b6b14;
+  border: 1px solid #ff6b6b55;
+}
+
+.team-zone {
+  bottom: 3%;
+  height: 28%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12%;
+  background: #4d96ff14;
+  border: 1px solid #4d96ff55;
+}
+
+.zone-label {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff9b9b;
+
+  .team-zone & {
+    color: #9fc3ff;
+  }
+}
+
+.ally-slot {
+  width: 12%;
+  aspect-ratio: 0.8;
+  border-radius: 8px;
+  border: 1px solid #9fc3ff66;
+  opacity: 0.6;
+}
+
+.member {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  cursor: grab;
+  touch-action: none;
+
+  img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 2px #0006);
+  }
+
+  &.chosen {
+    border-color: #fff;
+    background: #ffffff14;
+  }
+
+  &.dragging {
+    cursor: grabbing;
+    z-index: 2;
+  }
+}
+
+.member-pop {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, 40px);
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+
+  button {
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 9px;
+    border-radius: 7px;
+    font-size: 12px;
+
+    &.danger {
+      color: #ff8a8a;
+    }
+
+    &:hover {
+      background: var(--surface);
+    }
+  }
+}
+
+.member-thumb {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.grow-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.row-icon {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 16px;
+}

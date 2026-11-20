@@ -76,7 +76,8 @@ import { clampInt } from "../shared/database";
       font-weight: 700;
       color: var(--stepper-color, inherit);
     }
-    input {
+    /* (:host: above the editor's shared field style, see _sheets.scss) */
+    :host input {
       width: 3.2ch;
       padding: 0;
       border: none;

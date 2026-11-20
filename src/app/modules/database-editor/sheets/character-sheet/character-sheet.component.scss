@@ -1,0 +1,108 @@
+// Character sheet: its tabs, the stats' curves, what it will learn. The shared fields: ../../_sheets.scss.
+
+:host {
+  display: contents;
+}
+
+.sheet-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--surface);
+  margin-top: -6px;
+
+  button {
+    flex: 1;
+    height: 40px;
+    color: var(--muted);
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+
+    &.on {
+      color: #eceef4;
+      font-weight: 600;
+      border-bottom-color: var(--accent);
+    }
+  }
+}
+
+.curve {
+  height: 26px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+
+  span {
+    flex: 1;
+    border-radius: 1px;
+    background: #9fc3ff;
+    transition: height 150ms;
+  }
+}
+
+.learnable {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+
+  &.never {
+    > img, .texts, .state {
+      opacity: 0.5;
+    }
+  }
+
+  .exclude {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    margin: -4px -4px -4px 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 15px;
+
+    &:hover {
+      background: var(--field);
+      color: #eceef4;
+    }
+  }
+
+  img {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+  }
+
+  .texts {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    b {
+      font-size: 13px;
+    }
+
+    small {
+      font-size: 11px;
+      color: var(--muted);
+    }
+  }
+
+  .state {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+
+    &.ok {
+      color: var(--plus);
+    }
+  }
+}

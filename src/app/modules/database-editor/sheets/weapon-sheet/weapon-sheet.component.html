@@ -1,0 +1,16 @@
+@let wp = weapon();
+<div class="block">
+  <h3>Description</h3>
+  <input
+    type="text"
+    maxlength="120"
+    placeholder="Facultatif"
+    aria-label="Description"
+    [value]="wp.note ?? ''"
+    (input)="setNote(wp, $any($event.target).value)"
+  />
+</div>
+<p class="hint">
+  <svg lucideInfo></svg> Frapper avec ce type d'arme fait monter son niveau, qui
+  débloque des coups spéciaux (les compétences arrivent bientôt).
+</p>

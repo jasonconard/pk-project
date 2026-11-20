@@ -10,7 +10,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - Angular 22 standalone, zoneless, signals (`signal`/`computed`/`input()`/`viewChild`), `inject()`; Three.js 0.187;
   TypeScript 6. Router uses hash URLs (`/#/modeles`, `/#/musique`).
 - `npm start` → dev server on port 7777 (`--host 0.0.0.0`, reachable from the phone). `npx ng serve` → 4200.
-- Check a change compiles: `npx ng build --configuration development`. **No unit tests** (no `.spec.ts`): verify in
+- Lint and format: `npm run lint` / `npm run lint:fix` (ESLint + Prettier, same rules as self-checkout-v2: double
+  quotes, 80 columns, one HTML attribute per line, unicorn rules, no nested ternaries). `src/assets/` is left as the
+  editors export it. Run `lint:fix` before committing.
+- Check a change compiles: `npx ng build --configuration development`; before a release also `npx ng build` (the
+  production build checks the style budgets: 8 kB warning, 12 kB error per component). **No unit tests** (no `.spec.ts`): verify in
   a browser (headless Chrome via a small CDP script in the scratchpad is more reliable than pen.dev browser nodes
   for multi-step tests).
 - `npm run android-build` (native), `scripts/native-fingerprint.mjs` decides live update vs new APK (see README).
@@ -45,6 +49,14 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - `modules/music-editor/`: lo-fi music editor. `shared/`: `song`, `instruments` (data sheets), `synth`, `music-engine`, `song-storage`.
 - `modules/variables-editor/`: story flags and counters (`GameVariable`). `shared/`: `variables`, `variable-storage`
   (browser `pk-variables`, else `assets/variables/variables.ts`), `variable-values` (values in the game being played).
+- `modules/database-editor/`: the game's database (characters, enemies, groups, skills, items, states, elements,
+  weapon types), opened over the game. The editor is a shell (tables, list, sheet head, windows over it);
+  `sheets/<table>-sheet/` one component per table, extending `shared/db-sheet.ts` (`DbSheet`: the store, constants,
+  lookups); `shared/database-store.ts` (`DatabaseStore`, provided by the editor: the database, its saving, the table
+  shown, the pixel editor / weathers windows); `effects-editor/` (skills' and items' effects), `learn-select/`,
+  `pixel-editor/`, `stepper/`; `_sheets.scss` the sheets' shared fields (global, inside `app-database-editor`, in
+  `styles.scss`). `shared/database.ts` (types, rules), `database-storage` (`pk-database`, else
+  `assets/database/database.ts`), `party` (the team in the game being played: members, items, money).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be replaced by the Grandia-style combat.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
@@ -56,7 +68,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 ## Conventions
 
 - Code, comments and commit messages in English; UI text, docs (`docs/`) and release notes in simple French.
-- Commits: `[Feature] …`, `[Fix] …`, `[Docs] …`, `[Design] …` + a sentence saying what changed for the player.
+- Commits: `[Feature] …`, `[Fix] …`, `[Docs] …`, `[Design] …`, `[Refacto] …`, `[CI] …` + a sentence saying what changed for the player.
   Commit only when asked; code, then docs, then release as separate commits.
 - UI icons: Lucide via `@lucide/angular` (`<svg lucideXxx>`, `<svg [lucideIcon]="Comp">`), never emojis (weather
   emojis in `Weather.ts` are content). Check the icon name exists in `node_modules/@lucide/angular` (e.g. no `Trash2`).

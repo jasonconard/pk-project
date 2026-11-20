@@ -1,0 +1,153 @@
+@let gr = group();
+<div class="block">
+  <h3>Description</h3>
+  <input
+    type="text"
+    maxlength="120"
+    placeholder="Facultatif"
+    aria-label="Description"
+    [value]="gr.note ?? ''"
+    (input)="setNote(gr, $any($event.target).value)"
+  />
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Terrain de combat (vu de dessus)</h3>
+    <small>glisser pour placer</small>
+  </div>
+  <div class="battlefield" (click)="memberChosen.set(null)">
+    <div class="enemy-zone">
+      <span class="zone-label">Ennemis</span>
+    </div>
+    <div class="team-zone">
+      <span class="zone-label">Équipe</span>
+      @for (n of [0, 1, 2]; track n) {
+        <span class="ally-slot"></span>
+      }
+    </div>
+    @for (m of gr.members; track $index; let i = $index) {
+      @let pos = memberPos(i, m);
+      <button
+        type="button"
+        class="member"
+        [class.chosen]="memberChosen() === i"
+        [class.dragging]="drag()?.index === i"
+        [style.left.%]="4 + pos.x * 92"
+        [style.top.%]="4 + pos.y * 42"
+        [attr.aria-label]="enemyOf(m.enemy)?.name ?? '?'"
+        (pointerdown)="memberDown($event, i, m)"
+        (pointermove)="memberMove($event)"
+        (pointerup)="memberUp(gr)"
+        (pointercancel)="memberUp(gr)"
+        (click)="$event.stopPropagation()"
+      >
+        @if (enemyOf(m.enemy)?.sprite; as sprite) {
+          <img class="pixel" [src]="sprite" alt="" />
+        } @else {
+          <span class="no-icon big"></span>
+        }
+      </button>
+    }
+    @if (
+      memberChosen() !== null && !drag() && gr.members[memberChosen()!];
+      as chosen
+    ) {
+      <div
+        class="member-pop"
+        [style.left.%]="4 + chosen.x * 92"
+        [style.top.%]="4 + chosen.y * 42"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          type="button"
+          (click)="duplicateMember(gr, memberChosen()!)"
+          [disabled]="gr.members.length >= 8"
+        >
+          <svg lucideCopy></svg> Dupliquer
+        </button>
+        <button
+          type="button"
+          class="danger"
+          (click)="removeMember(gr, memberChosen()!)"
+        >
+          <svg lucideTrash></svg>
+        </button>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Ennemis du groupe</h3>
+    <small>{{ gr.members.length }} / 8</small>
+  </div>
+  @for (c of groupCounts(); track c.id) {
+    <div class="learn">
+      @if (c.enemy?.sprite; as sprite) {
+        <img class="pixel member-thumb" [src]="sprite" alt="" />
+      }
+      <b class="grow-text">{{ c.enemy?.name ?? "(supprimé)" }}</b>
+      <db-stepper
+        [value]="c.count"
+        [min]="0"
+        [max]="c.count + 8 - gr.members.length"
+        [label]="'Nombre'"
+        (changed)="$event > c.count ? addMember(gr, c.id) : removeOne(gr, c.id)"
+      />
+    </div>
+  }
+  @if (gr.members.length < 8) {
+    <label class="add-select">
+      <svg lucidePlus></svg> Ennemi
+      <select
+        aria-label="Ajouter un ennemi"
+        (change)="
+          addMember(gr, $any($event.target).value);
+          $any($event.target).value = ''
+        "
+      >
+        <option value="" selected></option>
+        @for (e of db().enemies; track e.id) {
+          <option [value]="e.id">{{ e.name }}</option>
+        }
+      </select>
+    </label>
+  }
+</div>
+
+<div class="block">
+  <h3>Combat</h3>
+  <label class="learn">
+    <svg lucideEighthNotes class="row-icon"></svg>
+    <span class="slot-label">Musique</span>
+    <select
+      aria-label="Musique"
+      (change)="setGroup(gr, { music: $any($event.target).value })"
+    >
+      <option value="" [selected]="!gr.music">Musique de combat</option>
+      @for (sg of songs; track sg.id) {
+        <option [value]="sg.id" [selected]="sg.id === gr.music">
+          {{ sg.name }}
+        </option>
+      }
+    </select>
+  </label>
+  <label class="switch">
+    <input
+      type="checkbox"
+      [checked]="gr.canFlee"
+      (change)="setGroup(gr, { canFlee: $any($event.target).checked })"
+    />
+    <span>On peut fuir</span>
+  </label>
+  <label class="switch">
+    <input
+      type="checkbox"
+      [checked]="gr.surprise"
+      (change)="setGroup(gr, { surprise: $any($event.target).checked })"
+    />
+    <span>Il peut attaquer par surprise</span>
+  </label>
+</div>

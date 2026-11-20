@@ -1,0 +1,109 @@
+@let el = element();
+@if (el.physical) {
+  <p class="hint">
+    <svg lucideInfo></svg> Le Physique sert aux dégâts et aux résistances. Les
+    compétences physiques s'apprennent avec les types d'armes.
+  </p>
+} @else {
+  <div class="block">
+    <h3>Sorte d'élément</h3>
+    <div class="segmented wide" role="group" aria-label="Sorte d'élément">
+      <button
+        type="button"
+        [class.on]="!el.parts"
+        [attr.aria-pressed]="!el.parts"
+        (click)="setComposed(el, false)"
+      >
+        Simple
+      </button>
+      <button
+        type="button"
+        [class.on]="!!el.parts"
+        [attr.aria-pressed]="!!el.parts"
+        (click)="setComposed(el, true)"
+      >
+        Composé
+      </button>
+    </div>
+    @if (el.parts; as parts) {
+      <div class="equation">
+        @for (i of [0, 1]; track i) {
+          @if (i) {
+            <b class="op">+</b>
+          }
+          <select
+            [attr.aria-label]="'Élément ' + (i + 1)"
+            (change)="setPart(el, $any(i), $any($event.target).value)"
+          >
+            @for (c of composable(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === parts[i]">
+                {{ c.name }}
+              </option>
+            }
+          </select>
+        }
+        <b class="op">=</b>
+        @if (el.icon) {
+          <img class="pixel result" [src]="el.icon" alt="" />
+        } @else {
+          <span class="no-icon" [style.background]="el.color"></span>
+        }
+      </div>
+      <p class="note">
+        Ses compétences s'apprennent avec un niveau dans les deux éléments, et
+        les font monter tous les deux.
+      </p>
+    }
+  </div>
+}
+
+@for (side of [true, false]; track side) {
+  <div class="block">
+    <div class="block-head">
+      <h3>{{ side ? "Plus fort par" : "Plus faible par" }}</h3>
+      <small
+        >dégâts
+        {{ el.name.trim() ? "de « " + el.name.trim() + " »" : "" }}</small
+      >
+    </div>
+    @for (w of side ? strong(el) : weak(el); track w.weather) {
+      <div class="weather">
+        <img
+          [src]="weatherImage(w.weather)"
+          alt=""
+          (error)="weatherImageMissing($event, w.weather)"
+        />
+        <b>{{ weatherLabel(w.weather) }}</b>
+        <db-stepper
+          [class]="side ? 'plus' : 'minus'"
+          [value]="side ? w.percent : -w.percent"
+          [min]="5"
+          [max]="percentMax"
+          [step]="5"
+          [suffix]="'%'"
+          [label]="'Pourcentage'"
+          (changed)="setWeatherPercent(el, w.weather, $event, side)"
+        />
+        <button
+          type="button"
+          class="remove"
+          title="Retirer"
+          aria-label="Retirer"
+          (click)="removeWeather(el, w.weather)"
+        >
+          <svg lucideX></svg>
+        </button>
+      </div>
+    }
+    <button
+      type="button"
+      class="add-select"
+      (click)="openWeatherPick(el, side)"
+    >
+      <svg lucidePlus></svg> Météo
+    </button>
+  </div>
+}
+<p class="hint">
+  <svg lucideInfo></svg> En combat, c'est la météo du donjon qui compte.
+</p>

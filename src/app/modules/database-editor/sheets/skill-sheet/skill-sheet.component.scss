@@ -1,0 +1,113 @@
+// Skill sheet: the cast time gauge and slider, the formula. The shared fields: ../../_sheets.scss.
+
+:host {
+  display: contents;
+}
+
+.cast-label {
+  color: #ffd34d !important;
+  font-weight: 600;
+}
+
+.gauge {
+  padding: 12px 12px 8px;
+  border-radius: 10px;
+  background: var(--field);
+
+  .bar {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+
+    span {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-radius: 3px;
+      transition: left 150ms, width 150ms;
+    }
+
+    .wait {
+      left: 0;
+      width: 70%;
+      background: var(--border);
+    }
+
+    .cast {
+      background: #ffd34d;
+    }
+
+    .act {
+      right: 0;
+      background: var(--danger);
+    }
+  }
+
+  .labels {
+    display: flex;
+    margin-top: 6px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+
+    span {
+      flex-shrink: 0;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: width 150ms;
+    }
+
+    span:last-child {
+      flex: 1;
+    }
+  }
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  small {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  input {
+    flex: 1;
+    accent-color: #ffd34d;
+  }
+}
+
+.fold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+
+  span {
+    flex: 1;
+  }
+
+  .chev {
+    transition: transform 150ms;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.mono {
+  font-family: ui-monospace, Menlo, Consolas, monospace !important;
+}

@@ -1,0 +1,264 @@
+@let row = owner();
+@let kinds = kindList();
+<div class="block">
+  <div class="block-head">
+    <h3>Effets</h3>
+    <small>dans l'ordre</small>
+  </div>
+  @for (
+    fx of row.effects ?? [];
+    track $index;
+    let i = $index;
+    let last = $last
+  ) {
+    <div class="fx">
+      <div class="fx-head">
+        <b
+          >{{ effectLabel(fx.kind)
+          }}{{
+            fx.kind === "damage"
+              ? " · " + (elementOf($any(row).element)?.name ?? "?")
+              : ""
+          }}</b
+        >
+        <button
+          type="button"
+          class="remove"
+          title="Monter"
+          aria-label="Monter"
+          [disabled]="i === 0"
+          (click)="moveSkillEffect(row, i, -1)"
+        >
+          <svg lucideArrowUp></svg>
+        </button>
+        <button
+          type="button"
+          class="remove"
+          title="Descendre"
+          aria-label="Descendre"
+          [disabled]="last"
+          (click)="moveSkillEffect(row, i, 1)"
+        >
+          <svg lucideArrowDown></svg>
+        </button>
+        <button
+          type="button"
+          class="remove"
+          title="Retirer"
+          aria-label="Retirer"
+          (click)="removeSkillEffect(row, i)"
+        >
+          <svg lucideX></svg>
+        </button>
+      </div>
+      <div class="fx-fields">
+        @switch (fx.kind) {
+          @case ("damage") {
+            <label class="field"
+              ><small>Selon</small>
+              <select
+                (change)="
+                  setSkillEffect(row, i, { stat: $any($event.target).value })
+                "
+              >
+                <option value="str" [selected]="fx.stat === 'str'">
+                  la Force
+                </option>
+                <option value="mag" [selected]="fx.stat === 'mag'">
+                  la Magie
+                </option>
+              </select>
+            </label>
+            <label class="field"
+              ><small>Puissance</small>
+              <db-stepper
+                [value]="fx.power"
+                [min]="1"
+                [max]="powerMax"
+                [step]="5"
+                [label]="'Puissance'"
+                (changed)="setSkillEffect(row, i, { power: $event })"
+              />
+            </label>
+          }
+          @case ("heal") {
+            <label class="field"
+              ><small>Rend des</small>
+              <select
+                (change)="
+                  setSkillEffect(row, i, {
+                    resource: $any($event.target).value,
+                  })
+                "
+              >
+                <option value="hp" [selected]="fx.resource === 'hp'">PV</option>
+                <option value="mp" [selected]="fx.resource === 'mp'">PM</option>
+              </select>
+            </label>
+            <label class="field"
+              ><small>Puissance</small>
+              <db-stepper
+                [value]="fx.power"
+                [min]="1"
+                [max]="powerMax"
+                [step]="5"
+                [label]="'Puissance'"
+                (changed)="setSkillEffect(row, i, { power: $event })"
+              />
+            </label>
+          }
+          @case ("addState") {
+            <label class="field grow"
+              ><small>État</small>
+              <select
+                (change)="
+                  setSkillEffect(row, i, { state: $any($event.target).value })
+                "
+              >
+                @if (!hasState(fx.state)) {
+                  <option value="" selected>—</option>
+                }
+                @for (st of db().states; track st.id) {
+                  <option [value]="st.id" [selected]="st.id === fx.state">
+                    {{ st.name }}
+                  </option>
+                }
+              </select>
+            </label>
+            <label class="field"
+              ><small>Chance</small>
+              <db-stepper
+                [value]="fx.chance"
+                [min]="1"
+                [max]="100"
+                [step]="5"
+                [suffix]="'%'"
+                [label]="'Chance'"
+                (changed)="setSkillEffect(row, i, { chance: $event })"
+              />
+            </label>
+          }
+          @case ("removeState") {
+            <label class="field grow"
+              ><small>État</small>
+              <select
+                (change)="
+                  setSkillEffect(row, i, { state: $any($event.target).value })
+                "
+              >
+                @if (!hasState(fx.state)) {
+                  <option value="" selected>—</option>
+                }
+                @for (st of db().states; track st.id) {
+                  <option [value]="st.id" [selected]="st.id === fx.state">
+                    {{ st.name }}
+                  </option>
+                }
+              </select>
+            </label>
+          }
+          @case ("statUp") {
+            <label class="field"
+              ><small>Stat</small>
+              <select
+                (change)="
+                  setSkillEffect(row, i, { stat: $any($event.target).value })
+                "
+              >
+                @for (st of stats; track st.id) {
+                  <option [value]="st.id" [selected]="st.id === fx.stat">
+                    {{ st.label }}
+                  </option>
+                }
+              </select>
+            </label>
+            <label class="field"
+              ><small>Pour toujours</small>
+              <db-stepper
+                class="plus"
+                [value]="fx.amount"
+                [min]="1"
+                [max]="bonusMax"
+                [signed]="true"
+                [label]="'Points'"
+                (changed)="setSkillEffect(row, i, { amount: $event })"
+              />
+            </label>
+          }
+          @case ("xp") {
+            <label class="field grow"
+              ><small>Progresse dans</small>
+              <db-learn-select
+                [value]="fx.id"
+                (picked)="setSkillEffect(row, i, { id: $event })"
+              />
+            </label>
+            <label class="field"
+              ><small>Expérience</small>
+              <db-stepper
+                [value]="fx.amount"
+                [min]="1"
+                [max]="xpMax"
+                [step]="10"
+                [label]="'Expérience'"
+                (changed)="setSkillEffect(row, i, { amount: $event })"
+              />
+            </label>
+          }
+          @case ("stat") {
+            <label class="field"
+              ><small>Stat</small>
+              <select
+                (change)="
+                  setSkillEffect(row, i, { stat: $any($event.target).value })
+                "
+              >
+                @for (st of stats; track st.id) {
+                  <option [value]="st.id" [selected]="st.id === fx.stat">
+                    {{ st.label }}
+                  </option>
+                }
+              </select>
+            </label>
+            <label class="field"
+              ><small>Change</small>
+              <db-stepper
+                [class]="fx.percent < 0 ? 'minus' : 'plus'"
+                [value]="fx.percent"
+                [min]="-percentMax"
+                [max]="percentMax"
+                [step]="5"
+                [signed]="true"
+                [suffix]="'%'"
+                [label]="'Pourcentage'"
+                (changed)="setSkillEffect(row, i, { percent: $event })"
+              />
+            </label>
+            <label class="field"
+              ><small>Tours</small>
+              <db-stepper
+                [value]="fx.turns"
+                [min]="1"
+                [max]="turnsMax"
+                [label]="'Tours'"
+                (changed)="setSkillEffect(row, i, { turns: $event })"
+              />
+            </label>
+          }
+        }
+      </div>
+    </div>
+  } @empty {
+    <p class="note">
+      Aucun effet : {{ table() === "items" ? "l'objet" : "la compétence" }} ne
+      fait rien pour l'instant.
+    </p>
+  }
+  <div class="add-effects">
+    @for (k of kinds; track k) {
+      <button type="button" (click)="addSkillEffect(row, k)">
+        <svg lucidePlus></svg> {{ effectLabel(k) }}
+      </button>
+    }
+  </div>
+</div>

@@ -1,0 +1,308 @@
+@let it = item();
+<div class="block">
+  <h3>Sorte d'objet</h3>
+  <div class="chips" role="group" aria-label="Sorte d'objet">
+    @for (k of itemKinds; track k.id) {
+      <button
+        type="button"
+        class="chip plain"
+        [class.on]="it.kind === k.id"
+        [attr.aria-pressed]="it.kind === k.id"
+        (click)="setItemKind(it, k.id)"
+      >
+        {{ k.label }}
+      </button>
+    }
+  </div>
+</div>
+
+<div class="block">
+  <h3>Description</h3>
+  <input
+    type="text"
+    maxlength="120"
+    placeholder="Facultatif"
+    aria-label="Description"
+    [value]="it.note ?? ''"
+    (input)="setNote(it, $any($event.target).value)"
+  />
+</div>
+
+@if (it.kind !== "key") {
+  <div class="block">
+    <h3>Prix</h3>
+    <div class="line">
+      <db-stepper
+        [value]="it.price"
+        [min]="0"
+        [max]="priceMax"
+        [step]="10"
+        [label]="'Prix'"
+        (changed)="setItem(it, { price: $event })"
+      />
+      <span class="muted">{{
+        it.price
+          ? "pièces (se revend moitié prix)"
+          : "Ne s'achète pas et ne se vend pas"
+      }}</span>
+    </div>
+  </div>
+}
+
+@switch (it.kind) {
+  @case ("consumable") {
+    <div class="two">
+      <div class="block grow">
+        <h3>Utilisable</h3>
+        <select
+          aria-label="Utilisable"
+          (change)="setItemUse(it, $any($event.target).value)"
+        >
+          @for (u of uses; track u.id) {
+            <option [value]="u.id" [selected]="u.id === it.use">
+              {{ u.label }}
+            </option>
+          }
+        </select>
+      </div>
+      <div class="block grow">
+        <h3>Cible</h3>
+        <select
+          aria-label="Cible"
+          (change)="setItemTarget(it, $any($event.target).value)"
+        >
+          @for (t of targets; track t.id) {
+            <option [value]="t.id" [selected]="t.id === it.target">
+              {{ t.label }}
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+    <db-effects-editor [owner]="it" [kindList]="itemEffectKinds" />
+  }
+  @case ("equipment") {
+    <div class="block">
+      <h3>Emplacement</h3>
+      <div class="segmented wide" role="group" aria-label="Emplacement">
+        @for (sl of slots; track sl.id) {
+          <button
+            type="button"
+            [class.on]="it.slot === sl.id"
+            [attr.aria-pressed]="it.slot === sl.id"
+            (click)="setSlot(it, sl.id)"
+          >
+            {{ sl.label }}
+          </button>
+        }
+      </div>
+    </div>
+    @if (it.slot === "weapon") {
+      <div class="two">
+        <div class="block grow">
+          <h3>Type d'arme</h3>
+          <select
+            aria-label="Type d'arme"
+            (change)="setItem(it, { weapon: $any($event.target).value })"
+          >
+            <option value="" [selected]="!it.weapon">—</option>
+            @for (w of db().weapons; track w.id) {
+              <option [value]="w.id" [selected]="w.id === it.weapon">
+                {{ w.name }}
+              </option>
+            }
+          </select>
+        </div>
+        <div class="block grow">
+          <h3>Ses attaques</h3>
+          <select
+            aria-label="Élément de ses attaques"
+            (change)="
+              setItem(it, {
+                attackElement: $any($event.target).value,
+              })
+            "
+          >
+            <option value="" [selected]="!it.attackElement">Physique</option>
+            @for (e of db().elements; track e.id) {
+              @if (!e.physical) {
+                <option [value]="e.id" [selected]="e.id === it.attackElement">
+                  {{ e.name }}
+                </option>
+              }
+            }
+          </select>
+        </div>
+      </div>
+      <p class="note">
+        Frapper avec cette arme fait monter le niveau de son type d'arme.
+      </p>
+    }
+
+    <div class="block">
+      <h3>Bonus de stats</h3>
+      @for (b of it.bonuses ?? []; track $index; let i = $index) {
+        <div class="learn">
+          <select
+            aria-label="Stat"
+            (change)="
+              setIn(it, 'bonuses', i, {
+                stat: $any($event.target).value,
+              })
+            "
+          >
+            @for (st of stats; track st.id) {
+              <option [value]="st.id" [selected]="st.id === b.stat">
+                {{ st.label }}
+              </option>
+            }
+          </select>
+          <db-stepper
+            [class]="b.amount < 0 ? 'minus' : 'plus'"
+            [value]="b.amount"
+            [min]="-bonusMax"
+            [max]="bonusMax"
+            [signed]="true"
+            [label]="'Bonus'"
+            (changed)="setIn(it, 'bonuses', i, { amount: $event })"
+          />
+          <button
+            type="button"
+            class="remove"
+            title="Retirer"
+            aria-label="Retirer"
+            (click)="removeFrom(it, 'bonuses', i)"
+          >
+            <svg lucideX></svg>
+          </button>
+        </div>
+      }
+      <button type="button" class="add-select" (click)="addTo(it, 'bonuses')">
+        <svg lucidePlus></svg> Bonus
+      </button>
+    </div>
+
+    <div class="block">
+      <h3>Face aux éléments</h3>
+      @for (r of it.resists ?? []; track $index; let i = $index) {
+        <div class="learn">
+          <select
+            aria-label="Élément"
+            (change)="
+              setIn(it, 'resists', i, {
+                element: $any($event.target).value,
+              })
+            "
+          >
+            @for (e of db().elements; track e.id) {
+              <option [value]="e.id" [selected]="e.id === r.element">
+                {{ e.name }}
+              </option>
+            }
+          </select>
+          <select
+            aria-label="Réaction"
+            (change)="
+              setIn(it, 'resists', i, {
+                level: $any($event.target).value,
+              })
+            "
+          >
+            @for (l of resistLevels; track l.id) {
+              <option [value]="l.id" [selected]="l.id === r.level">
+                {{ l.label }}
+              </option>
+            }
+          </select>
+          <button
+            type="button"
+            class="remove"
+            title="Retirer"
+            aria-label="Retirer"
+            (click)="removeFrom(it, 'resists', i)"
+          >
+            <svg lucideX></svg>
+          </button>
+        </div>
+      }
+      <button type="button" class="add-select" (click)="addTo(it, 'resists')">
+        <svg lucidePlus></svg> Élément
+      </button>
+    </div>
+
+    <div class="block">
+      <div class="block-head">
+        <h3>Progresse plus vite</h3>
+        <small>tant qu'on le porte</small>
+      </div>
+      @for (g of it.growth ?? []; track $index; let i = $index) {
+        <div class="learn">
+          <db-learn-select
+            [value]="g.id"
+            (picked)="setIn(it, 'growth', i, { id: $event })"
+          />
+          <db-stepper
+            class="plus"
+            [value]="g.percent"
+            [min]="5"
+            [max]="percentMax"
+            [step]="5"
+            [signed]="true"
+            [suffix]="'%'"
+            [label]="'Pourcentage'"
+            (changed)="setIn(it, 'growth', i, { percent: $event })"
+          />
+          <button
+            type="button"
+            class="remove"
+            title="Retirer"
+            aria-label="Retirer"
+            (click)="removeFrom(it, 'growth', i)"
+          >
+            <svg lucideX></svg>
+          </button>
+        </div>
+      }
+      <button type="button" class="add-select" (click)="addTo(it, 'growth')">
+        <svg lucidePlus></svg> Élément ou arme
+      </button>
+    </div>
+    <div class="block">
+      <div class="block-head">
+        <h3>Qui peut le porter</h3>
+        <small>{{ it.wearers?.length ? "" : "tout le monde" }}</small>
+      </div>
+      <div class="chips" role="group" aria-label="Qui peut le porter">
+        @for (c of teamCharacters(); track c.id) {
+          <button
+            type="button"
+            class="chip plain who"
+            [class.on]="it.wearers?.includes(c.id)"
+            [attr.aria-pressed]="!!it.wearers?.includes(c.id)"
+            (click)="toggleWearer(it, c.id)"
+          >
+            @if (c.icon) {
+              <img class="pixel" [src]="c.icon" alt="" />
+            }
+            {{ c.name }}
+          </button>
+        } @empty {
+          <p class="note">Pas encore de personnage dans l'équipe.</p>
+        }
+      </div>
+    </div>
+  }
+  @case ("key") {
+    <p class="hint">
+      <svg lucideInfo></svg> Un objet clé sert à l'histoire : il ne se vend pas
+      et ne s'utilise pas. Les événements pourront le donner et vérifier qu'on
+      l'a (bientôt).
+    </p>
+  }
+  @case ("gift") {
+    <p class="hint">
+      <svg lucideInfo></svg> Un cadeau s'offre aux habitants. Ce que chacun aime
+      ou déteste arrivera avec les liens sociaux.
+    </p>
+  }
+}

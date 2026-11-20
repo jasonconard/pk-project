@@ -139,7 +139,13 @@ Les [événements](09-evenements.md) donnent et retirent des objets et de l'arge
 
 | Fichier | Rôle |
 |---|---|
-| `src/app/modules/database-editor/database-editor.component.*` | L'éditeur (onglets, liste, fiches) |
+| `src/app/modules/database-editor/database-editor.component.*` | L'éditeur : les onglets, la liste, le haut de la fiche (icône, nom, couleur), les fenêtres par-dessus |
+| `src/app/modules/database-editor/sheets/<table>-sheet/` | Une fiche par table (personnage, ennemi, groupe, compétence, objet, état, élément, type d'arme) |
+| `src/app/modules/database-editor/shared/db-sheet.ts` | Ce que les fiches partagent (`DbSheet`) : les constantes, les noms des éléments, compétences, météos… |
+| `src/app/modules/database-editor/shared/database-store.ts` | La base en cours de modification et son enregistrement (`DatabaseStore`) |
+| `src/app/modules/database-editor/effects-editor/` | Les effets d'une compétence ou d'un objet |
+| `src/app/modules/database-editor/learn-select/` | Le choix d'un élément simple ou d'un type d'arme |
+| `src/app/modules/database-editor/_sheets.scss` | Le style des champs des fiches (commun) |
 | `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel (icônes 16 × 16, portraits, sprites) |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
 | `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbEnemy`, `DbGroup`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
