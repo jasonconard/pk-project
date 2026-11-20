@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.35',
+    date: '2026-11-20',
+    notes: [
+      'Éditeur : un objet peut maintenant avoir des événements. On choisit ce qui le déclenche : lui parler, marcher dessus, ou tout seul.',
+      'Un événement peut dépendre des variables, de l\'heure ou de la météo. Il peut afficher des messages, changer une variable, téléporter, changer la météo, jouer un petit son ou faire une pause.',
+      'Un personnage peut se tourner vers le joueur quand on lui parle.',
+      'Éditeur : nouvel onglet Événements, pour poser des zones invisibles qui déclenchent quelque chose quand on entre dedans.',
+      'Écrire dans un champ ne déclenche plus les raccourcis du jeu (météo, éditeur, déplacements).',
+    ],
+  },
+  {
     version: '0.0.34',
     date: '2026-11-19',
     notes: [
