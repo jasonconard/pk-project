@@ -15,14 +15,14 @@ export interface GameAction {
 const VERBS: Record<GameAction['kind'], string> = { enter: 'Entrer', talk: 'Parler', read: 'Lire', look: 'Regarder' };
 
 /**
- * The action of an event: a passage enters; a message with a face is someone talking (the target: their name),
+ * The action of an event: a passage enters; a message with a name is someone talking (the target: their name),
  * another message is read on the object.
  */
 export function describeAction(evt: SceneEvent, building: SceneBuilding): GameAction {
   const first = evt.instructions[0];
   const message = first?.type === InstructionType.MESSAGE ? first.message : undefined;
   const kind: GameAction['kind'] = first?.type === InstructionType.TELEPORT ? 'enter'
-    : message ? (message.pic && message.name ? 'talk' : 'read')
+    : message ? (message.name ? 'talk' : 'read')
     : 'look';
   return { kind, verb: VERBS[kind], target: kind === 'talk' ? message!.name! : modelLabel(building.modelId) };
 }

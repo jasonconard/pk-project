@@ -14,6 +14,7 @@ import { GameMapService } from "./game-map.service";
 import { createMap, downloadMapFile, duplicateMap, listMaps, loadMap, resetMap, saveMap } from "./map-storage";
 import { MapKind } from "../model/SceneMap";
 import { Passage } from "../model/Passage";
+import { ObjectTalk } from "../model/ObjectTalk";
 import { Vec3 } from "../model/SceneUtils";
 import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { KeyService } from "../../../../core/shared/service/key.service";
@@ -702,6 +703,15 @@ export class GameService {
     const game = this.game;
     if (game) {
       this.mapEditorService.setPassage(game, passage);
+      this.syncHud();
+    }
+  }
+
+  /** What the selected object says when the player talks to it (null: removed). */
+  setTalk(talk: ObjectTalk | null) {
+    const game = this.game;
+    if (game) {
+      this.mapEditorService.setTalk(game, talk);
       this.syncHud();
     }
   }

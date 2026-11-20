@@ -150,3 +150,40 @@
     cursor: pointer;
   }
 }
+
+/* Selected object: what it says when the player talks to it */
+
+.talk-hint {
+  color: #b8bbc8;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.talk-line {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  input,
+  textarea {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 8px;
+    border: 1px solid #4a4c5a;
+    border-radius: 6px;
+    background: #2a2b33;
+    color: inherit;
+    font: inherit;
+  }
+
+  input {
+    height: 30px;
+  }
+
+  textarea {
+    resize: vertical;
+    line-height: 1.35;
+  }
+}

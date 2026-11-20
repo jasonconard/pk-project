@@ -1,6 +1,7 @@
 import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { isGameCovered, setGameCovered } from '../../core/shared/app-visibility';
 import { Passage } from './shared/model/Passage';
+import { ObjectTalk } from './shared/model/ObjectTalk';
 import { DecimalPipe } from '@angular/common';
 import { isFirstStartOfNewVersion } from './release-notes/whats-new';
 import { GameMode } from './shared/model/Game';
@@ -237,6 +238,10 @@ export class GameComponent {
 
   protected setPassage(passage: Passage | null): void {
     this.gameService.setPassage(passage);
+  }
+
+  protected setTalk(talk: ObjectTalk | null): void {
+    this.gameService.setTalk(talk);
   }
 
   protected pickArrival(): void {

@@ -3,13 +3,14 @@ import { isGameCovered } from '../../../core/shared/app-visibility';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing, LucideCheck, LucideChevronDown, LucideCloudSun,
-  LucideClapperboard, LucideDatabase, LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideGrid2x2, LucideMessagesSquare, LucideSearch,
+  LucideClapperboard, LucideDatabase, LucideDoorOpen, LucideDynamicIcon, LucideEighthNotes, LucideGrid2x2, LucideMessagesSquare, LucideMessageSquareText, LucideSearch,
   LucideUserRound, LucideRotateCw, LucideCopy, LucideEllipsisVertical, LucideEraser, LucideFlag, LucideGrid3x3, LucideIcon,
   LucideLayoutGrid, LucideMap, LucideMapPin, LucideMountain, LucideMousePointer2, LucidePaintBucket, LucidePaintbrush, LucidePlay,
   LucidePlus, LucideRedo2, LucideSettings, LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap,
 } from '@lucide/angular';
 import { MapManagerComponent } from '../map-manager/map-manager.component';
 import { Passage } from '../shared/model/Passage';
+import { ObjectTalk, TalkLine } from '../shared/model/ObjectTalk';
 import { listMaps } from '../shared/services/map-storage';
 import { loadModelThumb, MODEL_CHOICES, modelLabel } from '../shared/model/ModelChoice';
 import { TERRAINS, TILESET_LINK, TILESET_SIZE, tilesetPos } from '../shared/model/Terrain';
@@ -74,7 +75,7 @@ interface PaletteEntry {
   imports: [MapManagerComponent, LucideDynamicIcon, LucideArrowBigDown, LucideArrowBigUp, LucideBox, LucideChartNoAxesColumnIncreasing,
     LucideCheck, LucideChevronDown, LucideCloudSun, LucideDoorOpen, LucideGrid2x2, LucideSearch, LucideRotateCw, LucideCopy, LucideEighthNotes, LucideEllipsisVertical, LucideEraser, LucideFlag,
     LucideGrid3x3, LucideMap, LucideMapPin, LucideMousePointer2, LucidePaintBucket, LucidePlay, LucidePlus, LucideRedo2, LucideSettings,
-    LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap],
+    LucideSquareMinus, LucideSquarePlus, LucideTrash, LucideUndo2, LucideVariable, LucideX, LucideZap, LucideMessageSquareText],
   templateUrl: './editor-bar.component.html',
   styleUrls: ['./editor-bar.component.scss', './editor-bar.passage.scss', './editor-bar.wide.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -97,6 +98,7 @@ export class EditorBarComponent {
   /** Weather and hour (the computer's bar: its Ambiance button). */
   readonly ambianceLabel = input('');
   readonly passageChange = output<Passage | null>();
+  readonly talkChange = output<ObjectTalk | null>();
   readonly pickArrival = output<void>();
   readonly cancelPick = output<void>();
   /** Maps a passage can lead to (read again when the selection changes). */
@@ -311,6 +313,21 @@ export class EditorBarComponent {
   /** Another destination: the point chosen on the old one doesn't apply. */
   protected setPassageMap(passage: Passage, map: string): void {
     this.passageChange.emit({ map, trigger: passage.trigger });
+  }
+
+  /** A line changed (when leaving the field: one undo step per line edited). */
+  protected setTalkLine(talk: ObjectTalk, index: number, line: TalkLine): void {
+    this.talkChange.emit({ lines: talk.lines.map((l, i) => i === index ? line : l) });
+  }
+
+  /** A new line, said by the same one as the last line. */
+  protected addTalkLine(talk: ObjectTalk): void {
+    const last = talk.lines[talk.lines.length - 1];
+    this.talkChange.emit({ lines: [...talk.lines, { ...(last?.name ? { name: last.name } : {}), text: '' }] });
+  }
+
+  protected removeTalkLine(talk: ObjectTalk, index: number): void {
+    this.talkChange.emit({ lines: talk.lines.filter((_, i) => i !== index) });
   }
 
   protected openMaps(event: Event): void {

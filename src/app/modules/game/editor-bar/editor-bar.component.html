@@ -200,9 +200,30 @@
           <button type="button" class="add-passage" (click)="addPassage()"><svg lucidePlus></svg> Ajouter un passage</button>
         }
       </div>
-      <button type="button" class="soon" disabled title="Personnages et événements : bientôt">
-        <svg lucideZap></svg> Ajouter un événement · bientôt
-      </button>
+      <div class="passage talk">
+        <h3><svg lucideMessageSquareText></svg> Parler, examiner</h3>
+        @if (selection.talk; as talk) {
+          <small class="talk-hint">Le joueur appuie sur la touche d'action à côté de l'objet : les répliques s'affichent l'une après l'autre.</small>
+          @for (line of talk.lines; track $index; let i = $index) {
+            <div class="talk-line">
+              <div class="passage-row">
+                <input type="text" aria-label="Qui parle" placeholder="Qui parle (facultatif)" maxlength="40" [value]="line.name ?? ''"
+                       (change)="setTalkLine(talk, i, { name: $any($event.target).value, text: line.text })" />
+                @if (talk.lines.length > 1) {
+                  <button type="button" class="small-btn icon-only" aria-label="Retirer cette réplique" title="Retirer cette réplique"
+                          (click)="removeTalkLine(talk, i)"><svg lucideX></svg></button>
+                }
+              </div>
+              <textarea aria-label="Ce qui est dit" placeholder="Ce qui est dit…" rows="2" maxlength="400" [value]="line.text"
+                        (change)="setTalkLine(talk, i, { name: line.name, text: $any($event.target).value })"></textarea>
+            </div>
+          }
+          <button type="button" class="add-passage" (click)="addTalkLine(talk)"><svg lucidePlus></svg> Ajouter une réplique</button>
+          <button type="button" class="remove-passage" data-haptic="warning" (click)="talkChange.emit(null)">Retirer l'événement</button>
+        } @else {
+          <button type="button" class="add-passage" (click)="talkChange.emit({ lines: [{ text: '' }] })"><svg lucidePlus></svg> Ajouter un événement</button>
+        }
+      </div>
     </section>
   }
   @if (!selection() || layout() !== 'portrait') {

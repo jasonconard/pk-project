@@ -13,7 +13,9 @@ import { TILE_SIZE } from '../model/Terrain';
 import { LEVEL_HEIGHT } from '../model/GroundMesh';
 import { CHUNK_SIZE, downloadMapFile, newChunk, saveMap } from './map-storage';
 import { eventsWithPassage, Passage, passageOf } from '../model/Passage';
+import { eventsWithTalk, ObjectTalk, talkOf } from '../model/ObjectTalk';
 import { Vec3 } from '../model/SceneUtils';
+import { SceneEvent } from '../model/SceneEvent';
 
 /** Camera zoom range in the editor (1 = normal game view, lower = closer). */
 const ZOOM_MIN = 0.4;
@@ -54,6 +56,8 @@ export interface EditSelection {
   canHide: boolean;
   /** Passage to another map set on the object. */
   passage: Passage | null;
+  /** What the object says when the player talks to it. */
+  talk: ObjectTalk | null;
 }
 
 /** Editor command sent by the UI (keyboard shortcuts, buttons). */
@@ -729,7 +733,7 @@ export class MapEditorService {
     game.editSelection = picked
       ? {
         modelId: picked.building.modelId, passable: picked.building.passable, canHide: picked.building.canHide,
-        passage: passageOf(picked.building),
+        passage: passageOf(picked.building), talk: talkOf(picked.building),
       }
       : null;
   }
@@ -911,8 +915,22 @@ export class MapEditorService {
       return;
     }
     const building = picked.building;
+    this.changeEvents(game, picked, eventsWithPassage(building, passage), passage?.trigger === 'walk' ? true : building.passable);
+  }
+
+  /** What the selected object says when the player talks to it (null: removed). Undone as one change. */
+  setTalk(game: Game, talk: ObjectTalk | null) {
+    const picked = this.selected;
+    if (picked) {
+      this.changeEvents(game, picked, eventsWithTalk(picked.building, talk), picked.building.passable);
+    }
+  }
+
+  /** New events (and passable option) for an object, undone as one change. */
+  private changeEvents(game: Game, picked: Picked, events: SceneEvent[], passable: boolean) {
+    const building = picked.building;
     const before = { events: building.events, passable: building.passable };
-    const after = { events: eventsWithPassage(building, passage), passable: passage?.trigger === 'walk' ? true : building.passable };
+    const after = { events, passable };
     const set = (state: typeof before) => {
       building.events = state.events;
       building.passable = state.passable;
