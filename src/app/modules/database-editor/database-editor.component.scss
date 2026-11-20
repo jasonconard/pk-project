@@ -705,6 +705,246 @@ db-stepper.minus {
   }
 }
 
+/* --- Skill sheet --- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px 0 10px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1.5px solid transparent;
+  font-size: 13px;
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c);
+  }
+
+  &.on {
+    border-color: var(--c);
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+}
+
+.learn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 8px;
+  border-radius: 10px;
+  background: var(--surface);
+
+  select {
+    flex: 1;
+    font-weight: 600;
+  }
+
+  .remove {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 16px;
+  }
+}
+
+.two {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  .grow {
+    flex: 1;
+    min-width: 0;
+  }
+
+  select {
+    height: 36px;
+  }
+}
+
+.cast-label {
+  color: #ffd34d !important;
+  font-weight: 600;
+}
+
+.gauge {
+  padding: 12px 12px 8px;
+  border-radius: 10px;
+  background: var(--field);
+
+  .bar {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+
+    span {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-radius: 3px;
+      transition: left 150ms, width 150ms;
+    }
+
+    .wait {
+      left: 0;
+      width: 70%;
+      background: var(--border);
+    }
+
+    .cast {
+      background: #ffd34d;
+    }
+
+    .act {
+      right: 0;
+      background: var(--danger);
+    }
+  }
+
+  .labels {
+    display: flex;
+    margin-top: 6px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+
+    span {
+      flex-shrink: 0;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: width 150ms;
+    }
+
+    span:last-child {
+      flex: 1;
+    }
+  }
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  small {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  input {
+    flex: 1;
+    accent-color: #ffd34d;
+  }
+}
+
+.fx {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 6px 10px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+
+  .fx-head {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    b {
+      flex: 1;
+      min-width: 0;
+      font-size: 14px;
+    }
+  }
+
+  .remove {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  .fx-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding-right: 6px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    &.grow {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    small {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    select {
+      height: 36px;
+    }
+  }
+}
+
+.fold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+
+  span {
+    flex: 1;
+  }
+
+  .chev {
+    transition: transform 150ms;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.mono {
+  font-family: ui-monospace, Menlo, Consolas, monospace !important;
+}
+
 /* The list and the sheet side by side */
 @media (min-width: 760px) {
   .body, .body.sheet-open {

@@ -1,7 +1,7 @@
 import { GameDatabase } from '../../app/modules/database-editor/shared/database';
 
 /**
- * The game's database (elements, weapon types, states…). Written by the database editor's export (editor →
+ * The game's database (elements, weapon types, states, skills…). Written by the database editor's export (editor →
  * Éditeurs → Base de données → Exporter); the database saved in the browser replaces this one.
  */
 export const CODE_DATABASE: GameDatabase = {
@@ -225,6 +225,194 @@ export const CODE_DATABASE: GameDatabase = {
           "kind": "stat",
           "stat": "str",
           "percent": 25
+        }
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "sk-fireball",
+      "name": "Boule de feu",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAqUlEQVR42mNgwANEhGT+MxAATPg036kSI2gIEyEbCBnChM92fi85gt5iwqWZWG8x4dKMbDtM05t3TxhV2l6heAurF5A1w9gwTeiuY8Ln9I9SMzAMIRiIMMUwzeiGkByNhAzBaQD/swysbHTASCgGUFyy7REDAwMDg0rbK4Y3754worgAFkXICglpZmBgYGBBVgQxhOE/AwMDwx0sLoBZgNULxOREZJupBgCxP1aciFf8igAAAABJRU5ErkJggg==",
+      "note": "Une petite boule de feu.",
+      "element": "el-fire",
+      "mp": 4,
+      "cast": 0.5,
+      "target": "enemy",
+      "use": "fight",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "mag",
+          "power": 40
+        },
+        {
+          "kind": "addState",
+          "state": "st-burn",
+          "chance": 30
+        }
+      ],
+      "learn": [
+        {
+          "id": "el-fire",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "id": "sk-ice-lance",
+      "name": "Lance de glace",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAtUlEQVR42mNgwANEhGT+iwjJ/GcgB4gIyfxf9ez//1XP/uM1hAldEzLfjeslVoOxGiAiJPN/2pXHKAp2fRPH0IyuBquzYX7/8OEFCp+Qd1AMgWmG0bg0s2DzF7Fh8ObdE0ZGmL+wKcYGkMMlS0eWgRGbC6ZdeYziApimLB1ZFMPevHvCyAJjYHPirm/iGC5DVkswFmCBSFQsoCvAlhKJMgRbdKKL40zK2PyHnhrxhgFVcyOxAACfpazfE0O7wAAAAABJRU5ErkJggg==",
+      "element": "el-ice",
+      "mp": 6,
+      "cast": 1.5,
+      "target": "enemy",
+      "use": "fight",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "mag",
+          "power": 60
+        }
+      ],
+      "learn": [
+        {
+          "id": "el-ice",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "sk-storm",
+      "name": "Orage",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgUlEQVR42mNkIAKICMn8R+a/efeEEcZmIUbz6yMmcL6ozRkUeSZSNSPbjtcAYjTjtfn/tYD//68F/P/w4cV/9DBABoz4bP4oNYNBRckEQxPOQETXzMDAwIDsDWyByIgvutANwBYOjAMeiNTVjGwA3TRjTYkqSibEBxi6C0h2NqUAAOEXcmOWAvBRAAAAAElFTkSuQmCC",
+      "element": "el-thunder",
+      "mp": 12,
+      "cast": 3,
+      "target": "enemies",
+      "use": "fight",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "mag",
+          "power": 80
+        },
+        {
+          "kind": "addState",
+          "state": "st-paralysis",
+          "chance": 20
+        }
+      ],
+      "learn": [
+        {
+          "id": "el-fire",
+          "level": 5
+        },
+        {
+          "id": "el-wind",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "sk-heal",
+      "name": "Soin",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAtElEQVR42mNgoBAwInNEhGT+w9hv3j0hSo4RWUHUtiC4hmVe6+AK8cmhKGjSqGJgYGBgqLvRBlfIwMDAgKwZ3RAWdAmYZlwaGRgYGI5sOAdnM+HSTCxgwSUBcz4h1zDBQhVdAwMDA8Ode2cY7tw7g+H8R7MewAORCTlqsBmCTzPedABzAQMDA4OKkgmKQcgGsGBzNj4xdMMwDEBWgMsFOA1ATnnYFKMnb4JAREjmPy7DBg8AAPIqYzz2395TAAAAAElFTkSuQmCC",
+      "element": "el-light",
+      "mp": 3,
+      "cast": 0.5,
+      "target": "ally",
+      "use": "both",
+      "effects": [
+        {
+          "kind": "heal",
+          "resource": "hp",
+          "power": 40
+        }
+      ],
+      "learn": [
+        {
+          "id": "el-light",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "sk-venom",
+      "name": "Venin",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAtUlEQVR42mNgoCUQEZL5LyIk859szatS7vxPMZqG1xAWXJqnBR1gYGBgYHAzcmNgYGBg2MDQ9v/NuyeM6GqZcGl26+GBi7kZuTEEKFQxYHMJCy7Nu0q+oCjE5RImbF5A14wPsGDzd9Y6BwYGBgYGXHxkVzBRGtVYYwFmEy4+3lhABlnrHODOxwUYccU/1sA9t4thw4M2BuRYYMSWDgIUquDRBtPIwMCAoRmrATBDsIljS4kDDwBXxFMZGUA4rAAAAABJRU5ErkJggg==",
+      "element": "el-dark",
+      "mp": 5,
+      "cast": 1,
+      "target": "enemy",
+      "use": "fight",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "mag",
+          "power": 20
+        },
+        {
+          "kind": "addState",
+          "state": "st-poison",
+          "chance": 60
+        }
+      ],
+      "learn": [
+        {
+          "id": "el-dark",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "id": "sk-double",
+      "name": "Coup double",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAbElEQVR42mNkIBOICMn8Z2BgYGAiV/Ode2cYyDIApvnc5Vfk2fzhw4v/+w5f+g/zwqhmNMXIiki2WURI5v+JaRr/YQaR5WxkQ8jyM7ohZGmelmLznyxDkDWT7BIRIZn/UTaYitFjhugoJAUAALvxgEVzTYQuAAAAAElFTkSuQmCC",
+      "element": "el-physical",
+      "mp": 0,
+      "cast": 0.5,
+      "target": "enemy",
+      "use": "fight",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "str",
+          "power": 30
+        },
+        {
+          "kind": "damage",
+          "stat": "str",
+          "power": 30
+        }
+      ],
+      "learn": [
+        {
+          "id": "wp-sword",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "id": "sk-lullaby",
+      "name": "Berceuse",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAf0lEQVR42mNgoBAw4pMUEZL5j0vuzbsnjAwMDAwshGywabmCIXakRoc454kIyfxHxgHTPvxHdxVeF8CcScg7RLkEm+0ogYhN8s27J4wiQjL/cYXDm3dPGFlwBRhyQBEVaIQCCxdgQnYucqBRPbAIugA5sGxarhAdbQRjgWH4AwDjmUVJJe+U1QAAAABJRU5ErkJggg==",
+      "element": "el-wind",
+      "mp": 7,
+      "cast": 3,
+      "target": "enemies",
+      "use": "fight",
+      "effects": [
+        {
+          "kind": "addState",
+          "state": "st-sleep",
+          "chance": 50
+        }
+      ],
+      "learn": [
+        {
+          "id": "el-wind",
+          "level": 4
         }
       ]
     }
