@@ -62,7 +62,7 @@ Pour garder où en est la partie : **Menu → Sauver** (pendant le jeu ; grisé 
 
 - Un emplacement montre la carte, l'heure du jeu, la météo et quand il a été sauvé (« Carte du monde · 07:38 · Neutre », « Sauvée le 19 nov. à 16:02 »).
 - **Sauver ici** remplit un emplacement vide. **Écraser** remplace une sauvegarde par la partie en cours.
-- **Charger** ramène à la sauvegarde : la carte, la position du joueur, l'heure, la météo et la valeur des [variables](08-variables.md). La partie en cours est perdue si elle n'a pas été sauvée.
+- **Charger** ramène à la sauvegarde : la carte, la position du joueur, l'heure, la météo, la valeur des [variables](08-variables.md) et l'équipe (ses membres, ses objets, son argent). La partie en cours est perdue si elle n'a pas été sauvée.
 - **Écraser**, **Charger** et la corbeille demandent deux appuis (pendant 3 secondes ; le texte sous les emplacements dit ce qui va se passer).
 - Si la carte d'une sauvegarde n'existe plus, le joueur revient à la carte de départ.
 - Les sauvegardes restent sur l'appareil : elles ne sont pas dans le projet de jeu (ce sont les parties, pas les créations).

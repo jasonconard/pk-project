@@ -37,6 +37,9 @@ Toutes doivent être vraies. Sans condition, l'événement se joue toujours.
 - **Variable** : un drapeau est vrai / faux, un compteur est =, ≠, ≥ ou ≤ à un nombre. Les variables se créent dans l'[éditeur de variables](08-variables.md).
 - **Heure** : de telle heure à telle heure (de 20 h à 6 h passe par minuit).
 - **Météo** : l'une des météos choisies (« + ou… » en ajoute une autre). Les météos se choisissent dans une liste avec leur image et un champ pour chercher (Entrée prend la première).
+- **Objet** : l'équipe a au moins tant de cet objet (les objets de la [base de données](10-base-de-donnees.md)).
+- **Argent** : l'équipe a au moins tant de pièces.
+- **Équipe** : tel personnage est dans l'équipe.
 
 ## Actions
 
@@ -53,10 +56,14 @@ Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'a
 | **Son** | Un petit son : bip, pièce, objet trouvé, réussite, erreur, porte, coffre, cloche, magie, saut, coup, pas. ▶ l'écoute. |
 | **Attendre** | Une pause, en secondes. |
 | **Arrêter** | L'événement s'arrête là : les actions suivantes ne sont pas jouées. |
+| **Objet** | Donne ou retire un nombre d'un objet de la [base de données](10-base-de-donnees.md) (jamais en dessous de 0). |
+| **Argent** | Donne ou retire des pièces. |
+| **Équipe** | Un personnage entre dans l'équipe ou en sort. |
+| **Combat** | Un combat contre un groupe d'ennemis de la base de données, puis la branche de la fin : **Victoire**, **Défaite** ou **Fuite** (seulement si on peut fuir ce groupe). En attendant le vrai combat, le jeu demande comment il se termine, pour essayer les branches ; une victoire donne le butin (l'argent des ennemis, leurs objets selon leur chance). |
 
 ## L'arbre d'actions
 
-Choix et Condition contiennent des **branches** (comme dans RPG Maker) : un trait de couleur à gauche (orange pour les réponses d'un choix, bleu pour Alors / Sinon), décalé vers la droite. Chaque branche a son **+ Action**.
+Choix, Condition et Combat contiennent des **branches** (comme dans RPG Maker) : un trait de couleur à gauche (orange pour les réponses d'un choix, bleu pour Alors / Sinon, rouge pour Victoire / Défaite / Fuite), décalé vers la droite. Chaque branche a son **+ Action**.
 
 - Le chevron **plie** une action à branches (il reste un résumé : « « Oui » · 2 actions ») ou une seule branche.
 - On peut mettre un choix dans un choix, mais pas plus de **3 niveaux** : au-delà, Choix et Condition sont grisés dans la feuille.

@@ -32,7 +32,7 @@ Pour essayer ce qui dépend d'une variable : **Menu → Test des variables**, pe
 
 - Chaque variable montre sa valeur du moment, à changer à la main (Non / Oui, ou − / + et le nombre), et sa valeur au début.
 - Une variable qui n'est plus à sa valeur au début a un trait jaune à gauche ; le bas de la fenêtre dit combien ont changé.
-- **Tout remettre au début** (deux appuis) remet toutes les variables à leur valeur au début, comme une nouvelle partie.
+- **Tout remettre au début** (deux appuis) remet toutes les variables à leur valeur au début, comme une nouvelle partie (l'équipe aussi : ses membres du début, sans objet ni argent).
 
 ## Sauvegarde et export
 

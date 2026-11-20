@@ -35,6 +35,7 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
 ## Personnages
 
 - **Équipe** ou **Habitant** : un habitant ne se bat pas, il n'a que son apparence (son emploi du temps et ses liens viendront plus tard).
+- **Dans l'équipe au début de la partie** : sinon, un [événement](09-evenements.md) le fait entrer (action Équipe).
 - **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (48 × 48), le **sprite de combat** (32 × 48, une image plate face à la caméra, à la Grandia) et le **modèle 3D** sur la carte.
 - Un membre de l'équipe a deux onglets :
   - **Général** :
@@ -124,6 +125,10 @@ Supprimer un élément fait passer ses compétences en Physique ; supprimer un �
 
 Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 9 objets (Potion, Remède, Graine de force, Cristal de feu, Épée courte, Bouclier de bois, Amulette de glace, Clé rouillée, Boîte à musique), 2 personnages (Hugo et Jason), 3 ennemis (Gluant, Chauve-souris, Gluant des neiges), 3 groupes (Gluants de la forêt, Nuée, Gluants des neiges), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
 
+## Pendant la partie
+
+Les [événements](09-evenements.md) donnent et retirent des objets et de l'argent, font entrer ou sortir des personnages de l'équipe et lancent des combats contre les groupes ; leurs conditions vérifient ce que l'équipe a. L'équipe (membres, objets, argent) est gardée dans le navigateur, et dans les [sauvegardes de partie](05-sauvegarde-export.md#sauvegarde-de-partie). **Tout remettre au début** (Menu → Test des variables) la remet comme au début d'une partie.
+
 ## Sauvegarde et export
 
 - Chaque changement est enregistré dans le navigateur (« Enregistré » sous le titre).
@@ -139,4 +144,5 @@ Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
 | `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbEnemy`, `DbGroup`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |
+| `src/app/modules/database-editor/shared/party.ts` | L'équipe dans la partie (`pk-party`) : membres, objets, argent |
 | `src/assets/database/database.ts` | La base du jeu (`CODE_DATABASE`), écrite par l'export |

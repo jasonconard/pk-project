@@ -28,9 +28,9 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 0 | **Plusieurs cartes** (fait) | Créer, renommer, ouvrir une carte ; chacune en chunks (la carte du monde par défaut) ; passages entre cartes. Voir [05](editeur/05-sauvegarde-export.md) et [02](editeur/02-objets.md) | Tout |
 | 1 | **Projet de jeu** (fait : exporter / importer le fichier `.pk` depuis le menu, l'envoyer depuis l'application Android, le résumé de ce que contient l'appareil, voir [05](editeur/05-sauvegarde-export.md#projet-de-jeu-fichier-pk)) | Toutes les créations (cartes, modèles, musiques) dans un seul projet : exporter / importer un fichier `.pk`, synchroniser entre téléphone et ordinateur | Tout |
 | 2 | **Variables et sauvegarde de partie** (fait : l'éditeur de variables et le test des variables, voir [08](editeur/08-variables.md), la sauvegarde de partie sur trois emplacements, voir [05](editeur/05-sauvegarde-export.md#sauvegarde-de-partie)) | Drapeaux d'histoire (« a parlé au maire »), compteurs, jour courant ; sauvegarde sur plusieurs emplacements | Tout |
-| 3 | **Personnages et événements** (fait : déclencheurs parler / entrer dessus / automatique, conditions variables / heure / météo, actions message / variable / téléporter / météo / son / attendre, se tourner vers le joueur, zones invisibles, voir [09](editeur/09-evenements.md) ; restent : téléporter vers un point choisi, donner un objet et lancer un combat, qui attendent la base de données et le combat) | Poser un PNJ, un panneau, une zone ; déclencheurs (parler, entrer, heure, météo, drapeau) et actions | Jour et nuit |
+| 3 | **Personnages et événements** (fait : déclencheurs parler / entrer dessus / automatique, conditions variables / heure / météo, actions message / variable / téléporter / météo / son / attendre / objet / argent / équipe / combat, conditions objet / argent / équipe, se tourner vers le joueur, zones invisibles, voir [09](editeur/09-evenements.md) ; restent : téléporter vers un point choisi, et le vrai combat derrière l'action Combat (point 9)) | Poser un PNJ, un panneau, une zone ; déclencheurs (parler, entrer, heure, météo, drapeau) et actions | Jour et nuit |
 | 4 | **Dialogues** (fait : arbre d'actions dans la fenêtre des événements, choix et conditions Si / Sinon avec leurs branches, arrêter, portrait et nom, voir [09](editeur/09-evenements.md#larbre-dactions) ; restent : conditions sur les liens (point 8), événements communs réutilisables, portraits dessinés (point 6)) | Répliques, choix, conditions (drapeaux, liens), effets ; portrait et nom de qui parle | Jour |
-| 5 | **Base de données** (en cours : toutes les tables sont faites (personnages, ennemis, groupes, compétences, objets, états, éléments, types d'armes), voir [10](editeur/10-base-de-donnees.md) ; reste le lien avec les événements (donner un objet, lancer un combat…), voir [plus bas](#base-de-données-point-5--en-cours)) | Personnages (stats, portrait), objets, compétences, ennemis et groupes, éléments et faiblesses | Tout |
+| 5 | **Base de données** (fait : personnages, ennemis, groupes, compétences, objets, états, éléments, types d'armes, et le lien avec les événements, voir [10](editeur/10-base-de-donnees.md) et [plus bas](#base-de-données-point-5--fait)) | Personnages (stats, portrait), objets, compétences, ennemis et groupes, éléments et faiblesses | Tout |
 | 6 | **Portraits et sprites** | Dessiner en pixel art les portraits de dialogue et les personnages (avec la vue 2D de l'éditeur de modèles) | Jour et nuit |
 | 7 | **Temps et calendrier** | Jours, périodes (matin, après-midi, soir, nuit), activités qui prennent du temps, emplois du temps des habitants | Jour |
 | 8 | **Liens sociaux** | Un niveau de lien par personnage, les scènes débloquées à chaque niveau, les bonus en combat | Jour → nuit |
@@ -57,7 +57,7 @@ Poser un PNJ ou un panneau, écrire son dialogue dans l'éditeur, choisir ce qui
 
 - Déclencheurs : parler, entrer dans une zone, une heure, une météo, un objet possédé.
 - Actions : dialogue (avec choix), téléporter, donner un objet, changer la météo, jouer un son, lancer un combat.
-- Fait : voir [09-evenements](editeur/09-evenements.md). Restent « donner un objet » et « lancer un combat » (base de données, combat), et une arrivée choisie pour « Téléporter ».
+- Fait : voir [09-evenements](editeur/09-evenements.md), y compris « donner un objet » et « lancer un combat » (le vrai combat viendra au point 9). Reste une arrivée choisie pour « Téléporter ».
 
 ### Éditeur de musique (MIDI lo-fi) — en cours (faits : composer et écouter, mixage et son lo-fi, un morceau par moment et par carte ; restent le moment Donjon et l'import MIDI, voir [07-musique](editeur/07-musique.md))
 
@@ -70,7 +70,7 @@ Une musique d'ambiance par zone, qui change avec la météo et l'heure, composé
 - Export en fichier du jeu (comme les modèles) ; plus tard, import d'un fichier MIDI.
 - Utilisable sur téléphone, comme l'éditeur de modèles.
 
-### Base de données (point 5) — en cours
+### Base de données (point 5) — fait
 
 Une page à part (`/#/base`), comme les variables ou la musique : un onglet par table, la liste puis la fiche.
 
@@ -86,7 +86,7 @@ Une page à part (`/#/base`), comme les variables ou la musique : un onglet par 
 - **Ennemis** : stats, faiblesses, butin (expérience, argent, objets avec une chance en %), comportement (compétences avec un poids et des conditions simples), météos et heures où il apparaît ou devient plus fort. **Groupes** : on place les ennemis sur le terrain (vue de dessus).
 - **Images** : un petit éditeur pixel dans les fiches pour les icônes (16×16), les portraits et les sprites de combat, avec import d'un PNG possible.
 - **Événements** : donner / retirer un objet, donner de l'argent ; conditions « a l'objet », « argent ≥ » ; faire entrer / sortir un personnage de l'équipe, soigner l'équipe ; lancer un combat avec les branches Victoire / Défaite / Fuite.
-- **Étapes** (une par session, validée) : 1) maquette `design/database.pen` (téléphone et ordinateur) — fait ; 2) la page, Éléments, Types d'armes et États, avec l'éditeur pixel des icônes — fait ; 3) Compétences — fait ; 4) Objets — fait ; 5) Personnages — fait ; 6) Ennemis et groupes — fait ; 7) les liens avec les événements.
+- **Étapes** (une par session, validée) : 1) maquette `design/database.pen` (téléphone et ordinateur) — fait ; 2) la page, Éléments, Types d'armes et États, avec l'éditeur pixel des icônes — fait ; 3) Compétences — fait ; 4) Objets — fait ; 5) Personnages — fait ; 6) Ennemis et groupes — fait ; 7) les liens avec les événements — fait. Reste « soigner l'équipe », qui attend les PV du combat (point 9).
 
 ### Zones d'action sur les objets
 
