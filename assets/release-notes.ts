@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.37',
+    date: '2026-11-20',
+    notes: [
+      'Base de données : on y crée maintenant les compétences, les objets, les personnages, les ennemis et leurs groupes.',
+      'Les compétences s\'apprennent à la Grandia : chaque personnage progresse dans les éléments et les armes qu\'il utilise.',
+      'Les portraits et les sprites de combat se dessinent en pixel art, en plus grand que les icônes.',
+      'Événements : nouvelles actions pour donner un objet ou de l\'argent, faire entrer un personnage dans l\'équipe ou lancer un combat. Les conditions peuvent vérifier ce que l\'équipe possède.',
+      'Dans un événement, les actions d\'une réponse ou d\'une condition se jouent bien avant la suite.',
+    ],
+  },
+  {
     version: '0.0.36',
     date: '2026-11-20',
     notes: [
