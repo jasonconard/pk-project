@@ -27,6 +27,7 @@ import {
   VariableKind,
 } from "./shared/variables";
 import { loadVariables, saveVariables } from "./shared/variable-storage";
+import { nameKey } from "../../core/shared/text";
 
 const KIND_LABELS: Record<VariableKind, string> = {
   flag: "Drapeau",
@@ -76,11 +77,11 @@ export class VariablesEditorComponent {
   protected readonly badNames = computed(() => {
     const seen = new Map<string, number>();
     this.variables().forEach((v) =>
-      seen.set(norm(v.name), (seen.get(norm(v.name)) ?? 0) + 1)
+      seen.set(nameKey(v.name), (seen.get(nameKey(v.name)) ?? 0) + 1)
     );
     return new Set(
       this.variables()
-        .filter((v) => !norm(v.name) || seen.get(norm(v.name))! > 1)
+        .filter((v) => !nameKey(v.name) || seen.get(nameKey(v.name))! > 1)
         .map((v) => v.id)
     );
   });
@@ -100,9 +101,9 @@ export class VariablesEditorComponent {
 
   protected add(kind: VariableKind): void {
     const base = kind === "flag" ? "Nouveau drapeau" : "Nouveau compteur";
-    const names = new Set(this.variables().map((v) => norm(v.name)));
+    const names = new Set(this.variables().map((v) => nameKey(v.name)));
     let name = base;
-    for (let i = 2; names.has(norm(name)); i++) {
+    for (let i = 2; names.has(nameKey(name)); i++) {
       name = `${base} ${i}`;
     }
     const variable = newVariable(kind, name);
@@ -192,8 +193,4 @@ export const CODE_VARIABLES: GameVariable[] = ${JSON.stringify(variables, null, 
     this.saveFailed.set(!saveVariables(variables));
     this.message.set("");
   }
-}
-
-function norm(name: string): string {
-  return name.trim().toLocaleLowerCase("fr-FR");
 }

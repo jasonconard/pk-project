@@ -1,5 +1,10 @@
 import { loadVariables, VARIABLES_KEY } from "./variable-storage";
 import { GameVariable } from "./variables";
+import {
+  cachedFromStorage,
+  readJson,
+  writeJson,
+} from "../../../core/shared/local-store";
 
 /**
  * The variables' values in the game being played (the variables editor gives their value at the start). Kept in the
@@ -12,21 +17,13 @@ export type VariableValue = boolean | number;
 export type VariableValues = Record<string, VariableValue>;
 
 function readValues(): VariableValues {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const values = raw ? JSON.parse(raw) : null;
-    return values && typeof values === "object" ? values : {};
-  } catch {
-    return {};
-  }
+  const values = readJson<VariableValues>(STORAGE_KEY);
+  return values && typeof values === "object" ? values : {};
 }
 
 function writeValues(values: VariableValues): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
-  } catch {
-    // No room: the values live until the page closes
-  }
+  // (no room: the values live until the page closes)
+  writeJson(STORAGE_KEY, values);
 }
 
 /** The value of a variable now: the game's if it has the right type, else the starting value. */
@@ -41,27 +38,16 @@ function valueOf(
   return typeof value === "number" ? value : variable.initial;
 }
 
-/** Last answer of currentVariableValues, with what it was read from (the game asks many times a second). */
-let cache: { raw: string; values: VariableValues } | null = null;
-
 /** Every variable of the game with its value now (id → value). Don't change the object returned. */
-export function currentVariableValues(): VariableValues {
-  let raw = "";
-  try {
-    raw = `${localStorage.getItem(STORAGE_KEY)}|${localStorage.getItem(VARIABLES_KEY)}`;
-  } catch {
-    // (no storage: read every time)
+export const currentVariableValues = cachedFromStorage(
+  [STORAGE_KEY, VARIABLES_KEY],
+  (): VariableValues => {
+    const values = readValues();
+    return Object.fromEntries(
+      loadVariables().map((v) => [v.id, valueOf(v, values)])
+    );
   }
-  if (cache && raw && cache.raw === raw) {
-    return cache.values;
-  }
-  const values = readValues();
-  const current = Object.fromEntries(
-    loadVariables().map((v) => [v.id, valueOf(v, values)])
-  );
-  cache = { raw, values: current };
-  return current;
-}
+);
 
 /** A saved game's values replace the current ones (the variables it doesn't know get their starting value). */
 export function restoreVariableValues(values: VariableValues): void {

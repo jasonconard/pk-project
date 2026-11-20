@@ -1,4 +1,9 @@
 import { loadDatabase } from "./database-storage";
+import {
+  cachedFromStorage,
+  readJson,
+  writeJson,
+} from "../../../core/shared/local-store";
 
 /**
  * The team in the game being played: who is in it, the items carried and the money. Kept in the browser so it
@@ -30,47 +35,25 @@ export function startParty(): PartyState {
 }
 
 function readParty(): PartyState | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const party = raw ? (JSON.parse(raw) as PartyState) : null;
-    return party &&
-      Array.isArray(party.team) &&
-      party.items &&
-      typeof party.money === "number"
-      ? party
-      : null;
-  } catch {
-    return null;
-  }
+  const party = readJson<PartyState>(STORAGE_KEY);
+  return party &&
+    Array.isArray(party.team) &&
+    party.items &&
+    typeof party.money === "number"
+    ? party
+    : null;
 }
 
 function writeParty(party: PartyState): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(party));
-  } catch {
-    // No room: the team lives until the page closes
-  }
-  cache = null;
+  // (no room: the team lives until the page closes)
+  writeJson(STORAGE_KEY, party);
 }
-
-/** Last answer of currentParty, with what it was read from (the conditions ask many times a second). */
-let cache: { raw: string; party: PartyState } | null = null;
 
 /** The team now. Don't change the object returned. */
-export function currentParty(): PartyState {
-  let raw = "";
-  try {
-    raw = localStorage.getItem(STORAGE_KEY) ?? "";
-  } catch {
-    // (no storage: read every time)
-  }
-  if (cache && raw && cache.raw === raw) {
-    return cache.party;
-  }
-  const party = readParty() ?? startParty();
-  cache = raw ? { raw, party } : null;
-  return party;
-}
+export const currentParty = cachedFromStorage(
+  [STORAGE_KEY],
+  (): PartyState => readParty() ?? startParty()
+);
 
 /** Items given (amount > 0) or taken (< 0, never below 0). */
 export function giveItem(id: string, amount: number): void {

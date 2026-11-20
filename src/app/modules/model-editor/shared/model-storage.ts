@@ -1,4 +1,9 @@
 import { EditableModel, FaceTexture } from "./EditableModel";
+import {
+  readJson,
+  removeKey,
+  writeJson,
+} from "../../../core/shared/local-store";
 
 /**
  * The edited models are kept in the browser's IndexedDB (room for hundreds of MB, where localStorage has ~5 MB
@@ -181,12 +186,7 @@ export function fromBase64(text: string): Uint8ClampedArray {
 }
 
 async function moveLegacyModels(database: IDBDatabase) {
-  let legacy: { models?: Record<string, LegacyModel> } | null = null;
-  try {
-    legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? "null");
-  } catch {
-    legacy = null;
-  }
+  const legacy = readJson<{ models?: Record<string, LegacyModel> }>(LEGACY_KEY);
   if (!legacy?.models) {
     return;
   }
@@ -211,32 +211,22 @@ async function moveLegacyModels(database: IDBDatabase) {
     } satisfies ModelRecord);
   });
   await done(tx);
-  try {
-    localStorage.removeItem(LEGACY_KEY);
-  } catch {
-    // Moved anyway; read again next time, written over with the same models
-  }
+  // (not removed: moved anyway; read again next time, written over with the same models)
+  removeKey(LEGACY_KEY);
 }
 
 const RECENT_COLORS_KEY = "pk-model-recent-colors";
 
 export function loadRecentColors(): string[] {
-  try {
-    const colors = JSON.parse(localStorage.getItem(RECENT_COLORS_KEY) ?? "[]");
-    return Array.isArray(colors)
-      ? colors.filter((c) => typeof c === "string")
-      : [];
-  } catch {
-    return [];
-  }
+  const colors = readJson<unknown>(RECENT_COLORS_KEY);
+  return Array.isArray(colors)
+    ? colors.filter((c) => typeof c === "string")
+    : [];
 }
 
 export function saveRecentColors(colors: string[]) {
-  try {
-    localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(colors));
-  } catch {
-    // Only a convenience
-  }
+  // (only a convenience: not kept when the browser refuses)
+  writeJson(RECENT_COLORS_KEY, colors);
 }
 
 const PALETTE_KEY = "pk-model-palette";
@@ -249,26 +239,17 @@ export interface StoredPalette {
 }
 
 export function loadImportedPalette(): StoredPalette | null {
-  try {
-    const palette = JSON.parse(
-      localStorage.getItem(PALETTE_KEY) ?? "null"
-    ) as StoredPalette | null;
-    return palette && Array.isArray(palette.colors) && palette.colors.length > 0
-      ? palette
-      : null;
-  } catch {
-    return null;
-  }
+  const palette = readJson<StoredPalette>(PALETTE_KEY);
+  return palette && Array.isArray(palette.colors) && palette.colors.length > 0
+    ? palette
+    : null;
 }
 
 export function saveImportedPalette(palette: StoredPalette | null) {
-  try {
-    if (palette) {
-      localStorage.setItem(PALETTE_KEY, JSON.stringify(palette));
-    } else {
-      localStorage.removeItem(PALETTE_KEY);
-    }
-  } catch {
-    // Only a convenience
+  // (only a convenience: not kept when the browser refuses)
+  if (palette) {
+    writeJson(PALETTE_KEY, palette);
+  } else {
+    removeKey(PALETTE_KEY);
   }
 }

@@ -127,6 +127,7 @@ import {
 } from "./shared/pixel-tools";
 import { PixelCanvasComponent } from "./pixel-canvas/pixel-canvas.component";
 import { haptic } from "../../core/shared/haptics";
+import { readJson, writeJson } from "../../core/shared/local-store";
 
 const FACE_LABELS: Record<BoxFace, string> = {
   front: "Avant",
@@ -274,20 +275,9 @@ type PanelSection =
 const SECTIONS_KEY = "pk-model-editor-sections";
 const BIG_VIEW_KEY = "pk-model-editor-big-view";
 
+/** A saved view setting, completed with the defaults (what it misses, or all when unreadable). */
 function loadJson<T>(key: string, fallback: T): T {
-  try {
-    return { ...fallback, ...JSON.parse(localStorage.getItem(key) ?? "null") };
-  } catch {
-    return fallback;
-  }
-}
-
-function saveJson(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Only a convenience
-  }
+  return { ...fallback, ...readJson<Partial<T>>(key) };
 }
 
 /** Delay before the model is saved in the browser after a change (ms). */
@@ -1113,7 +1103,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   protected toggleSection(section: PanelSection, open: boolean) {
     if (this.sections()[section] !== open) {
       this.sections.update((s) => ({ ...s, [section]: open }));
-      saveJson(SECTIONS_KEY, this.sections());
+      writeJson(SECTIONS_KEY, this.sections());
     }
   }
 
@@ -1172,7 +1162,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   protected setBigView(on: boolean) {
     this.bigView.set(on);
-    saveJson(BIG_VIEW_KEY, { on });
+    writeJson(BIG_VIEW_KEY, { on });
   }
 
   // --- Pointer / keyboard ---

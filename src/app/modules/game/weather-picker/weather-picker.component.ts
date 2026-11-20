@@ -12,7 +12,11 @@ import {
 import { LucideCheck, LucideSearch, LucideX } from "@lucide/angular";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import { WEATHER_CHOICES, WeatherType } from "../shared/weather/Weather";
-import { weatherScreenshot } from "../shared/weather/weather-catalog";
+import {
+  weatherImageError,
+  weatherScreenshot,
+} from "../shared/weather/weather-catalog";
+import { searchKey } from "../../../core/shared/text";
 
 /**
  * Choosing a weather in a long list: a search field and one 40 px line per weather, with its catalog picture.
@@ -41,12 +45,12 @@ export class WeatherPickerComponent implements OnInit {
   protected readonly search = signal("");
   protected readonly weathers = computed(() => {
     const exclude = new Set(this.exclude());
-    const q = norm(this.search());
+    const q = searchKey(this.search());
     return WEATHER_CHOICES.filter(
       (w) =>
         (this.withNeutral() || w.type !== WeatherType.NEUTRAL) &&
         !exclude.has(w.type) &&
-        (!q || norm(w.label).includes(q))
+        (!q || searchKey(w.label).includes(q))
     );
   });
 
@@ -90,20 +94,6 @@ export class WeatherPickerComponent implements OnInit {
 
   /** Some weathers only have a night picture. */
   protected imageMissing(ev: Event, type: WeatherType): void {
-    const img = ev.target as HTMLImageElement;
-    const night = weatherScreenshot(type, true);
-    if (img.src.endsWith(night)) {
-      img.style.visibility = "hidden";
-    } else {
-      img.src = night;
-    }
+    weatherImageError(ev, type);
   }
-}
-
-function norm(text: string): string {
-  return text
-    .trim()
-    .toLocaleLowerCase("fr-FR")
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "");
 }

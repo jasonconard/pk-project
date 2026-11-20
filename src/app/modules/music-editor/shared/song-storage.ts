@@ -4,6 +4,11 @@ import {
   CODE_SONGS,
 } from "../../../../assets/music/music";
 import { MapMusicUse, MusicUse, newSong, Song } from "./song";
+import {
+  readJson,
+  removeKey,
+  writeJson,
+} from "../../../core/shared/local-store";
 
 /** The songs, saved in the browser (a few kB of JSON each): { songs, current, use, mapUse }. */
 const STORAGE_KEY = "pk-songs";
@@ -27,22 +32,13 @@ export function replaceStoredSongs(stored: StoredSongs | null): void {
   if (stored?.songs?.length) {
     saveSongs(stored);
   } else {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // Nothing to forget
-    }
+    removeKey(STORAGE_KEY);
   }
 }
 
 function readStored(): StoredSongs | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const stored = raw ? (JSON.parse(raw) as StoredSongs) : null;
-    return stored?.songs?.length ? stored : null;
-  } catch {
-    return null; // unreadable
-  }
+  const stored = readJson<StoredSongs>(STORAGE_KEY);
+  return stored?.songs?.length ? stored : null;
 }
 
 /** The editor's songs: the browser's, else the game's (code), else a new one. */
@@ -64,11 +60,8 @@ export function loadSongs(): StoredSongs {
 }
 
 export function saveSongs(stored: StoredSongs): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-  } catch {
-    // storage full / private browsing: kept for this session only
-  }
+  // (storage full / private browsing: kept for this session only)
+  writeJson(STORAGE_KEY, stored);
 }
 
 /**

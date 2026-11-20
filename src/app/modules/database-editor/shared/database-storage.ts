@@ -1,5 +1,10 @@
 import { CODE_DATABASE } from "../../../../assets/database/database";
-import { GameDatabase } from "./database";
+import { DbTable, GameDatabase } from "./database";
+import {
+  readJson,
+  removeKey,
+  writeJson,
+} from "../../../core/shared/local-store";
 
 /** Where the database editor keeps the database in the browser: { database }. */
 export const DATABASE_KEY = "pk-database";
@@ -11,32 +16,17 @@ export interface StoredDatabase {
 /** Every table there (a table added by a later version is taken from the code). */
 function complete(database: Partial<GameDatabase>): GameDatabase {
   const code = structuredClone(CODE_DATABASE);
-  return {
-    elements: Array.isArray(database.elements)
-      ? database.elements
-      : code.elements,
-    weapons: Array.isArray(database.weapons) ? database.weapons : code.weapons,
-    states: Array.isArray(database.states) ? database.states : code.states,
-    skills: Array.isArray(database.skills) ? database.skills : code.skills,
-    items: Array.isArray(database.items) ? database.items : code.items,
-    characters: Array.isArray(database.characters)
-      ? database.characters
-      : code.characters,
-    enemies: Array.isArray(database.enemies) ? database.enemies : code.enemies,
-    groups: Array.isArray(database.groups) ? database.groups : code.groups,
-  };
+  const tables = Object.keys(code) as DbTable[];
+  return Object.fromEntries(
+    tables.map((t) => [t, Array.isArray(database[t]) ? database[t] : code[t]])
+  ) as unknown as GameDatabase;
 }
 
 function readStored(): StoredDatabase | null {
-  try {
-    const raw = localStorage.getItem(DATABASE_KEY);
-    const stored = raw ? (JSON.parse(raw) as StoredDatabase) : null;
-    return stored?.database && typeof stored.database === "object"
-      ? stored
-      : null;
-  } catch {
-    return null; // unreadable
-  }
+  const stored = readJson<StoredDatabase>(DATABASE_KEY);
+  return stored?.database && typeof stored.database === "object"
+    ? stored
+    : null;
 }
 
 /** The database saved in the browser, null if none (for the project file). */
@@ -52,15 +42,7 @@ export function loadDatabase(): GameDatabase {
 
 /** False if the browser refused (no room). */
 export function saveDatabase(database: GameDatabase): boolean {
-  try {
-    localStorage.setItem(
-      DATABASE_KEY,
-      JSON.stringify({ database } satisfies StoredDatabase)
-    );
-    return true;
-  } catch {
-    return false;
-  }
+  return writeJson(DATABASE_KEY, { database } satisfies StoredDatabase);
 }
 
 /** Replaces the database saved in the browser (project file import); null forgets it (the code's comes back). */
@@ -70,10 +52,6 @@ export function replaceStoredDatabase(
   if (stored?.database && typeof stored.database === "object") {
     saveDatabase(complete(stored.database));
   } else {
-    try {
-      localStorage.removeItem(DATABASE_KEY);
-    } catch {
-      // Nothing to forget
-    }
+    removeKey(DATABASE_KEY);
   }
 }

@@ -2,6 +2,7 @@ import { WeatherType } from "../weather/Weather";
 import { Vec3 } from "../model/SceneUtils";
 import { VariableValues } from "../../../variables-editor/shared/variable-values";
 import { PartyState } from "../../../database-editor/shared/party";
+import { readJson, writeJson } from "../../../../core/shared/local-store";
 
 /**
  * The saved games: a few slots, in the browser of this device (they are the player's progress, not creations: not
@@ -30,12 +31,7 @@ export interface GameSave {
 
 /** The slots (null: empty), always SAVE_SLOTS of them. */
 export function loadSaves(): (GameSave | null)[] {
-  let saves: unknown;
-  try {
-    saves = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-  } catch {
-    saves = [];
-  }
+  const saves = readJson<unknown>(STORAGE_KEY);
   const list = Array.isArray(saves) ? saves : [];
   return Array.from({ length: SAVE_SLOTS }, (_, i) =>
     isSave(list[i]) ? list[i] : null
@@ -46,12 +42,7 @@ export function loadSaves(): (GameSave | null)[] {
 export function writeSave(slot: number, save: GameSave | null): boolean {
   const saves = loadSaves();
   saves[slot] = save;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saves));
-    return true;
-  } catch {
-    return false;
-  }
+  return writeJson(STORAGE_KEY, saves);
 }
 
 function isSave(value: unknown): value is GameSave {

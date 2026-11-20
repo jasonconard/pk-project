@@ -14,6 +14,11 @@ import { LEGACY_TILE_IDS } from "../model/Terrain";
 import { downloadFile, SourceEnums, toSource } from "../util/ts-source";
 import { CODE_MAPS, DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { omit } from "../../../../core/shared/omit";
+import {
+  readJson,
+  removeKey,
+  writeJson,
+} from "../../../../core/shared/local-store";
 
 /**
  * The maps edited in the editor, saved in the browser: one entry per map (the code's maps edited, the maps made in
@@ -119,12 +124,7 @@ function currentTiles(
 }
 
 function readStored(): StoredMaps {
-  let stored: StoredMaps | null = null;
-  try {
-    stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
-  } catch {
-    stored = null;
-  }
+  let stored = readJson<StoredMaps>(STORAGE_KEY);
   if (!stored || stored.version !== STORAGE_VERSION || !stored.maps) {
     stored = { version: STORAGE_VERSION, maps: {} };
   }
@@ -133,24 +133,16 @@ function readStored(): StoredMaps {
 }
 
 function writeStored(stored: StoredMaps) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-  } catch {
-    // Storage full or blocked: the edits only live until the page is reloaded
-  }
+  // (storage full or blocked: the edits only live until the page is reloaded)
+  writeJson(STORAGE_KEY, stored);
 }
 
 /** The world map edits of the first version ({ version: 1, chunks: { id: content } }) become the world map's entry. */
 function migrateLegacy(stored: StoredMaps) {
-  let legacy: {
+  const legacy = readJson<{
     version: number;
     chunks: Record<string, Partial<StoredChunk>>;
-  } | null = null;
-  try {
-    legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? "null");
-  } catch {
-    legacy = null;
-  }
+  }>(LEGACY_KEY);
   if (!legacy) {
     return;
   }
@@ -172,11 +164,8 @@ function migrateLegacy(stored: StoredMaps) {
     };
     writeStored(stored);
   }
-  try {
-    localStorage.removeItem(LEGACY_KEY);
-  } catch {
-    // (read again next time: the world entry exists, nothing changes)
-  }
+  // (not removed: read again next time, the world entry exists, nothing changes)
+  removeKey(LEGACY_KEY);
 }
 
 /** Columns × rows of the area covered by chunks. */

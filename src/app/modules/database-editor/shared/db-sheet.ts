@@ -39,7 +39,10 @@ import {
   WEATHER_CHOICES,
   WeatherType,
 } from "../../game/shared/weather/Weather";
-import { weatherScreenshot } from "../../game/shared/weather/weather-catalog";
+import {
+  weatherImageError,
+  weatherScreenshot,
+} from "../../game/shared/weather/weather-catalog";
 import { MODEL_CHOICES, modelLabel } from "../../game/shared/model/ModelChoice";
 
 /** What has effects: skills and items. */
@@ -182,13 +185,7 @@ export abstract class DbSheet {
 
   /** Some weathers only have a night picture. */
   protected weatherImageMissing(ev: Event, type: string): void {
-    const img = ev.target as HTMLImageElement;
-    const night = weatherScreenshot(type as WeatherType, true);
-    if (img.src.endsWith(night)) {
-      img.style.visibility = "hidden";
-    } else {
-      img.src = night;
-    }
+    weatherImageError(ev, type as WeatherType);
   }
 
   protected modelName(id: string): string {

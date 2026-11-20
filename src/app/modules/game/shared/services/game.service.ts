@@ -57,6 +57,7 @@ import {
   windToX,
 } from "../weather/Weather";
 import { MusicSlot } from "../../../music-editor/shared/song";
+import { readJson, writeJson } from "../../../../core/shared/local-store";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
 export interface GameHud {
@@ -129,12 +130,7 @@ const MAX_INPUT_CATCH_UP = 250;
 
 /** Last saved settings; anything missing or invalid (old version, removed weather...) is left out. */
 function loadSettings(): Partial<SavedSettings> {
-  let raw: Record<string, unknown>;
-  try {
-    raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") ?? {};
-  } catch {
-    return {};
-  }
+  const raw = readJson<Record<string, unknown>>(SETTINGS_KEY) ?? {};
   const out: Partial<SavedSettings> = {};
   const unit = (v: unknown) =>
     typeof v === "number" && v >= 0 && v <= 1 ? v : undefined;
@@ -181,13 +177,11 @@ function saveSettings(settings: SavedSettings) {
   if (changed.length === 0) {
     return;
   }
-  try {
-    const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") ?? {};
-    changed.forEach((k) => (stored[k] = settings[k]));
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(stored));
+  const stored = readJson<Record<string, unknown>>(SETTINGS_KEY) ?? {};
+  changed.forEach((k) => (stored[k] = settings[k]));
+  // (storage unavailable, private mode…: the settings just won't be kept)
+  if (writeJson(SETTINGS_KEY, stored)) {
     lastSaved = { ...settings };
-  } catch {
-    // Storage unavailable (private mode...): settings just won't be kept
   }
 }
 

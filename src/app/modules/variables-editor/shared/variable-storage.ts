@@ -1,5 +1,10 @@
 import { CODE_VARIABLES } from "../../../../assets/variables/variables";
 import { GameVariable } from "./variables";
+import {
+  readJson,
+  removeKey,
+  writeJson,
+} from "../../../core/shared/local-store";
 
 /** The variables, saved in the browser: { variables }. */
 /** Where the variables editor keeps the variables in the browser. */
@@ -11,13 +16,8 @@ export interface StoredVariables {
 }
 
 function readStored(): StoredVariables | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const stored = raw ? (JSON.parse(raw) as StoredVariables) : null;
-    return Array.isArray(stored?.variables) ? stored : null;
-  } catch {
-    return null; // unreadable
-  }
+  const stored = readJson<StoredVariables>(STORAGE_KEY);
+  return Array.isArray(stored?.variables) ? stored : null;
 }
 
 /** The variables saved in the browser, null if none (for the project file). */
@@ -32,15 +32,7 @@ export function loadVariables(): GameVariable[] {
 
 /** False if the browser refused (no room). */
 export function saveVariables(variables: GameVariable[]): boolean {
-  try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ variables } satisfies StoredVariables)
-    );
-    return true;
-  } catch {
-    return false;
-  }
+  return writeJson(STORAGE_KEY, { variables } satisfies StoredVariables);
 }
 
 /** Replaces the variables saved in the browser (project file import); null forgets them (the code's come back). */
@@ -50,10 +42,6 @@ export function replaceStoredVariables(
   if (stored && Array.isArray(stored.variables)) {
     saveVariables(stored.variables);
   } else {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // Nothing to forget
-    }
+    removeKey(STORAGE_KEY);
   }
 }

@@ -72,6 +72,7 @@ import { ItemSheetComponent } from "./sheets/item-sheet/item-sheet.component";
 import { CharacterSheetComponent } from "./sheets/character-sheet/character-sheet.component";
 import { EnemySheetComponent } from "./sheets/enemy-sheet/enemy-sheet.component";
 import { GroupSheetComponent } from "./sheets/group-sheet/group-sheet.component";
+import { searchKey } from "../../core/shared/text";
 
 /** In the mockup's order. */
 const TABLES: { id: DbTable; label: string; one: string; icon: LucideIcon }[] =
@@ -196,11 +197,11 @@ export class DatabaseEditorComponent extends DbSheet {
   protected readonly rows = computed<Row[]>(() => this.db()[this.table()]);
 
   protected readonly shownRows = computed(() => {
-    const q = norm(this.search());
+    const q = searchKey(this.search());
     const kind = this.table() === "items" ? this.itemFilter() : null;
     return this.rows().filter(
       (r) =>
-        (!q || norm(r.name).includes(q)) &&
+        (!q || searchKey(r.name).includes(q)) &&
         (!kind || (r as DbItem).kind === kind)
     );
   });
@@ -318,9 +319,9 @@ export class DatabaseEditorComponent extends DbSheet {
       enemies: "Nouvel ennemi",
       groups: "Nouveau groupe",
     }[table];
-    const names = new Set(this.rows().map((r) => norm(r.name)));
+    const names = new Set(this.rows().map((r) => searchKey(r.name)));
     let name = base;
-    for (let i = 2; names.has(norm(name)); i++) {
+    for (let i = 2; names.has(searchKey(name)); i++) {
       name = `${base} ${i}`;
     }
     const makers: Record<DbTable, () => Row> = {
@@ -543,12 +544,4 @@ export const CODE_DATABASE: GameDatabase = ${JSON.stringify(this.db(), null, 2)}
       "database.ts téléchargé : à mettre dans src/assets/database/."
     );
   }
-}
-
-function norm(name: string): string {
-  return name
-    .trim()
-    .toLocaleLowerCase("fr-FR")
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "");
 }

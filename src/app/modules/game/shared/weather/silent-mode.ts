@@ -1,4 +1,5 @@
 import { signal } from "@angular/core";
+import { readText, writeText } from "../../../../core/shared/local-store";
 
 /** Saved choice (per device): play the sound even when the phone / tablet is in silent mode. */
 const STORAGE_KEY = "pk-ignore-silent-mode";
@@ -19,11 +20,7 @@ export const SILENT_MODE_BYPASS_SUPPORTED =
   typeof navigator !== "undefined" && !!session();
 
 function load(): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
+  return readText(STORAGE_KEY) === "1";
 }
 
 export const ignoreSilentMode = signal(SILENT_MODE_BYPASS_SUPPORTED && load());
@@ -36,9 +33,6 @@ export function applySilentMode(ignore = ignoreSilentMode()) {
     return;
   }
   audioSession.type = ignore ? "playback" : "auto";
-  try {
-    localStorage.setItem(STORAGE_KEY, ignore ? "1" : "0");
-  } catch {
-    // Private browsing: applied, not remembered
-  }
+  // (private browsing: applied, not remembered)
+  writeText(STORAGE_KEY, ignore ? "1" : "0");
 }

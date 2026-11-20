@@ -1,6 +1,7 @@
 import { signal } from "@angular/core";
 import { Capacitor } from "@capacitor/core";
 import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
+import { readText, writeText } from "./local-store";
 
 /**
  * Small vibrations on the actions (buttons, game controls, painting…):
@@ -35,11 +36,7 @@ const isIos =
 export const hapticsSupported = native || canVibrate || isIos;
 
 function loadEnabled(): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEY) !== "off";
-  } catch {
-    return true;
-  }
+  return readText(STORAGE_KEY) !== "off";
 }
 
 const enabledState = signal(loadEnabled());
@@ -47,11 +44,8 @@ export const hapticsEnabled = enabledState.asReadonly();
 
 export function setHapticsEnabled(enabled: boolean): void {
   enabledState.set(enabled);
-  try {
-    localStorage.setItem(STORAGE_KEY, enabled ? "on" : "off");
-  } catch {
-    // private browsing: only for this session
-  }
+  // (private browsing: only for this session)
+  writeText(STORAGE_KEY, enabled ? "on" : "off");
   if (enabled) {
     haptic("medium"); // feel it right away
   }

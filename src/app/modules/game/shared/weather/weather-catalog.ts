@@ -670,3 +670,17 @@ export const WEATHER_INFO: Record<WeatherType, WeatherInfo> = {
 export function weatherScreenshot(type: WeatherType, night: boolean): string {
   return `assets/weather/${type}-${night ? "night" : "day"}.webp`;
 }
+
+/**
+ * For an <img> of a weather's day screenshot that failed to load: some weathers only have a night picture, it is
+ * shown instead (and the image hidden when that one is missing too). Use: (error)="weatherImageError($event, type)".
+ */
+export function weatherImageError(ev: Event, type: WeatherType): void {
+  const img = ev.target as HTMLImageElement;
+  const night = weatherScreenshot(type, true);
+  if (img.src.endsWith(night)) {
+    img.style.visibility = "hidden";
+  } else {
+    img.src = night;
+  }
+}
