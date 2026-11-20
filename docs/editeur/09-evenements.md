@@ -36,7 +36,7 @@ Toutes doivent être vraies. Sans condition, l'événement se joue toujours.
 
 - **Variable** : un drapeau est vrai / faux, un compteur est =, ≠, ≥ ou ≤ à un nombre. Les variables se créent dans l'[éditeur de variables](08-variables.md).
 - **Heure** : de telle heure à telle heure (de 20 h à 6 h passe par minuit).
-- **Météo** : l'une des météos choisies (« + ou… » en ajoute une autre).
+- **Météo** : l'une des météos choisies (« + ou… » en ajoute une autre). Les météos se choisissent dans une liste avec leur image et un champ pour chercher (Entrée prend la première).
 
 ## Actions
 
@@ -49,7 +49,7 @@ Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'a
 | **Condition** | Teste des variables, l'heure ou la météo (comme les conditions de l'événement) : joue la branche **Alors** si tout est vrai, sinon la branche **Sinon**. |
 | **Variable** | Un drapeau devient vrai / faux ; un compteur devient un nombre ou augmente de (négatif : diminue). |
 | **Téléporter** | Vers une carte, à son point d'arrivée. |
-| **Météo** | Change la météo (comme le panneau Ambiance : une météo de jour la nuit fait passer au jour). |
+| **Météo** | Change la météo (comme le panneau Ambiance : une météo de jour la nuit fait passer au jour). Toucher la météo ouvre la liste des météos. |
 | **Son** | Un petit son : bip, pièce, objet trouvé, réussite, erreur, porte, coffre, cloche, magie, saut, coup, pas. ▶ l'écoute. |
 | **Attendre** | Une pause, en secondes. |
 | **Arrêter** | L'événement s'arrête là : les actions suivantes ne sont pas jouées. |

@@ -13,6 +13,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 7. [Éditeur de musique](07-musique.md) : composer les musiques avec des tampons sur une grille (à la Mario Paint), gammes, batterie, lecture en boucle.
 8. [Éditeur de variables](08-variables.md) : les drapeaux et compteurs de l'histoire, leur valeur au début, export.
 9. [Événements](09-evenements.md) : faire parler un objet, zones invisibles, déclencheurs, conditions (variables, heure, météo) et actions.
+10. [Base de données](10-base-de-donnees.md) : éléments (simples ou composés, liés aux météos), types d'armes, états, icônes en pixel art, export.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 
