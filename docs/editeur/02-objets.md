@@ -41,3 +41,7 @@ Chaque changement enregistre une action `{ undo, redo }` (`MapEditorService.reco
 ## Le rocher
 
 `md-rock.ts` : un bloc bas avec la tuile « Sea Rocks » de la planche d'animations (le fond rouge, couleur de transparence de la planche, est rendu transparent). Il bloque le passage et se pose dans l'eau comme sur la terre.
+
+## Événements
+
+Un objet sélectionné peut recevoir des événements (parler, entrer dessus, automatique) : voir [Événements](09-evenements.md). L'onglet **Événements** de la palette pose les zones invisibles.

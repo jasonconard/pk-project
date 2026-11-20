@@ -28,7 +28,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 0 | **Plusieurs cartes** (fait) | Créer, renommer, ouvrir une carte ; chacune en chunks (la carte du monde par défaut) ; passages entre cartes. Voir [05](editeur/05-sauvegarde-export.md) et [02](editeur/02-objets.md) | Tout |
 | 1 | **Projet de jeu** (fait : exporter / importer le fichier `.pk` depuis le menu, l'envoyer depuis l'application Android, le résumé de ce que contient l'appareil, voir [05](editeur/05-sauvegarde-export.md#projet-de-jeu-fichier-pk)) | Toutes les créations (cartes, modèles, musiques) dans un seul projet : exporter / importer un fichier `.pk`, synchroniser entre téléphone et ordinateur | Tout |
 | 2 | **Variables et sauvegarde de partie** (fait : l'éditeur de variables et le test des variables, voir [08](editeur/08-variables.md), la sauvegarde de partie sur trois emplacements, voir [05](editeur/05-sauvegarde-export.md#sauvegarde-de-partie)) | Drapeaux d'histoire (« a parlé au maire »), compteurs, jour courant ; sauvegarde sur plusieurs emplacements | Tout |
-| 3 | **Personnages et événements** (éditeur de carte) | Poser un PNJ, un panneau, une zone ; déclencheurs (parler, entrer, heure, météo, drapeau) et actions | Jour et nuit |
+| 3 | **Personnages et événements** (fait : déclencheurs parler / entrer dessus / automatique, conditions variables / heure / météo, actions message / variable / téléporter / météo / son / attendre, se tourner vers le joueur, zones invisibles, voir [09](editeur/09-evenements.md) ; restent : téléporter vers un point choisi, donner un objet et lancer un combat, qui attendent la base de données et le combat) | Poser un PNJ, un panneau, une zone ; déclencheurs (parler, entrer, heure, météo, drapeau) et actions | Jour et nuit |
 | 4 | **Dialogues** | Répliques, choix, conditions (drapeaux, liens), effets ; portrait et nom de qui parle | Jour |
 | 5 | **Base de données** | Personnages (stats, portrait), objets, compétences, ennemis et groupes, éléments et faiblesses | Tout |
 | 6 | **Portraits et sprites** | Dessiner en pixel art les portraits de dialogue et les personnages (avec la vue 2D de l'éditeur de modèles) | Jour et nuit |
@@ -51,13 +51,13 @@ Dans l'éditeur de modèles : une forme reçoit un mouvement (rotation, déplace
 - Réglages simples : axe, amplitude, vitesse, « en boucle » ou « à l'approche du joueur ».
 - Le vent (déjà dans les modèles) pourrait aussi pousser certaines formes.
 
-### Personnages et événements dans l'éditeur de carte
+### Personnages et événements dans l'éditeur de carte — fait en grande partie
 
 Poser un PNJ ou un panneau, écrire son dialogue dans l'éditeur, choisir ce qui le déclenche, sans coder.
 
 - Déclencheurs : parler, entrer dans une zone, une heure, une météo, un objet possédé.
 - Actions : dialogue (avec choix), téléporter, donner un objet, changer la météo, jouer un son, lancer un combat.
-- Les briques existent déjà (messages, téléporteurs, `sequence.service`) : il manque l'outil pour les placer.
+- Fait : voir [09-evenements](editeur/09-evenements.md). Restent « donner un objet » et « lancer un combat » (base de données, combat), et une arrivée choisie pour « Téléporter ».
 
 ### Éditeur de musique (MIDI lo-fi) — en cours (faits : composer et écouter, mixage et son lo-fi, un morceau par moment et par carte ; restent le moment Donjon et l'import MIDI, voir [07-musique](editeur/07-musique.md))
 

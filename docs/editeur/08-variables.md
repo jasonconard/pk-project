@@ -1,6 +1,6 @@
 # Éditeur de variables
 
-Les variables retiennent ce qui s'est passé dans l'histoire. Les événements et les dialogues (à venir) pourront les lire et les changer, et une sauvegarde de partie gardera leurs valeurs.
+Les variables retiennent ce qui s'est passé dans l'histoire. Les [événements](09-evenements.md) les lisent (conditions) et les changent (actions) ; les dialogues (à venir) le feront aussi. Une sauvegarde de partie garde leurs valeurs.
 
 ## Ouvrir l'éditeur
 

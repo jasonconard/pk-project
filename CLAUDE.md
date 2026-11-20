@@ -27,13 +27,16 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
   landscape/desktop), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
   `release-notes`, `game-saves` (saved games dialog), `variables-test` (change the variables' values while playing),
-  `teleport`; small windows over the game share `shared/_dialog.scss`.
+  `teleport`, `event-editor` (an object's event window: trigger, conditions, actions); small windows over the game share
+  `shared/_dialog.scss`.
   - `shared/services/`: `game.service` (settings, music, reload of models), `map-editor.service` (map editor logic),
     `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
-    `event` (`actionAt`), `sequence`, `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
+    `event` (`actionAt`, `armed`: enter / automatic events), `sequence` (plays the actions), `sfx` (synthesized sound
+    effects), `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
   - `shared/model/`: `MapHelper` (chunks, bounds, `refreshModels`), `Terrain`, `GroundMesh`, `SceneMap`,
     `SceneBuilding`, `SceneModel`, `ModelChoice` (`MODEL_CHOICES`, palette thumbnails), `ModelInstances`,
-    `browser-models`, `Passage` (links between maps), `Quality`.
+    `browser-models`, `Passage` (links between maps), `ObjectEvent` (editor events ↔ `SceneEvent`, `conditionsFit`),
+    `Zone` (invisible zones, camera layer 1 shown only in the editor; `findModel`), `Quality`.
   - `shared/weather/`: `Weather.ts` (enum, params, presets, temperature, `WEATHER_CHOICES`), `WeatherHelper.ts`
     (wiring), `GlowParticles.ts`, `weather-shader.ts`, `WeatherAudio.ts`, one `XxxHelper.ts` per effect, post passes
     (`BloomPass`, `GodRaysPass`, `HeatHazePass`), `weather-catalog.ts` (catalog texts). Details in `shared/weather/CLAUDE.md`.
