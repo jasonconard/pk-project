@@ -22,14 +22,14 @@ export function wave4Bit(ctx: BaseAudioContext): PeriodicWave {
   const size = 32;
   const table = Array.from({ length: size }, (_, i) => {
     const triangle = i < size / 2 ? i / (size / 2) : 2 - i / (size / 2);
-    return Math.round(triangle * 15) / 15 * 2 - 1;
+    return (Math.round(triangle * 15) / 15) * 2 - 1;
   });
   const real = new Float32Array(size / 2 + 1);
   const imag = new Float32Array(size / 2 + 1);
   for (let k = 1; k <= size / 2; k++) {
     for (let i = 0; i < size; i++) {
-      real[k] += table[i] * Math.cos((2 * Math.PI * k * i) / size) * 2 / size;
-      imag[k] += table[i] * Math.sin((2 * Math.PI * k * i) / size) * 2 / size;
+      real[k] += (table[i] * Math.cos((2 * Math.PI * k * i) / size) * 2) / size;
+      imag[k] += (table[i] * Math.sin((2 * Math.PI * k * i) / size) * 2) / size;
     }
   }
   return ctx.createPeriodicWave(real, imag);
@@ -39,11 +39,15 @@ export function wave4Bit(ctx: BaseAudioContext): PeriodicWave {
  * LFSR noise of the Game Boy: a 15-bit register (a hiss) or 7-bit (a short loop: metallic), shifted `clock` times per
  * second. One second of it, to loop.
  */
-export function lfsrNoise(ctx: BaseAudioContext, bits: 7 | 15, clock: number): AudioBuffer {
+export function lfsrNoise(
+  ctx: BaseAudioContext,
+  bits: 7 | 15,
+  clock: number
+): AudioBuffer {
   const length = ctx.sampleRate;
   const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
   const data = buffer.getChannelData(0);
-  let lfsr = 0x7fff;
+  let lfsr = 0x7f_ff;
   let phase = 0;
   const step = clock / ctx.sampleRate;
   for (let i = 0; i < length; i++) {

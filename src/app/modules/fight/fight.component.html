@@ -1,6 +1,6 @@
 <div class="fight-container">
   <div class="fight-content">
-    {{ pos() | number:'0.2-2' }}
+    {{ pos() | number: "0.2-2" }}
 
     <div class="fight-types-table">
       <div class="fight-types-row">
@@ -24,7 +24,10 @@
     </div>
 
     <div class="fight-bar">
-      <div class="fight-cursor" [style.left]="'calc(' + pos() + '% - 10px)'"></div>
+      <div
+        class="fight-cursor"
+        [style.left]="'calc(' + pos() + '% - 10px)'"
+      ></div>
       <div class="fight-bar-left"></div>
       <div class="fight-bar-right"></div>
     </div>

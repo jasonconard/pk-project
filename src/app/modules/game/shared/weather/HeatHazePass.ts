@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 /** Max image offset of the shimmer (fraction of the screen height) at full heat. */
 const SHIMMER_AMPLITUDE = 0.0022;
@@ -27,7 +27,7 @@ export interface PostEffects {
   lanternAt?: THREE.Vector2;
 }
 
-const FULLSCREEN_VERTEX = /* glsl */`
+const FULLSCREEN_VERTEX = /* glsl */ `
 varying vec2 vUv;
 void main() {
   vUv = uv;
@@ -35,7 +35,7 @@ void main() {
 }
 `;
 
-const HEAT_FRAGMENT = /* glsl */`
+const HEAT_FRAGMENT = /* glsl */ `
 uniform sampler2D tScene;
 uniform float uHeat;
 uniform float uWash;
@@ -132,10 +132,19 @@ void main() {
  * Only used while it's hot (no cost otherwise).
  */
 export class HeatHazePass {
-  private readonly sceneTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+  private readonly sceneTarget = new THREE.WebGLRenderTarget(1, 1, {
+    type: THREE.HalfFloatType,
+  });
   private readonly material: THREE.ShaderMaterial;
   private readonly quadScene = new THREE.Scene();
-  private readonly quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  private readonly quadCamera = new THREE.OrthographicCamera(
+    -1,
+    1,
+    1,
+    -1,
+    0,
+    1
+  );
   private readonly size = new THREE.Vector2();
 
   constructor() {
@@ -154,7 +163,9 @@ export class HeatHazePass {
         uTime: { value: 0 },
         uAspect: { value: 1 },
         uScale: { value: SHIMMER_SCALE },
-        uTint: { value: new THREE.Vector3(WARM_TINT.r, WARM_TINT.g, WARM_TINT.b) },
+        uTint: {
+          value: new THREE.Vector3(WARM_TINT.r, WARM_TINT.g, WARM_TINT.b),
+        },
       },
       depthTest: false,
       depthWrite: false,
@@ -168,25 +179,32 @@ export class HeatHazePass {
    * @param drawFrame renders the frame into the given target (the effect input)
    * @param fx strengths of the effects (heat shimmer, warm wash, negative, old film, mirage, lantern)
    */
-  render(renderer: THREE.WebGLRenderer, drawFrame: (target: THREE.WebGLRenderTarget) => void, fx: PostEffects) {
+  render(
+    renderer: THREE.WebGLRenderer,
+    drawFrame: (target: THREE.WebGLRenderTarget) => void,
+    fx: PostEffects
+  ) {
     renderer.getDrawingBufferSize(this.size);
-    if (this.sceneTarget.width !== this.size.x || this.sceneTarget.height !== this.size.y) {
+    if (
+      this.sceneTarget.width !== this.size.x ||
+      this.sceneTarget.height !== this.size.y
+    ) {
       this.sceneTarget.setSize(this.size.x, this.size.y);
     }
     drawFrame(this.sceneTarget);
 
     const u = this.material.uniforms;
-    u['uHeat'].value = fx.heat;
-    u['uWash'].value = fx.wash;
-    u['uInvert'].value = fx.invert ?? 0;
-    u['uFilm'].value = fx.film ?? 0;
-    u['uMirage'].value = fx.mirage ?? 0;
-    u['uLantern'].value = fx.lantern ?? 0;
+    u["uHeat"].value = fx.heat;
+    u["uWash"].value = fx.wash;
+    u["uInvert"].value = fx.invert ?? 0;
+    u["uFilm"].value = fx.film ?? 0;
+    u["uMirage"].value = fx.mirage ?? 0;
+    u["uLantern"].value = fx.lantern ?? 0;
     if (fx.lanternAt) {
-      u['uLanternAt'].value.copy(fx.lanternAt);
+      u["uLanternAt"].value.copy(fx.lanternAt);
     }
-    u['uTime'].value = fx.time;
-    u['uAspect'].value = this.size.x / this.size.y;
+    u["uTime"].value = fx.time;
+    u["uAspect"].value = this.size.x / this.size.y;
     renderer.setRenderTarget(null);
     renderer.render(this.quadScene, this.quadCamera);
   }

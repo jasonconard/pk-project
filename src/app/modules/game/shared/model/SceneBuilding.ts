@@ -1,17 +1,17 @@
-import { Vec3 } from './SceneUtils';
-import { SceneEvent } from './SceneEvent';
-import { SceneModel } from './SceneModel';
+import { Vec3 } from "./SceneUtils";
+import { SceneEvent } from "./SceneEvent";
+import { SceneModel } from "./SceneModel";
 
 export interface SceneBuilding {
-  id: string,
-  modelId: string
-  originModel?: SceneModel,
-  pos: Vec3,
+  id: string;
+  modelId: string;
+  originModel?: SceneModel;
+  pos: Vec3;
   /** Quarter turns around the vertical axis (0 to 3, clockwise seen from above): the editor's Tourner. */
-  rot?: number,
-  passable: boolean,
+  rot?: number;
+  passable: boolean;
   /** An invisible zone's size in cells (x wide, z deep; see Zone.ts). */
-  size?: { x: number, z: number },
-  canHide: boolean,
-  events: SceneEvent[]
+  size?: { x: number; z: number };
+  canHide: boolean;
+  events: SceneEvent[];
 }

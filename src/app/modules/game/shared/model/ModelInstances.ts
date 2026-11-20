@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { SceneModel } from './SceneModel';
-import { SceneBuilding } from './SceneBuilding';
-import { BasicMeshService } from '../services/basic-mesh.service';
+import * as THREE from "three";
+import { SceneModel } from "./SceneModel";
+import { SceneBuilding } from "./SceneBuilding";
+import { BasicMeshService } from "../services/basic-mesh.service";
 
 /** Room made when the copies don't fit anymore (the instanced meshes are created again, bigger). */
 const GROWTH = 2;
@@ -9,7 +9,7 @@ const MIN_CAPACITY = 8;
 
 /** Template of a model for instancing: its parts (geometry, material, place in the model) and its bounds. */
 interface Template {
-  parts: { mesh: THREE.Mesh, matrix: THREE.Matrix4 }[];
+  parts: { mesh: THREE.Mesh; matrix: THREE.Matrix4 }[];
   bounds: THREE.Box3;
   /** All its parts are drawn with the depth test: their drawing order doesn't matter, they can be instanced. */
   instanceable: boolean;
@@ -30,11 +30,13 @@ function templateOf(model: SceneModel): Template {
     group.updateMatrixWorld(true);
     const parts = group.children
       .filter((c): c is THREE.Mesh => (c as THREE.Mesh).isMesh)
-      .map(mesh => ({ mesh, matrix: mesh.matrix.clone() }));
+      .map((mesh) => ({ mesh, matrix: mesh.matrix.clone() }));
     template = {
       parts,
       bounds: new THREE.Box3().setFromObject(group),
-      instanceable: parts.every(p => (p.mesh.material as THREE.Material).depthTest),
+      instanceable: parts.every(
+        (p) => (p.mesh.material as THREE.Material).depthTest
+      ),
     };
     templates.set(model.id, template);
   }
@@ -45,8 +47,16 @@ function templateOf(model: SceneModel): Template {
  * Can a building be drawn as a copy of its model (instancing)? Not if it fades when the player is behind it
  * (its own opacity), has events (they need its own mesh), or its look depends on the drawing order of its parts.
  */
-export function canInstance(model: SceneModel, building: SceneBuilding): boolean {
-  return !building.canHide && !building.events.length && !building.rot && templateOf(model).instanceable;
+export function canInstance(
+  model: SceneModel,
+  building: SceneBuilding
+): boolean {
+  return (
+    !building.canHide &&
+    building.events.length === 0 &&
+    !building.rot &&
+    templateOf(model).instanceable
+  );
 }
 
 /**
@@ -63,7 +73,10 @@ export class ModelInstances {
   private readonly matrix = new THREE.Matrix4();
   private readonly position = new THREE.Matrix4();
 
-  constructor(model: SceneModel, private readonly group: THREE.Group) {
+  constructor(
+    model: SceneModel,
+    private readonly group: THREE.Group
+  ) {
     this.template = templateOf(model);
     this.grow(MIN_CAPACITY);
   }
@@ -95,7 +108,7 @@ export class ModelInstances {
     const last = this.buildings.length - 1;
     if (i !== last) {
       this.buildings[i] = this.buildings[last];
-      this.parts.forEach(part => {
+      this.parts.forEach((part) => {
         part.getMatrixAt(last, this.matrix);
         part.setMatrixAt(i, this.matrix);
       });
@@ -114,11 +127,13 @@ export class ModelInstances {
 
   /** The building of a copy hit by a ray (instanceId of the hit). */
   buildingAt(instanceId: number | undefined): SceneBuilding | null {
-    return instanceId === undefined ? null : this.buildings[instanceId] ?? null;
+    return instanceId === undefined
+      ? null
+      : (this.buildings[instanceId] ?? null);
   }
 
   dispose() {
-    this.parts.forEach(part => {
+    this.parts.forEach((part) => {
       part.removeFromParent();
       part.dispose();
     });
@@ -128,11 +143,15 @@ export class ModelInstances {
   private write(i: number, world: THREE.Vector3) {
     this.position.makeTranslation(world.x, world.y, world.z);
     this.template.parts.forEach(({ matrix }, p) =>
-      this.parts[p].setMatrixAt(i, this.matrix.multiplyMatrices(this.position, matrix)));
+      this.parts[p].setMatrixAt(
+        i,
+        this.matrix.multiplyMatrices(this.position, matrix)
+      )
+    );
   }
 
   private updateCount() {
-    this.parts.forEach(part => {
+    this.parts.forEach((part) => {
       part.count = this.buildings.length;
       part.instanceMatrix.needsUpdate = true;
       // Bounds for the raycasts (editor clicks, rain): computed again from the copies
@@ -145,7 +164,11 @@ export class ModelInstances {
   private grow(capacity: number) {
     const old = this.parts;
     this.parts = this.template.parts.map(({ mesh }, p) => {
-      const part = new THREE.InstancedMesh(mesh.geometry, mesh.material, capacity);
+      const part = new THREE.InstancedMesh(
+        mesh.geometry,
+        mesh.material,
+        capacity
+      );
       part.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       part.castShadow = mesh.castShadow;
       part.receiveShadow = mesh.receiveShadow;
@@ -164,7 +187,7 @@ export class ModelInstances {
       this.group.add(part);
       return part;
     });
-    old.forEach(part => {
+    old.forEach((part) => {
       part.removeFromParent();
       part.dispose();
     });

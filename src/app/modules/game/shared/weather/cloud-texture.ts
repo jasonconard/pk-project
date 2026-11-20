@@ -1,12 +1,14 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 /** Small deterministic PRNG so the clouds look the same on every load. */
 function seededRandom(seed: number): () => number {
   return () => {
-    seed = (seed + 0x6D2B79F5) | 0;
+    // (| 0 wraps to 32 bits: the generator needs it, Math.trunc doesn't do the same)
+    // eslint-disable-next-line unicorn/prefer-math-trunc
+    seed = (seed + 0x6d_2b_79_f5) | 0;
     let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    return ((t ^ (t >>> 14)) >>> 0) / 4_294_967_296;
   };
 }
 
@@ -34,7 +36,8 @@ export function sampleNoiseMap(u: number, v: number): number {
   const y0 = Math.floor(y);
   const fx = x - x0;
   const fy = y - y0;
-  const at = (px: number, py: number) => noiseValues![(((py % n) + n) % n) * n + (((px % n) + n) % n)];
+  const at = (px: number, py: number) =>
+    noiseValues![(((py % n) + n) % n) * n + (((px % n) + n) % n)];
   const top = at(x0, y0) + (at(x0 + 1, y0) - at(x0, y0)) * fx;
   const bottom = at(x0, y0 + 1) + (at(x0 + 1, y0 + 1) - at(x0, y0 + 1)) * fx;
   return (top + (bottom - top) * fy) / 255;
@@ -54,7 +57,8 @@ export function makeCloudTexture(size = NOISE_SIZE): THREE.DataTexture {
     const amplitude = Math.pow(0.5, o);
     // Random lattice, wrapped so the texture tiles seamlessly
     const lattice = Float32Array.from({ length: cells * cells }, () => rand());
-    const at = (x: number, y: number) => lattice[(y % cells) * cells + (x % cells)];
+    const at = (x: number, y: number) =>
+      lattice[(y % cells) * cells + (x % cells)];
     const cellSize = size / cells;
     for (let py = 0; py < size; py++) {
       const gy = py / cellSize;
@@ -67,7 +71,8 @@ export function makeCloudTexture(size = NOISE_SIZE): THREE.DataTexture {
         let fx = gx - x0;
         fx = fx * fx * (3 - 2 * fx);
         const top = at(x0, y0) + (at(x0 + 1, y0) - at(x0, y0)) * fx;
-        const bottom = at(x0, y0 + 1) + (at(x0 + 1, y0 + 1) - at(x0, y0 + 1)) * fx;
+        const bottom =
+          at(x0, y0 + 1) + (at(x0 + 1, y0 + 1) - at(x0, y0 + 1)) * fx;
         values[py * size + px] += (top + (bottom - top) * fy) * amplitude;
       }
     }
@@ -82,8 +87,8 @@ export function makeCloudTexture(size = NOISE_SIZE): THREE.DataTexture {
   }
   const data = new Uint8Array(size * size * 4);
   noiseValues = new Uint8Array(size * size);
-  for (let i = 0; i < values.length; i++) {
-    const v = Math.round(255 * (values[i] - min) / (max - min));
+  for (const [i, value] of values.entries()) {
+    const v = Math.round((255 * (value - min)) / (max - min));
     data.set([v, v, v, 255], i * 4);
     noiseValues[i] = v;
   }

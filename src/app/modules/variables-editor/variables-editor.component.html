@@ -1,11 +1,26 @@
 <header class="top">
-  <a href="#/" class="back" title="Retour au jeu" (click)="backToGame($event)"><svg lucideChevronLeft></svg> Jeu</a>
+  <a href="#/" class="back" title="Retour au jeu" (click)="backToGame($event)"
+    ><svg lucideChevronLeft></svg> Jeu</a
+  >
   <div class="title">
     <strong>Variables</strong>
-    <span>{{ countLabel() }} · {{ saveFailed() ? 'Pas enregistré (plus de place ?)' : 'Enregistré' }}</span>
+    <span
+      >{{ countLabel() }} ·
+      {{
+        saveFailed() ? "Pas enregistré (plus de place ?)" : "Enregistré"
+      }}</span
+    >
   </div>
-  <button type="button" class="square-btn" title="Exporter variables.ts (pour le code du jeu)" aria-label="Exporter"
-          [disabled]="!variables().length" (click)="exportVariables()"><svg lucideDownload></svg></button>
+  <button
+    type="button"
+    class="square-btn"
+    title="Exporter variables.ts (pour le code du jeu)"
+    aria-label="Exporter"
+    [disabled]="!variables().length"
+    (click)="exportVariables()"
+  >
+    <svg lucideDownload></svg>
+  </button>
 </header>
 
 <main class="list">
@@ -16,57 +31,144 @@
     <article class="variable" [class.bad]="badNames().has(v.id)">
       <div class="line">
         <span class="kind-icon" aria-hidden="true">
-          @if (v.kind === 'flag') { <svg lucideFlag></svg> } @else { <svg lucideHash></svg> }
+          @if (v.kind === "flag") {
+            <svg lucideFlag></svg>
+          } @else {
+            <svg lucideHash></svg>
+          }
         </span>
-        <input class="name" type="text" maxlength="60" aria-label="Nom" [attr.data-name]="v.id" [value]="v.name"
-               (input)="rename(v.id, $any($event.target).value)" />
-        <button type="button" class="square-btn delete" [class.armed]="deleting() === v.id"
-                [title]="deleting() === v.id ? 'Appuyer encore pour supprimer' : 'Supprimer'" aria-label="Supprimer"
-                (click)="remove(v.id)">
-          @if (deleting() === v.id) { <span>Supprimer ?</span> } @else { <svg lucideTrash></svg> }
+        <input
+          class="name"
+          type="text"
+          maxlength="60"
+          aria-label="Nom"
+          [attr.data-name]="v.id"
+          [value]="v.name"
+          (input)="rename(v.id, $any($event.target).value)"
+        />
+        <button
+          type="button"
+          class="square-btn delete"
+          [class.armed]="deleting() === v.id"
+          [title]="
+            deleting() === v.id ? 'Appuyer encore pour supprimer' : 'Supprimer'
+          "
+          aria-label="Supprimer"
+          (click)="remove(v.id)"
+        >
+          @if (deleting() === v.id) {
+            <span>Supprimer ?</span>
+          } @else {
+            <svg lucideTrash></svg>
+          }
         </button>
       </div>
       @if (badNames().has(v.id)) {
-        <p class="warning">{{ v.name.trim() ? 'Une autre variable a déjà ce nom.' : 'Donnez-lui un nom.' }}</p>
+        <p class="warning">
+          {{
+            v.name.trim()
+              ? "Une autre variable a déjà ce nom."
+              : "Donnez-lui un nom."
+          }}
+        </p>
       }
       <div class="line settings">
         <div class="segmented" role="group" aria-label="Type">
           @for (kind of kinds; track kind) {
-            <button type="button" [class.on]="v.kind === kind" [attr.aria-pressed]="v.kind === kind"
-                    (click)="setKind(v.id, kind)">{{ kindLabels[kind] }}</button>
+            <button
+              type="button"
+              [class.on]="v.kind === kind"
+              [attr.aria-pressed]="v.kind === kind"
+              (click)="setKind(v.id, kind)"
+            >
+              {{ kindLabels[kind] }}
+            </button>
           }
         </div>
         <div class="initial">
           <small>Au début</small>
-          @if (v.kind === 'flag') {
+          @if (v.kind === "flag") {
             <div class="segmented" role="group" aria-label="Valeur au début">
-              <button type="button" [class.on]="!v.initial" [attr.aria-pressed]="!v.initial" (click)="setFlag(v.id, false)">Non</button>
-              <button type="button" [class.on]="v.initial" [attr.aria-pressed]="v.initial" (click)="setFlag(v.id, true)">Oui</button>
+              <button
+                type="button"
+                [class.on]="!v.initial"
+                [attr.aria-pressed]="!v.initial"
+                (click)="setFlag(v.id, false)"
+              >
+                Non
+              </button>
+              <button
+                type="button"
+                [class.on]="v.initial"
+                [attr.aria-pressed]="v.initial"
+                (click)="setFlag(v.id, true)"
+              >
+                Oui
+              </button>
             </div>
           } @else {
             <div class="stepper">
-              <button type="button" aria-label="Moins" (click)="setCounter(v.id, v.initial - 1)"><svg lucideMinus></svg></button>
-              <input type="number" inputmode="numeric" aria-label="Valeur au début" [value]="v.initial"
-                     (change)="setCounter(v.id, +$any($event.target).value); $any($event.target).value = v.initial" />
-              <button type="button" aria-label="Plus" (click)="setCounter(v.id, v.initial + 1)"><svg lucidePlus></svg></button>
+              <button
+                type="button"
+                aria-label="Moins"
+                (click)="setCounter(v.id, v.initial - 1)"
+              >
+                <svg lucideMinus></svg>
+              </button>
+              <input
+                type="number"
+                inputmode="numeric"
+                aria-label="Valeur au début"
+                [value]="v.initial"
+                (change)="
+                  setCounter(v.id, +$any($event.target).value);
+                  $any($event.target).value = v.initial
+                "
+              />
+              <button
+                type="button"
+                aria-label="Plus"
+                (click)="setCounter(v.id, v.initial + 1)"
+              >
+                <svg lucidePlus></svg>
+              </button>
             </div>
           }
         </div>
       </div>
-      <input class="note" type="text" maxlength="200" placeholder="À quoi elle sert (facultatif)" aria-label="Note"
-             [value]="v.note ?? ''" (input)="setNote(v.id, $any($event.target).value)" />
+      <input
+        class="note"
+        type="text"
+        maxlength="200"
+        placeholder="À quoi elle sert (facultatif)"
+        aria-label="Note"
+        [value]="v.note ?? ''"
+        (input)="setNote(v.id, $any($event.target).value)"
+      />
     </article>
   } @empty {
     <div class="empty">
       <svg lucideVariable></svg>
       <p>Les variables retiennent ce qui s'est passé dans l'histoire.</p>
-      <p><b>Drapeau</b> : oui ou non, comme « A parlé au maire ».<br /><b>Compteur</b> : un nombre, comme « Pièces trouvées ».</p>
-      <p>Les événements et les dialogues pourront bientôt les lire et les changer.</p>
+      <p>
+        <b>Drapeau</b> : oui ou non, comme « A parlé au maire ».<br /><b
+          >Compteur</b
+        >
+        : un nombre, comme « Pièces trouvées ».
+      </p>
+      <p>
+        Les événements et les dialogues pourront bientôt les lire et les
+        changer.
+      </p>
     </div>
   }
 </main>
 
 <footer class="add">
-  <button type="button" (click)="add('flag')"><svg lucidePlus></svg> Drapeau</button>
-  <button type="button" (click)="add('counter')"><svg lucidePlus></svg> Compteur</button>
+  <button type="button" (click)="add('flag')">
+    <svg lucidePlus></svg> Drapeau
+  </button>
+  <button type="button" (click)="add('counter')">
+    <svg lucidePlus></svg> Compteur
+  </button>
 </footer>

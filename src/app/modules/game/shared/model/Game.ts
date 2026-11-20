@@ -1,14 +1,26 @@
-import { GameAction } from './GameAction';
-import * as THREE from 'three';
+import { GameAction } from "./GameAction";
+import * as THREE from "three";
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
 import { Diagnostics } from "./Diagnostics";
-import { AUTO_HIGH_FPS, AUTO_HIGH_SECONDS, AUTO_LOW_FPS, AUTO_LOW_SECONDS, AUTO_MIN_RATIO, AUTO_RATIO_STEP, isTouchDevice, QUALITY_PRESETS, QualityMode, RENDER_DETAIL } from "./Quality";
+import {
+  AUTO_HIGH_FPS,
+  AUTO_HIGH_SECONDS,
+  AUTO_LOW_FPS,
+  AUTO_LOW_SECONDS,
+  AUTO_MIN_RATIO,
+  AUTO_RATIO_STEP,
+  isTouchDevice,
+  QUALITY_PRESETS,
+  QualityMode,
+  RENDER_DETAIL,
+} from "./Quality";
 import type { EditBrush, EditSelection } from "../services/map-editor.service";
 
 export enum GameMode {
-  MAP, FIGHT
+  MAP,
+  FIGHT,
 }
 
 // export const CAMERA_LOOK = new THREE.Vector3(0, 30, 160);
@@ -84,14 +96,14 @@ export class Game {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
-    this.ambientLight = new THREE.AmbientLight(0xffffff);
+    this.ambientLight = new THREE.AmbientLight(0xff_ff_ff);
     this.sun = Game.makeSun();
     this.scene.add(this.ambientLight, this.sun, this.sun.target);
     this.weather = new WeatherHelper(this);
   }
 
   private static makeSun(): THREE.DirectionalLight {
-    const sun = new THREE.DirectionalLight(0xffffff);
+    const sun = new THREE.DirectionalLight(0xff_ff_ff);
     sun.castShadow = true;
     sun.shadow.mapSize.set(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
     const cam = sun.shadow.camera;
@@ -140,7 +152,7 @@ export class Game {
   readonly diagnostics = new Diagnostics();
 
   /** Graphics quality chosen, render pixel ratio and shadow texture size in use (see Quality.ts). */
-  qualityMode: QualityMode = 'auto';
+  qualityMode: QualityMode = "auto";
   pixelRatio = 1;
   shadowMapSize = 2048;
   /** Auto quality: seconds in a row below / above the fps thresholds. */
@@ -154,9 +166,17 @@ export class Game {
   /** Applies a quality mode: render resolution (capped screen density), shadows, particles, full screen effects. */
   public setQuality(mode: QualityMode) {
     this.qualityMode = mode;
-    const preset = QUALITY_PRESETS[mode === 'auto' ? (isTouchDevice() ? 'medium' : 'high') : mode];
+    const preset =
+      QUALITY_PRESETS[
+        mode === "auto" ? (isTouchDevice() ? "medium" : "high") : mode
+      ];
     this.slowSeconds = this.fastSeconds = 0;
-    this.applyQuality(Math.min(window.devicePixelRatio, preset.maxPixelRatio), preset.shadowMapSize, preset.detail, preset.postEffects);
+    this.applyQuality(
+      Math.min(window.devicePixelRatio, preset.maxPixelRatio),
+      preset.shadowMapSize,
+      preset.detail,
+      preset.postEffects
+    );
   }
 
   /**
@@ -165,7 +185,7 @@ export class Game {
    * Fast for a while → one step back up, the other way round, up to the high preset.
    */
   public adaptQuality(fps: number) {
-    if (this.qualityMode !== 'auto' || this.paused || this.loading) {
+    if (this.qualityMode !== "auto" || this.paused || this.loading) {
       return;
     }
     this.slowSeconds = fps < AUTO_LOW_FPS ? this.slowSeconds + 1 : 0;
@@ -176,37 +196,76 @@ export class Game {
     if (this.slowSeconds >= AUTO_LOW_SECONDS) {
       this.slowSeconds = 0;
       if (this.pixelRatio > AUTO_MIN_RATIO) {
-        this.applyQuality(Math.max(AUTO_MIN_RATIO, this.pixelRatio - AUTO_RATIO_STEP), this.shadowMapSize, this.detail, this.postEffects);
+        this.applyQuality(
+          Math.max(AUTO_MIN_RATIO, this.pixelRatio - AUTO_RATIO_STEP),
+          this.shadowMapSize,
+          this.detail,
+          this.postEffects
+        );
       } else if (this.shadowMapSize > minShadows) {
-        this.applyQuality(this.pixelRatio, this.shadowMapSize / 2, this.detail, this.postEffects);
+        this.applyQuality(
+          this.pixelRatio,
+          this.shadowMapSize / 2,
+          this.detail,
+          this.postEffects
+        );
       } else if (this.shadowMapSize) {
-        this.applyQuality(Math.min(this.pixelRatio, low.maxPixelRatio), low.shadowMapSize, low.detail, low.postEffects);
+        this.applyQuality(
+          Math.min(this.pixelRatio, low.maxPixelRatio),
+          low.shadowMapSize,
+          low.detail,
+          low.postEffects
+        );
       }
     } else if (this.fastSeconds >= AUTO_HIGH_SECONDS) {
       this.fastSeconds = 0;
       if (!this.shadowMapSize) {
-        this.applyQuality(Math.max(this.pixelRatio, AUTO_MIN_RATIO), minShadows, medium.detail, medium.postEffects);
+        this.applyQuality(
+          Math.max(this.pixelRatio, AUTO_MIN_RATIO),
+          minShadows,
+          medium.detail,
+          medium.postEffects
+        );
       } else if (this.shadowMapSize < medium.shadowMapSize) {
-        this.applyQuality(this.pixelRatio, this.shadowMapSize * 2, this.detail, this.postEffects);
+        this.applyQuality(
+          this.pixelRatio,
+          this.shadowMapSize * 2,
+          this.detail,
+          this.postEffects
+        );
       } else if (this.pixelRatio < maxRatio) {
-        this.applyQuality(Math.min(maxRatio, this.pixelRatio + AUTO_RATIO_STEP), this.shadowMapSize, high.detail, this.postEffects);
+        this.applyQuality(
+          Math.min(maxRatio, this.pixelRatio + AUTO_RATIO_STEP),
+          this.shadowMapSize,
+          high.detail,
+          this.postEffects
+        );
       }
     }
   }
 
   /** @param shadowMapSize shadow texture size, 0 = no shadows */
-  private applyQuality(pixelRatio: number, shadowMapSize: number, detail: number, postEffects: boolean) {
+  private applyQuality(
+    pixelRatio: number,
+    shadowMapSize: number,
+    detail: number,
+    postEffects: boolean
+  ) {
     this.pixelRatio = pixelRatio;
     this.renderer.setPixelRatio(pixelRatio);
     // Below 1 the picture is enlarged: keep the pixels crisp (pixel art) instead of blurring them
-    this.renderer.domElement.style.imageRendering = pixelRatio < 1 ? 'pixelated' : '';
+    this.renderer.domElement.style.imageRendering =
+      pixelRatio < 1 ? "pixelated" : "";
     this.detail = detail;
     this.postEffects = postEffects;
     RENDER_DETAIL.particles = detail;
     RENDER_DETAIL.postEffects = postEffects;
     // Shadows on / off: the materials are compiled again once (three.js notices the light change)
     this.sun.castShadow = shadowMapSize > 0;
-    if (shadowMapSize && (shadowMapSize !== this.shadowMapSize || !this.sun.shadow.map)) {
+    if (
+      shadowMapSize &&
+      (shadowMapSize !== this.shadowMapSize || !this.sun.shadow.map)
+    ) {
       this.sun.shadow.mapSize.set(shadowMapSize, shadowMapSize);
       // The shadow texture is created again at its new size on the next frame
       this.sun.shadow.map?.dispose();
@@ -236,7 +295,7 @@ export class Game {
    */
   public warmUp() {
     const hidden: THREE.Object3D[] = [];
-    this.scene.traverse(object => {
+    this.scene.traverse((object) => {
       if (!object.visible) {
         hidden.push(object);
         object.visible = true;
@@ -244,22 +303,30 @@ export class Game {
     });
     this.renderer.compile(this.scene, this.camera);
     const textures = new Set<THREE.Texture>();
-    this.scene.traverse(object => {
+    this.scene.traverse((object) => {
       const material = (object as THREE.Mesh).material;
-      (Array.isArray(material) ? material : material ? [material] : []).forEach(m => {
-        Object.values(m).forEach(value => (value as THREE.Texture)?.isTexture && textures.add(value));
-        Object.values((m as THREE.ShaderMaterial).uniforms ?? {}).forEach(u => (u.value as THREE.Texture)?.isTexture && textures.add(u.value));
-      });
+      [material]
+        .flat()
+        .filter(Boolean)
+        .forEach((m) => {
+          Object.values(m).forEach(
+            (value) =>
+              (value as THREE.Texture)?.isTexture && textures.add(value)
+          );
+          Object.values((m as THREE.ShaderMaterial).uniforms ?? {}).forEach(
+            (u) =>
+              (u.value as THREE.Texture)?.isTexture && textures.add(u.value)
+          );
+        });
     });
-    textures.forEach(texture => this.renderer.initTexture(texture));
-    hidden.forEach(object => object.visible = false);
+    textures.forEach((texture) => this.renderer.initTexture(texture));
+    hidden.forEach((object) => (object.visible = false));
   }
 
   public refreshRenderer() {
     const rect = this.canvas.getBoundingClientRect();
     this.camera.aspect = rect.width / rect.height;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize( rect.width, rect.height );
+    this.renderer.setSize(rect.width, rect.height);
   }
-
 }

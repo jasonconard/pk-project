@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { SurfaceHeights } from './SurfaceHeights';
+import * as THREE from "three";
+import { SurfaceHeights } from "./SurfaceHeights";
 
 /** Pairs of eyes at the same time at moonless = 1, distance range to the player where they appear (world units). */
 const MAX_PAIRS = 7;
@@ -16,7 +16,9 @@ const HEIGHT = [2.5, 7] as const;
 const SPACING = 2.2;
 const EYE_SIZE = 1.5;
 /** Eye colors (additive, bright enough to shine through the darkness and pick up the bloom). */
-const COLORS = [0xfff07a, 0xb8ff6a, 0xff5a3a, 0xfff0d0].map(c => new THREE.Color(c).multiplyScalar(2.2));
+const COLORS = [0xff_f0_7a, 0xb8_ff_6a, 0xff_5a_3a, 0xff_f0_d0].map((c) =>
+  new THREE.Color(c).multiplyScalar(2.2)
+);
 
 interface Pair {
   x: number;
@@ -33,14 +35,21 @@ interface Pair {
 
 function makeEyeTexture(): THREE.CanvasTexture {
   const size = 32;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.35, 'rgba(255,255,255,0.8)');
-  g.addColorStop(0.6, 'rgba(255,255,255,0.15)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
+  const ctx = canvas.getContext("2d")!;
+  const g = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2
+  );
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.35, "rgba(255,255,255,0.8)");
+  g.addColorStop(0.6, "rgba(255,255,255,0.15)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
@@ -65,10 +74,21 @@ export class EyesHelper {
   private readonly side = new THREE.Vector3();
   private readonly color = new THREE.Color();
 
-  constructor(scene: THREE.Scene, private readonly surfaces: SurfaceHeights) {
-    this.mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
-      map: makeEyeTexture(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
-    }), MAX_PAIRS * 2);
+  constructor(
+    scene: THREE.Scene,
+    private readonly surfaces: SurfaceHeights
+  ) {
+    this.mesh = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({
+        map: makeEyeTexture(),
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        fog: false,
+      }),
+      MAX_PAIRS * 2
+    );
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     this.mesh.setColorAt(0, this.color.set(0)); // creates the instance color buffer
     this.mesh.frustumCulled = false;
@@ -79,7 +99,13 @@ export class EyesHelper {
   }
 
   /** @param level 0..1 */
-  update(dt: number, target: THREE.Vector3, player: THREE.Vector3, level: number, camera: THREE.Camera) {
+  update(
+    dt: number,
+    target: THREE.Vector3,
+    player: THREE.Vector3,
+    level: number,
+    camera: THREE.Camera
+  ) {
     const wanted = Math.round(MAX_PAIRS * level);
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0 && this.pairs.length < wanted) {
@@ -105,17 +131,24 @@ export class EyesHelper {
         this.pairs.splice(i, 1);
         continue;
       }
-      const fade = Math.min(p.age / FADE, (p.life - p.age) / (p.fleeing ? FADE * 0.5 : FADE), 1);
+      const fade = Math.min(
+        p.age / FADE,
+        (p.life - p.age) / (p.fleeing ? FADE * 0.5 : FADE),
+        1
+      );
       // Blink: the eyes close (squashed vertically) for a short moment
       p.blinkTimer -= dt;
       if (p.blinkTimer <= 0) {
-        p.blinkTimer = THREE.MathUtils.randFloat(BLINK_INTERVAL[0], BLINK_INTERVAL[1]);
+        p.blinkTimer = THREE.MathUtils.randFloat(
+          BLINK_INTERVAL[0],
+          BLINK_INTERVAL[1]
+        );
         p.blinkAge = 0;
       }
       let open = 1;
       if (p.blinkAge >= 0) {
         p.blinkAge += dt;
-        open = Math.abs(p.blinkAge / BLINK_LENGTH * 2 - 1);
+        open = Math.abs((p.blinkAge / BLINK_LENGTH) * 2 - 1);
         if (p.blinkAge >= BLINK_LENGTH) {
           p.blinkAge = -1;
           open = 1;
@@ -124,7 +157,9 @@ export class EyesHelper {
       this.color.copy(p.color).multiplyScalar(fade);
       this.scale.set(EYE_SIZE, EYE_SIZE * Math.max(open, 0.08), 1);
       for (const s of [-0.5, 0.5]) {
-        this.position.set(p.x, p.y, p.z).addScaledVector(this.side, s * SPACING);
+        this.position
+          .set(p.x, p.y, p.z)
+          .addScaledVector(this.side, s * SPACING);
         this.matrix.compose(this.position, camera.quaternion, this.scale);
         this.mesh.setMatrixAt(n, this.matrix);
         this.mesh.setColorAt(n, this.color);
@@ -145,12 +180,18 @@ export class EyesHelper {
       const x = player.x + Math.cos(a) * r;
       const z = player.z + Math.sin(a) * r * 0.8;
       // Stay on screen (roughly the area the camera looks at)
-      if (Math.abs(x - target.x) > 170 || z - target.z < -200 || z - target.z > 70) {
+      if (
+        Math.abs(x - target.x) > 170 ||
+        z - target.z < -200 ||
+        z - target.z > 70
+      ) {
         continue;
       }
       const ground = this.surfaces.heightAt(x, z, target.y);
       this.pairs.push({
-        x, z, y: ground + THREE.MathUtils.randFloat(HEIGHT[0], HEIGHT[1]),
+        x,
+        z,
+        y: ground + THREE.MathUtils.randFloat(HEIGHT[0], HEIGHT[1]),
         age: 0,
         life: THREE.MathUtils.randFloat(STAY[0], STAY[1]),
         fleeing: false,

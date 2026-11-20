@@ -29,8 +29,8 @@ export class FightHelper {
     const group = new THREE.Group();
     chunk.group = group;
 
-    chunk.grounds.forEach(ground => {
-      const key = chunk.id + '-g-' + ground.id;
+    chunk.grounds.forEach((ground) => {
+      const key = chunk.id + "-g-" + ground.id;
       this.addMesh(
         key,
         BasicMeshService.makePlaneFromPoints(ground.link, ground.points),
@@ -42,14 +42,13 @@ export class FightHelper {
     });
     // return;
 
-
     // this.meshes[chunk.id].castShadow = true;
     // this.meshes[chunk.id].receiveShadow = true;
 
-    chunk.buildings.forEach( building => {
-      const key = chunk.id + '-' + building.id;
-      const model = MODELS.find(m => m.id === building.modelId);
-      if(model) {
+    chunk.buildings.forEach((building) => {
+      const key = chunk.id + "-" + building.id;
+      const model = MODELS.find((m) => m.id === building.modelId);
+      if (model) {
         building.originModel = model;
         this.addMesh(key, BasicMeshService.makeModel(model));
         const buildingMesh = this.meshes[key];
@@ -61,9 +60,9 @@ export class FightHelper {
     });
 
     this.originGame.scene.add(group);
-      chunk.buildings.forEach(building => {
-        this.updateVisibleMesh(chunk.id + '-' + building.id);
-      });
+    chunk.buildings.forEach((building) => {
+      this.updateVisibleMesh(chunk.id + "-" + building.id);
+    });
   }
 
   public addMesh(key: string, mesh: THREE.Object3D, position?: THREE.Vector3) {
@@ -74,13 +73,14 @@ export class FightHelper {
     mesh.position.z = pos.z;
   }
 
-
   public updateVisibleMesh(key: string) {
     const mesh = this.meshes[key];
-    if(!mesh) { return; }
+    if (!mesh) {
+      return;
+    }
 
-    const targets = mesh.children.length ? mesh.children : [mesh];
-    targets.forEach(target => {
+    const targets = mesh.children.length > 0 ? mesh.children : [mesh];
+    targets.forEach((target) => {
       if (target instanceof THREE.Mesh) {
         (target.material as THREE.Material).transparent = true;
       }

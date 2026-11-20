@@ -1,7 +1,7 @@
-import { DestroyRef, effect, inject, Injector, Service } from '@angular/core';
-import { App } from '@capacitor/app';
-import { Capacitor } from '@capacitor/core';
-import { isGameCovered } from '../app-visibility';
+import { DestroyRef, effect, inject, Injector, Service } from "@angular/core";
+import { App } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
+import { isGameCovered } from "../app-visibility";
 
 /** Something Escape closes (or steps back in): a menu, a popover, a selection, a tool in hand… */
 export interface EscapeLayer {
@@ -10,8 +10,12 @@ export interface EscapeLayer {
 
 /** Text fields keep Escape (their own: empty the search…). */
 const typing = (target: EventTarget | null): boolean =>
-  target instanceof HTMLTextAreaElement || (target instanceof HTMLElement && target.isContentEditable)
-  || (target instanceof HTMLInputElement && ['text', 'search', 'email', 'number', 'password', 'url'].includes(target.type));
+  target instanceof HTMLTextAreaElement ||
+  (target instanceof HTMLElement && target.isContentEditable) ||
+  (target instanceof HTMLInputElement &&
+    ["text", "search", "email", "number", "password", "url"].includes(
+      target.type
+    ));
 
 /**
  * Escape undoes the last thing done first: what is open (menus, popovers, dialogs, the selected object, the tool
@@ -37,7 +41,7 @@ export class EscapeService {
   private readonly native = Capacitor.isNativePlatform();
 
   constructor() {
-    window.addEventListener('popstate', () => {
+    window.addEventListener("popstate", () => {
       if (this.ownPops) {
         this.ownPops--;
         return;
@@ -47,24 +51,33 @@ export class EscapeService {
       }
       // Back pressed: like Escape (also over an editor: it closes, saved)
       this.armed = false;
-      this.layers[this.layers.length - 1]?.close();
+      this.layers.at(-1)?.close();
       this.syncHistory();
     });
-    window.addEventListener('keydown', ev => {
-      // (an editor over the game: Escape is its own)
-      if (ev.key !== 'Escape' || typing(ev.target) || !this.layers.length || isGameCovered()) {
-        return;
-      }
-      ev.preventDefault();
-      // (the other Escape listeners, on the window too, must not act as well)
-      ev.stopImmediatePropagation();
-      this.layers[this.layers.length - 1].close();
-    }, true);
+    window.addEventListener(
+      "keydown",
+      (ev) => {
+        // (an editor over the game: Escape is its own)
+        if (
+          ev.key !== "Escape" ||
+          typing(ev.target) ||
+          this.layers.length === 0 ||
+          isGameCovered()
+        ) {
+          return;
+        }
+        ev.preventDefault();
+        // (the other Escape listeners, on the window too, must not act as well)
+        ev.stopImmediatePropagation();
+        this.layers.at(-1)?.close();
+      },
+      true
+    );
   }
 
   /** The back button: the latest thing open is closed. False: nothing was open. */
   back(): boolean {
-    const top = this.layers[this.layers.length - 1];
+    const top = this.layers.at(-1);
     top?.close();
     return !!top;
   }
@@ -95,10 +108,10 @@ export class EscapeService {
     }
     clearTimeout(this.syncTimer);
     this.syncTimer = setTimeout(() => {
-      if (this.layers.length && !this.armed) {
-        history.pushState(history.state, '');
+      if (this.layers.length > 0 && !this.armed) {
+        history.pushState(history.state, "");
         this.armed = true;
-      } else if (!this.layers.length && this.armed) {
+      } else if (this.layers.length === 0 && this.armed) {
         this.armed = false;
         this.ownPops++;
         history.back();
@@ -112,14 +125,19 @@ export class EscapeService {
    */
   track(state: () => unknown, close: () => void, injector?: Injector): void {
     const layer: EscapeLayer = { close };
-    effect(() => {
-      if (state()) {
-        this.open(layer);
-      } else {
-        this.close(layer);
-      }
-    }, { injector });
-    (injector?.get(DestroyRef) ?? inject(DestroyRef)).onDestroy(() => this.close(layer));
+    effect(
+      () => {
+        if (state()) {
+          this.open(layer);
+        } else {
+          this.close(layer);
+        }
+      },
+      { injector }
+    );
+    (injector?.get(DestroyRef) ?? inject(DestroyRef)).onDestroy(() =>
+      this.close(layer)
+    );
   }
 
   /** A layer for as long as the component lives (a dialog shown only while open). In an injection context. */
@@ -139,10 +157,16 @@ export function initBackButton(escape: EscapeService): void {
   if (!Capacitor.isNativePlatform()) {
     return;
   }
-  void App.addListener('backButton', () => {
+  void App.addListener("backButton", () => {
     if (!escape.back()) {
-      for (const type of ['keydown', 'keyup']) {
-        document.body.dispatchEvent(new KeyboardEvent(type, { key: 'Escape', bubbles: true, cancelable: true }));
+      for (const type of ["keydown", "keyup"]) {
+        document.body.dispatchEvent(
+          new KeyboardEvent(type, {
+            key: "Escape",
+            bubbles: true,
+            cancelable: true,
+          })
+        );
       }
     }
   });

@@ -8,7 +8,20 @@ export function isTyping(ev: Event): boolean {
     return false;
   }
   if (target instanceof HTMLInputElement) {
-    return !['checkbox', 'radio', 'button', 'submit', 'reset', 'image', 'color', 'file'].includes(target.type);
+    return ![
+      "checkbox",
+      "radio",
+      "button",
+      "submit",
+      "reset",
+      "image",
+      "color",
+      "file",
+    ].includes(target.type);
   }
-  return target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target.isContentEditable;
+  return (
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target.isContentEditable
+  );
 }

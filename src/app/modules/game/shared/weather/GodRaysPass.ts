@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { BEAM_GLSL, WEATHER_UNIFORMS } from './weather-shader';
+import * as THREE from "three";
+import { BEAM_GLSL, WEATHER_UNIFORMS } from "./weather-shader";
 
 /** Ray-march samples per pixel (cost grows linearly). */
 const STEPS = 24;
@@ -12,7 +12,7 @@ const RAYS_STRENGTH = 0.5;
 /** Warm sunlight color of the rays. */
 const RAYS_COLOR = new THREE.Color(1.0, 0.9, 0.65);
 
-const FULLSCREEN_VERTEX = /* glsl */`
+const FULLSCREEN_VERTEX = /* glsl */ `
 varying vec2 vUv;
 void main() {
   vUv = uv;
@@ -25,7 +25,8 @@ void main() {
  * Each sample checks the sun shadow map: air inside a building's shadow does not glow, which "blocks" the beams.
  * The beams themselves come from a noise constant along the sun direction (=> shafts parallel to the sunlight).
  */
-const RAYS_FRAGMENT = /* glsl */`
+const RAYS_FRAGMENT =
+  /* glsl */ `
 uniform sampler2D tDepth;
 uniform sampler2DShadow tShadow;
 uniform mat4 uShadowMatrix;
@@ -38,7 +39,9 @@ varying vec2 vUv;
 
 // Interleaved gradient noise: per-pixel jitter of the march start, hides banding
 float ign(vec2 p) { return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }
-` + BEAM_GLSL + /* glsl */`
+` +
+  BEAM_GLSL +
+  /* glsl */ `
 void main() {
   // World position of the visible surface, rebuilt from the depth buffer
   float depth = texture(tDepth, vUv).r;
@@ -72,7 +75,7 @@ void main() {
 }
 `;
 
-const COMPOSITE_FRAGMENT = /* glsl */`
+const COMPOSITE_FRAGMENT = /* glsl */ `
 uniform sampler2D tScene;
 uniform sampler2D tRays;
 uniform vec3 uColor;
@@ -100,7 +103,14 @@ export class GodRaysPass {
   private readonly compositeMaterial: THREE.ShaderMaterial;
   private readonly quad: THREE.Mesh;
   private readonly quadScene = new THREE.Scene();
-  private readonly quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  private readonly quadCamera = new THREE.OrthographicCamera(
+    -1,
+    1,
+    1,
+    -1,
+    0,
+    1
+  );
   private readonly size = new THREE.Vector2();
 
   constructor() {
@@ -108,7 +118,9 @@ export class GodRaysPass {
       type: THREE.HalfFloatType, // linear colors: avoids banding in dark tones
       depthTexture: new THREE.DepthTexture(1, 1),
     });
-    this.raysTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+    this.raysTarget = new THREE.WebGLRenderTarget(1, 1, {
+      type: THREE.HalfFloatType,
+    });
 
     this.raysMaterial = new THREE.ShaderMaterial({
       vertexShader: FULLSCREEN_VERTEX,
@@ -140,7 +152,10 @@ export class GodRaysPass {
       depthWrite: false,
     });
 
-    this.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.raysMaterial);
+    this.quad = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      this.raysMaterial
+    );
     this.quad.frustumCulled = false;
     this.quadScene.add(this.quad);
   }
@@ -156,7 +171,7 @@ export class GodRaysPass {
     sun: THREE.DirectionalLight,
     sunDir: THREE.Vector3,
     intensity: number,
-    output: THREE.WebGLRenderTarget | null = null,
+    output: THREE.WebGLRenderTarget | null = null
   ): boolean {
     const shadowDepth = sun.shadow.map?.depthTexture;
     if (!shadowDepth) {
@@ -170,20 +185,21 @@ export class GodRaysPass {
 
     // 2. Ray-march
     const u = this.raysMaterial.uniforms;
-    u['tDepth'].value = this.sceneTarget.depthTexture;
-    u['tShadow'].value = shadowDepth;
-    u['uShadowMatrix'].value.copy(sun.shadow.matrix);
-    u['uProjInv'].value.copy(camera.projectionMatrixInverse);
-    u['uCamWorld'].value.copy(camera.matrixWorld);
-    u['uCamPos'].value.setFromMatrixPosition(camera.matrixWorld);
-    u['uSunDir'].value.copy(sunDir);
-    u['uTime'].value = WEATHER_UNIFORMS.uBeamTime.value;
+    u["tDepth"].value = this.sceneTarget.depthTexture;
+    u["tShadow"].value = shadowDepth;
+    u["uShadowMatrix"].value.copy(sun.shadow.matrix);
+    u["uProjInv"].value.copy(camera.projectionMatrixInverse);
+    u["uCamWorld"].value.copy(camera.matrixWorld);
+    u["uCamPos"].value.setFromMatrixPosition(camera.matrixWorld);
+    u["uSunDir"].value.copy(sunDir);
+    u["uTime"].value = WEATHER_UNIFORMS.uBeamTime.value;
     this.quad.material = this.raysMaterial;
     renderer.setRenderTarget(this.raysTarget);
     renderer.render(this.quadScene, this.quadCamera);
 
     // 3. Composite on screen
-    this.compositeMaterial.uniforms['uIntensity'].value = intensity * RAYS_STRENGTH;
+    this.compositeMaterial.uniforms["uIntensity"].value =
+      intensity * RAYS_STRENGTH;
     this.quad.material = this.compositeMaterial;
     renderer.setRenderTarget(output);
     renderer.render(this.quadScene, this.quadCamera);
@@ -196,7 +212,10 @@ export class GodRaysPass {
     const { x, y } = this.size;
     if (this.sceneTarget.width !== x || this.sceneTarget.height !== y) {
       this.sceneTarget.setSize(x, y);
-      this.raysTarget.setSize(Math.max(1, Math.round(x * RAYS_RESOLUTION)), Math.max(1, Math.round(y * RAYS_RESOLUTION)));
+      this.raysTarget.setSize(
+        Math.max(1, Math.round(x * RAYS_RESOLUTION)),
+        Math.max(1, Math.round(y * RAYS_RESOLUTION))
+      );
     }
   }
 }

@@ -1,4 +1,4 @@
-import { SceneEventInstruction } from './SceneEventInstruction';
+import { SceneEventInstruction } from "./SceneEventInstruction";
 
 export class SceneEventSequence {
   private currentIndex = -1;
@@ -17,9 +17,11 @@ export class SceneEventSequence {
     const instruction = this.current();
     this.currentIndex++;
     let at = this.currentIndex;
-    (instruction?.subInstructions ?? []).forEach(subIns => {
+    (instruction?.subInstructions ?? []).forEach((subIns) => {
       if (!subIns.condition || subIns.condition === val) {
-        subIns.instructions.forEach(subInstruction => this.instructions.splice(at++, 0, { ...subInstruction }));
+        subIns.instructions.forEach((subInstruction) =>
+          this.instructions.splice(at++, 0, { ...subInstruction })
+        );
       }
     });
     const current = this.current();

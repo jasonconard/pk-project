@@ -1,13 +1,56 @@
-import { Component, computed, DestroyRef, effect, ElementRef, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
-import { isGameCovered } from '../../../core/shared/app-visibility';
-import { EscapeService } from '../../../core/shared/service/escape.service';
-import { WeatherCatalogComponent } from '../weather-catalog/weather-catalog.component';
-import { KeyService } from '../../../core/shared/service/key.service';
-import { weatherScreenshot } from '../shared/weather/weather-catalog';
-import { applySilentMode, ignoreSilentMode, SILENT_MODE_BYPASS_SUPPORTED } from '../shared/weather/silent-mode';
-import { LucideCheck, LucideCloud, LucideDynamicIcon, LucideEighthNotes, LucideIcon, LucideMoon, LucideSun, LucideSunrise, LucideSunset, LucideTimer, LucideVolume2, LucideVolumeX, LucideWind, LucideWindArrowDown } from '@lucide/angular';
-import { formatHour, isWeatherAvailable, TIME_OF_DAY_LABELS, TimeOfDay, timeOfDayAt, FireflyColor, LeafMode, WEATHER_CHOICES, WeatherType, WIND_DIRECTIONS, WindDirection } from '../shared/weather/Weather';
-import { isTyping } from '../../../core/shared/typing';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  linkedSignal,
+  output,
+  signal,
+  viewChild,
+} from "@angular/core";
+import { isGameCovered } from "../../../core/shared/app-visibility";
+import { EscapeService } from "../../../core/shared/service/escape.service";
+import { WeatherCatalogComponent } from "../weather-catalog/weather-catalog.component";
+import { KeyService } from "../../../core/shared/service/key.service";
+import { weatherScreenshot } from "../shared/weather/weather-catalog";
+import {
+  applySilentMode,
+  ignoreSilentMode,
+  SILENT_MODE_BYPASS_SUPPORTED,
+} from "../shared/weather/silent-mode";
+import {
+  LucideCheck,
+  LucideCloud,
+  LucideDynamicIcon,
+  LucideEighthNotes,
+  LucideIcon,
+  LucideMoon,
+  LucideSun,
+  LucideSunrise,
+  LucideSunset,
+  LucideTimer,
+  LucideVolume2,
+  LucideVolumeX,
+  LucideWind,
+  LucideWindArrowDown,
+} from "@lucide/angular";
+import {
+  formatHour,
+  isWeatherAvailable,
+  TIME_OF_DAY_LABELS,
+  TimeOfDay,
+  timeOfDayAt,
+  FireflyColor,
+  LeafMode,
+  WEATHER_CHOICES,
+  WeatherType,
+  WIND_DIRECTIONS,
+  WindDirection,
+} from "../shared/weather/Weather";
+import { isTyping } from "../../../core/shared/typing";
 
 export interface SoundSetting {
   volume: number;
@@ -20,10 +63,15 @@ export interface WindSetting {
 }
 
 /** The settings that open in a small popover under their toolbar button. */
-export type SettingPanel = 'hour' | 'wind' | 'clouds' | 'sound';
+export type SettingPanel = "hour" | "wind" | "clouds" | "sound";
 
 /** Keyboard shortcuts (free keys: the game uses z q s d a e r f p o, the map editor b). M (weather catalog) is in the catalog. */
-const SHORTCUTS: Record<string, SettingPanel> = { h: 'hour', w: 'wind', n: 'clouds', v: 'sound' };
+const SHORTCUTS: Record<string, SettingPanel> = {
+  h: "hour",
+  w: "wind",
+  n: "clouds",
+  v: "sound",
+};
 /** Arrow steps: hour (h), gauges (share). */
 const HOUR_STEP = 0.25;
 const GAUGE_STEP = 0.05;
@@ -33,15 +81,35 @@ const GAUGE_STEP = 0.05;
  * Each setting opens a small popover; keyboard: M / H / W / N / V, then ← → to adjust, Escape to close.
  */
 /** Icon of the time of day (hour button and popover). */
-const TIME_ICONS: Record<TimeOfDay, LucideIcon> = { night: LucideMoon, dawn: LucideSunrise, day: LucideSun, dusk: LucideSunset };
+const TIME_ICONS: Record<TimeOfDay, LucideIcon> = {
+  night: LucideMoon,
+  dawn: LucideSunrise,
+  day: LucideSun,
+  dusk: LucideSunset,
+};
 
 @Component({
-  selector: 'game-weather-panel',
-  imports: [WeatherCatalogComponent, LucideDynamicIcon, LucideTimer, LucideWind, LucideWindArrowDown, LucideCloud, LucideVolume2, LucideVolumeX, LucideCheck, LucideEighthNotes],
-  templateUrl: './weather-panel.component.html',
-  styleUrls: ['./weather-panel.component.scss', './weather-panel.portrait.scss', './weather-panel.game.scss'],
+  selector: "game-weather-panel",
+  imports: [
+    WeatherCatalogComponent,
+    LucideDynamicIcon,
+    LucideTimer,
+    LucideWind,
+    LucideWindArrowDown,
+    LucideCloud,
+    LucideVolume2,
+    LucideVolumeX,
+    LucideCheck,
+    LucideEighthNotes,
+  ],
+  templateUrl: "./weather-panel.component.html",
+  styleUrls: [
+    "./weather-panel.component.scss",
+    "./weather-panel.portrait.scss",
+    "./weather-panel.game.scss",
+  ],
   host: {
-    '[class.game-mode]': 'gameMode()',
+    "[class.game-mode]": "gameMode()",
   },
 })
 export class WeatherPanelComponent {
@@ -55,9 +123,9 @@ export class WeatherPanelComponent {
   /** The time goes on by itself. */
   readonly timeFlow = input(true);
   readonly windStrength = input(0);
-  readonly windDirection = input<WindDirection>('east');
-  readonly fireflyColor = input<FireflyColor>('green');
-  readonly leafMode = input<LeafMode>('autumn');
+  readonly windDirection = input<WindDirection>("east");
+  readonly fireflyColor = input<FireflyColor>("green");
+  readonly leafMode = input<LeafMode>("autumn");
   readonly gusts = input(true);
   readonly cloudDensity = input(0.5);
   readonly soundVolume = input(0.7);
@@ -71,7 +139,7 @@ export class WeatherPanelComponent {
   readonly gameMode = input(false);
   /** Air temperature (°C, rounded) and its color, shown on the clock. */
   readonly temperature = input(20);
-  readonly temperatureColor = input('inherit');
+  readonly temperatureColor = input("inherit");
   readonly weatherSelected = output<WeatherType>();
   readonly hourChange = output<number>();
   readonly timeFlowChange = output<boolean>();
@@ -83,29 +151,49 @@ export class WeatherPanelComponent {
   readonly soundChange = output<SoundSetting>();
   readonly musicVolumeChange = output<number>();
 
-  private readonly catalog = viewChild.required<WeatherCatalogComponent>('catalog');
+  private readonly catalog =
+    viewChild.required<WeatherCatalogComponent>("catalog");
   /**
    * Latest values, updated as soon as they are emitted: keys pressed quickly in a row must build on the
    * previous change, even before the inputs come back from the parent.
    */
   private readonly hourNow = linkedSignal(() => this.hour());
-  private readonly windNow = linkedSignal(() => ({ strength: this.windStrength(), direction: this.windDirection() }));
+  private readonly windNow = linkedSignal(() => ({
+    strength: this.windStrength(),
+    direction: this.windDirection(),
+  }));
   private readonly gustsNow = linkedSignal(() => this.gusts());
   private readonly cloudsNow = linkedSignal(() => this.cloudDensity());
-  private readonly soundNow = linkedSignal(() => ({ volume: this.soundVolume(), muted: this.soundMuted() }));
+  private readonly soundNow = linkedSignal(() => ({
+    volume: this.soundVolume(),
+    muted: this.soundMuted(),
+  }));
   /** Popover currently open (null = none). */
   protected readonly panel = signal<SettingPanel | null>(null);
   /** The ambiance tools are unfolded (top left, in a column). */
   protected readonly ambianceOpen = signal(false);
   protected readonly windDirections = WIND_DIRECTIONS;
-  protected readonly windPercent = computed(() => Math.round(this.windStrength() * 100));
+  protected readonly windPercent = computed(() =>
+    Math.round(this.windStrength() * 100)
+  );
   /** Rough wind description shown next to the gauge. */
   protected readonly windLabel = computed(() => {
-    const s = this.windStrength();
-    return s < 0.05 ? 'Calme' : s < 0.35 ? 'Brise' : s < 0.7 ? 'Vent fort' : 'Tempête';
+    return levelLabel(
+      this.windStrength(),
+      [
+        [0.05, "Calme"],
+        [0.35, "Brise"],
+        [0.7, "Vent fort"],
+      ],
+      "Tempête"
+    );
   });
-  protected readonly soundPercent = computed(() => Math.round(this.soundVolume() * 100));
-  protected readonly musicPercent = computed(() => Math.round(this.musicVolume() * 100));
+  protected readonly soundPercent = computed(() =>
+    Math.round(this.soundVolume() * 100)
+  );
+  protected readonly musicPercent = computed(() =>
+    Math.round(this.musicVolume() * 100)
+  );
   /** iPhone / iPad: sound even in silent mode (only where the browser allows it). */
   protected readonly silentBypassSupported = SILENT_MODE_BYPASS_SUPPORTED;
   protected readonly ignoreSilentMode = ignoreSilentMode;
@@ -114,13 +202,26 @@ export class WeatherPanelComponent {
     event.stopPropagation();
     applySilentMode(!this.ignoreSilentMode());
   }
-  protected readonly cloudPercent = computed(() => Math.round(this.cloudDensity() * 100));
+  protected readonly cloudPercent = computed(() =>
+    Math.round(this.cloudDensity() * 100)
+  );
   protected readonly cloudLabel = computed(() => {
-    const d = this.cloudDensity();
-    return d < 0.25 ? 'Clairsemés' : d < 0.5 ? 'Épars' : d < 0.75 ? 'Nombreux' : 'Couvert';
+    return levelLabel(
+      this.cloudDensity(),
+      [
+        [0.25, "Clairsemés"],
+        [0.5, "Épars"],
+        [0.75, "Nombreux"],
+      ],
+      "Couvert"
+    );
   });
-  protected readonly timeOfDay = computed(() => TIME_OF_DAY_LABELS[timeOfDayAt(this.hour())]);
-  protected readonly timeIcon = computed(() => TIME_ICONS[timeOfDayAt(this.hour())]);
+  protected readonly timeOfDay = computed(
+    () => TIME_OF_DAY_LABELS[timeOfDayAt(this.hour())]
+  );
+  protected readonly timeIcon = computed(
+    () => TIME_ICONS[timeOfDayAt(this.hour())]
+  );
   protected readonly hourLabel = computed(() => formatHour(this.hour()));
   /**
    * Time of day of the current weather's screenshot: the current one, unless the weather only exists at the other
@@ -134,14 +235,23 @@ export class WeatherPanelComponent {
   });
   /** The picture failed: the other time of day's one is tried, then the emoji. */
   private readonly thumbOtherTime = signal(false);
-  protected readonly currentThumb = computed(() => weatherScreenshot(this.weather(), this.thumbNight() !== this.thumbOtherTime()));
+  protected readonly currentThumb = computed(() =>
+    weatherScreenshot(
+      this.weather(),
+      this.thumbNight() !== this.thumbOtherTime()
+    )
+  );
   protected readonly thumbMissing = signal(false);
-  protected readonly current = computed(() => WEATHER_CHOICES.find(c => c.type === this.weather()) ?? WEATHER_CHOICES[0]);
+  protected readonly current = computed(
+    () =>
+      WEATHER_CHOICES.find((c) => c.type === this.weather()) ??
+      WEATHER_CHOICES[0]
+  );
 
   protected thumbError(event: Event): void {
     // A late error of a picture no longer shown (at launch, the time of day arrives just after the weather): ignored,
     // or the right picture would give way to the emoji until the next weather change
-    const src = (event.target as HTMLImageElement).getAttribute('src');
+    const src = (event.target as HTMLImageElement).getAttribute("src");
     if (src !== this.currentThumb()) {
       return;
     }
@@ -162,19 +272,30 @@ export class WeatherPanelComponent {
     });
     // Escape: the popover, then the ambiance tools (in the order they were opened, among the other things open)
     const escape = inject(EscapeService);
-    escape.track(() => this.ambianceOpen(), () => this.ambianceOpen.set(false));
-    escape.track(() => this.panel(), () => this.panel.set(null));
+    escape.track(
+      () => this.ambianceOpen(),
+      () => this.ambianceOpen.set(false)
+    );
+    escape.track(
+      () => this.panel(),
+      () => this.panel.set(null)
+    );
     // Capture phase: before the game (document listener)
     // (an editor over the game: its keys and clicks are its own)
-    const onKeyDown = (ev: KeyboardEvent) => !isGameCovered() && this.onKeyDown(ev);
-    const onKeyUp = (ev: KeyboardEvent) => !isGameCovered() && this.panel() && ev.stopPropagation();
+    const onKeyDown = (ev: KeyboardEvent) =>
+      !isGameCovered() && this.onKeyDown(ev);
+    const onKeyUp = (ev: KeyboardEvent) =>
+      !isGameCovered() && this.panel() && ev.stopPropagation();
     const onPointerDown = (ev: PointerEvent) => {
       if (isGameCovered()) {
         return;
       }
       const target = ev.target as Node;
       // Click outside the toolbar closes the popover
-      if (this.panel() && !this.host.nativeElement.querySelector('.toolbar')?.contains(target)) {
+      if (
+        this.panel() &&
+        !this.host.nativeElement.querySelector(".toolbar")?.contains(target)
+      ) {
         this.panel.set(null);
       }
       // Click outside the panel (the catalog is inside it) folds the ambiance tools back
@@ -182,13 +303,13 @@ export class WeatherPanelComponent {
         this.ambianceOpen.set(false);
       }
     };
-    window.addEventListener('keydown', onKeyDown, true);
-    window.addEventListener('keyup', onKeyUp, true);
-    window.addEventListener('pointerdown', onPointerDown, true);
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    window.addEventListener("pointerdown", onPointerDown, true);
     inject(DestroyRef).onDestroy(() => {
-      window.removeEventListener('keydown', onKeyDown, true);
-      window.removeEventListener('keyup', onKeyUp, true);
-      window.removeEventListener('pointerdown', onPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+      window.removeEventListener("pointerdown", onPointerDown, true);
     });
   }
 
@@ -200,7 +321,7 @@ export class WeatherPanelComponent {
   protected toggleAmbiance(event: Event): void {
     this.dropFocus(event);
     this.panel.set(null);
-    this.ambianceOpen.update(open => !open);
+    this.ambianceOpen.update((open) => !open);
   }
 
   protected openCatalog(event?: Event): void {
@@ -215,13 +336,16 @@ export class WeatherPanelComponent {
     if (event) {
       this.dropFocus(event);
     }
-    this.panel.update(open => open === panel ? null : panel);
+    this.panel.update((open) => (open === panel ? null : panel));
     // Held keys would stay pressed (their keyup won't reach the game while a popover is open)
     this.keyService.clearKeys();
   }
 
   protected setWindStrength(event: Event): void {
-    this.emitWind((event.target as HTMLInputElement).valueAsNumber / 100, this.windNow().direction);
+    this.emitWind(
+      (event.target as HTMLInputElement).valueAsNumber / 100,
+      this.windNow().direction
+    );
   }
 
   protected setWindDirection(direction: WindDirection, event: Event): void {
@@ -236,11 +360,16 @@ export class WeatherPanelComponent {
 
   protected setSoundVolume(event: Event): void {
     // Moving the slider unmutes
-    this.emitSound((event.target as HTMLInputElement).valueAsNumber / 100, false);
+    this.emitSound(
+      (event.target as HTMLInputElement).valueAsNumber / 100,
+      false
+    );
   }
 
   protected setMusicVolume(event: Event): void {
-    this.musicVolumeChange.emit((event.target as HTMLInputElement).valueAsNumber / 100);
+    this.musicVolumeChange.emit(
+      (event.target as HTMLInputElement).valueAsNumber / 100
+    );
     // Moving the slider unmutes, like the sound one
     if (this.soundNow().muted) {
       this.emitSound(this.soundNow().volume, false);
@@ -283,7 +412,10 @@ export class WeatherPanelComponent {
   }
 
   private emitWind(strength: number, direction: WindDirection) {
-    this.windNow.set({ strength: Math.min(Math.max(strength, 0), 1), direction });
+    this.windNow.set({
+      strength: Math.min(Math.max(strength, 0), 1),
+      direction,
+    });
     this.windChange.emit(this.windNow());
   }
 
@@ -317,26 +449,52 @@ export class WeatherPanelComponent {
       return;
     }
     // A popover is open: arrows / Enter act on it, not on the game (Escape: see EscapeService)
-    const sign = ev.key === 'ArrowLeft' ? -1 : ev.key === 'ArrowRight' ? 1 : 0;
+    const signs: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1 };
+    const sign = signs[ev.key] ?? 0;
     let handled = true;
     if (sign) {
       switch (panel) {
-        case 'hour': this.emitHour(this.hourNow() + sign * HOUR_STEP); break;
-        case 'wind': this.emitWind(this.windNow().strength + sign * GAUGE_STEP, this.windNow().direction); break;
-        case 'clouds': this.emitClouds(this.cloudsNow() + sign * GAUGE_STEP); break;
-        case 'sound': this.emitSound(this.soundNow().volume + sign * GAUGE_STEP, false); break;
+        case "hour":
+          this.emitHour(this.hourNow() + sign * HOUR_STEP);
+          break;
+        case "wind":
+          this.emitWind(
+            this.windNow().strength + sign * GAUGE_STEP,
+            this.windNow().direction
+          );
+          break;
+        case "clouds":
+          this.emitClouds(this.cloudsNow() + sign * GAUGE_STEP);
+          break;
+        case "sound":
+          this.emitSound(this.soundNow().volume + sign * GAUGE_STEP, false);
+          break;
       }
-    } else if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') {
-      if (panel === 'wind') {
-        this.emitWind(this.windNow().strength, this.windNow().direction === 'east' ? 'west' : 'east');
+    } else if (ev.key === "ArrowUp" || ev.key === "ArrowDown") {
+      if (panel === "wind") {
+        this.emitWind(
+          this.windNow().strength,
+          this.windNow().direction === "east" ? "west" : "east"
+        );
       }
-    } else if (ev.key === 'Enter' || ev.key === ' ') {
-      if (panel === 'hour') {
-        this.toggleTimeFlow();
-      } else if (panel === 'wind') {
-        this.toggleGusts();
-      } else if (panel === 'sound') {
-        this.toggleMute();
+    } else if (ev.key === "Enter" || ev.key === " ") {
+      switch (panel) {
+        case "hour": {
+          this.toggleTimeFlow();
+
+          break;
+        }
+        case "wind": {
+          this.toggleGusts();
+
+          break;
+        }
+        case "sound": {
+          this.toggleMute();
+
+          break;
+        }
+        // No default
       }
     } else {
       handled = false;
@@ -351,4 +509,13 @@ export class WeatherPanelComponent {
   private dropFocus(event: Event): void {
     (event.currentTarget as HTMLElement | null)?.blur?.();
   }
+}
+
+/** The label of the first level the value is under (else the last one). */
+function levelLabel(
+  value: number,
+  levels: [number, string][],
+  last: string
+): string {
+  return levels.find(([under]) => value < under)?.[1] ?? last;
 }

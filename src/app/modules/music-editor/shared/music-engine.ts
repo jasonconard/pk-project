@@ -1,6 +1,30 @@
-import { Channel, CHANNELS, degreeMidi, DrumId, InstrumentId, lofiOf, LofiSettings, noteLength, Song, songLength, volumeOf } from './song';
-import { INSTRUMENT_DEFS, InstrumentDef, Wave } from './instruments';
-import { lfsrNoise, pulseWave, roomImpulse, wave4Bit, whiteNoise } from './synth';
+import {
+  Channel,
+  CHANNELS,
+  degreeMidi,
+  DrumId,
+  InstrumentId,
+  lofiOf,
+  LofiSettings,
+  noteLength,
+  Song,
+  songLength,
+  volumeOf,
+} from "./song";
+import { INSTRUMENT_DEFS, InstrumentDef, Wave } from "./instruments";
+import {
+  lfsrNoise,
+  pulseWave,
+  roomImpulse,
+  wave4Bit,
+  whiteNoise,
+} from "./synth";
+
+/** Pulse waves: the part of the period up (the others: 0.75). */
+const PULSE_WIDTHS: Partial<Record<Wave, number>> = {
+  pulse12: 0.125,
+  pulse25: 0.25,
+};
 
 /** The sequencer looks this far ahead (s) and wakes up this often (ms): steady tempo even when the page is busy. */
 const LOOKAHEAD = 0.12;
@@ -59,7 +83,7 @@ export class MusicEngine {
   private nextStep = 0;
   private nextTime = 0;
   /** Steps scheduled with the time they are heard, to show the playhead at the right moment. */
-  private readonly queue: { step: number, time: number }[] = [];
+  private readonly queue: { step: number; time: number }[] = [];
 
   get playing(): boolean {
     return this.timer !== undefined;
@@ -71,7 +95,7 @@ export class MusicEngine {
       this.build();
     }
     const ctx = this.ctx!;
-    if (ctx.state !== 'running') {
+    if (ctx.state !== "running") {
       void ctx.resume().catch(() => undefined);
     }
     return ctx;
@@ -89,7 +113,7 @@ export class MusicEngine {
 
     // Lo-fi chain: buses → flutter → grain → warmth → master
     this.warmth = ctx.createBiquadFilter();
-    this.warmth.type = 'lowpass';
+    this.warmth.type = "lowpass";
     this.warmth.Q.value = 0.5;
     this.warmth.connect(this.master);
     // Light reverb: a send from the end of the chain into a small room
@@ -105,7 +129,10 @@ export class MusicEngine {
     this.wowDepth = ctx.createGain();
     this.wowDepth.gain.value = 0;
     this.wowDepth.connect(wow.delayTime);
-    for (const [freq, share] of [[0.55, 1], [4.5, 0.12]]) {
+    for (const [freq, share] of [
+      [0.55, 1],
+      [4.5, 0.12],
+    ]) {
       const lfo = ctx.createOscillator();
       lfo.frequency.value = freq;
       const amount = ctx.createGain();
@@ -113,17 +140,19 @@ export class MusicEngine {
       lfo.connect(amount).connect(this.wowDepth);
       lfo.start();
     }
-    this.buses = Object.fromEntries(CHANNELS.map(c => {
-      const bus = ctx.createGain();
-      bus.connect(wow);
-      return [c.id, bus];
-    })) as Record<Channel, GainNode>;
+    this.buses = Object.fromEntries(
+      CHANNELS.map((c) => {
+        const bus = ctx.createGain();
+        bus.connect(wow);
+        return [c.id, bus];
+      })
+    ) as Record<Channel, GainNode>;
 
     // Noises: white (hiss, breath), LFSR (snare: 15 bits, hi-hat: 7 bits), crackles (sparse clicks)
     const length = ctx.sampleRate * 2;
     this.noise = whiteNoise(ctx);
-    this.snareNoise = lfsrNoise(ctx, 15, 16000);
-    this.hatNoise = lfsrNoise(ctx, 7, 24000);
+    this.snareNoise = lfsrNoise(ctx, 15, 16_000);
+    this.hatNoise = lfsrNoise(ctx, 7, 24_000);
     this.crackles = ctx.createBuffer(1, length, ctx.sampleRate);
     const crackles = this.crackles.getChannelData(0);
     for (let i = 0; i < length; i++) {
@@ -145,7 +174,11 @@ export class MusicEngine {
     this.output = Math.min(Math.max(volume, 0), 1);
     if (this.ctx && this.master) {
       this.master.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.master.gain.setTargetAtTime(MASTER * this.output, this.ctx.currentTime, Math.max(seconds, 0.01) / 3);
+      this.master.gain.setTargetAtTime(
+        MASTER * this.output,
+        this.ctx.currentTime,
+        Math.max(seconds, 0.01) / 3
+      );
     }
   }
 
@@ -175,7 +208,7 @@ export class MusicEngine {
       this.timer = undefined;
     }
     this.queue.length = 0;
-    this.beds.forEach(bed => bed.stop());
+    this.beds.forEach((bed) => bed.stop());
     this.beds = [];
   }
 
@@ -188,7 +221,9 @@ export class MusicEngine {
     while (this.queue.length > 1 && this.queue[1].time <= now) {
       this.queue.shift();
     }
-    return this.queue[0] && this.queue[0].time <= now ? this.queue[0].step : null;
+    return this.queue[0] && this.queue[0].time <= now
+      ? this.queue[0].step
+      : null;
   }
 
   /** Pause in the background (and resume on return). */
@@ -205,10 +240,22 @@ export class MusicEngine {
   }
 
   /** One note, now (touching the grid, trying a scale), with the song's mix and lo-fi sound. */
-  previewNote(song: Song, instrument: InstrumentId, degree: number, at = 0, steps = 1): void {
+  previewNote(
+    song: Song,
+    instrument: InstrumentId,
+    degree: number,
+    at = 0,
+    steps = 1
+  ): void {
     const ctx = this.audio();
     this.applySettings(song);
-    this.note(instrument, degreeMidi(song, degree), ctx.currentTime + 0.01 + at, this.stepDuration(song), steps);
+    this.note(
+      instrument,
+      degreeMidi(song, degree),
+      ctx.currentTime + 0.01 + at,
+      this.stepDuration(song),
+      steps
+    );
   }
 
   previewDrum(song: Song, drum: DrumId): void {
@@ -232,10 +279,18 @@ export class MusicEngine {
     const now = ctx.currentTime;
     const lofi = lofiOf(song);
     for (const channel of CHANNELS) {
-      this.buses![channel.id].gain.setTargetAtTime(volumeOf(song, channel.id), now, 0.02);
+      this.buses![channel.id].gain.setTargetAtTime(
+        volumeOf(song, channel.id),
+        now,
+        0.02
+      );
     }
     // Warmth: 20 kHz (open) down to 1.2 kHz
-    this.warmth!.frequency.setTargetAtTime(20000 * Math.pow(1200 / 20000, lofi.warmth), now, 0.03);
+    this.warmth!.frequency.setTargetAtTime(
+      20_000 * Math.pow(1200 / 20_000, lofi.warmth),
+      now,
+      0.03
+    );
     this.wowDepth!.gain.setTargetAtTime(WOW_DEPTH * lofi.wobble, now, 0.05);
     this.hissGain!.gain.setTargetAtTime(0.05 * lofi.hiss, now, 0.05);
     this.vinylGain!.gain.setTargetAtTime(0.5 * lofi.vinyl, now, 0.05);
@@ -271,7 +326,7 @@ export class MusicEngine {
     hiss.buffer = this.noise!;
     hiss.loop = true;
     const hissFilter = ctx.createBiquadFilter();
-    hissFilter.type = 'bandpass';
+    hissFilter.type = "bandpass";
     hissFilter.frequency.value = 5000;
     hissFilter.Q.value = 0.4;
     hiss.connect(hissFilter).connect(this.hissGain!);
@@ -279,7 +334,7 @@ export class MusicEngine {
     vinyl.buffer = this.crackles!;
     vinyl.loop = true;
     const vinylFilter = ctx.createBiquadFilter();
-    vinylFilter.type = 'bandpass';
+    vinylFilter.type = "bandpass";
     vinylFilter.frequency.value = 2500;
     vinylFilter.Q.value = 0.6;
     vinyl.connect(vinylFilter).connect(this.vinylGain!);
@@ -300,10 +355,17 @@ export class MusicEngine {
       const step = this.nextStep % length;
       const duration = this.stepDuration(song);
       // Swing: every second sixteenth comes a little late
-      const time = this.nextTime + (step % 2 === 1 ? swing * duration * 0.45 : 0);
+      const time =
+        this.nextTime + (step % 2 === 1 ? swing * duration * 0.45 : 0);
       for (const note of song.notes) {
         if (note.step === step) {
-          this.note(note.instrument, degreeMidi(song, note.degree), time, duration, noteLength(note));
+          this.note(
+            note.instrument,
+            degreeMidi(song, note.degree),
+            time,
+            duration,
+            noteLength(note)
+          );
         }
       }
       for (const hit of song.drums) {
@@ -320,21 +382,35 @@ export class MusicEngine {
   // --- Instruments ---
 
   /** A note held `steps` steps (`step`: one step's duration, s). */
-  private note(instrument: InstrumentId, midi: number, time: number, step: number, steps = 1): void {
+  private note(
+    instrument: InstrumentId,
+    midi: number,
+    time: number,
+    step: number,
+    steps = 1
+  ): void {
     this.target = this.buses![instrument];
     this.voice(INSTRUMENT_DEFS[instrument], midiFreq(midi), time, step, steps);
   }
 
   /** The wave of a layer: a Web Audio one, or a computed one (pulses, 4-bit wave), made once. */
   private setWave(osc: OscillatorNode, wave: Wave): void {
-    if (wave === 'sine' || wave === 'triangle' || wave === 'sawtooth' || wave === 'square') {
+    if (
+      wave === "sine" ||
+      wave === "triangle" ||
+      wave === "sawtooth" ||
+      wave === "square"
+    ) {
       osc.type = wave;
       return;
     }
     let periodic = this.waves.get(wave);
     if (!periodic) {
       const ctx = this.ctx!;
-      periodic = wave === 'wave4' ? wave4Bit(ctx) : pulseWave(ctx, wave === 'pulse12' ? 0.125 : wave === 'pulse25' ? 0.25 : 0.75);
+      periodic =
+        wave === "wave4"
+          ? wave4Bit(ctx)
+          : pulseWave(ctx, PULSE_WIDTHS[wave] ?? 0.75);
       this.waves.set(wave, periodic);
     }
     osc.setPeriodicWave(periodic);
@@ -345,34 +421,57 @@ export class MusicEngine {
    * at the end), FM, delayed vibrato, breath. 'held' notes last their length; 'ring' ones decay by themselves, slower
    * when held longer.
    */
-  private voice(def: InstrumentDef, freq: number, time: number, step: number, steps: number): void {
+  private voice(
+    def: InstrumentDef,
+    freq: number,
+    time: number,
+    step: number,
+    steps: number
+  ): void {
     const ctx = this.ctx!;
     const held = steps * step;
     let end: number;
     let decay = def.env.d;
-    if (def.kind === 'ring') {
+    if (def.kind === "ring") {
       const ring = Math.max(def.short, held);
       decay *= Math.max(1, ring / def.short);
       end = time + ring;
     } else {
-      end = time + Math.max(steps > 1 ? held * 0.95 : step * def.short, (def.minSteps ?? 0) * step);
+      end =
+        time +
+        Math.max(
+          steps > 1 ? held * 0.95 : step * def.short,
+          (def.minSteps ?? 0) * step
+        );
     }
     const stop = end + def.env.r * 1.6 + 0.1;
     this.stealVoice(time);
 
-    const out = this.envelope(time, def.peak, def.env.a, decay / 3, def.env.s, end, def.env.r / 3);
+    const out = this.envelope(
+      time,
+      def.peak,
+      def.env.a,
+      decay / 3,
+      def.env.s,
+      end,
+      def.env.r / 3
+    );
     let into: AudioNode = out;
     if (def.filter) {
       const filter = this.lowpass(def.filter.freq, out, def.filter.q ?? 0.7);
       filter.type = def.filter.type;
       if (def.filter.sweepTo) {
         filter.frequency.setValueAtTime(def.filter.freq, time);
-        filter.frequency.setTargetAtTime(Math.max(freq * def.filter.sweepTo, def.filter.sweepMin ?? 0), time, def.filter.sweepTime ?? 0.06);
+        filter.frequency.setTargetAtTime(
+          Math.max(freq * def.filter.sweepTo, def.filter.sweepMin ?? 0),
+          time,
+          def.filter.sweepTime ?? 0.06
+        );
       }
       into = filter;
     }
     const sources: AudioScheduledSourceNode[] = [];
-    const oscs = def.layers.map(layer => {
+    const oscs = def.layers.map((layer) => {
       const osc = ctx.createOscillator();
       this.setWave(osc, layer.wave);
       osc.frequency.value = freq * (layer.ratio ?? 1);
@@ -395,7 +494,13 @@ export class MusicEngine {
       depth.gain.setValueAtTime(freq * def.fm.index, time);
       depth.gain.setTargetAtTime(0, time, def.fm.time);
       depth.connect(oscs[0].frequency);
-      const modulator = this.osc('sine', freq * def.fm.ratio, time, stop, depth);
+      const modulator = this.osc(
+        "sine",
+        freq * def.fm.ratio,
+        time,
+        stop,
+        depth
+      );
       sources.push(modulator);
     }
     if (def.vibrato) {
@@ -403,15 +508,18 @@ export class MusicEngine {
       const depth = ctx.createGain();
       depth.gain.setValueAtTime(0, time);
       depth.gain.setValueAtTime(0, time + def.vibrato.delay);
-      depth.gain.linearRampToValueAtTime(def.vibrato.cents, time + def.vibrato.delay + 0.2);
-      oscs.forEach(osc => depth.connect(osc.detune));
-      sources.push(this.osc('sine', def.vibrato.rate, time, stop, depth));
+      depth.gain.linearRampToValueAtTime(
+        def.vibrato.cents,
+        time + def.vibrato.delay + 0.2
+      );
+      oscs.forEach((osc) => depth.connect(osc.detune));
+      sources.push(this.osc("sine", def.vibrato.rate, time, stop, depth));
     }
     if (def.breath) {
       const breath = ctx.createBufferSource();
       breath.buffer = this.noise!;
       const band = ctx.createBiquadFilter();
-      band.type = 'bandpass';
+      band.type = "bandpass";
       band.frequency.value = def.breath.freq;
       band.Q.value = 0.8;
       const gain = ctx.createGain();
@@ -426,18 +534,26 @@ export class MusicEngine {
 
   /** Too many notes at `time`: the oldest one still sounding is cut short (a quick fade, no click). */
   private stealVoice(time: number): void {
-    this.voices = this.voices.filter(v => v.until > time);
+    this.voices = this.voices.filter((v) => v.until > time);
     while (this.voices.length >= MAX_VOICES) {
       const oldest = this.voices.shift()!;
       oldest.gain.gain.cancelScheduledValues(time);
       oldest.gain.gain.setTargetAtTime(0, time, 0.008);
-      oldest.sources.forEach(source => source.stop(time + 0.05));
+      oldest.sources.forEach((source) => source.stop(time + 0.05));
     }
   }
 
   /** Volume envelope: attack, then down to `sustain` (time constant `decay`), released at `end`; into the current
    * channel's bus. */
-  private envelope(time: number, peak: number, attack: number, decay: number, sustain: number, end: number, release: number): GainNode {
+  private envelope(
+    time: number,
+    peak: number,
+    attack: number,
+    decay: number,
+    sustain: number,
+    end: number,
+    release: number
+  ): GainNode {
     const ctx = this.ctx!;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, time);
@@ -448,7 +564,13 @@ export class MusicEngine {
     return gain;
   }
 
-  private osc(type: OscillatorType, freq: number, time: number, stop: number, out: AudioNode): OscillatorNode {
+  private osc(
+    type: OscillatorType,
+    freq: number,
+    time: number,
+    stop: number,
+    out: AudioNode
+  ): OscillatorNode {
     const osc = this.ctx!.createOscillator();
     osc.type = type;
     osc.frequency.value = freq;
@@ -460,7 +582,7 @@ export class MusicEngine {
 
   private lowpass(freq: number, out: AudioNode, q = 0.7): BiquadFilterNode {
     const filter = this.ctx!.createBiquadFilter();
-    filter.type = 'lowpass';
+    filter.type = "lowpass";
     filter.frequency.value = freq;
     filter.Q.value = q;
     filter.connect(out);
@@ -471,28 +593,38 @@ export class MusicEngine {
   private drum(drum: DrumId, time: number): void {
     const ctx = this.ctx!;
     this.target = this.buses!.drums;
-    if (drum === 'kick') {
+    if (drum === "kick") {
       const out = this.envelope(time, 0.9, 0.002, 0.05, 0, time + 0.06, 0.05);
-      const osc = this.osc('sine', 150, time, time + 0.4, out);
+      const osc = this.osc("sine", 150, time, time + 0.4, out);
       osc.frequency.setValueAtTime(150, time);
       osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
       return;
     }
     const source = ctx.createBufferSource();
     const filter = ctx.createBiquadFilter();
-    if (drum === 'snare') {
+    if (drum === "snare") {
       source.buffer = this.snareNoise!;
-      filter.type = 'bandpass';
+      filter.type = "bandpass";
       filter.frequency.value = 2200;
       filter.Q.value = 0.7;
-      source.connect(filter).connect(this.envelope(time, 0.3, 0.001, 0.04, 0, time + 0.02, 0.04));
-      this.osc('triangle', 185, time, time + 0.15, this.envelope(time, 0.14, 0.001, 0.03, 0, time + 0.02, 0.03));
+      source
+        .connect(filter)
+        .connect(this.envelope(time, 0.3, 0.001, 0.04, 0, time + 0.02, 0.04));
+      this.osc(
+        "triangle",
+        185,
+        time,
+        time + 0.15,
+        this.envelope(time, 0.14, 0.001, 0.03, 0, time + 0.02, 0.03)
+      );
       source.start(time, Math.random() * 0.5, 0.35);
     } else {
       source.buffer = this.hatNoise!;
-      filter.type = 'highpass';
+      filter.type = "highpass";
       filter.frequency.value = 6000;
-      source.connect(filter).connect(this.envelope(time, 0.1, 0.001, 0.014, 0, time + 0.01, 0.014));
+      source
+        .connect(filter)
+        .connect(this.envelope(time, 0.1, 0.001, 0.014, 0, time + 0.01, 0.014));
       source.start(time, Math.random() * 0.5, 0.12);
     }
   }

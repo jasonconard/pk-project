@@ -1,17 +1,30 @@
-import { computed, effect, inject, Service, signal } from '@angular/core';
-import { MODELS } from '../../../../../assets/models/models';
-import { reloadBrowserModels } from '../model/browser-models';
-import { GameAction } from '../model/GameAction';
+import { computed, effect, inject, Service, signal } from "@angular/core";
+import { MODELS } from "../../../../../assets/models/models";
+import { reloadBrowserModels } from "../model/browser-models";
+import { GameAction } from "../model/GameAction";
 import { MapHelper } from "../model/MapHelper";
-import * as THREE from 'three';
+import * as THREE from "three";
 import { GameMode, Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
-import { QUALITY_CHOICES, QualityMode } from '../model/Quality';
-import { DiagnosticsReport } from '../model/Diagnostics';
-import { drawCallBreakdown } from '../model/DrawCallBreakdown';
-import { EditBrush, EditCommand, EditSelection, MapEditorService } from './map-editor.service';
+import { QUALITY_CHOICES, QualityMode } from "../model/Quality";
+import { DiagnosticsReport } from "../model/Diagnostics";
+import { drawCallBreakdown } from "../model/DrawCallBreakdown";
+import {
+  EditBrush,
+  EditCommand,
+  EditSelection,
+  MapEditorService,
+} from "./map-editor.service";
 import { GameMapService } from "./game-map.service";
-import { createMap, downloadMapFile, duplicateMap, listMaps, loadMap, resetMap, saveMap } from "./map-storage";
+import {
+  createMap,
+  downloadMapFile,
+  duplicateMap,
+  listMaps,
+  loadMap,
+  resetMap,
+  saveMap,
+} from "./map-storage";
 import { MapKind } from "../model/SceneMap";
 import { Passage } from "../model/Passage";
 import { ObjectEvent } from "../model/ObjectEvent";
@@ -22,10 +35,28 @@ import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { FightService } from "../../../fight/shared/services/fight.service";
-import { isGameAsleep, onGameAsleep } from "../../../../core/shared/app-visibility";
+import {
+  isGameAsleep,
+  onGameAsleep,
+} from "../../../../core/shared/app-visibility";
 import { GameMusic } from "./game-music";
 import { WEATHER_INFO } from "../weather/weather-catalog";
-import { DAY_ONLY_HOUR, NIGHT_ONLY_HOUR, MORNING_MIST_HOUR, mistAt, FIREFLY_COLORS, FireflyColor, fireflyColorHex, isNightHour, isWeatherAvailable, LeafMode, WeatherType, WindDirection, windToX } from "../weather/Weather";
+import {
+  DAY_ONLY_HOUR,
+  NIGHT_ONLY_HOUR,
+  MORNING_MIST_HOUR,
+  mistAt,
+  FIREFLY_COLORS,
+  FireflyColor,
+  fireflyColorHex,
+  isNightHour,
+  isWeatherAvailable,
+  LeafMode,
+  WeatherType,
+  WindDirection,
+  windToX,
+} from "../weather/Weather";
+import { MusicSlot } from "../../../music-editor/shared/song";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
 export interface GameHud {
@@ -66,7 +97,10 @@ export interface GameHud {
 }
 
 const sameHud = (a: GameHud | null, b: GameHud | null): boolean =>
-  a === b || (!!a && !!b && (Object.keys(a) as (keyof GameHud)[]).every(key => a[key] === b[key]));
+  a === b ||
+  (!!a &&
+    !!b &&
+    (Object.keys(a) as (keyof GameHud)[]).every((key) => a[key] === b[key]));
 
 /** Weather and ambience settings kept between sessions (browser storage). */
 interface SavedSettings {
@@ -86,7 +120,7 @@ interface SavedSettings {
   quality: QualityMode;
 }
 
-const SETTINGS_KEY = 'pk-weather-settings';
+const SETTINGS_KEY = "pk-weather-settings";
 
 /** Input / moves step (ms: 120 per second), most steps run at once, most time caught up at once (ms). */
 const INPUT_STEP = 1000 / 120;
@@ -97,38 +131,39 @@ const MAX_INPUT_CATCH_UP = 250;
 function loadSettings(): Partial<SavedSettings> {
   let raw: Record<string, unknown>;
   try {
-    raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') ?? {};
+    raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") ?? {};
   } catch {
     return {};
   }
   const out: Partial<SavedSettings> = {};
-  const unit = (v: unknown) => typeof v === 'number' && v >= 0 && v <= 1 ? v : undefined;
-  const bool = (v: unknown) => typeof v === 'boolean' ? v : undefined;
-  if (Object.values(WeatherType).includes(raw['weather'] as WeatherType)) {
-    out.weather = raw['weather'] as WeatherType;
+  const unit = (v: unknown) =>
+    typeof v === "number" && v >= 0 && v <= 1 ? v : undefined;
+  const bool = (v: unknown) => (typeof v === "boolean" ? v : undefined);
+  if (Object.values(WeatherType).includes(raw["weather"] as WeatherType)) {
+    out.weather = raw["weather"] as WeatherType;
   }
-  if (typeof raw['hour'] === 'number' && raw['hour'] >= 0 && raw['hour'] < 24) {
-    out.hour = raw['hour'];
+  if (typeof raw["hour"] === "number" && raw["hour"] >= 0 && raw["hour"] < 24) {
+    out.hour = raw["hour"];
   }
-  if (raw['windDirection'] === 'east' || raw['windDirection'] === 'west') {
-    out.windDirection = raw['windDirection'];
+  if (raw["windDirection"] === "east" || raw["windDirection"] === "west") {
+    out.windDirection = raw["windDirection"];
   }
-  if (FIREFLY_COLORS.some(c => c.color === raw['fireflyColor'])) {
-    out.fireflyColor = raw['fireflyColor'] as FireflyColor;
+  if (FIREFLY_COLORS.some((c) => c.color === raw["fireflyColor"])) {
+    out.fireflyColor = raw["fireflyColor"] as FireflyColor;
   }
-  if (QUALITY_CHOICES.some(q => q.mode === raw['quality'])) {
-    out.quality = raw['quality'] as QualityMode;
+  if (QUALITY_CHOICES.some((q) => q.mode === raw["quality"])) {
+    out.quality = raw["quality"] as QualityMode;
   }
-  if (raw['leafMode'] === 'autumn' || raw['leafMode'] === 'cherry') {
-    out.leafMode = raw['leafMode'];
+  if (raw["leafMode"] === "autumn" || raw["leafMode"] === "cherry") {
+    out.leafMode = raw["leafMode"];
   }
-  out.windStrength = unit(raw['windStrength']);
-  out.cloudDensity = unit(raw['cloudDensity']);
-  out.soundVolume = unit(raw['soundVolume']);
-  out.musicVolume = unit(raw['musicVolume']);
-  out.timeFlow = bool(raw['timeFlow']);
-  out.gusts = bool(raw['gusts']);
-  out.soundMuted = bool(raw['soundMuted']);
+  out.windStrength = unit(raw["windStrength"]);
+  out.cloudDensity = unit(raw["cloudDensity"]);
+  out.soundVolume = unit(raw["soundVolume"]);
+  out.musicVolume = unit(raw["musicVolume"]);
+  out.timeFlow = bool(raw["timeFlow"]);
+  out.gusts = bool(raw["gusts"]);
+  out.soundMuted = bool(raw["soundMuted"]);
   return out;
 }
 
@@ -140,13 +175,15 @@ let lastSaved: Partial<SavedSettings> = {};
  * clock going by doesn't overwrite the weather chosen in another one.
  */
 function saveSettings(settings: SavedSettings) {
-  const changed = (Object.keys(settings) as (keyof SavedSettings)[]).filter(k => settings[k] !== lastSaved[k]);
-  if (!changed.length) {
+  const changed = (Object.keys(settings) as (keyof SavedSettings)[]).filter(
+    (k) => settings[k] !== lastSaved[k]
+  );
+  if (changed.length === 0) {
     return;
   }
   try {
-    const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') ?? {};
-    changed.forEach(k => stored[k] = settings[k]);
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") ?? {};
+    changed.forEach((k) => (stored[k] = settings[k]));
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(stored));
     lastSaved = { ...settings };
   } catch {
@@ -175,7 +212,9 @@ export class GameService {
   /** Settings of the last session (weather, time, wind, clouds, sound...), see saveSettings. */
   private readonly saved = (lastSaved = loadSettings());
 
-  private readonly weatherState = signal(this.saved.weather ?? WeatherType.NEUTRAL);
+  private readonly weatherState = signal(
+    this.saved.weather ?? WeatherType.NEUTRAL
+  );
   readonly weather = this.weatherState.asReadonly();
   /** Time of day, 0..24 h (dawn 6-8 h, dusk 18-20 h). */
   private readonly hourState = signal(this.saved.hour ?? 12);
@@ -187,7 +226,9 @@ export class GameService {
   /** Wind strength 0..1 and where it blows towards. */
   private readonly windStrengthState = signal(this.saved.windStrength ?? 0.3);
   readonly windStrength = this.windStrengthState.asReadonly();
-  private readonly windDirectionState = signal<WindDirection>(this.saved.windDirection ?? 'east');
+  private readonly windDirectionState = signal<WindDirection>(
+    this.saved.windDirection ?? "east"
+  );
   readonly windDirection = this.windDirectionState.asReadonly();
   /** Sound volume 0..1 and mute. */
   private readonly soundVolumeState = signal(this.saved.soundVolume ?? 0.7);
@@ -207,30 +248,44 @@ export class GameService {
   /** Random wind gusts on top of the wind setting. */
   private readonly gustsState = signal(this.saved.gusts ?? true);
   readonly gusts = this.gustsState.asReadonly();
-  private readonly fireflyColorState = signal<FireflyColor>(this.saved.fireflyColor ?? 'green');
+  private readonly fireflyColorState = signal<FireflyColor>(
+    this.saved.fireflyColor ?? "green"
+  );
   readonly fireflyColor = this.fireflyColorState.asReadonly();
-  private readonly leafModeState = signal<LeafMode>(this.saved.leafMode ?? 'autumn');
+  private readonly leafModeState = signal<LeafMode>(
+    this.saved.leafMode ?? "autumn"
+  );
   readonly leafMode = this.leafModeState.asReadonly();
   /** Graphics quality (hidden menu on the temperature / fps tile). */
-  private readonly qualityState = signal<QualityMode>(this.saved.quality ?? 'auto');
+  private readonly qualityState = signal<QualityMode>(
+    this.saved.quality ?? "auto"
+  );
   readonly quality = this.qualityState.asReadonly();
 
   constructor() {
     this.initCheckResize();
     // The sound effects of the events follow the sound settings; an event may change the weather
     effect(() => setSfxVolume(this.soundVolumeState(), this.soundMutedState()));
-    this.sequenceService.weather$.subscribe(type => {
+    this.sequenceService.weather$.subscribe((type) => {
       if (Object.values(WeatherType).includes(type as WeatherType)) {
         this.setWeather(type as WeatherType);
       }
     });
     // Music: its volume (muted with the sounds), and the song of the moment
-    effect(() => this.music.setVolume(this.soundMutedState() ? 0 : this.musicVolumeState()));
+    effect(() =>
+      this.music.setVolume(this.soundMutedState() ? 0 : this.musicVolumeState())
+    );
     effect(() => {
       const fight = this.hudState()?.mode === GameMode.FIGHT;
-      const rain = WEATHER_INFO[this.weatherState()]?.category === 'rain';
+      const rain = WEATHER_INFO[this.weatherState()]?.category === "rain";
       const night = this.night();
-      this.music.setSlot(fight ? 'fight' : rain ? 'rain' : night ? 'night' : 'day', night);
+      let slot: MusicSlot = night ? "night" : "day";
+      if (fight) {
+        slot = "fight";
+      } else if (rain) {
+        slot = "rain";
+      }
+      this.music.setSlot(slot, night);
     });
     // The map's own songs (an empty id while loading: no change)
     effect(() => {
@@ -240,21 +295,23 @@ export class GameService {
       }
     });
     // Saved on every change (the hour changes a few times per second while the time goes by: tiny writes)
-    effect(() => saveSettings({
-      weather: this.weatherState(),
-      hour: this.hourState(),
-      timeFlow: this.timeFlowState(),
-      windStrength: this.windStrengthState(),
-      windDirection: this.windDirectionState(),
-      gusts: this.gustsState(),
-      cloudDensity: this.cloudDensityState(),
-      soundVolume: this.soundVolumeState(),
-      soundMuted: this.soundMutedState(),
-      musicVolume: this.musicVolumeState(),
-      fireflyColor: this.fireflyColorState(),
-      leafMode: this.leafModeState(),
-      quality: this.qualityState(),
-    }));
+    effect(() =>
+      saveSettings({
+        weather: this.weatherState(),
+        hour: this.hourState(),
+        timeFlow: this.timeFlowState(),
+        windStrength: this.windStrengthState(),
+        windDirection: this.windDirectionState(),
+        gusts: this.gustsState(),
+        cloudDensity: this.cloudDensityState(),
+        soundVolume: this.soundVolumeState(),
+        soundMuted: this.soundMutedState(),
+        musicVolume: this.musicVolumeState(),
+        fireflyColor: this.fireflyColorState(),
+        leafMode: this.leafModeState(),
+        quality: this.qualityState(),
+      })
+    );
   }
 
   init(canvas: HTMLElement, gameMode: GameMode = GameMode.MAP): Game {
@@ -262,16 +319,21 @@ export class GameService {
 
     const rect = canvas.getBoundingClientRect();
     // High performance GPU (phones with two modes, laptops with two GPUs)
-    const renderer = new THREE.WebGLRenderer({ powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({
+      powerPreference: "high-performance",
+    });
 
-    renderer.setSize( rect.width, rect.height );
-    canvas.appendChild( renderer.domElement );
+    renderer.setSize(rect.width, rect.height);
+    canvas.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
     const raycaster = new THREE.Raycaster();
 
     const game = new Game({
-      scene, raycaster, renderer, canvas,
+      scene,
+      raycaster,
+      renderer,
+      canvas,
       mode: gameMode,
     });
     this.game = game;
@@ -279,12 +341,17 @@ export class GameService {
     // Start with the settings shown in the UI
     game.weather.setWeather(this.weatherState());
     game.weather.setHour(this.hourState());
-    game.weather.setWind(windToX(this.windStrengthState(), this.windDirectionState()));
+    game.weather.setWind(
+      windToX(this.windStrengthState(), this.windDirectionState())
+    );
     game.weather.setFireflyColor(fireflyColorHex(this.fireflyColorState()));
     game.weather.setLeafMode(this.leafModeState());
     game.weather.setGusts(this.gustsState());
     game.weather.setCloudDensity(this.cloudDensityState());
-    game.weather.setSoundVolume(this.soundVolumeState(), this.soundMutedState());
+    game.weather.setSoundVolume(
+      this.soundVolumeState(),
+      this.soundMutedState()
+    );
     // Restored settings: start directly in them (no fade from the default weather)
     game.weather.snapToTarget();
 
@@ -293,7 +360,7 @@ export class GameService {
     game.setQuality(this.qualityState());
     // In the background (home screen, other app, screen locked): the game stops (see isGameAsleep in the loops);
     // keys held when leaving would stay pressed (their keyup is lost), and the time spent away is not caught up
-    onGameAsleep(hidden => {
+    onGameAsleep((hidden) => {
       this.keyService.clearKeys();
       if (!hidden) {
         this.lastFrameTime = performance.now();
@@ -307,8 +374,15 @@ export class GameService {
       game.framePerSec = game.frame;
       game.frame = 0;
       game.adaptQuality(game.framePerSec);
-      game.diagnostics.flush(game.renderer, { pixelRatio: game.pixelRatio, shadowMapSize: game.shadowMapSize, detail: game.detail },
-        () => drawCallBreakdown(game.scene, game.camera, game.mapHelper));
+      game.diagnostics.flush(
+        game.renderer,
+        {
+          pixelRatio: game.pixelRatio,
+          shadowMapSize: game.shadowMapSize,
+          detail: game.detail,
+        },
+        () => drawCallBreakdown(game.scene, game.camera, game.mapHelper)
+      );
     }, 1000);
 
     // Moves and inputs at a fixed 120 steps per second of real time: when the device is slow, the timer is called
@@ -342,8 +416,13 @@ export class GameService {
 
     // Time going by: small steps (the light and the sun move smoothly in between, see WeatherHelper)
     setInterval(() => {
-      if (this.timeFlowState() && !game.paused && !game.loading && !isGameAsleep()) {
-        this.advanceHour(TIME_STEP / 1000 * 24 / DAY_DURATION);
+      if (
+        this.timeFlowState() &&
+        !game.paused &&
+        !game.loading &&
+        !isGameAsleep()
+      ) {
+        this.advanceHour(((TIME_STEP / 1000) * 24) / DAY_DURATION);
       }
     }, TIME_STEP);
 
@@ -354,32 +433,35 @@ export class GameService {
 
   switchGameMode(gameMode: GameMode, firstInit?: boolean) {
     const game = this.game;
-    if(!game || game.loading) {
+    if (!game || game.loading) {
       return;
     }
 
     game.loading = true;
     game.mode = gameMode;
 
-    setTimeout( () => {
-      switch (gameMode) {
-        case GameMode.FIGHT:
-          this.gameMapService.clear(game);
-          this.fightService.init(game);
-          break;
-        case GameMode.MAP:
-          this.fightService.clear(game);
-          this.gameMapService.init(game);
-          break;
-      }
-      game.refreshRenderer();
+    setTimeout(
+      () => {
+        switch (gameMode) {
+          case GameMode.FIGHT:
+            this.gameMapService.clear(game);
+            this.fightService.init(game);
+            break;
+          case GameMode.MAP:
+            this.fightService.clear(game);
+            this.gameMapService.init(game);
+            break;
+        }
+        game.refreshRenderer();
 
-      setTimeout(() => {
-        // (a little later: the textures loaded meanwhile are sent too)
-        game.warmUp();
-        game.loading = false;
-      }, 300);
-    }, firstInit ? 0 : 300);
+        setTimeout(() => {
+          // (a little later: the textures loaded meanwhile are sent too)
+          game.warmUp();
+          game.loading = false;
+        }, 300);
+      },
+      firstInit ? 0 : 300
+    );
   }
 
   private lastFrameTime = performance.now();
@@ -393,11 +475,11 @@ export class GameService {
 
     this.keyService.updateGamePadKeys();
 
-    if(!game.paused) {
+    if (!game.paused) {
       const diag = game.diagnostics;
       diag.frameStart(game.renderer);
-      diag.measure('weather', () => game.updateLights(dt));
-      diag.measure('render', () => game.renderFrame());
+      diag.measure("weather", () => game.updateLights(dt));
+      diag.measure("render", () => game.renderFrame());
       diag.frameEnd(game.renderer);
     }
 
@@ -407,49 +489,59 @@ export class GameService {
   /** After an input step: pause / resume, then the pressed keys are forgotten (the held ones stay). */
   private consumePressedKeys(game: Game): void {
     const pressedCodes = this.keyService.pressedCodes;
-    if(pressedCodes.includes(KeyCode.pause)) {
+    if (pressedCodes.includes(KeyCode.pause)) {
       this.togglePaused();
-    } else if(pressedCodes.includes(KeyCode.cancel)) {
+    } else if (pressedCodes.includes(KeyCode.cancel)) {
       game.paused = false;
     }
-    if (pressedCodes.length) {
+    if (pressedCodes.length > 0) {
       this.keyService.clearPressedKey();
     }
   }
 
   private syncHud(): void {
     const game = this.game;
-    this.hudState.set(game ? {
-      loading: game.loading,
-      paused: game.paused,
-      framePerSec: game.framePerSec,
-      temperature: Math.round(game.weather.temperature * 10) / 10,
-      mode: game.mode,
-      editModelId: game.editModelId,
-      editTileId: game.editTileId,
-      editBrush: game.editBrush,
-      editGrid: game.editGrid,
-      editSelection: game.editSelection,
-      editCanUndo: game.editCanUndo,
-      editCanRedo: game.editCanRedo,
-      action: game.mode === GameMode.MAP ? game.action : null,
-      mapId: game.mapHelper?.sceneMap.id ?? '',
-      mapName: game.mapHelper?.sceneMap.name ?? '',
-      editPick: this.arrivalPick ? game.mapHelper?.sceneMap.name ?? '' : null,
-      pixelRatio: game.pixelRatio,
-      shadowMapSize: game.shadowMapSize,
-      diagnostics: game.diagnostics.report,
-      diagnosticsOpen: game.diagnostics.enabled,
-      editMode: game.editMode,
-      mapHelper: game.mapHelper ?? null,
-    } : null);
+    this.hudState.set(
+      game
+        ? {
+            loading: game.loading,
+            paused: game.paused,
+            framePerSec: game.framePerSec,
+            temperature: Math.round(game.weather.temperature * 10) / 10,
+            mode: game.mode,
+            editModelId: game.editModelId,
+            editTileId: game.editTileId,
+            editBrush: game.editBrush,
+            editGrid: game.editGrid,
+            editSelection: game.editSelection,
+            editCanUndo: game.editCanUndo,
+            editCanRedo: game.editCanRedo,
+            action: game.mode === GameMode.MAP ? game.action : null,
+            mapId: game.mapHelper?.sceneMap.id ?? "",
+            mapName: game.mapHelper?.sceneMap.name ?? "",
+            editPick: this.arrivalPick
+              ? (game.mapHelper?.sceneMap.name ?? "")
+              : null,
+            pixelRatio: game.pixelRatio,
+            shadowMapSize: game.shadowMapSize,
+            diagnostics: game.diagnostics.report,
+            diagnosticsOpen: game.diagnostics.enabled,
+            editMode: game.editMode,
+            mapHelper: game.mapHelper ?? null,
+          }
+        : null
+    );
   }
 
   private inputLoop(game: Game) {
-    game.diagnostics.measure('input', () => {
+    game.diagnostics.measure("input", () => {
       switch (game.mode) {
-        case GameMode.MAP: this.gameMapService.inputLoop(game); break;
-        case GameMode.FIGHT: this.fightService.inputLoop(game); break;
+        case GameMode.MAP:
+          this.gameMapService.inputLoop(game);
+          break;
+        case GameMode.FIGHT:
+          this.fightService.inputLoop();
+          break;
       }
     });
   }
@@ -462,10 +554,10 @@ export class GameService {
   }
 
   private initCheckResize() {
-    fromEvent(window, 'resize').pipe(auditTime(200)).subscribe(
-      () => this.game?.refreshRenderer())
+    fromEvent(window, "resize")
+      .pipe(auditTime(200))
+      .subscribe(() => this.game?.refreshRenderer());
   }
-
 
   /**
    * Back from the model editor: the models saved there replace the game's, the map draws them again, and the map
@@ -474,21 +566,26 @@ export class GameService {
   async reloadModels(): Promise<void> {
     const ids = await reloadBrowserModels();
     const game = this.game;
-    if (!game?.mapHelper || !ids.length) {
+    if (!game?.mapHelper || ids.length === 0) {
       return;
     }
     const inHand = game.editModelId;
     if (game.editMode) {
-      this.mapEditorService.command(game, 'deselect');
+      this.mapEditorService.command(game, "deselect");
       if (inHand && ids.includes(inHand)) {
         this.mapEditorService.selectModel(game, null);
       }
     }
     game.mapHelper.refreshModels(ids);
-    if (game.editMode && inHand && ids.includes(inHand) && MODELS.some(m => m.id === inHand)) {
+    if (
+      game.editMode &&
+      inHand &&
+      ids.includes(inHand) &&
+      MODELS.some((m) => m.id === inHand)
+    ) {
       this.mapEditorService.selectModel(game, inHand);
     }
-    this.modelsVersionState.update(v => v + 1);
+    this.modelsVersionState.update((v) => v + 1);
     this.syncHud();
   }
 
@@ -507,8 +604,13 @@ export class GameService {
   setWeather(type: WeatherType) {
     if (!isWeatherAvailable(type, this.night())) {
       // e.g. sunny at night, aurora by day: go to the right time of day
-      this.setHour(isWeatherAvailable(type, true) ? NIGHT_ONLY_HOUR : DAY_ONLY_HOUR);
-    } else if (type === WeatherType.MORNING_MIST && mistAt(this.hourState()) < 0.5) {
+      this.setHour(
+        isWeatherAvailable(type, true) ? NIGHT_ONLY_HOUR : DAY_ONLY_HOUR
+      );
+    } else if (
+      type === WeatherType.MORNING_MIST &&
+      mistAt(this.hourState()) < 0.5
+    ) {
       // The morning mist only exists in the early morning
       this.setHour(MORNING_MIST_HOUR);
     }
@@ -608,8 +710,8 @@ export class GameService {
 
   /** Map editor: undo, redo, delete, options of the selected object... */
   editCommand(command: EditCommand) {
-    if (command === 'reset') {
-      this.resetMap(this.game?.mapHelper?.sceneMap.id ?? '');
+    if (command === "reset") {
+      this.resetMap(this.game?.mapHelper?.sceneMap.id ?? "");
     } else if (this.game) {
       this.mapEditorService.command(this.game, command);
       this.syncHud();
@@ -669,8 +771,12 @@ export class GameService {
     }
     resetMap(id);
     if (game && current) {
-      const exists = listMaps().some(map => map.id === id);
-      this.gameMapService.travel(game, { map: exists ? id : DEFAULT_MAP_ID }, true);
+      const exists = listMaps().some((map) => map.id === id);
+      this.gameMapService.travel(
+        game,
+        { map: exists ? id : DEFAULT_MAP_ID },
+        true
+      );
     }
     this.syncHud();
   }
@@ -678,27 +784,43 @@ export class GameService {
   // --- Saved games ---
 
   /** Where the player is (a saved game), null: no map yet. */
-  playerSpot(): { map: string, mapName: string, pos: Vec3 } | null {
+  playerSpot(): { map: string; mapName: string; pos: Vec3 } | null {
     const mapHelper = this.game?.mapHelper;
     const sprite = mapHelper?.scenePlayer.mesh;
     if (!mapHelper || !sprite) {
       return null;
     }
-    const pos = { x: sprite.position.x, y: sprite.position.y, z: sprite.position.z };
-    return { map: mapHelper.sceneMap.id, mapName: mapHelper.sceneMap.name, pos };
+    const pos = {
+      x: sprite.position.x,
+      y: sprite.position.y,
+      z: sprite.position.z,
+    };
+    return {
+      map: mapHelper.sceneMap.id,
+      mapName: mapHelper.sceneMap.name,
+      pos,
+    };
   }
 
   /**
    * Back to a saved place, at that time and weather. A map that no longer exists: the default map's arrival point
    * (returns false).
    */
-  restoreSpot(map: string, pos: Vec3, hour: number, weather: WeatherType): boolean {
+  restoreSpot(
+    map: string,
+    pos: Vec3,
+    hour: number,
+    weather: WeatherType
+  ): boolean {
     const game = this.game;
-    const exists = listMaps().some(m => m.id === map);
+    const exists = listMaps().some((m) => m.id === map);
     this.setHour(hour);
     this.setWeather(weather);
     if (game) {
-      this.gameMapService.travel(game, exists ? { map, pos } : { map: DEFAULT_MAP_ID });
+      this.gameMapService.travel(
+        game,
+        exists ? { map, pos } : { map: DEFAULT_MAP_ID }
+      );
       this.syncHud();
     }
     return exists;
@@ -707,7 +829,12 @@ export class GameService {
   // --- Passages ---
 
   /** Choosing the arrival point of the selected object's passage: where to come back to. */
-  private arrivalPick: { origin: string, chunkId: string, buildingId: string, back: Vec3 } | null = null;
+  private arrivalPick: {
+    origin: string;
+    chunkId: string;
+    buildingId: string;
+    back: Vec3;
+  } | null = null;
 
   /** The selected object's passage (null: removed). */
   setPassage(passage: Passage | null) {
@@ -728,7 +855,7 @@ export class GameService {
   }
 
   /** The selected invisible zone's size in cells. */
-  setZoneSize(size: { x: number, z: number }) {
+  setZoneSize(size: { x: number; z: number }) {
     const game = this.game;
     if (game) {
       this.mapEditorService.setZoneSize(game, size);
@@ -749,11 +876,18 @@ export class GameService {
       return;
     }
     const origin = mapHelper.sceneMap.id;
-    this.arrivalPick = { origin, ...ref, back: { x: sprite.position.x, y: 0, z: sprite.position.z } };
+    this.arrivalPick = {
+      origin,
+      ...ref,
+      back: { x: sprite.position.x, y: 0, z: sprite.position.z },
+    };
     if (ref.passage.map !== origin) {
-      this.gameMapService.travel(game, { map: ref.passage.map, pos: ref.passage.pos });
+      this.gameMapService.travel(game, {
+        map: ref.passage.map,
+        pos: ref.passage.pos,
+      });
     }
-    this.mapEditorService.pickGround(point => this.endArrivalPick(point));
+    this.mapEditorService.pickGround((point) => this.endArrivalPick(point));
     this.syncHud();
   }
 
@@ -808,5 +942,4 @@ export class GameService {
       this.syncHud();
     }
   }
-
 }

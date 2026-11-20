@@ -1,36 +1,44 @@
-import { Vec2, Vec3 } from './SceneUtils';
-import * as THREE from 'three';
+import { Vec2, Vec3 } from "./SceneUtils";
+import * as THREE from "three";
 import { MapHelper } from "./MapHelper";
 
 export enum PlayerDirection {
-  UP, RIGHT, DOWN, LEFT
+  UP,
+  RIGHT,
+  DOWN,
+  LEFT,
 }
 
 export enum PlayerMoveStatus {
-  STAYING, WALKING, RUNNING, JUMPING
+  STAYING,
+  WALKING,
+  RUNNING,
+  JUMPING,
 }
 
 export interface ScenePlayer {
-  id: string,
-  tex: PlayerTex,
-  pos: Vec3,
-  dir: PlayerDirection,
-  mesh?: THREE.Object3D
+  id: string;
+  tex: PlayerTex;
+  pos: Vec3;
+  dir: PlayerDirection;
+  mesh?: THREE.Object3D;
 }
 
 export interface PlayerTex {
-  link: string
-  size: Vec2
+  link: string;
+  size: Vec2;
 }
 
 export interface PlayerMove {
-  mapHelper: MapHelper,
-  player: ScenePlayer,
-  currentFrame: number,
-  framePerSecond: number,
-  status: PlayerMoveStatus
+  mapHelper: MapHelper;
+  player: ScenePlayer;
+  currentFrame: number;
+  framePerSecond: number;
+  status: PlayerMoveStatus;
 }
 
 export function isPlayerMoving(pm: PlayerMove) {
-  return [PlayerMoveStatus.RUNNING, PlayerMoveStatus.WALKING].indexOf(pm.status) >= 0;
+  return [PlayerMoveStatus.RUNNING, PlayerMoveStatus.WALKING].includes(
+    pm.status
+  );
 }

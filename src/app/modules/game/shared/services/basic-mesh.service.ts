@@ -1,27 +1,29 @@
-import { Service } from '@angular/core';
-import * as THREE from 'three';
-import { MaterialService } from './material.service';
-import { ObjSide } from '../model/SceneMap';
-import { SceneModel } from '../model/SceneModel';
-import { Square3 } from '../model/SceneUtils';
-import { applyFaceUvs, BOX_FACES } from '../model/model-uv';
-import { RAIN_STOP_KEY } from '../weather/SurfaceHeights';
-import { getSwayDepthMaterial, SWAY_ATTRIBUTE } from '../weather/weather-shader';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { Service } from "@angular/core";
+import * as THREE from "three";
+import { MaterialService } from "./material.service";
+import { ObjSide } from "../model/SceneMap";
+import { SceneModel } from "../model/SceneModel";
+import { Square3 } from "../model/SceneUtils";
+import { applyFaceUvs, BOX_FACES } from "../model/model-uv";
+import { RAIN_STOP_KEY } from "../weather/SurfaceHeights";
+import {
+  getSwayDepthMaterial,
+  SWAY_ATTRIBUTE,
+} from "../weather/weather-shader";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 @Service()
 export class BasicMeshService {
-
   public static makeCube(link: string, size: number): THREE.Mesh {
     const cubeMaterial = MaterialService.getMaterialFromLink(link);
     const geometry = new THREE.BoxGeometry(size, size, size);
-    return new THREE.Mesh( geometry, cubeMaterial );
+    return new THREE.Mesh(geometry, cubeMaterial);
   }
 
   public static makeBox(link: string, size: THREE.Vector3): THREE.Mesh {
     const cubeMaterial = MaterialService.getMaterialFromLink(link);
     const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
-    return new THREE.Mesh( geometry, cubeMaterial );
+    return new THREE.Mesh(geometry, cubeMaterial);
   }
 
   public static makeSprite(link: string, size: THREE.Vector2): THREE.Group {
@@ -29,7 +31,7 @@ export class BasicMeshService {
     spMat.depthTest = true;
     spMat.depthWrite = true;
     spMat.side = THREE.DoubleSide;
-    const sprite = new THREE.Sprite( spMat );
+    const sprite = new THREE.Sprite(spMat);
     sprite.scale.set(size.x, size.y, 1);
     sprite.position.y = size.y / 2;
     const group = new THREE.Group();
@@ -37,56 +39,93 @@ export class BasicMeshService {
     return group;
   }
 
-  public static makePlane(link: string, size: THREE.Vector2, transparent?: boolean): THREE.Mesh {
-    const planeMaterial = MaterialService.getMaterialFromLink(link, transparent);
+  public static makePlane(
+    link: string,
+    size: THREE.Vector2,
+    transparent?: boolean
+  ): THREE.Mesh {
+    const planeMaterial = MaterialService.getMaterialFromLink(
+      link,
+      transparent
+    );
     planeMaterial.depthTest = true;
     planeMaterial.depthWrite = true;
     planeMaterial.side = THREE.DoubleSide;
-    const geometry = new THREE.PlaneGeometry( size.x, size.y );
-    return new THREE.Mesh( geometry, planeMaterial );
+    const geometry = new THREE.PlaneGeometry(size.x, size.y);
+    return new THREE.Mesh(geometry, planeMaterial);
   }
 
   /** Used for grounds: lit material so it receives the buildings' shadows. */
-  public static makePlaneFromPoints(link: string, points: Square3, transparent?: boolean): THREE.Mesh {
-    const planeMaterial = MaterialService.getLambertMaterialFromLink(link, transparent);
+  public static makePlaneFromPoints(
+    link: string,
+    points: Square3,
+    transparent?: boolean
+  ): THREE.Mesh {
+    const planeMaterial = MaterialService.getLambertMaterialFromLink(
+      link,
+      transparent
+    );
     planeMaterial.depthTest = true;
     planeMaterial.depthWrite = true;
     planeMaterial.side = THREE.DoubleSide;
 
-    let geometry = new THREE.BufferGeometry();
+    const geometry = new THREE.BufferGeometry();
     // Both triangles must share the same winding, otherwise their normals cancel out and lighting breaks.
     // Winding chosen so the normal points up (towards the sky) for a, b, c, d given clockwise seen from above.
-    const ab = new THREE.Vector3(points.b.x - points.a.x, points.b.y - points.a.y, points.b.z - points.a.z);
-    const ac = new THREE.Vector3(points.c.x - points.a.x, points.c.y - points.a.y, points.c.z - points.a.z);
+    const ab = new THREE.Vector3(
+      points.b.x - points.a.x,
+      points.b.y - points.a.y,
+      points.b.z - points.a.z
+    );
+    const ac = new THREE.Vector3(
+      points.c.x - points.a.x,
+      points.c.y - points.a.y,
+      points.c.z - points.a.z
+    );
     const facesUp = ac.clone().cross(ab).y >= 0;
     geometry.setIndex(facesUp ? [0, 3, 2, 0, 2, 1] : [0, 2, 3, 0, 1, 2]);
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array([
-      points.a.x, points.a.y, points.a.z,
-      points.b.x, points.b.y, points.b.z,
-      points.c.x, points.c.y, points.c.z,
-      points.d.x, points.d.y, points.d.z
-    ]), 3 ));
+    geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(
+        new Float32Array([
+          points.a.x,
+          points.a.y,
+          points.a.z,
+          points.b.x,
+          points.b.y,
+          points.b.z,
+          points.c.x,
+          points.c.y,
+          points.c.z,
+          points.d.x,
+          points.d.y,
+          points.d.z,
+        ]),
+        3
+      )
+    );
 
-    const uvs = [
-      0, 1,
-      1, 1,
-      1, 0,
-      0, 0
-    ]
+    const uvs = [0, 1, 1, 1, 1, 0, 0, 0];
 
-    geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( uvs, 2 ) );
+    geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
     geometry.computeVertexNormals(); // required by lit materials
-    const mesh = new THREE.Mesh( geometry, planeMaterial );
+    const mesh = new THREE.Mesh(geometry, planeMaterial);
     mesh.receiveShadow = true;
     mesh.userData[RAIN_STOP_KEY] = true;
     return mesh;
-
   }
 
-  public static makePhongPlane(link: string, size: THREE.Vector2, transparent?: boolean): THREE.Mesh {
-    const planeMaterial = MaterialService.getPhongMaterialFromLink(link, transparent);
-    const geometry = new THREE.PlaneGeometry( size.x, size.y );
-    return new THREE.Mesh( geometry, planeMaterial );
+  public static makePhongPlane(
+    link: string,
+    size: THREE.Vector2,
+    transparent?: boolean
+  ): THREE.Mesh {
+    const planeMaterial = MaterialService.getPhongMaterialFromLink(
+      link,
+      transparent
+    );
+    const geometry = new THREE.PlaneGeometry(size.x, size.y);
+    return new THREE.Mesh(geometry, planeMaterial);
   }
 
   public static makeModel(model: SceneModel): THREE.Group {
@@ -94,22 +133,34 @@ export class BasicMeshService {
 
     // mat.transparent = true;
 
-    model.boxes.forEach(box => {
+    model.boxes.forEach((box) => {
       const boxMat = MaterialService.getModelMaterial(model.tex, box.shininess);
       const geo = new THREE.BoxGeometry(box.size.x, box.size.y, box.size.z);
-      applyFaceUvs(geo, BOX_FACES.map(face => box.uvs[face]), model.tex.size);
+      applyFaceUvs(
+        geo,
+        BOX_FACES.map((face) => box.uvs[face]),
+        model.tex.size
+      );
 
       switch (box.side) {
-        case ObjSide.FRONT: boxMat.side = THREE.FrontSide; break;
-        case ObjSide.BACK: boxMat.side = THREE.BackSide; break;
-        case ObjSide.BOTH: boxMat.side = THREE.DoubleSide; break;
-        default: boxMat.side = THREE.FrontSide; break;
+        case ObjSide.FRONT:
+          boxMat.side = THREE.FrontSide;
+          break;
+        case ObjSide.BACK:
+          boxMat.side = THREE.BackSide;
+          break;
+        case ObjSide.BOTH:
+          boxMat.side = THREE.DoubleSide;
+          break;
+        default:
+          boxMat.side = THREE.FrontSide;
+          break;
       }
       boxMat.depthWrite = !!box.depthWrite;
       boxMat.depthTest = !!box.depthTest;
       boxMat.alphaTest = 0.5;
 
-      const mesh = new THREE.Mesh( geo, boxMat );
+      const mesh = new THREE.Mesh(geo, boxMat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       mesh.userData[RAIN_STOP_KEY] = true;
@@ -122,23 +173,31 @@ export class BasicMeshService {
       group.add(mesh);
     });
 
-    model.planes.forEach(plane => {
+    model.planes.forEach((plane) => {
       const mat = MaterialService.getModelMaterial(model.tex, plane.shininess);
       const geo = new THREE.PlaneGeometry(plane.size.x, plane.size.y);
       applyFaceUvs(geo, [plane.uvs.front, plane.uvs.back], model.tex.size);
 
       switch (plane.side) {
-        case ObjSide.FRONT: mat.side = THREE.FrontSide; break;
-        case ObjSide.BACK: mat.side = THREE.BackSide; break;
-        case ObjSide.BOTH: mat.side = THREE.DoubleSide; break;
-        default: mat.side = THREE.FrontSide; break;
+        case ObjSide.FRONT:
+          mat.side = THREE.FrontSide;
+          break;
+        case ObjSide.BACK:
+          mat.side = THREE.BackSide;
+          break;
+        case ObjSide.BOTH:
+          mat.side = THREE.DoubleSide;
+          break;
+        default:
+          mat.side = THREE.FrontSide;
+          break;
       }
       mat.depthWrite = !!plane.depthWrite;
       mat.depthTest = !!plane.depthTest;
       // Since three r152 opaque materials force alpha=1: discard transparent texels instead of drawing them black
       mat.alphaTest = 0.5;
 
-      const mesh = new THREE.Mesh( geo, mat );
+      const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       mesh.userData[RAIN_STOP_KEY] = true;
@@ -170,25 +229,35 @@ export class BasicMeshService {
     const sets = new Map<string, THREE.Mesh[]>();
     for (const child of group.children) {
       const mesh = child as THREE.Mesh;
-      const material = mesh.material as THREE.MeshLambertMaterial | THREE.MeshPhongMaterial;
+      const material = mesh.material as
+        THREE.MeshLambertMaterial | THREE.MeshPhongMaterial;
       // Parts drawn without the depth test rely on the drawing order (a sign's text over its posts): kept apart
       if (!material.depthTest) {
         continue;
       }
-      const shininess = (material as THREE.MeshPhongMaterial).isMeshPhongMaterial ? (material as THREE.MeshPhongMaterial).specular.r : -1;
-      const key = [material.type, shininess, material.side, material.depthWrite, material.depthTest].join('|');
+      const shininess = (material as THREE.MeshPhongMaterial)
+        .isMeshPhongMaterial
+        ? (material as THREE.MeshPhongMaterial).specular.r
+        : -1;
+      const key = [
+        material.type,
+        shininess,
+        material.side,
+        material.depthWrite,
+        material.depthTest,
+      ].join("|");
       sets.set(key, [...(sets.get(key) ?? []), mesh]);
     }
     for (const meshes of sets.values()) {
       if (meshes.length < 2) {
         continue;
       }
-      const geometries = meshes.map(mesh => {
+      const geometries = meshes.map((mesh) => {
         mesh.updateMatrix();
         return mesh.geometry.clone().applyMatrix4(mesh.matrix);
       });
       const merged = mergeGeometries(geometries);
-      geometries.forEach(g => g.dispose());
+      geometries.forEach((g) => g.dispose());
       if (!merged) {
         continue; // parts with different attributes: kept as they are
       }
@@ -200,7 +269,7 @@ export class BasicMeshService {
       if (first.customDepthMaterial) {
         mesh.customDepthMaterial = first.customDepthMaterial;
       }
-      meshes.forEach(part => {
+      meshes.forEach((part) => {
         group.remove(part);
         part.geometry.dispose();
         if (part !== first) {
@@ -216,27 +285,39 @@ export class BasicMeshService {
    * Read by the weather shader (see SWAY_ATTRIBUTE).
    */
   private static addSwayAttribute(group: THREE.Group, sway: number) {
-    const meshes = group.children.filter((c): c is THREE.Mesh => c instanceof THREE.Mesh);
+    const meshes = group.children.filter(
+      (c): c is THREE.Mesh => c instanceof THREE.Mesh
+    );
     const v = new THREE.Vector3();
     let top = 0;
-    meshes.forEach(mesh => {
+    meshes.forEach((mesh) => {
       mesh.updateMatrix();
-      const pos = mesh.geometry.getAttribute('position');
+      const pos = mesh.geometry.getAttribute("position");
       for (let i = 0; i < pos.count; i++) {
-        top = Math.max(top, v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrix).y);
+        top = Math.max(
+          top,
+          v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrix).y
+        );
       }
     });
     if (top <= 0) {
       return;
     }
-    meshes.forEach(mesh => {
-      const pos = mesh.geometry.getAttribute('position');
+    meshes.forEach((mesh) => {
+      const pos = mesh.geometry.getAttribute("position");
       const flex = new Float32Array(pos.count);
       for (let i = 0; i < pos.count; i++) {
-        const height = THREE.MathUtils.clamp(v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrix).y / top, 0, 1);
+        const height = THREE.MathUtils.clamp(
+          v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrix).y / top,
+          0,
+          1
+        );
         flex[i] = sway * Math.pow(height, 1.5); // the top bends much more than the middle
       }
-      mesh.geometry.setAttribute(SWAY_ATTRIBUTE, new THREE.BufferAttribute(flex, 1));
+      mesh.geometry.setAttribute(
+        SWAY_ATTRIBUTE,
+        new THREE.BufferAttribute(flex, 1)
+      );
       // Its shadow bends the same way
       mesh.customDepthMaterial = getSwayDepthMaterial();
     });

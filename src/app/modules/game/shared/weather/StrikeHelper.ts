@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { SurfaceHeights } from './SurfaceHeights';
-import { WEATHER_UNIFORMS } from './weather-shader';
+import * as THREE from "three";
+import { SurfaceHeights } from "./SurfaceHeights";
+import { WEATHER_UNIFORMS } from "./weather-shader";
 
 /** Seconds between two strikes at thunderRain = 1 (random in this range), chance that one falls near the player. */
 const STRIKE_INTERVAL = [1.2, 3.5] as const;
@@ -33,13 +33,20 @@ const GLOW_COLOR = new THREE.Color(0.45, 0.65, 1.0).multiplyScalar(1.5);
 
 function makeGlowTexture(): THREE.CanvasTexture {
   const size = 64;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.3, 'rgba(255,255,255,0.35)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
+  const ctx = canvas.getContext("2d")!;
+  const g = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2
+  );
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.3, "rgba(255,255,255,0.35)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
@@ -80,13 +87,27 @@ export class StrikeHelper {
   private readonly mid = new THREE.Vector3();
   private readonly color = new THREE.Color();
 
-  constructor(scene: THREE.Scene, private readonly surfaces: SurfaceHeights) {
-    const additive = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false } as const;
+  constructor(
+    scene: THREE.Scene,
+    private readonly surfaces: SurfaceHeights
+  ) {
+    const additive = {
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
+    } as const;
     const perBolt = MAIN_SEGMENTS + BRANCHES * BRANCH_SEGMENTS;
-    this.segments = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1),
-      new THREE.MeshBasicMaterial({ ...additive }), MAX_STRIKES * perBolt);
-    this.glows = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1),
-      new THREE.MeshBasicMaterial({ ...additive, map: makeGlowTexture() }), MAX_STRIKES);
+    this.segments = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ ...additive }),
+      MAX_STRIKES * perBolt
+    );
+    this.glows = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ ...additive, map: makeGlowTexture() }),
+      MAX_STRIKES
+    );
     for (const mesh of [this.segments, this.glows]) {
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.setColorAt(0, this.color.set(0)); // creates the instance color buffer
@@ -99,11 +120,20 @@ export class StrikeHelper {
   }
 
   /** @param level 0..1 strike frequency */
-  update(dt: number, target: THREE.Vector3, player: THREE.Vector3, level: number, camera: THREE.Camera) {
+  update(
+    dt: number,
+    target: THREE.Vector3,
+    player: THREE.Vector3,
+    level: number,
+    camera: THREE.Camera
+  ) {
     if (level > 0.05) {
       this.timer -= dt * level;
       if (this.timer <= 0) {
-        this.timer = THREE.MathUtils.randFloat(STRIKE_INTERVAL[0], STRIKE_INTERVAL[1]);
+        this.timer = THREE.MathUtils.randFloat(
+          STRIKE_INTERVAL[0],
+          STRIKE_INTERVAL[1]
+        );
         this.strike(target, player);
       }
     }
@@ -126,15 +156,19 @@ export class StrikeHelper {
       crackle = Math.max(crackle, Math.exp(-s.age * 2));
     }
     this.crackleDebt += dt * CRACKLE_RATE * crackle;
-    while (this.crackleDebt >= 1 && this.strikes.length) {
+    while (this.crackleDebt >= 1 && this.strikes.length > 0) {
       this.crackleDebt--;
       const s = this.strikes[Math.floor(Math.random() * this.strikes.length)];
       const a = Math.random() * Math.PI * 2;
       const r = Math.random() * 30;
-      this.mid.set(s.impact.x + Math.cos(a) * r, s.impact.y, s.impact.z + Math.sin(a) * r);
+      this.mid.set(
+        s.impact.x + Math.cos(a) * r,
+        s.impact.y,
+        s.impact.z + Math.sin(a) * r
+      );
       this.onCrackle?.(this.mid, Math.exp(-s.age * 2));
     }
-    if (!this.strikes.length) {
+    if (this.strikes.length === 0) {
       this.crackleDebt = 0;
     }
 
@@ -142,9 +176,14 @@ export class StrikeHelper {
     const uniforms = WEATHER_UNIFORMS.uStrikes.value;
     for (let i = 0; i < MAX_STRIKES; i++) {
       const s = this.strikes[i];
-      uniforms[i].set(s?.impact.x ?? 0, s?.impact.z ?? 0, s?.age ?? 0, s ? 1 : 0);
+      uniforms[i].set(
+        s?.impact.x ?? 0,
+        s?.impact.z ?? 0,
+        s?.age ?? 0,
+        s ? 1 : 0
+      );
     }
-    WEATHER_UNIFORMS.uStrikeOn.value = this.strikes.length ? 1 : 0;
+    WEATHER_UNIFORMS.uStrikeOn.value = this.strikes.length > 0 ? 1 : 0;
 
     this.draw(camera);
   }
@@ -165,18 +204,44 @@ export class StrikeHelper {
       x = target.x + THREE.MathUtils.randFloat(AREA.minX, AREA.maxX);
       z = target.z + THREE.MathUtils.randFloat(AREA.minZ, AREA.maxZ);
     }
-    const impact = new THREE.Vector3(x, this.surfaces.heightAt(x, z, target.y), z);
-    const top = impact.clone().add(new THREE.Vector3(
-      THREE.MathUtils.randFloatSpread(BOLT_DRIFT * 2), BOLT_HEIGHT, THREE.MathUtils.randFloatSpread(BOLT_DRIFT * 2)));
+    const impact = new THREE.Vector3(
+      x,
+      this.surfaces.heightAt(x, z, target.y),
+      z
+    );
+    const top = impact
+      .clone()
+      .add(
+        new THREE.Vector3(
+          THREE.MathUtils.randFloatSpread(BOLT_DRIFT * 2),
+          BOLT_HEIGHT,
+          THREE.MathUtils.randFloatSpread(BOLT_DRIFT * 2)
+        )
+      );
     const main = jagged(top, impact, MAIN_SEGMENTS, 0.22);
     const lines = [{ points: main, width: MAIN_WIDTH }];
     for (let b = 0; b < BRANCHES; b++) {
       // Branches leave from the upper 3/4 of the channel, going down and outwards
-      const from = main[Math.floor(THREE.MathUtils.randFloat(0.1, 0.75) * MAIN_SEGMENTS)];
-      const length = THREE.MathUtils.randFloat(BRANCH_LENGTH[0], BRANCH_LENGTH[1]);
+      const from =
+        main[Math.floor(THREE.MathUtils.randFloat(0.1, 0.75) * MAIN_SEGMENTS)];
+      const length = THREE.MathUtils.randFloat(
+        BRANCH_LENGTH[0],
+        BRANCH_LENGTH[1]
+      );
       const a = Math.random() * Math.PI * 2;
-      const to = from.clone().add(new THREE.Vector3(Math.cos(a) * length * 0.7, -length * 0.7, Math.sin(a) * length * 0.7));
-      lines.push({ points: jagged(from, to, BRANCH_SEGMENTS, 0.3), width: BRANCH_WIDTH });
+      const to = from
+        .clone()
+        .add(
+          new THREE.Vector3(
+            Math.cos(a) * length * 0.7,
+            -length * 0.7,
+            Math.sin(a) * length * 0.7
+          )
+        );
+      lines.push({
+        points: jagged(from, to, BRANCH_SEGMENTS, 0.3),
+        width: BRANCH_WIDTH,
+      });
     }
     this.strikes.push({ impact, age: 0, lines });
     this.onStrike?.(impact);
@@ -192,9 +257,11 @@ export class StrikeHelper {
         continue;
       }
       const t = s.age / BOLT_LIFE;
-      const blink = t < 0.15 ? 1 : t < 0.25 ? 0.15 : t < 0.4 ? 1 : 1 - (t - 0.4) / 0.6;
+      const blink = boltBlink(t);
       for (const line of s.lines) {
-        this.color.copy(BOLT_COLOR).multiplyScalar(blink * (line.width === MAIN_WIDTH ? 1 : 0.7));
+        this.color
+          .copy(BOLT_COLOR)
+          .multiplyScalar(blink * (line.width === MAIN_WIDTH ? 1 : 0.7));
         for (let k = 0; k < line.points.length - 1; k++) {
           const p0 = line.points[k];
           const p1 = line.points[k + 1];
@@ -203,20 +270,29 @@ export class StrikeHelper {
           this.xAxis.divideScalar(length || 1);
           this.yAxis.crossVectors(this.zAxis, this.xAxis).normalize();
           this.mid.addVectors(p0, p1).multiplyScalar(0.5);
-          this.matrix.makeBasis(
-            this.xAxis.multiplyScalar(length * 1.05),
-            this.yAxis.multiplyScalar(line.width),
-            this.zAxis,
-          ).setPosition(this.mid);
+          this.matrix
+            .makeBasis(
+              this.xAxis.multiplyScalar(length * 1.05),
+              this.yAxis.multiplyScalar(line.width),
+              this.zAxis
+            )
+            .setPosition(this.mid);
           this.segments.setMatrixAt(n, this.matrix);
           this.segments.setColorAt(n, this.color);
           n++;
         }
       }
       this.mid.copy(s.impact).y += 4;
-      this.matrix.compose(this.mid, camera.quaternion, this.xAxis.setScalar(GLOW_SIZE));
+      this.matrix.compose(
+        this.mid,
+        camera.quaternion,
+        this.xAxis.setScalar(GLOW_SIZE)
+      );
       this.glows.setMatrixAt(g, this.matrix);
-      this.glows.setColorAt(g, this.color.copy(GLOW_COLOR).multiplyScalar(blink));
+      this.glows.setColorAt(
+        g,
+        this.color.copy(GLOW_COLOR).multiplyScalar(blink)
+      );
       g++;
     }
     this.segments.count = n;
@@ -233,8 +309,13 @@ export class StrikeHelper {
  * Jagged line by midpoint displacement: each segment's middle is pushed sideways by a share (`roughness`) of
  * its length, then both halves are split again: big zigzags with smaller ones on them, like a real channel.
  */
-function jagged(from: THREE.Vector3, to: THREE.Vector3, segments: number, roughness: number): THREE.Vector3[] {
-  const points: THREE.Vector3[] = new Array(segments + 1);
+function jagged(
+  from: THREE.Vector3,
+  to: THREE.Vector3,
+  segments: number,
+  roughness: number
+): THREE.Vector3[] {
+  const points: THREE.Vector3[] = Array.from({ length: segments + 1 });
   points[0] = from.clone();
   points[segments] = to.clone();
   const split = (a: number, b: number) => {
@@ -243,14 +324,30 @@ function jagged(from: THREE.Vector3, to: THREE.Vector3, segments: number, roughn
     }
     const m = (a + b) >> 1;
     const length = points[a].distanceTo(points[b]);
-    points[m] = points[a].clone().lerp(points[b], 0.5).add(new THREE.Vector3(
-      THREE.MathUtils.randFloatSpread(length * roughness * 2),
-      THREE.MathUtils.randFloatSpread(length * roughness * 0.5),
-      THREE.MathUtils.randFloatSpread(length * roughness * 2),
-    ));
+    points[m] = points[a]
+      .clone()
+      .lerp(points[b], 0.5)
+      .add(
+        new THREE.Vector3(
+          THREE.MathUtils.randFloatSpread(length * roughness * 2),
+          THREE.MathUtils.randFloatSpread(length * roughness * 0.5),
+          THREE.MathUtils.randFloatSpread(length * roughness * 2)
+        )
+      );
     split(a, m);
     split(m, b);
   };
   split(0, segments);
   return points;
+}
+
+/** A bolt's brightness along its life (0 → 1): flash, dim, flash again, then fades out. */
+function boltBlink(t: number): number {
+  if (t < 0.15) {
+    return 1;
+  }
+  if (t < 0.25) {
+    return 0.15;
+  }
+  return t < 0.4 ? 1 : 1 - (t - 0.4) / 0.6;
 }

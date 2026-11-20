@@ -1,8 +1,15 @@
 import { GamePkSkill } from "./GamePkSkill";
 import { Item } from "../../../../core/shared/model/pokemon/Item";
-import { PkAbility, PkStats, Pokemon } from "../../../../core/shared/model/pokemon/Pokemon";
+import {
+  PkAbility,
+  PkStats,
+  Pokemon,
+} from "../../../../core/shared/model/pokemon/Pokemon";
 import { PkStatus } from "../../../../core/shared/model/pokemon/PkSkill";
-import { PK_NATURE_LIST, PkNature } from "../../../../core/shared/model/pokemon/PkNature";
+import {
+  PK_NATURE_LIST,
+  PkNature,
+} from "../../../../core/shared/model/pokemon/PkNature";
 import { POKEMONS } from "../../../../../assets/pokemons/pokemons";
 import { getXpValues } from "../../../../core/shared/model/pokemon/PkExp";
 
@@ -11,7 +18,14 @@ export const PKMN_MAX_LEVEL = 100;
 const MAX_EV_PER_STAT = 252;
 const MAX_EV_TOTAL = 510;
 
-const STAT_KEYS: readonly (keyof PkStats)[] = ['hp', 'atk', 'def', 'spAtk', 'spDef', 'speed'];
+const STAT_KEYS: readonly (keyof PkStats)[] = [
+  "hp",
+  "atk",
+  "def",
+  "spAtk",
+  "spDef",
+  "speed",
+];
 
 export interface GamePokemonInit {
   base: Pokemon;
@@ -73,8 +87,8 @@ export class GamePokemon {
     const level = 50;
     const xpValues = getXpValues(base.levellingRate);
     const baseSkills = base.learnSkills
-      .filter(ls => ls.level <= level)
-      .map(ls => ({ base: ls.skill, pp: ls.skill.pp }));
+      .filter((ls) => ls.level <= level)
+      .map((ls) => ({ base: ls.skill, pp: ls.skill.pp }));
 
     const pkmn = new GamePokemon({
       base,
@@ -89,7 +103,8 @@ export class GamePokemon {
       skills: baseSkills.slice(-PKMN_SKILL_NB),
       status: null,
       holdedItem: null,
-      ability: base.abilities[Math.floor(Math.random() * base.abilities.length)],
+      ability:
+        base.abilities[Math.floor(Math.random() * base.abilities.length)],
       nature,
     });
 
@@ -111,35 +126,73 @@ export class GamePokemon {
     // Stat == HP => ( ( IV + 2 x Base + (EV / 4) ) x Niveau / 100 ) + Niveau + 10
     // Stat != HP => ( ( ( IV + 2 x Base + (EV / 4) ) x Niveau / 100 ) + 5 ) x Nature
     return {
-      hp: Math.floor(GamePokemon.computeIvEv(base.hp, iv.hp, ev.hp, lvl) + lvl + 10),
-      atk: Math.floor((GamePokemon.computeIvEv(base.atk, iv.atk, ev.atk, lvl) + 5) * nature.atk),
-      def: Math.floor((GamePokemon.computeIvEv(base.def, iv.def, ev.def, lvl) + 5) * nature.def),
-      spAtk: Math.floor((GamePokemon.computeIvEv(base.spAtk, iv.spAtk, ev.spAtk, lvl) + 5) * nature.spAtk),
-      spDef: Math.floor((GamePokemon.computeIvEv(base.spDef, iv.spDef, ev.spDef, lvl) + 5) * nature.spDef),
-      speed: Math.floor((GamePokemon.computeIvEv(base.speed, iv.speed, ev.speed, lvl) + 5) * nature.speed)
+      hp: Math.floor(
+        GamePokemon.computeIvEv(base.hp, iv.hp, ev.hp, lvl) + lvl + 10
+      ),
+      atk: Math.floor(
+        (GamePokemon.computeIvEv(base.atk, iv.atk, ev.atk, lvl) + 5) *
+          nature.atk
+      ),
+      def: Math.floor(
+        (GamePokemon.computeIvEv(base.def, iv.def, ev.def, lvl) + 5) *
+          nature.def
+      ),
+      spAtk: Math.floor(
+        (GamePokemon.computeIvEv(base.spAtk, iv.spAtk, ev.spAtk, lvl) + 5) *
+          nature.spAtk
+      ),
+      spDef: Math.floor(
+        (GamePokemon.computeIvEv(base.spDef, iv.spDef, ev.spDef, lvl) + 5) *
+          nature.spDef
+      ),
+      speed: Math.floor(
+        (GamePokemon.computeIvEv(base.speed, iv.speed, ev.speed, lvl) + 5) *
+          nature.speed
+      ),
     };
   }
 
   private static getRandomStats(min: number, max: number): PkStats {
     const random = () => min + Math.floor(Math.random() * (max - min + 1));
-    return { hp: random(), atk: random(), def: random(), spAtk: random(), spDef: random(), speed: random() };
+    return {
+      hp: random(),
+      atk: random(),
+      def: random(),
+      spAtk: random(),
+      spDef: random(),
+      speed: random(),
+    };
   }
 
-  private static computeIvEv(base: number, iv: number, ev: number, level: number): number {
+  private static computeIvEv(
+    base: number,
+    iv: number,
+    ev: number,
+    level: number
+  ): number {
     const ivEv = iv + 2 * base + Math.floor(ev / 4);
     return Math.floor(ivEv * (level / 100));
   }
 
   public addEv(evStats: PkStats): void {
-    const evolvingStat = STAT_KEYS.find(key => !!evStats[key]);
+    const evolvingStat = STAT_KEYS.find((key) => !!evStats[key]);
     if (!evolvingStat) {
       return;
     }
 
-    const totalStatsAmount = STAT_KEYS.reduce((amount, key) => amount + this.ev[key], 0);
-    const amountToAdd = Math.min(MAX_EV_TOTAL - totalStatsAmount, evStats[evolvingStat]);
+    const totalStatsAmount = STAT_KEYS.reduce(
+      (amount, key) => amount + this.ev[key],
+      0
+    );
+    const amountToAdd = Math.min(
+      MAX_EV_TOTAL - totalStatsAmount,
+      evStats[evolvingStat]
+    );
     if (amountToAdd > 0) {
-      this.ev[evolvingStat] = Math.min(MAX_EV_PER_STAT, this.ev[evolvingStat] + amountToAdd);
+      this.ev[evolvingStat] = Math.min(
+        MAX_EV_PER_STAT,
+        this.ev[evolvingStat] + amountToAdd
+      );
     }
   }
 }

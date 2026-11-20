@@ -11,14 +11,14 @@ const listeners = new Set<(hidden: boolean) => void>();
 function setHidden(value: boolean) {
   if (value !== hidden) {
     hidden = value;
-    listeners.forEach(listener => listener(value));
+    listeners.forEach((listener) => listener(value));
   }
 }
 
-document.addEventListener('visibilitychange', () => setHidden(document.hidden));
+document.addEventListener("visibilitychange", () => setHidden(document.hidden));
 for (const target of [document, window]) {
-  target.addEventListener('pause', () => setHidden(true));
-  target.addEventListener('resume', () => setHidden(document.hidden));
+  target.addEventListener("pause", () => setHidden(true));
+  target.addEventListener("resume", () => setHidden(document.hidden));
 }
 
 export function isAppHidden(): boolean {
@@ -26,7 +26,9 @@ export function isAppHidden(): boolean {
 }
 
 /** Called when the app goes to the background (true) or comes back (false). Returns the function to stop listening. */
-export function onAppVisibility(listener: (hidden: boolean) => void): () => void {
+export function onAppVisibility(
+  listener: (hidden: boolean) => void
+): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
@@ -44,7 +46,7 @@ function notifyAsleep() {
   const asleep = hidden || covered;
   if (asleep !== wasAsleep) {
     wasAsleep = asleep;
-    asleepListeners.forEach(listener => listener(asleep));
+    asleepListeners.forEach((listener) => listener(asleep));
   }
 }
 

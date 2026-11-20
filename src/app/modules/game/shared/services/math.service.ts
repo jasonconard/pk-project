@@ -1,9 +1,8 @@
-import { Service } from '@angular/core';
-import * as THREE from 'three';
+import { Service } from "@angular/core";
+import * as THREE from "three";
 
 @Service()
 export class MathService {
-
   public static getDist(a: THREE.Vector3, b: THREE.Vector3): number {
     const pX = Math.pow(a.x - b.x, 2);
     const pY = Math.pow(a.y - b.y, 2);

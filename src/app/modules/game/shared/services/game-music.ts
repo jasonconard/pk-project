@@ -1,7 +1,13 @@
-import { MusicEngine } from '../../../music-editor/shared/music-engine';
-import { MapMusicUse, mapSlots, MusicSlot, MusicUse, Song } from '../../../music-editor/shared/song';
-import { loadGameMusic } from '../../../music-editor/shared/song-storage';
-import { onGameAsleep } from '../../../../core/shared/app-visibility';
+import { MusicEngine } from "../../../music-editor/shared/music-engine";
+import {
+  MapMusicUse,
+  mapSlots,
+  MusicSlot,
+  MusicUse,
+  Song,
+} from "../../../music-editor/shared/song";
+import { loadGameMusic } from "../../../music-editor/shared/song-storage";
+import { onGameAsleep } from "../../../../core/shared/app-visibility";
 
 /** Fade out of the song that stops, fade in of the next one (s). */
 const FADE_OUT = 0.9;
@@ -19,9 +25,12 @@ export class GameMusic {
   private use: MusicUse;
   private mapUse: MapMusicUse;
   /** The map the player is on. */
-  private mapId = '';
+  private mapId = "";
   /** The last moment asked for (the song is chosen again when the songs change). */
-  private slot: { slot: MusicSlot, night: boolean } = { slot: 'day', night: false };
+  private slot: { slot: MusicSlot; night: boolean } = {
+    slot: "day",
+    night: false,
+  };
   private unlocked = false;
   private volume = 0;
   /** Song heard now (null during a fade out), song asked for, song being switched to (playing or after the fade). */
@@ -41,10 +50,10 @@ export class GameMusic {
         this.apply();
       }
     };
-    for (const event of ['pointerup', 'keydown', 'touchend']) {
+    for (const event of ["pointerup", "keydown", "touchend"]) {
       window.addEventListener(event, unlock, { capture: true, passive: true });
     }
-    onGameAsleep(hidden => this.engine.setSuspended(hidden));
+    onGameAsleep((hidden) => this.engine.setSuspended(hidden));
   }
 
   /** Volume 0..1 (0: no music). */
@@ -60,7 +69,7 @@ export class GameMusic {
   setSlot(slot: MusicSlot, night: boolean): void {
     this.slot = { slot, night };
     const song = this.songFor(slot, night);
-    if (song === null && slot === 'fight') {
+    if (song === null && slot === "fight") {
       return; // no fight music: the current one goes on
     }
     this.wanted = song;
@@ -89,12 +98,17 @@ export class GameMusic {
   }
 
   private songFor(slot: MusicSlot, night: boolean): Song | null {
-    const order: MusicSlot[] = slot === 'fight' ? ['fight']
-      : slot === 'rain' ? ['rain', night ? 'night' : 'day', 'day', 'night']
-      : slot === 'night' ? ['night', 'day'] : ['day', 'night'];
+    // The songs tried in order (a missing one falls back to the next)
+    const orders: Record<MusicSlot, MusicSlot[]> = {
+      fight: ["fight"],
+      rain: ["rain", night ? "night" : "day", "day", "night"],
+      night: ["night", "day"],
+      day: ["day", "night"],
+    };
+    const order = orders[slot];
     const use = mapSlots(this.use, this.mapUse, this.mapId);
     for (const s of order) {
-      const song = this.songs.find(x => x.id === use[s]);
+      const song = this.songs.find((x) => x.id === use[s]);
       if (song) {
         return song;
       }

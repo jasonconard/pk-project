@@ -1,14 +1,33 @@
 <div class="backdrop" (click)="closed.emit()"></div>
-<section class="sheet" role="dialog" aria-modal="true" aria-labelledby="game-menu-title">
+<section
+  class="sheet"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="game-menu-title"
+>
   <span class="grip" aria-hidden="true"></span>
   <header>
     <h2 id="game-menu-title">Menu</h2>
-    <button type="button" class="close" aria-label="Fermer" title="Fermer (Échap)" (click)="closed.emit()"><svg lucideX></svg></button>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer"
+      title="Fermer (Échap)"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
   </header>
 
   <div class="entries">
     @for (entry of entries; track entry.label) {
-      <button type="button" class="entry" [disabled]="!entry.action || editing()" [title]="entryTitle(entry)" (click)="openEntry(entry)">
+      <button
+        type="button"
+        class="entry"
+        [disabled]="!entry.action || editing()"
+        [title]="entryTitle(entry)"
+        (click)="openEntry(entry)"
+      >
         <svg [lucideIcon]="entry.icon"></svg>
         <span>{{ entry.label }}</span>
       </button>
@@ -18,13 +37,32 @@
 
   <div class="switches">
     @if (fullScreenSupported) {
-      <button type="button" class="switch" [attr.aria-pressed]="fullScreened()" (click)="toggleFullScreen()">
-        @if (fullScreened()) { <svg lucideMinimize></svg> } @else { <svg lucideMaximize></svg> }
+      <button
+        type="button"
+        class="switch"
+        [attr.aria-pressed]="fullScreened()"
+        (click)="toggleFullScreen()"
+      >
+        @if (fullScreened()) {
+          <svg lucideMinimize></svg>
+        } @else {
+          <svg lucideMaximize></svg>
+        }
         Plein écran
       </button>
     }
-    <button type="button" class="switch" [attr.aria-pressed]="!soundMuted()" title="Couper / remettre le son" (click)="toggleMute()">
-      @if (soundMuted()) { <svg lucideVolumeX></svg> Muet } @else { <svg lucideVolume2></svg> Son {{ soundPercent() }} % }
+    <button
+      type="button"
+      class="switch"
+      [attr.aria-pressed]="!soundMuted()"
+      title="Couper / remettre le son"
+      (click)="toggleMute()"
+    >
+      @if (soundMuted()) {
+        <svg lucideVolumeX></svg> Muet
+      } @else {
+        <svg lucideVolume2></svg> Son {{ soundPercent() }} %
+      }
     </button>
     <button type="button" class="switch" disabled title="Mode photo : bientôt">
       <svg lucideCamera></svg> Photo
@@ -34,46 +72,90 @@
   <div class="settings">
     <button type="button" class="row" (click)="ambiance.emit()">
       <svg lucideCloudSun class="row-icon"></svg>
-      <span class="row-text"><b>Ambiance</b><small>Météo, heure, vent, nuages, son</small></span>
+      <span class="row-text"
+        ><b>Ambiance</b><small>Météo, heure, vent, nuages, son</small></span
+      >
       <svg lucideChevronRight class="chevron"></svg>
     </button>
-    <button type="button" class="row" [attr.aria-expanded]="qualityOpen()" (click)="qualityOpen.set(!qualityOpen())">
+    <button
+      type="button"
+      class="row"
+      [attr.aria-expanded]="qualityOpen()"
+      (click)="qualityOpen.set(!qualityOpen())"
+    >
       <svg lucideGauge class="row-icon"></svg>
       <span class="row-text">
         <b>Qualité graphique</b>
-        <small>{{ qualityLabel() }}@if (hud()?.framePerSec; as fps) { · {{ fps }} fps }</small>
+        <small
+          >{{ qualityLabel() }}
+          @if (hud()?.framePerSec; as fps) {
+            · {{ fps }} fps
+          }
+        </small>
       </span>
-      @if (qualityOpen()) { <svg lucideChevronDown class="chevron"></svg> } @else { <svg lucideChevronRight class="chevron"></svg> }
+      @if (qualityOpen()) {
+        <svg lucideChevronDown class="chevron"></svg>
+      } @else {
+        <svg lucideChevronRight class="chevron"></svg>
+      }
     </button>
     @if (qualityOpen()) {
       <div class="quality">
         <div role="radiogroup" aria-label="Qualité">
           @for (q of qualityChoices; track q.mode) {
-            <button type="button" role="radio" [attr.aria-checked]="quality() === q.mode" (click)="setQuality(q.mode)">
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="quality() === q.mode"
+              (click)="setQuality(q.mode)"
+            >
               <b>{{ q.label }}</b>
               <small>{{ q.hint }}</small>
             </button>
           }
         </div>
         @if (hud(); as hud) {
-          <p class="current">Résolution ×{{ hud.pixelRatio }} · Ombres {{ hud.shadowMapSize || 'aucune' }}</p>
+          <p class="current">
+            Résolution ×{{ hud.pixelRatio }} · Ombres
+            {{ hud.shadowMapSize || "aucune" }}
+          </p>
           @if (hapticsSupported) {
             <label class="check">
-              <input type="checkbox" [checked]="hapticsEnabled()" (change)="setHaptics($event)" />
+              <input
+                type="checkbox"
+                [checked]="hapticsEnabled()"
+                (change)="setHaptics($event)"
+              />
               Vibrations
             </label>
           }
           <label class="check">
-            <input type="checkbox" [checked]="hud.diagnosticsOpen" (change)="setDiagnostics($event)" />
+            <input
+              type="checkbox"
+              [checked]="hud.diagnosticsOpen"
+              (change)="setDiagnostics($event)"
+            />
             Console de diagnostic (images par seconde, rendu)
           </label>
         }
       </div>
     }
-    <button type="button" class="row" [attr.aria-expanded]="projectOpen()" (click)="toggleProject()">
+    <button
+      type="button"
+      class="row"
+      [attr.aria-expanded]="projectOpen()"
+      (click)="toggleProject()"
+    >
       <svg lucideFolderArchive class="row-icon"></svg>
-      <span class="row-text"><b>Projet de jeu</b><small>Cartes, modèles, musiques, variables : fichier .pk</small></span>
-      @if (projectOpen()) { <svg lucideChevronDown class="chevron"></svg> } @else { <svg lucideChevronRight class="chevron"></svg> }
+      <span class="row-text"
+        ><b>Projet de jeu</b
+        ><small>Cartes, modèles, musiques, variables : fichier .pk</small></span
+      >
+      @if (projectOpen()) {
+        <svg lucideChevronDown class="chevron"></svg>
+      } @else {
+        <svg lucideChevronRight class="chevron"></svg>
+      }
     </button>
     @if (projectOpen()) {
       <div class="project">
@@ -84,21 +166,57 @@
             <p class="current"><b>Sera remplacé :</b> {{ device }}</p>
           }
           <div class="actions">
-            <button type="button" class="danger" [disabled]="projectBusy()" (click)="confirmImport()">Remplacer</button>
-            <button type="button" [disabled]="projectBusy()" (click)="pendingImport.set(null)">Annuler</button>
+            <button
+              type="button"
+              class="danger"
+              [disabled]="projectBusy()"
+              (click)="confirmImport()"
+            >
+              Remplacer
+            </button>
+            <button
+              type="button"
+              [disabled]="projectBusy()"
+              (click)="pendingImport.set(null)"
+            >
+              Annuler
+            </button>
           </div>
         } @else {
-          <p class="current">Toutes vos créations dans un fichier, pour les passer du téléphone à l'ordinateur (et inversement).</p>
+          <p class="current">
+            Toutes vos créations dans un fichier, pour les passer du téléphone à
+            l'ordinateur (et inversement).
+          </p>
           @if (deviceSummary(); as device) {
             <p class="summary">Sur cet appareil : {{ device }}</p>
           }
           <div class="actions">
-            <button type="button" [disabled]="projectBusy()" (click)="exportProject()">
-              @if (sharesProject) { <svg lucideShare2></svg> Envoyer… } @else { <svg lucideDownload></svg> Exporter }
+            <button
+              type="button"
+              [disabled]="projectBusy()"
+              (click)="exportProject()"
+            >
+              @if (sharesProject) {
+                <svg lucideShare2></svg> Envoyer…
+              } @else {
+                <svg lucideDownload></svg> Exporter
+              }
             </button>
-            <button type="button" [disabled]="projectBusy()" (click)="fileInput.click()"><svg lucideUpload></svg> Importer…</button>
+            <button
+              type="button"
+              [disabled]="projectBusy()"
+              (click)="fileInput.click()"
+            >
+              <svg lucideUpload></svg> Importer…
+            </button>
             <!-- Android's file picker crashes on an extension it doesn't know (.pk): no filter there -->
-            <input #fileInput type="file" [attr.accept]="sharesProject ? null : '.pk'" hidden (change)="pickProject($event)" />
+            <input
+              #fileInput
+              type="file"
+              [attr.accept]="sharesProject ? null : '.pk'"
+              hidden
+              (change)="pickProject($event)"
+            />
           </div>
         }
         @if (projectMessage(); as message) {
@@ -108,12 +226,17 @@
     }
     <button type="button" class="row" (click)="variablesTest.emit()">
       <svg lucideVariable class="row-icon"></svg>
-      <span class="row-text"><b>Test des variables</b><small>Voir et changer leur valeur pendant la partie</small></span>
+      <span class="row-text"
+        ><b>Test des variables</b
+        ><small>Voir et changer leur valeur pendant la partie</small></span
+      >
       <svg lucideChevronRight class="chevron"></svg>
     </button>
     <button type="button" class="row" (click)="releaseNotes.emit()">
       <svg lucideSparkles class="row-icon"></svg>
-      <span class="row-text"><b>Nouveautés</b><small>v{{ version() }}</small></span>
+      <span class="row-text"
+        ><b>Nouveautés</b><small>v{{ version() }}</small></span
+      >
       <svg lucideChevronRight class="chevron"></svg>
     </button>
   </div>

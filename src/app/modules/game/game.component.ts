@@ -1,49 +1,97 @@
-import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { isGameCovered, setGameCovered } from '../../core/shared/app-visibility';
-import { Passage } from './shared/model/Passage';
-import { ObjectEvent } from './shared/model/ObjectEvent';
-import { DecimalPipe } from '@angular/common';
-import { isFirstStartOfNewVersion } from './release-notes/whats-new';
-import { GameMode } from './shared/model/Game';
-import { GameService } from './shared/services/game.service';
-import { StickComponent } from '../../core/stick/stick.component';
-import { TouchPadComponent } from '../../core/touch-pad/touch-pad.component';
-import { MessageComponent } from '../../core/message/message.component';
-import { TeleportComponent } from './teleport/teleport.component';
-import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
-import { EditorBarComponent, EditorPanel } from './editor-bar/editor-bar.component';
-import { MusicEditorComponent } from '../music-editor/music-editor.component';
-import { VariablesEditorComponent } from '../variables-editor/variables-editor.component';
-import { DatabaseEditorComponent } from '../database-editor/database-editor.component';
-import { ModelEditorComponent } from '../model-editor/model-editor.component';
-import { ReleaseNotesComponent } from './release-notes/release-notes.component';
-import { temperatureColor } from './shared/util/temperature-color';
-import { version } from '../../../../package.json';
-import { EditBrush, EditCommand } from './shared/services/map-editor.service';
-import { SoundSetting, WeatherPanelComponent, WindSetting } from './weather-panel/weather-panel.component';
-import { FireflyColor, formatHour, LeafMode, WEATHER_CHOICES, WeatherType } from './shared/weather/Weather';
-import { GameMenuComponent } from './game-menu/game-menu.component';
-import { GameSavesComponent } from './game-saves/game-saves.component';
-import { VariablesTestComponent } from './variables-test/variables-test.component';
-import { MapControlsComponent } from './map-controls/map-controls.component';
-import { EscapeService } from '../../core/shared/service/escape.service';
-import { CoreService } from '../../core/shared/service/core.service';
-import { SequenceService } from './shared/services/sequence.service';
-import { LucideMenu, LucidePencilRuler } from '@lucide/angular';
-import { isTyping } from '../../core/shared/typing';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from "@angular/core";
+import {
+  isGameCovered,
+  setGameCovered,
+} from "../../core/shared/app-visibility";
+import { Passage } from "./shared/model/Passage";
+import { ObjectEvent } from "./shared/model/ObjectEvent";
+import { DecimalPipe } from "@angular/common";
+import { isFirstStartOfNewVersion } from "./release-notes/whats-new";
+import { GameMode } from "./shared/model/Game";
+import { GameService } from "./shared/services/game.service";
+import { StickComponent } from "../../core/stick/stick.component";
+import { TouchPadComponent } from "../../core/touch-pad/touch-pad.component";
+import { MessageComponent } from "../../core/message/message.component";
+import { TeleportComponent } from "./teleport/teleport.component";
+import { FightUiComponent } from "../fight/fight-ui/fight-ui.component";
+import {
+  EditorBarComponent,
+  EditorPanel,
+} from "./editor-bar/editor-bar.component";
+import { MusicEditorComponent } from "../music-editor/music-editor.component";
+import { VariablesEditorComponent } from "../variables-editor/variables-editor.component";
+import { DatabaseEditorComponent } from "../database-editor/database-editor.component";
+import { ModelEditorComponent } from "../model-editor/model-editor.component";
+import { ReleaseNotesComponent } from "./release-notes/release-notes.component";
+import { temperatureColor } from "./shared/util/temperature-color";
+import { version } from "../../../../package.json";
+import { EditBrush, EditCommand } from "./shared/services/map-editor.service";
+import {
+  SoundSetting,
+  WeatherPanelComponent,
+  WindSetting,
+} from "./weather-panel/weather-panel.component";
+import {
+  FireflyColor,
+  formatHour,
+  LeafMode,
+  WEATHER_CHOICES,
+  WeatherType,
+} from "./shared/weather/Weather";
+import { GameMenuComponent } from "./game-menu/game-menu.component";
+import { GameSavesComponent } from "./game-saves/game-saves.component";
+import { VariablesTestComponent } from "./variables-test/variables-test.component";
+import { MapControlsComponent } from "./map-controls/map-controls.component";
+import { EscapeService } from "../../core/shared/service/escape.service";
+import { CoreService } from "../../core/shared/service/core.service";
+import { SequenceService } from "./shared/services/sequence.service";
+import { LucideMenu, LucidePencilRuler } from "@lucide/angular";
+import { isTyping } from "../../core/shared/typing";
 
 @Component({
-  selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, GameSavesComponent, VariablesTestComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, VariablesEditorComponent, DatabaseEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
-  templateUrl: './game.component.html',
-  styleUrl: './game.component.scss',
+  selector: "game-main",
+  imports: [
+    StickComponent,
+    TouchPadComponent,
+    MessageComponent,
+    TeleportComponent,
+    FightUiComponent,
+    WeatherPanelComponent,
+    EditorBarComponent,
+    ReleaseNotesComponent,
+    GameMenuComponent,
+    GameSavesComponent,
+    VariablesTestComponent,
+    MapControlsComponent,
+    MusicEditorComponent,
+    ModelEditorComponent,
+    VariablesEditorComponent,
+    DatabaseEditorComponent,
+    DecimalPipe,
+    LucideMenu,
+    LucidePencilRuler,
+  ],
+  templateUrl: "./game.component.html",
+  styleUrl: "./game.component.scss",
 })
 export class GameComponent {
   private readonly gameService = inject(GameService);
   private readonly coreService = inject(CoreService);
   private readonly sequenceService = inject(SequenceService);
-  private readonly canvasRef = viewChild.required<ElementRef<HTMLElement>>('canvas');
-  private readonly weatherPanel = viewChild.required<WeatherPanelComponent>('weatherPanel');
+  private readonly canvasRef =
+    viewChild.required<ElementRef<HTMLElement>>("canvas");
+  private readonly weatherPanel =
+    viewChild.required<WeatherPanelComponent>("weatherPanel");
   private readonly musicEditor = viewChild(MusicEditorComponent);
   private readonly modelEditor = viewChild(ModelEditorComponent);
   private readonly databaseEditor = viewChild(DatabaseEditorComponent);
@@ -85,42 +133,70 @@ export class GameComponent {
   /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
   protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
   /** Weather and hour, for the editor's Ambiance button (computer). */
-  protected readonly ambianceLabel = computed(() =>
-    `${WEATHER_CHOICES.find(c => c.type === this.weather())?.label ?? ''} · ${formatHour(this.hour())}`);
+  protected readonly ambianceLabel = computed(
+    () =>
+      `${WEATHER_CHOICES.find((c) => c.type === this.weather())?.label ?? ""} · ${formatHour(this.hour())}`
+  );
   /** Air temperature (°C, rounded) and its color, from icy blue to red. */
-  protected readonly temperatureLabel = computed(() => Math.round(this.hud()?.temperature ?? 20));
-  protected readonly temperatureColor = computed(() => temperatureColor(this.hud()?.temperature ?? 20));
+  protected readonly temperatureLabel = computed(() =>
+    Math.round(this.hud()?.temperature ?? 20)
+  );
+  protected readonly temperatureColor = computed(() =>
+    temperatureColor(this.hud()?.temperature ?? 20)
+  );
 
   constructor() {
-    afterNextRender(() => this.gameService.init(this.canvasRef().nativeElement));
+    afterNextRender(() =>
+      this.gameService.init(this.canvasRef().nativeElement)
+    );
     // An editor over the game: the game sleeps (no frames, moves, time, sounds, music, keys) until it is closed
     effect(() => setGameCovered(!!this.editorPanel()));
     // The back button closes the editor like its Jeu (saved first); the Escape key stays the editor's own
-    inject(EscapeService).track(() => this.editorPanel(), () => {
-      const editor = this.musicEditor() ?? this.modelEditor() ?? this.databaseEditor();
-      if (editor) {
-        void editor.requestClose();
-      } else {
-        this.editorPanel.set(null); // still loading, or saved at every change (variables)
+    inject(EscapeService).track(
+      () => this.editorPanel(),
+      () => {
+        const editor =
+          this.musicEditor() ?? this.modelEditor() ?? this.databaseEditor();
+        if (editor) {
+          void editor.requestClose();
+        } else {
+          this.editorPanel.set(null); // still loading, or saved at every change (variables)
+        }
       }
-    });
+    );
     inject(DestroyRef).onDestroy(() => setGameCovered(false));
     // On the map, the floating full screen button gives way to the menu (the game's Menu, the editor's Réglages)
     effect(() => {
       const hud = this.hud();
-      this.coreService.fullScreenButtonHidden.set(!!hud && hud.mode === GameMode.MAP && !hud.loading);
+      this.coreService.fullScreenButtonHidden.set(
+        !!hud && hud.mode === GameMode.MAP && !hud.loading
+      );
     });
-    inject(DestroyRef).onDestroy(() => this.coreService.fullScreenButtonHidden.set(false));
+    inject(DestroyRef).onDestroy(() =>
+      this.coreService.fullScreenButtonHidden.set(false)
+    );
     // Escape opens the game menu, when the game doesn't need it (a message, a fight, a dialog open). The game marks the
     // key as handled (its "cancel" key): defaultPrevented can't tell; the dialogs stop it before it gets here
     const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape' && !ev.repeat && !isGameCovered() && this.playing() && !this.menuOpen()
-        && !this.releaseNotes() && !this.savesOpen() && !this.variablesTestOpen() && !this.sequenceService.message() && !isTyping(ev)) {
+      if (
+        ev.key === "Escape" &&
+        !ev.repeat &&
+        !isGameCovered() &&
+        this.playing() &&
+        !this.menuOpen() &&
+        !this.releaseNotes() &&
+        !this.savesOpen() &&
+        !this.variablesTestOpen() &&
+        !this.sequenceService.message() &&
+        !isTyping(ev)
+      ) {
         this.menuOpen.set(true);
       }
     };
-    window.addEventListener('keydown', onKeyDown);
-    inject(DestroyRef).onDestroy(() => window.removeEventListener('keydown', onKeyDown));
+    window.addEventListener("keydown", onKeyDown);
+    inject(DestroyRef).onDestroy(() =>
+      window.removeEventListener("keydown", onKeyDown)
+    );
     // After an update: what's new, once the loading screen is gone
     effect(() => {
       const hud = this.hud();
@@ -214,9 +290,9 @@ export class GameComponent {
   /** The editor's Jeu: back to the game, which takes the editor's changes (the songs, the models). */
   protected closeEditorPanel(): void {
     const kind = this.editorPanel()?.kind;
-    if (kind === 'music') {
+    if (kind === "music") {
       this.gameService.reloadMusic();
-    } else if (kind === 'models') {
+    } else if (kind === "models") {
       void this.gameService.reloadModels();
     }
     this.editorPanel.set(null);
@@ -247,7 +323,7 @@ export class GameComponent {
     this.gameService.setObjectEvents(events);
   }
 
-  protected setZoneSize(size: { x: number, z: number }): void {
+  protected setZoneSize(size: { x: number; z: number }): void {
     this.gameService.setZoneSize(size);
   }
 

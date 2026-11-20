@@ -1,14 +1,38 @@
 <!-- Phone layout: top bar and mode switch above the view -->
 @if (phone()) {
   <header class="m-top">
-    <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)">‹ Jeu</a>
+    <a
+      href="#/"
+      class="back"
+      title="Retour au jeu, avec les modèles enregistrés ici"
+      (click)="backToGame($event)"
+      >‹ Jeu</a
+    >
     <button type="button" class="m-title" (click)="toggleSheet('model')">
-      <strong>{{ model()?.id ?? '—' }}</strong>
-      <span class="muted">{{ isEditedGameModel() ? 'Modifié · enregistré' : 'Enregistré' }}</span>
+      <strong>{{ model()?.id ?? "—" }}</strong>
+      <span class="muted">{{
+        isEditedGameModel() ? "Modifié · enregistré" : "Enregistré"
+      }}</span>
     </button>
     <div class="history">
-      <button type="button" class="btn" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()"><svg lucideUndo2></svg></button>
-      <button type="button" class="btn" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()"><svg lucideRedo2></svg></button>
+      <button
+        type="button"
+        class="btn"
+        aria-label="Annuler"
+        [disabled]="!canUndo()"
+        (click)="undo()"
+      >
+        <svg lucideUndo2></svg>
+      </button>
+      <button
+        type="button"
+        class="btn"
+        aria-label="Refaire"
+        [disabled]="!canRedo()"
+        (click)="redo()"
+      >
+        <svg lucideRedo2></svg>
+      </button>
     </div>
   </header>
   <div class="m-mode">
@@ -17,36 +41,89 @@
 }
 
 <div class="stage">
-  <div class="viewport" #viewport (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)"
-       (pointercancel)="onPointerUp($event)" [class.painting]="mode() === 'paint'">
-    @if (layer() !== 'color') {
-      <div class="preview" animate.enter="fade-in" animate.leave="fade-out" [style.width.%]="previewSize * 100" [style.height.%]="previewSize * 100"
-           [style.right.px]="previewMargin" [style.bottom.px]="previewMargin">
-        <span>Aperçu {{ previewNight() ? 'de nuit' : 'de jour' }}</span>
-        <button type="button" [title]="previewNight() ? 'Voir de jour' : 'Voir de nuit'" [attr.aria-label]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
-                (click)="setPreviewNight(!previewNight())">@if (previewNight()) { <svg lucideSun></svg> } @else { <svg lucideMoon></svg> }</button>
+  <div
+    class="viewport"
+    #viewport
+    (pointerdown)="onPointerDown($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="onPointerUp($event)"
+    [class.painting]="mode() === 'paint'"
+  >
+    @if (layer() !== "color") {
+      <div
+        class="preview"
+        animate.enter="fade-in"
+        animate.leave="fade-out"
+        [style.width.%]="previewSize * 100"
+        [style.height.%]="previewSize * 100"
+        [style.right.px]="previewMargin"
+        [style.bottom.px]="previewMargin"
+      >
+        <span>Aperçu {{ previewNight() ? "de nuit" : "de jour" }}</span>
+        <button
+          type="button"
+          [title]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
+          [attr.aria-label]="previewNight() ? 'Voir de jour' : 'Voir de nuit'"
+          (click)="setPreviewNight(!previewNight())"
+        >
+          @if (previewNight()) {
+            <svg lucideSun></svg>
+          } @else {
+            <svg lucideMoon></svg>
+          }
+        </button>
       </div>
     }
-    @if (!phone() && !(bigView() && mode() === 'paint' && faceTexture())) {
+    @if (!phone() && !(bigView() && mode() === "paint" && faceTexture())) {
       <p class="view-hint" animate.enter="fade-in">
         <svg lucideMousePointerClick></svg>
-        {{ mode() === 'select' ? 'Clic : choisir une forme · Glisser : tourner · Molette : zoom' : 'Appuyer sur le modèle : peindre · Glisser à côté : tourner · Molette : zoom' }}
+        {{
+          mode() === "select"
+            ? "Clic : choisir une forme · Glisser : tourner · Molette : zoom"
+            : "Appuyer sur le modèle : peindre · Glisser à côté : tourner · Molette : zoom"
+        }}
       </p>
     }
   </div>
 
-  @if (bigView() && mode() === 'paint' && faceTexture(); as face) {
-    <section class="big-face" animate.enter="face-in" animate.leave="face-out" aria-label="Grande vue de la face">
+  @if (bigView() && mode() === "paint" && faceTexture(); as face) {
+    <section
+      class="big-face"
+      animate.enter="face-in"
+      animate.leave="face-out"
+      aria-label="Grande vue de la face"
+    >
       @if (!phone()) {
         <header>
-          <strong>{{ parts()[selection()!.partIndex] }} · {{ faceInfo()?.face }}</strong>
-          <span class="muted">{{ faceInfo()?.size }} · {{ layerInfo().label }}</span>
-          <button type="button" class="btn ghost icon" title="Fermer la grande vue (G)" aria-label="Fermer la grande vue" (click)="setBigView(false)"><svg lucideX></svg></button>
+          <strong
+            >{{ parts()[selection()!.partIndex] }} ·
+            {{ faceInfo()?.face }}</strong
+          >
+          <span class="muted"
+            >{{ faceInfo()?.size }} · {{ layerInfo().label }}</span
+          >
+          <button
+            type="button"
+            class="btn ghost icon"
+            title="Fermer la grande vue (G)"
+            aria-label="Fermer la grande vue"
+            (click)="setBigView(false)"
+          >
+            <svg lucideX></svg>
+          </button>
         </header>
       }
-      <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()" [fill]="true"
-                        [faceKey]="face.texId"
-                        (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" (strokeCancel)="cancelStroke()" />
+      <app-pixel-canvas
+        [texture]="face.tex"
+        [layer]="layer()"
+        [version]="paintVersion()"
+        [fill]="true"
+        [faceKey]="face.texId"
+        (strokeStart)="strokeStart($event)"
+        (strokeMove)="strokeMove($event)"
+        (strokeEnd)="strokeEnd()"
+        (strokeCancel)="cancelStroke()"
+      />
     </section>
   }
 
@@ -54,46 +131,102 @@
     <div class="m-overlay">
       @if (pending(); as action) {
         <div class="banner" animate.enter="drop-in" animate.leave="fade-out">
-          <span>{{ action.kind === 'link' ? 'Touche la face à lier (même taille)' : 'Touche la face où copier' }}</span>
-          <button type="button" class="btn" (click)="cancelFaceAction()">Annuler</button>
+          <span>{{
+            action.kind === "link"
+              ? "Touche la face à lier (même taille)"
+              : "Touche la face où copier"
+          }}</span>
+          <button type="button" class="btn" (click)="cancelFaceAction()">
+            Annuler
+          </button>
         </div>
-      } @else if (mode() === 'select') {
+      } @else if (mode() === "select") {
         @if (!selectedPart()) {
-          <p class="chip" animate.enter="fade-in"><svg lucideHand></svg> Toucher une forme · 1 doigt : tourner · 2 doigts : zoomer</p>
+          <p class="chip" animate.enter="fade-in">
+            <svg lucideHand></svg> Toucher une forme · 1 doigt : tourner · 2
+            doigts : zoomer
+          </p>
         }
       } @else {
         <div class="m-view-top" animate.enter="fade-in">
           @if (faceInfo(); as info) {
-            <p class="chip face-chip"><strong>{{ parts()[selection()!.partIndex] }} · {{ info.face }}</strong><span>{{ info.size }} · {{ layerInfo().label }}</span></p>
+            <p class="chip face-chip">
+              <strong
+                >{{ parts()[selection()!.partIndex] }} · {{ info.face }}</strong
+              ><span>{{ info.size }} · {{ layerInfo().label }}</span>
+            </p>
           } @else {
             <p class="chip">Touche une face pour la peindre</p>
           }
           <div class="view-toggle" role="group" aria-label="Vue">
-            <button type="button" [class.on]="!bigView()" (click)="setBigView(false)">3D</button>
-            <button type="button" [class.on]="bigView()" [disabled]="!faceTexture()" (click)="setBigView(true)">Face</button>
+            <button
+              type="button"
+              [class.on]="!bigView()"
+              (click)="setBigView(false)"
+            >
+              3D
+            </button>
+            <button
+              type="button"
+              [class.on]="bigView()"
+              [disabled]="!faceTexture()"
+              (click)="setBigView(true)"
+            >
+              Face
+            </button>
           </div>
         </div>
       }
     </div>
 
-    @if (mode() === 'select' && selectedPart() && !pending() && !sheet()) {
-      <div class="selection-card" animate.enter="rise-in" animate.leave="sink-out">
+    @if (mode() === "select" && selectedPart() && !pending() && !sheet()) {
+      <div
+        class="selection-card"
+        animate.enter="rise-in"
+        animate.leave="sink-out"
+      >
         <div class="sel-head">
           <strong>{{ parts()[selection()!.partIndex] }}</strong>
-          <span class="muted grow">{{ selectedPart()!.size.x }} × {{ selectedPart()!.size.y }}{{ selectedPart()!.kind === 'box' ? ' × ' + selectedPart()!.size.z : '' }}</span>
-          <button type="button" class="btn" (click)="toggleSheet('shapes')"><svg lucideSettings2></svg> Réglages</button>
+          <span class="muted grow"
+            >{{ selectedPart()!.size.x }} × {{ selectedPart()!.size.y
+            }}{{
+              selectedPart()!.kind === "box"
+                ? " × " + selectedPart()!.size.z
+                : ""
+            }}</span
+          >
+          <button type="button" class="btn" (click)="toggleSheet('shapes')">
+            <svg lucideSettings2></svg> Réglages
+          </button>
         </div>
         <div class="nudges">
           @for (n of nudges; track n.label) {
-            <button type="button" class="btn" [attr.aria-label]="'Déplacer ' + n.label" (click)="nudge(n.axis, n.delta)">
-              <span><svg [lucideIcon]="n.icon"></svg></span><small>{{ n.label }}</small>
+            <button
+              type="button"
+              class="btn"
+              [attr.aria-label]="'Déplacer ' + n.label"
+              (click)="nudge(n.axis, n.delta)"
+            >
+              <span><svg [lucideIcon]="n.icon"></svg></span
+              ><small>{{ n.label }}</small>
             </button>
           }
         </div>
         <div class="sel-actions">
-          <button type="button" class="btn" (click)="duplicate()"><svg lucideCopy></svg> Dupliquer</button>
-          <button type="button" class="btn" (click)="turn()"><svg lucideRotateCw></svg> Tourner 90°</button>
-          <button type="button" class="btn danger" data-haptic="warning" (click)="remove()"><svg lucideTrash></svg> Supprimer</button>
+          <button type="button" class="btn" (click)="duplicate()">
+            <svg lucideCopy></svg> Dupliquer
+          </button>
+          <button type="button" class="btn" (click)="turn()">
+            <svg lucideRotateCw></svg> Tourner 90°
+          </button>
+          <button
+            type="button"
+            class="btn danger"
+            data-haptic="warning"
+            (click)="remove()"
+          >
+            <svg lucideTrash></svg> Supprimer
+          </button>
         </div>
       </div>
     }
@@ -101,150 +234,351 @@
 </div>
 
 @if (phone()) {
-  @if (mode() === 'paint') {
+  @if (mode() === "paint") {
     <div class="tray" animate.enter="rise-in">
       <div class="tray-colors">
-        @if (layer() === 'color') {
-          <label class="current" [style.background]="color()" title="Couleur libre">
-            <input type="color" [value]="color()" (change)="useColor($any($event.target).value)" aria-label="Couleur libre" />
+        @if (layer() === "color") {
+          <label
+            class="current"
+            [style.background]="color()"
+            title="Couleur libre"
+          >
+            <input
+              type="color"
+              [value]="color()"
+              (change)="useColor($any($event.target).value)"
+              aria-label="Couleur libre"
+            />
           </label>
           @for (c of trayColors(); track c) {
-            <button type="button" class="swatch" [style.background]="c" [class.on]="c === color()" [attr.aria-label]="c" (click)="setColor(c)"></button>
+            <button
+              type="button"
+              class="swatch"
+              [style.background]="c"
+              [class.on]="c === color()"
+              [attr.aria-label]="c"
+              (click)="setColor(c)"
+            ></button>
           }
         } @else {
           @for (g of grays; track g) {
-            <button type="button" class="swatch" [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'" [class.on]="g === gray()"
-                    [attr.aria-label]="'Gris ' + g" (click)="gray.set(g)"></button>
+            <button
+              type="button"
+              class="swatch"
+              [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'"
+              [class.on]="g === gray()"
+              [attr.aria-label]="'Gris ' + g"
+              (click)="gray.set(g)"
+            ></button>
           }
         }
-        <button type="button" class="btn palette-btn" [class.on]="sheet() === 'palette'" aria-label="Palette" (click)="toggleSheet('palette')"><svg lucidePalette></svg></button>
+        <button
+          type="button"
+          class="btn palette-btn"
+          [class.on]="sheet() === 'palette'"
+          aria-label="Palette"
+          (click)="toggleSheet('palette')"
+        >
+          <svg lucidePalette></svg>
+        </button>
       </div>
       <ng-container [ngTemplateOutlet]="toolsTpl" />
     </div>
   }
 
   <nav class="m-nav" aria-label="Sections">
-    <button type="button" [class.on]="sheet() === 'model'" (click)="toggleSheet('model')"><span><svg lucidePackage></svg></span>Modèle</button>
-    @if (mode() === 'select') {
-      <button type="button" [class.on]="sheet() === 'shapes'" (click)="toggleSheet('shapes')"><span><svg lucideShapes></svg></span>Formes</button>
-      <button type="button" [class.on]="sheet() === 'add'" (click)="toggleSheet('add')"><span><svg lucidePlus></svg></span>Ajouter</button>
+    <button
+      type="button"
+      [class.on]="sheet() === 'model'"
+      (click)="toggleSheet('model')"
+    >
+      <span><svg lucidePackage></svg></span>Modèle
+    </button>
+    @if (mode() === "select") {
+      <button
+        type="button"
+        [class.on]="sheet() === 'shapes'"
+        (click)="toggleSheet('shapes')"
+      >
+        <span><svg lucideShapes></svg></span>Formes
+      </button>
+      <button
+        type="button"
+        [class.on]="sheet() === 'add'"
+        (click)="toggleSheet('add')"
+      >
+        <span><svg lucidePlus></svg></span>Ajouter
+      </button>
     } @else {
-      <button type="button" [class.on]="sheet() === 'layer'" (click)="toggleSheet('layer')"><span><svg [lucideIcon]="layerInfo().icon"></svg></span>Calque</button>
-      <button type="button" [class.on]="sheet() === 'face'" (click)="toggleSheet('face')"><span><svg lucideSquareDashed></svg></span>Face</button>
+      <button
+        type="button"
+        [class.on]="sheet() === 'layer'"
+        (click)="toggleSheet('layer')"
+      >
+        <span><svg [lucideIcon]="layerInfo().icon"></svg></span>Calque
+      </button>
+      <button
+        type="button"
+        [class.on]="sheet() === 'face'"
+        (click)="toggleSheet('face')"
+      >
+        <span><svg lucideSquareDashed></svg></span>Face
+      </button>
     }
   </nav>
 
   @if (sheet(); as open) {
-    <section class="sheet" role="dialog" [attr.aria-label]="sheetTitles[open]" animate.enter="sheet-in" animate.leave="sheet-out"
-             [style.height.px]="sheetHeight()" [style.transform]="sheetDrag() ? 'translateY(' + sheetDrag() + 'px)' : null" [class.dragging]="sheetDrag() > 0">
+    <section
+      class="sheet"
+      role="dialog"
+      [attr.aria-label]="sheetTitles[open]"
+      animate.enter="sheet-in"
+      animate.leave="sheet-out"
+      [style.height.px]="sheetHeight()"
+      [style.transform]="
+        sheetDrag() ? 'translateY(' + sheetDrag() + 'px)' : null
+      "
+      [class.dragging]="sheetDrag() > 0"
+    >
       <!-- Measured: the sheet's height follows it smoothly when the content changes -->
       <div class="sheet-inner" #sheetInner>
-      <!-- Sticky top: the close button stays reachable when the sheet is scrolled; slide it down to close -->
-      <div class="sheet-top" (pointerdown)="sheetDragStart($event)" (pointermove)="sheetDragMove($event)"
-           (pointerup)="sheetDragEnd($event)" (pointercancel)="sheetDragEnd($event)">
-        <span class="grip" aria-hidden="true"></span>
-        <div class="sheet-head">
-          <h2>{{ sheetTitles[open] }}</h2>
-          @switch (open) {
-            @case ('model') {
-              <button type="button" class="btn" (click)="create()"><svg lucidePlus></svg> Nouveau</button>
-            }
-            @case ('shapes') {
-              <button type="button" class="btn" (click)="add('box')"><svg lucidePlus></svg> Box</button>
-              <button type="button" class="btn" (click)="add('plane')"><svg lucidePlus></svg> Plane</button>
-            }
-            @case ('face') {
-              @if (selectedPart()) { <span class="muted">{{ parts()[selection()!.partIndex] }}</span> }
-            }
-            @case ('palette') {
-              @if (layer() === 'color') {
-                <label class="btn" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)">
-                  <svg lucideUpload></svg> Importer<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
-                </label>
+        <!-- Sticky top: the close button stays reachable when the sheet is scrolled; slide it down to close -->
+        <div
+          class="sheet-top"
+          (pointerdown)="sheetDragStart($event)"
+          (pointermove)="sheetDragMove($event)"
+          (pointerup)="sheetDragEnd($event)"
+          (pointercancel)="sheetDragEnd($event)"
+        >
+          <span class="grip" aria-hidden="true"></span>
+          <div class="sheet-head">
+            <h2>{{ sheetTitles[open] }}</h2>
+            @switch (open) {
+              @case ("model") {
+                <button type="button" class="btn" (click)="create()">
+                  <svg lucidePlus></svg> Nouveau
+                </button>
+              }
+              @case ("shapes") {
+                <button type="button" class="btn" (click)="add('box')">
+                  <svg lucidePlus></svg> Box
+                </button>
+                <button type="button" class="btn" (click)="add('plane')">
+                  <svg lucidePlus></svg> Plane
+                </button>
+              }
+              @case ("face") {
+                @if (selectedPart()) {
+                  <span class="muted">{{
+                    parts()[selection()!.partIndex]
+                  }}</span>
+                }
+              }
+              @case ("palette") {
+                @if (layer() === "color") {
+                  <label
+                    class="btn"
+                    title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)"
+                  >
+                    <svg lucideUpload></svg> Importer<input
+                      type="file"
+                      hidden
+                      [accept]="paletteFileTypes"
+                      (change)="importPalette($any($event.target))"
+                    />
+                  </label>
+                }
               }
             }
-          }
-          <button type="button" class="btn close" title="Fermer" aria-label="Fermer" (click)="sheet.set(null)"><svg lucideX></svg></button>
+            <button
+              type="button"
+              class="btn close"
+              title="Fermer"
+              aria-label="Fermer"
+              (click)="sheet.set(null)"
+            >
+              <svg lucideX></svg>
+            </button>
+          </div>
         </div>
-      </div>
-      <!-- Recreated for each section: its content fades in -->
-      @for (key of [open]; track key) {
-        <div class="sheet-body" animate.enter="fade-in">
-          @switch (open) {
-            @case ('model') {
-              <ng-container [ngTemplateOutlet]="modelTpl" />
+        <!-- Recreated for each section: its content fades in -->
+        @for (key of [open]; track key) {
+          <div class="sheet-body" animate.enter="fade-in">
+            @switch (open) {
+              @case ("model") {
+                <ng-container [ngTemplateOutlet]="modelTpl" />
+              }
+              @case ("shapes") {
+                <ng-container [ngTemplateOutlet]="shapesTpl" />
+              }
+              @case ("add") {
+                <div class="add-choices">
+                  <button
+                    type="button"
+                    class="btn"
+                    (click)="add('box'); sheet.set(null)"
+                  >
+                    <span><svg lucideBox></svg></span><strong>Box</strong
+                    ><small>Bâtiments, murs, toits</small>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    (click)="add('plane'); sheet.set(null)"
+                  >
+                    <span><svg lucideRectangleHorizontal></svg></span
+                    ><strong>Plane</strong
+                    ><small>Fleurs, herbes, panneaux</small>
+                  </button>
+                </div>
+              }
+              @case ("layer") {
+                <ng-container [ngTemplateOutlet]="layerTpl" />
+              }
+              @case ("face") {
+                <ng-container [ngTemplateOutlet]="faceTpl" />
+              }
+              @case ("palette") {
+                <ng-container [ngTemplateOutlet]="paletteTpl" />
+              }
             }
-            @case ('shapes') {
-              <ng-container [ngTemplateOutlet]="shapesTpl" />
-            }
-            @case ('add') {
-              <div class="add-choices">
-                <button type="button" class="btn" (click)="add('box'); sheet.set(null)"><span><svg lucideBox></svg></span><strong>Box</strong><small>Bâtiments, murs, toits</small></button>
-                <button type="button" class="btn" (click)="add('plane'); sheet.set(null)"><span><svg lucideRectangleHorizontal></svg></span><strong>Plane</strong><small>Fleurs, herbes, panneaux</small></button>
-              </div>
-            }
-            @case ('layer') {
-              <ng-container [ngTemplateOutlet]="layerTpl" />
-            }
-            @case ('face') {
-              <ng-container [ngTemplateOutlet]="faceTpl" />
-            }
-            @case ('palette') {
-              <ng-container [ngTemplateOutlet]="paletteTpl" />
-            }
-          }
-        </div>
-      }
+          </div>
+        }
       </div>
     </section>
   }
 } @else {
   <!-- Computer: a bar across the top (model, mode, history, export), the 3D view and the side panel -->
   <header class="d-top">
-    <a href="#/" class="back" title="Retour au jeu, avec les modèles enregistrés ici" (click)="backToGame($event)"><svg lucideChevronLeft></svg> Jeu</a>
+    <a
+      href="#/"
+      class="back"
+      title="Retour au jeu, avec les modèles enregistrés ici"
+      (click)="backToGame($event)"
+      ><svg lucideChevronLeft></svg> Jeu</a
+    >
     <span class="d-sep"></span>
     <label class="d-model" title="Ouvrir un modèle">
       <svg lucideHouse></svg>
-      <select aria-label="Ouvrir un modèle" (change)="open($any($event.target).value)">
+      <select
+        aria-label="Ouvrir un modèle"
+        (change)="open($any($event.target).value)"
+      >
         <ng-container [ngTemplateOutlet]="modelOptions" />
       </select>
       <svg lucideChevronDown></svg>
     </label>
-    <span class="d-save" title="Tes changements sont enregistrés dans ce navigateur et visibles dans le jeu. L'export sert à les ajouter au code.">
-      <svg lucideCloudCheck></svg> {{ isEditedGameModel() ? 'Modifié · enregistré' : 'Enregistré' }}
+    <span
+      class="d-save"
+      title="Tes changements sont enregistrés dans ce navigateur et visibles dans le jeu. L'export sert à les ajouter au code."
+    >
+      <svg lucideCloudCheck></svg>
+      {{ isEditedGameModel() ? "Modifié · enregistré" : "Enregistré" }}
     </span>
     <div class="d-mode"><ng-container [ngTemplateOutlet]="modeSwitch" /></div>
     <div class="history">
-      <button type="button" class="btn ghost icon" title="Annuler (Ctrl+Z)" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()"><svg lucideUndo2></svg></button>
-      <button type="button" class="btn ghost icon" title="Refaire (Ctrl+Y)" aria-label="Refaire" [disabled]="!canRedo()" (click)="redo()"><svg lucideRedo2></svg></button>
+      <button
+        type="button"
+        class="btn ghost icon"
+        title="Annuler (Ctrl+Z)"
+        aria-label="Annuler"
+        [disabled]="!canUndo()"
+        (click)="undo()"
+      >
+        <svg lucideUndo2></svg>
+      </button>
+      <button
+        type="button"
+        class="btn ghost icon"
+        title="Refaire (Ctrl+Y)"
+        aria-label="Refaire"
+        [disabled]="!canRedo()"
+        (click)="redo()"
+      >
+        <svg lucideRedo2></svg>
+      </button>
     </div>
-    <button type="button" class="btn accent" data-haptic="success" [disabled]="!model()" title="Télécharge le .ts et les .png, à mettre dans le code" (click)="export()"><svg lucideDownload></svg> Exporter</button>
+    <button
+      type="button"
+      class="btn accent"
+      data-haptic="success"
+      [disabled]="!model()"
+      title="Télécharge le .ts et les .png, à mettre dans le code"
+      (click)="export()"
+    >
+      <svg lucideDownload></svg> Exporter
+    </button>
   </header>
 
   <aside class="panel" aria-label="Éditeur de modèles">
-    <details class="block" [open]="sections().model" (toggle)="toggleSection('model', $any($event.target).open)">
-      <summary><span class="chev"><svg lucideChevronDown></svg></span><span class="title">Modèle</span></summary>
+    <details
+      class="block"
+      [open]="sections().model"
+      (toggle)="toggleSection('model', $any($event.target).open)"
+    >
+      <summary>
+        <span class="chev"><svg lucideChevronDown></svg></span
+        ><span class="title">Modèle</span>
+      </summary>
       @if (model(); as model) {
         <div class="prop">
           <span class="label">Nom</span>
-          <input type="text" aria-label="Nom du modèle (id)" title="En minuscules avec des tirets" [value]="model.id" (change)="rename($any($event.target).value)" />
+          <input
+            type="text"
+            aria-label="Nom du modèle (id)"
+            title="En minuscules avec des tirets"
+            [value]="model.id"
+            (change)="rename($any($event.target).value)"
+          />
         </div>
         <div class="prop" title="0 à 1 : plie au vent comme la végétation">
           <span class="label">Vent</span>
           <div class="stepper">
-            <button type="button" aria-label="Moins de vent" (click)="setSway((model.sway ?? 0) - 0.1)"><svg lucideMinus></svg></button>
-            <input type="number" min="0" max="1" step="0.1" aria-label="Vent" [value]="model.sway ?? 0" (change)="setSway(+$any($event.target).value)" />
-            <button type="button" aria-label="Plus de vent" (click)="setSway((model.sway ?? 0) + 0.1)"><svg lucidePlus></svg></button>
+            <button
+              type="button"
+              aria-label="Moins de vent"
+              (click)="setSway((model.sway ?? 0) - 0.1)"
+            >
+              <svg lucideMinus></svg>
+            </button>
+            <input
+              type="number"
+              min="0"
+              max="1"
+              step="0.1"
+              aria-label="Vent"
+              [value]="model.sway ?? 0"
+              (change)="setSway(+$any($event.target).value)"
+            />
+            <button
+              type="button"
+              aria-label="Plus de vent"
+              (click)="setSway((model.sway ?? 0) + 0.1)"
+            >
+              <svg lucidePlus></svg>
+            </button>
           </div>
           <span class="note">0 = immobile</span>
         </div>
       }
       <div class="pair">
-        <button type="button" class="btn outline" (click)="create()"><svg lucidePlus></svg> Nouveau</button>
+        <button type="button" class="btn outline" (click)="create()">
+          <svg lucidePlus></svg> Nouveau
+        </button>
         @if (isEditedGameModel()) {
-          <button type="button" class="btn outline" [class.danger]="confirmRevert()" data-haptic="warning" (click)="revert()"
-                  title="Oublie les modifications enregistrées dans le navigateur">
-            @if (confirmRevert()) { Confirmer ? } @else { <svg lucideRotateCcw></svg> Version du jeu }
+          <button
+            type="button"
+            class="btn outline"
+            [class.danger]="confirmRevert()"
+            data-haptic="warning"
+            (click)="revert()"
+            title="Oublie les modifications enregistrées dans le navigateur"
+          >
+            @if (confirmRevert()) {
+              Confirmer ?
+            } @else {
+              <svg lucideRotateCcw></svg> Version du jeu
+            }
           </button>
         }
       </div>
@@ -257,43 +591,125 @@
     </details>
 
     @if (model()) {
-      @if (mode() === 'select') {
-        <details class="block" [open]="sections().parts" (toggle)="toggleSection('parts', $any($event.target).open)">
+      @if (mode() === "select") {
+        <details
+          class="block"
+          [open]="sections().parts"
+          (toggle)="toggleSection('parts', $any($event.target).open)"
+        >
           <summary>
-            <span class="chev"><svg lucideChevronDown></svg></span><span class="title">Formes</span>
-            <button type="button" class="btn small" (click)="$event.preventDefault(); add('box')"><svg lucidePlus></svg> Box</button>
-            <button type="button" class="btn small" (click)="$event.preventDefault(); add('plane')"><svg lucidePlus></svg> Plane</button>
+            <span class="chev"><svg lucideChevronDown></svg></span
+            ><span class="title">Formes</span>
+            <button
+              type="button"
+              class="btn small"
+              (click)="$event.preventDefault(); add('box')"
+            >
+              <svg lucidePlus></svg> Box
+            </button>
+            <button
+              type="button"
+              class="btn small"
+              (click)="$event.preventDefault(); add('plane')"
+            >
+              <svg lucidePlus></svg> Plane
+            </button>
           </summary>
           <div class="shape-list" role="listbox" aria-label="Formes du modèle">
             @for (part of model()!.parts; track $index) {
-              <button type="button" role="option" [class.on]="selection()?.partIndex === $index" [attr.aria-selected]="selection()?.partIndex === $index"
-                      (click)="selectPart($index)">
-                @if (part.kind === 'box') { <svg lucideBox></svg> } @else { <svg lucideSquare></svg> }
+              <button
+                type="button"
+                role="option"
+                [class.on]="selection()?.partIndex === $index"
+                [attr.aria-selected]="selection()?.partIndex === $index"
+                (click)="selectPart($index)"
+              >
+                @if (part.kind === "box") {
+                  <svg lucideBox></svg>
+                } @else {
+                  <svg lucideSquare></svg>
+                }
                 <span class="grow">{{ parts()[$index] }}</span>
-                <small>{{ part.size.x }} × {{ part.size.y }}{{ part.kind === 'box' ? ' × ' + part.size.z : '' }}</small>
+                <small
+                  >{{ part.size.x }} × {{ part.size.y
+                  }}{{ part.kind === "box" ? " × " + part.size.z : "" }}</small
+                >
               </button>
             }
           </div>
         </details>
 
         @if (selectedPart(); as part) {
-          <details class="block" [open]="sections().part" (toggle)="toggleSection('part', $any($event.target).open)">
+          <details
+            class="block"
+            [open]="sections().part"
+            (toggle)="toggleSection('part', $any($event.target).open)"
+          >
             <summary>
-              <span class="chev"><svg lucideChevronDown></svg></span><span class="title">{{ parts()[selection()!.partIndex] }}</span>
-              <button type="button" class="btn ghost icon" title="Dupliquer (Ctrl+D)" aria-label="Dupliquer" (click)="$event.preventDefault(); duplicate()"><svg lucideCopy></svg></button>
-              <button type="button" class="btn ghost icon" title="Tourner de 90°" aria-label="Tourner de 90°" (click)="$event.preventDefault(); turn()"><svg lucideRotateCw></svg></button>
-              <button type="button" class="btn ghost icon danger" data-haptic="warning" title="Supprimer (Suppr)" aria-label="Supprimer" (click)="$event.preventDefault(); remove()"><svg lucideTrash></svg></button>
+              <span class="chev"><svg lucideChevronDown></svg></span
+              ><span class="title">{{ parts()[selection()!.partIndex] }}</span>
+              <button
+                type="button"
+                class="btn ghost icon"
+                title="Dupliquer (Ctrl+D)"
+                aria-label="Dupliquer"
+                (click)="$event.preventDefault(); duplicate()"
+              >
+                <svg lucideCopy></svg>
+              </button>
+              <button
+                type="button"
+                class="btn ghost icon"
+                title="Tourner de 90°"
+                aria-label="Tourner de 90°"
+                (click)="$event.preventDefault(); turn()"
+              >
+                <svg lucideRotateCw></svg>
+              </button>
+              <button
+                type="button"
+                class="btn ghost icon danger"
+                data-haptic="warning"
+                title="Supprimer (Suppr)"
+                aria-label="Supprimer"
+                (click)="$event.preventDefault(); remove()"
+              >
+                <svg lucideTrash></svg>
+              </button>
             </summary>
             @for (v of vecs; track v.kind) {
               <div class="prop">
                 <span class="label">{{ v.label }}</span>
                 @for (axis of axes; track axis) {
-                  @if (v.kind !== 'size' || part.kind === 'box' || axis !== 'z') {
+                  @if (
+                    v.kind !== "size" || part.kind === "box" || axis !== "z"
+                  ) {
                     <div class="stepper">
-                      <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' moins'" (click)="stepVec(v.kind, axis, -1)"><svg lucideMinus></svg></button>
-                      <label><i>{{ axis }}</i><input type="number" [step]="v.step" [min]="v.kind === 'size' ? 1 : null" [value]="vecValue(part, v.kind, axis)"
-                                                     (change)="setVec(v.kind, axis, +$any($event.target).value)" /></label>
-                      <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' plus'" (click)="stepVec(v.kind, axis, 1)"><svg lucidePlus></svg></button>
+                      <button
+                        type="button"
+                        [attr.aria-label]="v.label + ' ' + axis + ' moins'"
+                        (click)="stepVec(v.kind, axis, -1)"
+                      >
+                        <svg lucideMinus></svg>
+                      </button>
+                      <label
+                        ><i>{{ axis }}</i
+                        ><input
+                          type="number"
+                          [step]="v.step"
+                          [min]="v.kind === 'size' ? 1 : null"
+                          [value]="vecValue(part, v.kind, axis)"
+                          (change)="
+                            setVec(v.kind, axis, +$any($event.target).value)
+                          "
+                      /></label>
+                      <button
+                        type="button"
+                        [attr.aria-label]="v.label + ' ' + axis + ' plus'"
+                        (click)="stepVec(v.kind, axis, 1)"
+                      >
+                        <svg lucidePlus></svg>
+                      </button>
                     </div>
                   } @else {
                     <span class="stepper-gap"></span>
@@ -305,76 +721,217 @@
               <span class="label">Faces</span>
               <div class="segmented">
                 @for (side of sides; track side.value) {
-                  <button type="button" [class.on]="(part.side ?? 0) === side.value" (click)="setSide('' + side.value)">{{ side.label }}</button>
+                  <button
+                    type="button"
+                    [class.on]="(part.side ?? 0) === side.value"
+                    (click)="setSide('' + side.value)"
+                  >
+                    {{ side.label }}
+                  </button>
                 }
               </div>
             </div>
             <label class="switch">
-              <span>Caché par les autres<small>Décocher pour le texte d'un panneau</small></span>
-              <input type="checkbox" [checked]="!!part.depthTest" (change)="setFlag('depthTest', $any($event.target).checked)" />
+              <span
+                >Caché par les autres<small
+                  >Décocher pour le texte d'un panneau</small
+                ></span
+              >
+              <input
+                type="checkbox"
+                [checked]="!!part.depthTest"
+                (change)="setFlag('depthTest', $any($event.target).checked)"
+              />
             </label>
             <label class="switch">
-              <span>Cache les autres<small>Décocher pour les fleurs, les herbes</small></span>
-              <input type="checkbox" [checked]="!!part.depthWrite" (change)="setFlag('depthWrite', $any($event.target).checked)" />
+              <span
+                >Cache les autres<small
+                  >Décocher pour les fleurs, les herbes</small
+                ></span
+              >
+              <input
+                type="checkbox"
+                [checked]="!!part.depthWrite"
+                (change)="setFlag('depthWrite', $any($event.target).checked)"
+              />
             </label>
           </details>
         }
       } @else {
-        <details class="block" [open]="sections().layer" (toggle)="toggleSection('layer', $any($event.target).open)">
-          <summary><span class="chev"><svg lucideChevronDown></svg></span><span class="title">Calque</span><span class="aside">{{ layerInfo().label }}</span></summary>
+        <details
+          class="block"
+          [open]="sections().layer"
+          (toggle)="toggleSection('layer', $any($event.target).open)"
+        >
+          <summary>
+            <span class="chev"><svg lucideChevronDown></svg></span
+            ><span class="title">Calque</span
+            ><span class="aside">{{ layerInfo().label }}</span>
+          </summary>
           <ng-container [ngTemplateOutlet]="layerTpl" />
         </details>
-        <details class="block" [open]="sections().drawing" (toggle)="toggleSection('drawing', $any($event.target).open)">
-          <summary><span class="chev"><svg lucideChevronDown></svg></span><span class="title">Outils</span></summary>
+        <details
+          class="block"
+          [open]="sections().drawing"
+          (toggle)="toggleSection('drawing', $any($event.target).open)"
+        >
+          <summary>
+            <span class="chev"><svg lucideChevronDown></svg></span
+            ><span class="title">Outils</span>
+          </summary>
           <ng-container [ngTemplateOutlet]="toolsTpl" />
         </details>
-        <details class="block" [open]="sections().color" (toggle)="toggleSection('color', $any($event.target).open)">
+        <details
+          class="block"
+          [open]="sections().color"
+          (toggle)="toggleSection('color', $any($event.target).open)"
+        >
           <summary>
-            <span class="chev"><svg lucideChevronDown></svg></span><span class="title">{{ layer() === 'color' ? 'Couleur' : 'Gris' }}</span>
-            @if (layer() === 'color') {
-              <label class="btn small ghost" title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)" (click)="$event.stopPropagation()">
-                <svg lucideUpload></svg> Importer<input type="file" hidden [accept]="paletteFileTypes" (change)="importPalette($any($event.target))" />
+            <span class="chev"><svg lucideChevronDown></svg></span
+            ><span class="title">{{
+              layer() === "color" ? "Couleur" : "Gris"
+            }}</span>
+            @if (layer() === "color") {
+              <label
+                class="btn small ghost"
+                title="Fichier .gpl, .pal, .hex ou .png (Aseprite, Lospec, GIMP)"
+                (click)="$event.stopPropagation()"
+              >
+                <svg lucideUpload></svg> Importer<input
+                  type="file"
+                  hidden
+                  [accept]="paletteFileTypes"
+                  (change)="importPalette($any($event.target))"
+                />
               </label>
             }
           </summary>
           <ng-container [ngTemplateOutlet]="paletteTpl" />
         </details>
-        <details class="block" [open]="sections().face" (toggle)="toggleSection('face', $any($event.target).open)">
+        <details
+          class="block"
+          [open]="sections().face"
+          (toggle)="toggleSection('face', $any($event.target).open)"
+        >
           <summary>
-            <span class="chev"><svg lucideChevronDown></svg></span><span class="title">Face</span>
-            @if (faceInfo(); as info) { <span class="aside">{{ parts()[selection()!.partIndex] }} · {{ info.face }}</span> }
+            <span class="chev"><svg lucideChevronDown></svg></span
+            ><span class="title">Face</span>
+            @if (faceInfo(); as info) {
+              <span class="aside"
+                >{{ parts()[selection()!.partIndex] }} · {{ info.face }}</span
+              >
+            }
           </summary>
           @if (partFaces().length) {
             <div class="segmented faces" aria-label="Choisir la face">
               @for (f of partFaces(); track f.face) {
-                <button type="button" [class.on]="selection()?.face === f.face" (click)="selectFace(f.face)">{{ f.label }}</button>
+                <button
+                  type="button"
+                  [class.on]="selection()?.face === f.face"
+                  (click)="selectFace(f.face)"
+                >
+                  {{ f.label }}
+                </button>
               }
             </div>
           }
           @if (faceInfo(); as info) {
             <div class="face-row">
-              <button type="button" class="btn" [class.on]="pending()?.kind === 'link'" (click)="startFaceAction('link')"
-                      title="Puis clique une autre face de même taille : elles auront les mêmes pixels"><svg lucideLink></svg> Lier à…</button>
-              <button type="button" class="btn" [class.on]="pending()?.kind === 'copy'" (click)="startFaceAction('copy')"
-                      title="Puis clique la face où copier ce dessin"><svg lucideClipboardCopy></svg> Copier vers…</button>
-              <button type="button" class="btn icon" title="Retourner gauche ↔ droite" aria-label="Retourner gauche droite" (click)="flip(true)"><svg lucideArrowLeftRight></svg></button>
-              <button type="button" class="btn icon" title="Retourner haut ↕ bas" aria-label="Retourner haut bas" (click)="flip(false)"><svg lucideArrowUpDown></svg></button>
+              <button
+                type="button"
+                class="btn"
+                [class.on]="pending()?.kind === 'link'"
+                (click)="startFaceAction('link')"
+                title="Puis clique une autre face de même taille : elles auront les mêmes pixels"
+              >
+                <svg lucideLink></svg> Lier à…
+              </button>
+              <button
+                type="button"
+                class="btn"
+                [class.on]="pending()?.kind === 'copy'"
+                (click)="startFaceAction('copy')"
+                title="Puis clique la face où copier ce dessin"
+              >
+                <svg lucideClipboardCopy></svg> Copier vers…
+              </button>
+              <button
+                type="button"
+                class="btn icon"
+                title="Retourner gauche ↔ droite"
+                aria-label="Retourner gauche droite"
+                (click)="flip(true)"
+              >
+                <svg lucideArrowLeftRight></svg>
+              </button>
+              <button
+                type="button"
+                class="btn icon"
+                title="Retourner haut ↕ bas"
+                aria-label="Retourner haut bas"
+                (click)="flip(false)"
+              >
+                <svg lucideArrowUpDown></svg>
+              </button>
             </div>
             <div class="prop">
               <span class="grow note">Copie en miroir</span>
-              <button type="button" class="btn icon" [class.on]="mirrorH()" title="Copie en miroir gauche ↔ droite" aria-label="Miroir gauche droite" (click)="mirrorH.set(!mirrorH())"><svg lucideArrowLeftRight></svg></button>
-              <button type="button" class="btn icon" [class.on]="mirrorV()" title="Copie en miroir haut ↕ bas" aria-label="Miroir haut bas" (click)="mirrorV.set(!mirrorV())"><svg lucideArrowUpDown></svg></button>
+              <button
+                type="button"
+                class="btn icon"
+                [class.on]="mirrorH()"
+                title="Copie en miroir gauche ↔ droite"
+                aria-label="Miroir gauche droite"
+                (click)="mirrorH.set(!mirrorH())"
+              >
+                <svg lucideArrowLeftRight></svg>
+              </button>
+              <button
+                type="button"
+                class="btn icon"
+                [class.on]="mirrorV()"
+                title="Copie en miroir haut ↕ bas"
+                aria-label="Miroir haut bas"
+                (click)="mirrorV.set(!mirrorV())"
+              >
+                <svg lucideArrowUpDown></svg>
+              </button>
             </div>
             @if (info.linked) {
-              <p class="note">Liée à {{ info.linked }} autre(s) face(s) · <button type="button" class="link-btn" (click)="unlink()" title="Cette face garde une copie de ses pixels et ne suit plus les autres">Délier</button></p>
+              <p class="note">
+                Liée à {{ info.linked }} autre(s) face(s) ·
+                <button
+                  type="button"
+                  class="link-btn"
+                  (click)="unlink()"
+                  title="Cette face garde une copie de ses pixels et ne suit plus les autres"
+                >
+                  Délier
+                </button>
+              </p>
             }
             @if (faceTexture(); as face) {
-              <button type="button" class="btn outline" [class.on]="bigView()" (click)="setBigView(!bigView())" title="Grande vue de la face (G)">
-                <svg lucideMaximize2></svg> {{ bigView() ? 'Fermer la grande vue' : 'Grande vue' }}
+              <button
+                type="button"
+                class="btn outline"
+                [class.on]="bigView()"
+                (click)="setBigView(!bigView())"
+                title="Grande vue de la face (G)"
+              >
+                <svg lucideMaximize2></svg>
+                {{ bigView() ? "Fermer la grande vue" : "Grande vue" }}
               </button>
               @if (!bigView()) {
-                <app-pixel-canvas [texture]="face.tex" [layer]="layer()" [version]="paintVersion()" [faceKey]="face.texId"
-                                  (strokeStart)="strokeStart($event)" (strokeMove)="strokeMove($event)" (strokeEnd)="strokeEnd()" (strokeCancel)="cancelStroke()" />
+                <app-pixel-canvas
+                  [texture]="face.tex"
+                  [layer]="layer()"
+                  [version]="paintVersion()"
+                  [faceKey]="face.texId"
+                  (strokeStart)="strokeStart($event)"
+                  (strokeMove)="strokeMove($event)"
+                  (strokeEnd)="strokeEnd()"
+                  (strokeCancel)="cancelStroke()"
+                />
               }
             }
           } @else {
@@ -386,16 +943,26 @@
 
     @if (pending(); as action) {
       <div class="banner" animate.enter="drop-in" animate.leave="fade-out">
-        <span>{{ action.kind === 'link' ? 'Clique la face à lier (même taille)' : 'Clique la face où copier' }}</span>
-        <button type="button" class="btn" (click)="cancelFaceAction()">Annuler (Échap)</button>
+        <span>{{
+          action.kind === "link"
+            ? "Clique la face à lier (même taille)"
+            : "Clique la face où copier"
+        }}</span>
+        <button type="button" class="btn" (click)="cancelFaceAction()">
+          Annuler (Échap)
+        </button>
       </div>
     }
 
     <footer class="shortcuts">
-      @if (mode() === 'select') {
-        <span><kbd>←→</kbd> déplacer</span><span><kbd>Ctrl D</kbd> dupliquer</span><span><kbd>Suppr</kbd> supprimer</span>
+      @if (mode() === "select") {
+        <span><kbd>←→</kbd> déplacer</span
+        ><span><kbd>Ctrl D</kbd> dupliquer</span
+        ><span><kbd>Suppr</kbd> supprimer</span>
       } @else {
-        <span><kbd>P E I F L R</kbd> outils</span><span><kbd>G</kbd> grande vue</span><span><kbd>Ctrl Z</kbd> annuler</span>
+        <span><kbd>P E I F L R</kbd> outils</span
+        ><span><kbd>G</kbd> grande vue</span
+        ><span><kbd>Ctrl Z</kbd> annuler</span>
       }
     </footer>
   </aside>
@@ -405,10 +972,26 @@
 
 <ng-template #modeSwitch>
   <div class="mode-switch" role="tablist" aria-label="Mode">
-    <button type="button" role="tab" [class.on]="mode() === 'select'" [attr.aria-selected]="mode() === 'select'"
-            title="Modélisation : choisir, déplacer, régler les formes (V)" (click)="setEditorMode('select')"><svg lucideBox></svg> Modélisation</button>
-    <button type="button" role="tab" [class.on]="mode() === 'paint'" [attr.aria-selected]="mode() === 'paint'"
-            title="Dessin : peindre les faces" (click)="setEditorMode('paint')"><svg lucideBrush></svg> Dessin</button>
+    <button
+      type="button"
+      role="tab"
+      [class.on]="mode() === 'select'"
+      [attr.aria-selected]="mode() === 'select'"
+      title="Modélisation : choisir, déplacer, régler les formes (V)"
+      (click)="setEditorMode('select')"
+    >
+      <svg lucideBox></svg> Modélisation
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [class.on]="mode() === 'paint'"
+      [attr.aria-selected]="mode() === 'paint'"
+      title="Dessin : peindre les faces"
+      (click)="setEditorMode('paint')"
+    >
+      <svg lucideBrush></svg> Dessin
+    </button>
   </div>
 </ng-template>
 
@@ -418,7 +1001,9 @@
   }
   <optgroup label="Modèles du jeu">
     @for (id of modelIds; track id) {
-      <option [value]="id" [selected]="model()?.id === id">{{ id }}{{ storedIds().includes(id) ? ' (modifié)' : '' }}</option>
+      <option [value]="id" [selected]="model()?.id === id">
+        {{ id }}{{ storedIds().includes(id) ? " (modifié)" : "" }}
+      </option>
     }
   </optgroup>
   @if (newIds().length) {
@@ -441,26 +1026,73 @@
     <div class="row">
       <label class="field grow">
         <span>Nom (id)</span>
-        <input type="text" [value]="model.id" (change)="rename($any($event.target).value)" />
+        <input
+          type="text"
+          [value]="model.id"
+          (change)="rename($any($event.target).value)"
+        />
       </label>
       <div class="field" title="0 à 1 : plie au vent (végétation)">
         <span>Vent</span>
         <div class="stepper">
-          <button type="button" aria-label="Moins de vent" (click)="setSway((model.sway ?? 0) - 0.1)"><svg lucideMinus></svg></button>
-          <input type="number" min="0" max="1" step="0.1" aria-label="Vent" [value]="model.sway ?? 0" (change)="setSway(+$any($event.target).value)" />
-          <button type="button" aria-label="Plus de vent" (click)="setSway((model.sway ?? 0) + 0.1)"><svg lucidePlus></svg></button>
+          <button
+            type="button"
+            aria-label="Moins de vent"
+            (click)="setSway((model.sway ?? 0) - 0.1)"
+          >
+            <svg lucideMinus></svg>
+          </button>
+          <input
+            type="number"
+            min="0"
+            max="1"
+            step="0.1"
+            aria-label="Vent"
+            [value]="model.sway ?? 0"
+            (change)="setSway(+$any($event.target).value)"
+          />
+          <button
+            type="button"
+            aria-label="Plus de vent"
+            (click)="setSway((model.sway ?? 0) + 0.1)"
+          >
+            <svg lucidePlus></svg>
+          </button>
         </div>
       </div>
     </div>
-    <p class="hint small">Vent : 0 = immobile, 1 = plie beaucoup (herbes, arbres).</p>
+    <p class="hint small">
+      Vent : 0 = immobile, 1 = plie beaucoup (herbes, arbres).
+    </p>
     @if (isEditedGameModel()) {
-      <button type="button" class="btn wide" [class.danger]="!confirmRevert()" [class.on]="confirmRevert()" data-haptic="warning" (click)="revert()"
-              title="Oublie les modifications enregistrées dans le navigateur">
-        @if (confirmRevert()) { Confirmer : revenir à la version du jeu ? } @else { <svg lucideRotateCcw></svg> Revenir à la version du jeu }
+      <button
+        type="button"
+        class="btn wide"
+        [class.danger]="!confirmRevert()"
+        [class.on]="confirmRevert()"
+        data-haptic="warning"
+        (click)="revert()"
+        title="Oublie les modifications enregistrées dans le navigateur"
+      >
+        @if (confirmRevert()) {
+          Confirmer : revenir à la version du jeu ?
+        } @else {
+          <svg lucideRotateCcw></svg> Revenir à la version du jeu
+        }
       </button>
     }
-    <button type="button" class="primary" data-haptic="success" (click)="export()"><svg lucideDownload></svg> Exporter (.ts + .png)</button>
-    <p class="hint small">Tes changements sont enregistrés dans ce navigateur et visibles dans le jeu. L'export sert à les ajouter au code.</p>
+    <button
+      type="button"
+      class="primary"
+      data-haptic="success"
+      (click)="export()"
+    >
+      <svg lucideDownload></svg> Exporter (.ts + .png)
+    </button>
+    <p class="hint small">
+      Tes changements sont enregistrés dans ce navigateur et visibles dans le
+      jeu. L'export sert à les ajouter au code.
+    </p>
   }
   @if (status()) {
     <p class="status">{{ status() }}</p>
@@ -473,8 +1105,15 @@
 <ng-template #shapesTpl>
   <div class="chips" role="listbox" aria-label="Formes du modèle">
     @for (name of parts(); track $index) {
-      <button type="button" role="option" [attr.aria-selected]="selection()?.partIndex === $index"
-              [class.on]="selection()?.partIndex === $index" (click)="selectPart($index)">{{ name }}</button>
+      <button
+        type="button"
+        role="option"
+        [attr.aria-selected]="selection()?.partIndex === $index"
+        [class.on]="selection()?.partIndex === $index"
+        (click)="selectPart($index)"
+      >
+        {{ name }}
+      </button>
     }
   </div>
   @if (selectedPart(); as part) {
@@ -483,12 +1122,31 @@
       <div class="vec">
         <span>{{ v.label }}</span>
         @for (axis of axes; track axis) {
-          @if (v.kind !== 'size' || part.kind === 'box' || axis !== 'z') {
+          @if (v.kind !== "size" || part.kind === "box" || axis !== "z") {
             <div class="stepper">
-              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' moins'" (click)="stepVec(v.kind, axis, -1)"><svg lucideMinus></svg></button>
-              <label><i>{{ axis }}</i><input type="number" [step]="v.step" [min]="v.kind === 'size' ? 1 : null" [value]="vecValue(part, v.kind, axis)"
-                                             (change)="setVec(v.kind, axis, +$any($event.target).value)" /></label>
-              <button type="button" [attr.aria-label]="v.label + ' ' + axis + ' plus'" (click)="stepVec(v.kind, axis, 1)"><svg lucidePlus></svg></button>
+              <button
+                type="button"
+                [attr.aria-label]="v.label + ' ' + axis + ' moins'"
+                (click)="stepVec(v.kind, axis, -1)"
+              >
+                <svg lucideMinus></svg>
+              </button>
+              <label
+                ><i>{{ axis }}</i
+                ><input
+                  type="number"
+                  [step]="v.step"
+                  [min]="v.kind === 'size' ? 1 : null"
+                  [value]="vecValue(part, v.kind, axis)"
+                  (change)="setVec(v.kind, axis, +$any($event.target).value)"
+              /></label>
+              <button
+                type="button"
+                [attr.aria-label]="v.label + ' ' + axis + ' plus'"
+                (click)="stepVec(v.kind, axis, 1)"
+              >
+                <svg lucidePlus></svg>
+              </button>
             </div>
           } @else {
             <span></span>
@@ -500,17 +1158,37 @@
       <span>Faces</span>
       <div class="segmented">
         @for (side of sides; track side.value) {
-          <button type="button" [class.on]="(part.side ?? 0) === side.value" (click)="setSide('' + side.value)">{{ side.label }}</button>
+          <button
+            type="button"
+            [class.on]="(part.side ?? 0) === side.value"
+            (click)="setSide('' + side.value)"
+          >
+            {{ side.label }}
+          </button>
         }
       </div>
     </div>
-    <label class="switch" title="Décocher pour un élément posé par-dessus (texte d'un panneau)">
+    <label
+      class="switch"
+      title="Décocher pour un élément posé par-dessus (texte d'un panneau)"
+    >
       <span>Caché par les autres</span>
-      <input type="checkbox" [checked]="!!part.depthTest" (change)="setFlag('depthTest', $any($event.target).checked)" />
+      <input
+        type="checkbox"
+        [checked]="!!part.depthTest"
+        (change)="setFlag('depthTest', $any($event.target).checked)"
+      />
     </label>
-    <label class="switch" title="Décocher pour les fleurs, herbes (ne cachent pas ce qui est derrière)">
+    <label
+      class="switch"
+      title="Décocher pour les fleurs, herbes (ne cachent pas ce qui est derrière)"
+    >
       <span>Cache les autres</span>
-      <input type="checkbox" [checked]="!!part.depthWrite" (change)="setFlag('depthWrite', $any($event.target).checked)" />
+      <input
+        type="checkbox"
+        [checked]="!!part.depthWrite"
+        (change)="setFlag('depthWrite', $any($event.target).checked)"
+      />
     </label>
   } @else {
     <p class="hint">Touche une forme du modèle, ou choisis-la ci-dessus.</p>
@@ -520,29 +1198,74 @@
 <ng-template #layerTpl>
   <div class="layer-tiles" role="tablist" aria-label="Calque">
     @for (l of layers; track l.id) {
-      <button type="button" role="tab" [class.on]="layer() === l.id" [attr.aria-selected]="layer() === l.id" (click)="setLayer(l.id)">
-        <span><svg [lucideIcon]="l.icon"></svg></span><strong>{{ l.label }}</strong><small>{{ l.short }}</small>
+      <button
+        type="button"
+        role="tab"
+        [class.on]="layer() === l.id"
+        [attr.aria-selected]="layer() === l.id"
+        (click)="setLayer(l.id)"
+      >
+        <span><svg [lucideIcon]="l.icon"></svg></span
+        ><strong>{{ l.label }}</strong
+        ><small>{{ l.short }}</small>
       </button>
     }
   </div>
   <p class="hint box">{{ layerInfo().hint }}</p>
-  @if (layer() === 'color') {
-    <label class="switch" title="Voir le modèle la nuit : le calque Nuit s'allume">
+  @if (layer() === "color") {
+    <label
+      class="switch"
+      title="Voir le modèle la nuit : le calque Nuit s'allume"
+    >
       <span>Vue de nuit</span>
-      <input type="checkbox" [checked]="night()" (change)="setNight($any($event.target).checked)" />
+      <input
+        type="checkbox"
+        [checked]="night()"
+        (change)="setNight($any($event.target).checked)"
+      />
     </label>
   } @else {
-    <label class="switch" title="Le coin de la vue 3D montre le modèle en couleurs">
-      <span>Aperçu de nuit<small>Coin de la vue 3D : le modèle en couleurs, lumières allumées</small></span>
-      <input type="checkbox" [checked]="previewNight()" (change)="setPreviewNight($any($event.target).checked)" />
+    <label
+      class="switch"
+      title="Le coin de la vue 3D montre le modèle en couleurs"
+    >
+      <span
+        >Aperçu de nuit<small
+          >Coin de la vue 3D : le modèle en couleurs, lumières allumées</small
+        ></span
+      >
+      <input
+        type="checkbox"
+        [checked]="previewNight()"
+        (change)="setPreviewNight($any($event.target).checked)"
+      />
     </label>
-    @if (layer() === 'bump') {
+    @if (layer() === "bump") {
       <div class="field" title="Force du relief (1 par défaut)">
         <span>Force du relief</span>
         <div class="stepper">
-          <button type="button" aria-label="Moins de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) - 0.1)"><svg lucideMinus></svg></button>
-          <input type="number" min="0.1" step="0.1" aria-label="Force du relief" [value]="model()?.bumpScale ?? 1" (change)="setBumpScale(+$any($event.target).value)" />
-          <button type="button" aria-label="Plus de relief" (click)="setBumpScale((model()?.bumpScale ?? 1) + 0.1)"><svg lucidePlus></svg></button>
+          <button
+            type="button"
+            aria-label="Moins de relief"
+            (click)="setBumpScale((model()?.bumpScale ?? 1) - 0.1)"
+          >
+            <svg lucideMinus></svg>
+          </button>
+          <input
+            type="number"
+            min="0.1"
+            step="0.1"
+            aria-label="Force du relief"
+            [value]="model()?.bumpScale ?? 1"
+            (change)="setBumpScale(+$any($event.target).value)"
+          />
+          <button
+            type="button"
+            aria-label="Plus de relief"
+            (click)="setBumpScale((model()?.bumpScale ?? 1) + 0.1)"
+          >
+            <svg lucidePlus></svg>
+          </button>
         </div>
       </div>
     }
@@ -552,45 +1275,96 @@
 <ng-template #toolsTpl>
   <div class="tools" role="toolbar" aria-label="Outils">
     @for (t of tools; track t.id) {
-      <button type="button" class="btn" [class.on]="mode() === 'paint' && tool() === t.id" [title]="t.label + ' (' + t.key.toUpperCase() + ')'"
-              [attr.aria-label]="t.label" [attr.aria-pressed]="mode() === 'paint' && tool() === t.id" (click)="pickTool(t.id)">
-        <span><svg [lucideIcon]="t.icon"></svg></span><small>{{ t.short }}</small>
+      <button
+        type="button"
+        class="btn"
+        [class.on]="mode() === 'paint' && tool() === t.id"
+        [title]="t.label + ' (' + t.key.toUpperCase() + ')'"
+        [attr.aria-label]="t.label"
+        [attr.aria-pressed]="mode() === 'paint' && tool() === t.id"
+        (click)="pickTool(t.id)"
+      >
+        <span><svg [lucideIcon]="t.icon"></svg></span
+        ><small>{{ t.short }}</small>
       </button>
     }
   </div>
-  @if (tool() === 'rect') {
+  @if (tool() === "rect") {
     <label class="switch">
       <span>Rectangle plein</span>
-      <input type="checkbox" [checked]="rectFilled()" (change)="rectFilled.set($any($event.target).checked)" />
+      <input
+        type="checkbox"
+        [checked]="rectFilled()"
+        (change)="rectFilled.set($any($event.target).checked)"
+      />
     </label>
   }
 </ng-template>
 
 <ng-template #paletteTpl>
-  @if (layer() === 'color') {
+  @if (layer() === "color") {
     <div class="current-color">
-      <label class="current big" [style.background]="color()" title="Couleur libre">
-        <input type="color" [value]="color()" (change)="useColor($any($event.target).value)" aria-label="Couleur libre" />
+      <label
+        class="current big"
+        [style.background]="color()"
+        title="Couleur libre"
+      >
+        <input
+          type="color"
+          [value]="color()"
+          (change)="useColor($any($event.target).value)"
+          aria-label="Couleur libre"
+        />
       </label>
-      <div class="grow"><strong>{{ color().toUpperCase() }}</strong><span class="muted">Touche le carré : couleur libre</span></div>
+      <div class="grow">
+        <strong>{{ color().toUpperCase() }}</strong><span class="muted"
+          >Touche le carré : couleur libre</span
+        >
+      </div>
     </div>
     @if (importedPalette(); as pal) {
       <div class="swatches" aria-label="Palette importée">
-        <span class="palette-head">{{ pal.name }} ({{ pal.colors.length }}) <button type="button" class="link-btn" (click)="removePalette()">Retirer</button></span>
+        <span class="palette-head"
+          >{{ pal.name }} ({{ pal.colors.length }})
+          <button type="button" class="link-btn" (click)="removePalette()">
+            Retirer
+          </button></span
+        >
         @for (c of pal.colors; track c) {
-          <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+          <button
+            type="button"
+            [style.background]="c"
+            [class.on]="c === color()"
+            [title]="c"
+            [attr.aria-label]="c"
+            (click)="setColor(c)"
+          ></button>
         }
       </div>
-      <label class="switch" title="Le crayon, le pot, la ligne et le rectangle prennent toujours la couleur de la palette la plus proche">
+      <label
+        class="switch"
+        title="Le crayon, le pot, la ligne et le rectangle prennent toujours la couleur de la palette la plus proche"
+      >
         <span><svg lucideLock></svg> Garder seulement ces couleurs</span>
-        <input type="checkbox" [checked]="pal.locked" (change)="setPaletteLocked($any($event.target).checked)" />
+        <input
+          type="checkbox"
+          [checked]="pal.locked"
+          (change)="setPaletteLocked($any($event.target).checked)"
+        />
       </label>
     }
     @if (recentColors().length) {
       <div class="swatches" aria-label="Couleurs récentes">
         <span>Récentes</span>
         @for (c of recentColors(); track c) {
-          <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+          <button
+            type="button"
+            [style.background]="c"
+            [class.on]="c === color()"
+            [title]="c"
+            [attr.aria-label]="c"
+            (click)="setColor(c)"
+          ></button>
         }
       </div>
     }
@@ -598,20 +1372,43 @@
       <div class="swatches" aria-label="Couleurs du modèle">
         <span>Couleurs du modèle</span>
         @for (c of palette(); track c) {
-          <button type="button" [style.background]="c" [class.on]="c === color()" [title]="c" [attr.aria-label]="c" (click)="setColor(c)"></button>
+          <button
+            type="button"
+            [style.background]="c"
+            [class.on]="c === color()"
+            [title]="c"
+            [attr.aria-label]="c"
+            (click)="setColor(c)"
+          ></button>
         }
       </div>
     }
   } @else {
     <div class="grays" aria-label="Nuances de gris">
       @for (g of grays; track g) {
-        <button type="button" [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'" [class.on]="g === gray()"
-                [title]="g" [attr.aria-label]="'Gris ' + g" (click)="gray.set(g)"></button>
+        <button
+          type="button"
+          [style.background]="'rgb(' + g + ',' + g + ',' + g + ')'"
+          [class.on]="g === gray()"
+          [title]="g"
+          [attr.aria-label]="'Gris ' + g"
+          (click)="gray.set(g)"
+        ></button>
       }
     </div>
     <label class="row gray-slider">
-      <input type="range" min="0" max="255" [value]="gray()" (input)="gray.set(+$any($event.target).value)" aria-label="Valeur de gris" />
-      <span class="gray-value" [style.background]="'rgb(' + gray() + ',' + gray() + ',' + gray() + ')'"></span>
+      <input
+        type="range"
+        min="0"
+        max="255"
+        [value]="gray()"
+        (input)="gray.set(+$any($event.target).value)"
+        aria-label="Valeur de gris"
+      />
+      <span
+        class="gray-value"
+        [style.background]="'rgb(' + gray() + ',' + gray() + ',' + gray() + ')'"
+      ></span>
       <span>{{ gray() }}</span>
     </label>
   }
@@ -621,7 +1418,14 @@
   @if (partFaces().length) {
     <div class="face-buttons" aria-label="Choisir la face">
       @for (f of partFaces(); track f.face) {
-        <button type="button" class="btn" [class.on]="selection()?.face === f.face" (click)="selectFace(f.face)">{{ f.label }}</button>
+        <button
+          type="button"
+          class="btn"
+          [class.on]="selection()?.face === f.face"
+          (click)="selectFace(f.face)"
+        >
+          {{ f.label }}
+        </button>
       }
     </div>
   }
@@ -630,21 +1434,72 @@
       {{ info.face }} · {{ info.size }}
       @if (info.linked) {
         · liée à {{ info.linked }} autre(s) face(s)
-        <button type="button" class="link-btn" (click)="unlink()" title="Cette face garde une copie de ses pixels et ne suit plus les autres">Délier</button>
+        <button
+          type="button"
+          class="link-btn"
+          (click)="unlink()"
+          title="Cette face garde une copie de ses pixels et ne suit plus les autres"
+        >
+          Délier
+        </button>
       }
     </p>
     <div class="face-actions">
-      <button type="button" class="btn" (click)="flip(true)" title="Retourner gauche ↔ droite"><svg lucideArrowLeftRight></svg> Retourner</button>
-      <button type="button" class="btn" (click)="flip(false)" title="Retourner haut ↕ bas"><svg lucideArrowUpDown></svg> Retourner</button>
-      <button type="button" class="btn" [class.on]="pending()?.kind === 'link'" (click)="startFaceAction('link')"
-              title="Puis touche une autre face de même taille : elles auront les mêmes pixels"><svg lucideLink></svg> Lier à…</button>
-      <button type="button" class="btn" [class.on]="pending()?.kind === 'copy'" (click)="startFaceAction('copy')"
-              title="Puis touche la face où copier ce dessin"><svg lucideClipboardCopy></svg> Copier vers…</button>
+      <button
+        type="button"
+        class="btn"
+        (click)="flip(true)"
+        title="Retourner gauche ↔ droite"
+      >
+        <svg lucideArrowLeftRight></svg> Retourner
+      </button>
+      <button
+        type="button"
+        class="btn"
+        (click)="flip(false)"
+        title="Retourner haut ↕ bas"
+      >
+        <svg lucideArrowUpDown></svg> Retourner
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.on]="pending()?.kind === 'link'"
+        (click)="startFaceAction('link')"
+        title="Puis touche une autre face de même taille : elles auront les mêmes pixels"
+      >
+        <svg lucideLink></svg> Lier à…
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.on]="pending()?.kind === 'copy'"
+        (click)="startFaceAction('copy')"
+        title="Puis touche la face où copier ce dessin"
+      >
+        <svg lucideClipboardCopy></svg> Copier vers…
+      </button>
     </div>
     <div class="row wrap mirror">
       <span class="grow">Copie en miroir</span>
-      <button type="button" class="btn" [class.on]="mirrorH()" aria-label="Miroir gauche droite" (click)="mirrorH.set(!mirrorH())"><svg lucideArrowLeftRight></svg></button>
-      <button type="button" class="btn" [class.on]="mirrorV()" aria-label="Miroir haut bas" (click)="mirrorV.set(!mirrorV())"><svg lucideArrowUpDown></svg></button>
+      <button
+        type="button"
+        class="btn"
+        [class.on]="mirrorH()"
+        aria-label="Miroir gauche droite"
+        (click)="mirrorH.set(!mirrorH())"
+      >
+        <svg lucideArrowLeftRight></svg>
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.on]="mirrorV()"
+        aria-label="Miroir haut bas"
+        (click)="mirrorV.set(!mirrorV())"
+      >
+        <svg lucideArrowUpDown></svg>
+      </button>
     </div>
   } @else {
     <p class="hint">Touche une face du modèle pour la choisir.</p>

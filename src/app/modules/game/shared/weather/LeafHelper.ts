@@ -1,10 +1,14 @@
-import * as THREE from 'three';
-import { RENDER_DETAIL } from '../model/Quality';
-import { SurfaceHeights } from './SurfaceHeights';
-import { plantPositions, registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
+import * as THREE from "three";
+import { RENDER_DETAIL } from "../model/Quality";
+import { SurfaceHeights } from "./SurfaceHeights";
+import {
+  plantPositions,
+  registerUnlitMaterial,
+  SWAY_ATTRIBUTE,
+} from "./weather-shader";
 
 /** 'autumn' = leaves of all colors from the trees, 'cherry' = pink cherry blossom petals. */
-export type LeafMode = 'autumn' | 'cherry';
+export type LeafMode = "autumn" | "cherry";
 
 /** Leaves at density = 1. */
 const MAX_LEAVES = 450;
@@ -27,28 +31,33 @@ const SWING_SPEED = 1.8;
 const REST_TIME = [3, 7] as const;
 const SHRINK_TIME = 0.8;
 
-const SIZE: Record<LeafMode, readonly [number, number]> = { autumn: [3.2, 4.8], cherry: [2.4, 3.4] };
+const SIZE: Record<LeafMode, readonly [number, number]> = {
+  autumn: [3.2, 4.8],
+  cherry: [2.4, 3.4],
+};
 export const LEAF_PALETTES: Record<LeafMode, number[]> = {
-  autumn: [0xd9822b, 0xc4452b, 0xe6b33d, 0xb5562a, 0x9a6b2f, 0x8fb040],
-  cherry: [0xffc0dc, 0xffadd2, 0xffd9ea, 0xff9ac6, 0xfff0f6],
+  autumn: [
+    0xd9_82_2b, 0xc4_45_2b, 0xe6_b3_3d, 0xb5_56_2a, 0x9a_6b_2f, 0x8f_b0_40,
+  ],
+  cherry: [0xff_c0_dc, 0xff_ad_d2, 0xff_d9_ea, 0xff_9a_c6, 0xff_f0_f6],
 };
 
 /** White leaf / petal shapes (tinted per instance), drawn on a canvas. */
 export function makeLeafTexture(mode: LeafMode): THREE.CanvasTexture {
   const size = 64;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext("2d")!;
   ctx.translate(size / 2, size / 2);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  if (mode === 'autumn') {
+  if (mode === "autumn") {
     // Pointed leaf with a darker midrib
     ctx.moveTo(0, -28);
     ctx.bezierCurveTo(22, -14, 18, 16, 0, 28);
     ctx.bezierCurveTo(-18, 16, -22, -14, 0, -28);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.strokeStyle = "rgba(0,0,0,0.3)";
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(0, -22);
@@ -63,8 +72,8 @@ export function makeLeafTexture(mode: LeafMode): THREE.CanvasTexture {
     ctx.bezierCurveTo(22, -24, 26, 10, 0, 28);
     ctx.fill();
     const g = ctx.createRadialGradient(0, 22, 0, 0, 22, 26);
-    g.addColorStop(0, 'rgba(255,90,150,0.45)');
-    g.addColorStop(1, 'rgba(255,90,150,0)');
+    g.addColorStop(0, "rgba(255,90,150,0.45)");
+    g.addColorStop(1, "rgba(255,90,150,0)");
     ctx.fillStyle = g;
     ctx.fill();
   }
@@ -80,8 +89,11 @@ export function makeLeafTexture(mode: LeafMode): THREE.CanvasTexture {
 export class LeafHelper {
   private readonly mesh: THREE.InstancedMesh;
   private readonly material: THREE.MeshBasicMaterial;
-  private readonly textures: Record<LeafMode, THREE.CanvasTexture> = { autumn: makeLeafTexture('autumn'), cherry: makeLeafTexture('cherry') };
-  private mode: LeafMode = 'autumn';
+  private readonly textures: Record<LeafMode, THREE.CanvasTexture> = {
+    autumn: makeLeafTexture("autumn"),
+    cherry: makeLeafTexture("cherry"),
+  };
+  private mode: LeafMode = "autumn";
 
   private readonly x = new Float32Array(MAX_LEAVES);
   private readonly y = new Float32Array(MAX_LEAVES);
@@ -106,15 +118,24 @@ export class LeafHelper {
   private readonly euler = new THREE.Euler();
   private readonly color = new THREE.Color();
 
-  constructor(private readonly scene: THREE.Scene, private readonly surfaces: SurfaceHeights) {
-    this.material = registerUnlitMaterial(new THREE.MeshBasicMaterial({
-      map: this.textures.autumn,
-      alphaTest: 0.5, // cut-out shapes: no transparency sorting needed
-      side: THREE.DoubleSide,
-    }));
-    this.mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), this.material, MAX_LEAVES);
+  constructor(
+    private readonly scene: THREE.Scene,
+    private readonly surfaces: SurfaceHeights
+  ) {
+    this.material = registerUnlitMaterial(
+      new THREE.MeshBasicMaterial({
+        map: this.textures.autumn,
+        alphaTest: 0.5, // cut-out shapes: no transparency sorting needed
+        side: THREE.DoubleSide,
+      })
+    );
+    this.mesh = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      this.material,
+      MAX_LEAVES
+    );
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.mesh.setColorAt(0, this.color.set(0xffffff)); // creates the instance color buffer
+    this.mesh.setColorAt(0, this.color.set(0xff_ff_ff)); // creates the instance color buffer
     this.mesh.frustumCulled = false;
     this.mesh.castShadow = true;
     this.mesh.raycast = () => {};
@@ -145,7 +166,11 @@ export class LeafHelper {
    */
   update(dt: number, target: THREE.Vector3, density: number, windX = 0) {
     // (fewer leaves at a lower graphics quality)
-    const count = Math.round(MAX_LEAVES * RENDER_DETAIL.particles * THREE.MathUtils.clamp(density, 0, 1));
+    const count = Math.round(
+      MAX_LEAVES *
+        RENDER_DETAIL.particles *
+        THREE.MathUtils.clamp(density, 0, 1)
+    );
     for (let i = count; i < this.active; i++) {
       this.alive[i] = 0;
     }
@@ -167,11 +192,18 @@ export class LeafHelper {
       if (this.rest[i] < 0) {
         // Falling: gliding swing, slower when the leaf swings wide, tumbling rotation
         const swing = Math.sin(this.time * SWING_SPEED + p);
-        this.y[i] -= this.speed[i] * (0.6 + 0.4 * Math.abs(Math.cos(this.time * SWING_SPEED + p))) * dt;
+        this.y[i] -=
+          this.speed[i] *
+          (0.6 + 0.4 * Math.abs(Math.cos(this.time * SWING_SPEED + p))) *
+          dt;
         this.x[i] += (vx + swing * SWING * SWING_SPEED * 0.5) * dt;
         this.z[i] += Math.cos(this.time * SWING_SPEED * 0.7 + p) * 1.5 * dt;
         const t = this.time * this.spin[i] + p;
-        this.euler.set(Math.sin(t) * 1.2 + 0.4, t * 0.8, Math.cos(t * 1.3) * 0.9);
+        this.euler.set(
+          Math.sin(t) * 1.2 + 0.4,
+          t * 0.8,
+          Math.cos(t * 1.3) * 0.9
+        );
         // Surface below the current position (the leaf drifted since it spawned; the heights are cached)
         const stop = this.surfaces.heightAt(this.x[i], this.z[i], target.y);
         if (this.y[i] <= stop) {
@@ -180,7 +212,12 @@ export class LeafHelper {
         }
         const dx = this.x[i] - target.x;
         const dz = this.z[i] - target.z;
-        if (dx < AREA.minX || dx > AREA.maxX || dz < AREA.minZ || dz > AREA.maxZ) {
+        if (
+          dx < AREA.minX ||
+          dx > AREA.maxX ||
+          dz < AREA.minZ ||
+          dz > AREA.maxZ
+        ) {
           this.respawn(i, target, false);
         }
       } else {
@@ -195,7 +232,11 @@ export class LeafHelper {
         }
       }
       // Lying leaves sit slightly above the surface (no z-fighting)
-      this.position.set(this.x[i], this.y[i] + (this.rest[i] >= 0 ? 0.15 : 0), this.z[i]);
+      this.position.set(
+        this.x[i],
+        this.y[i] + (this.rest[i] >= 0 ? 0.15 : 0),
+        this.z[i]
+      );
       this.quaternion.setFromEuler(this.euler);
       this.scale.set(s, s, s);
       this.matrix.compose(this.position, this.quaternion, this.scale);
@@ -212,8 +253,9 @@ export class LeafHelper {
     }
     this.plantsAge = 0;
     const plants: THREE.Vector3[] = [];
-    this.scene.traverseVisible(o => {
-      const geometry = (o as THREE.Mesh).geometry as THREE.BufferGeometry | undefined;
+    this.scene.traverseVisible((o) => {
+      const geometry = (o as THREE.Mesh).geometry as
+        THREE.BufferGeometry | undefined;
       if (geometry?.getAttribute?.(SWAY_ATTRIBUTE)) {
         plants.push(...plantPositions(o));
       }
@@ -222,25 +264,37 @@ export class LeafHelper {
   }
 
   private spawnPoint(target: THREE.Vector3): [number, number] {
-    if (this.plants.length && Math.random() < NEAR_PLANTS) {
+    if (this.plants.length > 0 && Math.random() < NEAR_PLANTS) {
       for (let attempt = 0; attempt < 6; attempt++) {
-        const plant = this.plants[Math.floor(Math.random() * this.plants.length)];
+        const plant =
+          this.plants[Math.floor(Math.random() * this.plants.length)];
         const dx = plant.x - target.x;
         const dz = plant.z - target.z;
-        if (dx > AREA.minX && dx < AREA.maxX && dz > AREA.minZ && dz < AREA.maxZ) {
+        if (
+          dx > AREA.minX &&
+          dx < AREA.maxX &&
+          dz > AREA.minZ &&
+          dz < AREA.maxZ
+        ) {
           const angle = Math.random() * Math.PI * 2;
           const r = Math.random() * PLANT_RADIUS;
           return [plant.x + Math.cos(angle) * r, plant.z + Math.sin(angle) * r];
         }
       }
     }
-    return [target.x + THREE.MathUtils.randFloat(AREA.minX, AREA.maxX), target.z + THREE.MathUtils.randFloat(AREA.minZ, AREA.maxZ)];
+    return [
+      target.x + THREE.MathUtils.randFloat(AREA.minX, AREA.maxX),
+      target.z + THREE.MathUtils.randFloat(AREA.minZ, AREA.maxZ),
+    ];
   }
 
   /** Random color and size from the current mode. */
   private pickLook(i: number) {
     const palette = LEAF_PALETTES[this.mode];
-    this.mesh.setColorAt(i, this.color.set(palette[Math.floor(Math.random() * palette.length)]));
+    this.mesh.setColorAt(
+      i,
+      this.color.set(palette[Math.floor(Math.random() * palette.length)])
+    );
     const [min, max] = SIZE[this.mode];
     this.size[i] = THREE.MathUtils.randFloat(min, max);
   }
@@ -248,7 +302,8 @@ export class LeafHelper {
   private respawn(i: number, target: THREE.Vector3, randomHeight: boolean) {
     const [x, z] = this.spawnPoint(target);
     const ground = this.surfaces.heightAt(x, z, target.y);
-    const top = ground + THREE.MathUtils.randFloat(SPAWN_HEIGHT[0], SPAWN_HEIGHT[1]);
+    const top =
+      ground + THREE.MathUtils.randFloat(SPAWN_HEIGHT[0], SPAWN_HEIGHT[1]);
     this.x[i] = x;
     this.z[i] = z;
     // Random height on (re)activation so they don't all fall in a single wave

@@ -1,4 +1,4 @@
-import { EditableModel } from './EditableModel';
+import { EditableModel } from "./EditableModel";
 
 /** Steps kept for undo. */
 const MAX_STEPS = 60;

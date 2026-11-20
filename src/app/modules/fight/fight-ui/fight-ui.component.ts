@@ -1,15 +1,15 @@
-import { Component, computed, inject, linkedSignal } from '@angular/core';
-import { FightMenu } from '../shared/models/FightMenu';
-import { FightMenuService } from '../shared/services/fight-menu.service';
-import { FightSequenceService } from '../shared/services/fight-sequence.service';
-import { isTyping } from '../../../core/shared/typing';
+import { Component, computed, inject, linkedSignal } from "@angular/core";
+import { FightMenu } from "../shared/models/FightMenu";
+import { FightMenuService } from "../shared/services/fight-menu.service";
+import { FightSequenceService } from "../shared/services/fight-sequence.service";
+import { isTyping } from "../../../core/shared/typing";
 
 @Component({
-  selector: 'fight-ui',
-  templateUrl: './fight-ui.component.html',
-  styleUrl: './fight-ui.component.scss',
+  selector: "fight-ui",
+  templateUrl: "./fight-ui.component.html",
+  styleUrl: "./fight-ui.component.scss",
   host: {
-    '(window:keydown)': 'onKeyDown($event)',
+    "(window:keydown)": "onKeyDown($event)",
   },
 })
 export class FightUiComponent {
@@ -17,14 +17,24 @@ export class FightUiComponent {
 
   protected readonly menuItems = inject(FightMenuService).menu;
   /** Reset to the first entry each time a new menu is opened. */
-  protected readonly currentMenu = linkedSignal<FightMenu | undefined>(() => this.menuItems()[0]);
-  protected readonly selectedMenu = linkedSignal<FightMenu[], FightMenu | null>({
-    source: this.menuItems,
-    computation: () => null,
-  });
-  protected readonly currentSubMenu = linkedSignal(() => this.selectedMenu()?.subMenus[0]);
-  protected readonly subMenus = computed(() => this.selectedMenu()?.subMenus ?? []);
-  protected readonly description = computed(() => (this.currentSubMenu() ?? this.currentMenu())?.desc ?? '');
+  protected readonly currentMenu = linkedSignal<FightMenu | undefined>(
+    () => this.menuItems()[0]
+  );
+  protected readonly selectedMenu = linkedSignal<FightMenu[], FightMenu | null>(
+    {
+      source: this.menuItems,
+      computation: () => null,
+    }
+  );
+  protected readonly currentSubMenu = linkedSignal(
+    () => this.selectedMenu()?.subMenus[0]
+  );
+  protected readonly subMenus = computed(
+    () => this.selectedMenu()?.subMenus ?? []
+  );
+  protected readonly description = computed(
+    () => (this.currentSubMenu() ?? this.currentMenu())?.desc ?? ""
+  );
 
   protected onKeyDown(event: KeyboardEvent): void {
     if (isTyping(event)) {
@@ -42,10 +52,12 @@ export class FightUiComponent {
     if (!currentMenu) {
       return;
     }
-    if (code === 'ArrowDown' || code === 'ArrowUp') {
-      this.currentMenu.set(FightUiComponent.moveInList(this.menuItems(), currentMenu, code));
-    } else if (code === 'Enter' || code === 'ArrowRight') {
-      if (currentMenu.subMenus.length) {
+    if (code === "ArrowDown" || code === "ArrowUp") {
+      this.currentMenu.set(
+        FightUiComponent.moveInList(this.menuItems(), currentMenu, code)
+      );
+    } else if (code === "Enter" || code === "ArrowRight") {
+      if (currentMenu.subMenus.length > 0) {
         this.selectedMenu.set(currentMenu);
       } else if (currentMenu.enabled) {
         this.fightSequenceService.afterChoice(currentMenu);
@@ -58,20 +70,43 @@ export class FightUiComponent {
     if (!currentSubMenu) {
       return;
     }
-    if (code === 'ArrowDown' || code === 'ArrowUp') {
-      this.currentSubMenu.set(FightUiComponent.moveInList(this.subMenus(), currentSubMenu, code));
-    } else if (code === 'Enter' || code === 'ArrowRight') {
-      if (currentSubMenu.enabled) {
-        this.fightSequenceService.afterChoice(currentSubMenu);
+    switch (code) {
+      case "ArrowDown":
+      case "ArrowUp": {
+        this.currentSubMenu.set(
+          FightUiComponent.moveInList(this.subMenus(), currentSubMenu, code)
+        );
+
+        break;
       }
-    } else if (code === 'Space' || code === 'ArrowLeft') {
-      this.selectedMenu.set(null);
+      case "Enter":
+      case "ArrowRight": {
+        if (currentSubMenu.enabled) {
+          this.fightSequenceService.afterChoice(currentSubMenu);
+        }
+
+        break;
+      }
+      case "Space":
+      case "ArrowLeft": {
+        this.selectedMenu.set(null);
+
+        break;
+      }
+      // No default
     }
   }
 
-  private static moveInList(list: FightMenu[], current: FightMenu, code: 'ArrowDown' | 'ArrowUp'): FightMenu {
+  private static moveInList(
+    list: FightMenu[],
+    current: FightMenu,
+    code: "ArrowDown" | "ArrowUp"
+  ): FightMenu {
     const i = list.indexOf(current);
-    const next = code === 'ArrowDown' ? Math.min(list.length - 1, i + 1) : Math.max(0, i - 1);
+    const next =
+      code === "ArrowDown"
+        ? Math.min(list.length - 1, i + 1)
+        : Math.max(0, i - 1);
     return list[next];
   }
 }

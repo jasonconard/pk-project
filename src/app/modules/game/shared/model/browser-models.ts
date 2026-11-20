@@ -1,12 +1,15 @@
-import { MODELS } from '../../../../../assets/models/models';
-import { SceneModel } from './SceneModel';
-import { MODEL_CHOICES } from './ModelChoice';
-import { loadStoredModels } from '../../../model-editor/shared/model-storage';
-import { atlasToPng, exportModel } from '../../../model-editor/shared/model-export';
-import { GRAY_LAYERS } from '../../../model-editor/shared/EditableModel';
+import { MODELS } from "../../../../../assets/models/models";
+import { SceneModel } from "./SceneModel";
+import { MODEL_CHOICES } from "./ModelChoice";
+import { loadStoredModels } from "../../../model-editor/shared/model-storage";
+import {
+  atlasToPng,
+  exportModel,
+} from "../../../model-editor/shared/model-export";
+import { GRAY_LAYERS } from "../../../model-editor/shared/EditableModel";
 
 /** The models of the code, before the browser's versions replace some of them (the model editor starts from these). */
-export const CODE_MODELS: readonly SceneModel[] = MODELS.slice();
+export const CODE_MODELS: readonly SceneModel[] = [...MODELS];
 
 let applied: Promise<string[]> | null = null;
 
@@ -29,10 +32,10 @@ export function applyBrowserModels(): Promise<string[]> {
 export async function reloadBrowserModels(): Promise<string[]> {
   const before = await (applied ?? Promise.resolve([]));
   const now = await (applied = readBrowserModels());
-  for (const id of before.filter(id => !now.includes(id))) {
-    const code = CODE_MODELS.find(m => m.id === id);
-    const index = MODELS.findIndex(m => m.id === id);
-    const choice = MODEL_CHOICES.findIndex(c => c.model.id === id);
+  for (const id of before.filter((id) => !now.includes(id))) {
+    const code = CODE_MODELS.find((m) => m.id === id);
+    const index = MODELS.findIndex((m) => m.id === id);
+    const choice = MODEL_CHOICES.findIndex((c) => c.model.id === id);
     if (code) {
       MODELS[index] = code;
       if (choice >= 0) {
@@ -57,13 +60,13 @@ async function readBrowserModels(): Promise<string[]> {
   for (const edited of await loadStoredModels()) {
     try {
       const model = await toGameModel(edited.id, exportModel(edited));
-      const index = MODELS.findIndex(m => m.id === model.id);
+      const index = MODELS.findIndex((m) => m.id === model.id);
       if (index >= 0) {
         MODELS[index] = model;
       } else {
         MODELS.push(model);
       }
-      const choice = MODEL_CHOICES.find(c => c.model.id === model.id);
+      const choice = MODEL_CHOICES.find((c) => c.model.id === model.id);
       if (choice) {
         choice.model = model;
         choice.croppedPic = undefined;
@@ -79,8 +82,12 @@ async function readBrowserModels(): Promise<string[]> {
 }
 
 /** The exported model with its images as blob: URLs (read by the texture loader like files). */
-async function toGameModel(id: string, exported: ReturnType<typeof exportModel>): Promise<SceneModel> {
-  const url = async (image: ImageData) => URL.createObjectURL(await atlasToPng(image));
+async function toGameModel(
+  id: string,
+  exported: ReturnType<typeof exportModel>
+): Promise<SceneModel> {
+  const url = async (image: ImageData) =>
+    URL.createObjectURL(await atlasToPng(image));
   const tex = { ...exported.model.tex, link: await url(exported.atlas) };
   for (const layer of GRAY_LAYERS) {
     const map = exported.maps[layer];

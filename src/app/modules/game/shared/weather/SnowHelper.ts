@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { RENDER_DETAIL } from '../model/Quality';
-import { SurfaceHeights } from './SurfaceHeights';
-import { registerUnlitMaterial } from './weather-shader';
+import * as THREE from "three";
+import { RENDER_DETAIL } from "../model/Quality";
+import { SurfaceHeights } from "./SurfaceHeights";
+import { registerUnlitMaterial } from "./weather-shader";
 
 /** Flakes at snow = 1, and the max (snow up to 2: blizzard). */
 const FLAKES_PER_DENSITY = 2000;
@@ -23,13 +23,20 @@ const FLAKE_SIZE = [0.6, 1.4] as const;
 
 function makeFlakeTexture(): THREE.CanvasTexture {
   const size = 32;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.5, 'rgba(255,255,255,0.8)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
+  const ctx = canvas.getContext("2d")!;
+  const g = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2
+  );
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.5, "rgba(255,255,255,0.8)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
@@ -63,15 +70,22 @@ export class SnowHelper {
   private readonly position = new THREE.Vector3();
   private readonly scale = new THREE.Vector3();
 
-  constructor(scene: THREE.Scene, private readonly surfaces: SurfaceHeights) {
+  constructor(
+    scene: THREE.Scene,
+    private readonly surfaces: SurfaceHeights
+  ) {
     const material = new THREE.MeshBasicMaterial({
       map: makeFlakeTexture(),
-      color: 0xffffff,
+      color: 0xff_ff_ff,
       transparent: true,
       depthWrite: false,
     });
     registerUnlitMaterial(material); // dimmed at night like the other sprites
-    this.flakes = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), material, MAX_FLAKES);
+    this.flakes = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      material,
+      MAX_FLAKES
+    );
     this.flakes.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     this.flakes.frustumCulled = false;
     this.flakes.renderOrder = 10; // after the (possibly transparent) buildings, like the rain
@@ -86,13 +100,25 @@ export class SnowHelper {
    * @param windX signed wind, -1..1
    * @param drift how much the wind carries the flakes (1 = normal snow, more = blizzard, almost horizontal)
    */
-  update(dt: number, target: THREE.Vector3, density: number, camera: THREE.Camera, windX = 0, drift = 1) {
+  update(
+    dt: number,
+    target: THREE.Vector3,
+    density: number,
+    camera: THREE.Camera,
+    windX = 0,
+    drift = 1
+  ) {
     this.vx = windX * SNOW_WIND_SPEED * drift;
     // Blown snow falls faster (else flakes would start far off screen) and streaks along the wind
     this.fallScale = 1 + (drift - 1) * 0.6;
     this.stretch = 1 + (drift - 1) * 0.5 * Math.min(Math.abs(windX), 1);
     // (fewer flakes at a lower graphics quality)
-    const count = Math.min(Math.round(FLAKES_PER_DENSITY * RENDER_DETAIL.particles * Math.max(density, 0)), MAX_FLAKES);
+    const count = Math.min(
+      Math.round(
+        FLAKES_PER_DENSITY * RENDER_DETAIL.particles * Math.max(density, 0)
+      ),
+      MAX_FLAKES
+    );
     for (let i = count; i < this.activeFlakes; i++) {
       this.alive[i] = 0;
     }
@@ -112,10 +138,17 @@ export class SnowHelper {
       this.z[i] += SNOW_DRIFT_Z * dt;
 
       // Area check on where the flake will land (it drifts with the wind)
-      const fallLeft = Math.max(this.y[i] - this.stopY[i], 0) / (this.speed[i] * this.fallScale);
+      const fallLeft =
+        Math.max(this.y[i] - this.stopY[i], 0) /
+        (this.speed[i] * this.fallScale);
       const dx = this.x[i] + this.vx * fallLeft - target.x;
       const dz = this.z[i] + SNOW_DRIFT_Z * fallLeft - target.z;
-      if (dx < SNOW_AREA.minX || dx > SNOW_AREA.maxX || dz < SNOW_AREA.minZ || dz > SNOW_AREA.maxZ) {
+      if (
+        dx < SNOW_AREA.minX ||
+        dx > SNOW_AREA.maxX ||
+        dz < SNOW_AREA.minZ ||
+        dz > SNOW_AREA.maxZ
+      ) {
         this.respawn(i, target, true);
       } else if (this.y[i] <= this.stopY[i]) {
         this.respawn(i, target, false); // landed: melts into the snow layer
@@ -133,13 +166,17 @@ export class SnowHelper {
 
   private respawn(i: number, target: THREE.Vector3, randomHeight: boolean) {
     // Pick where the flake lands, then start it upwind so the wind brings it there
-    const landX = target.x + THREE.MathUtils.randFloat(SNOW_AREA.minX, SNOW_AREA.maxX);
-    const landZ = target.z + THREE.MathUtils.randFloat(SNOW_AREA.minZ, SNOW_AREA.maxZ);
+    const landX =
+      target.x + THREE.MathUtils.randFloat(SNOW_AREA.minX, SNOW_AREA.maxX);
+    const landZ =
+      target.z + THREE.MathUtils.randFloat(SNOW_AREA.minZ, SNOW_AREA.maxZ);
     const top = target.y + SNOW_TOP;
     const speed = THREE.MathUtils.randFloat(FALL_SPEED[0], FALL_SPEED[1]);
     const stopY = this.surfaces.heightAt(landX, landZ, target.y);
     // Random height on (re)activation so flakes don't all fall in a single wave
-    const y = randomHeight ? THREE.MathUtils.randFloat(stopY, Math.max(top, stopY)) : Math.max(top, stopY);
+    const y = randomHeight
+      ? THREE.MathUtils.randFloat(stopY, Math.max(top, stopY))
+      : Math.max(top, stopY);
     const fallTime = (y - stopY) / (speed * this.fallScale);
     this.x[i] = landX - this.vx * fallTime;
     this.z[i] = landZ - SNOW_DRIFT_Z * fallTime;

@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { makeCloudTexture, sampleNoiseMap } from './cloud-texture';
+import * as THREE from "three";
+import { makeCloudTexture, sampleNoiseMap } from "./cloud-texture";
 
 /**
  * Uniforms shared by every lit material (same objects => updating a value updates all materials).
@@ -81,7 +81,7 @@ export const WEATHER_UNIFORMS = {
 };
 
 /** Per-vertex flexibility of the vegetation (0 = rigid / base, up to the model sway at the top). */
-export const SWAY_ATTRIBUTE = 'aSway';
+export const SWAY_ATTRIBUTE = "aSway";
 
 /** World positions of a plant mesh: its own, or each copy's for an instanced mesh (one mesh for all the trees). */
 export function plantPositions(object: THREE.Object3D): THREE.Vector3[] {
@@ -93,7 +93,11 @@ export function plantPositions(object: THREE.Object3D): THREE.Vector3[] {
   const positions: THREE.Vector3[] = [];
   for (let i = 0; i < instanced.count; i++) {
     instanced.getMatrixAt(i, matrix);
-    positions.push(new THREE.Vector3().setFromMatrixPosition(matrix.premultiply(object.matrixWorld)));
+    positions.push(
+      new THREE.Vector3().setFromMatrixPosition(
+        matrix.premultiply(object.matrixWorld)
+      )
+    );
   }
   return positions;
 }
@@ -101,7 +105,9 @@ export function plantPositions(object: THREE.Object3D): THREE.Vector3[] {
 const SWAY_LEAN = 5.0;
 
 /** Unlit materials (sprites...): tinted each frame by WeatherHelper so they follow day/night. */
-export const UNLIT_MATERIALS = new Set<THREE.MeshBasicMaterial | THREE.SpriteMaterial>();
+export const UNLIT_MATERIALS = new Set<
+  THREE.MeshBasicMaterial | THREE.SpriteMaterial
+>();
 
 /**
  * Unlit materials use three's scene fog, normally mixed after the output color conversion: on screen it mixes
@@ -109,20 +115,25 @@ export const UNLIT_MATERIALS = new Set<THREE.MeshBasicMaterial | THREE.SpriteMat
  * Moves it before the conversion, like the weather fog of the lit materials.
  */
 export function applyLinearFog<T extends THREE.Material>(mat: T): T {
-  mat.onBeforeCompile = shader => {
+  mat.onBeforeCompile = (shader) => {
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <fog_fragment>', '')
-      .replace('#include <colorspace_fragment>', '#include <fog_fragment>\n#include <colorspace_fragment>');
+      .replace("#include <fog_fragment>", "")
+      .replace(
+        "#include <colorspace_fragment>",
+        "#include <fog_fragment>\n#include <colorspace_fragment>"
+      );
   };
-  mat.customProgramCacheKey = () => 'linear-fog-v1';
+  mat.customProgramCacheKey = () => "linear-fog-v1";
   return mat;
 }
 
 /** Registers an unlit material: follows the day / night tint and the fog. */
-export function registerUnlitMaterial<T extends THREE.MeshBasicMaterial | THREE.SpriteMaterial>(mat: T): T {
+export function registerUnlitMaterial<
+  T extends THREE.MeshBasicMaterial | THREE.SpriteMaterial,
+>(mat: T): T {
   UNLIT_MATERIALS.add(mat);
   // Its own color is kept: the light tint multiplies it (white for the sprites, red for the blood drops...)
-  mat.userData['unlitBaseColor'] = mat.color.clone();
+  mat.userData["unlitBaseColor"] = mat.color.clone();
   applyLinearFog(mat);
   return mat;
 }
@@ -132,7 +143,7 @@ export function registerUnlitMaterial<T extends THREE.MeshBasicMaterial | THREE.
  * a noise constant along the sun direction, so a beam lights the air and the surface it hits identically.
  * Returns 0 (between beams) .. 1 (inside a beam).
  */
-export const BEAM_GLSL = /* glsl */`
+export const BEAM_GLSL = /* glsl */ `
 // Hash without sine (Dave Hoskins): sin() of big values is imprecise on phone GPUs, the noise cells didn't
 // match anymore and the fog showed straight seams every ~5 tiles
 float wbHash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
@@ -151,7 +162,7 @@ float beamPattern(vec3 p, vec3 sunDir, float time) {
 }
 `;
 
-const VERTEX_HEAD = /* glsl */`
+const VERTEX_HEAD = /* glsl */ `
 attribute float ${SWAY_ATTRIBUTE};
 uniform float uWindX;
 uniform float uBeamTime;
@@ -162,7 +173,7 @@ varying vec3 vWeatherWorldNormal;
 
 // Vegetation bending (before projection). Meshes without the attribute read 0 = rigid.
 // Only x moves: stays correct for the tree layers tilted around x.
-const SWAY_VERTEX = /* glsl */`
+const SWAY_VERTEX = /* glsl */ `
 if (${SWAY_ATTRIBUTE} > 0.0) {
   #ifdef USE_INSTANCING
     vec3 swayWorld = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
@@ -177,7 +188,7 @@ if (${SWAY_ATTRIBUTE} > 0.0) {
 }
 `;
 
-const VERTEX_BODY = /* glsl */`
+const VERTEX_BODY = /* glsl */ `
 // (instanced copies: their own position / rotation too)
 #ifdef USE_INSTANCING
   vWeatherWorldPos = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
@@ -205,7 +216,10 @@ const PUDDLE_EDGE = 0.02;
 /** Puddle threshold for a puddles level 0..1: ~2% of the ground at first, ~15% when full. */
 const PUDDLE_LEVEL = [0.671, 0.553] as const;
 export function puddleLevel(puddles: number): number {
-  return PUDDLE_LEVEL[0] + (PUDDLE_LEVEL[1] - PUDDLE_LEVEL[0]) * Math.sqrt(Math.max(puddles, 0));
+  return (
+    PUDDLE_LEVEL[0] +
+    (PUDDLE_LEVEL[1] - PUDDLE_LEVEL[0]) * Math.sqrt(Math.max(puddles, 0))
+  );
 }
 /** Is there a puddle at this ground position (same map as the shader)? */
 export function puddleAt(x: number, z: number, puddles: number): boolean {
@@ -216,7 +230,12 @@ export function puddleAt(x: number, z: number, puddles: number): boolean {
   for (const l of PUDDLE_LAYERS) {
     const c = Math.cos(l.angle);
     const s = Math.sin(l.angle);
-    hollow += l.weight * sampleNoiseMap((c * x - s * z) * l.scale + l.offset[0], (s * x + c * z) * l.scale + l.offset[1]);
+    hollow +=
+      l.weight *
+      sampleNoiseMap(
+        (c * x - s * z) * l.scale + l.offset[0],
+        (s * x + c * z) * l.scale + l.offset[1]
+      );
   }
   return hollow > puddleLevel(puddles) + PUDDLE_EDGE * 0.5;
 }
@@ -234,7 +253,7 @@ const CANOPY_LAYERS = [
 const CANOPY_SHADE = 0.8;
 const CANOPY_GAPS = 0.47;
 const CANOPY_EDGE = 0.025;
-const CANOPY_GLSL = /* glsl */`
+const CANOPY_GLSL = /* glsl */ `
 float canopyLeaves(vec2 p, vec2 sway) {
   float h = 0.0;
 ${CANOPY_LAYERS.map((l, i) => {
@@ -242,27 +261,28 @@ ${CANOPY_LAYERS.map((l, i) => {
   const sn = Math.sin(l.angle).toFixed(5);
   return `  { vec2 q = p + sway * ${l.sway.toFixed(2)};
     h += ${l.weight.toFixed(3)} * texture2D(uCloudMap, vec2(${c} * q.x - ${sn} * q.y, ${sn} * q.x + ${c} * q.y) * ${l.scale.toFixed(6)} + vec2(${(0.21 + i * 0.29).toFixed(2)}, ${(0.47 + i * 0.17).toFixed(2)})).r; }`;
-}).join('\n')}
+}).join("\n")}
   return h;
 }
 `;
 
-const PUDDLE_LEVEL_GLSL = /* glsl */`
+const PUDDLE_LEVEL_GLSL = /* glsl */ `
 float puddleLevel(float puddles) {
   return mix(${PUDDLE_LEVEL[0].toFixed(3)}, ${PUDDLE_LEVEL[1].toFixed(3)}, sqrt(max(puddles, 0.0)));
 }
 float puddleHollow(vec2 p) {
   float h = 0.0;
-${PUDDLE_LAYERS.map(l => {
+${PUDDLE_LAYERS.map((l) => {
   const c = Math.cos(l.angle).toFixed(5);
   const s = Math.sin(l.angle).toFixed(5);
   return `  h += ${l.weight.toFixed(3)} * texture2D(uCloudMap, vec2(${c} * p.x - ${s} * p.y, ${s} * p.x + ${c} * p.y) * ${l.scale.toFixed(6)} + vec2(${l.offset[0].toFixed(2)}, ${l.offset[1].toFixed(2)})).r;`;
-}).join('\n')}
+}).join("\n")}
   return h;
 }
 `;
 
-const FRAGMENT_HEAD = /* glsl */`
+const FRAGMENT_HEAD =
+  /* glsl */ `
 #define AURORA_GLOBAL_TINT ${AURORA_GLOBAL_TINT.toFixed(3)}
 uniform sampler2D uCloudMap;
 uniform float uCloudScale;
@@ -310,7 +330,10 @@ uniform float uStalk;
 uniform float uStalkRadius;
 varying vec3 vWeatherWorldPos;
 varying vec3 vWeatherWorldNormal;
-` + BEAM_GLSL + PUDDLE_LEVEL_GLSL + CANOPY_GLSL;
+` +
+  BEAM_GLSL +
+  PUDDLE_LEVEL_GLSL +
+  CANOPY_GLSL;
 
 /** Stars in the puddles: grid cells per world unit (star spacing), share of cells with a star (higher = fewer). */
 /** Light tide: wave length (world units), speed (world units / s), color (linear, above 1 to bloom). */
@@ -329,7 +352,7 @@ const STRIKE_RADIUS = 45;
 const STRIKE_GROW = 0.25;
 const STRIKE_GLOW = 1.6;
 
-const FRAGMENT_BODY = /* glsl */`
+const FRAGMENT_BODY = /* glsl */ `
 {
   // Project the point along the sun direction onto the y = 0 plane,
   // so a roof and the ground below it receive a coherent cloud shadow.
@@ -493,7 +516,7 @@ const FRAGMENT_BODY = /* glsl */`
       float trail = smoothstep(0.2, 0.86, wave) * (1.0 - smoothstep(0.86, 1.0, wave)) * 0.25 * swell;
       vec2 cell = floor(tp * 1.8);
       float plankton = step(0.8, wbHash(cell)) * (0.5 + 0.5 * sin(uBeamTime * 4.0 + wbHash(cell + 3.1) * 30.0));
-      vec3 tideColor = vec3(${TIDE_COLOR.join(', ')});
+      vec3 tideColor = vec3(${TIDE_COLOR.join(", ")});
       reflectedLight.indirectDiffuse += tideColor * uTide * tideGround * (crest * 0.18 + (crest + trail) * plankton * 1.8);
     }
   }
@@ -520,7 +543,7 @@ const SNOW_GROUND_HEIGHT = 1.0;
 const SNOW_GROUND_MAX = 0.42;
 
 // Runs right after the texture is read: turns the surfaces facing up white (before lighting).
-const SNOW_FRAGMENT = /* glsl */`
+const SNOW_FRAGMENT = /* glsl */ `
 if (uSnowCover > 0.0) {
   vec3 snowNormal = normalize(vWeatherWorldNormal) * (gl_FrontFacing ? 1.0 : -1.0);
   float facingUp = smoothstep(0.25, 0.75, snowNormal.y);
@@ -545,14 +568,18 @@ let swayDepthMaterial: THREE.MeshDepthMaterial | undefined;
 export function getSwayDepthMaterial(): THREE.MeshDepthMaterial {
   if (!swayDepthMaterial) {
     swayDepthMaterial = new THREE.MeshDepthMaterial();
-    swayDepthMaterial.onBeforeCompile = shader => {
-      shader.uniforms['uWindX'] = WEATHER_UNIFORMS.uWindX;
-      shader.uniforms['uBeamTime'] = WEATHER_UNIFORMS.uBeamTime;
-      shader.uniforms['uFlutterPhase'] = WEATHER_UNIFORMS.uFlutterPhase;
-      shader.vertexShader = `attribute float ${SWAY_ATTRIBUTE};\nuniform float uWindX;\nuniform float uBeamTime;\nuniform float uFlutterPhase;\n`
-        + shader.vertexShader.replace('#include <project_vertex>', SWAY_VERTEX + '#include <project_vertex>');
+    swayDepthMaterial.onBeforeCompile = (shader) => {
+      shader.uniforms["uWindX"] = WEATHER_UNIFORMS.uWindX;
+      shader.uniforms["uBeamTime"] = WEATHER_UNIFORMS.uBeamTime;
+      shader.uniforms["uFlutterPhase"] = WEATHER_UNIFORMS.uFlutterPhase;
+      shader.vertexShader =
+        `attribute float ${SWAY_ATTRIBUTE};\nuniform float uWindX;\nuniform float uBeamTime;\nuniform float uFlutterPhase;\n` +
+        shader.vertexShader.replace(
+          "#include <project_vertex>",
+          SWAY_VERTEX + "#include <project_vertex>"
+        );
     };
-    swayDepthMaterial.customProgramCacheKey = () => 'weather-sway-depth-v4';
+    swayDepthMaterial.customProgramCacheKey = () => "weather-sway-depth-v4";
   }
   return swayDepthMaterial;
 }
@@ -563,23 +590,29 @@ export function getSwayDepthMaterial(): THREE.MeshDepthMaterial {
  * noise-free, and the result changes continuously when the shadow moves (also one tap cheaper).
  */
 // First occurrence = the directional / spot light version (the point light one comes later)
-const PCF_NOISY = 'float phi = interleavedGradientNoise( gl_FragCoord.xy ) * PI2;';
+const PCF_NOISY =
+  "float phi = interleavedGradientNoise( gl_FragCoord.xy ) * PI2;";
 function patchShadowFilter() {
   const chunk = THREE.ShaderChunk.shadowmap_pars_fragment;
   const start = chunk.indexOf(PCF_NOISY);
-  const end = start < 0 ? -1 : chunk.indexOf(') * 0.2;', start);
+  const end = start < 0 ? -1 : chunk.indexOf(") * 0.2;", start);
   if (end < 0) {
-    console.warn('Shadow filter patch not applied (three shader chunk changed)');
+    console.warn(
+      "Shadow filter patch not applied (three shader chunk changed)"
+    );
     return;
   }
-  THREE.ShaderChunk.shadowmap_pars_fragment = chunk.slice(0, start) + /* glsl */`
+  THREE.ShaderChunk.shadowmap_pars_fragment =
+    chunk.slice(0, start) +
+    /* glsl */ `
 				vec2 o = 0.5 * radius;
 				shadow = (
 					texture( shadowMap, vec3( shadowCoord.xy + vec2( -o.x, -o.y ), shadowCoord.z ) ) +
 					texture( shadowMap, vec3( shadowCoord.xy + vec2( o.x, -o.y ), shadowCoord.z ) ) +
 					texture( shadowMap, vec3( shadowCoord.xy + vec2( -o.x, o.y ), shadowCoord.z ) ) +
 					texture( shadowMap, vec3( shadowCoord.xy + vec2( o.x, o.y ), shadowCoord.z ) )
-				) * 0.25;` + chunk.slice(end + ') * 0.2;'.length);
+				) * 0.25;` +
+    chunk.slice(end + ") * 0.2;".length);
 }
 patchShadowFilter();
 
@@ -596,7 +629,7 @@ const STALK_NEAR = 0.12;
 const STALK_FAR = 0.97;
 
 // Replaces three's fog (runs on the final color): patchy fog, thicker far away and near the ground
-const FOG_FRAGMENT = /* glsl */`
+const FOG_FRAGMENT = /* glsl */ `
 if (uFog > 0.0) {
   float fogDist = length(vWeatherWorldPos - cameraPosition);
   vec2 fogPos = vWeatherWorldPos.xz;
@@ -634,7 +667,7 @@ const SAND_UP_MAX = 0.6;
 const SAND_WALL_MAX = 0.45;
 
 // Right after the texture is read (after the snow): patchy sand on the ground / roofs and on the windward walls
-const SAND_FRAGMENT = /* glsl */`
+const SAND_FRAGMENT = /* glsl */ `
 if (uSandCover > 0.0) {
   vec3 sandNormal = normalize(vWeatherWorldNormal) * (gl_FrontFacing ? 1.0 : -1.0);
   float up = smoothstep(0.25, 0.75, sandNormal.y);
@@ -658,10 +691,9 @@ const PUDDLE_DARKEN = 0.45;
 const BLOOD_WET_STAIN = 0.4;
 const BLOOD_PUDDLE_STAIN = 0.9;
 
-
 // After the snow / sand: wet surfaces facing up get darker, puddles appear in the hollows of the ground.
 // wbPuddle is declared here (main scope) and read by FRAGMENT_BODY for the reflection.
-const PUDDLE_FRAGMENT = /* glsl */`
+const PUDDLE_FRAGMENT = /* glsl */ `
 float wbPuddle = 0.0;
 if (uWetness > 0.0 || uPuddles > 0.0) {
   vec3 wetNormal = normalize(vWeatherWorldNormal) * (gl_FrontFacing ? 1.0 : -1.0);
@@ -708,32 +740,44 @@ if (uFrost > 0.0) {
 `;
 
 /** Plugs the weather effects (cloud shadows, sun reflections strength) into a lit three.js material. */
-export function applyWeatherShader<T extends THREE.MeshLambertMaterial | THREE.MeshPhongMaterial>(mat: T): T {
-  mat.onBeforeCompile = shader => {
+export function applyWeatherShader<
+  T extends THREE.MeshLambertMaterial | THREE.MeshPhongMaterial,
+>(mat: T): T {
+  mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, WEATHER_UNIFORMS);
-    shader.vertexShader = VERTEX_HEAD + shader.vertexShader.replace(
-      '#include <project_vertex>',
-      SWAY_VERTEX + '#include <project_vertex>\n' + VERTEX_BODY
-    );
-    shader.fragmentShader = FRAGMENT_HEAD + shader.fragmentShader
-      .replace(
-        '#include <map_fragment>',
-        '#include <map_fragment>\n' + SNOW_FRAGMENT + SAND_FRAGMENT + PUDDLE_FRAGMENT
-      )
-      .replace(
-        '#include <emissivemap_fragment>',
-        // Emissive is only used for the night window lights
-        '#include <emissivemap_fragment>\ntotalEmissiveRadiance *= uWindowGlow * uWindowTint;'
-      )
-      .replace(
-        '#include <lights_fragment_end>',
-        '#include <lights_fragment_end>\n' + FRAGMENT_BODY
-      )
-      // Fog mixed before the output color conversion (linear): same result whether the frame is rendered
-      // on screen or through a post effect (bloom, sun rays)
-      .replace('#include <fog_fragment>', '')
-      .replace('#include <colorspace_fragment>', FOG_FRAGMENT + '#include <colorspace_fragment>');
+    shader.vertexShader =
+      VERTEX_HEAD +
+      shader.vertexShader.replace(
+        "#include <project_vertex>",
+        SWAY_VERTEX + "#include <project_vertex>\n" + VERTEX_BODY
+      );
+    shader.fragmentShader =
+      FRAGMENT_HEAD +
+      shader.fragmentShader
+        .replace(
+          "#include <map_fragment>",
+          "#include <map_fragment>\n" +
+            SNOW_FRAGMENT +
+            SAND_FRAGMENT +
+            PUDDLE_FRAGMENT
+        )
+        .replace(
+          "#include <emissivemap_fragment>",
+          // Emissive is only used for the night window lights
+          "#include <emissivemap_fragment>\ntotalEmissiveRadiance *= uWindowGlow * uWindowTint;"
+        )
+        .replace(
+          "#include <lights_fragment_end>",
+          "#include <lights_fragment_end>\n" + FRAGMENT_BODY
+        )
+        // Fog mixed before the output color conversion (linear): same result whether the frame is rendered
+        // on screen or through a post effect (bloom, sun rays)
+        .replace("#include <fog_fragment>", "")
+        .replace(
+          "#include <colorspace_fragment>",
+          FOG_FRAGMENT + "#include <colorspace_fragment>"
+        );
   };
-  mat.customProgramCacheKey = () => 'weather-v39';
+  mat.customProgramCacheKey = () => "weather-v39";
   return mat;
 }

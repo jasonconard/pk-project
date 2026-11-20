@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 /** Geysers at once, the area (relative to the camera target) where they are, in view. */
 const GEYSERS = 4;
@@ -40,15 +40,29 @@ export class GeyserHelper {
     // Keep GEYSERS vents in the area
     for (let i = this.geysers.length - 1; i >= 0; i--) {
       const g = this.geysers[i];
-      if (g.x - target.x < AREA.minX || g.x - target.x > AREA.maxX || g.z - target.z < AREA.minZ || g.z - target.z > AREA.maxZ) {
+      if (
+        g.x - target.x < AREA.minX ||
+        g.x - target.x > AREA.maxX ||
+        g.z - target.z < AREA.minZ ||
+        g.z - target.z > AREA.maxZ
+      ) {
         this.geysers.splice(i, 1);
       }
     }
     for (let tries = 0; this.geysers.length < GEYSERS && tries < 20; tries++) {
       const x = target.x + THREE.MathUtils.randFloat(AREA.minX, AREA.maxX);
       const z = target.z + THREE.MathUtils.randFloat(AREA.minZ, AREA.maxZ);
-      if (this.geysers.every(g => Math.hypot(g.x - x, g.z - z) > MIN_SPACING)) {
-        this.geysers.push({ x, z, timer: THREE.MathUtils.randFloat(1, ERUPTION_INTERVAL[1]), age: -1, length: 0, power: 0 });
+      if (
+        this.geysers.every((g) => Math.hypot(g.x - x, g.z - z) > MIN_SPACING)
+      ) {
+        this.geysers.push({
+          x,
+          z,
+          timer: THREE.MathUtils.randFloat(1, ERUPTION_INTERVAL[1]),
+          age: -1,
+          length: 0,
+          power: 0,
+        });
       }
     }
     // Eruption cycles: a quick burst, a strong jet, then it dies down
@@ -58,7 +72,10 @@ export class GeyserHelper {
         g.power = 0;
         if (g.timer <= 0) {
           g.age = 0;
-          g.length = THREE.MathUtils.randFloat(ERUPTION_LENGTH[0], ERUPTION_LENGTH[1]);
+          g.length = THREE.MathUtils.randFloat(
+            ERUPTION_LENGTH[0],
+            ERUPTION_LENGTH[1]
+          );
           this.onEruption?.(g);
         }
         continue;
@@ -67,7 +84,10 @@ export class GeyserHelper {
       const t = g.age / g.length;
       if (t >= 1) {
         g.age = -1;
-        g.timer = THREE.MathUtils.randFloat(ERUPTION_INTERVAL[0], ERUPTION_INTERVAL[1]);
+        g.timer = THREE.MathUtils.randFloat(
+          ERUPTION_INTERVAL[0],
+          ERUPTION_INTERVAL[1]
+        );
         g.power = 0;
         continue;
       }
@@ -82,8 +102,10 @@ export class GeyserHelper {
 
   /** A point in a vent: any geyser (gentle steam), or only the erupting ones (jets, weighted by their power). */
   spawnPoint(erupting: boolean): [number, number] | null {
-    const candidates = erupting ? this.geysers.filter(g => g.power > 0.05) : this.geysers;
-    if (!candidates.length) {
+    const candidates = erupting
+      ? this.geysers.filter((g) => g.power > 0.05)
+      : this.geysers;
+    if (candidates.length === 0) {
       return null;
     }
     let pick = candidates[0];
@@ -105,8 +127,11 @@ export class GeyserHelper {
   }
 
   /** The erupting geyser closest to a point, with its distance (or null). */
-  nearestErupting(x: number, z: number): { geyser: Geyser, distance: number } | null {
-    let best: { geyser: Geyser, distance: number } | null = null;
+  nearestErupting(
+    x: number,
+    z: number
+  ): { geyser: Geyser; distance: number } | null {
+    let best: { geyser: Geyser; distance: number } | null = null;
     for (const g of this.geysers) {
       if (g.power > 0.3) {
         const distance = Math.hypot(g.x - x, g.z - z);

@@ -1,9 +1,37 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
-import { EscapeService } from '../../../core/shared/service/escape.service';
-import { LucideCastle, LucideCheck, LucideChevronLeft, LucideCopy, LucideDoorOpen, LucideDownload, LucideDynamicIcon, LucideEllipsis, LucideGlobe, LucideIcon, LucidePencil, LucidePlus, LucideRotateCcw, LucideSkull, LucideTrash, LucideX } from '@lucide/angular';
-import { GameService } from '../shared/services/game.service';
-import { listMaps, MapSummary } from '../shared/services/map-storage';
-import { MapKind } from '../shared/model/SceneMap';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+  viewChild,
+} from "@angular/core";
+import { EscapeService } from "../../../core/shared/service/escape.service";
+import {
+  LucideCastle,
+  LucideCheck,
+  LucideChevronLeft,
+  LucideCopy,
+  LucideDoorOpen,
+  LucideDownload,
+  LucideDynamicIcon,
+  LucideEllipsis,
+  LucideGlobe,
+  LucideIcon,
+  LucidePencil,
+  LucidePlus,
+  LucideRotateCcw,
+  LucideSkull,
+  LucideTrash,
+  LucideX,
+} from "@lucide/angular";
+import { GameService } from "../shared/services/game.service";
+import { listMaps, MapSummary } from "../shared/services/map-storage";
+import { MapKind } from "../shared/model/SceneMap";
 
 /** Time to confirm a reset / delete (ms). */
 const CONFIRM_TIME = 3000;
@@ -11,11 +39,11 @@ const CONFIRM_TIME = 3000;
 const GRID_COLS = 6;
 const GRID_ROWS = 4;
 
-const KINDS: { id: MapKind, label: string, icon: LucideIcon }[] = [
-  { id: 'world', label: 'Monde', icon: LucideGlobe },
-  { id: 'town', label: 'Ville', icon: LucideCastle },
-  { id: 'interior', label: 'Intérieur', icon: LucideDoorOpen },
-  { id: 'dungeon', label: 'Donjon', icon: LucideSkull },
+const KINDS: { id: MapKind; label: string; icon: LucideIcon }[] = [
+  { id: "world", label: "Monde", icon: LucideGlobe },
+  { id: "town", label: "Ville", icon: LucideCastle },
+  { id: "interior", label: "Intérieur", icon: LucideDoorOpen },
+  { id: "dungeon", label: "Donjon", icon: LucideSkull },
 ];
 
 /**
@@ -24,10 +52,22 @@ const KINDS: { id: MapKind, label: string, icon: LucideIcon }[] = [
  * otherwise.
  */
 @Component({
-  selector: 'game-map-manager',
-  imports: [LucideDynamicIcon, LucideCheck, LucideChevronLeft, LucideCopy, LucideDownload, LucideEllipsis, LucidePencil, LucidePlus, LucideRotateCcw, LucideTrash, LucideX],
-  templateUrl: './map-manager.component.html',
-  styleUrl: './map-manager.component.scss',
+  selector: "game-map-manager",
+  imports: [
+    LucideDynamicIcon,
+    LucideCheck,
+    LucideChevronLeft,
+    LucideCopy,
+    LucideDownload,
+    LucideEllipsis,
+    LucidePencil,
+    LucidePlus,
+    LucideRotateCcw,
+    LucideTrash,
+    LucideX,
+  ],
+  templateUrl: "./map-manager.component.html",
+  styleUrl: "./map-manager.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MapManagerComponent implements OnInit {
@@ -40,7 +80,7 @@ export class MapManagerComponent implements OnInit {
 
   protected readonly kinds = KINDS;
   protected readonly maps = signal<MapSummary[]>(listMaps());
-  protected readonly view = signal<'list' | 'new'>('list');
+  protected readonly view = signal<"list" | "new">("list");
   /** Map whose actions are shown (the current one at first). */
   protected readonly expanded = signal<string | null>(null);
   protected readonly renaming = signal<string | null>(null);
@@ -49,13 +89,13 @@ export class MapManagerComponent implements OnInit {
   private confirmTimer?: ReturnType<typeof setTimeout>;
 
   // New map
-  protected readonly newName = signal('Nouvelle carte');
-  protected readonly newKind = signal<MapKind>('town');
+  protected readonly newName = signal("Nouvelle carte");
+  protected readonly newKind = signal<MapKind>("town");
   protected readonly newCols = signal(2);
   protected readonly newRows = signal(2);
   protected readonly gridRows = Array.from({ length: GRID_ROWS }, (_, r) => r);
   protected readonly gridCols = Array.from({ length: GRID_COLS }, (_, c) => c);
-  private readonly grid = viewChild<ElementRef<HTMLElement>>('grid');
+  private readonly grid = viewChild<ElementRef<HTMLElement>>("grid");
 
   constructor() {
     // Escape: back to the list from the new map form, else closes (not while typing a name)
@@ -68,17 +108,17 @@ export class MapManagerComponent implements OnInit {
   }
 
   protected kindOf(kind: MapKind) {
-    return KINDS.find(k => k.id === kind) ?? KINDS[0];
+    return KINDS.find((k) => k.id === kind) ?? KINDS[0];
   }
 
   protected sizeLabel(cols: number, rows: number): string {
-    return `${cols} × ${rows} zone${cols * rows > 1 ? 's' : ''}`;
+    return `${cols} × ${rows} zone${cols * rows > 1 ? "s" : ""}`;
   }
 
   /** Escape / back: the list from the new map form, else closes. */
   protected back(): void {
-    if (this.view() === 'new') {
-      this.view.set('list');
+    if (this.view() === "new") {
+      this.view.set("list");
     } else {
       this.closed.emit();
     }
@@ -96,7 +136,7 @@ export class MapManagerComponent implements OnInit {
 
   protected toggleActions(map: MapSummary, event: Event): void {
     event.stopPropagation();
-    this.expanded.update(id => id === map.id ? null : map.id);
+    this.expanded.update((id) => (id === map.id ? null : map.id));
     this.confirming.set(null);
   }
 
@@ -107,7 +147,10 @@ export class MapManagerComponent implements OnInit {
   protected startRename(map: MapSummary): void {
     this.renaming.set(map.id);
     setTimeout(() => {
-      const field = this.host.nativeElement.querySelector<HTMLInputElement>('.rename-input');
+      const field =
+        this.host.nativeElement.querySelector<HTMLInputElement>(
+          ".rename-input"
+        );
       field?.focus();
       field?.select();
     });
@@ -142,7 +185,10 @@ export class MapManagerComponent implements OnInit {
     if (this.confirming() !== map.id) {
       this.confirming.set(map.id);
       clearTimeout(this.confirmTimer);
-      this.confirmTimer = setTimeout(() => this.confirming.set(null), CONFIRM_TIME);
+      this.confirmTimer = setTimeout(
+        () => this.confirming.set(null),
+        CONFIRM_TIME
+      );
       return;
     }
     clearTimeout(this.confirmTimer);
@@ -154,29 +200,38 @@ export class MapManagerComponent implements OnInit {
   // --- New map ---
 
   protected startNew(): void {
-    this.newName.set('Nouvelle carte');
-    this.view.set('new');
+    this.newName.set("Nouvelle carte");
+    this.view.set("new");
   }
 
   /** Size grid: the cell under the finger / mouse gives the columns and rows (pressed then dragged). */
   protected sizeAt(event: PointerEvent): void {
     const grid = this.grid()?.nativeElement;
-    if (!grid || (event.type === 'pointermove' && !event.buttons)) {
+    if (!grid || (event.type === "pointermove" && !event.buttons)) {
       return;
     }
-    if (event.type === 'pointerdown') {
+    if (event.type === "pointerdown") {
       grid.setPointerCapture?.(event.pointerId);
     }
     const rect = grid.getBoundingClientRect();
-    const col = Math.floor((event.clientX - rect.left) / rect.width * GRID_COLS);
-    const row = Math.floor((event.clientY - rect.top) / rect.height * GRID_ROWS);
+    const col = Math.floor(
+      ((event.clientX - rect.left) / rect.width) * GRID_COLS
+    );
+    const row = Math.floor(
+      ((event.clientY - rect.top) / rect.height) * GRID_ROWS
+    );
     this.newCols.set(Math.min(GRID_COLS, Math.max(1, col + 1)));
     this.newRows.set(Math.min(GRID_ROWS, Math.max(1, row + 1)));
   }
 
   protected create(): void {
-    const name = this.newName().trim() || 'Nouvelle carte';
-    this.gameService.createMap(name, this.newKind(), this.newCols(), this.newRows());
+    const name = this.newName().trim() || "Nouvelle carte";
+    this.gameService.createMap(
+      name,
+      this.newKind(),
+      this.newCols(),
+      this.newRows()
+    );
     this.closed.emit();
   }
 

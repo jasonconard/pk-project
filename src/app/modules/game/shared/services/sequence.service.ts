@@ -1,18 +1,30 @@
-import { inject, Service, signal } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { CoreService } from '../../../../core/shared/service/core.service';
-import { SceneEvent } from '../model/SceneEvent';
-import { SceneEventSequence } from '../model/SceneEventSequence';
+import { inject, Service, signal } from "@angular/core";
+import { Observable, Subject } from "rxjs";
+import { CoreService } from "../../../../core/shared/service/core.service";
+import { SceneEvent } from "../model/SceneEvent";
+import { SceneEventSequence } from "../model/SceneEventSequence";
 import {
-  InstructionLog, InstructionMessage, InstructionTeleport, InstructionType, InstructionVariable, InstructionWait,
-} from '../model/SceneEventInstruction';
-import { currentVariableValues, setVariableValue } from '../../../variables-editor/shared/variable-values';
-import { clampCounter } from '../../../variables-editor/shared/variables';
-import { playSound } from './sfx';
-import { conditionsFit, EventContext } from '../model/ObjectEvent';
-import { KeyService } from '../../../../core/shared/service/key.service';
-import { giveItem, giveMoney, setInTeam } from '../../../database-editor/shared/party';
-import { loadDatabase } from '../../../database-editor/shared/database-storage';
+  InstructionLog,
+  InstructionMessage,
+  InstructionTeleport,
+  InstructionType,
+  InstructionVariable,
+  InstructionWait,
+} from "../model/SceneEventInstruction";
+import {
+  currentVariableValues,
+  setVariableValue,
+} from "../../../variables-editor/shared/variable-values";
+import { clampCounter } from "../../../variables-editor/shared/variables";
+import { playSound } from "./sfx";
+import { conditionsFit, EventContext } from "../model/ObjectEvent";
+import { KeyService } from "../../../../core/shared/service/key.service";
+import {
+  giveItem,
+  giveMoney,
+  setInTeam,
+} from "../../../database-editor/shared/party";
+import { loadDatabase } from "../../../database-editor/shared/database-storage";
 
 @Service()
 export class SequenceService {
@@ -27,7 +39,8 @@ export class SequenceService {
 
   private readonly teleportSubject = new Subject<InstructionTeleport>();
   /** Emits each teleport instruction; the listener must call `nextSequence()` once done. */
-  readonly teleport$: Observable<InstructionTeleport> = this.teleportSubject.asObservable();
+  readonly teleport$: Observable<InstructionTeleport> =
+    this.teleportSubject.asObservable();
 
   private readonly weatherSubject = new Subject<string>();
   /** Emits each weather change asked by an event (WeatherType); the game applies it. */
@@ -40,7 +53,7 @@ export class SequenceService {
    * The fight being played. The combat doesn't exist yet (docs/idees.md, point 9): the player chooses how it ends,
    * to try the event's branches; a victory gives the loot (shown in a message, then the 'win' branch).
    */
-  private fight: { group: string, result?: string } | null = null;
+  private fight: { group: string; result?: string } | null = null;
 
   /** `true` while an event sequence is being played (player inputs are frozen). */
   get isRunning(): boolean {
@@ -50,7 +63,9 @@ export class SequenceService {
   launchSequence(event: SceneEvent, context?: () => EventContext): void {
     this.context = context ?? null;
     this.keyService.clearKeys();
-    this.sequence = new SceneEventSequence(event.instructions.map(i => ({ ...i })));
+    this.sequence = new SceneEventSequence(
+      event.instructions.map((i) => ({ ...i }))
+    );
     this.nextSequence();
   }
 
@@ -72,10 +87,10 @@ export class SequenceService {
         this.nextSequence(fight.result);
         return;
       }
-      if (choiceKey === 'win') {
+      if (choiceKey === "win") {
         const loot = this.giveLoot(fight.group);
         if (loot) {
-          fight.result = 'win';
+          fight.result = "win";
           this.messageState.set({ text: loot });
           return;
         }
@@ -96,11 +111,21 @@ export class SequenceService {
       return;
     }
     switch (instruction.type) {
-      case InstructionType.LOG: this.setLogs(instruction.log); break;
-      case InstructionType.MESSAGE: this.setMessage(instruction.message); break;
-      case InstructionType.WAIT: this.setWait(instruction.wait); break;
-      case InstructionType.TELEPORT: this.setTeleport(instruction.teleport); break;
-      case InstructionType.VARIABLE: this.setVariable(instruction.variable); break;
+      case InstructionType.LOG:
+        this.setLogs(instruction.log);
+        break;
+      case InstructionType.MESSAGE:
+        this.setMessage(instruction.message);
+        break;
+      case InstructionType.WAIT:
+        this.setWait(instruction.wait);
+        break;
+      case InstructionType.TELEPORT:
+        this.setTeleport(instruction.teleport);
+        break;
+      case InstructionType.VARIABLE:
+        this.setVariable(instruction.variable);
+        break;
       case InstructionType.WEATHER:
         if (instruction.weather) {
           this.weatherSubject.next(instruction.weather.type);
@@ -116,8 +141,13 @@ export class SequenceService {
       case InstructionType.BRANCH: {
         // (the sub-instructions 'then' or 'else' come next)
         const ctx = this.context?.();
-        const fits = !!ctx && conditionsFit(instruction.branch ?? {}, { ...ctx, values: currentVariableValues() });
-        this.nextSequence(fits ? 'then' : 'else');
+        const fits =
+          !!ctx &&
+          conditionsFit(instruction.branch ?? {}, {
+            ...ctx,
+            values: currentVariableValues(),
+          });
+        this.nextSequence(fits ? "then" : "else");
         break;
       }
       case InstructionType.STOP:
@@ -142,23 +172,24 @@ export class SequenceService {
         this.nextSequence();
         break;
       case InstructionType.FIGHT:
-        this.startFight(instruction.fight?.group ?? '');
+        this.startFight(instruction.fight?.group ?? "");
         break;
-      default: this.nextSequence();
+      default:
+        this.nextSequence();
     }
   }
 
   /** For now: asks how the fight ends (Victoire, Défaite, and Fuite when the group allows it). */
   private startFight(groupId: string): void {
-    const group = loadDatabase().groups.find(g => g.id === groupId);
+    const group = loadDatabase().groups.find((g) => g.id === groupId);
     this.fight = { group: groupId };
     this.messageState.set({
-      name: 'Combat',
-      text: `${group?.name ?? 'Des ennemis'} ! (Le combat arrive bientôt : choisis comment il se termine.)`,
+      name: "Combat",
+      text: `${group?.name ?? "Des ennemis"} ! (Le combat arrive bientôt : choisis comment il se termine.)`,
       choices: [
-        { key: 'win', text: 'Victoire' },
-        { key: 'lose', text: 'Défaite' },
-        ...(group?.canFlee ?? true ? [{ key: 'flee', text: 'Fuite' }] : []),
+        { key: "win", text: "Victoire" },
+        { key: "lose", text: "Défaite" },
+        ...((group?.canFlee ?? true) ? [{ key: "flee", text: "Fuite" }] : []),
       ],
     });
   }
@@ -166,16 +197,16 @@ export class SequenceService {
   /** A victory's loot: the enemies' money, and their items by chance. « Victoire ! 16 pièces, Potion. » (null: nothing). */
   private giveLoot(groupId: string): string | null {
     const db = loadDatabase();
-    const group = db.groups.find(g => g.id === groupId);
+    const group = db.groups.find((g) => g.id === groupId);
     if (!group) {
       return null;
     }
     let money = 0;
     const items = new Map<string, number>();
     for (const member of group.members) {
-      const enemy = db.enemies.find(e => e.id === member.enemy);
+      const enemy = db.enemies.find((e) => e.id === member.enemy);
       money += enemy?.money ?? 0;
-      enemy?.drops.forEach(drop => {
+      enemy?.drops.forEach((drop) => {
         if (Math.random() * 100 < drop.chance) {
           items.set(drop.item, (items.get(drop.item) ?? 0) + 1);
         }
@@ -186,10 +217,13 @@ export class SequenceService {
     }
     items.forEach((n, id) => giveItem(id, n));
     const parts = [
-      ...(money ? [`${money} pièce${money > 1 ? 's' : ''}`] : []),
-      ...[...items].map(([id, n]) => `${db.items.find(i => i.id === id)?.name ?? '?'}${n > 1 ? ` ×${n}` : ''}`),
+      ...(money ? [`${money} pièce${money > 1 ? "s" : ""}`] : []),
+      ...[...items].map(
+        ([id, n]) =>
+          `${db.items.find((i) => i.id === id)?.name ?? "?"}${n > 1 ? ` ×${n}` : ""}`
+      ),
     ];
-    return parts.length ? `Victoire ! ${parts.join(', ')}.` : null;
+    return parts.length > 0 ? `Victoire ! ${parts.join(", ")}.` : null;
   }
 
   private setLogs(log: InstructionLog | undefined): void {
@@ -203,28 +237,37 @@ export class SequenceService {
   private setVariable(change: InstructionVariable | undefined): void {
     const current = change ? currentVariableValues()[change.id] : undefined;
     if (change && current !== undefined) {
-      if (typeof current === 'boolean') {
+      if (typeof current === "boolean") {
         setVariableValue(change.id, !!change.value);
       } else {
         const value = Number(change.value) || 0;
-        setVariableValue(change.id, clampCounter(change.op === 'add' ? current + value : value));
+        setVariableValue(
+          change.id,
+          clampCounter(change.op === "add" ? current + value : value)
+        );
       }
     }
     this.nextSequence();
   }
 
   private setMessage(msg: InstructionMessage | undefined): void {
-    if (!msg) { return this.nextSequence(); }
+    if (!msg) {
+      return this.nextSequence();
+    }
     this.messageState.set(msg);
   }
 
   private setWait(wait: InstructionWait | undefined): void {
-    if (!wait) { return this.nextSequence(); }
+    if (!wait) {
+      return this.nextSequence();
+    }
     setTimeout(() => this.nextSequence(), wait.time);
   }
 
   private setTeleport(teleport: InstructionTeleport | undefined): void {
-    if (!teleport) { return this.nextSequence(); }
+    if (!teleport) {
+      return this.nextSequence();
+    }
     this.teleportSubject.next(teleport);
   }
 }

@@ -1,28 +1,86 @@
-import * as THREE from 'three';
-import { RENDER_DETAIL } from '../model/Quality';
-import type { Game } from '../model/Game';
-import { cloneWeatherParams, DAWN, DAWN_TINT, DAY_PRESETS, daylightAt, mistAt, DUSK, DUSK_TINT, getWeatherParams, isNightHour, twilightAt, WeatherParams, WeatherType } from './Weather';
-import { DARK_RADIUS, puddleAt, UNLIT_MATERIALS, WEATHER_UNIFORMS } from './weather-shader';
-import { StrikeHelper } from './StrikeHelper';
-import { EyesHelper } from './EyesHelper';
-import { StepSurface, ThunderBolt, WeatherAudio } from './WeatherAudio';
-import { ACID_RAIN_STYLE, BLOOD_RAIN_STYLE, DRIZZLE_STYLE, HAIL_STYLE, POISON_RAIN_STYLE, RainHelper, SUN_RAIN_STYLE } from './RainHelper';
-import { SnowHelper } from './SnowHelper';
-import { SurfaceHeights } from './SurfaceHeights';
-import { GodRaysPass } from './GodRaysPass';
-import { BloomPass } from './BloomPass';
-import { HeatHazePass } from './HeatHazePass';
-import { ASH_SMOKE_STYLE, BREATH_STYLE, MIST_STYLE, STRIKE_SPARK_STYLE, GRAVITY_DROP_STYLE, GRAVITY_PEBBLE_STYLE, TIME_MOTE_STYLE, QUAKE_DEBRIS_STYLE, QUAKE_DUST_STYLE, SPINDRIFT_STYLE, STEAM_JET_STYLE, STEAM_STYLE, ASH_STYLE, CRYSTAL_STYLE, DARK_WISP_STYLE, FUME_STYLE, HAUNT_WISP_STYLE, POISON_FUME_STYLE, MARS_DUST_STYLE, VOLCANO_SMOKE_STYLE, EMBER_STYLE, ENERGY_STYLE, FAIRY_STYLE, MAGIC_SNOW_STYLE, POLLEN_STYLE, STARDUST_STYLE, LAVA_STYLE, FIREFLY_STYLE, GlowParticles, SPORE_STYLE } from './GlowParticles';
-import { LeafHelper, LeafMode } from './LeafHelper';
-import { SandHelper } from './SandHelper';
-import { ElectricHelper } from './ElectricHelper';
-import { WispHelper } from './WispHelper';
-import { FireworksHelper } from './FireworksHelper';
-import { GeyserHelper } from './GeyserHelper';
-import { WhirlHelper } from './WhirlHelper';
-import { TornadoHelper } from './TornadoHelper';
-import { GhostHelper } from './GhostHelper';
-import { FloodHelper } from './FloodHelper';
+import * as THREE from "three";
+import { RENDER_DETAIL } from "../model/Quality";
+import type { Game } from "../model/Game";
+import {
+  cloneWeatherParams,
+  DAWN,
+  DAWN_TINT,
+  DAY_PRESETS,
+  daylightAt,
+  mistAt,
+  DUSK,
+  DUSK_TINT,
+  getWeatherParams,
+  isNightHour,
+  twilightAt,
+  WeatherParams,
+  WeatherType,
+} from "./Weather";
+import {
+  DARK_RADIUS,
+  puddleAt,
+  UNLIT_MATERIALS,
+  WEATHER_UNIFORMS,
+} from "./weather-shader";
+import { StrikeHelper } from "./StrikeHelper";
+import { EyesHelper } from "./EyesHelper";
+import { StepSurface, ThunderBolt, WeatherAudio } from "./WeatherAudio";
+import {
+  ACID_RAIN_STYLE,
+  BLOOD_RAIN_STYLE,
+  DRIZZLE_STYLE,
+  HAIL_STYLE,
+  POISON_RAIN_STYLE,
+  RainHelper,
+  SUN_RAIN_STYLE,
+} from "./RainHelper";
+import { SnowHelper } from "./SnowHelper";
+import { SurfaceHeights } from "./SurfaceHeights";
+import { GodRaysPass } from "./GodRaysPass";
+import { BloomPass } from "./BloomPass";
+import { HeatHazePass } from "./HeatHazePass";
+import {
+  ASH_SMOKE_STYLE,
+  BREATH_STYLE,
+  MIST_STYLE,
+  STRIKE_SPARK_STYLE,
+  GRAVITY_DROP_STYLE,
+  GRAVITY_PEBBLE_STYLE,
+  TIME_MOTE_STYLE,
+  QUAKE_DEBRIS_STYLE,
+  QUAKE_DUST_STYLE,
+  SPINDRIFT_STYLE,
+  STEAM_JET_STYLE,
+  STEAM_STYLE,
+  ASH_STYLE,
+  CRYSTAL_STYLE,
+  DARK_WISP_STYLE,
+  FUME_STYLE,
+  HAUNT_WISP_STYLE,
+  POISON_FUME_STYLE,
+  MARS_DUST_STYLE,
+  VOLCANO_SMOKE_STYLE,
+  EMBER_STYLE,
+  ENERGY_STYLE,
+  FAIRY_STYLE,
+  MAGIC_SNOW_STYLE,
+  POLLEN_STYLE,
+  STARDUST_STYLE,
+  LAVA_STYLE,
+  FIREFLY_STYLE,
+  GlowParticles,
+  SPORE_STYLE,
+} from "./GlowParticles";
+import { LeafHelper, LeafMode } from "./LeafHelper";
+import { SandHelper } from "./SandHelper";
+import { ElectricHelper } from "./ElectricHelper";
+import { WispHelper } from "./WispHelper";
+import { FireworksHelper } from "./FireworksHelper";
+import { GeyserHelper } from "./GeyserHelper";
+import { WhirlHelper } from "./WhirlHelper";
+import { TornadoHelper } from "./TornadoHelper";
+import { GhostHelper } from "./GhostHelper";
+import { FloodHelper } from "./FloodHelper";
 
 /**
  * Where the sun is on the map (world coordinates), see sunWorldPos. Shadows and reflections are computed from
@@ -60,7 +118,11 @@ function sunWorldPos(hour: number, out: THREE.Vector3): THREE.Vector3 {
     toX = SUN_EAST_X;
   }
   const arc = Math.sin(Math.PI * t);
-  return out.set(THREE.MathUtils.lerp(fromX, toX, t), SUN_HEIGHT * (SUN_LOW + (1 - SUN_LOW) * arc), SUN_Z);
+  return out.set(
+    THREE.MathUtils.lerp(fromX, toX, t),
+    SUN_HEIGHT * (SUN_LOW + (1 - SUN_LOW) * arc),
+    SUN_Z
+  );
 }
 /** Lowest sun elevation (sin of the angle): prevents endless shadows far from the sun. */
 const MIN_SUN_ELEVATION = 0.45;
@@ -73,7 +135,7 @@ const LIGHTNING_AMBIENT = 0.9;
 const LIGHTNING_SUN = 0.8;
 /** Electric field: faint blue light flicker following the sparks (relative to the texture color). */
 const ELECTRIC_FLICKER = 0.07;
-const ELECTRIC_COLOR = new THREE.Color(0x9cc4ff);
+const ELECTRIC_COLOR = new THREE.Color(0x9c_c4_ff);
 /** Seconds of full snowfall to cover the roofs completely. */
 const SNOW_ACCUMULATION_TIME = 40;
 /** Seconds for a full snow layer to melt once it stopped snowing. */
@@ -203,7 +265,7 @@ const SNOW_STEPS = 0.35;
 const WET_STEPS = 0.55;
 
 /** Blue sky reflected by the puddles under a clear day sky (clouds and night turn it to the ambient grey / blue). */
-const SKY_BLUE = new THREE.Color(0x7fb2ea);
+const SKY_BLUE = new THREE.Color(0x7f_b2_ea);
 /** Cloud drift direction for a west -> east wind (x is flipped for east -> west). */
 const CLOUD_DRIFT = new THREE.Vector2(1, 0.15).normalize();
 /** Cloud speed multiplier: without wind clouds barely move, at full wind they race. */
@@ -245,7 +307,13 @@ interface FlashPulse {
  */
 function newStrike(minDistance = 0): ThunderBolt[] {
   const r = Math.random();
-  const picked = r < 0.3 ? THREE.MathUtils.randFloat(0.7, 1) : r < 0.8 ? THREE.MathUtils.randFloat(0.35, 0.7) : Math.random() * 0.35;
+  // 30 % far away, 50 % in between, 20 % close
+  let picked = Math.random() * 0.35;
+  if (r < 0.3) {
+    picked = THREE.MathUtils.randFloat(0.7, 1);
+  } else if (r < 0.8) {
+    picked = THREE.MathUtils.randFloat(0.35, 0.7);
+  }
   // Some weathers only rumble far away (monsoon): the strike is pushed to the horizon
   const distance = minDistance + (1 - minDistance) * picked;
   const pan = THREE.MathUtils.randFloat(-0.8, 0.8);
@@ -254,8 +322,16 @@ function newStrike(minDistance = 0): ThunderBolt[] {
   if (Math.random() < 0.15 + 0.25 * (1 - distance)) {
     bolts.push({
       at: THREE.MathUtils.randFloat(0.35, 1.4),
-      distance: THREE.MathUtils.clamp(distance + THREE.MathUtils.randFloat(-0.2, 0.2), 0, 1),
-      pan: THREE.MathUtils.clamp(pan + THREE.MathUtils.randFloat(-0.4, 0.4), -1, 1),
+      distance: THREE.MathUtils.clamp(
+        distance + THREE.MathUtils.randFloat(-0.2, 0.2),
+        0,
+        1
+      ),
+      pan: THREE.MathUtils.clamp(
+        pan + THREE.MathUtils.randFloat(-0.4, 0.4),
+        -1,
+        1
+      ),
     });
   }
   return bolts;
@@ -264,13 +340,18 @@ function newStrike(minDistance = 0): ThunderBolt[] {
 /** Flash pulses of a bolt: far = 1-2 soft dim glows, close = several sharp blinding flickers. */
 function boltPulses(bolt: ThunderBolt): FlashPulse[] {
   const near = 1 - bolt.distance;
-  const count = bolt.distance > 0.7 ? 1 + Math.floor(Math.random() * 2) : 1 + Math.floor(Math.random() * (2 + 2 * near));
+  const count =
+    bolt.distance > 0.7
+      ? 1 + Math.floor(Math.random() * 2)
+      : 1 + Math.floor(Math.random() * (2 + 2 * near));
   const pulses: FlashPulse[] = [];
   let start = bolt.at;
   for (let i = 0; i < count; i++) {
     pulses.push({
       start,
-      peak: (0.25 + 0.75 * near * near) * (i === 0 ? 1 : THREE.MathUtils.randFloat(0.55, 1)),
+      peak:
+        (0.25 + 0.75 * near * near) *
+        (i === 0 ? 1 : THREE.MathUtils.randFloat(0.55, 1)),
       rise: THREE.MathUtils.lerp(0.12, 0.02, near),
       decay: THREE.MathUtils.lerp(3.5, 12, near),
     });
@@ -283,10 +364,14 @@ export class WeatherHelper {
   private weatherType = WeatherType.SUNNY;
   /** Time of day (0..24 h) and the matching params the weather blends towards. */
   private hour = 12;
-  private readonly target: WeatherParams = cloneWeatherParams(DAY_PRESETS[WeatherType.SUNNY]!);
+  private readonly target: WeatherParams = cloneWeatherParams(
+    DAY_PRESETS[WeatherType.SUNNY]!
+  );
   private readonly sunPos = sunWorldPos(12, new THREE.Vector3());
   private readonly sunTarget = new THREE.Vector3();
-  private readonly current: WeatherParams = cloneWeatherParams(DAY_PRESETS[WeatherType.SUNNY]!);
+  private readonly current: WeatherParams = cloneWeatherParams(
+    DAY_PRESETS[WeatherType.SUNNY]!
+  );
   private readonly audio = new WeatherAudio();
   /** Footsteps: last player position, distance walked since the last step. */
   private readonly lastPlayerPos = new THREE.Vector3(NaN, 0, 0);
@@ -328,7 +413,11 @@ export class WeatherHelper {
   /** Earthquake debris: wall feet around the view (x, z), the view center they were found around, the scan going on. */
   private wallFeet: [number, number][] = [];
   private wallFeetCenter: THREE.Vector2 | null = null;
-  private wallScan: { center: THREE.Vector2, index: number, found: [number, number][] } | null = null;
+  private wallScan: {
+    center: THREE.Vector2;
+    index: number;
+    found: [number, number][];
+  } | null = null;
   private readonly strikes: StrikeHelper;
   private readonly strikeSparks: GlowParticles;
   private readonly mist: GlowParticles;
@@ -421,7 +510,7 @@ export class WeatherHelper {
   private gustTime = 0;
   private readonly tmpColor = new THREE.Color();
   /** three's fog, only used by the unlit materials (sprites, particles): the lit ones use the weather fog. */
-  private readonly sceneFog = new THREE.FogExp2(0xffffff, 0);
+  private readonly sceneFog = new THREE.FogExp2(0xff_ff_ff, 0);
   /** Lightning: time until the next strike, time since the current strike (-1 = none), its flash pulses. */
   private lightningTimer = 1;
   private flashTime = -1;
@@ -431,48 +520,121 @@ export class WeatherHelper {
     this.surfaces = new SurfaceHeights(game.scene);
     this.rain = new RainHelper(game.scene, this.surfaces);
     this.drizzle = new RainHelper(game.scene, this.surfaces, DRIZZLE_STYLE);
-    this.bloodRain = new RainHelper(game.scene, this.surfaces, BLOOD_RAIN_STYLE);
-    this.poisonRain = new RainHelper(game.scene, this.surfaces, POISON_RAIN_STYLE);
+    this.bloodRain = new RainHelper(
+      game.scene,
+      this.surfaces,
+      BLOOD_RAIN_STYLE
+    );
+    this.poisonRain = new RainHelper(
+      game.scene,
+      this.surfaces,
+      POISON_RAIN_STYLE
+    );
     this.embers = new GlowParticles(game.scene, this.surfaces, EMBER_STYLE);
-    this.fireflies = new GlowParticles(game.scene, this.surfaces, FIREFLY_STYLE);
-    this.fairyLights = new GlowParticles(game.scene, this.surfaces, FAIRY_STYLE);
-    this.risingEnergy = new GlowParticles(game.scene, this.surfaces, ENERGY_STYLE);
+    this.fireflies = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      FIREFLY_STYLE
+    );
+    this.fairyLights = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      FAIRY_STYLE
+    );
+    this.risingEnergy = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      ENERGY_STYLE
+    );
     this.lava = new GlowParticles(game.scene, this.surfaces, LAVA_STYLE);
-    this.volcanoSmoke = new GlowParticles(game.scene, this.surfaces, VOLCANO_SMOKE_STYLE);
+    this.volcanoSmoke = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      VOLCANO_SMOKE_STYLE
+    );
     this.leaves = new LeafHelper(game.scene, this.surfaces);
     this.autumnLeaves = new LeafHelper(game.scene, this.surfaces);
     this.spores = new GlowParticles(game.scene, this.surfaces, SPORE_STYLE);
     this.pollen = new GlowParticles(game.scene, this.surfaces, POLLEN_STYLE);
     this.ashFall = new GlowParticles(game.scene, this.surfaces, ASH_STYLE);
-    this.ashSmoke = new GlowParticles(game.scene, this.surfaces, ASH_SMOKE_STYLE);
-    this.spindrift = new GlowParticles(game.scene, this.surfaces, SPINDRIFT_STYLE);
-    this.quakeDebris = new GlowParticles(game.scene, this.surfaces, QUAKE_DEBRIS_STYLE);
-    this.quakeDust = new GlowParticles(game.scene, this.surfaces, QUAKE_DUST_STYLE);
+    this.ashSmoke = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      ASH_SMOKE_STYLE
+    );
+    this.spindrift = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      SPINDRIFT_STYLE
+    );
+    this.quakeDebris = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      QUAKE_DEBRIS_STYLE
+    );
+    this.quakeDust = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      QUAKE_DUST_STYLE
+    );
     this.steam = new GlowParticles(game.scene, this.surfaces, STEAM_STYLE);
     this.steam.spawnAt = () => this.geysers.spawnPoint(false);
-    this.steamJet = new GlowParticles(game.scene, this.surfaces, STEAM_JET_STYLE);
-    this.timeMotes = new GlowParticles(game.scene, this.surfaces, TIME_MOTE_STYLE);
-    this.gravityPebbles = new GlowParticles(game.scene, this.surfaces, GRAVITY_PEBBLE_STYLE);
-    this.gravityDrops = new GlowParticles(game.scene, this.surfaces, GRAVITY_DROP_STYLE);
+    this.steamJet = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      STEAM_JET_STYLE
+    );
+    this.timeMotes = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      TIME_MOTE_STYLE
+    );
+    this.gravityPebbles = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      GRAVITY_PEBBLE_STYLE
+    );
+    this.gravityDrops = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      GRAVITY_DROP_STYLE
+    );
     this.strikes = new StrikeHelper(game.scene, this.surfaces);
-    this.strikes.onStrike = impact => this.onGroundStrike(impact);
+    this.strikes.onStrike = (impact) => this.onGroundStrike(impact);
     this.strikes.onCrackle = (pos, strength) => {
       const player = this.playerPosition();
       const dx = pos.x - player.x;
-      const closeness = Math.max(0, 1 - Math.hypot(dx, pos.z - player.z) / STRIKE_HEARING);
+      const closeness = Math.max(
+        0,
+        1 - Math.hypot(dx, pos.z - player.z) / STRIKE_HEARING
+      );
       if (closeness > 0) {
-        this.audio.zap(closeness * strength, THREE.MathUtils.clamp(dx / 60, -1, 1), THREE.MathUtils.randFloat(0.05, 0.25));
+        this.audio.zap(
+          closeness * strength,
+          THREE.MathUtils.clamp(dx / 60, -1, 1),
+          THREE.MathUtils.randFloat(0.05, 0.25)
+        );
       }
     };
-    this.strikeSparks = new GlowParticles(game.scene, this.surfaces, STRIKE_SPARK_STYLE);
+    this.strikeSparks = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      STRIKE_SPARK_STYLE
+    );
     this.mist = new GlowParticles(game.scene, this.surfaces, MIST_STYLE);
     this.eyes = new EyesHelper(game.scene, this.surfaces);
     this.breath = new GlowParticles(game.scene, this.surfaces, BREATH_STYLE);
     // The breath comes out in front of the player's face (a bit towards the camera, so it's drawn over the sprite)
     this.breath.spawnAt = () => {
       const player = this.playerPosition();
-      this.breathPos.subVectors(this.game.camera.position, player).setY(0).setLength(BREATH_FORWARD);
-      return [player.x + this.breathPos.x + THREE.MathUtils.randFloatSpread(0.8), player.z + this.breathPos.z];
+      this.breathPos
+        .subVectors(this.game.camera.position, player)
+        .setY(0)
+        .setLength(BREATH_FORWARD);
+      return [
+        player.x + this.breathPos.x + THREE.MathUtils.randFloatSpread(0.8),
+        player.z + this.breathPos.z,
+      ];
     };
     // New puffs only while breathing out; the others finish fading
     this.breath.spawnGate = () => {
@@ -482,7 +644,7 @@ export class WeatherHelper {
       this.breathTokens--;
       return true;
     };
-    this.eyes.onFlee = pos => {
+    this.eyes.onFlee = (pos) => {
       const player = this.playerPosition();
       const dx = pos.x - player.x;
       this.audio.scurry(THREE.MathUtils.clamp(dx / 80, -1, 1));
@@ -490,33 +652,67 @@ export class WeatherHelper {
     this.strikeSparks.spawnAt = () => {
       const a = Math.random() * Math.PI * 2;
       const r = Math.random() * 5;
-      return [this.strikes.sparkAt.x + Math.cos(a) * r, this.strikes.sparkAt.z + Math.sin(a) * r];
+      return [
+        this.strikes.sparkAt.x + Math.cos(a) * r,
+        this.strikes.sparkAt.z + Math.sin(a) * r,
+      ];
     };
     this.steamJet.spawnAt = () => this.geysers.spawnPoint(true);
-    this.geysers.onEruption = g => {
+    this.geysers.onEruption = (g) => {
       const player = this.playerPosition();
       const d = Math.hypot(g.x - player.x, g.z - player.z);
-      this.audio.geyserBurst(Math.max(0, 1 - d / GEYSER_HEARING), THREE.MathUtils.clamp((g.x - player.x) / 150, -1, 1));
+      this.audio.geyserBurst(
+        Math.max(0, 1 - d / GEYSER_HEARING),
+        THREE.MathUtils.clamp((g.x - player.x) / 150, -1, 1)
+      );
     };
     // Debris falls along the walls: at one of the wall feet found beforehand (see updateWallFeet)
     this.quakeDebris.spawnAt = () => {
-      if (!this.wallFeet.length) {
+      if (this.wallFeet.length === 0) {
         return null;
       }
-      const [x, z] = this.wallFeet[Math.floor(Math.random() * this.wallFeet.length)];
-      return [x + THREE.MathUtils.randFloatSpread(4), z + THREE.MathUtils.randFloatSpread(4)];
+      const [x, z] =
+        this.wallFeet[Math.floor(Math.random() * this.wallFeet.length)];
+      return [
+        x + THREE.MathUtils.randFloatSpread(4),
+        z + THREE.MathUtils.randFloatSpread(4),
+      ];
     };
-    this.magicSnow = new GlowParticles(game.scene, this.surfaces, MAGIC_SNOW_STYLE);
-    this.stardust = new GlowParticles(game.scene, this.surfaces, STARDUST_STYLE);
+    this.magicSnow = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      MAGIC_SNOW_STYLE
+    );
+    this.stardust = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      STARDUST_STYLE
+    );
     this.crystals = new GlowParticles(game.scene, this.surfaces, CRYSTAL_STYLE);
-    this.marsDust = new GlowParticles(game.scene, this.surfaces, MARS_DUST_STYLE);
+    this.marsDust = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      MARS_DUST_STYLE
+    );
     this.acidRain = new RainHelper(game.scene, this.surfaces, ACID_RAIN_STYLE);
     this.fumes = new GlowParticles(game.scene, this.surfaces, FUME_STYLE);
     // Vapor rises from the puddles, where the acid gathers
     this.fumes.spawnFilter = (x, z) => puddleAt(x, z, this.puddles);
-    this.poisonFumes = new GlowParticles(game.scene, this.surfaces, POISON_FUME_STYLE);
-    this.hauntWisps = new GlowParticles(game.scene, this.surfaces, HAUNT_WISP_STYLE);
-    this.darkWisps = new GlowParticles(game.scene, this.surfaces, DARK_WISP_STYLE);
+    this.poisonFumes = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      POISON_FUME_STYLE
+    );
+    this.hauntWisps = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      HAUNT_WISP_STYLE
+    );
+    this.darkWisps = new GlowParticles(
+      game.scene,
+      this.surfaces,
+      DARK_WISP_STYLE
+    );
     // Darkness: the black wisps crawl on a ring around the player, where the visible area ends
     this.darkWisps.spawnAt = () => {
       const player = this.playerPosition();
@@ -527,8 +723,10 @@ export class WeatherHelper {
     this.poisonFumes.spawnFilter = (x, z) => puddleAt(x, z, this.puddles);
     this.wisps = new WispHelper(game.scene);
     this.fireworks = new FireworksHelper(game.scene);
-    this.fireworks.onLaunch = (climb, side) => this.audio.rocketWhistle(climb, side);
-    this.fireworks.onBurst = (closeness, side) => this.audio.fireworkBang(closeness, side);
+    this.fireworks.onLaunch = (climb, side) =>
+      this.audio.rocketWhistle(climb, side);
+    this.fireworks.onBurst = (closeness, side) =>
+      this.audio.fireworkBang(closeness, side);
     this.whirls = new WhirlHelper(game.scene);
     this.tornado = new TornadoHelper(game.scene);
     this.ghosts = new GhostHelper(game.scene);
@@ -539,12 +737,18 @@ export class WeatherHelper {
     this.electric = new ElectricHelper(game.scene, this.surfaces);
     // Arcs crackle when the player is close to them (louder the closer, on their side)
     this.electric.onArc = (pos, life) => {
-      const player = this.game.mapHelper?.scenePlayer?.mesh?.position ?? this.game.getCameraTarget();
+      const player =
+        this.game.mapHelper?.scenePlayer?.mesh?.position ??
+        this.game.getCameraTarget();
       const dx = pos.x - player.x;
       const dist = Math.hypot(dx, pos.z - player.z);
       if (dist < ARC_HEARING) {
         const closeness = 1 - dist / ARC_HEARING;
-        this.audio.zap(closeness * closeness, THREE.MathUtils.clamp(dx / 60, -1, 1), life);
+        this.audio.zap(
+          closeness * closeness,
+          THREE.MathUtils.clamp(dx / 60, -1, 1),
+          life
+        );
       }
     };
     this.snow = new SnowHelper(game.scene, this.surfaces);
@@ -625,12 +829,17 @@ export class WeatherHelper {
     // Curse: the sun wanders by itself, the shadows slowly move on their own
     if (p.sunWander > 0.01) {
       const w = WEATHER_UNIFORMS.uBeamTime.value;
-      this.sunTarget.x += SUN_WANDER * p.sunWander * (0.7 * Math.sin(w * 0.11) + 0.3 * Math.sin(w * 0.27 + 1));
+      this.sunTarget.x +=
+        SUN_WANDER *
+        p.sunWander *
+        (0.7 * Math.sin(w * 0.11) + 0.3 * Math.sin(w * 0.27 + 1));
     }
     this.sunPos.lerp(this.sunTarget, 1 - Math.exp(-dt * TRANSITION_SPEED));
     const dir = this.sunDir.copy(this.sunPos).sub(target).normalize();
     if (dir.y < MIN_SUN_ELEVATION) {
-      const horizontal = Math.sqrt(1 - MIN_SUN_ELEVATION * MIN_SUN_ELEVATION) / Math.hypot(dir.x, dir.z);
+      const horizontal =
+        Math.sqrt(1 - MIN_SUN_ELEVATION * MIN_SUN_ELEVATION) /
+        Math.hypot(dir.x, dir.z);
       dir.set(dir.x * horizontal, MIN_SUN_ELEVATION, dir.z * horizontal);
     }
     this.game.placeSun(target, dir);
@@ -638,23 +847,42 @@ export class WeatherHelper {
     // three's Lambert/Phong divide by PI: these intensities give exactly litLevel on a flat ground in the sun
     // and shadowLevel in the shade, whatever the sun elevation.
     // Lightning flash: everything gets a short white-blue light boost (stronger sun = shadows "snap")
-    const flash = this.updateLightning(dt, p.lightning) * Math.min(Math.max(p.lightning, p.thunderRain), 1);
+    const flash =
+      this.updateLightning(dt, p.lightning) *
+      Math.min(Math.max(p.lightning, p.thunderRain), 1);
     // Slow uneven "breathing" of the light (blood moon)
     const t = WEATHER_UNIFORMS.uBeamTime.value;
     // Solar storm interferences: brief random dips of all the lights
     const dip = this.updateDips(dt, p.flicker);
-    const pulse = (1 + p.lightPulse * (0.7 * Math.sin(t * 0.8) + 0.3 * Math.sin(t * 2.3))) * (1 - dip);
+    const pulse =
+      (1 + p.lightPulse * (0.7 * Math.sin(t * 0.8) + 0.3 * Math.sin(t * 2.3))) *
+      (1 - dip);
     const spark = this.electric.flicker * Math.min(p.electric, 1);
     // Fireworks: each burst tints the whole scene with its colors for a moment
     const burst = this.fireworks.flash * this.fireworks.flash;
-    this.game.ambientLight.intensity = Math.PI * (p.shadowLevel * pulse + LIGHTNING_AMBIENT * flash
-      + ELECTRIC_FLICKER * spark + FIREWORK_LIGHT * burst);
-    this.game.ambientLight.color.copy(p.ambientColor).lerp(ELECTRIC_COLOR, spark * 0.3).lerp(p.lightningColor, flash)
+    this.game.ambientLight.intensity =
+      Math.PI *
+      (p.shadowLevel * pulse +
+        LIGHTNING_AMBIENT * flash +
+        ELECTRIC_FLICKER * spark +
+        FIREWORK_LIGHT * burst);
+    this.game.ambientLight.color
+      .copy(p.ambientColor)
+      .lerp(ELECTRIC_COLOR, spark * 0.3)
+      .lerp(p.lightningColor, flash)
       .lerp(this.fireworks.flashColor, burst * 0.6);
     this.game.sun.color.copy(p.sunColor).lerp(p.lightningColor, flash);
     this.tmpColor.copy(p.unlitTint).lerp(p.lightningColor, flash);
-    UNLIT_MATERIALS.forEach(mat => mat.color.copy(this.tmpColor).multiply(mat.userData['unlitBaseColor'] ?? WHITE));
-    this.game.sun.intensity = Math.PI * (Math.max(p.litLevel - p.shadowLevel, 0) * pulse + LIGHTNING_SUN * flash) / dir.y;
+    UNLIT_MATERIALS.forEach((mat) =>
+      mat.color
+        .copy(this.tmpColor)
+        .multiply(mat.userData["unlitBaseColor"] ?? WHITE)
+    );
+    this.game.sun.intensity =
+      (Math.PI *
+        (Math.max(p.litLevel - p.shadowLevel, 0) * pulse +
+          LIGHTNING_SUN * flash)) /
+      dir.y;
 
     const u = WEATHER_UNIFORMS;
     u.uSunDir.value.copy(dir);
@@ -669,22 +897,82 @@ export class WeatherHelper {
     u.uAurora.value = p.aurora;
     // Wind: blended to the setting, drives the clouds, the precipitations and the vegetation
     // Sandstorm, blizzard: always blow hard (whatever the gauge), in the chosen direction
-    const windTarget = Math.sign(this.targetWindX || 1) * Math.max(Math.abs(this.targetWindX), p.minWind);
-    this.baseWindX += (windTarget - this.baseWindX) * (1 - Math.exp(-dt * TRANSITION_SPEED));
-    this.windX = THREE.MathUtils.clamp(this.baseWindX + this.updateGusts(dt), -MAX_GUSTY_WIND, MAX_GUSTY_WIND);
+    const windTarget =
+      Math.sign(this.targetWindX || 1) *
+      Math.max(Math.abs(this.targetWindX), p.minWind);
+    this.baseWindX +=
+      (windTarget - this.baseWindX) * (1 - Math.exp(-dt * TRANSITION_SPEED));
+    this.windX = THREE.MathUtils.clamp(
+      this.baseWindX + this.updateGusts(dt),
+      -MAX_GUSTY_WIND,
+      MAX_GUSTY_WIND
+    );
     const windAbs = Math.abs(this.windX);
     // Clouds are high up: they follow the wind setting, not the gusts near the ground
     const cloudWind = Math.min(Math.abs(this.baseWindX), 1);
-    const cloudSpeed = p.cloudSpeed * THREE.MathUtils.lerp(CLOUD_SPEED_NO_WIND, CLOUD_SPEED_FULL_WIND, cloudWind);
-    this.cloudVelocity.set(CLOUD_DRIFT.x * Math.sign(this.baseWindX || 1), CLOUD_DRIFT.y).multiplyScalar(cloudSpeed);
-    u.uCloudDensity.value += (this.targetCloudDensity - u.uCloudDensity.value) * (1 - Math.exp(-dt * TRANSITION_SPEED));
-    u.uCloudOffset.value.addScaledVector(this.cloudVelocity, -dt * u.uCloudScale.value);
+    const cloudSpeed =
+      p.cloudSpeed *
+      THREE.MathUtils.lerp(
+        CLOUD_SPEED_NO_WIND,
+        CLOUD_SPEED_FULL_WIND,
+        cloudWind
+      );
+    this.cloudVelocity
+      .set(CLOUD_DRIFT.x * Math.sign(this.baseWindX || 1), CLOUD_DRIFT.y)
+      .multiplyScalar(cloudSpeed);
+    u.uCloudDensity.value +=
+      (this.targetCloudDensity - u.uCloudDensity.value) *
+      (1 - Math.exp(-dt * TRANSITION_SPEED));
+    u.uCloudOffset.value.addScaledVector(
+      this.cloudVelocity,
+      -dt * u.uCloudScale.value
+    );
     u.uWindX.value = this.windX;
     this.updateFog(dt, p, windAbs);
     // Flutter gets faster with the wind; wrapped to keep float precision in the shader
-    u.uFlutterPhase.value = (u.uFlutterPhase.value + dt * (2.5 + 5 * windAbs)) % (Math.PI * 2);
+    u.uFlutterPhase.value =
+      (u.uFlutterPhase.value + dt * (2.5 + 5 * windAbs)) % (Math.PI * 2);
 
-    if (p.rain > 0 || p.bloodRain > 0 || p.poisonRain > 0 || p.drizzle > 0 || p.snow > 0 || p.embers > 0 || p.lava > 0 || p.fireflies > 0 || p.fairyLights > 0 || p.risingEnergy > 0 || p.leaves > 0 || p.autumnLeaves > 0 || p.spores > 0 || p.pollen > 0 || p.ash > 0 || p.magicSnow > 0 || p.stardust > 0 || p.crystals > 0 || p.marsDust > 0 || p.acidRain > 0 || p.fumes > 0 || p.poisonFumes > 0 || p.haunt > 0 || p.darkness > 0 || p.quake > 0 || p.geysers > 0 || p.timeWarp > 0 || p.antigravity > 0 || p.thunderRain > 0 || p.morningMist > 0 || p.groundMist > 0 || p.moonless > 0 || p.watchingEyes > 0 || p.deepFreeze > 0 || p.hail > 0 || p.sunRain > 0 || p.sand > 0 || p.electric > 0) {
+    if (
+      p.rain > 0 ||
+      p.bloodRain > 0 ||
+      p.poisonRain > 0 ||
+      p.drizzle > 0 ||
+      p.snow > 0 ||
+      p.embers > 0 ||
+      p.lava > 0 ||
+      p.fireflies > 0 ||
+      p.fairyLights > 0 ||
+      p.risingEnergy > 0 ||
+      p.leaves > 0 ||
+      p.autumnLeaves > 0 ||
+      p.spores > 0 ||
+      p.pollen > 0 ||
+      p.ash > 0 ||
+      p.magicSnow > 0 ||
+      p.stardust > 0 ||
+      p.crystals > 0 ||
+      p.marsDust > 0 ||
+      p.acidRain > 0 ||
+      p.fumes > 0 ||
+      p.poisonFumes > 0 ||
+      p.haunt > 0 ||
+      p.darkness > 0 ||
+      p.quake > 0 ||
+      p.geysers > 0 ||
+      p.timeWarp > 0 ||
+      p.antigravity > 0 ||
+      p.thunderRain > 0 ||
+      p.morningMist > 0 ||
+      p.groundMist > 0 ||
+      p.moonless > 0 ||
+      p.watchingEyes > 0 ||
+      p.deepFreeze > 0 ||
+      p.hail > 0 ||
+      p.sunRain > 0 ||
+      p.sand > 0 ||
+      p.electric > 0
+    ) {
       this.surfaces.update(dt);
     }
     this.rain.update(dt, target, p.rain, this.windX);
@@ -692,15 +980,43 @@ export class WeatherHelper {
     this.poisonRain.update(dt, target, p.poisonRain, this.windX);
     this.drizzle.update(dt, target, p.drizzle, this.windX);
     this.embers.update(dt, target, p.embers, this.game.camera, this.windX);
-    this.fireflies.update(dt, target, p.fireflies, this.game.camera, this.windX);
-    this.fairyLights.update(dt, target, p.fairyLights, this.game.camera, this.windX);
-    this.risingEnergy.update(dt, target, p.risingEnergy, this.game.camera, this.windX);
+    this.fireflies.update(
+      dt,
+      target,
+      p.fireflies,
+      this.game.camera,
+      this.windX
+    );
+    this.fairyLights.update(
+      dt,
+      target,
+      p.fairyLights,
+      this.game.camera,
+      this.windX
+    );
+    this.risingEnergy.update(
+      dt,
+      target,
+      p.risingEnergy,
+      this.game.camera,
+      this.windX
+    );
     // Imminent eruption: more embers and smoke as the tension builds, a burst while the ground shakes
     // (the densities are capped at 1: the calm level is lowered to leave room for the bursts)
-    const stir = (1 + p.eruption * (ERUPTION_TENSION_BOOST * this.eruptionTension + ERUPTION_SHAKE_BOOST * this.quakeShake))
-      / (1 + p.eruption * ERUPTION_HEADROOM);
+    const stir =
+      (1 +
+        p.eruption *
+          (ERUPTION_TENSION_BOOST * this.eruptionTension +
+            ERUPTION_SHAKE_BOOST * this.quakeShake)) /
+      (1 + p.eruption * ERUPTION_HEADROOM);
     this.lava.update(dt, target, p.lava * stir, this.game.camera, this.windX);
-    this.volcanoSmoke.update(dt, target, p.lava * stir, this.game.camera, this.windX);
+    this.volcanoSmoke.update(
+      dt,
+      target,
+      p.lava * stir,
+      this.game.camera,
+      this.windX
+    );
     this.leaves.update(dt, target, p.leaves, this.windX);
     this.autumnLeaves.update(dt, target, p.autumnLeaves, this.windX);
     this.spores.update(dt, target, p.spores, this.game.camera, this.windX);
@@ -708,58 +1024,178 @@ export class WeatherHelper {
     this.ashFall.update(dt, target, p.ash, this.game.camera, this.windX);
     this.ashSmoke.update(dt, target, p.ash, this.game.camera, this.windX);
     // Blizzard: powder snow swept up by the wind (only when the snow is blown: snowDrift above 1)
-    this.spindrift.update(dt, target, THREE.MathUtils.clamp((p.snowDrift - 1) / 2.5, 0, 1), this.game.camera, this.windX);
-    this.magicSnow.update(dt, target, p.magicSnow, this.game.camera, this.windX);
+    this.spindrift.update(
+      dt,
+      target,
+      THREE.MathUtils.clamp((p.snowDrift - 1) / 2.5, 0, 1),
+      this.game.camera,
+      this.windX
+    );
+    this.magicSnow.update(
+      dt,
+      target,
+      p.magicSnow,
+      this.game.camera,
+      this.windX
+    );
     this.stardust.update(dt, target, p.stardust, this.game.camera, this.windX);
     this.crystals.update(dt, target, p.crystals, this.game.camera, this.windX);
     this.marsDust.update(dt, target, p.marsDust, this.game.camera, this.windX);
     this.acidRain.update(dt, target, p.acidRain, this.windX);
     // Fumes only where it's wet enough to be eaten
-    this.fumes.update(dt, target, p.fumes * Math.min(this.wetness * 1.5, 1), this.game.camera, this.windX);
-    this.poisonFumes.update(dt, target, p.poisonFumes * Math.min(this.wetness * 1.5, 1), this.game.camera, this.windX);
+    this.fumes.update(
+      dt,
+      target,
+      p.fumes * Math.min(this.wetness * 1.5, 1),
+      this.game.camera,
+      this.windX
+    );
+    this.poisonFumes.update(
+      dt,
+      target,
+      p.poisonFumes * Math.min(this.wetness * 1.5, 1),
+      this.game.camera,
+      this.windX
+    );
     this.hauntWisps.update(dt, target, p.haunt, this.game.camera, this.windX);
     // Only the real darkness (the haunted mist's half darkness has its own pale wisps)
-    this.darkWisps.update(dt, target, Math.max(0, p.darkness - 0.6) / 0.4, this.game.camera, this.windX);
+    this.darkWisps.update(
+      dt,
+      target,
+      Math.max(0, p.darkness - 0.6) / 0.4,
+      this.game.camera,
+      this.windX
+    );
     this.wisps.update(dt, this.playerPosition(), p.curse, this.game.camera);
     this.fireworks.update(dt, target, p.fireworks, this.game.camera);
     this.whirls.update(dt, target, p.petalWhirl, this.windX);
-    this.tornado.update(dt, this.playerPosition(), p.tornado, this.game.camera, this.windX);
+    this.tornado.update(
+      dt,
+      this.playerPosition(),
+      p.tornado,
+      this.game.camera,
+      this.windX
+    );
     this.updateFlight(dt);
     if (p.eruption > 0.01) {
-      this.eruptionTension = Math.min(1, this.eruptionTension + dt * p.eruption / ERUPTION_BUILDUP);
+      this.eruptionTension = Math.min(
+        1,
+        this.eruptionTension + (dt * p.eruption) / ERUPTION_BUILDUP
+      );
     } else {
       this.eruptionTension = 0;
     }
-    const quakeRate = p.eruption > 0.01 ? THREE.MathUtils.lerp(ERUPTION_RATE[0], ERUPTION_RATE[1], this.eruptionTension) : 1;
+    const quakeRate =
+      p.eruption > 0.01
+        ? THREE.MathUtils.lerp(
+            ERUPTION_RATE[0],
+            ERUPTION_RATE[1],
+            this.eruptionTension
+          )
+        : 1;
     this.quakeShake = this.updateQuake(dt, p.quake * quakeRate);
     this.updateWallFeet(target, p.quake > 0.05 || p.thunderRain > 0.05);
-    this.quakeDebris.update(dt, target, this.quakeShake, this.game.camera, this.windX);
-    this.quakeDust.update(dt, target, this.quakeShake, this.game.camera, this.windX);
+    this.quakeDebris.update(
+      dt,
+      target,
+      this.quakeShake,
+      this.game.camera,
+      this.windX
+    );
+    this.quakeDust.update(
+      dt,
+      target,
+      this.quakeShake,
+      this.game.camera,
+      this.windX
+    );
     this.geysers.update(dt, target, p.geysers > 0.5);
-    this.steam.update(dt, target, Math.min(p.geysers, 1), this.game.camera, this.windX);
-    this.steamJet.update(dt, target, Math.min(this.geysers.eruptions / 2, 1), this.game.camera, this.windX);
+    this.steam.update(
+      dt,
+      target,
+      Math.min(p.geysers, 1),
+      this.game.camera,
+      this.windX
+    );
+    this.steamJet.update(
+      dt,
+      target,
+      Math.min(this.geysers.eruptions / 2, 1),
+      this.game.camera,
+      this.windX
+    );
     this.timeMotes.update(dt, target, p.timeWarp, this.game.camera, this.windX);
-    this.gravityPebbles.update(dt, target, p.antigravity, this.game.camera, this.windX);
-    this.gravityDrops.update(dt, target, p.antigravity, this.game.camera, this.windX);
-    this.strikes.update(dt, target, this.playerPosition(), p.thunderRain, this.game.camera);
-    this.strikeSparks.update(dt, target, this.strikes.sparks, this.game.camera, 0);
-    this.mist.update(dt, target, Math.max(p.morningMist, p.groundMist), this.game.camera, this.windX);
-    this.eyes.update(dt, target, this.playerPosition(), Math.max(p.moonless, p.watchingEyes), this.game.camera);
+    this.gravityPebbles.update(
+      dt,
+      target,
+      p.antigravity,
+      this.game.camera,
+      this.windX
+    );
+    this.gravityDrops.update(
+      dt,
+      target,
+      p.antigravity,
+      this.game.camera,
+      this.windX
+    );
+    this.strikes.update(
+      dt,
+      target,
+      this.playerPosition(),
+      p.thunderRain,
+      this.game.camera
+    );
+    this.strikeSparks.update(
+      dt,
+      target,
+      this.strikes.sparks,
+      this.game.camera,
+      0
+    );
+    this.mist.update(
+      dt,
+      target,
+      Math.max(p.morningMist, p.groundMist),
+      this.game.camera,
+      this.windX
+    );
+    this.eyes.update(
+      dt,
+      target,
+      this.playerPosition(),
+      Math.max(p.moonless, p.watchingEyes),
+      this.game.camera
+    );
     // Breathing: a puff every BREATH_PERIOD, exhaled during the first third of it
     this.breathTime += dt;
     const breathPhase = (this.breathTime % BREATH_PERIOD) / BREATH_PERIOD;
-    this.breathTokens = breathPhase < 0.3 ? Math.min(this.breathTokens + dt * BREATH_PUFFS, 3) : 0;
+    this.breathTokens =
+      breathPhase < 0.3
+        ? Math.min(this.breathTokens + dt * BREATH_PUFFS, 3)
+        : 0;
     this.breath.update(dt, target, p.deepFreeze, this.game.camera, this.windX);
-    this.frostClimb = p.deepFreeze > 0.05
-      ? Math.min(FROST_CLIMB_MAX, this.frostClimb + dt * p.deepFreeze * FROST_CLIMB_SPEED)
-      : Math.max(0, this.frostClimb - dt * FROST_CLIMB_SPEED * 3);
+    this.frostClimb =
+      p.deepFreeze > 0.05
+        ? Math.min(
+            FROST_CLIMB_MAX,
+            this.frostClimb + dt * p.deepFreeze * FROST_CLIMB_SPEED
+          )
+        : Math.max(0, this.frostClimb - dt * FROST_CLIMB_SPEED * 3);
     WEATHER_UNIFORMS.uFrostClimb.value = this.frostClimb;
     this.updateFloat(dt, p.antigravity);
     this.ghosts.update(dt, this.playerPosition(), p.haunt);
-    this.flood.update(dt, target, p.flood, this.surfaces.heightAt(target.x, target.z, target.y), this.windX);
-    this.frostCover = p.frost > 0.05
-      ? Math.min(1, this.frostCover + dt * p.frost / FROST_SPREAD_TIME)
-      : Math.max(0, this.frostCover - dt / FROST_MELT_TIME);
+    this.flood.update(
+      dt,
+      target,
+      p.flood,
+      this.surfaces.heightAt(target.x, target.z, target.y),
+      this.windX
+    );
+    this.frostCover =
+      p.frost > 0.05
+        ? Math.min(1, this.frostCover + (dt * p.frost) / FROST_SPREAD_TIME)
+        : Math.max(0, this.frostCover - dt / FROST_MELT_TIME);
     u.uFrost.value = this.frostCover;
     u.uIridescence.value = p.iridescence;
     u.uAuroraRed.value = p.auroraRed;
@@ -768,40 +1204,93 @@ export class WeatherHelper {
     this.sand.setTint(p.sandTint);
     this.sand.update(dt, target, p.sand, this.game.camera, this.windX);
     this.electric.update(dt, target, p.electric, this.game.camera);
-    this.snow.update(dt, target, p.snow, this.game.camera, this.windX, p.snowDrift);
+    this.snow.update(
+      dt,
+      target,
+      p.snow,
+      this.game.camera,
+      this.windX,
+      p.snowDrift
+    );
 
-    this.snowCover = p.snow > 0.05
-      ? Math.min(1, this.snowCover + dt * p.snow / SNOW_ACCUMULATION_TIME)
-      : Math.max(0, this.snowCover - dt / SNOW_MELT_TIME);
+    this.snowCover =
+      p.snow > 0.05
+        ? Math.min(1, this.snowCover + (dt * p.snow) / SNOW_ACCUMULATION_TIME)
+        : Math.max(0, this.snowCover - dt / SNOW_MELT_TIME);
     u.uSnowCover.value = this.snowCover;
-    this.iceCover = p.ice > 0.05
-      ? Math.min(1, this.iceCover + dt * p.ice / ICE_GLAZE_TIME)
-      : Math.max(0, this.iceCover - dt / ICE_MELT_TIME);
+    this.iceCover =
+      p.ice > 0.05
+        ? Math.min(1, this.iceCover + (dt * p.ice) / ICE_GLAZE_TIME)
+        : Math.max(0, this.iceCover - dt / ICE_MELT_TIME);
     u.uIce.value = this.iceCover;
-    this.sandCover = p.sand > 0.05
-      ? Math.min(1, this.sandCover + dt * p.sand / SAND_ACCUMULATION_TIME)
-      : Math.max(0, this.sandCover - dt / SAND_CLEAR_TIME);
+    this.sandCover =
+      p.sand > 0.05
+        ? Math.min(1, this.sandCover + (dt * p.sand) / SAND_ACCUMULATION_TIME)
+        : Math.max(0, this.sandCover - dt / SAND_CLEAR_TIME);
     u.uSandCover.value = this.sandCover;
     u.uSandColor.value.copy(p.sandColor);
     this.updatePuddles(dt, p);
-    this.audio.update(dt, { rain: Math.min(p.rain + p.bloodRain + p.poisonRain + p.acidRain + p.sunRain * 0.6 + p.hail * 0.05, 1), drizzle: p.drizzle, wind: Math.abs(this.windX), sand: p.sand, lava: p.lava * (1 + 0.5 * p.eruption * this.eruptionTension), poison: Math.max(p.poisonRain > 0 ? Math.min(p.poisonRain / 0.6, 1) : 0, SPORE_BUBBLES * Math.min(p.spores, 1)),
-      howl: THREE.MathUtils.clamp((p.snowDrift - 1) / 2.5, 0, 1) * Math.min(Math.abs(this.windX), 1),
+    this.audio.update(dt, {
+      rain: Math.min(
+        p.rain +
+          p.bloodRain +
+          p.poisonRain +
+          p.acidRain +
+          p.sunRain * 0.6 +
+          p.hail * 0.05,
+        1
+      ),
+      drizzle: p.drizzle,
+      wind: Math.abs(this.windX),
+      sand: p.sand,
+      lava: p.lava * (1 + 0.5 * p.eruption * this.eruptionTension),
+      poison: Math.max(
+        p.poisonRain > 0 ? Math.min(p.poisonRain / 0.6, 1) : 0,
+        SPORE_BUBBLES * Math.min(p.spores, 1)
+      ),
+      howl:
+        THREE.MathUtils.clamp((p.snowDrift - 1) / 2.5, 0, 1) *
+        Math.min(Math.abs(this.windX), 1),
       darkness: p.darkness,
       forest: p.canopy,
       daylight: daylightAt(this.hour),
       hail: p.hail,
       sea: p.sea,
       birds: p.birds,
-      chimes: Math.max(p.magicSnow * MAGIC_SNOW_CHIMES, p.stardust * STARDUST_CHIMES, p.crystals * CRYSTAL_CHIMES),
+      chimes: Math.max(
+        p.magicSnow * MAGIC_SNOW_CHIMES,
+        p.stardust * STARDUST_CHIMES,
+        p.crystals * CRYSTAL_CHIMES
+      ),
       static: p.flicker,
       whispers: Math.max(p.curse, p.haunt * 0.6),
-      crackle: this.frostCover > 0.05 && p.frost > 0.05 ? 0.5 + 0.5 * this.frostCover : 0,
+      crackle:
+        this.frostCover > 0.05 && p.frost > 0.05
+          ? 0.5 + 0.5 * this.frostCover
+          : 0,
       moan: p.haunt > 0.3 ? 0.35 + 0.65 * this.ghosts.nearest : 0,
-      lapping: Math.max(Math.min(this.flood.depth * 1.5, 1) * 0.5, p.tide * 0.35),
-      roar: this.tornado.strength * Math.max(0, 1 - Math.hypot(this.tornado.position.x - this.playerPosition().x,
-        this.tornado.position.z - this.playerPosition().z) / TORNADO_HEARING),
+      lapping: Math.max(
+        Math.min(this.flood.depth * 1.5, 1) * 0.5,
+        p.tide * 0.35
+      ),
+      roar:
+        this.tornado.strength *
+        Math.max(
+          0,
+          1 -
+            Math.hypot(
+              this.tornado.position.x - this.playerPosition().x,
+              this.tornado.position.z - this.playerPosition().z
+            ) /
+              TORNADO_HEARING
+        ),
       ashCrackle: Math.min(p.ash, 1),
-      whirl: Math.max(p.petalWhirl > 0.05 ? this.whirls.closeness(this.playerPosition(), WHIRL_HEARING) : 0, this.flightTime >= 0 ? 1 : 0),
+      whirl: Math.max(
+        p.petalWhirl > 0.05
+          ? this.whirls.closeness(this.playerPosition(), WHIRL_HEARING)
+          : 0,
+        this.flightTime >= 0 ? 1 : 0
+      ),
       // The rising red embers only exist under the blood moon
       bloodMoon: Math.min(p.embers, 1),
       quake: this.quakeShake,
@@ -815,7 +1304,11 @@ export class WeatherHelper {
       frogs: p.frogs,
       crickets: p.crickets,
       city: p.city,
-      sizzle: p.acidRain > 0.05 ? Math.min(p.acidRain / 0.7, 1) * Math.min(this.wetness * 1.5, 1) : 0 });
+      sizzle:
+        p.acidRain > 0.05
+          ? Math.min(p.acidRain / 0.7, 1) * Math.min(this.wetness * 1.5, 1)
+          : 0,
+    });
     this.updateFootsteps(dt);
   }
 
@@ -829,13 +1322,18 @@ export class WeatherHelper {
     this.updateStalkingFog(dt, p.stalkingFog);
     u.uDarkCenter.value.copy(this.game.getCameraTarget());
     u.uFogColor.value.copy(p.fogColor);
-    const drift = THREE.MathUtils.lerp(FOG_DRIFT_NO_WIND, FOG_DRIFT_FULL_WIND, windAbs) * Math.sign(this.windX || 1);
+    const drift =
+      THREE.MathUtils.lerp(FOG_DRIFT_NO_WIND, FOG_DRIFT_FULL_WIND, windAbs) *
+      Math.sign(this.windX || 1);
     u.uFogOffset.value.x -= drift * dt;
     u.uFogOffset.value.y -= FOG_DRIFT_NO_WIND * 0.5 * dt;
 
     // FogExp2: 1 - exp(-(density * depth)^2) = wanted share at the camera target distance
     const share = Math.min(p.fog * UNLIT_FOG_SHARE, 0.95);
-    this.sceneFog.density = share > 0.001 ? Math.sqrt(-Math.log(1 - share)) / CAMERA_TARGET_DISTANCE : 0;
+    this.sceneFog.density =
+      share > 0.001
+        ? Math.sqrt(-Math.log(1 - share)) / CAMERA_TARGET_DISTANCE
+        : 0;
     this.sceneFog.color.copy(u.uFogColor.value);
   }
 
@@ -850,7 +1348,19 @@ export class WeatherHelper {
     // Frame with rays or bloom, into `target` (null = screen). False if none is needed.
     const drawFrame = (target: THREE.WebGLRenderTarget | null): boolean => {
       // (no full screen effects at a low graphics quality)
-      if (RENDER_DETAIL.postEffects && p.godRays >= 0.01 && this.godRays.render(g.renderer, g.scene, g.camera, g.sun, this.sunDir, p.godRays, target)) {
+      if (
+        RENDER_DETAIL.postEffects &&
+        p.godRays >= 0.01 &&
+        this.godRays.render(
+          g.renderer,
+          g.scene,
+          g.camera,
+          g.sun,
+          this.sunDir,
+          p.godRays,
+          target
+        )
+      ) {
         return true;
       }
       if (RENDER_DETAIL.postEffects && p.windowGlow >= 0.01) {
@@ -869,16 +1379,30 @@ export class WeatherHelper {
       // The lantern light follows the player (at hip height) on screen
       this.lanternPos.copy(this.playerPosition()).y += 8;
       this.lanternPos.project(g.camera);
-      this.lanternAt.set(this.lanternPos.x * 0.5 + 0.5, this.lanternPos.y * 0.5 + 0.5);
+      this.lanternAt.set(
+        this.lanternPos.x * 0.5 + 0.5,
+        this.lanternPos.y * 0.5 + 0.5
+      );
     }
     // The heat shimmer / warm wash alone are dropped at a low graphics quality (a whole extra pass); the effects
     // a weather is made of (negative, old film, mirage, lantern) are kept
-    const essential = p.invert >= 0.01 || p.oldFilm >= 0.01 || p.mirage >= 0.01 || p.moonless >= 0.01;
-    const shimmer = RENDER_DETAIL.postEffects && (p.heatHaze >= 0.01 || p.heatWash >= 0.01);
+    const essential =
+      p.invert >= 0.01 ||
+      p.oldFilm >= 0.01 ||
+      p.mirage >= 0.01 ||
+      p.moonless >= 0.01;
+    const shimmer =
+      RENDER_DETAIL.postEffects && (p.heatHaze >= 0.01 || p.heatWash >= 0.01);
     if (essential || shimmer) {
       this.heatHaze.render(g.renderer, drawFrame, {
-        heat: p.heatHaze, wash: p.heatWash, time: WEATHER_UNIFORMS.uBeamTime.value, invert: p.invert, film: p.oldFilm,
-        mirage: p.mirage, lantern: p.moonless, lanternAt: this.lanternAt,
+        heat: p.heatHaze,
+        wash: p.heatWash,
+        time: WEATHER_UNIFORMS.uBeamTime.value,
+        invert: p.invert,
+        film: p.oldFilm,
+        mirage: p.mirage,
+        lantern: p.moonless,
+        lanternAt: this.lanternAt,
       });
       return true;
     }
@@ -891,7 +1415,10 @@ export class WeatherHelper {
    */
   private updateStalkingFog(dt: number, level: number) {
     const pos = this.playerPosition();
-    const moved = Math.hypot(pos.x - this.stalkLastPos.x, pos.z - this.stalkLastPos.z);
+    const moved = Math.hypot(
+      pos.x - this.stalkLastPos.x,
+      pos.z - this.stalkLastPos.z
+    );
     this.stalkLastPos.copy(pos);
     if (level < 0.01) {
       this.stalkRadius = STALK_CLOSED;
@@ -911,7 +1438,10 @@ export class WeatherHelper {
       return;
     }
     const pos = player.position;
-    const moved = Math.hypot(pos.x - this.lastPlayerPos.x, pos.z - this.lastPlayerPos.z);
+    const moved = Math.hypot(
+      pos.x - this.lastPlayerPos.x,
+      pos.z - this.lastPlayerPos.z
+    );
     this.lastPlayerPos.copy(pos);
     if (!(moved > 0) || moved > MAX_STEP_MOVE) {
       // Standing still (short pauses between two map tiles don't count) or teleported
@@ -929,29 +1459,46 @@ export class WeatherHelper {
     }
     this.stepDistance = 0;
     const flooded = this.flood.depth > FLOOD_STEPS;
-    const inPuddle = flooded || (puddleAt(pos.x, pos.z, this.puddles) && this.snowCover < SNOW_STEPS);
-    let surface: StepSurface = 'ground';
-    if (!flooded && (this.snowCover >= SNOW_STEPS || this.iceCover >= ICE_STEPS || this.frostCover >= ICE_STEPS)) {
-      surface = 'snow'; // crunchy
+    const inPuddle =
+      flooded ||
+      (puddleAt(pos.x, pos.z, this.puddles) && this.snowCover < SNOW_STEPS);
+    let surface: StepSurface = "ground";
+    if (
+      !flooded &&
+      (this.snowCover >= SNOW_STEPS ||
+        this.iceCover >= ICE_STEPS ||
+        this.frostCover >= ICE_STEPS)
+    ) {
+      surface = "snow"; // crunchy
     } else if (inPuddle || this.wetness >= WET_STEPS) {
-      surface = 'water';
+      surface = "water";
     }
     this.audio.footstep(surface, inPuddle, running);
   }
 
   /** Rain makes the surfaces wet and fills puddles; they dry once it stops (faster in a hot sun). */
   private updatePuddles(dt: number, p: WeatherParams) {
-    const raining = Math.max(p.rain, p.bloodRain, p.poisonRain, p.acidRain, p.sunRain * 0.6, p.drizzle * 0.5);
+    const raining = Math.max(
+      p.rain,
+      p.bloodRain,
+      p.poisonRain,
+      p.acidRain,
+      p.sunRain * 0.6,
+      p.drizzle * 0.5
+    );
     if (raining > 0.05) {
       // What falls sets the color: blood / poison stain, water rain washes them away
       const stained = p.bloodRain + p.poisonRain + p.acidRain;
       const water = p.rain + p.sunRain + p.drizzle * 0.5;
       const share = stained / Math.max(stained + water, 0.001);
-      const k = Math.min(1, dt * raining / BLOOD_STAIN_TIME);
+      const k = Math.min(1, (dt * raining) / BLOOD_STAIN_TIME);
       this.blood += (share - this.blood) * k;
       if (stained > 0.01) {
-        STAIN_MIX.copy(BLOOD_STAIN).multiplyScalar(p.bloodRain / stained)
-          .add(TMP_STAIN.copy(POISON_STAIN).multiplyScalar(p.poisonRain / stained))
+        STAIN_MIX.copy(BLOOD_STAIN)
+          .multiplyScalar(p.bloodRain / stained)
+          .add(
+            TMP_STAIN.copy(POISON_STAIN).multiplyScalar(p.poisonRain / stained)
+          )
           .add(TMP_STAIN.copy(ACID_STAIN).multiplyScalar(p.acidRain / stained));
         WEATHER_UNIFORMS.uStainColor.value.lerp(STAIN_MIX, k);
       }
@@ -960,17 +1507,30 @@ export class WeatherHelper {
     }
     WEATHER_UNIFORMS.uBlood.value = this.blood;
     if (raining > 0.05) {
-      this.wetness = Math.min(1, this.wetness + dt * raining * p.soak / WET_TIME);
-      this.puddles = Math.min(1, this.puddles + dt * raining * p.soak / PUDDLE_FILL_TIME);
+      this.wetness = Math.min(
+        1,
+        this.wetness + (dt * raining * p.soak) / WET_TIME
+      );
+      this.puddles = Math.min(
+        1,
+        this.puddles + (dt * raining * p.soak) / PUDDLE_FILL_TIME
+      );
     } else {
-      const sun = THREE.MathUtils.clamp(p.litLevel, 0.3, 1.2) * (1 + 2 * p.heatWash);
-      this.wetness = Math.max(0, this.wetness - dt * sun / DRY_TIME);
-      this.puddles = Math.max(0, this.puddles - dt * sun / PUDDLE_DRY_TIME);
+      const sun =
+        THREE.MathUtils.clamp(p.litLevel, 0.3, 1.2) * (1 + 2 * p.heatWash);
+      this.wetness = Math.max(0, this.wetness - (dt * sun) / DRY_TIME);
+      this.puddles = Math.max(0, this.puddles - (dt * sun) / PUDDLE_DRY_TIME);
     }
     // Night dew: the ground stays a bit wet, with shallow puddles (they dry normally once it's gone)
     if (p.dew > 0.01) {
-      this.wetness = Math.max(this.wetness, Math.min(DEW_WETNESS * p.dew, this.wetness + dt / WET_TIME));
-      this.puddles = Math.max(this.puddles, Math.min(DEW_PUDDLES * p.dew, this.puddles + dt / PUDDLE_FILL_TIME));
+      this.wetness = Math.max(
+        this.wetness,
+        Math.min(DEW_WETNESS * p.dew, this.wetness + dt / WET_TIME)
+      );
+      this.puddles = Math.max(
+        this.puddles,
+        Math.min(DEW_PUDDLES * p.dew, this.puddles + dt / PUDDLE_FILL_TIME)
+      );
     }
     const u = WEATHER_UNIFORMS;
     u.uStars.value = p.stars;
@@ -979,10 +1539,17 @@ export class WeatherHelper {
     u.uWarpCenter.value.copy(this.playerPosition());
     u.uWetness.value = this.wetness;
     u.uPuddles.value = this.puddles;
-    u.uRipples.value = Math.min(raining * 1.5, 1) * (1 - Math.max(this.iceCover, this.frostCover)); // frozen puddles don't ripple
+    u.uRipples.value =
+      Math.min(raining * 1.5, 1) *
+      (1 - Math.max(this.iceCover, this.frostCover)); // frozen puddles don't ripple
     // Sky seen in the water: blue when the day is clear, the ambient light color under clouds / at night
-    const clearSky = (1 - Math.min(p.cloudCover, 1) * 0.85) * THREE.MathUtils.smoothstep(p.litLevel, 0.6, 0.95);
-    u.uSkyColor.value.copy(p.ambientColor).lerp(SKY_BLUE, clearSky).multiplyScalar(Math.min(p.litLevel * 0.85, 1));
+    const clearSky =
+      (1 - Math.min(p.cloudCover, 1) * 0.85) *
+      THREE.MathUtils.smoothstep(p.litLevel, 0.6, 0.95);
+    u.uSkyColor.value
+      .copy(p.ambientColor)
+      .lerp(SKY_BLUE, clearSky)
+      .multiplyScalar(Math.min(p.litLevel * 0.85, 1));
   }
 
   /** Extra signed wind of the current gust (0 between gusts), in the wind direction. */
@@ -992,7 +1559,10 @@ export class WeatherHelper {
       this.gustTimer -= dt;
       if (this.gustTimer <= 0 && this.gustsEnabled) {
         this.gustAge = 0;
-        this.gustDuration = THREE.MathUtils.randFloat(GUST_DURATION[0], GUST_DURATION[1]);
+        this.gustDuration = THREE.MathUtils.randFloat(
+          GUST_DURATION[0],
+          GUST_DURATION[1]
+        );
         this.gustPeak = THREE.MathUtils.randFloat(0.55, 1);
       }
       if (this.gustAge < 0) {
@@ -1003,15 +1573,31 @@ export class WeatherHelper {
     const t = this.gustAge;
     if (t >= this.gustDuration) {
       this.gustAge = -1;
-      this.gustTimer = THREE.MathUtils.randFloat(GUST_INTERVAL[0], GUST_INTERVAL[1]);
+      this.gustTimer = THREE.MathUtils.randFloat(
+        GUST_INTERVAL[0],
+        GUST_INTERVAL[1]
+      );
       return 0;
     }
     // Rises fast, shakes a little at its peak, then calms down
-    const envelope = THREE.MathUtils.smoothstep(t, 0, GUST_RISE)
-      * (1 - THREE.MathUtils.smoothstep(t, this.gustDuration - GUST_FALL, this.gustDuration));
-    const shake = 1 + 0.15 * Math.sin(this.gustTime * 7.3) * Math.sin(this.gustTime * 2.9);
+    const envelope =
+      THREE.MathUtils.smoothstep(t, 0, GUST_RISE) *
+      (1 -
+        THREE.MathUtils.smoothstep(
+          t,
+          this.gustDuration - GUST_FALL,
+          this.gustDuration
+        ));
+    const shake =
+      1 + 0.15 * Math.sin(this.gustTime * 7.3) * Math.sin(this.gustTime * 2.9);
     const strength = GUST_CALM + GUST_STRENGTH * Math.abs(this.baseWindX);
-    return Math.sign(this.baseWindX || 1) * strength * this.gustPeak * envelope * shake;
+    return (
+      Math.sign(this.baseWindX || 1) *
+      strength *
+      this.gustPeak *
+      envelope *
+      shake
+    );
   }
 
   /**
@@ -1026,7 +1612,10 @@ export class WeatherHelper {
     }
     this.lightningTimer -= dt * frequency;
     if (frequency >= 0.05 && this.lightningTimer <= 0) {
-      this.lightningTimer = THREE.MathUtils.randFloat(LIGHTNING_INTERVAL[0], LIGHTNING_INTERVAL[1]);
+      this.lightningTimer = THREE.MathUtils.randFloat(
+        LIGHTNING_INTERVAL[0],
+        LIGHTNING_INTERVAL[1]
+      );
       const bolts = newStrike(this.current.lightningFar);
       this.flashPulses = bolts.flatMap(boltPulses);
       this.flashTime = 0;
@@ -1042,7 +1631,12 @@ export class WeatherHelper {
       const t = this.flashTime - pulse.start;
       if (t >= 0) {
         // Fast rise, exponential decay (slower for the far, diffuse ones)
-        flash = Math.max(flash, pulse.peak * Math.min(t / pulse.rise, 1) * Math.exp(-Math.max(t - pulse.rise, 0) * pulse.decay));
+        flash = Math.max(
+          flash,
+          pulse.peak *
+            Math.min(t / pulse.rise, 1) *
+            Math.exp(-Math.max(t - pulse.rise, 0) * pulse.decay)
+        );
       }
       end = Math.max(end, pulse.start);
     }
@@ -1091,21 +1685,43 @@ export class WeatherHelper {
       return;
     }
     if (!this.wallScan) {
-      const moved = !this.wallFeetCenter || this.wallFeetCenter.distanceTo(new THREE.Vector2(target.x, target.z)) > WALL_RESCAN;
+      const moved =
+        !this.wallFeetCenter ||
+        this.wallFeetCenter.distanceTo(new THREE.Vector2(target.x, target.z)) >
+          WALL_RESCAN;
       if (!moved) {
         return;
       }
-      this.wallScan = { center: new THREE.Vector2(target.x, target.z), index: 0, found: [] };
+      this.wallScan = {
+        center: new THREE.Vector2(target.x, target.z),
+        index: 0,
+        found: [],
+      };
     }
     const scan = this.wallScan;
     const cols = Math.floor((WALL_AREA.maxX - WALL_AREA.minX) / WALL_STEP) + 1;
     const rows = Math.floor((WALL_AREA.maxZ - WALL_AREA.minZ) / WALL_STEP) + 1;
     const end = Math.min(scan.index + WALL_SCAN_PER_FRAME, cols * rows);
     for (; scan.index < end; scan.index++) {
-      const x = scan.center.x + WALL_AREA.minX + (scan.index % cols) * WALL_STEP;
-      const z = scan.center.y + WALL_AREA.minZ + Math.floor(scan.index / cols) * WALL_STEP;
+      const x =
+        scan.center.x + WALL_AREA.minX + (scan.index % cols) * WALL_STEP;
+      const z =
+        scan.center.y +
+        WALL_AREA.minZ +
+        Math.floor(scan.index / cols) * WALL_STEP;
       const ground = this.surfaces.heightAt(x, z, target.y);
-      if (ground < target.y + 2 && [[6, 0], [-6, 0], [0, 6], [0, -6]].some(([dx, dz]) => this.surfaces.heightAt(x + dx, z + dz, target.y) > ground + 15)) {
+      if (
+        ground < target.y + 2 &&
+        [
+          [6, 0],
+          [-6, 0],
+          [0, 6],
+          [0, -6],
+        ].some(
+          ([dx, dz]) =>
+            this.surfaces.heightAt(x + dx, z + dz, target.y) > ground + 15
+        )
+      ) {
         scan.found.push([x, z]);
       }
     }
@@ -1128,9 +1744,12 @@ export class WeatherHelper {
       return;
     }
     this.floatTime += dt;
-    this.floatOffset = level * (FLOAT_HEIGHT + FLOAT_BOB * Math.sin(this.floatTime * FLOAT_SPEED));
+    this.floatOffset =
+      level *
+      (FLOAT_HEIGHT + FLOAT_BOB * Math.sin(this.floatTime * FLOAT_SPEED));
     plane.position.y += this.floatOffset;
-    plane.rotation.z = level * FLOAT_SWAY * Math.sin(this.floatTime * FLOAT_SPEED * 0.7);
+    plane.rotation.z =
+      level * FLOAT_SWAY * Math.sin(this.floatTime * FLOAT_SPEED * 0.7);
   }
 
   /**
@@ -1164,11 +1783,17 @@ export class WeatherHelper {
     this.flightCooldown = Math.max(0, this.flightCooldown - dt);
     if (this.flightTime < 0) {
       const player = this.playerPosition();
-      const dist = Math.hypot(this.tornado.position.x - player.x, this.tornado.position.z - player.z);
+      const dist = Math.hypot(
+        this.tornado.position.x - player.x,
+        this.tornado.position.z - player.z
+      );
       // Thrown by an erupting geyser too
       const geyser = this.geysers.nearestErupting(player.x, player.z);
       const onGeyser = !!geyser && geyser.distance < GEYSER_CATCH;
-      if (((this.tornado.strength > 0.8 && dist < TORNADO_CATCH) || onGeyser) && !this.flightCooldown) {
+      if (
+        ((this.tornado.strength > 0.8 && dist < TORNADO_CATCH) || onGeyser) &&
+        !this.flightCooldown
+      ) {
         this.flightTime = 0;
         this.flightBaseY = plane.position.y;
         this.flightSpin = 0;
@@ -1188,15 +1813,23 @@ export class WeatherHelper {
     }
     // Up fast and slowing (60% of the time), then falling faster and faster, a little bounce at the end
     const up = 0.6;
-    const lift = t < up ? 1 - Math.pow(1 - t / up, 2) : 1 - Math.pow((t - up) / (1 - up), 2);
-    const bounce = t > 0.93 ? Math.sin((t - 0.93) / 0.07 * Math.PI) * 0.05 : 0;
-    plane.position.y = this.flightBaseY + FLIGHT_HEIGHT * Math.max(lift, bounce);
+    const lift =
+      t < up
+        ? 1 - Math.pow(1 - t / up, 2)
+        : 1 - Math.pow((t - up) / (1 - up), 2);
+    const bounce =
+      t > 0.93 ? Math.sin(((t - 0.93) / 0.07) * Math.PI) * 0.05 : 0;
+    plane.position.y =
+      this.flightBaseY + FLIGHT_HEIGHT * Math.max(lift, bounce);
     // The camera follows the player up (a bit less, so the rise is still felt on screen)
     this.liftCamera(FLIGHT_HEIGHT * lift * FLIGHT_CAMERA_FOLLOW);
     // Spinning on themselves: fast in the air, slowing to land facing the camera again
     const speed = FLIGHT_SPIN * Math.sin(Math.PI * Math.min(t / 0.9, 1));
     this.flightSpin += speed * dt;
-    plane.rotation.y = t < 0.9 ? this.flightSpin : this.flightSpin * (1 - (t - 0.9) / 0.1) % (Math.PI * 2);
+    plane.rotation.y =
+      t < 0.9
+        ? this.flightSpin
+        : (this.flightSpin * (1 - (t - 0.9) / 0.1)) % (Math.PI * 2);
   }
 
   /**
@@ -1212,9 +1845,15 @@ export class WeatherHelper {
       if (this.quakeTimer > 0) {
         return 0;
       }
-      this.quakeTimer = THREE.MathUtils.randFloat(QUAKE_INTERVAL[0], QUAKE_INTERVAL[1]);
+      this.quakeTimer = THREE.MathUtils.randFloat(
+        QUAKE_INTERVAL[0],
+        QUAKE_INTERVAL[1]
+      );
       this.quakeAge = 0;
-      this.quakeLength = THREE.MathUtils.randFloat(QUAKE_LENGTH[0], QUAKE_LENGTH[1]);
+      this.quakeLength = THREE.MathUtils.randFloat(
+        QUAKE_LENGTH[0],
+        QUAKE_LENGTH[1]
+      );
       this.quakePower = THREE.MathUtils.randFloat(0.5, 1);
       if (this.eruptionTension >= 1) {
         // The big one: longer, stronger, then the tension starts building again
@@ -1230,14 +1869,24 @@ export class WeatherHelper {
       return 0;
     }
     // Quick rise, long tail, with jolts
-    const envelope = Math.pow(Math.sin(Math.PI * Math.pow(t, 0.6)), 0.8) * this.quakePower;
-    const jolt = 0.75 + 0.25 * Math.sin(this.quakeAge * 7.3) * Math.sin(this.quakeAge * 2.1);
+    const envelope =
+      Math.pow(Math.sin(Math.PI * Math.pow(t, 0.6)), 0.8) * this.quakePower;
+    const jolt =
+      0.75 +
+      0.25 * Math.sin(this.quakeAge * 7.3) * Math.sin(this.quakeAge * 2.1);
     const s = envelope * jolt;
     const a = this.quakeAge;
     this.shakeOffset.set(
-      (Math.sin(a * 31) * 0.6 + Math.sin(a * 53 + 1) * 0.4) * SHAKE_AMPLITUDE * s,
-      (Math.sin(a * 41 + 2) * 0.5 + Math.sin(a * 67) * 0.5) * SHAKE_AMPLITUDE * 0.5 * s,
-      (Math.sin(a * 37 + 3) * 0.6 + Math.sin(a * 59 + 2) * 0.4) * SHAKE_AMPLITUDE * s,
+      (Math.sin(a * 31) * 0.6 + Math.sin(a * 53 + 1) * 0.4) *
+        SHAKE_AMPLITUDE *
+        s,
+      (Math.sin(a * 41 + 2) * 0.5 + Math.sin(a * 67) * 0.5) *
+        SHAKE_AMPLITUDE *
+        0.5 *
+        s,
+      (Math.sin(a * 37 + 3) * 0.6 + Math.sin(a * 59 + 2) * 0.4) *
+        SHAKE_AMPLITUDE *
+        s
     );
     this.game.camera.position.add(this.shakeOffset);
     return s;
@@ -1248,7 +1897,10 @@ export class WeatherHelper {
     const player = this.playerPosition();
     let level = 0;
     for (const g of this.geysers.geysers) {
-      const near = Math.max(0, 1 - Math.hypot(g.x - player.x, g.z - player.z) / GEYSER_HEARING);
+      const near = Math.max(
+        0,
+        1 - Math.hypot(g.x - player.x, g.z - player.z) / GEYSER_HEARING
+      );
       level = Math.max(level, near * (0.15 + 0.85 * g.power));
     }
     return level;
@@ -1264,7 +1916,10 @@ export class WeatherHelper {
 
   /** Where the player stands (the camera target if there is none, e.g. in a fight). */
   private playerPosition(): THREE.Vector3 {
-    return this.game.mapHelper?.scenePlayer?.mesh?.position ?? this.game.getCameraTarget();
+    return (
+      this.game.mapHelper?.scenePlayer?.mesh?.position ??
+      this.game.getCameraTarget()
+    );
   }
 
   /** Solar storm: random brief dips of the light (0 = none .. 1 = black), more often with a higher flicker. */
@@ -1278,7 +1933,10 @@ export class WeatherHelper {
       if (this.dipTimer > 0) {
         return 0;
       }
-      this.dipTimer = THREE.MathUtils.randFloat(DIP_INTERVAL[0], DIP_INTERVAL[1]);
+      this.dipTimer = THREE.MathUtils.randFloat(
+        DIP_INTERVAL[0],
+        DIP_INTERVAL[1]
+      );
       this.dipAge = 0;
       this.dipLength = THREE.MathUtils.randFloat(0.05, 0.3);
       this.dipDepth = THREE.MathUtils.randFloat(0.25, 0.65) * flicker;
@@ -1307,7 +1965,10 @@ export class WeatherHelper {
     const twilight = twilightAt(this.hour);
     if (twilight.amount > 0) {
       const tint = twilight.dusk ? DUSK_TINT : DAWN_TINT;
-      const k = twilight.amount * TWILIGHT_STRENGTH * (1 - 0.6 * Math.min(to.cloudCover, 1));
+      const k =
+        twilight.amount *
+        TWILIGHT_STRENGTH *
+        (1 - 0.6 * Math.min(to.cloudCover, 1));
       to.sunColor.lerp(tint.sunColor, k);
       to.ambientColor.lerp(tint.ambientColor, k);
       to.unlitTint.lerp(tint.unlitTint, k);
@@ -1390,10 +2051,33 @@ export class WeatherHelper {
   }
 }
 
-type NumberKey = { [K in keyof WeatherParams]: WeatherParams[K] extends number ? K : never }[keyof WeatherParams];
-type ColorKey = { [K in keyof WeatherParams]: WeatherParams[K] extends THREE.Color ? K : never }[keyof WeatherParams];
+type NumberKey = {
+  [K in keyof WeatherParams]: WeatherParams[K] extends number ? K : never;
+}[keyof WeatherParams];
+type ColorKey = {
+  [K in keyof WeatherParams]: WeatherParams[K] extends THREE.Color ? K : never;
+}[keyof WeatherParams];
 const SAMPLE = DAY_PRESETS[WeatherType.NEUTRAL]!;
 /** Particle densities snapped to 0 once faded out, so their helpers fully stop. */
-const SNAP_KEYS: NumberKey[] = ['autumnLeaves', 'hail', 'sunRain', 'ash', 'magicSnow', 'stardust', 'crystals', 'marsDust', 'acidRain', 'fumes', 'poisonFumes', 'curse', 'petalWhirl', 'haunt'];
-const NUMBER_KEYS = (Object.keys(SAMPLE) as (keyof WeatherParams)[]).filter(k => typeof SAMPLE[k] === 'number') as NumberKey[];
-const COLOR_KEYS = (Object.keys(SAMPLE) as (keyof WeatherParams)[]).filter(k => SAMPLE[k] instanceof THREE.Color) as ColorKey[];
+const SNAP_KEYS: NumberKey[] = [
+  "autumnLeaves",
+  "hail",
+  "sunRain",
+  "ash",
+  "magicSnow",
+  "stardust",
+  "crystals",
+  "marsDust",
+  "acidRain",
+  "fumes",
+  "poisonFumes",
+  "curse",
+  "petalWhirl",
+  "haunt",
+];
+const NUMBER_KEYS = (Object.keys(SAMPLE) as (keyof WeatherParams)[]).filter(
+  (k) => typeof SAMPLE[k] === "number"
+) as NumberKey[];
+const COLOR_KEYS = (Object.keys(SAMPLE) as (keyof WeatherParams)[]).filter(
+  (k) => SAMPLE[k] instanceof THREE.Color
+) as ColorKey[];

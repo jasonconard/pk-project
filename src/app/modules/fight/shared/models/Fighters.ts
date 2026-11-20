@@ -1,28 +1,32 @@
 import { GamePokemon } from "../../../game/shared/model/GamePokemon";
 import { PkStats } from "../../../../core/shared/model/pokemon/Pokemon";
-import { PkSpecialStatus, PkStatus, PkVolatileStatus } from "../../../../core/shared/model/pokemon/PkSkill";
+import {
+  PkSpecialStatus,
+  PkStatus,
+  PkVolatileStatus,
+} from "../../../../core/shared/model/pokemon/PkSkill";
 
 export interface Fighters {
-  currentFighter: Fighter,
-  ally: Fighter | null,
-  opponents: Fighter[],
-  isDoubleFight: boolean
+  currentFighter: Fighter;
+  ally: Fighter | null;
+  opponents: Fighter[];
+  isDoubleFight: boolean;
 }
 
 export interface Fighter {
-  name: string,
-  money: number,
-  stamina: number,
-  pokemons: FighterPokemon[]
+  name: string;
+  money: number;
+  stamina: number;
+  pokemons: FighterPokemon[];
 }
 
 export interface FighterPokemon {
-  origin: GamePokemon,
-  current: boolean,
-  currentStats: PkStats,
-  status: PkStatus | null,
-  specialStatus: PkSpecialStatus[],
-  volatileStatus: PkVolatileStatus[]
+  origin: GamePokemon;
+  current: boolean;
+  currentStats: PkStats;
+  status: PkStatus | null;
+  specialStatus: PkSpecialStatus[];
+  volatileStatus: PkVolatileStatus[];
 }
 
 export function gamePokemonToFighter(pk: GamePokemon): FighterPokemon {
@@ -33,6 +37,6 @@ export function gamePokemonToFighter(pk: GamePokemon): FighterPokemon {
     currentStats: { ...pk.currentStats, hp: pk.currentHp },
     status: pk.status,
     specialStatus: [],
-    volatileStatus: []
+    volatileStatus: [],
   };
 }

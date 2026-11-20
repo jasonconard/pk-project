@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 /** Surface heights are raycasted once per cell of this size, then cached. */
 const HEIGHT_CELL = 4;
@@ -6,7 +6,7 @@ const HEIGHT_CELL = 4;
 const SURFACES_CHECK_INTERVAL = 1;
 
 /** Meshes flagged with this userData key stop the precipitations (grounds, buildings). */
-export const RAIN_STOP_KEY = 'rainStop';
+export const RAIN_STOP_KEY = "rainStop";
 
 /**
  * Height of the surfaces (ground, roofs...) where rain drops and snowflakes stop.
@@ -22,8 +22,7 @@ export class SurfaceHeights {
   private readonly rayOrigin = new THREE.Vector3();
   private readonly down = new THREE.Vector3(0, -1, 0);
 
-  constructor(private readonly scene: THREE.Scene) {
-  }
+  constructor(private readonly scene: THREE.Scene) {}
 
   /**
    * Call every frame while something falls: checks the surfaces list regularly.
@@ -39,14 +38,17 @@ export class SurfaceHeights {
     // there (the rain stops on it). Following their own visibility emptied the whole cache every time one was
     // hidden / shown while walking, and thousands of raycasts started again.
     const surfaces: THREE.Object3D[] = [];
-    this.scene.traverse(o => {
+    this.scene.traverse((o) => {
       if (o.userData[RAIN_STOP_KEY] && SurfaceHeights.parentsVisible(o)) {
         surfaces.push(o);
       }
     });
-    const geometries = surfaces.map(o => (o as THREE.Mesh).geometry);
-    const changed = surfaces.length !== this.surfaces.length
-      || surfaces.some((o, i) => o !== this.surfaces[i] || geometries[i] !== this.geometries[i]);
+    const geometries = surfaces.map((o) => (o as THREE.Mesh).geometry);
+    const changed =
+      surfaces.length !== this.surfaces.length ||
+      surfaces.some(
+        (o, i) => o !== this.surfaces[i] || geometries[i] !== this.geometries[i]
+      );
     if (changed) {
       this.surfaces = surfaces;
       this.geometries = geometries;

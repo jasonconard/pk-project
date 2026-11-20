@@ -1,6 +1,6 @@
-import { Service } from '@angular/core';
-import * as THREE from 'three';
-import { KeyCode } from '../../../../core/shared/model/PressedKey';
+import { Service } from "@angular/core";
+import * as THREE from "three";
+import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { PlayerDirection, PlayerMoveStatus } from "../model/ScenePlayer";
 import { MapHelper } from "../model/MapHelper";
 import { Vec3 } from "../model/SceneUtils";
@@ -14,8 +14,11 @@ const FOOT_HALF_DEPTH = 3;
 
 @Service()
 export class SceneService {
-
-  public static checkCollisions(mapHelper: MapHelper, playerMesh: THREE.Object3D, move: Vec3) {
+  public static checkCollisions(
+    mapHelper: MapHelper,
+    playerMesh: THREE.Object3D,
+    move: Vec3
+  ) {
     const nextPosition = new THREE.Vector3(
       playerMesh.position.x + move.x,
       playerMesh.position.y + move.y,
@@ -25,13 +28,13 @@ export class SceneService {
     const spriteSize = new THREE.Vector3();
     new THREE.Box3().setFromObject(playerMesh).getSize(spriteSize);
 
-    mapHelper.sceneMap.chunks.forEach(chunk => {
-      if(chunk.visible) {
-        chunk.buildings.forEach(building => {
-          if(!building.originModel) {
+    mapHelper.sceneMap.chunks.forEach((chunk) => {
+      if (chunk.visible) {
+        chunk.buildings.forEach((building) => {
+          if (!building.originModel) {
             return;
           }
-          if(building.passable) {
+          if (building.passable) {
             return;
           }
           const bounds = mapHelper.buildingBounds(chunk, building);
@@ -39,18 +42,20 @@ export class SceneService {
           if (!bounds || !hb) {
             return;
           }
-          const spx = (spriteSize.x / 2);
+          const spx = spriteSize.x / 2;
           const bMinX = bounds.min.x - spx - hb.min.x;
           const bMaxX = bounds.max.x + spx - hb.max.x;
           const npx = nextPosition.x;
           const npz = nextPosition.z;
 
-
-          if(npx >= bMinX && npx <= bMaxX) {
-            if(npz >= bounds.min.z - hb.min.z && npz < bounds.max.z + hb.max.z) {
-              move.z = 0;
-              move.x = 0;
-            }
+          if (
+            npx >= bMinX &&
+            npx <= bMaxX &&
+            npz >= bounds.min.z - hb.min.z &&
+            npz < bounds.max.z + hb.max.z
+          ) {
+            move.z = 0;
+            move.x = 0;
           }
         });
       }
@@ -62,7 +67,11 @@ export class SceneService {
    * cell (walls can't be climbed). Checked a few units ahead in the move direction, so the sprite doesn't walk
    * half into the water / the wall.
    */
-  public static checkGroundCollisions(mapHelper: MapHelper, playerMesh: THREE.Object3D, move: Vec3) {
+  public static checkGroundCollisions(
+    mapHelper: MapHelper,
+    playerMesh: THREE.Object3D,
+    move: Vec3
+  ) {
     const ahead = (v: number) => Math.sign(v) * GROUND_MARGIN;
     const pos = playerMesh.position;
     const block = () => {
@@ -71,9 +80,20 @@ export class SceneService {
     };
     // Both sides of the sprite (across the move), so it can't slip half over a higher / blocking cell
     const alongZ = move.z !== 0;
-    const sides: [number, number][] = alongZ ? [[-FOOT_HALF_WIDTH, 0], [FOOT_HALF_WIDTH, 0]] : [[0, -FOOT_HALF_DEPTH], [0, FOOT_HALF_DEPTH]];
+    const sides: [number, number][] = alongZ
+      ? [
+          [-FOOT_HALF_WIDTH, 0],
+          [FOOT_HALF_WIDTH, 0],
+        ]
+      : [
+          [0, -FOOT_HALF_DEPTH],
+          [0, FOOT_HALF_DEPTH],
+        ];
     const here = sides.map(([dx, dz]) => [pos.x + dx, pos.z + dz]);
-    const next = sides.map(([dx, dz]) => [pos.x + move.x + ahead(move.x) + dx, pos.z + move.z + ahead(move.z) + dz]);
+    const next = sides.map(([dx, dz]) => [
+      pos.x + move.x + ahead(move.x) + dx,
+      pos.z + move.z + ahead(move.z) + dz,
+    ]);
     // Stairs (all in the same direction, else they are a wall):
     // - along their slope, both feet are on them (the player centered on a single one, anywhere across stairs set
     //   side by side): this is how a level is climbed;
@@ -81,12 +101,16 @@ export class SceneService {
     //   but doesn't enter / leave them by the side.
     const hereStairs = here.map(([x, z]) => mapHelper.stairsAt(x, z));
     const nextStairs = next.map(([x, z]) => mapHelper.stairsAt(x, z));
-    const side = [...hereStairs, ...nextStairs].find(s => s);
+    const side = [...hereStairs, ...nextStairs].find(Boolean);
     let onStairs = false;
     if (side) {
-      const alongSlope = (side === 'n' || side === 's') === alongZ;
-      const sameSide = [...hereStairs, ...nextStairs].every(s => !s || s === side);
-      const bothFeet = [hereStairs, nextStairs].every(feet => feet.every(s => s) || feet.every(s => !s));
+      const alongSlope = (side === "n" || side === "s") === alongZ;
+      const sameSide = [...hereStairs, ...nextStairs].every(
+        (s) => !s || s === side
+      );
+      const bothFeet = [hereStairs, nextStairs].every(
+        (feet) => feet.every(Boolean) || feet.every((s) => !s)
+      );
       const staysOn = hereStairs.every((s, i) => s === nextStairs[i]);
       if (!sameSide || !(alongSlope ? bothFeet : staysOn)) {
         block();
@@ -94,39 +118,72 @@ export class SceneService {
       }
       onStairs = alongSlope;
     }
-    const levelHere = Math.max(...here.map(([x, z]) => mapHelper.levelAtWorld(x, z)));
+    const levelHere = Math.max(
+      ...here.map(([x, z]) => mapHelper.levelAtWorld(x, z))
+    );
     for (const [x, z] of next) {
       const cell = mapHelper.cellAt(x, z);
       // Climbing a wall is impossible, one level by stairs is fine
       const rise = mapHelper.levelAtWorld(x, z) - levelHere;
-      if ((rise > 0 && !(rise === 1 && onStairs)) || (cell && terrainById(cell.chunk.tiles?.[cell.col + ',' + cell.row])?.blocking)) {
+      if (
+        (rise > 0 && !(rise === 1 && onStairs)) ||
+        (cell &&
+          terrainById(cell.chunk.tiles?.[cell.col + "," + cell.row])?.blocking)
+      ) {
         block();
         return;
       }
     }
   }
 
-  public static getMove(mapHelper: MapHelper, holdedCodes: KeyCode[]): { move: THREE.Vector3, speed: number, status: PlayerMoveStatus } {
+  public static getMove(
+    mapHelper: MapHelper,
+    holdedCodes: KeyCode[]
+  ): { move: THREE.Vector3; speed: number; status: PlayerMoveStatus } {
     const move = new THREE.Vector3(0, 0, 0);
 
-    const runPressed = holdedCodes.includes(KeyCode.confirm) || holdedCodes.includes(KeyCode.run);
-    let status = runPressed ? PlayerMoveStatus.RUNNING : PlayerMoveStatus.WALKING;
-    let speed = (runPressed ? 2 : 1)
+    const runPressed =
+      holdedCodes.includes(KeyCode.confirm) ||
+      holdedCodes.includes(KeyCode.run);
+    let status = runPressed
+      ? PlayerMoveStatus.RUNNING
+      : PlayerMoveStatus.WALKING;
+    const speed = runPressed ? 2 : 1;
 
     let playerSpeed = 0;
 
     let direction = mapHelper.scenePlayer.dir;
-    for(let i = 0; i < holdedCodes.length; i++) {
+    for (let i = 0; i < holdedCodes.length; i++) {
       const key = holdedCodes[i];
       switch (key) {
-        case KeyCode.up: move.z = -speed; direction = PlayerDirection.UP; holdedCodes = []; playerSpeed = speed; break;
-        case KeyCode.left: move.x = -speed; direction = PlayerDirection.LEFT; holdedCodes = []; playerSpeed = speed; break;
-        case KeyCode.down: move.z = speed; direction = PlayerDirection.DOWN; holdedCodes = []; playerSpeed = speed; break;
-        case KeyCode.right: move.x = speed; direction = PlayerDirection.RIGHT; holdedCodes = []; playerSpeed = speed; break;
+        case KeyCode.up:
+          move.z = -speed;
+          direction = PlayerDirection.UP;
+          holdedCodes = [];
+          playerSpeed = speed;
+          break;
+        case KeyCode.left:
+          move.x = -speed;
+          direction = PlayerDirection.LEFT;
+          holdedCodes = [];
+          playerSpeed = speed;
+          break;
+        case KeyCode.down:
+          move.z = speed;
+          direction = PlayerDirection.DOWN;
+          holdedCodes = [];
+          playerSpeed = speed;
+          break;
+        case KeyCode.right:
+          move.x = speed;
+          direction = PlayerDirection.RIGHT;
+          holdedCodes = [];
+          playerSpeed = speed;
+          break;
       }
     }
 
-    if(!playerSpeed) {
+    if (!playerSpeed) {
       status = PlayerMoveStatus.STAYING;
     }
 

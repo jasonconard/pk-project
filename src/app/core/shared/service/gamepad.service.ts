@@ -1,9 +1,8 @@
-import { Service } from '@angular/core';
-import { getKeyFromAxes, KeyCode } from '../model/PressedKey';
+import { Service } from "@angular/core";
+import { getKeyFromAxes, KeyCode } from "../model/PressedKey";
 
 @Service()
 export class GamepadService {
-
   public vibrating = false;
 
   public static isGamepadAvailable(): boolean {
@@ -14,42 +13,60 @@ export class GamepadService {
     const keySet = new Set<KeyCode>();
     const gamepad = navigator.getGamepads()[0];
 
-    if(gamepad) {
-      if(gamepad.buttons[0].pressed) { keySet.add(KeyCode.confirm); }
-      if(gamepad.buttons[1].pressed) { keySet.add(KeyCode.cancel); }
-      if(gamepad.buttons[3].pressed) { keySet.add(KeyCode.y); }
-      if(gamepad.buttons[2].pressed) { keySet.add(KeyCode.x); }
-      if(gamepad.buttons[9].pressed) { keySet.add(KeyCode.pause); } // PAUSE
-      if(gamepad.buttons[8].pressed) { keySet.add(KeyCode.select); } // SELECT
-      if(gamepad.buttons[12].pressed) { keySet.add(KeyCode.up); }
-      if(gamepad.buttons[13].pressed) { keySet.add(KeyCode.down); }
-      if(gamepad.buttons[14].pressed) { keySet.add(KeyCode.left); }
-      if(gamepad.buttons[15].pressed) { keySet.add(KeyCode.right); }
+    if (gamepad) {
+      if (gamepad.buttons[0].pressed) {
+        keySet.add(KeyCode.confirm);
+      }
+      if (gamepad.buttons[1].pressed) {
+        keySet.add(KeyCode.cancel);
+      }
+      if (gamepad.buttons[3].pressed) {
+        keySet.add(KeyCode.y);
+      }
+      if (gamepad.buttons[2].pressed) {
+        keySet.add(KeyCode.x);
+      }
+      if (gamepad.buttons[9].pressed) {
+        keySet.add(KeyCode.pause);
+      } // PAUSE
+      if (gamepad.buttons[8].pressed) {
+        keySet.add(KeyCode.select);
+      } // SELECT
+      if (gamepad.buttons[12].pressed) {
+        keySet.add(KeyCode.up);
+      }
+      if (gamepad.buttons[13].pressed) {
+        keySet.add(KeyCode.down);
+      }
+      if (gamepad.buttons[14].pressed) {
+        keySet.add(KeyCode.left);
+      }
+      if (gamepad.buttons[15].pressed) {
+        keySet.add(KeyCode.right);
+      }
 
       const axes = [...gamepad.axes];
       const key = getKeyFromAxes({ x: axes[0], y: axes[1] });
-      if(key !== null) {
+      if (key !== null) {
         keySet.add(key);
       }
-
     }
 
-    return Array.from(keySet);
+    return [...keySet];
   }
 
   public vibrate() {
     const gamepad = navigator.getGamepads()[0];
     const va = gamepad?.vibrationActuator;
-    if(va && !this.vibrating) {
+    if (va && !this.vibrating) {
       this.vibrating = true;
       va.playEffect("dual-rumble", {
         startDelay: 0,
         duration: 2,
         weakMagnitude: 0.5,
-        strongMagnitude: 0.5
+        strongMagnitude: 0.5,
       });
       // setTimeout( () => { this.vibrating = false; }, 20);
     }
   }
-
 }

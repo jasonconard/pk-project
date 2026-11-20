@@ -1,139 +1,286 @@
 @if (editMode()) {
   <!-- The editor's bar: back to the game, the open map, history, more -->
-  <header class="bar" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-    <button type="button" class="play-btn" title="Jouer : quitter l'édition (B)" (click)="toggle($event)">
+  <header
+    class="bar"
+    animate.enter="anim-fade-in"
+    animate.leave="anim-fade-out"
+  >
+    <button
+      type="button"
+      class="play-btn"
+      title="Jouer : quitter l'édition (B)"
+      (click)="toggle($event)"
+    >
       <svg lucidePlay></svg><span class="label">Jouer</span><kbd>B</kbd>
     </button>
-    <button type="button" class="map-btn" title="Cartes : ouvrir, créer, renommer une carte" (click)="openMaps($event)">
-      <svg lucideMap></svg> <span class="map-name">{{ mapName() }}</span> <svg lucideChevronDown class="chevron"></svg>
+    <button
+      type="button"
+      class="map-btn"
+      title="Cartes : ouvrir, créer, renommer une carte"
+      (click)="openMaps($event)"
+    >
+      <svg lucideMap></svg> <span class="map-name">{{ mapName() }}</span>
+      <svg lucideChevronDown class="chevron"></svg>
     </button>
-    <button type="button" class="icon-btn" title="Annuler (Ctrl+Z)" aria-label="Annuler"
-            [disabled]="!canUndo()" (click)="send('undo', $event)"><svg lucideUndo2></svg></button>
-    <button type="button" class="icon-btn" title="Refaire (Ctrl+Y)" aria-label="Refaire"
-            [disabled]="!canRedo()" (click)="send('redo', $event)"><svg lucideRedo2></svg></button>
-    @if (layout() === 'desktop') {
-      <button type="button" class="icon-btn" title="Grille des cases" aria-label="Grille des cases" [class.on]="grid()"
-              [attr.aria-pressed]="grid()" (click)="send('toggleGrid', $event)"><svg lucideGrid2x2></svg></button>
+    <button
+      type="button"
+      class="icon-btn"
+      title="Annuler (Ctrl+Z)"
+      aria-label="Annuler"
+      [disabled]="!canUndo()"
+      (click)="send('undo', $event)"
+    >
+      <svg lucideUndo2></svg>
+    </button>
+    <button
+      type="button"
+      class="icon-btn"
+      title="Refaire (Ctrl+Y)"
+      aria-label="Refaire"
+      [disabled]="!canRedo()"
+      (click)="send('redo', $event)"
+    >
+      <svg lucideRedo2></svg>
+    </button>
+    @if (layout() === "desktop") {
+      <button
+        type="button"
+        class="icon-btn"
+        title="Grille des cases"
+        aria-label="Grille des cases"
+        [class.on]="grid()"
+        [attr.aria-pressed]="grid()"
+        (click)="send('toggleGrid', $event)"
+      >
+        <svg lucideGrid2x2></svg>
+      </button>
       <span class="spacer"></span>
-      <button type="button" class="chip-btn" title="Ambiance : météo, heure, vent, nuages, son (M, H, W, N, V)" (click)="openAmbiance($event)">
+      <button
+        type="button"
+        class="chip-btn"
+        title="Ambiance : météo, heure, vent, nuages, son (M, H, W, N, V)"
+        (click)="openAmbiance($event)"
+      >
         <svg lucideCloudSun></svg> {{ ambianceLabel() }}
       </button>
-      <button type="button" class="icon-btn" title="Réglages : plein écran, son, qualité graphique, nouveautés" aria-label="Réglages"
-              (click)="openSettings($event)"><svg lucideSettings></svg></button>
+      <button
+        type="button"
+        class="icon-btn"
+        title="Réglages : plein écran, son, qualité graphique, nouveautés"
+        aria-label="Réglages"
+        (click)="openSettings($event)"
+      >
+        <svg lucideSettings></svg>
+      </button>
       <div class="more">
-        <button type="button" class="chip-btn" title="Ouvrir un autre éditeur du jeu" [class.on]="editorsOpen()"
-                [attr.aria-expanded]="editorsOpen()" (click)="toggleEditors($event)">
-          <svg lucideGrid3x3></svg> Éditeurs <svg lucideChevronDown class="chevron"></svg>
+        <button
+          type="button"
+          class="chip-btn"
+          title="Ouvrir un autre éditeur du jeu"
+          [class.on]="editorsOpen()"
+          [attr.aria-expanded]="editorsOpen()"
+          (click)="toggleEditors($event)"
+        >
+          <svg lucideGrid3x3></svg> Éditeurs
+          <svg lucideChevronDown class="chevron"></svg>
         </button>
         @if (editorsOpen()) {
           <div class="more-backdrop" (click)="editorsOpen.set(false)"></div>
-          <div class="more-menu editors-menu" role="menu" animate.enter="anim-fade-in">
+          <div
+            class="more-menu editors-menu"
+            role="menu"
+            animate.enter="anim-fade-in"
+          >
             <p class="more-title">Ouvrir un éditeur</p>
             @for (editor of editors; track editor.label) {
-              <button type="button" role="menuitem" [disabled]="!editor.id" (click)="openEditor(editor.id)">
+              <button
+                type="button"
+                role="menuitem"
+                [disabled]="!editor.id"
+                (click)="openEditor(editor.id)"
+              >
                 <svg [lucideIcon]="editor.icon"></svg>
-                <span class="editor-text"><b>{{ editor.label }}</b><small>{{ editor.sub }}</small></span>
+                <span class="editor-text"
+                  ><b>{{ editor.label }}</b
+                  ><small>{{ editor.sub }}</small></span
+                >
               </button>
             }
           </div>
         }
       </div>
     } @else {
-    <div class="more">
-      <button type="button" class="icon-btn" title="Plus : grille, ambiance, réglages, éditeurs" aria-label="Plus"
-              [class.on]="moreOpen()" [attr.aria-expanded]="moreOpen()" (click)="toggleMore($event)"><svg lucideEllipsisVertical></svg></button>
-      @if (moreOpen()) {
-        <div class="more-backdrop" (click)="moreOpen.set(false)"></div>
-        <div class="more-menu" role="menu" animate.enter="anim-fade-in">
-          <button type="button" role="menuitemcheckbox" [attr.aria-checked]="grid()" (click)="send('toggleGrid', $event)">
-            <svg lucideGrid3x3></svg> Grille des cases
-            <span class="check" aria-hidden="true">@if (grid()) { <svg lucideCheck></svg> }</span>
-          </button>
-          <button type="button" role="menuitem" title="Météo, heure, vent, nuages, son" (click)="openAmbiance()">
-            <svg lucideCloudSun></svg> Ambiance
-          </button>
-          <button type="button" role="menuitem" title="Plein écran, son, qualité graphique, nouveautés" (click)="openSettings()">
-            <svg lucideSettings></svg> Réglages
-          </button>
-          <hr />
-          <p class="more-title">Éditeurs</p>
-          <button type="button" role="menuitem" title="Créer et peindre les bâtiments, les fleurs…" (click)="openModelEditor()">
-            <svg lucideBox></svg> Modèles 3D
-          </button>
-          <button type="button" role="menuitem" title="Composer les musiques du jeu" (click)="openPanel('music')">
-            <svg lucideEighthNotes></svg> Musique
-          </button>
-          <button type="button" role="menuitem" title="Les drapeaux et compteurs de l'histoire" (click)="openPanel('variables')">
-            <svg lucideVariable></svg> Variables
-          </button>
-          <button type="button" role="menuitem" title="Éléments, types d'armes, états…" (click)="openPanel('database')">
-            <svg lucideDatabase></svg> Base de données
-          </button>
-        </div>
-      }
-    </div>
+      <div class="more">
+        <button
+          type="button"
+          class="icon-btn"
+          title="Plus : grille, ambiance, réglages, éditeurs"
+          aria-label="Plus"
+          [class.on]="moreOpen()"
+          [attr.aria-expanded]="moreOpen()"
+          (click)="toggleMore($event)"
+        >
+          <svg lucideEllipsisVertical></svg>
+        </button>
+        @if (moreOpen()) {
+          <div class="more-backdrop" (click)="moreOpen.set(false)"></div>
+          <div class="more-menu" role="menu" animate.enter="anim-fade-in">
+            <button
+              type="button"
+              role="menuitemcheckbox"
+              [attr.aria-checked]="grid()"
+              (click)="send('toggleGrid', $event)"
+            >
+              <svg lucideGrid3x3></svg> Grille des cases
+              <span class="check" aria-hidden="true">
+                @if (grid()) {
+                  <svg lucideCheck></svg>
+                }
+              </span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              title="Météo, heure, vent, nuages, son"
+              (click)="openAmbiance()"
+            >
+              <svg lucideCloudSun></svg> Ambiance
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              title="Plein écran, son, qualité graphique, nouveautés"
+              (click)="openSettings()"
+            >
+              <svg lucideSettings></svg> Réglages
+            </button>
+            <hr />
+            <p class="more-title">Éditeurs</p>
+            <button
+              type="button"
+              role="menuitem"
+              title="Créer et peindre les bâtiments, les fleurs…"
+              (click)="openModelEditor()"
+            >
+              <svg lucideBox></svg> Modèles 3D
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              title="Composer les musiques du jeu"
+              (click)="openPanel('music')"
+            >
+              <svg lucideEighthNotes></svg> Musique
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              title="Les drapeaux et compteurs de l'histoire"
+              (click)="openPanel('variables')"
+            >
+              <svg lucideVariable></svg> Variables
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              title="Éléments, types d'armes, états…"
+              (click)="openPanel('database')"
+            >
+              <svg lucideDatabase></svg> Base de données
+            </button>
+          </div>
+        }
+      </div>
     }
   </header>
 
   <!-- How the current tool works (closed by its ✕ until the tool changes) -->
-  @if (layout() === 'desktop') {
+  @if (layout() === "desktop") {
     <!-- The computer: the keyboard and mouse of the current tool, at the bottom -->
     @if (!pickMap()) {
       <footer class="keys" aria-label="Aide">
         @if (selection()) {
-          <span><kbd>Glisser</kbd> déplacer l'objet</span><span><kbd>R</kbd> tourner</span><span><kbd>Ctrl D</kbd> dupliquer</span>
+          <span><kbd>Glisser</kbd> déplacer l'objet</span
+          ><span><kbd>R</kbd> tourner</span
+          ><span><kbd>Ctrl D</kbd> dupliquer</span>
           <span><kbd>Suppr</kbd> supprimer</span>
           <span><kbd>Échap</kbd> désélectionner</span>
-        } @else if (tileId() === 'spawn') {
+        } @else if (tileId() === "spawn") {
           <span><kbd>Clic</kbd> point d'arrivée de la carte</span>
-        } @else if (tileId() === 'chunk-add') {
+        } @else if (tileId() === "chunk-add") {
           <span><kbd>Clic</kbd> sur une place verte : ajouter une zone</span>
-        } @else if (tileId() === 'chunk-remove') {
+        } @else if (tileId() === "chunk-remove") {
           <span><kbd>Clic</kbd> sur une zone : la retirer</span>
         } @else if (tileId()) {
-          <span><kbd>Clic</kbd> / <kbd>Glisser</kbd> peindre</span><span><kbd>Clic droit glissé</kbd> déplacer la vue</span>
+          <span><kbd>Clic</kbd> / <kbd>Glisser</kbd> peindre</span
+          ><span><kbd>Clic droit glissé</kbd> déplacer la vue</span>
           <span><kbd>Échap</kbd> reposer le pinceau</span>
         } @else if (modelId()) {
-          <span><kbd>Clic</kbd> poser</span><span><kbd>Glisser</kbd> déplacer la vue</span><span><kbd>Échap</kbd> reposer le modèle</span>
+          <span><kbd>Clic</kbd> poser</span
+          ><span><kbd>Glisser</kbd> déplacer la vue</span
+          ><span><kbd>Échap</kbd> reposer le modèle</span>
         } @else {
-          <span><kbd>Clic</kbd> sélectionner un objet</span><span><kbd>Glisser</kbd> déplacer la vue</span>
+          <span><kbd>Clic</kbd> sélectionner un objet</span
+          ><span><kbd>Glisser</kbd> déplacer la vue</span>
         }
-        <span><kbd>Molette</kbd> zoom</span><span><kbd>Ctrl Z</kbd> / <kbd>Ctrl Y</kbd> annuler, refaire</span>
+        <span><kbd>Molette</kbd> zoom</span
+        ><span><kbd>Ctrl Z</kbd> / <kbd>Ctrl Y</kbd> annuler, refaire</span>
         <span><kbd>B</kbd> jouer</span>
       </footer>
     }
   } @else if (!hintClosed() && !selection() && !pickMap()) {
     <p class="hint" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
       <span>
-        @if (tileId() === 'spawn') {
-          {{ touch() ? 'Toucher' : 'Clic sur' }} le sol : point d'arrivée de la carte (le repère jaune)
-        } @else if (tileId() === 'chunk-add') {
-          {{ touch() ? 'Toucher' : 'Clic sur' }} une place verte : ajouter une zone · {{ touch() ? 'Deux doigts' : 'Molette' }} : dézoomer pour voir les places
-        } @else if (tileId() === 'chunk-remove') {
-          {{ touch() ? 'Toucher' : 'Clic sur' }} une zone : la retirer (pas celle du joueur ni du point d'arrivée) · Annuler la remet
+        @if (tileId() === "spawn") {
+          {{ touch() ? "Toucher" : "Clic sur" }} le sol : point d'arrivée de la
+          carte (le repère jaune)
+        } @else if (tileId() === "chunk-add") {
+          {{ touch() ? "Toucher" : "Clic sur" }} une place verte : ajouter une
+          zone · {{ touch() ? "Deux doigts" : "Molette" }} : dézoomer pour voir
+          les places
+        } @else if (tileId() === "chunk-remove") {
+          {{ touch() ? "Toucher" : "Clic sur" }} une zone : la retirer (pas
+          celle du joueur ni du point d'arrivée) · Annuler la remet
         } @else if (touch()) {
           @if (tileId()) {
             Toucher : peindre · Glisser : déplacer la vue · Deux doigts : zoom
           } @else if (modelId()) {
             Toucher : poser · Glisser : déplacer la vue · Deux doigts : zoom
           } @else {
-            Toucher un objet : le sélectionner · Glisser : déplacer la vue · Deux doigts : zoom
+            Toucher un objet : le sélectionner · Glisser : déplacer la vue ·
+            Deux doigts : zoom
           }
         } @else if (tileId()) {
-          Clic / glisser : peindre le sol · Clic droit glissé : déplacer la vue · Échap : reposer le pinceau
+          Clic / glisser : peindre le sol · Clic droit glissé : déplacer la vue
+          · Échap : reposer le pinceau
         } @else if (modelId()) {
-          Clic : poser · Échap : reposer le modèle · Glisser : déplacer la vue · Molette : zoom
+          Clic : poser · Échap : reposer le modèle · Glisser : déplacer la vue ·
+          Molette : zoom
         } @else {
-          Clic sur un objet : le sélectionner · Glisser : déplacer la vue · Molette : zoom · Choisis un modèle {{ layout() === 'portrait' ? 'en bas' : 'à gauche' }} pour le poser
+          Clic sur un objet : le sélectionner · Glisser : déplacer la vue ·
+          Molette : zoom · Choisis un modèle
+          {{ layout() === "portrait" ? "en bas" : "à gauche" }} pour le poser
         }
       </span>
-      <button type="button" aria-label="Masquer l'aide" title="Masquer l'aide" (click)="hintClosed.set(true)"><svg lucideX></svg></button>
+      <button
+        type="button"
+        aria-label="Masquer l'aide"
+        title="Masquer l'aide"
+        (click)="hintClosed.set(true)"
+      >
+        <svg lucideX></svg>
+      </button>
     </p>
   }
 
   @if (selection(); as selection) {
     <!-- The selected object: its sheet takes the dock's place (phone upright), or opens on the right -->
-    <section class="sheet selection" aria-label="Objet sélectionné" animate.enter="anim-sheet-in" animate.leave="anim-fade-out">
+    <section
+      class="sheet selection"
+      aria-label="Objet sélectionné"
+      animate.enter="anim-sheet-in"
+      animate.leave="anim-fade-out"
+    >
       <header class="sheet-head">
         <span class="thumb">
           @if (selection.zoneSize) {
@@ -144,37 +291,77 @@
         </span>
         <span class="title">
           <h2>{{ selectionLabel() }}</h2>
-          <small>{{ touch() ? 'Glisser l\'objet pour le déplacer' : 'Glisser l\'objet pour le déplacer · Échap : désélectionner' }}</small>
+          <small>{{
+            touch()
+              ? "Glisser l'objet pour le déplacer"
+              : "Glisser l'objet pour le déplacer · Échap : désélectionner"
+          }}</small>
         </span>
-        <button type="button" class="close" aria-label="Désélectionner" title="Désélectionner (Échap)" (click)="send('deselect', $event)"><svg lucideX></svg></button>
+        <button
+          type="button"
+          class="close"
+          aria-label="Désélectionner"
+          title="Désélectionner (Échap)"
+          (click)="send('deselect', $event)"
+        >
+          <svg lucideX></svg>
+        </button>
       </header>
       <div class="actions">
         @if (!selection.zoneSize) {
-          <button type="button" title="Tourner d'un quart de tour (R)" (click)="send('rotate', $event)">
+          <button
+            type="button"
+            title="Tourner d'un quart de tour (R)"
+            (click)="send('rotate', $event)"
+          >
             <svg lucideRotateCw></svg> Tourner
           </button>
         }
-        <button type="button" title="Dupliquer : une copie à côté (Ctrl D)" (click)="send('duplicate', $event)">
+        <button
+          type="button"
+          title="Dupliquer : une copie à côté (Ctrl D)"
+          (click)="send('duplicate', $event)"
+        >
           <svg lucideCopy></svg> Dupliquer
         </button>
         @if (!selection.zoneSize) {
-          <button type="button" title="Ouvrir ce modèle dans l'éditeur de modèles 3D" (click)="openModelEditor(selection.modelId)">
+          <button
+            type="button"
+            title="Ouvrir ce modèle dans l'éditeur de modèles 3D"
+            (click)="openModelEditor(selection.modelId)"
+          >
             <svg lucideBox></svg> Modèle
           </button>
         }
-        <button type="button" class="danger" data-haptic="warning" title="Supprimer (Suppr)" (click)="send('delete', $event)">
+        <button
+          type="button"
+          class="danger"
+          data-haptic="warning"
+          title="Supprimer (Suppr)"
+          (click)="send('delete', $event)"
+        >
           <svg lucideTrash></svg> Supprimer
         </button>
       </div>
       <div class="options">
         <label class="switch-row">
           <span>Bloque le passage</span>
-          <input type="checkbox" role="switch" [checked]="!selection.passable" (change)="send('togglePassable', $event)" />
+          <input
+            type="checkbox"
+            role="switch"
+            [checked]="!selection.passable"
+            (change)="send('togglePassable', $event)"
+          />
         </label>
         @if (!selection.zoneSize) {
           <label class="switch-row">
             <span>Transparent quand le joueur est derrière</span>
-            <input type="checkbox" role="switch" [checked]="selection.canHide" (change)="send('toggleCanHide', $event)" />
+            <input
+              type="checkbox"
+              role="switch"
+              [checked]="selection.canHide"
+              (change)="send('toggleCanHide', $event)"
+            />
           </label>
         }
       </div>
@@ -183,46 +370,122 @@
         @if (selection.passage; as passage) {
           <label class="passage-row">
             <span>Vers</span>
-            <select aria-label="Carte de destination" (change)="setPassageMap(passage, $any($event.target).value)">
+            <select
+              aria-label="Carte de destination"
+              (change)="setPassageMap(passage, $any($event.target).value)"
+            >
               @for (map of maps(); track map.id) {
-                <option [value]="map.id" [selected]="map.id === passage.map">{{ map.name }}{{ map.id === mapId() ? ' (cette carte)' : '' }}</option>
+                <option [value]="map.id" [selected]="map.id === passage.map">
+                  {{ map.name }}{{ map.id === mapId() ? " (cette carte)" : "" }}
+                </option>
               }
             </select>
           </label>
           <div class="segmented" role="radiogroup" aria-label="Déclenchement">
-            <button type="button" role="radio" [attr.aria-checked]="passage.trigger === 'door'"
-                    title="En avançant vers l'objet (comme une porte), ou avec la touche d'action devant"
-                    (click)="changePassage({ map: passage.map, pos: passage.pos, trigger: 'door' })">Porte</button>
-            <button type="button" role="radio" [attr.aria-checked]="passage.trigger === 'walk'"
-                    title="En marchant sur l'objet (il laisse alors passer le joueur)"
-                    (click)="changePassage({ map: passage.map, pos: passage.pos, trigger: 'walk' })">Marcher dessus</button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="passage.trigger === 'door'"
+              title="En avançant vers l'objet (comme une porte), ou avec la touche d'action devant"
+              (click)="
+                changePassage({
+                  map: passage.map,
+                  pos: passage.pos,
+                  trigger: 'door',
+                })
+              "
+            >
+              Porte
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="passage.trigger === 'walk'"
+              title="En marchant sur l'objet (il laisse alors passer le joueur)"
+              (click)="
+                changePassage({
+                  map: passage.map,
+                  pos: passage.pos,
+                  trigger: 'walk',
+                })
+              "
+            >
+              Marcher dessus
+            </button>
           </div>
           <div class="passage-row arrival">
-            <span>Arrivée : {{ passage.pos ? 'point choisi' : 'celle de la carte' }}</span>
-            <button type="button" class="small-btn" title="Aller sur la carte de destination et toucher le point d'arrivée"
-                    (click)="pickArrival.emit()"><svg lucideMapPin></svg> Choisir</button>
+            <span
+              >Arrivée :
+              {{ passage.pos ? "point choisi" : "celle de la carte" }}</span
+            >
+            <button
+              type="button"
+              class="small-btn"
+              title="Aller sur la carte de destination et toucher le point d'arrivée"
+              (click)="pickArrival.emit()"
+            >
+              <svg lucideMapPin></svg> Choisir
+            </button>
             @if (passage.pos) {
-              <button type="button" class="small-btn icon-only" aria-label="Arrivée de la carte" title="Revenir au point d'arrivée de la carte"
-                      (click)="changePassage({ map: passage.map, trigger: passage.trigger })"><svg lucideX></svg></button>
+              <button
+                type="button"
+                class="small-btn icon-only"
+                aria-label="Arrivée de la carte"
+                title="Revenir au point d'arrivée de la carte"
+                (click)="
+                  changePassage({ map: passage.map, trigger: passage.trigger })
+                "
+              >
+                <svg lucideX></svg>
+              </button>
             }
           </div>
-          <button type="button" class="remove-passage" data-haptic="warning" (click)="passageChange.emit(null)">Retirer le passage</button>
+          <button
+            type="button"
+            class="remove-passage"
+            data-haptic="warning"
+            (click)="passageChange.emit(null)"
+          >
+            Retirer le passage
+          </button>
         } @else {
-          <button type="button" class="add-passage" (click)="addPassage()"><svg lucidePlus></svg> Ajouter un passage</button>
+          <button type="button" class="add-passage" (click)="addPassage()">
+            <svg lucidePlus></svg> Ajouter un passage
+          </button>
         }
       </div>
       @if (selection.zoneSize; as size) {
         <div class="passage zone-size">
           <h3><svg lucideSquareDashed></svg> Zone invisible</h3>
-          <small class="talk-hint">Invisible dans le jeu : elle sert à ses événements (entrer dessus, examiner un endroit).</small>
+          <small class="talk-hint"
+            >Invisible dans le jeu : elle sert à ses événements (entrer dessus,
+            examiner un endroit).</small
+          >
           @for (axis of zoneAxes; track axis.id) {
             <div class="passage-row">
               <span>{{ axis.label }}</span>
-              <button type="button" class="small-btn icon-only" [attr.aria-label]="axis.label + ' : moins'" [disabled]="size[axis.id] <= 1"
-                      (click)="resizeZone(size, axis.id, -1)"><svg lucideMinus></svg></button>
-              <b class="zone-count">{{ size[axis.id] }} {{ size[axis.id] > 1 ? 'cases' : 'case' }}</b>
-              <button type="button" class="small-btn icon-only" [attr.aria-label]="axis.label + ' : plus'" [disabled]="size[axis.id] >= zoneMax"
-                      (click)="resizeZone(size, axis.id, 1)"><svg lucidePlus></svg></button>
+              <button
+                type="button"
+                class="small-btn icon-only"
+                [attr.aria-label]="axis.label + ' : moins'"
+                [disabled]="size[axis.id] <= 1"
+                (click)="resizeZone(size, axis.id, -1)"
+              >
+                <svg lucideMinus></svg>
+              </button>
+              <b class="zone-count"
+                >{{ size[axis.id] }}
+                {{ size[axis.id] > 1 ? "cases" : "case" }}</b
+              >
+              <button
+                type="button"
+                class="small-btn icon-only"
+                [attr.aria-label]="axis.label + ' : plus'"
+                [disabled]="size[axis.id] >= zoneMax"
+                (click)="resizeZone(size, axis.id, 1)"
+              >
+                <svg lucidePlus></svg>
+              </button>
             </div>
           }
         </div>
@@ -231,63 +494,125 @@
         <h3><svg lucideZap></svg> Événements</h3>
         @for (evt of selection.events; track $index; let i = $index) {
           <div class="event-card">
-            <button type="button" class="event-open" title="Modifier l'événement" (click)="editingEvent.set({ index: i })">
+            <button
+              type="button"
+              class="event-open"
+              title="Modifier l'événement"
+              (click)="editingEvent.set({ index: i })"
+            >
               <b>{{ i + 1 }}. {{ triggerLabel(evt) }}</b>
               <small>{{ eventSummary(evt) }}</small>
             </button>
             @if (i > 0) {
-              <button type="button" class="small-btn icon-only" aria-label="Passer avant" title="Passer avant (joué en priorité)"
-                      (click)="moveEvent(selection.events, i)"><svg lucideArrowUp></svg></button>
+              <button
+                type="button"
+                class="small-btn icon-only"
+                aria-label="Passer avant"
+                title="Passer avant (joué en priorité)"
+                (click)="moveEvent(selection.events, i)"
+              >
+                <svg lucideArrowUp></svg>
+              </button>
             }
           </div>
         }
         @if (selection.events.length > 1) {
-          <small class="talk-hint">Le jeu joue le premier événement dont le déclencheur et les conditions conviennent.</small>
+          <small class="talk-hint"
+            >Le jeu joue le premier événement dont le déclencheur et les
+            conditions conviennent.</small
+          >
         }
-        <button type="button" class="add-passage" (click)="addEvent(selection.events)"><svg lucidePlus></svg> Ajouter un événement</button>
+        <button
+          type="button"
+          class="add-passage"
+          (click)="addEvent(selection.events)"
+        >
+          <svg lucidePlus></svg> Ajouter un événement
+        </button>
       </div>
     </section>
   }
-  @if (!selection() || layout() !== 'portrait') {
+  @if (!selection() || layout() !== "portrait") {
     <!-- The tools: tabs, brush sizes, (search,) the palette -->
-    <div class="sheet dock" animate.enter="anim-sheet-in" animate.leave="anim-fade-out">
+    <div
+      class="sheet dock"
+      animate.enter="anim-sheet-in"
+      animate.leave="anim-fade-out"
+    >
       <div class="tabs" role="tablist" aria-label="Catégories">
         @for (t of tabs; track t.id) {
-          <button type="button" role="tab" [title]="t.label" [attr.aria-selected]="tab() === t.id" (click)="setTab(t.id, $event)">
-            <svg [lucideIcon]="t.icon"></svg><span class="label">{{ t.label }}</span>
+          <button
+            type="button"
+            role="tab"
+            [title]="t.label"
+            [attr.aria-selected]="tab() === t.id"
+            (click)="setTab(t.id, $event)"
+          >
+            <svg [lucideIcon]="t.icon"></svg
+            ><span class="label">{{ t.label }}</span>
           </button>
         }
       </div>
-      @if (tab() === 'ground' || tab() === 'relief') {
+      @if (tab() === "ground" || tab() === "relief") {
         <div class="brushes" role="radiogroup" aria-label="Pinceau">
           @for (b of brushes; track b.value) {
-            @if (tab() === 'ground' || b.value !== 'fill') {
-              <button type="button" role="radio" [title]="b.title" [attr.aria-checked]="brush() === b.value"
-                      (click)="setBrush(b.value, $event)">@if (b.value === 'fill') { <svg lucidePaintBucket></svg> } @else { {{ b.label }} }</button>
+            @if (tab() === "ground" || b.value !== "fill") {
+              <button
+                type="button"
+                role="radio"
+                [title]="b.title"
+                [attr.aria-checked]="brush() === b.value"
+                (click)="setBrush(b.value, $event)"
+              >
+                @if (b.value === "fill") {
+                  <svg lucidePaintBucket></svg>
+                } @else {
+                  {{ b.label }}
+                }
+              </button>
             }
           }
         </div>
       }
-      @if (layout() === 'desktop' && tab() === 'objects') {
+      @if (layout() === "desktop" && tab() === "objects") {
         <label class="search">
           <svg lucideSearch></svg>
-          <input type="text" placeholder="Chercher un objet…" aria-label="Chercher un objet" [value]="query()"
-                 (input)="query.set($any($event.target).value)" (keydown)="searchKey($event)" />
+          <input
+            type="text"
+            placeholder="Chercher un objet…"
+            aria-label="Chercher un objet"
+            [value]="query()"
+            (input)="query.set($any($event.target).value)"
+            (keydown)="searchKey($event)"
+          />
         </label>
       }
       <div class="palette" role="toolbar" aria-label="Outils">
-        <button type="button" class="entry none" title="Aucun (Échap) : toucher sélectionne et déplace la vue"
-                [class.selected]="!modelId() && !tileId()" [attr.aria-pressed]="!modelId() && !tileId()" (click)="pick(null, $event); tileSelected.emit(null)">
-          <span class="pic" aria-hidden="true"><svg lucideMousePointer2></svg></span>
+        <button
+          type="button"
+          class="entry none"
+          title="Aucun (Échap) : toucher sélectionne et déplace la vue"
+          [class.selected]="!modelId() && !tileId()"
+          [attr.aria-pressed]="!modelId() && !tileId()"
+          (click)="pick(null, $event); tileSelected.emit(null)"
+        >
+          <span class="pic" aria-hidden="true"
+            ><svg lucideMousePointer2></svg
+          ></span>
           <span class="name">Aucun</span>
         </button>
-        @if (tab() === 'objects') {
+        @if (tab() === "objects") {
           @for (family of families(); track family.label) {
             <h3 class="family">{{ family.label }}</h3>
             @for (entry of family.entries; track entry.id) {
-              <button type="button" class="entry" [title]="entry.label"
-                      [class.selected]="entry.id === modelId()" [attr.aria-pressed]="entry.id === modelId()"
-                      (click)="pick(entry.id, $event)">
+              <button
+                type="button"
+                class="entry"
+                [title]="entry.label"
+                [class.selected]="entry.id === modelId()"
+                [attr.aria-pressed]="entry.id === modelId()"
+                (click)="pick(entry.id, $event)"
+              >
                 <span class="pic">
                   @if (thumbs()[entry.id]; as thumb) {
                     <img [src]="thumb" alt="" />
@@ -299,69 +624,136 @@
           } @empty {
             <p class="no-result">Aucun objet pour « {{ query() }} »</p>
           }
-        } @else if (tab() === 'ground') {
+        } @else if (tab() === "ground") {
           @for (tile of tiles; track tile.id) {
-            <button type="button" class="entry tile" [title]="'Sol : ' + tile.label"
-                    [class.selected]="tile.id === tileId()" [attr.aria-pressed]="tile.id === tileId()"
-                    (click)="pickTile(tile.id, $event)">
-              <span class="pic"><span class="tile-pic" [style.background]="tile.background"></span></span>
+            <button
+              type="button"
+              class="entry tile"
+              [title]="'Sol : ' + tile.label"
+              [class.selected]="tile.id === tileId()"
+              [attr.aria-pressed]="tile.id === tileId()"
+              (click)="pickTile(tile.id, $event)"
+            >
+              <span class="pic"
+                ><span
+                  class="tile-pic"
+                  [style.background]="tile.background"
+                ></span
+              ></span>
               <span class="name">{{ tile.label }}</span>
             </button>
           }
-          <button type="button" class="entry tile" title="Gomme : revenir au sol d'origine (enlève aussi les escaliers)"
-                  [class.selected]="tileId() === 'erase'" [attr.aria-pressed]="tileId() === 'erase'"
-                  (click)="pickTile('erase', $event)">
+          <button
+            type="button"
+            class="entry tile"
+            title="Gomme : revenir au sol d'origine (enlève aussi les escaliers)"
+            [class.selected]="tileId() === 'erase'"
+            [attr.aria-pressed]="tileId() === 'erase'"
+            (click)="pickTile('erase', $event)"
+          >
             <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
             <span class="name">Gomme</span>
           </button>
-        } @else if (tab() === 'events') {
-          <button type="button" class="entry tile" title="Zone invisible : poser une zone qui déclenche des événements (entrer dessus, examiner un endroit)"
-                  [class.selected]="modelId() === zoneId" [attr.aria-pressed]="modelId() === zoneId"
-                  (click)="pick(zoneId, $event)">
-            <span class="pic" aria-hidden="true"><svg lucideSquareDashed></svg></span>
+        } @else if (tab() === "events") {
+          <button
+            type="button"
+            class="entry tile"
+            title="Zone invisible : poser une zone qui déclenche des événements (entrer dessus, examiner un endroit)"
+            [class.selected]="modelId() === zoneId"
+            [attr.aria-pressed]="modelId() === zoneId"
+            (click)="pick(zoneId, $event)"
+          >
+            <span class="pic" aria-hidden="true"
+              ><svg lucideSquareDashed></svg
+            ></span>
             <span class="name">Zone invisible</span>
           </button>
-        } @else if (tab() === 'chunks') {
-          <button type="button" class="entry tile" title="Ajouter une zone de carte (32 × 32 cases d'herbe) sur une place libre, à côté de la carte"
-                  [class.selected]="tileId() === 'chunk-add'" [attr.aria-pressed]="tileId() === 'chunk-add'"
-                  (click)="pickTile('chunk-add', $event)">
-            <span class="pic" aria-hidden="true"><svg lucideSquarePlus></svg></span>
+        } @else if (tab() === "chunks") {
+          <button
+            type="button"
+            class="entry tile"
+            title="Ajouter une zone de carte (32 × 32 cases d'herbe) sur une place libre, à côté de la carte"
+            [class.selected]="tileId() === 'chunk-add'"
+            [attr.aria-pressed]="tileId() === 'chunk-add'"
+            (click)="pickTile('chunk-add', $event)"
+          >
+            <span class="pic" aria-hidden="true"
+              ><svg lucideSquarePlus></svg
+            ></span>
             <span class="name">Ajouter</span>
           </button>
-          <button type="button" class="entry tile" title="Point d'arrivée de la carte : où l'on arrive par un passage sans point choisi"
-                  [class.selected]="tileId() === 'spawn'" [attr.aria-pressed]="tileId() === 'spawn'"
-                  (click)="pickTile('spawn', $event)">
+          <button
+            type="button"
+            class="entry tile"
+            title="Point d'arrivée de la carte : où l'on arrive par un passage sans point choisi"
+            [class.selected]="tileId() === 'spawn'"
+            [attr.aria-pressed]="tileId() === 'spawn'"
+            (click)="pickTile('spawn', $event)"
+          >
             <span class="pic" aria-hidden="true"><svg lucideFlag></svg></span>
             <span class="name">Arrivée</span>
           </button>
-          <button type="button" class="entry tile" title="Retirer une zone de carte (avec ce qu'elle contient ; Annuler la remet)"
-                  [class.selected]="tileId() === 'chunk-remove'" [attr.aria-pressed]="tileId() === 'chunk-remove'"
-                  (click)="pickTile('chunk-remove', $event)">
-            <span class="pic" aria-hidden="true"><svg lucideSquareMinus></svg></span>
+          <button
+            type="button"
+            class="entry tile"
+            title="Retirer une zone de carte (avec ce qu'elle contient ; Annuler la remet)"
+            [class.selected]="tileId() === 'chunk-remove'"
+            [attr.aria-pressed]="tileId() === 'chunk-remove'"
+            (click)="pickTile('chunk-remove', $event)"
+          >
+            <span class="pic" aria-hidden="true"
+              ><svg lucideSquareMinus></svg
+            ></span>
             <span class="name">Retirer</span>
           </button>
         } @else {
-          <button type="button" class="entry tile" title="Monter le sol d'un niveau (clic / glisser)"
-                  [class.selected]="tileId() === 'raise'" [attr.aria-pressed]="tileId() === 'raise'"
-                  (click)="pickTile('raise', $event)">
-            <span class="pic" aria-hidden="true"><svg lucideArrowBigUp></svg></span>
+          <button
+            type="button"
+            class="entry tile"
+            title="Monter le sol d'un niveau (clic / glisser)"
+            [class.selected]="tileId() === 'raise'"
+            [attr.aria-pressed]="tileId() === 'raise'"
+            (click)="pickTile('raise', $event)"
+          >
+            <span class="pic" aria-hidden="true"
+              ><svg lucideArrowBigUp></svg
+            ></span>
             <span class="name">Monter</span>
           </button>
-          <button type="button" class="entry tile" title="Descendre le sol d'un niveau (clic / glisser)"
-                  [class.selected]="tileId() === 'lower'" [attr.aria-pressed]="tileId() === 'lower'"
-                  (click)="pickTile('lower', $event)">
-            <span class="pic" aria-hidden="true"><svg lucideArrowBigDown></svg></span>
+          <button
+            type="button"
+            class="entry tile"
+            title="Descendre le sol d'un niveau (clic / glisser)"
+            [class.selected]="tileId() === 'lower'"
+            [attr.aria-pressed]="tileId() === 'lower'"
+            (click)="pickTile('lower', $event)"
+          >
+            <span class="pic" aria-hidden="true"
+              ><svg lucideArrowBigDown></svg
+            ></span>
             <span class="name">Descendre</span>
           </button>
-          <button type="button" class="entry tile" title="Escalier : monte d'un niveau vers la case voisine plus haute"
-                  [class.selected]="tileId() === 'stairs'" [attr.aria-pressed]="tileId() === 'stairs'"
-                  (click)="pickTile('stairs', $event)">
-            <span class="pic" aria-hidden="true"><svg lucideChartNoAxesColumnIncreasing></svg></span>
+          <button
+            type="button"
+            class="entry tile"
+            title="Escalier : monte d'un niveau vers la case voisine plus haute"
+            [class.selected]="tileId() === 'stairs'"
+            [attr.aria-pressed]="tileId() === 'stairs'"
+            (click)="pickTile('stairs', $event)"
+          >
+            <span class="pic" aria-hidden="true"
+              ><svg lucideChartNoAxesColumnIncreasing></svg
+            ></span>
             <span class="name">Escalier</span>
           </button>
-          <button type="button" class="entry tile" title="Enlever les escaliers (le sol et sa hauteur ne changent pas)"
-                  [class.selected]="tileId() === 'unstairs'" [attr.aria-pressed]="tileId() === 'unstairs'"
-                  (click)="pickTile('unstairs', $event)">
+          <button
+            type="button"
+            class="entry tile"
+            title="Enlever les escaliers (le sol et sa hauteur ne changent pas)"
+            [class.selected]="tileId() === 'unstairs'"
+            [attr.aria-pressed]="tileId() === 'unstairs'"
+            (click)="pickTile('unstairs', $event)"
+          >
             <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
             <span class="name">Sans escalier</span>
           </button>
@@ -371,9 +763,16 @@
   }
 
   @if (pickMap(); as pickName) {
-    <div class="pick-banner" role="status" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    <div
+      class="pick-banner"
+      role="status"
+      animate.enter="anim-fade-in"
+      animate.leave="anim-fade-out"
+    >
       <svg lucideMapPin></svg>
-      <span>Touchez le point d'arrivée sur <b>{{ pickName }}</b></span>
+      <span
+        >Touchez le point d'arrivée sur <b>{{ pickName }}</b></span
+      >
       <button type="button" (click)="cancelPick.emit()">Annuler</button>
     </div>
   }
@@ -381,8 +780,15 @@
   @if (selection(); as selection) {
     @if (editingEvent(); as editing) {
       @if (selection.events[editing.index]; as evt) {
-        <game-event-editor [event]="evt" [number]="editing.index + 1" [objectName]="selectionLabel()" [maps]="maps()" [currentMap]="mapId()"
-                           (closed)="saveEvent(selection.events, editing.index, $event)" (removed)="removeEvent(selection.events, editing.index)" />
+        <game-event-editor
+          [event]="evt"
+          [number]="editing.index + 1"
+          [objectName]="selectionLabel()"
+          [maps]="maps()"
+          [currentMap]="mapId()"
+          (closed)="saveEvent(selection.events, editing.index, $event)"
+          (removed)="removeEvent(selection.events, editing.index)"
+        />
       }
     }
   }

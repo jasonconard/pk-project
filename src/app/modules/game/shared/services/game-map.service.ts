@@ -1,5 +1,5 @@
-import { inject, Service } from '@angular/core';
-import { describeAction, sameAction } from '../model/GameAction';
+import { inject, Service } from "@angular/core";
+import { describeAction, sameAction } from "../model/GameAction";
 import { CAMERA_LOOK, Game, SHADE_OFFSET, TOO_FAR_LIMIT } from "../model/Game";
 import { SCENE_PLAYER } from "../../../../../assets/characters/player";
 import { MapHelper } from "../model/MapHelper";
@@ -12,7 +12,7 @@ import { EventContext } from "../model/ObjectEvent";
 import { SceneEvent } from "../model/SceneEvent";
 import { currentVariableValues } from "../../../variables-editor/shared/variable-values";
 import { KeyService } from "../../../../core/shared/service/key.service";
-import * as THREE from 'three';
+import * as THREE from "three";
 import { SequenceService } from "./sequence.service";
 import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { SceneChunk } from "../model/SceneMap";
@@ -21,7 +21,6 @@ import { currentMapId, loadMap, setCurrentMapId } from "./map-storage";
 import { InstructionTeleport } from "../model/SceneEventInstruction";
 import { isPassageEvent } from "../model/Passage";
 import { DustPuff } from "../model/DustPuff";
-
 
 /** Ledge hop length (s) and height (world units). */
 const HOP_TIME = 0.42;
@@ -41,7 +40,6 @@ export class GameMapService {
   private readonly keyService = inject(KeyService);
   private readonly sequenceService = inject(SequenceService);
   private readonly mapEditorService = inject(MapEditorService);
-
 
   private pixelSize = 8;
   /** Ledge hop: time since it started (s, -1 = none) and the height currently added to the sprite. */
@@ -63,35 +61,45 @@ export class GameMapService {
   private passageGuard = false;
   /** The events starting on their own that could play at the last check (see EventService.armed). */
   private armedBefore = new Set<SceneEvent>();
-  private moveRatio: Vec3 = { x:0, y:0, z:0 };
+  private moveRatio: Vec3 = { x: 0, y: 0, z: 0 };
   private moveSpeed: number = 0;
   private moveDir: PlayerDirection = PlayerDirection.DOWN;
   private moveStatus: PlayerMoveStatus = PlayerMoveStatus.STAYING;
 
   init(game: Game) {
-    if(game.mapHelper) {
-      Object.values(game.mapHelper.meshes).forEach(mesh => mesh.visible = true);
+    if (game.mapHelper) {
+      Object.values(game.mapHelper.meshes).forEach(
+        (mesh) => (mesh.visible = true)
+      );
     } else {
       // (the map edited in the editor, saved in the browser, replaces the one of the code)
       const mapHelper = new MapHelper({
         originGame: game,
         sceneMap: loadMap(currentMapId()) ?? loadMap(DEFAULT_MAP_ID)!,
-        scenePlayer: SCENE_PLAYER
+        scenePlayer: SCENE_PLAYER,
       });
       game.mapHelper = mapHelper;
 
       const rect = game.canvas.getBoundingClientRect();
 
-      game.camera = new THREE.PerspectiveCamera( 45, rect.width / rect.height, 1, TOO_FAR_LIMIT + SHADE_OFFSET );
+      game.camera = new THREE.PerspectiveCamera(
+        45,
+        rect.width / rect.height,
+        1,
+        TOO_FAR_LIMIT + SHADE_OFFSET
+      );
       game.camera.position.set(CAMERA_LOOK.x, CAMERA_LOOK.y, CAMERA_LOOK.z);
-      game.camera.lookAt( 0, 0, 0 );
+      game.camera.lookAt(0, 0, 0);
 
       game.render();
 
       mapHelper.buildChunks();
       mapHelper.buildPlayer();
       // (another map than the world: the player starts at its arrival point)
-      const spawn = mapHelper.sceneMap.id !== DEFAULT_MAP_ID ? mapHelper.sceneMap.spawn : undefined;
+      const spawn =
+        mapHelper.sceneMap.id === DEFAULT_MAP_ID
+          ? undefined
+          : mapHelper.sceneMap.spawn;
       if (spawn) {
         this.travel(game, { pos: spawn });
       }
@@ -115,7 +123,7 @@ export class GameMapService {
     if (teleport.map && (rebuild || teleport.map !== mapHelper.sceneMap.id)) {
       const map = loadMap(teleport.map);
       if (!map) {
-        console.warn('Teleport: unknown map', teleport.map);
+        console.warn("Teleport: unknown map", teleport.map);
         return;
       }
       this.mapEditorService.leaveMap(game);
@@ -192,67 +200,96 @@ export class GameMapService {
   }
 
   clear(game: Game) {
-    if(game.mapHelper) {
-      Object.values(game.mapHelper.meshes).forEach(mesh => mesh.visible = false);
+    if (game.mapHelper) {
+      Object.values(game.mapHelper.meshes).forEach(
+        (mesh) => (mesh.visible = false)
+      );
     }
   }
 
   /** What the events' conditions read: the hour, the weather, the story variables. */
   private eventContext(game: Game): EventContext {
-    return { hour: game.weather.hourOfDay, weather: game.weather.type, values: currentVariableValues() };
+    return {
+      hour: game.weather.hourOfDay,
+      weather: game.weather.type,
+      values: currentVariableValues(),
+    };
   }
 
   /** Plays an event (its object turns towards the player first if asked). */
-  private launch(mapHelper: MapHelper, sprite: THREE.Object3D, found: FoundEvent) {
+  private launch(
+    mapHelper: MapHelper,
+    sprite: THREE.Object3D,
+    found: FoundEvent
+  ) {
     if (found.evt.face) {
       mapHelper.faceTowards(found.chunk, found.building, sprite.position);
     }
-    this.sequenceService.launchSequence(found.evt, () => this.eventContext(mapHelper.originGame));
+    this.sequenceService.launchSequence(found.evt, () =>
+      this.eventContext(mapHelper.originGame)
+    );
   }
 
   inputLoop(game: Game) {
     const mapHelper = game.mapHelper;
     const sprite = mapHelper?.scenePlayer.mesh;
-    if(!mapHelper || !sprite) { return; }
-    if(game.paused) { return; }
+    if (!mapHelper || !sprite) {
+      return;
+    }
+    if (game.paused) {
+      return;
+    }
     // Map editor: the player is frozen, the camera moves instead
-    if(game.editMode) {
+    if (game.editMode) {
       game.action = null;
       this.mapEditorService.update(game);
       return;
     }
     // No moves during a sequence, or while a tornado carries the player away
-    const moveDetails = this.sequenceService.isRunning || game.weather.playerFlying ?
-      { move: { x: 0, y: 0, z: 0 }, speed: 0, status: PlayerMoveStatus.STAYING } :
-      SceneService.getMove(mapHelper, this.keyService.holdedCodes);
+    const moveDetails =
+      this.sequenceService.isRunning || game.weather.playerFlying
+        ? {
+            move: { x: 0, y: 0, z: 0 },
+            speed: 0,
+            status: PlayerMoveStatus.STAYING,
+          }
+        : SceneService.getMove(mapHelper, this.keyService.holdedCodes);
     const move = moveDetails.move;
 
-    let mouvStatus = moveDetails.status;
+    const mouvStatus = moveDetails.status;
 
-    if(!this.isMoving) {
+    if (this.isMoving) {
+      mapHelper.scenePlayer.dir = this.moveDir;
+    } else {
       this.moveRatio = move;
       this.moveSpeed = moveDetails.speed;
       this.moveDir = mapHelper.scenePlayer.dir;
       this.moveStatus = mouvStatus;
-    } else {
-      mapHelper.scenePlayer.dir = this.moveDir;
     }
-    if(this.isMoving < this.pixelSize) {
+    if (this.isMoving < this.pixelSize) {
       this.isMoving += this.moveSpeed;
     } else {
       this.isMoving = 0;
       this.moveSpeed = 0;
       this.moveDir = PlayerDirection.DOWN;
-      this.moveRatio = { x:0, y:0, z:0 };
+      this.moveRatio = { x: 0, y: 0, z: 0 };
       this.moveStatus = mouvStatus;
     }
 
-    if(this.isMoving && this.isMoving === this.moveSpeed) {
+    if (this.isMoving && this.isMoving === this.moveSpeed) {
       const ratio = this.pixelSize / this.moveSpeed;
-      const collisions = { x: this.moveRatio.x * ratio, y: this.moveRatio.y * ratio, z: this.moveRatio.z * ratio };
+      const collisions = {
+        x: this.moveRatio.x * ratio,
+        y: this.moveRatio.y * ratio,
+        z: this.moveRatio.z * ratio,
+      };
       SceneService.checkCollisions(mapHelper, sprite, collisions);
       SceneService.checkGroundCollisions(mapHelper, sprite, collisions);
-      this.moveRatio = { x: collisions.x / ratio, y: collisions.y / ratio, z: collisions.z / ratio };
+      this.moveRatio = {
+        x: collisions.x / ratio,
+        y: collisions.y / ratio,
+        z: collisions.z / ratio,
+      };
     }
 
     const camera = game.camera;
@@ -266,21 +303,32 @@ export class GameMapService {
     sprite.position.x += this.moveRatio.x;
     sprite.position.z += this.moveRatio.z;
 
-
     // (from high above: the ground may have been raised under the player in the editor)
     // (slightly off the exact position: a ray going exactly through a vertex shared by the cells can miss them all)
-    const spriteRayOrigin = new THREE.Vector3(sprite.position.x + RAY_NUDGE, sprite.position.y + GROUND_RAY_UP, sprite.position.z + RAY_NUDGE);
-    game.raycaster.ray = new THREE.Ray(spriteRayOrigin, new THREE.Vector3(0, -1, 0));
+    const spriteRayOrigin = new THREE.Vector3(
+      sprite.position.x + RAY_NUDGE,
+      sprite.position.y + GROUND_RAY_UP,
+      sprite.position.z + RAY_NUDGE
+    );
+    game.raycaster.ray = new THREE.Ray(
+      spriteRayOrigin,
+      new THREE.Vector3(0, -1, 0)
+    );
     let dist = -1;
-    const rayGrounds = (chunk: SceneChunk) => chunk.grounds.forEach(ground => {
-      if(!ground.passable || !ground.mesh) { return; }
-      const rayCasting = game.raycaster.intersectObject(ground.mesh)[0];
-      if(rayCasting && rayCasting.distance) {
-        if(dist === -1  || rayCasting.distance < dist) {
-          dist = rayCasting.distance
+    const rayGrounds = (chunk: SceneChunk) =>
+      chunk.grounds.forEach((ground) => {
+        if (!ground.passable || !ground.mesh) {
+          return;
         }
-      }
-    });
+        const rayCasting = game.raycaster.intersectObject(ground.mesh)[0];
+        if (
+          rayCasting &&
+          rayCasting.distance &&
+          (dist === -1 || rayCasting.distance < dist)
+        ) {
+          dist = rayCasting.distance;
+        }
+      });
     // The ground under the player is in the chunk under them (120 times per second: not every visible chunk);
     // the others only if it has none there
     const under = mapHelper.chunkAt(sprite.position.x, sprite.position.z);
@@ -288,18 +336,28 @@ export class GameMapService {
       rayGrounds(under);
     }
     if (dist === -1) {
-      mapHelper.sceneMap.chunks.forEach(chunk => chunk.visible && chunk !== under && rayGrounds(chunk));
+      mapHelper.sceneMap.chunks.forEach(
+        (chunk) => chunk.visible && chunk !== under && rayGrounds(chunk)
+      );
     }
 
-    if(dist > -1) {
+    if (dist > -1) {
       const previousY = sprite.position.y;
       sprite.position.y -= dist - GROUND_RAY_UP;
       camera.position.y -= dist - GROUND_RAY_UP;
       // Stepping off a ledge: a little hop, like in the Pokémon games, once the player really enters the lower cell
       // (not by stairs)
-      const level = mapHelper.levelAtWorld(sprite.position.x, sprite.position.z);
+      const level = mapHelper.levelAtWorld(
+        sprite.position.x,
+        sprite.position.z
+      );
       const stairs = mapHelper.isStairsAt(sprite.position.x, sprite.position.z);
-      if (level < this.lastLevel && !stairs && !this.lastOnStairs && this.hopTime < 0) {
+      if (
+        level < this.lastLevel &&
+        !stairs &&
+        !this.lastOnStairs &&
+        this.hopTime < 0
+      ) {
         this.hopTime = 0;
         this.hopLastTime = performance.now();
         this.hopDrop = previousY - sprite.position.y;
@@ -311,8 +369,14 @@ export class GameMapService {
         // Carried one more step forward if the back of the body is still over the ledge
         const dx = Math.sign(this.moveRatio.x);
         const dz = Math.sign(this.moveRatio.z);
-        const back = mapHelper.levelAtWorld(sprite.position.x - dx * HOP_BODY, sprite.position.z - dz * HOP_BODY);
-        this.hopNudge.set(back > level ? dx * this.pixelSize : 0, back > level ? dz * this.pixelSize : 0);
+        const back = mapHelper.levelAtWorld(
+          sprite.position.x - dx * HOP_BODY,
+          sprite.position.z - dz * HOP_BODY
+        );
+        this.hopNudge.set(
+          back > level ? dx * this.pixelSize : 0,
+          back > level ? dz * this.pixelSize : 0
+        );
         game.weather.playLedgeHop();
       }
       this.lastLevel = level;
@@ -324,20 +388,22 @@ export class GameMapService {
       camera.position.z -= this.moveRatio.z;
     }
 
-
     PlayerService.updatePlayerSprite({
       mapHelper: mapHelper,
       player: mapHelper.scenePlayer,
       status: this.moveStatus,
       currentFrame: game.frame,
-      framePerSecond: game.framePerSec
+      framePerSecond: game.framePerSec,
     });
 
     // What the action key would do (the action button, the prompt), the events starting on their own: 30 times per
     // second is plenty
     if (++this.actionTick % ACTION_EVERY === 0) {
       const ctx = this.eventContext(game);
-      const found = this.sequenceService.isRunning || game.weather.playerFlying ? null : EventService.actionAt(mapHelper, sprite, ctx);
+      const found =
+        this.sequenceService.isRunning || game.weather.playerFlying
+          ? null
+          : EventService.actionAt(mapHelper, sprite, ctx);
       const action = found ? describeAction(found.evt, found.building) : null;
       if (!sameAction(action, game.action)) {
         game.action = action;
@@ -346,31 +412,45 @@ export class GameMapService {
         // An event that just became possible (stepped in, conditions now true) plays, one at a time; it plays again
         // only after having been impossible
         const armed = EventService.armed(mapHelper, sprite, ctx);
-        const fresh = armed.find(f => !this.armedBefore.has(f.evt));
-        this.armedBefore = new Set(armed.filter(f => this.armedBefore.has(f.evt) || f === fresh).map(f => f.evt));
+        const fresh = armed.find((f) => !this.armedBefore.has(f.evt));
+        this.armedBefore = new Set(
+          armed
+            .filter((f) => this.armedBefore.has(f.evt) || f === fresh)
+            .map((f) => f.evt)
+        );
         if (fresh) {
           this.launch(mapHelper, sprite, fresh);
         }
       }
     }
 
-    if(!this.sequenceService.isRunning) {
-      const found = EventService.checkEvents(mapHelper, sprite, this.eventContext(game), this.keyService.pressedCodes, this.keyService.holdedCodes);
+    if (!this.sequenceService.isRunning) {
+      const found = EventService.checkEvents(
+        mapHelper,
+        sprite,
+        this.eventContext(game),
+        this.keyService.pressedCodes,
+        this.keyService.holdedCodes
+      );
       const event = found?.evt;
       // Just arrived through a passage: the passages are ignored until the player has stepped out of them
       if (this.passageGuard && (!event || isPassageEvent(event))) {
         this.passageGuard = !!event;
-      } else if(found) {
+      } else if (found) {
         this.launch(mapHelper, sprite, found);
       }
     }
 
     // Buildings fading / hiding: 30 times per second is plenty (every building's box is computed)
     if (++this.visibilityTick % VISIBILITY_EVERY === 0) {
-      mapHelper.sceneMap.chunks.forEach(chunk => {
-        if(chunk.visible) {
-          chunk.buildings.forEach(building => {
-            mapHelper.updateVisibleMesh(chunk.id + '-' + building.id, sprite.position, building.canHide);
+      mapHelper.sceneMap.chunks.forEach((chunk) => {
+        if (chunk.visible) {
+          chunk.buildings.forEach((building) => {
+            mapHelper.updateVisibleMesh(
+              chunk.id + "-" + building.id,
+              sprite.position,
+              building.canHide
+            );
           });
         }
       });
@@ -389,7 +469,5 @@ export class GameMapService {
     // }
     // CoreService.me.setLogs(camera.zoom);
     // camera.updateProjectionMatrix();
-
   }
-
 }

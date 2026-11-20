@@ -1,7 +1,11 @@
-import * as THREE from 'three';
-import { RENDER_DETAIL } from '../model/Quality';
-import { SurfaceHeights } from './SurfaceHeights';
-import { plantPositions, registerUnlitMaterial, SWAY_ATTRIBUTE } from './weather-shader';
+import * as THREE from "three";
+import { RENDER_DETAIL } from "../model/Quality";
+import { SurfaceHeights } from "./SurfaceHeights";
+import {
+  plantPositions,
+  registerUnlitMaterial,
+  SWAY_ATTRIBUTE,
+} from "./weather-shader";
 
 /** Area (relative to the point the camera looks at) where particles live: covers the screen. */
 const AREA = { minX: -240, maxX: 240, minZ: -300, maxZ: 140 };
@@ -23,7 +27,7 @@ export interface GlowStyle {
    * 'additive' (default): pure light, fades by dimming; great at night, washes to white on a bright ground.
    * 'normal': colored blobs that keep their color by day, fade by shrinking.
    */
-  blending?: 'additive' | 'normal';
+  blending?: "additive" | "normal";
   /** Color multiplier: above 1 the particle core gets bright enough for the bloom. */
   intensity: number;
   /** Upward speed range (world units / s), negative = sinks. */
@@ -68,7 +72,7 @@ export interface GlowStyle {
 /** Blood moon: red embers slowly rising from the ground. */
 export const EMBER_STYLE: GlowStyle = {
   maxParticles: 240,
-  color: 0xff4020,
+  color: 0xff_40_20,
   intensity: 2.2,
   rise: [5, 12],
   wobble: 1.8,
@@ -88,10 +92,10 @@ export const EMBER_STYLE: GlowStyle = {
  */
 export const LAVA_STYLE: GlowStyle = {
   maxParticles: 420,
-  color: 0xff7a1a,
-  palette: [0xffb020, 0xff4a10, 0xffd060],
+  color: 0xff_7a_1a,
+  palette: [0xff_b0_20, 0xff_4a_10, 0xff_d0_60],
   intensity: 1.8,
-  blending: 'normal',
+  blending: "normal",
   rise: [10, 22],
   wobble: 1.2,
   wobbleSpeed: 2,
@@ -107,10 +111,10 @@ export const LAVA_STYLE: GlowStyle = {
 /** Forest: tiny golden pollen / dust motes slowly drifting in the light, mostly around the plants. */
 export const POLLEN_STYLE: GlowStyle = {
   maxParticles: 220,
-  color: 0xfff0a0,
-  palette: [0xffffff, 0xe8ffb0],
+  color: 0xff_f0_a0,
+  palette: [0xff_ff_ff, 0xe8_ff_b0],
   intensity: 1.3,
-  blending: 'normal',
+  blending: "normal",
   rise: [-0.6, 0.9],
   wobble: 3,
   wobbleSpeed: 0.4,
@@ -126,10 +130,10 @@ export const POLLEN_STYLE: GlowStyle = {
 /** Ash fall: grey flakes slowly falling and swirling (not glowing). */
 export const ASH_STYLE: GlowStyle = {
   maxParticles: 700,
-  color: 0x8c8884,
-  palette: [0x5c5856, 0xb0aaa4],
+  color: 0x8c_88_84,
+  palette: [0x5c_58_56, 0xb0_aa_a4],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   rise: [-14, -7],
   wobble: 4,
   wobbleSpeed: 0.8,
@@ -145,10 +149,10 @@ export const ASH_STYLE: GlowStyle = {
 /** Magic snow: blue / cyan / white sparkles slowly falling, twinkling fast. */
 export const MAGIC_SNOW_STYLE: GlowStyle = {
   maxParticles: 600,
-  color: 0x6cc8ff,
-  palette: [0xd8f4ff, 0x3a90ff, 0xa080ff],
+  color: 0x6c_c8_ff,
+  palette: [0xd8_f4_ff, 0x3a_90_ff, 0xa0_80_ff],
   intensity: 2.2,
-  blending: 'normal',
+  blending: "normal",
   rise: [-9, -4],
   wobble: 3,
   wobbleSpeed: 0.9,
@@ -167,10 +171,10 @@ export const MAGIC_SNOW_STYLE: GlowStyle = {
  */
 export const CRYSTAL_STYLE: GlowStyle = {
   maxParticles: 520,
-  color: 0x40d8ff,
-  palette: [0xff60d0, 0xffd040, 0x9070ff, 0x40ffa0, 0xffffff],
+  color: 0x40_d8_ff,
+  palette: [0xff_60_d0, 0xff_d0_40, 0x90_70_ff, 0x40_ff_a0, 0xff_ff_ff],
   intensity: 2.2,
-  blending: 'normal',
+  blending: "normal",
   rise: [-0.8, 0.8],
   wobble: 2,
   wobbleSpeed: 0.35,
@@ -186,10 +190,10 @@ export const CRYSTAL_STYLE: GlowStyle = {
 /** Mars: reddish dust motes drifting very slowly, up and down, for a long time (as in a low gravity). */
 export const MARS_DUST_STYLE: GlowStyle = {
   maxParticles: 500,
-  color: 0xb4583a,
-  palette: [0xd8805a, 0x8a3c28, 0xe8a080],
+  color: 0xb4_58_3a,
+  palette: [0xd8_80_5a, 0x8a_3c_28, 0xe8_a0_80],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   rise: [-2.5, 1.5],
   wobble: 5,
   wobbleSpeed: 0.25,
@@ -205,11 +209,11 @@ export const MARS_DUST_STYLE: GlowStyle = {
 /** Acid rain fumes: pale green smoke puffs rising from the puddles, spreading and fading. */
 export const FUME_STYLE: GlowStyle = {
   maxParticles: 420,
-  color: 0x4a5244,
-  palette: [0x3e463a, 0x565e50],
+  color: 0x4a_52_44,
+  palette: [0x3e_46_3a, 0x56_5e_50],
   intensity: 0.7,
   // Additive: the puffs fade out with their color (smoke can't be faded by shrinking), they lighten the air like steam
-  blending: 'additive',
+  blending: "additive",
   followLight: true,
   smoke: { spin: 0.6 },
   rise: [5, 9],
@@ -224,14 +228,14 @@ export const FUME_STYLE: GlowStyle = {
   windSpeed: 18,
   stretchY: 1.3,
   grow: 2.6,
-}
+};
 
 /** Poisoned climate: toxic purple smoke rising from the puddles (same smoke as the acid fumes). */
 export const POISON_FUME_STYLE: GlowStyle = {
   ...FUME_STYLE,
   // Lighter than the acid fumes: they must stand out of the thick purple haze
-  color: 0x9a78bc,
-  palette: [0x8462a8, 0xb090d0],
+  color: 0x9a_78_bc,
+  palette: [0x84_62_a8, 0xb0_90_d0],
   maxParticles: 480,
 };
 
@@ -239,8 +243,8 @@ export const POISON_FUME_STYLE: GlowStyle = {
 export const HAUNT_WISP_STYLE: GlowStyle = {
   ...FUME_STYLE,
   maxParticles: 220,
-  color: 0x3c4450,
-  palette: [0x343b46, 0x48505c],
+  color: 0x3c_44_50,
+  palette: [0x34_3b_46, 0x48_50_5c],
   smoke: { spin: 0.25 },
   rise: [2, 4.5],
   wobble: 5,
@@ -255,10 +259,10 @@ export const HAUNT_WISP_STYLE: GlowStyle = {
 /** Darkness: black wisps creeping low around the edge of the visible area (wider than tall, slowly crawling). */
 export const DARK_WISP_STYLE: GlowStyle = {
   maxParticles: 200,
-  color: 0x060609,
-  palette: [0x0a0a10, 0x040406],
+  color: 0x06_06_09,
+  palette: [0x0a_0a_10, 0x04_04_06],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   smoke: { spin: 0.2 },
   smokeOpacity: 0.7,
   rise: [0.3, 1.8],
@@ -278,10 +282,10 @@ export const DARK_WISP_STYLE: GlowStyle = {
 /** Ash fall: wide grey smoke banks drifting with the wind (lit by the scene, fading in and out). */
 export const ASH_SMOKE_STYLE: GlowStyle = {
   maxParticles: 70,
-  color: 0x7a726c,
-  palette: [0x6a625c, 0x8a827c],
+  color: 0x7a_72_6c,
+  palette: [0x6a_62_5c, 0x8a_82_7c],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   smoke: { spin: 0.08 },
   smokeOpacity: 0.35,
@@ -302,10 +306,10 @@ export const ASH_SMOKE_STYLE: GlowStyle = {
 /** Blizzard: powder snow swept up from the ground, long white gusts racing low with the wind. */
 export const SPINDRIFT_STYLE: GlowStyle = {
   maxParticles: 170,
-  color: 0xf4f8ff,
-  palette: [0xe8eef8, 0xffffff],
+  color: 0xf4_f8_ff,
+  palette: [0xe8_ee_f8, 0xff_ff_ff],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   smoke: { spin: 0.05 },
   smokeOpacity: 0.5,
@@ -326,10 +330,10 @@ export const SPINDRIFT_STYLE: GlowStyle = {
 /** Earthquake: dust and grit shaken off the roofs, falling along the walls. */
 export const QUAKE_DEBRIS_STYLE: GlowStyle = {
   maxParticles: 700,
-  color: 0x6e604e,
-  palette: [0x54483a, 0x8a7a66],
+  color: 0x6e_60_4e,
+  palette: [0x54_48_3a, 0x8a_7a_66],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   rise: [-30, -14],
   wobble: 1,
@@ -346,10 +350,10 @@ export const QUAKE_DEBRIS_STYLE: GlowStyle = {
 /** Earthquake: dust clouds rising from the shaken ground. */
 export const QUAKE_DUST_STYLE: GlowStyle = {
   maxParticles: 260,
-  color: 0x8a7860,
-  palette: [0x74644e, 0x9c8a72],
+  color: 0x8a_78_60,
+  palette: [0x74_64_4e, 0x9c_8a_72],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   smoke: { spin: 0.3 },
   smokeOpacity: 0.65,
@@ -370,10 +374,10 @@ export const QUAKE_DUST_STYLE: GlowStyle = {
 /** Geysers, at rest: thin white steam wisps rising lazily from the vents. */
 export const STEAM_STYLE: GlowStyle = {
   maxParticles: 140,
-  color: 0xf0f4f8,
-  palette: [0xe4eaf0, 0xffffff],
+  color: 0xf0_f4_f8,
+  palette: [0xe4_ea_f0, 0xff_ff_ff],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   smoke: { spin: 0.3 },
   smokeOpacity: 0.45,
@@ -408,10 +412,10 @@ export const STEAM_JET_STYLE: GlowStyle = {
 /** Time warp: motes of light hanging in the air, barely moving (time almost stopped), gold and pale blue. */
 export const TIME_MOTE_STYLE: GlowStyle = {
   maxParticles: 260,
-  color: 0xffe0a0,
-  palette: [0xb0d0ff, 0xd8c0ff, 0xffffff],
+  color: 0xff_e0_a0,
+  palette: [0xb0_d0_ff, 0xd8_c0_ff, 0xff_ff_ff],
   intensity: 1.8,
-  blending: 'normal',
+  blending: "normal",
   rise: [-0.3, 0.3],
   wobble: 0.8,
   wobbleSpeed: 0.15,
@@ -427,10 +431,10 @@ export const TIME_MOTE_STYLE: GlowStyle = {
 /** Reversed gravity: pebbles and clods of earth slowly falling upwards, lit by the scene. */
 export const GRAVITY_PEBBLE_STYLE: GlowStyle = {
   maxParticles: 650,
-  color: 0x5a4a3a,
-  palette: [0x3e3630, 0x7a6e60, 0x4e5a38],
+  color: 0x5a_4a_3a,
+  palette: [0x3e_36_30, 0x7a_6e_60, 0x4e_5a_38],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   rise: [5, 13],
   wobble: 1.5,
@@ -447,10 +451,10 @@ export const GRAVITY_PEBBLE_STYLE: GlowStyle = {
 /** Reversed gravity: water drops streaking up from the ground, like rain played backwards. */
 export const GRAVITY_DROP_STYLE: GlowStyle = {
   maxParticles: 500,
-  color: 0xf0f8ff,
-  palette: [0xffffff, 0xd0e4f8],
+  color: 0xf0_f8_ff,
+  palette: [0xff_ff_ff, 0xd0_e4_f8],
   intensity: 1.3,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   stretchY: 4,
   rise: [30, 55],
@@ -468,8 +472,8 @@ export const GRAVITY_DROP_STYLE: GlowStyle = {
 /** Thunder rain: blue-white sparks jumping from a lightning impact. */
 export const STRIKE_SPARK_STYLE: GlowStyle = {
   maxParticles: 160,
-  color: 0xc8e0ff,
-  palette: [0xffffff, 0x88b8ff],
+  color: 0xc8_e0_ff,
+  palette: [0xff_ff_ff, 0x88_b8_ff],
   intensity: 2.4,
   rise: [8, 30],
   wobble: 4,
@@ -486,10 +490,10 @@ export const STRIKE_SPARK_STYLE: GlowStyle = {
 /** Morning mist: wide pale banks lying on the ground, drifting slowly, lit by the scene (golden at sunrise). */
 export const MIST_STYLE: GlowStyle = {
   maxParticles: 160,
-  color: 0xf4f2ee,
-  palette: [0xe8ecf0, 0xfffaf0],
+  color: 0xf4_f2_ee,
+  palette: [0xe8_ec_f0, 0xff_fa_f0],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   smoke: { spin: 0.03 },
   rise: [-0.3, 0.6],
@@ -511,9 +515,9 @@ export const MIST_STYLE: GlowStyle = {
 /** Deep freeze: the player's breath, small white puffs in front of their face, spreading and fading fast. */
 export const BREATH_STYLE: GlowStyle = {
   maxParticles: 24,
-  color: 0xf4f8ff,
+  color: 0xf4_f8_ff,
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   smoke: { spin: 0.8 },
   rise: [1.5, 3],
@@ -534,10 +538,10 @@ export const BREATH_STYLE: GlowStyle = {
 /** Volcanic: dark smoke puffs rising here and there from the ground, spreading and fading (lit by the scene). */
 export const VOLCANO_SMOKE_STYLE: GlowStyle = {
   maxParticles: 300,
-  color: 0x3a3330,
-  palette: [0x2c2624, 0x4a4240],
+  color: 0x3a_33_30,
+  palette: [0x2c_26_24, 0x4a_42_40],
   intensity: 1,
-  blending: 'normal',
+  blending: "normal",
   followLight: true,
   smoke: { spin: 0.4 },
   rise: [8, 12],
@@ -558,10 +562,10 @@ export const VOLCANO_SMOKE_STYLE: GlowStyle = {
 /** Star dust: golden and violet motes floating lazily, shimmering. */
 export const STARDUST_STYLE: GlowStyle = {
   maxParticles: 480,
-  color: 0xffc840,
-  palette: [0xc890ff, 0xfff2c0, 0x90b0ff],
+  color: 0xff_c8_40,
+  palette: [0xc8_90_ff, 0xff_f2_c0, 0x90_b0_ff],
   intensity: 1.6,
-  blending: 'normal',
+  blending: "normal",
   rise: [-1, 1.5],
   wobble: 4,
   wobbleSpeed: 0.5,
@@ -577,7 +581,7 @@ export const STARDUST_STYLE: GlowStyle = {
 /** Fireflies: yellow-green lights drifting slowly around the trees and flowers, glowing on and off. */
 export const FIREFLY_STYLE: GlowStyle = {
   maxParticles: 260,
-  color: 0xc8ff4a,
+  color: 0xc8_ff_4a,
   intensity: 3.2,
   rise: [-1.2, 1.5],
   wobble: 5,
@@ -597,10 +601,10 @@ export const FIREFLY_STYLE: GlowStyle = {
  */
 export const FAIRY_STYLE: GlowStyle = {
   maxParticles: 280,
-  color: 0xff6fd2,
-  palette: [0xffa3e6, 0xff4fc0],
+  color: 0xff_6f_d2,
+  palette: [0xff_a3_e6, 0xff_4f_c0],
   intensity: 1.6,
-  blending: 'normal',
+  blending: "normal",
   rise: [-0.8, 1.6],
   wobble: 5,
   wobbleSpeed: 0.55,
@@ -616,8 +620,8 @@ export const FAIRY_STYLE: GlowStyle = {
 /** Rising energy: round teal sparks flowing straight up from the ground to the sky. */
 export const ENERGY_STYLE: GlowStyle = {
   maxParticles: 210,
-  color: 0x45b49b,
-  palette: [0x6ff0d0, 0x2fd6b0, 0xa8ffe8],
+  color: 0x45_b4_9b,
+  palette: [0x6f_f0_d0, 0x2f_d6_b0, 0xa8_ff_e8],
   intensity: 2.4,
   rise: [12, 22],
   wobble: 1.5,
@@ -634,10 +638,10 @@ export const ENERGY_STYLE: GlowStyle = {
 /** Spores: big soft green / purple lights slowly floating up from the ground and the plants. */
 export const SPORE_STYLE: GlowStyle = {
   maxParticles: 320,
-  color: 0x6dff9a,
-  palette: [0xb070ff, 0x52ffd8],
+  color: 0x6d_ff_9a,
+  palette: [0xb0_70_ff, 0x52_ff_d8],
   intensity: 1.15,
-  blending: 'normal',
+  blending: "normal",
   rise: [1.5, 4],
   wobble: 3.5,
   wobbleSpeed: 0.5,
@@ -664,21 +668,29 @@ function addInstanceOpacity(material: THREE.MeshBasicMaterial) {
   const previousKey = material.customProgramCacheKey();
   material.onBeforeCompile = (shader, renderer) => {
     previous.call(material, shader, renderer);
-    shader.vertexShader = 'attribute float aOpacity;\nvarying float vOpacity;\n' + shader.vertexShader
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvOpacity = aOpacity;');
-    shader.fragmentShader = 'varying float vOpacity;\n' + shader.fragmentShader
-      .replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.a *= vOpacity;');
+    shader.vertexShader =
+      "attribute float aOpacity;\nvarying float vOpacity;\n" +
+      shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\nvOpacity = aOpacity;"
+      );
+    shader.fragmentShader =
+      "varying float vOpacity;\n" +
+      shader.fragmentShader.replace(
+        "#include <map_fragment>",
+        "#include <map_fragment>\ndiffuseColor.a *= vOpacity;"
+      );
   };
-  material.customProgramCacheKey = () => previousKey + '-instance-opacity';
+  material.customProgramCacheKey = () => previousKey + "-instance-opacity";
 }
 
 export function makeSmokeTexture(): THREE.CanvasTexture {
   const size = 64;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext("2d")!;
   let seed = 7;
-  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const rand = () => (seed = (seed * 16_807) % 2_147_483_647) / 2_147_483_647;
   for (let i = 0; i < 14; i++) {
     const r = size * (0.12 + 0.18 * rand());
     const angle = rand() * Math.PI * 2;
@@ -687,7 +699,7 @@ export function makeSmokeTexture(): THREE.CanvasTexture {
     const y = size / 2 + Math.sin(angle) * dist;
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
     g.addColorStop(0, `rgba(255,255,255,${0.18 + 0.12 * rand()})`);
-    g.addColorStop(1, 'rgba(255,255,255,0)');
+    g.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
   }
@@ -698,14 +710,21 @@ export function makeSmokeTexture(): THREE.CanvasTexture {
 
 function makeGlowTexture(): THREE.CanvasTexture {
   const size = 32;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.25, 'rgba(255,255,255,0.85)');
-  g.addColorStop(0.6, 'rgba(255,255,255,0.2)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
+  const ctx = canvas.getContext("2d")!;
+  const g = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2
+  );
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.25, "rgba(255,255,255,0.85)");
+  g.addColorStop(0.6, "rgba(255,255,255,0.2)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
@@ -747,13 +766,20 @@ export class GlowParticles {
   private static readonly FORWARD = new THREE.Vector3(0, 0, 1);
   private static readonly UP = new THREE.Vector3(0, 1, 0);
   private static readonly HIDDEN = new THREE.Matrix4().makeScale(0, 0, 0);
-  private static readonly FLAT = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+  private static readonly FLAT = new THREE.Quaternion().setFromAxisAngle(
+    new THREE.Vector3(1, 0, 0),
+    -Math.PI / 2
+  );
   /** Displayed color (with the style intensity) and the one it blends to after setColor. */
   private readonly baseColor: THREE.Color;
   private readonly targetColor: THREE.Color;
   private readonly tmpColor = new THREE.Color();
 
-  constructor(private readonly scene: THREE.Scene, private readonly surfaces: SurfaceHeights, private readonly style: GlowStyle) {
+  constructor(
+    private readonly scene: THREE.Scene,
+    private readonly surfaces: SurfaceHeights,
+    private readonly style: GlowStyle
+  ) {
     const n = style.maxParticles;
     this.x = new Float32Array(n);
     this.y = new Float32Array(n);
@@ -765,11 +791,15 @@ export class GlowParticles {
     this.phase = new Float32Array(n);
     this.alive = new Uint8Array(n);
     this.colorIndex = new Uint8Array(n);
-    this.paletteColors = (style.palette ?? []).map(c => new THREE.Color(c).multiplyScalar(style.intensity));
-    this.baseColor = new THREE.Color(style.color).multiplyScalar(style.intensity);
+    this.paletteColors = (style.palette ?? []).map((c) =>
+      new THREE.Color(c).multiplyScalar(style.intensity)
+    );
+    this.baseColor = new THREE.Color(style.color).multiplyScalar(
+      style.intensity
+    );
     this.targetColor = this.baseColor.clone();
 
-    const additive = style.blending !== 'normal';
+    const additive = style.blending !== "normal";
     const material = new THREE.MeshBasicMaterial({
       map: style.smoke ? makeSmokeTexture() : makeGlowTexture(),
       transparent: true,
@@ -787,7 +817,7 @@ export class GlowParticles {
     if (fadeAlpha) {
       this.opacity = new THREE.InstancedBufferAttribute(new Float32Array(n), 1);
       this.opacity.setUsage(THREE.DynamicDrawUsage);
-      geometry.setAttribute('aOpacity', this.opacity);
+      geometry.setAttribute("aOpacity", this.opacity);
       addInstanceOpacity(material);
     }
     this.mesh = new THREE.InstancedMesh(geometry, material, n);
@@ -810,10 +840,20 @@ export class GlowParticles {
    * @param camera particles always face it
    * @param windX signed wind, -1..1
    */
-  update(dt: number, target: THREE.Vector3, density: number, camera: THREE.Camera, windX = 0) {
+  update(
+    dt: number,
+    target: THREE.Vector3,
+    density: number,
+    camera: THREE.Camera,
+    windX = 0
+  ) {
     const s = this.style;
     // (fewer particles at a lower graphics quality)
-    const count = Math.round(s.maxParticles * RENDER_DETAIL.particles * THREE.MathUtils.clamp(density, 0, 1));
+    const count = Math.round(
+      s.maxParticles *
+        RENDER_DETAIL.particles *
+        THREE.MathUtils.clamp(density, 0, 1)
+    );
     for (let i = count; i < this.active; i++) {
       this.alive[i] = 0;
     }
@@ -834,7 +874,10 @@ export class GlowParticles {
       if (!this.alive[i]) {
         // At most MAX_NEW_PER_UPDATE new particles at once: a burst (quake, strike) comes over a few frames
         // instead of all its spawn points (heights, raycasts...) computed in one
-        if ((this.spawnGate && !this.spawnGate()) || spawned >= MAX_NEW_PER_UPDATE) {
+        if (
+          (this.spawnGate && !this.spawnGate()) ||
+          spawned >= MAX_NEW_PER_UPDATE
+        ) {
           this.hide(i);
           continue;
         }
@@ -847,7 +890,13 @@ export class GlowParticles {
       this.x[i] += vx * dt;
       const dx = this.x[i] - target.x;
       const dz = this.z[i] - target.z;
-      if (this.age[i] >= this.life[i] || dx < AREA.minX || dx > AREA.maxX || dz < AREA.minZ || dz > AREA.maxZ) {
+      if (
+        this.age[i] >= this.life[i] ||
+        dx < AREA.minX ||
+        dx > AREA.maxX ||
+        dz < AREA.minZ ||
+        dz > AREA.maxZ
+      ) {
         if (this.spawnGate && !this.spawnGate()) {
           // Waits, hidden, until new particles may appear again
           this.alive[i] = 0;
@@ -859,30 +908,63 @@ export class GlowParticles {
 
       // Fade in / out over the life, plus a flicker
       const t = this.age[i] / this.life[i];
-      const flicker = 1 - s.flicker * (0.5 + 0.5 * Math.sin(this.time * s.flickerSpeed + this.phase[i] * 3));
+      const flicker =
+        1 -
+        s.flicker *
+          (0.5 +
+            0.5 * Math.sin(this.time * s.flickerSpeed + this.phase[i] * 3));
       // Puff: quick appearance (first 8% of the life), then an ease-out fade: (1 - u)² drops fast then lingers
-      const brightness = (s.puff ? (t < 0.08 ? t / 0.08 : Math.pow(1 - (t - 0.08) / 0.92, 2)) : Math.sin(Math.PI * t)) * flicker;
-      const color = this.colorIndex[i] ? this.paletteColors[this.colorIndex[i] - 1] : this.baseColor;
+      const brightness =
+        (s.puff ? puffBrightness(t) : Math.sin(Math.PI * t)) * flicker;
+      const color = this.colorIndex[i]
+        ? this.paletteColors[this.colorIndex[i] - 1]
+        : this.baseColor;
       // Normal blending can't dim to transparent with the color: the particle shrinks instead
-      const additive = s.blending !== 'normal';
-      this.mesh.setColorAt(i, additive ? this.tmpColor.copy(color).multiplyScalar(brightness) : color);
+      const additive = s.blending !== "normal";
+      this.mesh.setColorAt(
+        i,
+        additive ? this.tmpColor.copy(color).multiplyScalar(brightness) : color
+      );
 
       const p = this.phase[i];
       const w = this.time * s.wobbleSpeed + p;
-      this.position.set(this.x[i] + Math.sin(w) * s.wobble, this.y[i], this.z[i] + Math.cos(w * 0.7) * s.wobble * 0.5);
+      this.position.set(
+        this.x[i] + Math.sin(w) * s.wobble,
+        this.y[i],
+        this.z[i] + Math.cos(w * 0.7) * s.wobble * 0.5
+      );
       // (a puff spreads fast at first, then slows down: ease-out 1 - (1 - t)²)
-      const grow = 1 + ((s.grow ?? 1) - 1) * (s.puff ? 1 - (1 - t) * (1 - t) : t);
+      const grow =
+        1 + ((s.grow ?? 1) - 1) * (s.puff ? 1 - (1 - t) * (1 - t) : t);
       // Normal blending fades by shrinking, unless the smoke has its own opacity
-      const size = this.size[i] * grow * (additive || this.opacity ? 1 : Math.sqrt(Math.max(brightness, 0)));
+      const size =
+        this.size[i] *
+        grow *
+        (additive || this.opacity ? 1 : Math.sqrt(Math.max(brightness, 0)));
       this.scale.set(size, size * (s.stretchY ?? 1), size);
       if (s.flat) {
         // Lying flat, slowly turning around the vertical axis
-        this.spin.setFromAxisAngle(GlowParticles.UP, this.phase[i] * 3 + this.age[i] * (s.smoke?.spin ?? 0));
-        this.matrix.compose(this.position, this.turned.copy(this.spin).multiply(GlowParticles.FLAT), this.scale);
+        this.spin.setFromAxisAngle(
+          GlowParticles.UP,
+          this.phase[i] * 3 + this.age[i] * (s.smoke?.spin ?? 0)
+        );
+        this.matrix.compose(
+          this.position,
+          this.turned.copy(this.spin).multiply(GlowParticles.FLAT),
+          this.scale
+        );
       } else if (s.smoke) {
         // Facing the camera, turned around the view axis
-        this.spin.setFromAxisAngle(GlowParticles.FORWARD, this.phase[i] * 3 + this.age[i] * s.smoke.spin * (this.phase[i] > Math.PI ? 1 : -1));
-        this.matrix.compose(this.position, this.turned.copy(camera.quaternion).multiply(this.spin), this.scale);
+        this.spin.setFromAxisAngle(
+          GlowParticles.FORWARD,
+          this.phase[i] * 3 +
+            this.age[i] * s.smoke.spin * (this.phase[i] > Math.PI ? 1 : -1)
+        );
+        this.matrix.compose(
+          this.position,
+          this.turned.copy(camera.quaternion).multiply(this.spin),
+          this.scale
+        );
       } else {
         this.matrix.compose(this.position, camera.quaternion, this.scale);
       }
@@ -904,8 +986,9 @@ export class GlowParticles {
     }
     this.plantsAge = 0;
     const plants: THREE.Vector3[] = [];
-    this.scene.traverseVisible(o => {
-      const geometry = (o as THREE.Mesh).geometry as THREE.BufferGeometry | undefined;
+    this.scene.traverseVisible((o) => {
+      const geometry = (o as THREE.Mesh).geometry as
+        THREE.BufferGeometry | undefined;
       if (geometry?.getAttribute?.(SWAY_ATTRIBUTE)) {
         plants.push(...plantPositions(o));
       }
@@ -941,19 +1024,28 @@ export class GlowParticles {
         }
       }
     }
-    if (this.plants.length && Math.random() < this.style.nearPlants) {
+    if (this.plants.length > 0 && Math.random() < this.style.nearPlants) {
       for (let attempt = 0; attempt < 6; attempt++) {
-        const plant = this.plants[Math.floor(Math.random() * this.plants.length)];
+        const plant =
+          this.plants[Math.floor(Math.random() * this.plants.length)];
         const dx = plant.x - target.x;
         const dz = plant.z - target.z;
-        if (dx > AREA.minX && dx < AREA.maxX && dz > AREA.minZ && dz < AREA.maxZ) {
+        if (
+          dx > AREA.minX &&
+          dx < AREA.maxX &&
+          dz > AREA.minZ &&
+          dz < AREA.maxZ
+        ) {
           const angle = Math.random() * Math.PI * 2;
           const r = Math.random() * PLANT_RADIUS;
           return [plant.x + Math.cos(angle) * r, plant.z + Math.sin(angle) * r];
         }
       }
     }
-    return [target.x + THREE.MathUtils.randFloat(AREA.minX, AREA.maxX), target.z + THREE.MathUtils.randFloat(AREA.minZ, AREA.maxZ)];
+    return [
+      target.x + THREE.MathUtils.randFloat(AREA.minX, AREA.maxX),
+      target.z + THREE.MathUtils.randFloat(AREA.minZ, AREA.maxZ),
+    ];
   }
 
   private respawn(i: number, target: THREE.Vector3, randomAge: boolean) {
@@ -962,14 +1054,22 @@ export class GlowParticles {
     const ground = this.surfaces.heightAt(x, z, target.y);
     this.x[i] = x;
     this.z[i] = z;
-    this.y[i] = ground + THREE.MathUtils.randFloat(s.spawnHeight[0], s.spawnHeight[1]);
+    this.y[i] =
+      ground + THREE.MathUtils.randFloat(s.spawnHeight[0], s.spawnHeight[1]);
     this.rise[i] = THREE.MathUtils.randFloat(s.rise[0], s.rise[1]);
     this.life[i] = THREE.MathUtils.randFloat(s.life[0], s.life[1]);
     // Random age on (re)activation so they don't all fade in together
     this.age[i] = randomAge ? Math.random() * this.life[i] : 0;
     this.size[i] = THREE.MathUtils.randFloat(s.size[0], s.size[1]);
     this.phase[i] = Math.random() * Math.PI * 2;
-    this.colorIndex[i] = Math.floor(Math.random() * (this.paletteColors.length + 1));
+    this.colorIndex[i] = Math.floor(
+      Math.random() * (this.paletteColors.length + 1)
+    );
     this.alive[i] = 1;
   }
+}
+
+/** A puff's brightness along its life (0 → 1): quick appearance (first 8%), then an ease-out fade. */
+function puffBrightness(t: number): number {
+  return t < 0.08 ? t / 0.08 : Math.pow(1 - (t - 0.08) / 0.92, 2);
 }

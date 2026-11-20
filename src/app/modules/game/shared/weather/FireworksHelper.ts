@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 /**
  * Where bursts happen on screen (normalized device coordinates, -1..1): the camera looks down at the ground,
@@ -22,18 +22,28 @@ const MAX_SPARKS = 1400;
 /** Sizes (world units) and colors (additive, above 1 to bloom). */
 const SPARK_SIZE = 2.6;
 const ROCKET_SIZE = 2.6;
-const COLORS = [0xff4040, 0x40ff70, 0x4aa0ff, 0xffd040, 0xc060ff, 0xffffff, 0xff70d0, 0x40f0ff];
+const COLORS = [
+  0xff_40_40, 0x40_ff_70, 0x4a_a0_ff, 0xff_d0_40, 0xc0_60_ff, 0xff_ff_ff,
+  0xff_70_d0, 0x40_f0_ff,
+];
 const INTENSITY = 2.4;
 
 function makeGlowTexture(): THREE.CanvasTexture {
   const size = 32;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.3, 'rgba(255,255,255,0.6)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
+  const ctx = canvas.getContext("2d")!;
+  const g = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2
+  );
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.3, "rgba(255,255,255,0.6)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
@@ -81,9 +91,17 @@ export class FireworksHelper {
 
   constructor(scene: THREE.Scene) {
     const material = new THREE.MeshBasicMaterial({
-      map: makeGlowTexture(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+      map: makeGlowTexture(),
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
     });
-    this.mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), material, MAX_SPARKS);
+    this.mesh = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      material,
+      MAX_SPARKS
+    );
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     this.mesh.setColorAt(0, this.color.set(0));
     this.mesh.frustumCulled = false;
@@ -94,16 +112,24 @@ export class FireworksHelper {
   }
 
   /** @param intensity 0..1, how often rockets are launched */
-  update(dt: number, target: THREE.Vector3, intensity: number, camera: THREE.Camera) {
+  update(
+    dt: number,
+    target: THREE.Vector3,
+    intensity: number,
+    camera: THREE.Camera
+  ) {
     this.flash = Math.max(0, this.flash - dt * 2.2);
     if (intensity > 0.05) {
       this.timer -= dt * intensity;
       if (this.timer <= 0) {
-        this.timer = THREE.MathUtils.randFloat(LAUNCH_INTERVAL[0], LAUNCH_INTERVAL[1]);
+        this.timer = THREE.MathUtils.randFloat(
+          LAUNCH_INTERVAL[0],
+          LAUNCH_INTERVAL[1]
+        );
         this.launch(target, camera);
       }
     }
-    if (!this.rockets.length && !this.sparks.length) {
+    if (this.rockets.length === 0 && this.sparks.length === 0) {
       this.mesh.visible = false;
       return;
     }
@@ -124,7 +150,11 @@ export class FireworksHelper {
         this.rockets.splice(i, 1);
         continue;
       }
-      pos.compose(new THREE.Vector3(x, y, z), camera.quaternion, this.scale.setScalar(ROCKET_SIZE));
+      pos.compose(
+        new THREE.Vector3(x, y, z),
+        camera.quaternion,
+        this.scale.setScalar(ROCKET_SIZE)
+      );
       this.mesh.setMatrixAt(n, pos);
       this.mesh.setColorAt(n++, this.color.setRGB(1.6, 1.3, 0.9));
     }
@@ -145,9 +175,16 @@ export class FireworksHelper {
       }
       const k = 1 - s.age / s.life;
       const blink = s.twinkle && k < 0.6 ? (Math.random() < 0.5 ? 1 : 0.15) : 1;
-      this.matrix.compose(s.pos, camera.quaternion, this.scale.setScalar(SPARK_SIZE * (0.5 + 0.5 * k)));
+      this.matrix.compose(
+        s.pos,
+        camera.quaternion,
+        this.scale.setScalar(SPARK_SIZE * (0.5 + 0.5 * k))
+      );
       this.mesh.setMatrixAt(n, this.matrix);
-      this.mesh.setColorAt(n++, this.color.copy(s.color).multiplyScalar(INTENSITY * k * k * blink));
+      this.mesh.setColorAt(
+        n++,
+        this.color.copy(s.color).multiplyScalar(INTENSITY * k * k * blink)
+      );
     }
     this.mesh.count = n;
     this.mesh.visible = n > 0;
@@ -160,28 +197,44 @@ export class FireworksHelper {
    * through it, the point at the burst height (ray: camera + d·dir, solve camera.y + d·dir.y = height).
    */
   private launch(target: THREE.Vector3, camera: THREE.Camera) {
-    const height = target.y + THREE.MathUtils.randFloat(BURST_HEIGHT[0], BURST_HEIGHT[1]);
+    const height =
+      target.y + THREE.MathUtils.randFloat(BURST_HEIGHT[0], BURST_HEIGHT[1]);
     const dir = new THREE.Vector3(
       THREE.MathUtils.randFloat(SCREEN_X[0], SCREEN_X[1]),
       THREE.MathUtils.randFloat(SCREEN_Y[0], SCREEN_Y[1]),
-      0.5,
-    ).unproject(camera).sub(camera.position).normalize();
+      0.5
+    )
+      .unproject(camera)
+      .sub(camera.position)
+      .normalize();
     if (dir.y > -0.01) {
       return; // looking up: no ground under this point
     }
     const d = (height - camera.position.y) / dir.y;
     const to = camera.position.clone().addScaledVector(dir, d);
-    const from = new THREE.Vector3(to.x + THREE.MathUtils.randFloatSpread(20), target.y, to.z + THREE.MathUtils.randFloatSpread(10));
+    const from = new THREE.Vector3(
+      to.x + THREE.MathUtils.randFloatSpread(20),
+      target.y,
+      to.z + THREE.MathUtils.randFloatSpread(10)
+    );
     const climb = THREE.MathUtils.randFloat(CLIMB_TIME[0], CLIMB_TIME[1]);
     this.rockets.push({ from, to, age: 0, climb });
-    this.onLaunch?.(climb, THREE.MathUtils.clamp((to.x - target.x) / SIDE_RANGE, -1, 1));
+    this.onLaunch?.(
+      climb,
+      THREE.MathUtils.clamp((to.x - target.x) / SIDE_RANGE, -1, 1)
+    );
   }
 
   /** A sphere of sparks (random directions on the sphere), one or two colors, sometimes crackling. */
   private burst(at: THREE.Vector3, target: THREE.Vector3) {
     const count = THREE.MathUtils.randInt(SPARKS[0], SPARKS[1]);
-    const c1 = new THREE.Color(COLORS[Math.floor(Math.random() * COLORS.length)]);
-    const c2 = Math.random() < 0.4 ? new THREE.Color(COLORS[Math.floor(Math.random() * COLORS.length)]) : c1;
+    const c1 = new THREE.Color(
+      COLORS[Math.floor(Math.random() * COLORS.length)]
+    );
+    const c2 =
+      Math.random() < 0.4
+        ? new THREE.Color(COLORS[Math.floor(Math.random() * COLORS.length)])
+        : c1;
     const speed = THREE.MathUtils.randFloat(SPARK_SPEED[0], SPARK_SPEED[1]);
     const twinkle = Math.random() < 0.35;
     for (let i = 0; i < count && this.sparks.length < MAX_SPARKS; i++) {
@@ -203,6 +256,9 @@ export class FireworksHelper {
     this.flashColor.copy(c1).lerp(c2, 0.5);
     this.flash = 1;
     const dist = Math.hypot(at.x - target.x, at.z - target.z);
-    this.onBurst?.(THREE.MathUtils.clamp(1 - dist / 300, 0.2, 1), THREE.MathUtils.clamp((at.x - target.x) / SIDE_RANGE, -1, 1));
+    this.onBurst?.(
+      THREE.MathUtils.clamp(1 - dist / 300, 0.2, 1),
+      THREE.MathUtils.clamp((at.x - target.x) / SIDE_RANGE, -1, 1)
+    );
   }
 }

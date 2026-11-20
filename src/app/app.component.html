@@ -3,8 +3,14 @@
 
   <!-- Hidden in the game mode: full screen is in its menu -->
   @if (!fullScreenButtonHidden()) {
-    <button type="button" class="btn-fullscreen" (click)="toggleFullscreen()"
-            [attr.aria-label]="fullScreened() ? 'Quitter le plein écran' : 'Plein écran'">
+    <button
+      type="button"
+      class="btn-fullscreen"
+      (click)="toggleFullscreen()"
+      [attr.aria-label]="
+        fullScreened() ? 'Quitter le plein écran' : 'Plein écran'
+      "
+    >
       @if (fullScreened()) {
         <svg lucideMinimize></svg>
       } @else {

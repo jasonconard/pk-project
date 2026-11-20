@@ -9,18 +9,23 @@ export type GameVariable = {
   name: string;
   /** What it is for, optional. */
   note?: string;
-} & ({ kind: 'flag', initial: boolean } | { kind: 'counter', initial: number });
+} & ({ kind: "flag"; initial: boolean } | { kind: "counter"; initial: number });
 
-export type VariableKind = GameVariable['kind'];
+export type VariableKind = GameVariable["kind"];
 
 export const COUNTER_MIN = -9999;
 export const COUNTER_MAX = 9999;
 
 export function newVariable(kind: VariableKind, name: string): GameVariable {
   const id = `v-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-  return kind === 'flag' ? { id, name, kind, initial: false } : { id, name, kind, initial: 0 };
+  return kind === "flag"
+    ? { id, name, kind, initial: false }
+    : { id, name, kind, initial: 0 };
 }
 
 export function clampCounter(value: number): number {
-  return Math.min(COUNTER_MAX, Math.max(COUNTER_MIN, Math.round(Number.isFinite(value) ? value : 0)));
+  return Math.min(
+    COUNTER_MAX,
+    Math.max(COUNTER_MIN, Math.round(Number.isFinite(value) ? value : 0))
+  );
 }

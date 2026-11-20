@@ -11,10 +11,10 @@ const COLOR_STOPS: [number, [number, number, number]][] = [
 export function temperatureColor(t: number): string {
   const i = COLOR_STOPS.findIndex(([at]) => at >= t);
   if (i <= 0) {
-    return `rgb(${COLOR_STOPS[i < 0 ? COLOR_STOPS.length - 1 : 0][1].join(',')})`;
+    return `rgb(${COLOR_STOPS[i < 0 ? COLOR_STOPS.length - 1 : 0][1].join(",")})`;
   }
   const [a, ca] = COLOR_STOPS[i - 1];
   const [b, cb] = COLOR_STOPS[i];
   const k = (t - a) / (b - a);
-  return `rgb(${ca.map((c, j) => Math.round(c + (cb[j] - c) * k)).join(',')})`;
+  return `rgb(${ca.map((c, j) => Math.round(c + (cb[j] - c) * k)).join(",")})`;
 }

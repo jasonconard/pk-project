@@ -1,4 +1,4 @@
-import { loadDatabase } from './database-storage';
+import { loadDatabase } from "./database-storage";
 
 /**
  * The team in the game being played: who is in it, the items carried and the money. Kept in the browser so it
@@ -6,8 +6,8 @@ import { loadDatabase } from './database-storage';
  * (give an item, money, a character joins…) and read by their conditions. A new game starts with the characters
  * marked « Dans l'équipe au début », no item and no money.
  */
-const STORAGE_KEY = 'pk-party';
-export const MONEY_MAX = 9999999;
+const STORAGE_KEY = "pk-party";
+export const MONEY_MAX = 9_999_999;
 export const ITEM_COUNT_MAX = 99;
 
 export interface PartyState {
@@ -20,14 +20,25 @@ export interface PartyState {
 
 /** The team when a new game starts. */
 export function startParty(): PartyState {
-  return { team: loadDatabase().characters.filter(c => c.team && c.startsInTeam).map(c => c.id), items: {}, money: 0 };
+  return {
+    team: loadDatabase()
+      .characters.filter((c) => c.team && c.startsInTeam)
+      .map((c) => c.id),
+    items: {},
+    money: 0,
+  };
 }
 
 function readParty(): PartyState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    const party = raw ? JSON.parse(raw) as PartyState : null;
-    return party && Array.isArray(party.team) && party.items && typeof party.money === 'number' ? party : null;
+    const party = raw ? (JSON.parse(raw) as PartyState) : null;
+    return party &&
+      Array.isArray(party.team) &&
+      party.items &&
+      typeof party.money === "number"
+      ? party
+      : null;
   } catch {
     return null;
   }
@@ -43,13 +54,13 @@ function writeParty(party: PartyState): void {
 }
 
 /** Last answer of currentParty, with what it was read from (the conditions ask many times a second). */
-let cache: { raw: string, party: PartyState } | null = null;
+let cache: { raw: string; party: PartyState } | null = null;
 
 /** The team now. Don't change the object returned. */
 export function currentParty(): PartyState {
-  let raw = '';
+  let raw = "";
   try {
-    raw = localStorage.getItem(STORAGE_KEY) ?? '';
+    raw = localStorage.getItem(STORAGE_KEY) ?? "";
   } catch {
     // (no storage: read every time)
   }
@@ -64,7 +75,10 @@ export function currentParty(): PartyState {
 /** Items given (amount > 0) or taken (< 0, never below 0). */
 export function giveItem(id: string, amount: number): void {
   const party = structuredClone(currentParty());
-  const count = Math.min(ITEM_COUNT_MAX, Math.max(0, (party.items[id] ?? 0) + amount));
+  const count = Math.min(
+    ITEM_COUNT_MAX,
+    Math.max(0, (party.items[id] ?? 0) + amount)
+  );
   if (count) {
     party.items[id] = count;
   } else {
@@ -82,7 +96,7 @@ export function giveMoney(amount: number): void {
 /** A character joins the team (at the end) or leaves it. */
 export function setInTeam(id: string, inTeam: boolean): void {
   const party = structuredClone(currentParty());
-  party.team = party.team.filter(c => c !== id);
+  party.team = party.team.filter((c) => c !== id);
   if (inTeam) {
     party.team.push(id);
   }
@@ -91,7 +105,9 @@ export function setInTeam(id: string, inTeam: boolean): void {
 
 /** A saved game's team replaces the current one. */
 export function restoreParty(party: PartyState | undefined): void {
-  writeParty(party && Array.isArray(party.team) ? structuredClone(party) : startParty());
+  writeParty(
+    party && Array.isArray(party.team) ? structuredClone(party) : startParty()
+  );
 }
 
 /** Back to a new game's team. */

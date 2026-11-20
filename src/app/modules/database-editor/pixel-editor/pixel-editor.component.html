@@ -1,49 +1,131 @@
-<div class="dim" (click)="cancel.emit()"></div>
-<section class="sheet" role="dialog" aria-modal="true" [attr.aria-label]="title()">
+<div class="dim" (click)="dismissed.emit()"></div>
+<section
+  class="sheet"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="title()"
+>
   <span class="handle" aria-hidden="true"></span>
   <header>
     <div class="titles">
       <strong>{{ title() }}</strong>
       <small>{{ width() }} × {{ height() }} pixels</small>
     </div>
-    <button type="button" class="square" title="Annuler le dernier trait" aria-label="Annuler" [disabled]="!canUndo()" (click)="undo()"><svg lucideUndo2></svg></button>
-    <button type="button" class="cancel" (click)="cancel.emit()">Fermer</button>
+    <button
+      type="button"
+      class="square"
+      title="Annuler le dernier trait"
+      aria-label="Annuler"
+      [disabled]="!canUndo()"
+      (click)="undo()"
+    >
+      <svg lucideUndo2></svg>
+    </button>
+    <button type="button" class="cancel" (click)="dismissed.emit()">
+      Fermer
+    </button>
     <button type="button" class="ok" (click)="ok()">OK</button>
   </header>
 
-  <div class="grid-wrap" #wrap [style.aspect-ratio]="width() + ' / ' + height()" [style.--ratio]="width() / height()" (wheel)="wheel($event)">
-    <canvas #canvas class="grid" [style.width.%]="zoom() * 100" [style.aspect-ratio]="width() + ' / ' + height()"
-            [style.background-size]="(100 / width() * 2) + '% ' + (100 / height() * 2) + '%'"
-            (pointerdown)="down($event)" (pointermove)="move($event)" (pointerup)="up($event)" (pointercancel)="up($event)"></canvas>
+  <div
+    class="grid-wrap"
+    #wrap
+    [style.aspect-ratio]="width() + ' / ' + height()"
+    [style.--ratio]="width() / height()"
+    (wheel)="wheel($event)"
+  >
+    <canvas
+      #canvas
+      class="grid"
+      [style.width.%]="zoom() * 100"
+      [style.aspect-ratio]="width() + ' / ' + height()"
+      [style.background-size]="
+        (100 / width()) * 2 + '% ' + (100 / height()) * 2 + '%'
+      "
+      (pointerdown)="down($event)"
+      (pointermove)="move($event)"
+      (pointerup)="up($event)"
+      (pointercancel)="up($event)"
+    ></canvas>
   </div>
 
   <div class="tools" role="group" aria-label="Outils">
     @for (t of tools; track t.id) {
-      <button type="button" [class.on]="tool() === t.id" [attr.aria-pressed]="tool() === t.id" [title]="t.label" [attr.aria-label]="t.label" (click)="setTool(t.id)">
+      <button
+        type="button"
+        [class.on]="tool() === t.id"
+        [attr.aria-pressed]="tool() === t.id"
+        [title]="t.label"
+        [attr.aria-label]="t.label"
+        (click)="setTool(t.id)"
+      >
         @switch (t.id) {
-          @case ('pencil') { <svg lucidePencil></svg> }
-          @case ('eraser') { <svg lucideEraser></svg> }
-          @case ('fill') { <svg lucidePaintBucket></svg> }
-          @case ('pick') { <svg lucidePipette></svg> }
+          @case ("pencil") {
+            <svg lucidePencil></svg>
+          }
+          @case ("eraser") {
+            <svg lucideEraser></svg>
+          }
+          @case ("fill") {
+            <svg lucidePaintBucket></svg>
+          }
+          @case ("pick") {
+            <svg lucidePipette></svg>
+          }
         }
       </button>
     }
-    <button type="button" title="Retourner (miroir)" aria-label="Miroir" (click)="flip()"><svg lucideFlipHorizontal2></svg></button>
+    <button
+      type="button"
+      title="Retourner (miroir)"
+      aria-label="Miroir"
+      (click)="flip()"
+    >
+      <svg lucideFlipHorizontal2></svg>
+    </button>
   </div>
 
   <div class="zoom" role="group" aria-label="Zoom">
-    <button type="button" title="Dézoomer" aria-label="Dézoomer" [disabled]="zoom() <= zoomMin" (click)="zoomBy(1 / 1.5)"><svg lucideZoomOut></svg></button>
+    <button
+      type="button"
+      title="Dézoomer"
+      aria-label="Dézoomer"
+      [disabled]="zoom() <= zoomMin"
+      (click)="zoomBy(1 / 1.5)"
+    >
+      <svg lucideZoomOut></svg>
+    </button>
     <span>{{ zoomLabel() }}</span>
-    <button type="button" title="Zoomer (ou deux doigts, Ctrl + molette)" aria-label="Zoomer" [disabled]="zoom() >= zoomMax" (click)="zoomBy(1.5)"><svg lucideZoomIn></svg></button>
+    <button
+      type="button"
+      title="Zoomer (ou deux doigts, Ctrl + molette)"
+      aria-label="Zoomer"
+      [disabled]="zoom() >= zoomMax"
+      (click)="zoomBy(1.5)"
+    >
+      <svg lucideZoomIn></svg>
+    </button>
   </div>
 
   <div class="palette" role="group" aria-label="Couleurs">
     @for (c of palette(); track c) {
-      <button type="button" [style.background]="c" [class.on]="color() === c && tool() !== 'eraser'" [title]="c" [attr.aria-label]="'Couleur ' + c" (click)="setColor(c)"></button>
+      <button
+        type="button"
+        [style.background]="c"
+        [class.on]="color() === c && tool() !== 'eraser'"
+        [title]="c"
+        [attr.aria-label]="'Couleur ' + c"
+        (click)="setColor(c)"
+      ></button>
     }
     <label class="custom" title="Autre couleur">
       <svg lucidePlus></svg>
-      <input type="color" aria-label="Autre couleur" [value]="color()" (change)="setColor($any($event.target).value)" />
+      <input
+        type="color"
+        aria-label="Autre couleur"
+        [value]="color()"
+        (change)="setColor($any($event.target).value)"
+      />
     </label>
   </div>
 
@@ -56,6 +138,8 @@
       <svg lucideImageUp></svg> Importer un PNG
       <input type="file" accept="image/*" (change)="importPng($event)" />
     </label>
-    <button type="button" class="action" (click)="clear()"><svg lucideTrash></svg> Tout effacer</button>
+    <button type="button" class="action" (click)="clear()">
+      <svg lucideTrash></svg> Tout effacer
+    </button>
   </div>
 </section>

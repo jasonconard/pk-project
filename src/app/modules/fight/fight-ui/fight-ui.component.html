@@ -1,13 +1,21 @@
 @if (menuItems().length) {
-  <div class="menu" role="listbox" aria-label="Menu de combat"
-       animate.enter="anim-slide-in-right" animate.leave="anim-slide-out-right"
-       [class.back]="subMenus().length">
+  <div
+    class="menu"
+    role="listbox"
+    aria-label="Menu de combat"
+    animate.enter="anim-slide-in-right"
+    animate.leave="anim-slide-out-right"
+    [class.back]="subMenus().length"
+  >
     @for (item of menuItems(); track item.id) {
-      <div class="menu-choice" role="option"
-           [attr.aria-selected]="item === currentMenu()"
-           [attr.aria-disabled]="!item.enabled"
-           [class.disabled]="!item.enabled"
-           [class.selected]="item === currentMenu()">
+      <div
+        class="menu-choice"
+        role="option"
+        [attr.aria-selected]="item === currentMenu()"
+        [attr.aria-disabled]="!item.enabled"
+        [class.disabled]="!item.enabled"
+        [class.selected]="item === currentMenu()"
+      >
         <div class="choice-label">{{ item.label }}</div>
         @if (item.amount) {
           <div class="choice-amount">{{ item.amount }}</div>
@@ -19,14 +27,22 @@
 
 @if (selectedMenu(); as selectedMenu) {
   @if (subMenus().length) {
-    <div class="menu sub-menu" role="listbox" [attr.aria-label]="selectedMenu.label"
-         animate.enter="anim-slide-in-right" animate.leave="anim-slide-out-right">
+    <div
+      class="menu sub-menu"
+      role="listbox"
+      [attr.aria-label]="selectedMenu.label"
+      animate.enter="anim-slide-in-right"
+      animate.leave="anim-slide-out-right"
+    >
       @for (item of subMenus(); track item.id) {
-        <div class="menu-choice" role="option"
-             [attr.aria-selected]="item === currentSubMenu()"
-             [attr.aria-disabled]="!item.enabled"
-             [class.disabled]="!item.enabled"
-             [class.selected]="item === currentSubMenu()">
+        <div
+          class="menu-choice"
+          role="option"
+          [attr.aria-selected]="item === currentSubMenu()"
+          [attr.aria-disabled]="!item.enabled"
+          [class.disabled]="!item.enabled"
+          [class.selected]="item === currentSubMenu()"
+        >
           <div class="choice-label">{{ item.label }}</div>
           @if (item.amount) {
             <div class="choice-amount">{{ item.amount }}</div>
@@ -38,7 +54,12 @@
 }
 
 @if (description()) {
-  <div class="ui-desc" aria-live="polite" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+  <div
+    class="ui-desc"
+    aria-live="polite"
+    animate.enter="anim-fade-in"
+    animate.leave="anim-fade-out"
+  >
     {{ description() }}
   </div>
 }

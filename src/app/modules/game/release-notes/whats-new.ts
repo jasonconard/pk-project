@@ -1,5 +1,5 @@
 /** Last version of the game started on this device: the "what's new" dialog opens once after an update. */
-const LAST_SEEN_KEY = 'pk-last-seen-version';
+const LAST_SEEN_KEY = "pk-last-seen-version";
 
 /**
  * True the first time a new version starts on this device (then remembered: once per version).
@@ -13,7 +13,9 @@ export function isFirstStartOfNewVersion(current: string): boolean {
     if (seen !== null) {
       return seen !== current;
     }
-    return Object.keys(localStorage).some(key => key.startsWith('pk-') && key !== LAST_SEEN_KEY);
+    return Object.keys(localStorage).some(
+      (key) => key.startsWith("pk-") && key !== LAST_SEEN_KEY
+    );
   } catch {
     return false; // private browsing: no dialog
   }

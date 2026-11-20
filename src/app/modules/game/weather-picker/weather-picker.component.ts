@@ -1,8 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, OnInit, output, signal } from '@angular/core';
-import { LucideCheck, LucideSearch, LucideX } from '@lucide/angular';
-import { EscapeService } from '../../../core/shared/service/escape.service';
-import { WEATHER_CHOICES, WeatherType } from '../shared/weather/Weather';
-import { weatherScreenshot } from '../shared/weather/weather-catalog';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from "@angular/core";
+import { LucideCheck, LucideSearch, LucideX } from "@lucide/angular";
+import { EscapeService } from "../../../core/shared/service/escape.service";
+import { WEATHER_CHOICES, WeatherType } from "../shared/weather/Weather";
+import { weatherScreenshot } from "../shared/weather/weather-catalog";
 
 /**
  * Choosing a weather in a long list: a search field and one 40 px line per weather, with its catalog picture.
@@ -10,14 +20,14 @@ import { weatherScreenshot } from '../shared/weather/weather-catalog';
  * (it is the latest layer); Enter in the search takes the first weather.
  */
 @Component({
-  selector: 'game-weather-picker',
+  selector: "game-weather-picker",
   imports: [LucideCheck, LucideSearch, LucideX],
-  templateUrl: './weather-picker.component.html',
-  styleUrl: './weather-picker.component.scss',
+  templateUrl: "./weather-picker.component.html",
+  styleUrl: "./weather-picker.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeatherPickerComponent implements OnInit {
-  readonly title = input('Choisir une météo');
+  readonly title = input("Choisir une météo");
   /** Weathers not offered (already chosen). */
   readonly exclude = input<readonly string[]>([]);
   /** The weather chosen now (marked). */
@@ -28,12 +38,16 @@ export class WeatherPickerComponent implements OnInit {
   readonly closed = output<void>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  protected readonly search = signal('');
+  protected readonly search = signal("");
   protected readonly weathers = computed(() => {
     const exclude = new Set(this.exclude());
     const q = norm(this.search());
-    return WEATHER_CHOICES.filter(w => (this.withNeutral() || w.type !== WeatherType.NEUTRAL) && !exclude.has(w.type)
-      && (!q || norm(w.label).includes(q)));
+    return WEATHER_CHOICES.filter(
+      (w) =>
+        (this.withNeutral() || w.type !== WeatherType.NEUTRAL) &&
+        !exclude.has(w.type) &&
+        (!q || norm(w.label).includes(q))
+    );
   });
 
   constructor() {
@@ -42,8 +56,12 @@ export class WeatherPickerComponent implements OnInit {
 
   ngOnInit(): void {
     // The keyboard only on computers (on a phone it would hide half the list)
-    if (matchMedia('(pointer: fine)').matches) {
-      setTimeout(() => this.host.nativeElement.querySelector<HTMLInputElement>('input')?.focus());
+    if (matchMedia("(pointer: fine)").matches) {
+      setTimeout(() =>
+        this.host.nativeElement
+          .querySelector<HTMLInputElement>("input")
+          ?.focus()
+      );
     }
   }
 
@@ -74,14 +92,18 @@ export class WeatherPickerComponent implements OnInit {
   protected imageMissing(ev: Event, type: WeatherType): void {
     const img = ev.target as HTMLImageElement;
     const night = weatherScreenshot(type, true);
-    if (!img.src.endsWith(night)) {
-      img.src = night;
+    if (img.src.endsWith(night)) {
+      img.style.visibility = "hidden";
     } else {
-      img.style.visibility = 'hidden';
+      img.src = night;
     }
   }
 }
 
 function norm(text: string): string {
-  return text.trim().toLocaleLowerCase('fr-FR').normalize('NFD').replace(/\p{M}/gu, '');
+  return text
+    .trim()
+    .toLocaleLowerCase("fr-FR")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
 }

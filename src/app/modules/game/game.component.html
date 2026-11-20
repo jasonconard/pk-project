@@ -3,25 +3,57 @@
 @if (hud(); as hud) {
   @if (hud.framePerSec) {
     @if (hud.diagnosticsOpen) {
-      <aside class="diagnostics" aria-label="Diagnostic" [class.editing]="hud.editMode">
+      <aside
+        class="diagnostics"
+        aria-label="Diagnostic"
+        [class.editing]="hud.editMode"
+      >
         @if (hud.diagnostics; as d) {
-          <div><span class="k">Images</span> <b>{{ d.fps }} fps</b> · moy. {{ d.frameAvg | number:'1.0-1' }} ms ·
-            pire <b [class.bad]="d.frameMax > 50">{{ d.frameMax | number:'1.0-0' }} ms</b></div>
-          <div><span class="k">Calcul</span> {{ d.input + d.weather + d.render | number:'1.0-0' }} ms/s
-            ({{ (d.input + d.weather + d.render) / 10 | number:'1.0-0' }} %) :
-            déplacements {{ d.input | number:'1.0-0' }} · météo {{ d.weather | number:'1.0-0' }} ·
-            envoi du rendu {{ d.render | number:'1.0-0' }}</div>
-          <div><span class="k">Rendu</span> {{ d.calls }} appels · {{ d.triangles | number }} triangles ·
-            {{ d.width }}×{{ d.height }} (×{{ d.pixelRatio }})</div>
-          <div><span class="k">Réglages</span> ombres {{ d.shadowMapSize || 'aucune' }} · particules {{ d.detail * 100 | number:'1.0-0' }} % ·
-            {{ d.geometries }} géométries · {{ d.textures }} textures</div>
-          <div><span class="k">Répartition</span>
+          <div>
+            <span class="k">Images</span> <b>{{ d.fps }} fps</b> · moy.
+            {{ d.frameAvg | number: "1.0-1" }} ms · pire
+            <b [class.bad]="d.frameMax > 50"
+              >{{ d.frameMax | number: "1.0-0" }} ms</b
+            >
+          </div>
+          <div>
+            <span class="k">Calcul</span>
+            {{ d.input + d.weather + d.render | number: "1.0-0" }} ms/s ({{
+              (d.input + d.weather + d.render) / 10 | number: "1.0-0"
+            }}
+            %) : déplacements {{ d.input | number: "1.0-0" }} · météo
+            {{ d.weather | number: "1.0-0" }} · envoi du rendu
+            {{ d.render | number: "1.0-0" }}
+          </div>
+          <div>
+            <span class="k">Rendu</span> {{ d.calls }} appels ·
+            {{ d.triangles | number }} triangles · {{ d.width }}×{{
+              d.height
+            }}
+            (×{{ d.pixelRatio }})
+          </div>
+          <div>
+            <span class="k">Réglages</span> ombres
+            {{ d.shadowMapSize || "aucune" }} · particules
+            {{ d.detail * 100 | number: "1.0-0" }} % ·
+            {{ d.geometries }} géométries · {{ d.textures }} textures
+          </div>
+          <div>
+            <span class="k">Répartition</span>
             @for (g of d.breakdown; track g.label) {
-              <span class="part">{{ g.label }} <b>{{ g.calls }}</b>@if (g.copies > 1) { ({{ g.copies }}×) }</span>
+              <span class="part"
+                >{{ g.label }} <b>{{ g.calls }}</b>
+                @if (g.copies > 1) {
+                  ({{ g.copies }}×)
+                }
+              </span>
             }
           </div>
-          <div class="hint">« Envoi du rendu » élevé : la carte graphique ou son pilote limite (trop d'appels de dessin, de pixels,
-            d'ombres ou de transparences). Déplacements / météo élevés : c'est le calcul du jeu.</div>
+          <div class="hint">
+            « Envoi du rendu » élevé : la carte graphique ou son pilote limite
+            (trop d'appels de dessin, de pixels, d'ombres ou de transparences).
+            Déplacements / météo élevés : c'est le calcul du jeu.
+          </div>
         } @else {
           <div>Mesure en cours…</div>
         }
@@ -32,35 +64,93 @@
 
 @if (hud(); as hud) {
   @if (hud.mode === GameMode.MAP) {
-    <game-editor-bar [editMode]="hud.editMode" [modelId]="hud.editModelId" [tileId]="hud.editTileId" [brush]="hud.editBrush" [grid]="hud.editGrid" [selection]="hud.editSelection"
-                     [canUndo]="hud.editCanUndo" [canRedo]="hud.editCanRedo" [mapId]="hud.mapId" [mapName]="hud.mapName" [pickMap]="hud.editPick" [ambianceLabel]="ambianceLabel()"
-                     (toggled)="toggleEditMode()" (modelSelected)="selectEditModel($event)" (tileSelected)="selectEditTile($event)" (brushChange)="setEditBrush($event)" (command)="editCommand($event)"
-                     (passageChange)="setPassage($event)" (eventsChange)="setObjectEvents($event)" (zoneSizeChange)="setZoneSize($event)" (pickArrival)="pickArrival()" (cancelPick)="cancelPick()"
-                     (ambiance)="openAmbiance()" (settings)="menuOpen.set(true)" (editorPanel)="editorPanel.set($event)" [modelsVersion]="modelsVersion()" />
+    <game-editor-bar
+      [editMode]="hud.editMode"
+      [modelId]="hud.editModelId"
+      [tileId]="hud.editTileId"
+      [brush]="hud.editBrush"
+      [grid]="hud.editGrid"
+      [selection]="hud.editSelection"
+      [canUndo]="hud.editCanUndo"
+      [canRedo]="hud.editCanRedo"
+      [mapId]="hud.mapId"
+      [mapName]="hud.mapName"
+      [pickMap]="hud.editPick"
+      [ambianceLabel]="ambianceLabel()"
+      (toggled)="toggleEditMode()"
+      (modelSelected)="selectEditModel($event)"
+      (tileSelected)="selectEditTile($event)"
+      (brushChange)="setEditBrush($event)"
+      (editCommand)="editCommand($event)"
+      (passageChange)="setPassage($event)"
+      (eventsChange)="setObjectEvents($event)"
+      (zoneSizeChange)="setZoneSize($event)"
+      (pickArrival)="pickArrival()"
+      (cancelPick)="cancelPick()"
+      (ambiance)="openAmbiance()"
+      (settings)="menuOpen.set(true)"
+      (editorPanel)="editorPanel.set($event)"
+      [modelsVersion]="modelsVersion()"
+    />
   }
 }
 
 <!-- Game mode: Créer (map editor) and Menu, top right -->
 @if (playing()) {
-  <div class="hud-corner" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-    <button type="button" class="hud-btn create" title="Créer : éditer la carte (B)" (click)="create($event)">
+  <div
+    class="hud-corner"
+    animate.enter="anim-fade-in"
+    animate.leave="anim-fade-out"
+  >
+    <button
+      type="button"
+      class="hud-btn create"
+      title="Créer : éditer la carte (B)"
+      (click)="create($event)"
+    >
       <svg lucidePencilRuler></svg><span class="label">Créer</span><kbd>B</kbd>
     </button>
-    <button type="button" class="hud-btn" title="Menu (Échap)" [attr.aria-expanded]="menuOpen()" (click)="openMenu($event)">
+    <button
+      type="button"
+      class="hud-btn"
+      title="Menu (Échap)"
+      [attr.aria-expanded]="menuOpen()"
+      (click)="openMenu($event)"
+    >
       <svg lucideMenu></svg><span class="label">Menu</span><kbd>Échap</kbd>
     </button>
   </div>
 }
 
-<game-weather-panel #weatherPanel [gameMode]="playing()" [temperature]="temperatureLabel()" [temperatureColor]="temperatureColor()"
-                    [weather]="weather()" [night]="night()" [hour]="hour()" [timeFlow]="timeFlow()"
-                    [windStrength]="windStrength()" [windDirection]="windDirection()"
-                    [fireflyColor]="fireflyColor()" [leafMode]="leafMode()" [gusts]="gusts()" [cloudDensity]="cloudDensity()"
-                    [soundVolume]="soundVolume()" [soundMuted]="soundMuted()" [musicVolume]="musicVolume()"
-                    (weatherSelected)="setWeather($event)" (hourChange)="setHour($event)" (timeFlowChange)="setTimeFlow($event)"
-                    (windChange)="setWind($event)" (fireflyColorChange)="setFireflyColor($event)"
-                    (leafModeChange)="setLeafMode($event)" (gustsChange)="setGusts($event)"
-                    (cloudDensityChange)="setCloudDensity($event)" (soundChange)="setSound($event)" (musicVolumeChange)="setMusicVolume($event)" />
+<game-weather-panel
+  #weatherPanel
+  [gameMode]="playing()"
+  [temperature]="temperatureLabel()"
+  [temperatureColor]="temperatureColor()"
+  [weather]="weather()"
+  [night]="night()"
+  [hour]="hour()"
+  [timeFlow]="timeFlow()"
+  [windStrength]="windStrength()"
+  [windDirection]="windDirection()"
+  [fireflyColor]="fireflyColor()"
+  [leafMode]="leafMode()"
+  [gusts]="gusts()"
+  [cloudDensity]="cloudDensity()"
+  [soundVolume]="soundVolume()"
+  [soundMuted]="soundMuted()"
+  [musicVolume]="musicVolume()"
+  (weatherSelected)="setWeather($event)"
+  (hourChange)="setHour($event)"
+  (timeFlowChange)="setTimeFlow($event)"
+  (windChange)="setWind($event)"
+  (fireflyColorChange)="setFireflyColor($event)"
+  (leafModeChange)="setLeafMode($event)"
+  (gustsChange)="setGusts($event)"
+  (cloudDensityChange)="setCloudDensity($event)"
+  (soundChange)="setSound($event)"
+  (musicVolumeChange)="setMusicVolume($event)"
+/>
 
 <core-stick />
 <!-- On the map: Courir and the action button (the A B X Y buttons are for the fights) -->
@@ -70,22 +160,42 @@
 }
 
 @if (hud()?.loading) {
-  <div class="loading-screen" animate.enter="anim-fade-in" animate.leave="anim-loading-out">
+  <div
+    class="loading-screen"
+    animate.enter="anim-fade-in"
+    animate.leave="anim-loading-out"
+  >
     Chargement ...
   </div>
 }
 @if (hud()?.paused) {
-  <div class="pause-screen" animate.enter="anim-fade-in" animate.leave="anim-fade-out" (touchend)="togglePaused()">
+  <div
+    class="pause-screen"
+    animate.enter="anim-fade-in"
+    animate.leave="anim-fade-out"
+    (touchend)="togglePaused()"
+  >
     Pause
   </div>
 }
 
 @if (menuOpen() && hud()?.mode === GameMode.MAP) {
-  <game-menu [version]="appVersion" (closed)="menuOpen.set(false)" (ambiance)="openAmbiance()" (releaseNotes)="openReleaseNotes()" (saves)="openSaves()" (variablesTest)="openVariablesTest()" />
+  <game-menu
+    [version]="appVersion"
+    (closed)="menuOpen.set(false)"
+    (ambiance)="openAmbiance()"
+    (releaseNotes)="openReleaseNotes()"
+    (saves)="openSaves()"
+    (variablesTest)="openVariablesTest()"
+  />
 }
 
 @if (savesOpen()) {
-  <game-saves [version]="appVersion" (closed)="savesOpen.set(false)" (loaded)="savesOpen.set(false)" />
+  <game-saves
+    [version]="appVersion"
+    (closed)="savesOpen.set(false)"
+    (loaded)="savesOpen.set(false)"
+  />
 }
 
 @if (variablesTestOpen()) {
@@ -93,25 +203,44 @@
 }
 
 @if (releaseNotes()) {
-  <game-release-notes [current]="appVersion" [justUpdated]="justUpdated()" (closed)="closeReleaseNotes()" />
+  <game-release-notes
+    [current]="appVersion"
+    [justUpdated]="justUpdated()"
+    (closed)="closeReleaseNotes()"
+  />
 }
 
 <!-- An editor over the game: a full screen panel coming from the side; the game sleeps behind it -->
 @if (editorPanel(); as panel) {
-  <section class="editor-panel" aria-label="Éditeur" animate.enter="editor-panel-in" animate.leave="editor-panel-out">
+  <section
+    class="editor-panel"
+    aria-label="Éditeur"
+    animate.enter="editor-panel-in"
+    animate.leave="editor-panel-out"
+  >
     @defer (on immediate) {
       @switch (panel.kind) {
-        @case ('music') {
+        @case ("music") {
           <app-music-editor [embedded]="true" (closed)="closeEditorPanel()" />
         }
-        @case ('variables') {
-          <app-variables-editor [embedded]="true" (closed)="closeEditorPanel()" />
+        @case ("variables") {
+          <app-variables-editor
+            [embedded]="true"
+            (closed)="closeEditorPanel()"
+          />
         }
-        @case ('database') {
-          <app-database-editor [embedded]="true" (closed)="closeEditorPanel()" />
+        @case ("database") {
+          <app-database-editor
+            [embedded]="true"
+            (closed)="closeEditorPanel()"
+          />
         }
-        @case ('models') {
-          <app-model-editor [embedded]="true" [modelId]="panel.kind === 'models' ? panel.modelId ?? null : null" (closed)="closeEditorPanel()" />
+        @case ("models") {
+          <app-model-editor
+            [embedded]="true"
+            [modelId]="panel.kind === 'models' ? (panel.modelId ?? null) : null"
+            (closed)="closeEditorPanel()"
+          />
         }
       }
     } @loading (after 150ms) {
@@ -124,7 +253,6 @@
 @if (hud()?.mapHelper; as mapHelper) {
   <core-teleport [mapHelper]="mapHelper" />
 }
-
 
 @if (hud()?.mode === GameMode.FIGHT) {
   <fight-ui />

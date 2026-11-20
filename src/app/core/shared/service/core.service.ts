@@ -1,9 +1,9 @@
-import { Service, signal } from '@angular/core';
-import { fromEvent } from 'rxjs';
+import { Service, signal } from "@angular/core";
+import { fromEvent } from "rxjs";
 
 @Service()
 export class CoreService {
-  private readonly logsState = signal('');
+  private readonly logsState = signal("");
   readonly logs = this.logsState.asReadonly();
 
   private readonly resumedState = signal(!document.hidden);
@@ -18,12 +18,14 @@ export class CoreService {
   readonly fullScreenButtonHidden = signal(false);
 
   constructor() {
-    fromEvent(document, 'fullscreenchange').subscribe(() => {
+    fromEvent(document, "fullscreenchange").subscribe(() => {
       this.fullScreenedState.set(!!document.fullscreenElement);
     });
-    fromEvent(document, 'visibilitychange').subscribe(() => this.resumedState.set(!document.hidden));
-    fromEvent(window, 'blur').subscribe(() => this.resumedState.set(false));
-    fromEvent(window, 'focus').subscribe(() => this.resumedState.set(true));
+    fromEvent(document, "visibilitychange").subscribe(() =>
+      this.resumedState.set(!document.hidden)
+    );
+    fromEvent(window, "blur").subscribe(() => this.resumedState.set(false));
+    fromEvent(window, "focus").subscribe(() => this.resumedState.set(true));
   }
 
   toggleFullScreen(): void {

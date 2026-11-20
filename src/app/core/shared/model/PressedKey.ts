@@ -1,28 +1,45 @@
 import { Vec2 } from "../../../modules/game/shared/model/SceneUtils";
 
 export enum KeyCode {
-  confirm, cancel, left, right, down, up, x, y, pause, select,
+  confirm,
+  cancel,
+  left,
+  right,
+  down,
+  up,
+  x,
+  y,
+  pause,
+  select,
   /** Running only (the touch Courir button, Shift): the confirm key also runs while held, but acts when pressed. */
   run,
 }
 
 export interface PressedKey {
-  code: KeyCode,
-  pressedTime: number
+  code: KeyCode;
+  pressedTime: number;
 }
 
 export function getKeyFromAxes(axes: Vec2): KeyCode | null {
   let xDir: KeyCode | null = null;
   let zDir: KeyCode | null = null;
-  if(axes.x < -0.2) { xDir = KeyCode.left; }
-  if(axes.x > 0.2) { xDir = KeyCode.right; }
-  if(axes.y < -0.2) { zDir = KeyCode.up; }
-  if(axes.y > 0.2) { zDir = KeyCode.down; }
-  if(xDir != null && zDir != null) {
+  if (axes.x < -0.2) {
+    xDir = KeyCode.left;
+  }
+  if (axes.x > 0.2) {
+    xDir = KeyCode.right;
+  }
+  if (axes.y < -0.2) {
+    zDir = KeyCode.up;
+  }
+  if (axes.y > 0.2) {
+    zDir = KeyCode.down;
+  }
+  if (xDir != null && zDir != null) {
     return Math.abs(axes.x) > Math.abs(axes.y) ? xDir : zDir;
-  } else if(xDir != null) {
+  } else if (xDir != null) {
     return xDir;
-  } else if(zDir != null) {
+  } else if (zDir != null) {
     return zDir;
   }
   return null;

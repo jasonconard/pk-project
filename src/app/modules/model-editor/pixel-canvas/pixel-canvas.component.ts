@@ -1,8 +1,21 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
-import { FaceTexture, LayerName, layerRgba } from '../shared/EditableModel';
-import { Px } from '../shared/pixel-tools';
-import { LucideMaximize, LucideZoomIn, LucideZoomOut } from '@lucide/angular';
-import { haptic } from '../../../core/shared/haptics';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from "@angular/core";
+import { FaceTexture, LayerName, layerRgba } from "../shared/EditableModel";
+import { Px } from "../shared/pixel-tools";
+import { LucideMaximize, LucideZoomIn, LucideZoomOut } from "@lucide/angular";
+import { haptic } from "../../../core/shared/haptics";
 
 /** Width the face is fitted in (px), before the zoom buttons. */
 const FIT_WIDTH = 264;
@@ -26,37 +39,65 @@ interface Gesture {
  * Ctrl + wheel (or a trackpad pinch) zooms too.
  */
 @Component({
-  selector: 'app-pixel-canvas',
+  selector: "app-pixel-canvas",
   template: `
     <div class="zoom">
-      <button type="button" class="btn" title="Dézoomer" aria-label="Dézoomer" (click)="zoomBy(-1)"><svg lucideZoomOut></svg></button>
+      <button
+        type="button"
+        class="btn"
+        title="Dézoomer"
+        aria-label="Dézoomer"
+        (click)="zoomBy(-1)">
+        <svg lucideZoomOut></svg>
+      </button>
       <span>× {{ scale() }}</span>
-      <button type="button" class="btn" title="Zoomer" aria-label="Zoomer" (click)="zoomBy(1)"><svg lucideZoomIn></svg></button>
+      <button
+        type="button"
+        class="btn"
+        title="Zoomer"
+        aria-label="Zoomer"
+        (click)="zoomBy(1)">
+        <svg lucideZoomIn></svg>
+      </button>
       @if (zoom() !== 0) {
-        <button type="button" class="btn fit" title="Toute la face" aria-label="Toute la face" (click)="zoom.set(0)"><svg lucideMaximize></svg></button>
+        <button
+          type="button"
+          class="btn fit"
+          title="Toute la face"
+          aria-label="Toute la face"
+          (click)="zoom.set(0)">
+          <svg lucideMaximize></svg>
+        </button>
       }
       @if (hover(); as p) {
         <span class="coords">{{ p.x }}, {{ p.y }}</span>
       }
     </div>
-    <div class="scroll" #scroll (wheel)="wheel($event)" (pointerdown)="down($event)" (pointermove)="move($event)"
-         (pointerup)="up($event)" (pointercancel)="up($event)" (pointerleave)="hover.set(null)">
+    <div
+      class="scroll"
+      #scroll
+      (wheel)="wheel($event)"
+      (pointerdown)="down($event)"
+      (pointermove)="move($event)"
+      (pointerup)="up($event)"
+      (pointercancel)="up($event)"
+      (pointerleave)="hover.set(null)">
       <canvas #canvas></canvas>
     </div>
   `,
   imports: [LucideZoomIn, LucideZoomOut, LucideMaximize],
-  styleUrl: './pixel-canvas.component.scss',
-  host: { '[class.fill]': 'fill()' },
+  styleUrl: "./pixel-canvas.component.scss",
+  host: { "[class.fill]": "fill()" },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PixelCanvasComponent {
   readonly texture = input.required<FaceTexture>();
   /** Layer shown and drawn on (a grayscale layer is shown in gray). */
-  readonly layer = input<LayerName>('color');
+  readonly layer = input<LayerName>("color");
   /** Changes when the texture's pixels changed (redraw). */
   readonly version = input(0);
   /** The face shown: the zoom goes back to fitting when it changes (not when its pixels change, e.g. undo). */
-  readonly faceKey = input('');
+  readonly faceKey = input("");
   /** Fits the face in all the room the component is given (big view), instead of the panel's width. */
   readonly fill = input(false);
   readonly strokeStart = output<Px>();
@@ -65,8 +106,10 @@ export class PixelCanvasComponent {
   /** A second finger came during a stroke: undo it. */
   readonly strokeCancel = output<void>();
 
-  private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
-  private readonly scroll = viewChild.required<ElementRef<HTMLElement>>('scroll');
+  private readonly canvas =
+    viewChild.required<ElementRef<HTMLCanvasElement>>("canvas");
+  private readonly scroll =
+    viewChild.required<ElementRef<HTMLElement>>("scroll");
   /** Room to fit the face in (px). */
   private readonly room = signal({ w: FIT_WIDTH, h: FIT_HEIGHT });
   protected readonly zoom = signal(0);
@@ -83,7 +126,10 @@ export class PixelCanvasComponent {
   protected readonly scale = computed(() => {
     const tex = this.texture();
     const room = this.fill() ? this.room() : { w: FIT_WIDTH, h: FIT_HEIGHT };
-    return Math.min(this.maxScale(tex), Math.max(1, this.fitScale(tex, room) + this.zoom()));
+    return Math.min(
+      this.maxScale(tex),
+      Math.max(1, this.fitScale(tex, room) + this.zoom())
+    );
   });
 
   constructor() {
@@ -91,11 +137,17 @@ export class PixelCanvasComponent {
     afterNextRender(() => {
       const el = this.scroll().nativeElement;
       const observer = new ResizeObserver(() => {
-        if (el.clientWidth > 0 && el.clientHeight > 0) { // not laid out yet: keep the last room
+        if (el.clientWidth > 0 && el.clientHeight > 0) {
+          // not laid out yet: keep the last room
           const style = getComputedStyle(el);
-          const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-          const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-          this.room.set({ w: el.clientWidth - padX - 2, h: el.clientHeight - padY - 2 });
+          const padX =
+            parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+          const padY =
+            parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+          this.room.set({
+            w: el.clientWidth - padX - 2,
+            h: el.clientHeight - padY - 2,
+          });
         }
       });
       observer.observe(el);
@@ -127,20 +179,33 @@ export class PixelCanvasComponent {
     if (at) {
       // From the canvas as shown (it may not be redrawn at the last scale yet)
       const rect = this.canvas().nativeElement.getBoundingClientRect();
-      this.anchor = { u: (at.x - rect.left) / rect.width * tex.w, v: (at.y - rect.top) / rect.height * tex.h, x: at.x, y: at.y };
+      this.anchor = {
+        u: ((at.x - rect.left) / rect.width) * tex.w,
+        v: ((at.y - rect.top) / rect.height) * tex.h,
+        x: at.x,
+        y: at.y,
+      };
     }
-    this.zoom.update(z => z + target - current);
+    this.zoom.update((z) => z + target - current);
   }
 
   protected wheel(event: WheelEvent) {
-    if (!event.ctrlKey) { // plain wheel: scroll the zoomed face
+    if (!event.ctrlKey) {
+      // plain wheel: scroll the zoomed face
       return;
     }
     event.preventDefault();
     const scale = this.scale();
-    this.setScale(scale * Math.exp(-event.deltaY / 100), { x: event.clientX, y: event.clientY });
-    if (this.scale() === scale && Math.abs(event.deltaY) > 0) { // small steps: at least one level
-      this.setScale(scale - Math.sign(event.deltaY), { x: event.clientX, y: event.clientY });
+    this.setScale(scale * Math.exp(-event.deltaY / 100), {
+      x: event.clientX,
+      y: event.clientY,
+    });
+    if (this.scale() === scale && Math.abs(event.deltaY) > 0) {
+      // small steps: at least one level
+      this.setScale(scale - Math.sign(event.deltaY), {
+        x: event.clientX,
+        y: event.clientY,
+      });
     }
   }
 
@@ -159,19 +224,26 @@ export class PixelCanvasComponent {
       return;
     }
     // Beside the face (room around it in the big view): only for two-finger gestures
-    if (this.pointers.size > 2 || this.gestureDone || event.target !== this.canvas().nativeElement) {
+    if (
+      this.pointers.size > 2 ||
+      this.gestureDone ||
+      event.target !== this.canvas().nativeElement
+    ) {
       return;
     }
     this.drawing = true;
-    if (event.pointerType === 'touch') {
-      haptic('tick');
+    if (event.pointerType === "touch") {
+      haptic("tick");
     }
     this.strokeStart.emit(this.pixelAt(event));
   }
 
   protected move(event: PointerEvent) {
     if (this.pointers.has(event.pointerId)) {
-      this.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      this.pointers.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
       if (this.gesture) {
         this.moveGesture();
         return;
@@ -207,7 +279,11 @@ export class PixelCanvasComponent {
 
   private startGesture() {
     const [a, b] = [...this.pointers.values()];
-    this.gesture = { dist: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), scale: this.scale(), mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } };
+    this.gesture = {
+      dist: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+      scale: this.scale(),
+      mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
+    };
     this.hover.set(null);
   }
 
@@ -221,7 +297,10 @@ export class PixelCanvasComponent {
     scroll.scrollTop -= mid.y - gesture.mid.y;
     gesture.mid = mid;
     // Pinch: zoom around the fingers
-    this.setScale(gesture.scale * Math.hypot(a.x - b.x, a.y - b.y) / gesture.dist, mid);
+    this.setScale(
+      (gesture.scale * Math.hypot(a.x - b.x, a.y - b.y)) / gesture.dist,
+      mid
+    );
   }
 
   private fitScale(tex: FaceTexture, room: { w: number; h: number }) {
@@ -236,16 +315,34 @@ export class PixelCanvasComponent {
     const tex = this.texture();
     const rect = this.canvas().nativeElement.getBoundingClientRect();
     return {
-      x: Math.min(tex.w - 1, Math.max(0, Math.floor((event.clientX - rect.left) / rect.width * tex.w))),
-      y: Math.min(tex.h - 1, Math.max(0, Math.floor((event.clientY - rect.top) / rect.height * tex.h))),
+      x: Math.min(
+        tex.w - 1,
+        Math.max(
+          0,
+          Math.floor(((event.clientX - rect.left) / rect.width) * tex.w)
+        )
+      ),
+      y: Math.min(
+        tex.h - 1,
+        Math.max(
+          0,
+          Math.floor(((event.clientY - rect.top) / rect.height) * tex.h)
+        )
+      ),
     };
   }
 
-  private draw(tex: FaceTexture, layer: LayerName, scale: number, hover: Px | null) {
+  private draw(
+    tex: FaceTexture,
+    layer: LayerName,
+    scale: number,
+    hover: Px | null
+  ) {
     const canvas = this.canvas().nativeElement;
     canvas.width = tex.w * scale;
     canvas.height = tex.h * scale;
-    if (this.anchor) { // zoomed around a point: scroll so that its pixel stays under it
+    if (this.anchor) {
+      // zoomed around a point: scroll so that its pixel stays under it
       const { u, v, x, y } = this.anchor;
       this.anchor = null;
       const scroll = this.scroll().nativeElement;
@@ -253,24 +350,34 @@ export class PixelCanvasComponent {
       scroll.scrollLeft += rect.left + u * scale - x;
       scroll.scrollTop += rect.top + v * scale - y;
     }
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext("2d")!;
     // Checkerboard (transparent pixels): 2 squares per pixel when zoomed in
     const cell = Math.max(2, Math.floor(scale / 2));
     for (let y = 0; y < canvas.height; y += cell) {
       for (let x = 0; x < canvas.width; x += cell) {
-        ctx.fillStyle = ((x + y) / cell) % 2 ? '#4a4a52' : '#5c5c66';
+        ctx.fillStyle = ((x + y) / cell) % 2 ? "#4a4a52" : "#5c5c66";
         ctx.fillRect(x, y, cell, cell);
       }
     }
-    const pixels = document.createElement('canvas');
+    const pixels = document.createElement("canvas");
     pixels.width = tex.w;
     pixels.height = tex.h;
-    pixels.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(layerRgba(tex, layer)), tex.w, tex.h), 0, 0);
+    pixels
+      .getContext("2d")!
+      .putImageData(
+        new ImageData(
+          new Uint8ClampedArray(layerRgba(tex, layer)),
+          tex.w,
+          tex.h
+        ),
+        0,
+        0
+      );
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(pixels, 0, 0, canvas.width, canvas.height);
 
     if (scale >= GRID_MIN_SCALE) {
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.18)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (let x = 1; x < tex.w; x++) {
@@ -284,9 +391,14 @@ export class PixelCanvasComponent {
       ctx.stroke();
     }
     if (hover) {
-      ctx.strokeStyle = '#ffd34d';
+      ctx.strokeStyle = "#ffd34d";
       ctx.lineWidth = 1;
-      ctx.strokeRect(hover.x * scale + 0.5, hover.y * scale + 0.5, scale - 1, scale - 1);
+      ctx.strokeRect(
+        hover.x * scale + 0.5,
+        hover.y * scale + 0.5,
+        scale - 1,
+        scale - 1
+      );
     }
   }
 }

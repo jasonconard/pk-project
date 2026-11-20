@@ -1,16 +1,43 @@
-import * as THREE from 'three';
-import { findModel, isZone, makeZoneMesh, ZONE_DEFAULT_SIZE, ZONE_ID } from './Zone';
-import { SceneChunk, SceneMap, StairsSide, stairsSide } from './SceneMap';
-import { ScenePlayer } from './ScenePlayer';
-import { CAMERA_LOOK, Game, SHADE_OFFSET, SHADOW_AREA, TOO_CLOSE_LIMIT, TOO_FAR_LIMIT } from "./Game";
+import * as THREE from "three";
+import {
+  findModel,
+  isZone,
+  makeZoneMesh,
+  ZONE_DEFAULT_SIZE,
+  ZONE_ID,
+} from "./Zone";
+import { SceneChunk, SceneMap, StairsSide, stairsSide } from "./SceneMap";
+import { ScenePlayer } from "./ScenePlayer";
+import {
+  CAMERA_LOOK,
+  Game,
+  SHADE_OFFSET,
+  SHADOW_AREA,
+  TOO_CLOSE_LIMIT,
+  TOO_FAR_LIMIT,
+} from "./Game";
 import { BasicMeshService } from "../services/basic-mesh.service";
 import { convertVec2, convertVec3 } from "./SceneUtils";
 import { MODELS } from "../../../../../assets/models/models";
 import { SceneBuilding } from "./SceneBuilding";
 import { MathService } from "../services/math.service";
-import { autotile, NEIGHBORS, terrainById, TILE_SIZE, TILESET_ANIM_LINK, TILESET_LINK, tilesetPos, waterFramePos } from "./Terrain";
+import {
+  autotile,
+  NEIGHBORS,
+  terrainById,
+  TILE_SIZE,
+  TILESET_ANIM_LINK,
+  TILESET_LINK,
+  tilesetPos,
+  waterFramePos,
+} from "./Terrain";
 import { applyWeatherShader } from "../weather/weather-shader";
-import { buildGroundGeometry, LEVEL_HEIGHT, MAX_LEVEL, STAIRS_TILE } from "./GroundMesh";
+import {
+  buildGroundGeometry,
+  LEVEL_HEIGHT,
+  MAX_LEVEL,
+  STAIRS_TILE,
+} from "./GroundMesh";
 import { canInstance, forgetTemplate, ModelInstances } from "./ModelInstances";
 import { isGameAsleep } from "../../../../core/shared/app-visibility";
 
@@ -33,7 +60,7 @@ const IMAGES = new Map<string, Promise<HTMLImageElement>>();
 function loadImage(link: string): Promise<HTMLImageElement> {
   let image = IMAGES.get(link);
   if (!image) {
-    image = new Promise(resolve => {
+    image = new Promise((resolve) => {
       const img = new Image();
       img.onload = () => resolve(img);
       img.src = link;
@@ -50,9 +77,9 @@ export interface MapHelperInit {
 }
 
 /** userData key of a turned building's mesh: its shift (see MapHelper.turn). */
-const TURN_SHIFT = 'turnShift';
+const TURN_SHIFT = "turnShift";
 /** userData key: the quarter turns an object is drawn with when it turned towards the player (faceTowards). */
-const FACING = 'facing';
+const FACING = "facing";
 
 export class MapHelper {
   originGame: Game;
@@ -66,12 +93,13 @@ export class MapHelper {
     this.scenePlayer = o.scenePlayer;
   }
 
-
   public getPlayerScreenCoords(game: Game): THREE.Vector2 | null {
     const vector = new THREE.Vector3();
 
     const player = this.scenePlayer.mesh;
-    if(!player) { return null; }
+    if (!player) {
+      return null;
+    }
 
     const widthHalf = game.canvas.clientWidth / 2;
     const heightHalf = game.canvas.clientHeight / 2;
@@ -80,8 +108,8 @@ export class MapHelper {
     vector.setFromMatrixPosition(player.matrixWorld);
     vector.project(game.camera);
 
-    vector.x = ( vector.x * widthHalf ) + widthHalf;
-    vector.y = - ( vector.y * heightHalf ) + heightHalf;
+    vector.x = vector.x * widthHalf + widthHalf;
+    vector.y = -(vector.y * heightHalf) + heightHalf;
 
     return new THREE.Vector2(vector.x, vector.y);
   }
@@ -89,7 +117,11 @@ export class MapHelper {
   public buildPlayer() {
     const p = this.scenePlayer;
     const spriteGroup = new THREE.Group();
-    const spritePlane = BasicMeshService.makePlane(p.tex.link, convertVec2(p.tex.size), true);
+    const spritePlane = BasicMeshService.makePlane(
+      p.tex.link,
+      convertVec2(p.tex.size),
+      true
+    );
     const mat = spritePlane.material as THREE.Material;
     mat.depthTest = true;
     mat.depthWrite = true;
@@ -108,7 +140,7 @@ export class MapHelper {
     this.playerShadow.castShadow = true;
     spritePlane.add(this.playerShadow);
     spritePlane.position.x = 0;
-    spritePlane.position.y = p.tex.size.y / 2 * stretch;
+    spritePlane.position.y = (p.tex.size.y / 2) * stretch;
     spritePlane.position.z = 0;
     spriteGroup.add(spritePlane);
 
@@ -133,15 +165,29 @@ export class MapHelper {
   public updateVisibleChunks(focus?: THREE.Vector3, extra = 0) {
     const chunks = this.sceneMap.chunks;
     const center = focus ?? this.scenePlayer.mesh?.position;
-    if (!center) { return; }
-    const comparePos = new THREE.Vector3(center.x, center.y, focus ? focus.z + CAMERA_LOOK.z : this.originGame.camera.position.z);
+    if (!center) {
+      return;
+    }
+    const comparePos = new THREE.Vector3(
+      center.x,
+      center.y,
+      focus ? focus.z + CAMERA_LOOK.z : this.originGame.camera.position.z
+    );
     let ahead = 1;
-    chunks.forEach(chunk => {
+    chunks.forEach((chunk) => {
       const visible = MapHelper.isChunkInRange(chunk, comparePos, extra);
-      if (!chunk.group && (visible || (ahead > 0 && MapHelper.isChunkInRange(chunk, comparePos, extra + BUILD_AHEAD)))) {
+      if (
+        !chunk.group &&
+        (visible ||
+          (ahead > 0 &&
+            MapHelper.isChunkInRange(chunk, comparePos, extra + BUILD_AHEAD)))
+      ) {
         ahead -= visible ? 0 : 1;
         this.buildChunk(chunk);
-      } else if (chunk.group && !MapHelper.isChunkInRange(chunk, comparePos, extra + KEEP_RANGE)) {
+      } else if (
+        chunk.group &&
+        !MapHelper.isChunkInRange(chunk, comparePos, extra + KEEP_RANGE)
+      ) {
         this.unbuildChunk(chunk);
       }
       chunk.visible = visible && !!chunk.group;
@@ -152,20 +198,24 @@ export class MapHelper {
   }
 
   /** Can the chunk be seen from this point (`extra` chunk sizes added around: built ahead, kept)? */
-  private static isChunkInRange(chunk: SceneChunk, comparePos: THREE.Vector3, extra: number): boolean {
+  private static isChunkInRange(
+    chunk: SceneChunk,
+    comparePos: THREE.Vector3,
+    extra: number
+  ): boolean {
     const marginX = chunk.size.x * extra;
     const marginZ = chunk.size.y * extra;
     return !(
       // HIDE BEHIND CAMERA
-      (chunk.pos.z - chunk.size.y / 2 - marginZ) > comparePos.z ||
+      chunk.pos.z - chunk.size.y / 2 - marginZ > comparePos.z ||
       // HIDE TOO FAR
-      (chunk.pos.z + (chunk.size.y * 1.4) + marginZ) < comparePos.z ||
+      chunk.pos.z + chunk.size.y * 1.4 + marginZ < comparePos.z ||
       // HIDE TOO FAR LEFT
-      (chunk.pos.x + (chunk.size.x * 1.2) + marginX) < comparePos.x ||
+      chunk.pos.x + chunk.size.x * 1.2 + marginX < comparePos.x ||
       // HIDE TOO FAR RIGHT
-      (chunk.pos.x - (chunk.size.x * 1.2) - marginX) > comparePos.x ||
+      chunk.pos.x - chunk.size.x * 1.2 - marginX > comparePos.x ||
       // HIDE TOO FAR HEIGHT
-      Math.abs(chunk.pos.y - comparePos.y) > (TOO_FAR_LIMIT + SHADE_OFFSET)
+      Math.abs(chunk.pos.y - comparePos.y) > TOO_FAR_LIMIT + SHADE_OFFSET
     );
   }
 
@@ -173,10 +223,17 @@ export class MapHelper {
   public buildChunks(focus?: THREE.Vector3) {
     const spawn = this.sceneMap.spawn;
     const center = focus ?? (spawn ? convertVec3(spawn) : new THREE.Vector3());
-    const comparePos = new THREE.Vector3(center.x, center.y, center.z + CAMERA_LOOK.z);
+    const comparePos = new THREE.Vector3(
+      center.x,
+      center.y,
+      center.z + CAMERA_LOOK.z
+    );
     this.sceneMap.chunks
-      .filter(chunk => !chunk.group && MapHelper.isChunkInRange(chunk, comparePos, 0))
-      .forEach(chunk => this.buildChunk(chunk));
+      .filter(
+        (chunk) =>
+          !chunk.group && MapHelper.isChunkInRange(chunk, comparePos, 0)
+      )
+      .forEach((chunk) => this.buildChunk(chunk));
   }
 
   /** A chunk added to the map (editor): built if it is in view; its neighbors' borders and walls are redrawn. */
@@ -189,7 +246,7 @@ export class MapHelper {
   /** A chunk taken out of the map (editor; its data is kept by the caller for undo). */
   public removeChunk(chunk: SceneChunk) {
     this.unbuildChunk(chunk);
-    this.sceneMap.chunks = this.sceneMap.chunks.filter(c => c !== chunk);
+    this.sceneMap.chunks = this.sceneMap.chunks.filter((c) => c !== chunk);
     chunk.visible = false;
     this.refreshNeighbors(chunk);
   }
@@ -200,10 +257,12 @@ export class MapHelper {
    */
   public refreshModels(ids: string[]) {
     ids.forEach(forgetTemplate);
-    this.sceneMap.chunks.forEach(chunk => {
-      const changed = chunk.buildings.filter(b => ids.includes(b.modelId));
-      changed.forEach(b => b.originModel = MODELS.find(m => m.id === b.modelId));
-      if (changed.length && chunk.group) {
+    this.sceneMap.chunks.forEach((chunk) => {
+      const changed = chunk.buildings.filter((b) => ids.includes(b.modelId));
+      changed.forEach(
+        (b) => (b.originModel = MODELS.find((m) => m.id === b.modelId))
+      );
+      if (changed.length > 0 && chunk.group) {
         const shown = chunk.group.visible;
         const visible = chunk.visible;
         this.unbuildChunk(chunk);
@@ -217,10 +276,14 @@ export class MapHelper {
   /** The built chunks touching this one are built again (their borders, walls and shores depend on it). */
   private refreshNeighbors(chunk: SceneChunk) {
     this.sceneMap.chunks
-      .filter(c => c !== chunk && c.group
-        && Math.abs(c.pos.x - chunk.pos.x) <= (c.size.x + chunk.size.x) / 2
-        && Math.abs(c.pos.z - chunk.pos.z) <= (c.size.y + chunk.size.y) / 2)
-      .forEach(c => {
+      .filter(
+        (c) =>
+          c !== chunk &&
+          c.group &&
+          Math.abs(c.pos.x - chunk.pos.x) <= (c.size.x + chunk.size.x) / 2 &&
+          Math.abs(c.pos.z - chunk.pos.z) <= (c.size.y + chunk.size.y) / 2
+      )
+      .forEach((c) => {
         const visible = c.group!.visible;
         this.unbuildChunk(c);
         this.buildChunk(c);
@@ -232,39 +295,52 @@ export class MapHelper {
     const group = new THREE.Group();
     chunk.group = group;
 
-    chunk.grounds.forEach(ground => {
-      const key = chunk.id + '-g-' + ground.id;
-      const groundMesh = BasicMeshService.makePlaneFromPoints(ground.link, ground.points);
+    chunk.grounds.forEach((ground) => {
+      const key = chunk.id + "-g-" + ground.id;
+      const groundMesh = BasicMeshService.makePlaneFromPoints(
+        ground.link,
+        ground.points
+      );
       this.addMesh(key, groundMesh, convertVec3(chunk.pos));
       ground.mesh = groundMesh;
       group.add(groundMesh);
-      if (chunk.tiles && Object.keys(chunk.tiles).length && ground === chunk.grounds[0]) {
+      if (
+        chunk.tiles &&
+        Object.keys(chunk.tiles).length > 0 &&
+        ground === chunk.grounds[0]
+      ) {
         this.paintedGround(chunk);
       }
-      if (chunk.stairs && Object.keys(chunk.stairs).length && ground === chunk.grounds[0]) {
+      if (
+        chunk.stairs &&
+        Object.keys(chunk.stairs).length > 0 &&
+        ground === chunk.grounds[0]
+      ) {
         this.paintedGround(chunk);
       }
-      if (((chunk.heights && Object.keys(chunk.heights).length) || (chunk.stairs && Object.keys(chunk.stairs).length))
-        && ground === chunk.grounds[0]) {
+      if (
+        ((chunk.heights && Object.keys(chunk.heights).length > 0) ||
+          (chunk.stairs && Object.keys(chunk.stairs).length > 0)) &&
+        ground === chunk.grounds[0]
+      ) {
         this.rebuildGround(chunk);
       }
       // ground.mesh.rotation.x = Math.PI / -2;
     });
     // return;
 
-
     // this.meshes[chunk.id].castShadow = true;
     // this.meshes[chunk.id].receiveShadow = true;
 
     // (the group is needed by the views: set before)
-    chunk.buildings.forEach(building => this.createView(chunk, building));
+    chunk.buildings.forEach((building) => this.createView(chunk, building));
 
     this.originGame.scene.add(group);
   }
 
   /** Another map takes the place of the current one: its chunks are built, the old ones taken down. */
   public setMap(map: SceneMap) {
-    this.sceneMap.chunks.forEach(chunk => this.unbuildChunk(chunk));
+    this.sceneMap.chunks.forEach((chunk) => this.unbuildChunk(chunk));
     this.sceneMap = map;
     this.buildChunks();
   }
@@ -272,7 +348,7 @@ export class MapHelper {
   /** Takes a chunk out of the scene and frees what was made for it (its data stays). */
   private unbuildChunk(chunk: SceneChunk) {
     chunk.visible = false;
-    this.instances.get(chunk.id)?.forEach(set => set.dispose());
+    this.instances.get(chunk.id)?.forEach((set) => set.dispose());
     this.instances.delete(chunk.id);
     const painted = this.paintedGrounds.get(chunk.id);
     if (painted) {
@@ -284,17 +360,20 @@ export class MapHelper {
     this.flatGrounds.get(chunk.id)?.geometry.dispose();
     this.flatGrounds.delete(chunk.id);
     // (materials are shared between chunks: only the geometries are the chunk's own)
-    chunk.group?.traverse(object => {
-      if ((object as THREE.Mesh).isMesh && !(object as THREE.InstancedMesh).isInstancedMesh) {
+    chunk.group?.traverse((object) => {
+      if (
+        (object as THREE.Mesh).isMesh &&
+        !(object as THREE.InstancedMesh).isInstancedMesh
+      ) {
         (object as THREE.Mesh).geometry.dispose();
       }
     });
     chunk.group?.removeFromParent();
     chunk.group = undefined;
-    chunk.grounds.forEach(ground => ground.mesh = undefined);
+    chunk.grounds.forEach((ground) => (ground.mesh = undefined));
     Object.keys(this.meshes)
-      .filter(key => key.startsWith(chunk.id + '-'))
-      .forEach(key => delete this.meshes[key]);
+      .filter((key) => key.startsWith(chunk.id + "-"))
+      .forEach((key) => delete this.meshes[key]);
   }
 
   private readonly paintedGrounds = new Map<string, PaintedGround>();
@@ -303,7 +382,10 @@ export class MapHelper {
   private waterTimer?: ReturnType<typeof setInterval>;
 
   /** The ground cell (column, row from the chunk corner) under a world point, if any. */
-  public cellAt(x: number, z: number): { chunk: SceneChunk, col: number, row: number } | null {
+  public cellAt(
+    x: number,
+    z: number
+  ): { chunk: SceneChunk; col: number; row: number } | null {
     const chunk = this.chunkAt(x, z);
     if (!chunk) {
       return null;
@@ -314,8 +396,13 @@ export class MapHelper {
   }
 
   /** Paints a ground cell with a tile (null = back to the original ground). */
-  public paintCell(chunk: SceneChunk, col: number, row: number, tileId: string | null) {
-    const key = col + ',' + row;
+  public paintCell(
+    chunk: SceneChunk,
+    col: number,
+    row: number,
+    tileId: string | null
+  ) {
+    const key = col + "," + row;
     chunk.tiles ??= {};
     if (tileId) {
       chunk.tiles[key] = tileId;
@@ -329,7 +416,10 @@ export class MapHelper {
     // The painted neighbors change their borders (autotiling), in this chunk or the next one
     for (const [dc, dr] of NEIGHBORS) {
       const n = this.neighborCell(chunk, col + dc, row + dr);
-      const nPainted = n && n.chunk.tiles?.[n.col + ',' + n.row] ? this.paintedGround(n.chunk) : null;
+      const nPainted =
+        n && n.chunk.tiles?.[n.col + "," + n.row]
+          ? this.paintedGround(n.chunk)
+          : null;
       if (n && nPainted) {
         this.drawCell(n.chunk, nPainted, n.col, n.row);
       }
@@ -339,38 +429,53 @@ export class MapHelper {
   /** Ground level of a cell (possibly in the next chunk; 0 outside the map). */
   public levelAt(chunk: SceneChunk, col: number, row: number): number {
     const cell = this.neighborCell(chunk, col, row);
-    return cell?.chunk.heights?.[cell.col + ',' + cell.row] ?? 0;
+    return cell?.chunk.heights?.[cell.col + "," + cell.row] ?? 0;
   }
 
   /** Ground level under a world point (0 outside the map or on flat ground). */
   public levelAtWorld(x: number, z: number): number {
     const cell = this.cellAt(x, z);
-    return cell ? cell.chunk.heights?.[cell.col + ',' + cell.row] ?? 0 : 0;
+    return cell ? (cell.chunk.heights?.[cell.col + "," + cell.row] ?? 0) : 0;
   }
 
   /** Side the stairs cell under a world point rises towards (null = no stairs there). */
   public stairsAt(x: number, z: number): StairsSide | null {
     const cell = this.cellAt(x, z);
-    return cell ? stairsSide(cell.chunk.stairs?.[cell.col + ',' + cell.row]) : null;
+    return cell
+      ? stairsSide(cell.chunk.stairs?.[cell.col + "," + cell.row])
+      : null;
   }
 
   /** Is there a stairs cell under a world point? */
   public isStairsAt(x: number, z: number): boolean {
     const cell = this.cellAt(x, z);
-    return !!cell?.chunk.stairs?.[cell.col + ',' + cell.row];
+    return !!cell?.chunk.stairs?.[cell.col + "," + cell.row];
   }
 
   /**
    * Puts / removes stairs on a cell: a ramp up one level towards `side` (null = no stairs), the stairs tile painted
    * on it. 'auto' rises towards the neighbor exactly one level higher (north first), north if none.
    */
-  public setStairs(chunk: SceneChunk, col: number, row: number, side: StairsSide | 'auto' | null) {
-    const key = col + ',' + row;
+  public setStairs(
+    chunk: SceneChunk,
+    col: number,
+    row: number,
+    side: StairsSide | "auto" | null
+  ) {
+    const key = col + "," + row;
     chunk.stairs ??= {};
-    if (side === 'auto') {
+    if (side === "auto") {
       const level = this.levelAt(chunk, col, row);
-      const sides: [StairsSide, number, number][] = [['n', 0, -1], ['e', 1, 0], ['w', -1, 0], ['s', 0, 1]];
-      side = sides.find(([, dc, dr]) => this.levelAt(chunk, col + dc, row + dr) === level + 1)?.[0] ?? 'n';
+      const sides: [StairsSide, number, number][] = [
+        ["n", 0, -1],
+        ["e", 1, 0],
+        ["w", -1, 0],
+        ["s", 0, 1],
+      ];
+      side =
+        sides.find(
+          ([, dc, dr]) => this.levelAt(chunk, col + dc, row + dr) === level + 1
+        )?.[0] ?? "n";
     }
     if (side) {
       chunk.stairs[key] = side;
@@ -386,7 +491,7 @@ export class MapHelper {
 
   /** Sets the ground level of a cell and rebuilds the ground (and the next chunk's on a border: its walls). */
   public setLevel(chunk: SceneChunk, col: number, row: number, level: number) {
-    const key = col + ',' + row;
+    const key = col + "," + row;
     level = Math.max(0, Math.min(MAX_LEVEL, level));
     chunk.heights ??= {};
     if (level) {
@@ -396,7 +501,7 @@ export class MapHelper {
     }
     this.rebuildGround(chunk);
     // The objects standing on the cell go up / down with it
-    chunk.buildings.forEach(building => {
+    chunk.buildings.forEach((building) => {
       const bc = Math.floor((building.pos.x + chunk.size.x / 2) / TILE_SIZE);
       const br = Math.floor((building.pos.z + chunk.size.y / 2) / TILE_SIZE);
       if (bc === col && br === row) {
@@ -405,7 +510,9 @@ export class MapHelper {
         if (set) {
           set.move(building, this.buildingWorldPos(chunk, building));
         } else {
-          this.meshes[chunk.id + '-' + building.id]?.position.setY(chunk.pos.y + level * LEVEL_HEIGHT);
+          this.meshes[chunk.id + "-" + building.id]?.position.setY(
+            chunk.pos.y + level * LEVEL_HEIGHT
+          );
         }
       }
     });
@@ -423,7 +530,10 @@ export class MapHelper {
 
   private wallMaterial?: THREE.MeshLambertMaterial;
   /** Original flat ground of the chunks given reliefs (put back once every cell is flat again). */
-  private readonly flatGrounds = new Map<string, { geometry: THREE.BufferGeometry, castShadow: boolean }>();
+  private readonly flatGrounds = new Map<
+    string,
+    { geometry: THREE.BufferGeometry; castShadow: boolean }
+  >();
 
   /**
    * The chunk ground becomes a grid of cells at their level, with rock walls (see buildGroundGeometry); without any
@@ -435,7 +545,9 @@ export class MapHelper {
       return;
     }
     const flat = this.flatGrounds.get(chunk.id);
-    const hasRelief = Object.keys(chunk.heights ?? {}).length > 0 || Object.keys(chunk.stairs ?? {}).length > 0;
+    const hasRelief =
+      Object.keys(chunk.heights ?? {}).length > 0 ||
+      Object.keys(chunk.stairs ?? {}).length > 0;
     if (!hasRelief) {
       if (flat) {
         mesh.geometry.dispose();
@@ -449,18 +561,26 @@ export class MapHelper {
       return;
     }
     if (!flat) {
-      this.flatGrounds.set(chunk.id, { geometry: mesh.geometry, castShadow: mesh.castShadow });
+      this.flatGrounds.set(chunk.id, {
+        geometry: mesh.geometry,
+        castShadow: mesh.castShadow,
+      });
     }
     const old = flat ? mesh.geometry : null;
-    mesh.geometry = buildGroundGeometry(chunk, (col, row) => this.levelAt(chunk, col, row),
-      (col, row) => stairsSide(chunk.stairs?.[col + ',' + row]));
+    mesh.geometry = buildGroundGeometry(
+      chunk,
+      (col, row) => this.levelAt(chunk, col, row),
+      (col, row) => stairsSide(chunk.stairs?.[col + "," + row])
+    );
     old?.dispose(); // (the flat ground is kept)
     if (!this.wallMaterial) {
       const texture = new THREE.TextureLoader().load(TILESET_LINK);
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.magFilter = THREE.NearestFilter;
       texture.minFilter = THREE.NearestFilter;
-      this.wallMaterial = applyWeatherShader(new THREE.MeshLambertMaterial({ map: texture }));
+      this.wallMaterial = applyWeatherShader(
+        new THREE.MeshLambertMaterial({ map: texture })
+      );
     }
     if (!Array.isArray(mesh.material)) {
       mesh.material = [mesh.material, this.wallMaterial];
@@ -470,7 +590,11 @@ export class MapHelper {
   }
 
   /** A cell given from a chunk, possibly out of it (then in the chunk next to it). */
-  private neighborCell(chunk: SceneChunk, col: number, row: number): { chunk: SceneChunk, col: number, row: number } | null {
+  private neighborCell(
+    chunk: SceneChunk,
+    col: number,
+    row: number
+  ): { chunk: SceneChunk; col: number; row: number } | null {
     const cols = chunk.size.x / TILE_SIZE;
     const rows = chunk.size.y / TILE_SIZE;
     if (col >= 0 && row >= 0 && col < cols && row < rows) {
@@ -486,12 +610,16 @@ export class MapHelper {
     if (neighborId === terrainId) {
       return false;
     }
-    return !(terrainById(terrainId)?.blocking && neighborId === 'sand');
+    return !(terrainById(terrainId)?.blocking && neighborId === "sand");
   }
 
-  private terrainIdAt(chunk: SceneChunk, col: number, row: number): string | undefined {
+  private terrainIdAt(
+    chunk: SceneChunk,
+    col: number,
+    row: number
+  ): string | undefined {
     const cell = this.neighborCell(chunk, col, row);
-    return cell?.chunk.tiles?.[cell.col + ',' + cell.row];
+    return cell?.chunk.tiles?.[cell.col + "," + cell.row];
   }
 
   /**
@@ -504,28 +632,34 @@ export class MapHelper {
     if (existing || !ground?.mesh) {
       return existing ?? null;
     }
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = chunk.size.x;
     canvas.height = chunk.size.y;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext("2d")!;
     ctx.imageSmoothingEnabled = false;
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.magFilter = THREE.NearestFilter;
     const current = ground.mesh.material;
-    const old = (Array.isArray(current) ? current[0] : current) as THREE.MeshLambertMaterial;
-    const material = applyWeatherShader(new THREE.MeshLambertMaterial({ map: texture, side: old.side }));
+    const old = (
+      Array.isArray(current) ? current[0] : current
+    ) as THREE.MeshLambertMaterial;
+    const material = applyWeatherShader(
+      new THREE.MeshLambertMaterial({ map: texture, side: old.side })
+    );
     // (with reliefs, the mesh has a second material: the walls)
-    ground.mesh.material = Array.isArray(current) ? [material, ...current.slice(1)] : material;
+    ground.mesh.material = Array.isArray(current)
+      ? [material, ...current.slice(1)]
+      : material;
     const painted: PaintedGround = { ctx, texture, base: null };
     this.paintedGrounds.set(chunk.id, painted);
     // Once the original texture is there: drawn whole, then every painted cell
     this.waterTimer ??= setInterval(() => this.animateWater(), WATER_STEP);
-    loadImage(ground.link).then(base => {
+    loadImage(ground.link).then((base) => {
       painted.base = base;
       ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
-      Object.keys(chunk.tiles ?? {}).forEach(key => {
-        const [col, row] = key.split(',').map(Number);
+      Object.keys(chunk.tiles ?? {}).forEach((key) => {
+        const [col, row] = key.split(",").map(Number);
         this.drawCell(chunk, painted, col, row);
       });
       texture.needsUpdate = true;
@@ -539,90 +673,151 @@ export class MapHelper {
       return;
     }
     this.waterFrame++;
-    loadImage(TILESET_ANIM_LINK).then(img => this.paintedGrounds.forEach((painted, chunkId) => {
-      const chunk = this.sceneMap.chunks.find(c => c.id === chunkId);
-      if (!chunk?.visible || !chunk.tiles) {
-        return;
-      }
-      let changed = false;
-      Object.entries(chunk.tiles).forEach(([key, id]) => {
-        const terrain = terrainById(id);
-        if (!terrain?.blocking) {
+    loadImage(TILESET_ANIM_LINK).then((img) =>
+      this.paintedGrounds.forEach((painted, chunkId) => {
+        const chunk = this.sceneMap.chunks.find((c) => c.id === chunkId);
+        if (!chunk?.visible || !chunk.tiles) {
           return;
         }
-        const [col, row] = key.split(',').map(Number);
-        const differs = NEIGHBORS.map(([dc, dr]) => this.differs(id, this.terrainIdAt(chunk, col + dc, row + dr)));
-        const [c, r] = autotile(terrain, differs);
-        if (c !== terrain.center[0] || r !== terrain.center[1]) {
-          return; // shores stay still
+        let changed = false;
+        Object.entries(chunk.tiles).forEach(([key, id]) => {
+          const terrain = terrainById(id);
+          if (!terrain?.blocking) {
+            return;
+          }
+          const [col, row] = key.split(",").map(Number);
+          const differs = NEIGHBORS.map(([dc, dr]) =>
+            this.differs(id, this.terrainIdAt(chunk, col + dc, row + dr))
+          );
+          const [c, r] = autotile(terrain, differs);
+          if (c !== terrain.center[0] || r !== terrain.center[1]) {
+            return; // shores stay still
+          }
+          const src = waterFramePos(id, this.waterFrame);
+          if (!src) {
+            return;
+          }
+          painted.ctx.drawImage(
+            img,
+            src.x,
+            src.y,
+            TILE_SIZE,
+            TILE_SIZE,
+            col * TILE_SIZE,
+            row * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+          changed = true;
+        });
+        if (changed) {
+          painted.texture.needsUpdate = true;
         }
-        const src = waterFramePos(id, this.waterFrame);
-        if (!src) {
-          return;
-        }
-        painted.ctx.drawImage(img, src.x, src.y, TILE_SIZE, TILE_SIZE, col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-        changed = true;
-      });
-      if (changed) {
-        painted.texture.needsUpdate = true;
-      }
-    }));
+      })
+    );
   }
 
-  private drawCell(chunk: SceneChunk, painted: PaintedGround, col: number, row: number) {
+  private drawCell(
+    chunk: SceneChunk,
+    painted: PaintedGround,
+    col: number,
+    row: number
+  ) {
     const x = col * TILE_SIZE;
     const y = row * TILE_SIZE;
-    const tileId = chunk.tiles?.[col + ',' + row];
+    const tileId = chunk.tiles?.[col + "," + row];
     const terrain = terrainById(tileId);
-    const stairs = stairsSide(chunk.stairs?.[col + ',' + row]);
+    const stairs = stairsSide(chunk.stairs?.[col + "," + row]);
     if (stairs) {
-      loadImage(TILESET_LINK).then(img => {
-        if (stairsSide(chunk.stairs?.[col + ',' + row]) === stairs) {
+      loadImage(TILESET_LINK).then((img) => {
+        if (stairsSide(chunk.stairs?.[col + "," + row]) === stairs) {
           // The steps are drawn for a ramp rising north: turned for the other sides
           const src = tilesetPos(...STAIRS_TILE);
           const ctx = painted.ctx;
           ctx.save();
           ctx.translate(x + TILE_SIZE / 2, y + TILE_SIZE / 2);
-          ctx.rotate({ n: 0, e: Math.PI / 2, s: Math.PI, w: -Math.PI / 2 }[stairs]);
-          ctx.drawImage(img, src.x, src.y, TILE_SIZE, TILE_SIZE, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+          ctx.rotate(
+            { n: 0, e: Math.PI / 2, s: Math.PI, w: -Math.PI / 2 }[stairs]
+          );
+          ctx.drawImage(
+            img,
+            src.x,
+            src.y,
+            TILE_SIZE,
+            TILE_SIZE,
+            -TILE_SIZE / 2,
+            -TILE_SIZE / 2,
+            TILE_SIZE,
+            TILE_SIZE
+          );
           ctx.restore();
           painted.texture.needsUpdate = true;
         }
       });
     } else if (terrain) {
-      loadImage(TILESET_LINK).then(img => {
+      loadImage(TILESET_LINK).then((img) => {
         // (still the same terrain once loaded: the cell may have been repainted meanwhile)
-        if (chunk.tiles?.[col + ',' + row] === tileId) {
+        if (chunk.tiles?.[col + "," + row] === tileId) {
           // The tile whose borders match the neighbors (autotiling)
-          const ids = NEIGHBORS.map(([dc, dr]) => this.terrainIdAt(chunk, col + dc, row + dr));
-          const differs = ids.map(id => this.differs(tileId!, id));
+          const ids = NEIGHBORS.map(([dc, dr]) =>
+            this.terrainIdAt(chunk, col + dc, row + dr)
+          );
+          const differs = ids.map((id) => this.differs(tileId!, id));
           // Beach: every different neighbor is water
-          const others = ids.filter(id => id !== tileId);
-          const shore = others.length > 0 && others.every(id => terrainById(id)?.blocking);
+          const others = ids.filter((id) => id !== tileId);
+          const shore =
+            others.length > 0 &&
+            others.every((id) => terrainById(id)?.blocking);
           const src = tilesetPos(...autotile(terrain, differs, shore));
-          painted.ctx.drawImage(img, src.x, src.y, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+          painted.ctx.drawImage(
+            img,
+            src.x,
+            src.y,
+            TILE_SIZE,
+            TILE_SIZE,
+            x,
+            y,
+            TILE_SIZE,
+            TILE_SIZE
+          );
           painted.texture.needsUpdate = true;
         }
       });
     } else if (painted.base) {
       const sx = painted.base.width / chunk.size.x;
       const sy = painted.base.height / chunk.size.y;
-      painted.ctx.drawImage(painted.base, x * sx, y * sy, TILE_SIZE * sx, TILE_SIZE * sy, x, y, TILE_SIZE, TILE_SIZE);
+      painted.ctx.drawImage(
+        painted.base,
+        x * sx,
+        y * sy,
+        TILE_SIZE * sx,
+        TILE_SIZE * sy,
+        x,
+        y,
+        TILE_SIZE,
+        TILE_SIZE
+      );
       painted.texture.needsUpdate = true;
     }
   }
 
   /** Chunk containing a world point (x, z), if any. */
   public chunkAt(x: number, z: number): SceneChunk | undefined {
-    return this.sceneMap.chunks.find(c =>
-      Math.abs(x - c.pos.x) <= c.size.x / 2 && Math.abs(z - c.pos.z) <= c.size.y / 2);
+    return this.sceneMap.chunks.find(
+      (c) =>
+        Math.abs(x - c.pos.x) <= c.size.x / 2 &&
+        Math.abs(z - c.pos.z) <= c.size.y / 2
+    );
   }
 
   /**
    * Map editor: adds a building / nature object at a world position, in the chunk under it. Its options
    * (passable, canHide) are those most used by the same model on the map. Returns null outside the map.
    */
-  public addBuildingAt(modelId: string, world: THREE.Vector3): SceneBuilding | null {
+  public addBuildingAt(
+    modelId: string,
+    world: THREE.Vector3
+  ): SceneBuilding | null {
     const chunk = this.chunkAt(world.x, world.z);
     const model = findModel(modelId);
     if (!chunk || !model || !chunk.group) {
@@ -631,7 +826,11 @@ export class MapHelper {
     const building: SceneBuilding = {
       id: `${modelId}-${Date.now().toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`,
       modelId,
-      pos: { x: world.x - chunk.pos.x, y: world.y - chunk.pos.y, z: world.z - chunk.pos.z },
+      pos: {
+        x: world.x - chunk.pos.x,
+        y: world.y - chunk.pos.y,
+        z: world.z - chunk.pos.z,
+      },
       ...this.defaultOptions(modelId),
       ...(modelId === ZONE_ID ? { size: { ...ZONE_DEFAULT_SIZE } } : {}),
       originModel: model,
@@ -656,7 +855,10 @@ export class MapHelper {
   private readonly instances = new Map<string, Map<string, ModelInstances>>();
 
   /** The copies of a building's model in a chunk, if the building is drawn as one of them. */
-  private instancesOf(chunk: SceneChunk, building: SceneBuilding): ModelInstances | undefined {
+  private instancesOf(
+    chunk: SceneChunk,
+    building: SceneBuilding
+  ): ModelInstances | undefined {
     const set = this.instances.get(chunk.id)?.get(building.modelId);
     return set?.has(building) ? set : undefined;
   }
@@ -665,7 +867,11 @@ export class MapHelper {
    * What draws a building: a copy of its model (instancing: repeated objects that don't fade, e.g. trees,
    * barriers) or its own meshes (houses, the lab, objects with events).
    */
-  private createView(chunk: SceneChunk, building: SceneBuilding, rot = building.rot ?? 0) {
+  private createView(
+    chunk: SceneChunk,
+    building: SceneBuilding,
+    rot = building.rot ?? 0
+  ) {
     const model = building.originModel ?? findModel(building.modelId);
     if (!model || !chunk.group) {
       return;
@@ -674,7 +880,7 @@ export class MapHelper {
     const world = convertVec3(chunk.pos).add(convertVec3(building.pos));
     if (isZone(building)) {
       const zone = makeZoneMesh(building.size);
-      this.addMesh(chunk.id + '-' + building.id, zone, world);
+      this.addMesh(chunk.id + "-" + building.id, zone, world);
       chunk.group.add(zone);
       return;
     }
@@ -694,7 +900,11 @@ export class MapHelper {
     }
     const mesh = BasicMeshService.makeModel(model);
     MapHelper.turn(mesh, rot);
-    this.addMesh(chunk.id + '-' + building.id, mesh, MapHelper.viewPos(mesh, world));
+    this.addMesh(
+      chunk.id + "-" + building.id,
+      mesh,
+      MapHelper.viewPos(mesh, world)
+    );
     chunk.group.add(mesh);
   }
 
@@ -706,14 +916,22 @@ export class MapHelper {
     if (!rot) {
       return;
     }
-    const angle = -rot * Math.PI / 2;
-    const middle = new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3()).setY(0);
+    const angle = (-rot * Math.PI) / 2;
+    const middle = new THREE.Box3()
+      .setFromObject(mesh)
+      .getCenter(new THREE.Vector3())
+      .setY(0);
     mesh.rotation.y = angle;
-    mesh.userData[TURN_SHIFT] = middle.clone().sub(middle.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), angle));
+    mesh.userData[TURN_SHIFT] = middle
+      .clone()
+      .sub(middle.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), angle));
   }
 
   /** Where a building's mesh goes for the building to be at a world position (the shift of a turned one). */
-  private static viewPos(mesh: THREE.Object3D, world: THREE.Vector3): THREE.Vector3 {
+  private static viewPos(
+    mesh: THREE.Object3D,
+    world: THREE.Vector3
+  ): THREE.Vector3 {
     const shift = mesh.userData[TURN_SHIFT] as THREE.Vector3 | undefined;
     return shift ? world.clone().add(shift) : world;
   }
@@ -725,7 +943,7 @@ export class MapHelper {
       set.remove(building);
       return;
     }
-    const key = chunk.id + '-' + building.id;
+    const key = chunk.id + "-" + building.id;
     this.meshes[key]?.removeFromParent();
     delete this.meshes[key];
   }
@@ -740,7 +958,11 @@ export class MapHelper {
    * In the game, an object turns its front towards a point (a character towards the player): drawn turned by
    * quarter turns, its map data unchanged (the editor shows it as it was set).
    */
-  public faceTowards(chunk: SceneChunk, building: SceneBuilding, point: THREE.Vector3) {
+  public faceTowards(
+    chunk: SceneChunk,
+    building: SceneBuilding,
+    point: THREE.Vector3
+  ) {
     const bounds = this.buildingBounds(chunk, building);
     if (!bounds || isZone(building)) {
       return;
@@ -749,9 +971,15 @@ export class MapHelper {
     const dx = point.x - center.x;
     const dz = point.z - center.z;
     // The front (rot 0) faces +z; each quarter turn is clockwise seen from above: west, back, east
-    const rot = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 3 : 1) : (dz > 0 ? 0 : 2);
-    const key = chunk.id + '-' + building.id;
-    if (this.meshes[key]?.userData[FACING] === rot || (this.meshes[key]?.userData[FACING] === undefined && rot === (building.rot ?? 0))) {
+    const sideRot = dx > 0 ? 3 : 1;
+    const frontRot = dz > 0 ? 0 : 2;
+    const rot = Math.abs(dx) > Math.abs(dz) ? sideRot : frontRot;
+    const key = chunk.id + "-" + building.id;
+    if (
+      this.meshes[key]?.userData[FACING] === rot ||
+      (this.meshes[key]?.userData[FACING] === undefined &&
+        rot === (building.rot ?? 0))
+    ) {
       return;
     }
     this.removeView(chunk, building);
@@ -764,71 +992,97 @@ export class MapHelper {
 
   /** The objects turned towards the player are drawn again as they were set (opening the editor). */
   public resetFacing() {
-    this.sceneMap.chunks.forEach(chunk => chunk.buildings.forEach(building => {
-      if (this.meshes[chunk.id + '-' + building.id]?.userData[FACING] !== undefined) {
-        this.refreshBuilding(chunk, building);
-      }
-    }));
+    this.sceneMap.chunks.forEach((chunk) =>
+      chunk.buildings.forEach((building) => {
+        if (
+          this.meshes[chunk.id + "-" + building.id]?.userData[FACING] !==
+          undefined
+        ) {
+          this.refreshBuilding(chunk, building);
+        }
+      })
+    );
   }
 
   /** Bounds of a building in the world (collisions, editor selection), instanced or not. */
-  public buildingBounds(chunk: SceneChunk, building: SceneBuilding): THREE.Box3 | null {
+  public buildingBounds(
+    chunk: SceneChunk,
+    building: SceneBuilding
+  ): THREE.Box3 | null {
     const set = this.instancesOf(chunk, building);
     if (set) {
       return set.boundsAt(this.buildingWorldPos(chunk, building));
     }
-    return this.getBounds(chunk.id + '-' + building.id);
+    return this.getBounds(chunk.id + "-" + building.id);
   }
 
   /** Takes a building out of its chunk and of the scene (its data can be added back: undo). */
   public removeBuilding(chunk: SceneChunk, building: SceneBuilding) {
     this.removeView(chunk, building);
-    chunk.buildings = chunk.buildings.filter(b => b !== building);
+    chunk.buildings = chunk.buildings.filter((b) => b !== building);
   }
 
   /** Moves a building to a world position, changing its chunk if it crosses a border. False outside the map. */
-  public moveBuilding(chunk: SceneChunk, building: SceneBuilding, world: THREE.Vector3): boolean {
+  public moveBuilding(
+    chunk: SceneChunk,
+    building: SceneBuilding,
+    world: THREE.Vector3
+  ): boolean {
     const target = this.chunkAt(world.x, world.z);
     if (!target) {
       return false;
     }
     if (target !== chunk) {
       this.removeBuilding(chunk, building);
-      building.pos = { x: world.x - target.pos.x, y: world.y - target.pos.y, z: world.z - target.pos.z };
+      building.pos = {
+        x: world.x - target.pos.x,
+        y: world.y - target.pos.y,
+        z: world.z - target.pos.z,
+      };
       this.addBuilding(target, building);
       return true;
     }
-    building.pos = { x: world.x - chunk.pos.x, y: world.y - chunk.pos.y, z: world.z - chunk.pos.z };
+    building.pos = {
+      x: world.x - chunk.pos.x,
+      y: world.y - chunk.pos.y,
+      z: world.z - chunk.pos.z,
+    };
     const set = this.instancesOf(chunk, building);
     if (set) {
       set.move(building, world);
     } else {
-      const mesh = this.meshes[chunk.id + '-' + building.id];
+      const mesh = this.meshes[chunk.id + "-" + building.id];
       mesh?.position.copy(MapHelper.viewPos(mesh, world));
     }
     return true;
   }
 
   /** World position of a building. */
-  public buildingWorldPos(chunk: SceneChunk, building: SceneBuilding): THREE.Vector3 {
+  public buildingWorldPos(
+    chunk: SceneChunk,
+    building: SceneBuilding
+  ): THREE.Vector3 {
     return convertVec3(chunk.pos).add(convertVec3(building.pos));
   }
 
   /** The building a scene object (one of its meshes) belongs to, if any. */
-  public findBuilding(object: THREE.Object3D, instanceId?: number): { chunk: SceneChunk, building: SceneBuilding } | null {
+  public findBuilding(
+    object: THREE.Object3D,
+    instanceId?: number
+  ): { chunk: SceneChunk; building: SceneBuilding } | null {
     // An instanced copy: the copy number gives the building
     for (const [chunkId, byModel] of this.instances) {
       for (const set of byModel.values()) {
         if (set.parts.includes(object as THREE.InstancedMesh)) {
           const building = set.buildingAt(instanceId);
-          const chunk = this.sceneMap.chunks.find(c => c.id === chunkId);
+          const chunk = this.sceneMap.chunks.find((c) => c.id === chunkId);
           return building && chunk ? { chunk, building } : null;
         }
       }
     }
     for (const chunk of this.sceneMap.chunks) {
       for (const building of chunk.buildings) {
-        const mesh = this.meshes[chunk.id + '-' + building.id];
+        const mesh = this.meshes[chunk.id + "-" + building.id];
         let o: THREE.Object3D | null = object;
         while (o) {
           if (o === mesh) {
@@ -843,38 +1097,58 @@ export class MapHelper {
 
   /** Building meshes that can be clicked (visible chunks, not hidden near the camera). */
   public pickableBuildingMeshes(): THREE.Object3D[] {
-    const visible = this.sceneMap.chunks.filter(chunk => chunk.visible);
+    const visible = this.sceneMap.chunks.filter((chunk) => chunk.visible);
     return [
-      ...visible.flatMap(chunk => chunk.buildings.map(b => this.meshes[chunk.id + '-' + b.id]))
+      ...visible
+        .flatMap((chunk) =>
+          chunk.buildings.map((b) => this.meshes[chunk.id + "-" + b.id])
+        )
         .filter((mesh): mesh is THREE.Object3D => !!mesh && mesh.visible),
-      ...visible.flatMap(chunk => [...(this.instances.get(chunk.id)?.values() ?? [])].flatMap(set => set.parts)),
+      ...visible.flatMap((chunk) =>
+        [...(this.instances.get(chunk.id)?.values() ?? [])].flatMap(
+          (set) => set.parts
+        )
+      ),
     ];
   }
 
   /** Instanced copies of the visible chunks' models (diagnostics): model id, copies, its instanced meshes. */
-  public instancedSets(): { modelId: string, copies: number, parts: THREE.InstancedMesh[] }[] {
+  public instancedSets(): {
+    modelId: string;
+    copies: number;
+    parts: THREE.InstancedMesh[];
+  }[] {
     return [...this.instances.entries()].flatMap(([, byModel]) =>
-      [...byModel.entries()].map(([modelId, set]) => ({ modelId, copies: set.buildings.length, parts: set.parts })));
+      [...byModel.entries()].map(([modelId, set]) => ({
+        modelId,
+        copies: set.buildings.length,
+        parts: set.parts,
+      }))
+    );
   }
 
   /** Options used by most buildings of this model on the map (a new tree behaves like the other trees). */
-  private defaultOptions(modelId: string): { passable: boolean, canHide: boolean } {
+  private defaultOptions(modelId: string): {
+    passable: boolean;
+    canHide: boolean;
+  } {
     if (modelId === ZONE_ID) {
       return { passable: true, canHide: false };
     }
     const votes = new Map<string, number>();
-    this.sceneMap.chunks.forEach(c => c.buildings.forEach(b => {
-      if (b.modelId === modelId) {
-        const key = `${b.passable}-${b.canHide}`;
-        votes.set(key, (votes.get(key) ?? 0) + 1);
-      }
-    }));
+    this.sceneMap.chunks.forEach((c) =>
+      c.buildings.forEach((b) => {
+        if (b.modelId === modelId) {
+          const key = `${b.passable}-${b.canHide}`;
+          votes.set(key, (votes.get(key) ?? 0) + 1);
+        }
+      })
+    );
     const best = [...votes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
     return best
-      ? { passable: best.startsWith('true'), canHide: best.endsWith('true') }
+      ? { passable: best.startsWith("true"), canHide: best.endsWith("true") }
       : { passable: false, canHide: false };
   }
-
 
   /** Invisible copy of the player sprite casting its shadow (see buildPlayer). */
   private playerShadow?: THREE.Mesh;
@@ -897,7 +1171,10 @@ export class MapHelper {
     camera.lookAt(this.originGame.getCameraTarget());
     const game = this.originGame;
     if (game.editMode) {
-      this.updateVisibleChunks(game.getCameraTarget(), Math.max(0, game.cameraZoom - 1) * 0.8);
+      this.updateVisibleChunks(
+        game.getCameraTarget(),
+        Math.max(0, game.cameraZoom - 1) * 0.8
+      );
     } else {
       this.updateVisibleChunks();
     }
@@ -913,26 +1190,44 @@ export class MapHelper {
 
   public getBounds(key: string): THREE.Box3 | null {
     const mesh = this.meshes[key];
-    if(!mesh) { return null; }
+    if (!mesh) {
+      return null;
+    }
     return new THREE.Box3().setFromObject(mesh);
   }
 
-  public updateVisibleMesh(key: string, playerPos: THREE.Vector3, canHide: boolean) {
+  public updateVisibleMesh(
+    key: string,
+    playerPos: THREE.Vector3,
+    canHide: boolean
+  ) {
     const mesh = this.meshes[key];
-    if(!mesh) { return; }
+    if (!mesh) {
+      return;
+    }
 
     const bounds = new THREE.Box3().setFromObject(mesh);
     const opacity = this.getOpacity(mesh, bounds, playerPos, canHide);
     // A hidden mesh is only kept for its shadow while it is inside the area where shadows are computed
     // (around the camera target): farther, it can't shade anything visible and is dropped completely.
     const target = this.originGame.getCameraTarget();
-    const castsShadow = bounds.max.x > target.x - SHADOW_AREA && bounds.min.x < target.x + SHADOW_AREA
-      && bounds.max.z > target.z - SHADOW_AREA && bounds.min.z < target.z + SHADOW_AREA;
+    const castsShadow =
+      bounds.max.x > target.x - SHADOW_AREA &&
+      bounds.min.x < target.x + SHADOW_AREA &&
+      bounds.max.z > target.z - SHADOW_AREA &&
+      bounds.min.z < target.z + SHADOW_AREA;
 
-    mesh.children.forEach(child => MapHelper.updateMeshOpacity(child, opacity, castsShadow));
+    mesh.children.forEach((child) =>
+      MapHelper.updateMeshOpacity(child, opacity, castsShadow)
+    );
   }
 
-  private getOpacity(mesh: THREE.Object3D, bounds: THREE.Box3, playerPos: THREE.Vector3, canHide: boolean): number {
+  private getOpacity(
+    mesh: THREE.Object3D,
+    bounds: THREE.Box3,
+    playerPos: THREE.Vector3,
+    canHide: boolean
+  ): number {
     let opacity = 1;
 
     const camera = this.originGame.camera;
@@ -941,8 +1236,10 @@ export class MapHelper {
     // a point h high is seen along the same line of sight as the ground h × CAMERA_LOOK.z / CAMERA_LOOK.y further
     // ahead, so a tall building (the lab, a tower) is still on screen when its base already left it.
     const cameraZ = camera.position.z - TOO_CLOSE_LIMIT;
-    const visibleZ = bounds.max.z - (bounds.max.y - bounds.min.y) * CAMERA_LOOK.z / CAMERA_LOOK.y;
-    if(cameraZ < visibleZ) {
+    const visibleZ =
+      bounds.max.z -
+      ((bounds.max.y - bounds.min.y) * CAMERA_LOOK.z) / CAMERA_LOOK.y;
+    if (cameraZ < visibleZ) {
       opacity = Math.max(0, 1 - (visibleZ - cameraZ) / SHADE_OFFSET);
       return opacity;
     }
@@ -951,27 +1248,35 @@ export class MapHelper {
     // (farther when the editor zooms out)
     const farLimit = TOO_FAR_LIMIT * Math.max(1, this.originGame.cameraZoom);
     const dist = MathService.getDist(mesh.position, camera.position);
-    if(dist > farLimit) {
+    if (dist > farLimit) {
       opacity = Math.max(0, 1 - (dist - farLimit) / SHADE_OFFSET);
       return opacity;
     }
 
-    if(bounds.min.x < playerPos.x && bounds.max.x > playerPos.x && playerPos.z < bounds.min.z) {
-      const borderDist = Math.min(Math.abs(playerPos.x - bounds.min.x), Math.abs(playerPos.x - bounds.max.x));
+    if (
+      bounds.min.x < playerPos.x &&
+      bounds.max.x > playerPos.x &&
+      playerPos.z < bounds.min.z
+    ) {
+      const borderDist = Math.min(
+        Math.abs(playerPos.x - bounds.min.x),
+        Math.abs(playerPos.x - bounds.max.x)
+      );
       const behindDist = Math.abs(playerPos.z - bounds.min.z);
-      const height = (bounds.max.y - bounds.min.y + SHADE_OFFSET);
-      if(behindDist < height) {
-        const opacityOffsetX = borderDist > SHADE_OFFSET ? 0 : (1 - borderDist/SHADE_OFFSET);
-        const opacityOffsetZ = behindDist > height ? 0 : (behindDist/height);
+      const height = bounds.max.y - bounds.min.y + SHADE_OFFSET;
+      if (behindDist < height) {
+        const opacityOffsetX =
+          borderDist > SHADE_OFFSET ? 0 : 1 - borderDist / SHADE_OFFSET;
+        const opacityOffsetZ = behindDist > height ? 0 : behindDist / height;
         const opacityOffset = Math.max(opacityOffsetX, opacityOffsetZ);
-        opacity = 0.7 + (0.3 * opacityOffset);
+        opacity = 0.7 + 0.3 * opacityOffset;
       }
     }
 
-    if(!canHide) {
-      return opacity > 0 ? 1 : 0;
-    } else {
+    if (canHide) {
       return opacity;
+    } else {
+      return opacity > 0 ? 1 : 0;
     }
   }
 
@@ -981,8 +1286,14 @@ export class MapHelper {
    * shadow when walking past it). Hidden = no color and no depth written. Once its shadow can't reach the view
    * anymore, it is removed (`visible = false`: no more drawing, shadow or weather effects on it).
    */
-  private static updateMeshOpacity(mesh: THREE.Object3D, opacity: number, castsShadow: boolean) {
-    if (!(mesh instanceof THREE.Mesh)) { return; }
+  private static updateMeshOpacity(
+    mesh: THREE.Object3D,
+    opacity: number,
+    castsShadow: boolean
+  ) {
+    if (!(mesh instanceof THREE.Mesh)) {
+      return;
+    }
     const material = mesh.material as THREE.Material;
     // Transparent only while fading: a transparent double sided material is drawn in two passes (back faces,
     // then front faces), twice the draw calls; the cut-out texels are handled by the alphaTest anyway.
@@ -992,13 +1303,12 @@ export class MapHelper {
     material.transparent = (opacity > 0 && opacity < 1) || !material.depthTest;
     material.forceSinglePass = true;
     mesh.visible = opacity > 0 || castsShadow;
-    if (material.userData['depthWrite'] === undefined) {
-      material.userData['depthWrite'] = material.depthWrite;
+    if (material.userData["depthWrite"] === undefined) {
+      material.userData["depthWrite"] = material.depthWrite;
     }
     const hidden = opacity <= 0;
     material.colorWrite = !hidden;
-    material.depthWrite = hidden ? false : material.userData['depthWrite'];
+    material.depthWrite = hidden ? false : material.userData["depthWrite"];
     material.opacity = Math.min(opacity, 1);
   }
-
 }

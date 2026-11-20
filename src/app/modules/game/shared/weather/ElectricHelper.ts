@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { SurfaceHeights } from './SurfaceHeights';
+import * as THREE from "three";
+import { SurfaceHeights } from "./SurfaceHeights";
 
 /** Area (relative to the point the camera looks at) where sparks can appear: covers the screen. */
 const AREA = { minX: -240, maxX: 240, minZ: -300, maxZ: 140 };
@@ -28,13 +28,20 @@ const SURFACES_REFRESH = 2;
 
 function makeGlowTexture(): THREE.CanvasTexture {
   const size = 64;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.35, 'rgba(255,255,255,0.35)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
+  const ctx = canvas.getContext("2d")!;
+  const g = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2
+  );
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.35, "rgba(255,255,255,0.35)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
@@ -76,12 +83,26 @@ export class ElectricHelper {
   private readonly mid = new THREE.Vector3();
   private readonly color = new THREE.Color();
 
-  constructor(private readonly scene: THREE.Scene, private readonly surfaces: SurfaceHeights) {
-    const additive = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false } as const;
-    this.segments = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1),
-      new THREE.MeshBasicMaterial({ ...additive }), MAX_ARCS * SEGMENTS);
-    this.glows = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1),
-      new THREE.MeshBasicMaterial({ ...additive, map: makeGlowTexture() }), MAX_ARCS);
+  constructor(
+    private readonly scene: THREE.Scene,
+    private readonly surfaces: SurfaceHeights
+  ) {
+    const additive = {
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
+    } as const;
+    this.segments = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ ...additive }),
+      MAX_ARCS * SEGMENTS
+    );
+    this.glows = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ ...additive, map: makeGlowTexture() }),
+      MAX_ARCS
+    );
     for (const mesh of [this.segments, this.glows]) {
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.setColorAt(0, this.color.set(0)); // creates the instance color buffer
@@ -99,9 +120,14 @@ export class ElectricHelper {
   }
 
   /** @param intensity 0..1 */
-  update(dt: number, target: THREE.Vector3, intensity: number, camera: THREE.Camera) {
+  update(
+    dt: number,
+    target: THREE.Vector3,
+    intensity: number,
+    camera: THREE.Camera
+  ) {
     this.activity = Math.max(0, this.activity - dt * 6);
-    if (intensity <= 0.01 && !this.arcs.length) {
+    if (intensity <= 0.01 && this.arcs.length === 0) {
       this.segments.visible = this.glows.visible = false;
       return;
     }
@@ -143,7 +169,8 @@ export class ElectricHelper {
     let s = 0;
     this.arcs.forEach((arc, a) => {
       const t = arc.age / arc.life;
-      const brightness = (t < 0.15 ? 1 : 1 - (t - 0.15) / 0.85) * (0.7 + 0.3 * Math.random());
+      const brightness =
+        (t < 0.15 ? 1 : 1 - (t - 0.15) / 0.85) * (0.7 + 0.3 * Math.random());
       this.color.copy(ARC_COLOR).multiplyScalar(brightness);
       for (let k = 0; k < SEGMENTS; k++) {
         const p0 = arc.points[k];
@@ -153,19 +180,28 @@ export class ElectricHelper {
         this.xAxis.divideScalar(length || 1);
         this.yAxis.crossVectors(this.zAxis, this.xAxis).normalize();
         this.mid.addVectors(p0, p1).multiplyScalar(0.5);
-        this.matrix.makeBasis(
-          this.xAxis.multiplyScalar(length),
-          this.yAxis.multiplyScalar(ARC_WIDTH),
-          this.zAxis,
-        ).setPosition(this.mid);
+        this.matrix
+          .makeBasis(
+            this.xAxis.multiplyScalar(length),
+            this.yAxis.multiplyScalar(ARC_WIDTH),
+            this.zAxis
+          )
+          .setPosition(this.mid);
         this.segments.setMatrixAt(s, this.matrix);
         this.segments.setColorAt(s, this.color);
         s++;
       }
       this.mid.addVectors(arc.start, arc.end).multiplyScalar(0.5);
-      this.matrix.compose(this.mid, camera.quaternion, this.xAxis.setScalar(GLOW_SIZE));
+      this.matrix.compose(
+        this.mid,
+        camera.quaternion,
+        this.xAxis.setScalar(GLOW_SIZE)
+      );
       this.glows.setMatrixAt(a, this.matrix);
-      this.glows.setColorAt(a, this.color.copy(GLOW_COLOR).multiplyScalar(brightness));
+      this.glows.setColorAt(
+        a,
+        this.color.copy(GLOW_COLOR).multiplyScalar(brightness)
+      );
       this.activity = Math.max(this.activity, brightness * 0.5);
     });
     this.segments.count = s;
@@ -185,25 +221,30 @@ export class ElectricHelper {
     }
     this.conductorsAge = 0;
     const boxes: THREE.Box3[] = [];
-    this.scene.traverseVisible(o => {
+    this.scene.traverseVisible((o) => {
       const mesh = o as THREE.Mesh;
-      if (mesh.isMesh && (mesh.material as THREE.Material)?.type === 'MeshPhongMaterial') {
+      if (
+        mesh.isMesh &&
+        (mesh.material as THREE.Material)?.type === "MeshPhongMaterial"
+      ) {
         boxes.push(new THREE.Box3().setFromObject(mesh));
       }
     });
     this.conductors = boxes;
     let total = 0;
-    this.conductorAreas = boxes.map(b => total += Math.max((b.max.x - b.min.x) * (b.max.z - b.min.z), 1));
+    this.conductorAreas = boxes.map(
+      (b) => (total += Math.max((b.max.x - b.min.x) * (b.max.z - b.min.z), 1))
+    );
   }
 
   /** Random conductor, weighted by its area. */
   private pickConductor(): THREE.Box3 | undefined {
-    const total = this.conductorAreas[this.conductorAreas.length - 1];
+    const total = this.conductorAreas.at(-1);
     if (!total) {
       return undefined;
     }
     const r = Math.random() * total;
-    return this.conductors[this.conductorAreas.findIndex(a => a >= r)];
+    return this.conductors[this.conductorAreas.findIndex((a) => a >= r)];
   }
 
   /** A new arc on a conductive surface in the area (at `near` for a burst). */
@@ -221,8 +262,17 @@ export class ElectricHelper {
         const z = THREE.MathUtils.randFloat(box.min.z, box.max.z);
         const dx = x - target.x;
         const dz = z - target.z;
-        if (dx > AREA.minX && dx < AREA.maxX && dz > AREA.minZ && dz < AREA.maxZ) {
-          start = new THREE.Vector3(x, this.surfaces.heightAt(x, z, target.y) + ARC_HEIGHT, z);
+        if (
+          dx > AREA.minX &&
+          dx < AREA.maxX &&
+          dz > AREA.minZ &&
+          dz < AREA.maxZ
+        ) {
+          start = new THREE.Vector3(
+            x,
+            this.surfaces.heightAt(x, z, target.y) + ARC_HEIGHT,
+            z
+          );
         }
       }
     }
@@ -231,9 +281,20 @@ export class ElectricHelper {
     }
     const angle = Math.random() * Math.PI * 2;
     const length = THREE.MathUtils.randFloat(ARC_LENGTH[0], ARC_LENGTH[1]);
-    const end = start.clone().add(new THREE.Vector3(Math.cos(angle) * length, Math.random() * 1.5, Math.sin(angle) * length));
+    const end = start
+      .clone()
+      .add(
+        new THREE.Vector3(
+          Math.cos(angle) * length,
+          Math.random() * 1.5,
+          Math.sin(angle) * length
+        )
+      );
     const arc: Arc = {
-      start, end, age: 0, jitterAge: 0,
+      start,
+      end,
+      age: 0,
+      jitterAge: 0,
       life: THREE.MathUtils.randFloat(ARC_LIFE[0], ARC_LIFE[1]),
       points: Array.from({ length: SEGMENTS + 1 }, () => new THREE.Vector3()),
     };

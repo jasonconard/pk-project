@@ -1,13 +1,29 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { LucideDownload, LucideSave, LucideTrash, LucideX } from '@lucide/angular';
-import { EscapeService } from '../../../core/shared/service/escape.service';
-import { GameService } from '../shared/services/game.service';
-import { GameSave, loadSaves, writeSave } from '../shared/services/game-saves';
-import { WEATHER_CHOICES } from '../shared/weather/Weather';
-import { currentVariableValues, restoreVariableValues } from '../../variables-editor/shared/variable-values';
-import { currentParty, restoreParty } from '../../database-editor/shared/party';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  output,
+  signal,
+} from "@angular/core";
+import {
+  LucideDownload,
+  LucideSave,
+  LucideTrash,
+  LucideX,
+} from "@lucide/angular";
+import { EscapeService } from "../../../core/shared/service/escape.service";
+import { GameService } from "../shared/services/game.service";
+import { GameSave, loadSaves, writeSave } from "../shared/services/game-saves";
+import { WEATHER_CHOICES } from "../shared/weather/Weather";
+import {
+  currentVariableValues,
+  restoreVariableValues,
+} from "../../variables-editor/shared/variable-values";
+import { currentParty, restoreParty } from "../../database-editor/shared/party";
 
-type SlotAction = 'load' | 'overwrite' | 'delete';
+type SlotAction = "load" | "overwrite" | "delete";
 
 /**
  * Saved games (menu → Sauver): a few slots, each with where the player was, the time, the weather and when it was
@@ -15,10 +31,10 @@ type SlotAction = 'load' | 'overwrite' | 'delete';
  * twice, like Écraser and Supprimer). Closed by the ✕, the backdrop or Escape.
  */
 @Component({
-  selector: 'game-saves',
+  selector: "game-saves",
   imports: [LucideDownload, LucideSave, LucideTrash, LucideX],
-  templateUrl: './game-saves.component.html',
-  styleUrl: './game-saves.component.scss',
+  templateUrl: "./game-saves.component.html",
+  styleUrl: "./game-saves.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameSavesComponent {
@@ -29,9 +45,12 @@ export class GameSavesComponent {
 
   private readonly gameService = inject(GameService);
   protected readonly slots = signal(loadSaves());
-  protected readonly message = signal('');
+  protected readonly message = signal("");
   /** The action pressed once (pressed again within 3 s: done). */
-  protected readonly armed = signal<{ slot: number, action: SlotAction } | null>(null);
+  protected readonly armed = signal<{
+    slot: number;
+    action: SlotAction;
+  } | null>(null);
   private armTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
@@ -45,7 +64,7 @@ export class GameSavesComponent {
   }
 
   protected saveTo(slot: number): void {
-    if (this.slots()[slot] && !this.confirm(slot, 'overwrite')) {
+    if (this.slots()[slot] && !this.confirm(slot, "overwrite")) {
       return;
     }
     const spot = this.gameService.playerSpot();
@@ -61,19 +80,27 @@ export class GameSavesComponent {
       variables: currentVariableValues(),
       party: structuredClone(currentParty()),
     };
-    this.message.set(writeSave(slot, save) ? `Partie sauvée dans l'emplacement ${slot + 1}.` : 'La sauvegarde a échoué (plus de place ?).');
+    this.message.set(
+      writeSave(slot, save)
+        ? `Partie sauvée dans l'emplacement ${slot + 1}.`
+        : "La sauvegarde a échoué (plus de place ?)."
+    );
     this.slots.set(loadSaves());
   }
 
   protected load(slot: number): void {
     const save = this.slots()[slot];
-    if (!save || !this.confirm(slot, 'load')) {
+    if (!save || !this.confirm(slot, "load")) {
       return;
     }
     restoreVariableValues(save.variables ?? {});
     restoreParty(save.party);
-    if (!this.gameService.restoreSpot(save.map, save.pos, save.hour, save.weather)) {
-      this.message.set(`La carte « ${save.mapName} » n'existe plus : retour à la carte de départ.`);
+    if (
+      !this.gameService.restoreSpot(save.map, save.pos, save.hour, save.weather)
+    ) {
+      this.message.set(
+        `La carte « ${save.mapName} » n'existe plus : retour à la carte de départ.`
+      );
       this.slots.set(loadSaves());
       return;
     }
@@ -81,7 +108,7 @@ export class GameSavesComponent {
   }
 
   protected remove(slot: number): void {
-    if (!this.confirm(slot, 'delete')) {
+    if (!this.confirm(slot, "delete")) {
       return;
     }
     writeSave(slot, null);
@@ -92,14 +119,26 @@ export class GameSavesComponent {
   protected place(save: GameSave): string {
     const hours = Math.floor(save.hour);
     const minutes = Math.floor((save.hour - hours) * 60);
-    const weather = WEATHER_CHOICES.find(w => w.type === save.weather)?.label;
-    return [save.mapName, `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`, weather].filter(Boolean).join(' · ');
+    const weather = WEATHER_CHOICES.find((w) => w.type === save.weather)?.label;
+    return [
+      save.mapName,
+      `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
+      weather,
+    ]
+      .filter(Boolean)
+      .join(" · ");
   }
 
   protected when(save: GameSave): string {
     const date = new Date(save.savedAt);
-    const day = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const day = date.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+    });
+    const time = date.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
     return `Sauvée le ${day} à ${time}`;
   }
 
@@ -111,7 +150,7 @@ export class GameSavesComponent {
       return true;
     }
     this.armed.set({ slot, action });
-    this.message.set('');
+    this.message.set("");
     this.armTimer = setTimeout(() => this.armed.set(null), 3000);
     return false;
   }

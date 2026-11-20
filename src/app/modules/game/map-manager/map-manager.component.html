@@ -1,14 +1,35 @@
-<div class="scrim" (click)="closed.emit()" animate.enter="anim-fade-in" animate.leave="anim-fade-out"></div>
+<div
+  class="scrim"
+  (click)="closed.emit()"
+  animate.enter="anim-fade-in"
+  animate.leave="anim-fade-out"
+></div>
 
-<section class="sheet" role="dialog" aria-modal="true" [attr.aria-label]="view() === 'list' ? 'Cartes' : 'Nouvelle carte'"
-         animate.enter="sheet-in" animate.leave="sheet-out">
-  @if (view() === 'list') {
+<section
+  class="sheet"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="view() === 'list' ? 'Cartes' : 'Nouvelle carte'"
+  animate.enter="sheet-in"
+  animate.leave="sheet-out"
+>
+  @if (view() === "list") {
     <header class="sheet-top">
       <span class="grip" aria-hidden="true" (click)="closed.emit()"></span>
       <div class="title-row">
         <h2>Cartes</h2>
-        <button type="button" class="new-small" (click)="startNew()"><svg lucidePlus></svg> Nouvelle</button>
-        <button type="button" class="round" aria-label="Fermer" title="Fermer (Échap)" (click)="closed.emit()"><svg lucideX></svg></button>
+        <button type="button" class="new-small" (click)="startNew()">
+          <svg lucidePlus></svg> Nouvelle
+        </button>
+        <button
+          type="button"
+          class="round"
+          aria-label="Fermer"
+          title="Fermer (Échap)"
+          (click)="closed.emit()"
+        >
+          <svg lucideX></svg>
+        </button>
       </div>
       <p class="hint">Touchez une carte pour l'ouvrir dans l'éditeur.</p>
     </header>
@@ -16,39 +37,103 @@
     <ul class="list">
       @for (map of maps(); track map.id) {
         <li class="card" [class.current]="map.id === currentId()">
-          <div class="row" role="button" tabindex="0" (click)="open(map)" (keydown.enter)="open(map)">
-            <span class="kind" aria-hidden="true"><svg [lucideIcon]="kindOf(map.kind).icon"></svg></span>
+          <div
+            class="row"
+            role="button"
+            tabindex="0"
+            (click)="open(map)"
+            (keydown.enter)="open(map)"
+          >
+            <span class="kind" aria-hidden="true"
+              ><svg [lucideIcon]="kindOf(map.kind).icon"></svg
+            ></span>
             <span class="texts">
               @if (renaming() === map.id) {
-                <input #name class="rename-input" type="text" maxlength="40" aria-label="Nom de la carte" [value]="map.name"
-                       (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keydown.enter)="rename(map, name.value)"
-                       (keydown.escape)="renaming.set(null)" (blur)="rename(map, name.value)" />
+                <input
+                  #name
+                  class="rename-input"
+                  type="text"
+                  maxlength="40"
+                  aria-label="Nom de la carte"
+                  [value]="map.name"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()"
+                  (keydown.enter)="rename(map, name.value)"
+                  (keydown.escape)="renaming.set(null)"
+                  (blur)="rename(map, name.value)"
+                />
               } @else {
                 <span class="name">{{ map.name }}</span>
               }
               <span class="sub">
-                {{ kindOf(map.kind).label }} · {{ sizeLabel(map.cols, map.rows) }}
-                @if (map.id === currentId()) { <span class="badge on">Ouverte</span> }
-                @if (!map.inCode) { <span class="badge">Navigateur</span> }
-                @else if (map.edited) { <span class="badge">Modifiée</span> }
+                {{ kindOf(map.kind).label }} ·
+                {{ sizeLabel(map.cols, map.rows) }}
+                @if (map.id === currentId()) {
+                  <span class="badge on">Ouverte</span>
+                }
+                @if (!map.inCode) {
+                  <span class="badge">Navigateur</span>
+                } @else if (map.edited) {
+                  <span class="badge">Modifiée</span>
+                }
               </span>
             </span>
-            <button type="button" class="round more" [class.on]="isExpanded(map)" aria-label="Actions"
-                    [attr.aria-expanded]="isExpanded(map)" (click)="toggleActions(map, $event)"><svg lucideEllipsis></svg></button>
+            <button
+              type="button"
+              class="round more"
+              [class.on]="isExpanded(map)"
+              aria-label="Actions"
+              [attr.aria-expanded]="isExpanded(map)"
+              (click)="toggleActions(map, $event)"
+            >
+              <svg lucideEllipsis></svg>
+            </button>
           </div>
           @if (isExpanded(map)) {
             <div class="actions" animate.enter="anim-fade-in">
-              <button type="button" (click)="startRename(map)"><svg lucidePencil></svg> Renommer</button>
-              <button type="button" (click)="duplicate(map)"><svg lucideCopy></svg> Dupliquer</button>
-              <button type="button" data-haptic="success" [title]="'Télécharger ' + map.id + '.ts, à mettre dans src/assets/map/' + map.id + '/'"
-                      (click)="exportMap(map)"><svg lucideDownload></svg> Exporter</button>
+              <button type="button" (click)="startRename(map)">
+                <svg lucidePencil></svg> Renommer
+              </button>
+              <button type="button" (click)="duplicate(map)">
+                <svg lucideCopy></svg> Dupliquer
+              </button>
+              <button
+                type="button"
+                data-haptic="success"
+                [title]="
+                  'Télécharger ' +
+                  map.id +
+                  '.ts, à mettre dans src/assets/map/' +
+                  map.id +
+                  '/'
+                "
+                (click)="exportMap(map)"
+              >
+                <svg lucideDownload></svg> Exporter
+              </button>
               @if (map.inCode) {
-                <button type="button" class="danger" data-haptic="warning" [disabled]="!map.edited"
-                        title="Revenir à la carte du code (oublie les modifications du navigateur)"
-                        (click)="reset(map)"><svg lucideRotateCcw></svg> {{ confirming() === map.id ? 'Confirmer ?' : 'Réinit.' }}</button>
+                <button
+                  type="button"
+                  class="danger"
+                  data-haptic="warning"
+                  [disabled]="!map.edited"
+                  title="Revenir à la carte du code (oublie les modifications du navigateur)"
+                  (click)="reset(map)"
+                >
+                  <svg lucideRotateCcw></svg>
+                  {{ confirming() === map.id ? "Confirmer ?" : "Réinit." }}
+                </button>
               } @else {
-                <button type="button" class="danger" data-haptic="warning" title="Supprimer la carte (elle n'existe que dans ce navigateur)"
-                        (click)="reset(map)"><svg lucideTrash></svg> {{ confirming() === map.id ? 'Confirmer ?' : 'Supprimer' }}</button>
+                <button
+                  type="button"
+                  class="danger"
+                  data-haptic="warning"
+                  title="Supprimer la carte (elle n'existe que dans ce navigateur)"
+                  (click)="reset(map)"
+                >
+                  <svg lucideTrash></svg>
+                  {{ confirming() === map.id ? "Confirmer ?" : "Supprimer" }}
+                </button>
               }
             </div>
           }
@@ -57,13 +142,17 @@
     </ul>
 
     <footer class="foot">
-      <button type="button" class="primary" (click)="startNew()"><svg lucidePlus></svg> Nouvelle carte</button>
+      <button type="button" class="primary" (click)="startNew()">
+        <svg lucidePlus></svg> Nouvelle carte
+      </button>
     </footer>
   } @else {
     <header class="sheet-top">
       <span class="grip" aria-hidden="true" (click)="closed.emit()"></span>
       <div class="title-row">
-        <button type="button" class="back" (click)="view.set('list')"><svg lucideChevronLeft></svg> Cartes</button>
+        <button type="button" class="back" (click)="view.set('list')">
+          <svg lucideChevronLeft></svg> Cartes
+        </button>
         <h2>Nouvelle carte</h2>
       </div>
     </header>
@@ -71,14 +160,24 @@
     <form class="form" (submit)="$event.preventDefault(); create()">
       <label class="field">
         <span class="label">Nom</span>
-        <input type="text" maxlength="40" [value]="newName()" (input)="newName.set($any($event.target).value)" />
+        <input
+          type="text"
+          maxlength="40"
+          [value]="newName()"
+          (input)="newName.set($any($event.target).value)"
+        />
       </label>
 
       <div class="field">
         <span class="label">Type</span>
         <div class="kinds" role="radiogroup" aria-label="Type">
           @for (kind of kinds; track kind.id) {
-            <button type="button" role="radio" [attr.aria-checked]="newKind() === kind.id" (click)="newKind.set(kind.id)">
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="newKind() === kind.id"
+              (click)="newKind.set(kind.id)"
+            >
               <svg [lucideIcon]="kind.icon"></svg>{{ kind.label }}
             </button>
           }
@@ -86,21 +185,38 @@
       </div>
 
       <div class="field">
-        <span class="label-row"><span class="label">Taille</span><b>{{ sizeLabel(newCols(), newRows()) }}</b></span>
-        <div #grid class="size-grid" role="group" [attr.aria-label]="'Taille : ' + sizeLabel(newCols(), newRows())"
-             (pointerdown)="sizeAt($event)" (pointermove)="sizeAt($event)">
+        <span class="label-row"
+          ><span class="label">Taille</span
+          ><b>{{ sizeLabel(newCols(), newRows()) }}</b></span
+        >
+        <div
+          #grid
+          class="size-grid"
+          role="group"
+          [attr.aria-label]="'Taille : ' + sizeLabel(newCols(), newRows())"
+          (pointerdown)="sizeAt($event)"
+          (pointermove)="sizeAt($event)"
+        >
           @for (r of gridRows; track r) {
             @for (c of gridCols; track c) {
-              <span class="cell" [class.on]="c < newCols() && r < newRows()"></span>
+              <span
+                class="cell"
+                [class.on]="c < newCols() && r < newRows()"
+              ></span>
             }
           }
         </div>
-        <p class="hint">Glissez sur la grille pour choisir la taille. Une zone fait 32 × 32 cases ; la carte pourra grandir ensuite.</p>
+        <p class="hint">
+          Glissez sur la grille pour choisir la taille. Une zone fait 32 × 32
+          cases ; la carte pourra grandir ensuite.
+        </p>
       </div>
     </form>
 
     <footer class="foot">
-      <button type="button" class="primary" (click)="create()"><svg lucideCheck></svg> Créer et ouvrir</button>
+      <button type="button" class="primary" (click)="create()">
+        <svg lucideCheck></svg> Créer et ouvrir
+      </button>
     </footer>
   }
 </section>

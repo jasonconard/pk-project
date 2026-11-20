@@ -1,19 +1,61 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
-  LucideBackpack, LucideCalendarDays, LucideCamera, LucideChevronDown, LucideChevronRight, LucideCloudSun, LucideDownload, LucideDynamicIcon, LucideFolderArchive,
-  LucideGauge, LucideHeartHandshake, LucideIcon, LucideMap, LucideMaximize, LucideMinimize, LucideSave, LucideShare2, LucideSparkles,
-  LucideUpload, LucideUsers, LucideVariable, LucideVolume2, LucideVolumeX, LucideX,
-} from '@lucide/angular';
-import { GameService } from '../shared/services/game.service';
-import { CoreService } from '../../../core/shared/service/core.service';
-import { KeyService } from '../../../core/shared/service/key.service';
-import { QUALITY_CHOICES, QualityMode } from '../shared/model/Quality';
-import { applyProject, collectProject, projectFileBlob, ProjectFile, readProjectFile, SHARES_PROJECT, shareProjectFile,
-  summarize } from '../shared/services/project-file';
-import { downloadFile } from '../shared/util/ts-source';
-import { hapticsEnabled, hapticsSupported, setHapticsEnabled } from '../../../core/shared/haptics';
-import { isTyping } from '../../../core/shared/typing';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  output,
+  signal,
+} from "@angular/core";
+import { EscapeService } from "../../../core/shared/service/escape.service";
+import {
+  LucideBackpack,
+  LucideCalendarDays,
+  LucideCamera,
+  LucideChevronDown,
+  LucideChevronRight,
+  LucideCloudSun,
+  LucideDownload,
+  LucideDynamicIcon,
+  LucideFolderArchive,
+  LucideGauge,
+  LucideHeartHandshake,
+  LucideIcon,
+  LucideMap,
+  LucideMaximize,
+  LucideMinimize,
+  LucideSave,
+  LucideShare2,
+  LucideSparkles,
+  LucideUpload,
+  LucideUsers,
+  LucideVariable,
+  LucideVolume2,
+  LucideVolumeX,
+  LucideX,
+} from "@lucide/angular";
+import { GameService } from "../shared/services/game.service";
+import { CoreService } from "../../../core/shared/service/core.service";
+import { KeyService } from "../../../core/shared/service/key.service";
+import { QUALITY_CHOICES, QualityMode } from "../shared/model/Quality";
+import {
+  applyProject,
+  collectProject,
+  projectFileBlob,
+  ProjectFile,
+  readProjectFile,
+  SHARES_PROJECT,
+  shareProjectFile,
+  summarize,
+} from "../shared/services/project-file";
+import { downloadFile } from "../shared/util/ts-source";
+import {
+  hapticsEnabled,
+  hapticsSupported,
+  setHapticsEnabled,
+} from "../../../core/shared/haptics";
+import { isTyping } from "../../../core/shared/typing";
 
 /** An entry of the game's own menus: each one comes with its tool (docs/idees.md), greyed until then. */
 interface MenuEntry {
@@ -22,16 +64,29 @@ interface MenuEntry {
   /** What the tool brings, shown in the tooltip. */
   soon: string;
   /** What it opens; none yet: greyed. */
-  action?: 'saves';
+  action?: "saves";
 }
 
 const ENTRIES: MenuEntry[] = [
-  { icon: LucideUsers, label: 'Équipe', soon: 'L\'équipe et ses compétences' },
-  { icon: LucideBackpack, label: 'Sac', soon: 'Les objets trouvés et achetés' },
-  { icon: LucideHeartHandshake, label: 'Liens', soon: 'Les liens avec les habitants et l\'équipe' },
-  { icon: LucideCalendarDays, label: 'Agenda', soon: 'Les jours, les activités, les donjons ouverts' },
-  { icon: LucideMap, label: 'Carte', soon: 'La carte du monde' },
-  { icon: LucideSave, label: 'Sauver', soon: 'Sauver ou charger la partie', action: 'saves' },
+  { icon: LucideUsers, label: "Équipe", soon: "L'équipe et ses compétences" },
+  { icon: LucideBackpack, label: "Sac", soon: "Les objets trouvés et achetés" },
+  {
+    icon: LucideHeartHandshake,
+    label: "Liens",
+    soon: "Les liens avec les habitants et l'équipe",
+  },
+  {
+    icon: LucideCalendarDays,
+    label: "Agenda",
+    soon: "Les jours, les activités, les donjons ouverts",
+  },
+  { icon: LucideMap, label: "Carte", soon: "La carte du monde" },
+  {
+    icon: LucideSave,
+    label: "Sauver",
+    soon: "Sauver ou charger la partie",
+    action: "saves",
+  },
 ];
 
 /**
@@ -41,12 +96,28 @@ const ENTRIES: MenuEntry[] = [
  * A sheet from the bottom on phones in portrait, a panel on the right otherwise.
  */
 @Component({
-  selector: 'game-menu',
-  imports: [LucideDynamicIcon, LucideX, LucideMaximize, LucideMinimize, LucideVolume2, LucideVolumeX, LucideCamera,
-    LucideCloudSun, LucideGauge, LucideSparkles, LucideChevronRight, LucideChevronDown, LucideFolderArchive,
-    LucideDownload, LucideShare2, LucideUpload, LucideVariable],
-  templateUrl: './game-menu.component.html',
-  styleUrl: './game-menu.component.scss',
+  selector: "game-menu",
+  imports: [
+    LucideDynamicIcon,
+    LucideX,
+    LucideMaximize,
+    LucideMinimize,
+    LucideVolume2,
+    LucideVolumeX,
+    LucideCamera,
+    LucideCloudSun,
+    LucideGauge,
+    LucideSparkles,
+    LucideChevronRight,
+    LucideChevronDown,
+    LucideFolderArchive,
+    LucideDownload,
+    LucideShare2,
+    LucideUpload,
+    LucideVariable,
+  ],
+  templateUrl: "./game-menu.component.html",
+  styleUrl: "./game-menu.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameMenuComponent {
@@ -72,10 +143,14 @@ export class GameMenuComponent {
   protected readonly fullScreenSupported = this.coreService.fullScreenSupported;
   protected readonly soundVolume = this.gameService.soundVolume;
   protected readonly soundMuted = this.gameService.soundMuted;
-  protected readonly soundPercent = computed(() => Math.round(this.soundVolume() * 100));
+  protected readonly soundPercent = computed(() =>
+    Math.round(this.soundVolume() * 100)
+  );
   protected readonly quality = this.gameService.quality;
   protected readonly qualityChoices = QUALITY_CHOICES;
-  protected readonly qualityLabel = computed(() => QUALITY_CHOICES.find(q => q.mode === this.quality())?.label ?? '');
+  protected readonly qualityLabel = computed(
+    () => QUALITY_CHOICES.find((q) => q.mode === this.quality())?.label ?? ""
+  );
   /** The graphics settings are unfolded. */
   protected readonly qualityOpen = signal(false);
   /** The game project's actions are unfolded. */
@@ -83,11 +158,14 @@ export class GameMenuComponent {
   /** Android app: the project is sent with the share sheet instead of downloaded. */
   protected readonly sharesProject = SHARES_PROJECT;
   protected readonly projectBusy = signal(false);
-  protected readonly projectMessage = signal('');
+  protected readonly projectMessage = signal("");
   /** A project file read, waiting for the player to confirm it replaces every creation. */
-  protected readonly pendingImport = signal<{ project: ProjectFile, label: string } | null>(null);
+  protected readonly pendingImport = signal<{
+    project: ProjectFile;
+    label: string;
+  } | null>(null);
   /** What this device holds (« 3 cartes · 12 modèles · 4 musiques · 85 ko »), read when the project unfolds. */
-  protected readonly deviceSummary = signal('');
+  protected readonly deviceSummary = signal("");
   protected readonly hapticsSupported = hapticsSupported;
   protected readonly hapticsEnabled = hapticsEnabled;
 
@@ -102,11 +180,11 @@ export class GameMenuComponent {
       }
     };
     const onKeyUp = (ev: KeyboardEvent) => ev.stopPropagation();
-    window.addEventListener('keydown', onKeyDown, true);
-    window.addEventListener('keyup', onKeyUp, true);
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
     inject(DestroyRef).onDestroy(() => {
-      window.removeEventListener('keydown', onKeyDown, true);
-      window.removeEventListener('keyup', onKeyUp, true);
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
     });
   }
 
@@ -131,7 +209,7 @@ export class GameMenuComponent {
   }
 
   protected openEntry(entry: MenuEntry): void {
-    if (entry.action === 'saves') {
+    if (entry.action === "saves") {
       this.saves.emit();
     }
   }
@@ -154,29 +232,33 @@ export class GameMenuComponent {
     try {
       const project = await collectProject(this.version());
       const { blob } = await projectFileBlob(project);
-      this.deviceSummary.set(`${projectLabel(project, false)} · ${sizeLabel(blob)}`);
+      this.deviceSummary.set(
+        `${projectLabel(project, false)} · ${sizeLabel(blob)}`
+      );
     } catch {
-      this.deviceSummary.set('');
+      this.deviceSummary.set("");
     }
   }
 
   protected async exportProject(): Promise<void> {
     this.projectBusy.set(true);
-    this.projectMessage.set('');
+    this.projectMessage.set("");
     try {
       const project = await collectProject(this.version());
       const { name, blob } = await projectFileBlob(project);
       if (SHARES_PROJECT) {
-        if (!await shareProjectFile(name, blob)) {
-          this.projectMessage.set('Envoi annulé.');
+        if (!(await shareProjectFile(name, blob))) {
+          this.projectMessage.set("Envoi annulé.");
           return;
         }
       } else {
         downloadFile(name, blob);
       }
-      this.projectMessage.set(`${SHARES_PROJECT ? 'Envoyé' : 'Exporté'} : ${name} (${projectLabel(project, false)}, ${sizeLabel(blob)})`);
+      this.projectMessage.set(
+        `${SHARES_PROJECT ? "Envoyé" : "Exporté"} : ${name} (${projectLabel(project, false)}, ${sizeLabel(blob)})`
+      );
     } catch {
-      this.projectMessage.set('L\'export a échoué.');
+      this.projectMessage.set("L'export a échoué.");
     } finally {
       this.projectBusy.set(false);
     }
@@ -185,14 +267,17 @@ export class GameMenuComponent {
   protected async pickProject(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    input.value = ''; // the same file can be picked again
+    input.value = ""; // the same file can be picked again
     if (!file) {
       return;
     }
-    this.projectMessage.set('');
+    this.projectMessage.set("");
     try {
       const project = await readProjectFile(file);
-      this.pendingImport.set({ project, label: `${projectLabel(project)} · ${sizeLabel(file)}` });
+      this.pendingImport.set({
+        project,
+        label: `${projectLabel(project)} · ${sizeLabel(file)}`,
+      });
     } catch (e) {
       this.projectMessage.set((e as Error).message);
     }
@@ -206,7 +291,7 @@ export class GameMenuComponent {
     this.projectBusy.set(true);
     try {
       await applyProject(pending.project);
-      this.projectMessage.set('Projet importé, le jeu redémarre…');
+      this.projectMessage.set("Projet importé, le jeu redémarre…");
       location.reload(); // every service holds the old project
     } catch (e) {
       this.projectMessage.set((e as Error).message);
@@ -219,14 +304,16 @@ export class GameMenuComponent {
 /** « 3 cartes · 12 modèles · 4 musiques » (+ « · du 19/11/2026 »). */
 function projectLabel(project: ProjectFile, withDate = true): string {
   const s = summarize(project);
-  const count = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
-  const date = new Date(s.savedAt).toLocaleDateString('fr-FR');
-  const label = `${count(s.maps, 'carte')} · ${count(s.models, 'modèle')} · ${count(s.songs, 'musique')} · ${count(s.variables, 'variable')}${s.database ? ' · base de données' : ''}`;
+  const count = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
+  const date = new Date(s.savedAt).toLocaleDateString("fr-FR");
+  const label = `${count(s.maps, "carte")} · ${count(s.models, "modèle")} · ${count(s.songs, "musique")} · ${count(s.variables, "variable")}${s.database ? " · base de données" : ""}`;
   return withDate ? `${label} · du ${date}` : label;
 }
 
 /** Size of a `.pk` file: « 85 ko », « 1,2 Mo ». */
 function sizeLabel(blob: Blob): string {
   const ko = blob.size / 1024;
-  return ko < 1000 ? `${Math.max(1, Math.round(ko))} ko` : `${(ko / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} Mo`;
+  return ko < 1000
+    ? `${Math.max(1, Math.round(ko))} ko`
+    : `${(ko / 1024).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} Mo`;
 }

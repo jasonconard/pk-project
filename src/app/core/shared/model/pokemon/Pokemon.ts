@@ -3,69 +3,72 @@ import { ElementType } from "./PkElement";
 import { PkExp } from "./PkExp";
 
 export interface Pokemon {
-  id: string,
-  name: string,
-  description: string,
-  height: number,
-  weight: number
+  id: string;
+  name: string;
+  description: string;
+  height: number;
+  weight: number;
 
-  baseStats: PkStats,
-  types: ElementType[],
+  baseStats: PkStats;
+  types: ElementType[];
 
-  evolve: PkEvolve[],
-  sprites: PkSprites,
+  evolve: PkEvolve[];
+  sprites: PkSprites;
 
-  evYield: PkStats,
-  baseExpYield: number,
+  evYield: PkStats;
+  baseExpYield: number;
 
-  genderRatio: PkGenderRatio,
-  eggGroups: PkEggGroup[], // [] = no reproduction available
-  hatchTime: number, // nb of steps
-  baby: Pokemon | null, // null = himSelf
+  genderRatio: PkGenderRatio;
+  eggGroups: PkEggGroup[]; // [] = no reproduction available
+  hatchTime: number; // nb of steps
+  baby: Pokemon | null; // null = himSelf
 
-  levellingRate: PkExp,
-  catchRate: number,
+  levellingRate: PkExp;
+  catchRate: number;
 
-  abilities: PkAbility[],
-  learnSkills: PkLearnSkill[],
-  tutorableSkills: PkSkill[]
+  abilities: PkAbility[];
+  learnSkills: PkLearnSkill[];
+  tutorableSkills: PkSkill[];
 }
 
 export interface PkStats {
-  hp: number,
-  atk: number,
-  def: number,
-  spAtk: number,
-  spDef: number,
-  speed: number
+  hp: number;
+  atk: number;
+  def: number;
+  spAtk: number;
+  spDef: number;
+  speed: number;
 }
 
 export interface PkEvolve {
-  pokemon: Pokemon
-  level?: number,
+  pokemon: Pokemon;
+  level?: number;
   // object/zone/daytime ...
 }
 
 export interface PkSprites {
-  map: string,
-  fight: string
+  map: string;
+  fight: string;
 }
 
 export interface PkGenderRatio {
-  neutral: number,
-  female: number,
-  male: number
+  neutral: number;
+  female: number;
+  male: number;
 }
 
 export enum PkEggGroup {
-  FOO, FEE, FAA
+  FOO,
+  FEE,
+  FAA,
 }
 
 export enum PkAbility {
-  BLAZE, SOLAR_POWER
+  BLAZE,
+  SOLAR_POWER,
 }
 
 export interface PkLearnSkill {
-  level: number,
-  skill: PkSkill
+  level: number;
+  skill: PkSkill;
 }

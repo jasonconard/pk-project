@@ -1,9 +1,13 @@
-import { ObjSide } from '../../game/shared/model/SceneMap';
-import { Vec3, VecBox3 } from '../../game/shared/model/SceneUtils';
-import { BOX_FACES, BoxFace, boxFaceSize } from '../../game/shared/model/model-uv';
+import { ObjSide } from "../../game/shared/model/SceneMap";
+import { Vec3, VecBox3 } from "../../game/shared/model/SceneUtils";
+import {
+  BOX_FACES,
+  BoxFace,
+  boxFaceSize,
+} from "../../game/shared/model/model-uv";
 
 /** Painted layers of a face: the color (RGBA), and grayscale maps (1 byte per pixel, filled in a later step). */
-export type LayerName = 'color' | 'specular' | 'night' | 'bump';
+export type LayerName = "color" | "specular" | "night" | "bump";
 
 /**
  * Pixels of one face, as big as the face (1 unit = 1 pixel). Rows go down (row 0 = top of the face),
@@ -20,7 +24,7 @@ export interface FaceTexture {
 }
 
 export interface EditablePart {
-  kind: 'box' | 'plane';
+  kind: "box" | "plane";
   size: Vec3;
   pos: Vec3;
   rot: Vec3;
@@ -44,21 +48,33 @@ export interface EditableModel {
 
 /** Faces of a part: the 6 faces of a box, the only face of a plane (its back shows the same pixels). */
 export function partFaces(part: EditablePart): BoxFace[] {
-  return part.kind === 'box' ? BOX_FACES : ['front'];
+  return part.kind === "box" ? BOX_FACES : ["front"];
 }
 
 /** Size in pixels of a part's face (whole pixels, at least 1). */
-export function partFaceSize(part: EditablePart, face: BoxFace): { w: number, h: number } {
-  const size = part.kind === 'box' ? boxFaceSize(part.size, face) : { x: part.size.x, y: part.size.y };
-  return { w: Math.max(1, Math.round(size.x)), h: Math.max(1, Math.round(size.y)) };
+export function partFaceSize(
+  part: EditablePart,
+  face: BoxFace
+): { w: number; h: number } {
+  const size =
+    part.kind === "box"
+      ? boxFaceSize(part.size, face)
+      : { x: part.size.x, y: part.size.y };
+  return {
+    w: Math.max(1, Math.round(size.x)),
+    h: Math.max(1, Math.round(size.y)),
+  };
 }
 
-export type GrayLayer = Exclude<LayerName, 'color'>;
-export const GRAY_LAYERS: GrayLayer[] = ['specular', 'night', 'bump'];
+export type GrayLayer = Exclude<LayerName, "color">;
+export const GRAY_LAYERS: GrayLayer[] = ["specular", "night", "bump"];
 
 /** Pixels of a layer of a face, to draw on (a grayscale layer is created, black, the first time). */
-export function layerGrid(tex: FaceTexture, layer: LayerName): { w: number, h: number, data: Uint8ClampedArray, channels: 1 | 4 } {
-  if (layer === 'color') {
+export function layerGrid(
+  tex: FaceTexture,
+  layer: LayerName
+): { w: number; h: number; data: Uint8ClampedArray; channels: 1 | 4 } {
+  if (layer === "color") {
     return { w: tex.w, h: tex.h, data: tex.color, channels: 4 };
   }
   tex[layer] ??= new Uint8ClampedArray(tex.w * tex.h);
@@ -66,8 +82,11 @@ export function layerGrid(tex: FaceTexture, layer: LayerName): { w: number, h: n
 }
 
 /** A layer as RGBA pixels to show: gray (v, v, v), transparent where the colors are. */
-export function layerRgba(tex: FaceTexture, layer: LayerName): Uint8ClampedArray {
-  if (layer === 'color') {
+export function layerRgba(
+  tex: FaceTexture,
+  layer: LayerName
+): Uint8ClampedArray {
+  if (layer === "color") {
     return tex.color;
   }
   const gray = tex[layer];

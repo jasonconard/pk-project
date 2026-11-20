@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { LEAF_PALETTES, makeLeafTexture } from './LeafHelper';
-import { registerUnlitMaterial } from './weather-shader';
+import * as THREE from "three";
+import { LEAF_PALETTES, makeLeafTexture } from "./LeafHelper";
+import { registerUnlitMaterial } from "./weather-shader";
 
 /** Area (relative to the camera target) where the whirls travel. */
 const AREA = { minX: -220, maxX: 220, minZ: -260, maxZ: 120 };
@@ -51,10 +51,18 @@ export class WhirlHelper {
   private readonly color = new THREE.Color();
 
   constructor(scene: THREE.Scene) {
-    const material = registerUnlitMaterial(new THREE.MeshBasicMaterial({
-      map: makeLeafTexture('cherry'), alphaTest: 0.5, side: THREE.DoubleSide,
-    }));
-    this.mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), material, MAX_WHIRLS * PETALS_PER_WHIRL);
+    const material = registerUnlitMaterial(
+      new THREE.MeshBasicMaterial({
+        map: makeLeafTexture("cherry"),
+        alphaTest: 0.5,
+        side: THREE.DoubleSide,
+      })
+    );
+    this.mesh = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      material,
+      MAX_WHIRLS * PETALS_PER_WHIRL
+    );
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     const palette = LEAF_PALETTES.cherry;
     for (let i = 0; i < MAX_WHIRLS * PETALS_PER_WHIRL; i++) {
@@ -68,8 +76,10 @@ export class WhirlHelper {
   }
 
   update(dt: number, target: THREE.Vector3, density: number, windX: number) {
-    const wanted = Math.round(MAX_WHIRLS * THREE.MathUtils.clamp(density, 0, 1));
-    if (!wanted && !this.whirls.length) {
+    const wanted = Math.round(
+      MAX_WHIRLS * THREE.MathUtils.clamp(density, 0, 1)
+    );
+    if (!wanted && this.whirls.length === 0) {
       this.mesh.visible = false;
       return;
     }
@@ -81,12 +91,19 @@ export class WhirlHelper {
     let n = 0;
     for (let w = this.whirls.length - 1; w >= 0; w--) {
       const whirl = this.whirls[w];
-      whirl.x += (windX * TRAVEL + Math.sin(this.time * 0.3 + whirl.phase) * WANDER) * dt;
+      whirl.x +=
+        (windX * TRAVEL + Math.sin(this.time * 0.3 + whirl.phase) * WANDER) *
+        dt;
       whirl.z += Math.cos(this.time * 0.25 + whirl.phase) * WANDER * dt;
       const dx = whirl.x - target.x;
       const dz = whirl.z - target.z;
-      const leaving = w >= wanted || dx * dir > AREA.maxX || dz < AREA.minZ || dz > AREA.maxZ;
-      whirl.presence = THREE.MathUtils.clamp(whirl.presence + (leaving ? -dt : dt) * 0.6, 0, 1);
+      const leaving =
+        w >= wanted || dx * dir > AREA.maxX || dz < AREA.minZ || dz > AREA.maxZ;
+      whirl.presence = THREE.MathUtils.clamp(
+        whirl.presence + (leaving ? -dt : dt) * 0.6,
+        0,
+        1
+      );
       if (leaving && whirl.presence <= 0) {
         if (w >= wanted) {
           this.whirls.splice(w, 1);
@@ -97,19 +114,24 @@ export class WhirlHelper {
     }
     // Turning: integrated (the speed depends on the height, which changes: multiplying the time by it would accelerate)
     for (const p of this.petals) {
-      const h = (p.h + this.time * p.climb / HEIGHT) % 1;
+      const h = (p.h + (this.time * p.climb) / HEIGHT) % 1;
       p.angle += dt * SPIN * p.spin * (1.4 - h * 0.7);
     }
     for (const whirl of this.whirls) {
       for (const p of this.petals) {
         // Climb the spiral, then start again at the bottom
-        const h = (p.h + this.time * p.climb / HEIGHT) % 1;
-        const radius = THREE.MathUtils.lerp(RADIUS[0], RADIUS[1], h * h) * (0.6 + 0.4 * whirl.presence);
+        const h = (p.h + (this.time * p.climb) / HEIGHT) % 1;
+        const radius =
+          THREE.MathUtils.lerp(RADIUS[0], RADIUS[1], h * h) *
+          (0.6 + 0.4 * whirl.presence);
         const angle = p.angle + whirl.phase;
         this.position.set(
           whirl.x + Math.cos(angle) * radius,
-          target.y + BASE_HEIGHT + h * HEIGHT + Math.sin(this.time * 2 + p.tumble) * 1.5,
-          whirl.z + Math.sin(angle) * radius * 0.8,
+          target.y +
+            BASE_HEIGHT +
+            h * HEIGHT +
+            Math.sin(this.time * 2 + p.tumble) * 1.5,
+          whirl.z + Math.sin(angle) * radius * 0.8
         );
         const t = this.time * 3 + p.tumble;
         this.euler.set(Math.sin(t) * 1.3, t * 0.9, Math.cos(t * 1.2));
@@ -137,9 +159,15 @@ export class WhirlHelper {
   }
 
   /** A whirl in the area (or entering from the upwind side). */
-  private newWhirl(target: THREE.Vector3, windX: number, anywhere: boolean): Whirl {
+  private newWhirl(
+    target: THREE.Vector3,
+    windX: number,
+    anywhere: boolean
+  ): Whirl {
     const dir = Math.sign(windX || 1);
-    const x = anywhere ? THREE.MathUtils.randFloat(AREA.minX, AREA.maxX) : (dir > 0 ? AREA.minX : AREA.maxX);
+    // (anywhere, or coming in from the side the wind blows from)
+    const edge = dir > 0 ? AREA.minX : AREA.maxX;
+    const x = anywhere ? THREE.MathUtils.randFloat(AREA.minX, AREA.maxX) : edge;
     return {
       x: target.x + x,
       z: target.z + THREE.MathUtils.randFloat(AREA.minZ * 0.7, AREA.maxZ * 0.7),

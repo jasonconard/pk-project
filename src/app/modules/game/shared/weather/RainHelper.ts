@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { RENDER_DETAIL } from '../model/Quality';
-import { SurfaceHeights } from './SurfaceHeights';
-import { applyLinearFog, registerUnlitMaterial } from './weather-shader';
+import * as THREE from "three";
+import { RENDER_DETAIL } from "../model/Quality";
+import { SurfaceHeights } from "./SurfaceHeights";
+import { applyLinearFog, registerUnlitMaterial } from "./weather-shader";
 
 const MAX_SPLASHES = 400;
 /** Area (relative to the point the camera looks at) where it rains: wide enough to cover the screen. */
@@ -36,7 +36,7 @@ export const RAIN_STYLE: RainStyle = {
   speed: 420,
   length: 7,
   width: 0.35,
-  color: 0xd6e6ff,
+  color: 0xd6_e6_ff,
   opacity: 0.6,
   windSpeed: 220,
   splashes: true,
@@ -51,7 +51,7 @@ export const DRIZZLE_STYLE: RainStyle = {
   // ~1 screen pixel wide: thinner drops vanish between pixels
   length: 3.5,
   width: 0.5,
-  color: 0xe4ecf6,
+  color: 0xe4_ec_f6,
   opacity: 0.5,
   windSpeed: 110,
   splashes: false,
@@ -67,10 +67,10 @@ export const BLOOD_RAIN_STYLE: RainStyle = {
   speed: 380,
   length: 6,
   width: 0.5,
-  color: 0xa0141c,
+  color: 0xa0_14_1c,
   opacity: 0.9,
   followLight: true,
-  splashColor: 0x7a0a0e,
+  splashColor: 0x7a_0a_0e,
 };
 
 /** Hail: short thick white pellets, falling very fast, white splashes. */
@@ -80,30 +80,30 @@ export const HAIL_STYLE: RainStyle = {
   speed: 520,
   length: 1.8,
   width: 1.1,
-  color: 0xf4f8ff,
+  color: 0xf4_f8_ff,
   opacity: 0.95,
   windSpeed: 120,
   followLight: true,
-  splashColor: 0xc8d4e4,
+  splashColor: 0xc8_d4_e4,
 };
 
 /** Sun shower: light rain of golden drops lit by the sun (always bright, like backlit). */
 export const SUN_RAIN_STYLE: RainStyle = {
   ...RAIN_STYLE,
   maxDrops: 1200,
-  color: 0xfff0c0,
+  color: 0xff_f0_c0,
   opacity: 0.7,
-  splashColor: 0xb0a070,
+  splashColor: 0xb0_a0_70,
 };
 
 /** Acid rain: thin sickly yellow-green drops, green splashes. */
 export const ACID_RAIN_STYLE: RainStyle = {
   ...RAIN_STYLE,
   maxDrops: 2200,
-  color: 0xc4e86a,
+  color: 0xc4_e8_6a,
   opacity: 0.8,
   followLight: true,
-  splashColor: 0x5a8a20,
+  splashColor: 0x5a_8a_20,
 };
 
 /** Poisoned climate: toxic purple drops, a bit thinner and slower than the rain. */
@@ -113,10 +113,10 @@ export const POISON_RAIN_STYLE: RainStyle = {
   speed: 340,
   length: 6,
   width: 0.45,
-  color: 0xa64cf0,
+  color: 0xa6_4c_f0,
   opacity: 0.85,
   followLight: true,
-  splashColor: 0x6a2aa0,
+  splashColor: 0x6a_2a_a0,
 };
 
 const Z_AXIS = new THREE.Vector3(0, 0, 1);
@@ -153,8 +153,12 @@ export class RainHelper {
   private readonly splashColor = new THREE.Color();
   private readonly splashBaseColor: THREE.Color;
 
-  constructor(scene: THREE.Scene, private readonly surfaces: SurfaceHeights, private readonly style: RainStyle = RAIN_STYLE) {
-    this.splashBaseColor = new THREE.Color(style.splashColor ?? 0x9fb8d8);
+  constructor(
+    scene: THREE.Scene,
+    private readonly surfaces: SurfaceHeights,
+    private readonly style: RainStyle = RAIN_STYLE
+  ) {
+    this.splashBaseColor = new THREE.Color(style.splashColor ?? 0x9f_b8_d8);
     const n = style.maxDrops;
     this.dropX = new Float32Array(n);
     this.dropY = new Float32Array(n);
@@ -177,12 +181,12 @@ export class RainHelper {
     // transparent at the top, opaque at the bottom. Tilted along its motion in update (see `tilt`)
     const geo = new THREE.PlaneGeometry(style.width, style.length);
     geo.translate(0, style.length / 2, 0); // origin at the bottom of the drop
-    const pos = geo.getAttribute('position');
+    const pos = geo.getAttribute("position");
     const colors = new Float32Array(pos.count * 4);
     for (let i = 0; i < pos.count; i++) {
       colors.set([1, 1, 1, pos.getY(i) > style.length / 2 ? 0 : 1], i * 4);
     }
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 4));
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 4));
     const mat = new THREE.MeshBasicMaterial({
       color: style.color,
       vertexColors: true,
@@ -207,7 +211,7 @@ export class RainHelper {
     geo.rotateX(-Math.PI / 2);
     // Additive blending: fading the instance color to black makes the splash vanish
     const mat = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
+      color: 0xff_ff_ff,
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
@@ -235,7 +239,11 @@ export class RainHelper {
     // Streak tilted along its motion: the top points upwind
     this.tilt.setFromAxisAngle(Z_AXIS, Math.atan2(this.vx, this.style.speed));
     // (fewer drops at a lower graphics quality)
-    const count = Math.round(this.style.maxDrops * RENDER_DETAIL.particles * THREE.MathUtils.clamp(density, 0, 1));
+    const count = Math.round(
+      this.style.maxDrops *
+        RENDER_DETAIL.particles *
+        THREE.MathUtils.clamp(density, 0, 1)
+    );
     for (let i = count; i < this.activeDrops; i++) {
       this.dropAlive[i] = 0;
     }
@@ -260,10 +268,18 @@ export class RainHelper {
       this.dropX[i] += this.vx * dt;
 
       // Area check on where the drop will land (it drifts with the wind)
-      const landX = this.dropX[i] + this.vx * Math.max(this.dropY[i] - this.dropStopY[i], 0) / this.style.speed;
+      const landX =
+        this.dropX[i] +
+        (this.vx * Math.max(this.dropY[i] - this.dropStopY[i], 0)) /
+          this.style.speed;
       const dx = landX - target.x;
       const dz = this.dropZ[i] - target.z;
-      if (dx < RAIN_AREA.minX || dx > RAIN_AREA.maxX || dz < RAIN_AREA.minZ || dz > RAIN_AREA.maxZ) {
+      if (
+        dx < RAIN_AREA.minX ||
+        dx > RAIN_AREA.maxX ||
+        dz < RAIN_AREA.minZ ||
+        dz > RAIN_AREA.maxZ
+      ) {
         // The camera moved away: recycle the drop inside the new area
         this.respawnDrop(i, target, true);
       } else if (this.dropY[i] <= this.dropStopY[i]) {
@@ -283,13 +299,17 @@ export class RainHelper {
 
   private respawnDrop(i: number, target: THREE.Vector3, randomHeight: boolean) {
     // Pick where the drop lands, then start it upwind so the wind brings it there
-    const landX = target.x + THREE.MathUtils.randFloat(RAIN_AREA.minX, RAIN_AREA.maxX);
-    const z = target.z + THREE.MathUtils.randFloat(RAIN_AREA.minZ, RAIN_AREA.maxZ);
+    const landX =
+      target.x + THREE.MathUtils.randFloat(RAIN_AREA.minX, RAIN_AREA.maxX);
+    const z =
+      target.z + THREE.MathUtils.randFloat(RAIN_AREA.minZ, RAIN_AREA.maxZ);
     const top = target.y + this.style.top;
     const stopY = this.surfaces.heightAt(landX, z, target.y);
     // Random height on (re)activation so drops don't all fall in a single wave
-    const y = randomHeight ? THREE.MathUtils.randFloat(stopY, Math.max(top, stopY)) : Math.max(top, stopY);
-    this.dropX[i] = landX - this.vx * (y - stopY) / this.style.speed;
+    const y = randomHeight
+      ? THREE.MathUtils.randFloat(stopY, Math.max(top, stopY))
+      : Math.max(top, stopY);
+    this.dropX[i] = landX - (this.vx * (y - stopY)) / this.style.speed;
     this.dropY[i] = y;
     this.dropZ[i] = z;
     this.dropStopY[i] = stopY;
@@ -314,11 +334,18 @@ export class RainHelper {
       this.splashAge[i] += dt;
       const t = Math.min(this.splashAge[i] / SPLASH_LIFE, 1);
       const s = t < 1 ? 0.4 + 1.6 * t : 0;
-      this.position.set(this.splashPos[i * 3], this.splashPos[i * 3 + 1], this.splashPos[i * 3 + 2]);
+      this.position.set(
+        this.splashPos[i * 3],
+        this.splashPos[i * 3 + 1],
+        this.splashPos[i * 3 + 2]
+      );
       this.scale.set(s, s, s);
       this.matrix.compose(this.position, this.quaternion, this.scale);
       this.splashes.setMatrixAt(i, this.matrix);
-      this.splashes.setColorAt(i, this.splashColor.copy(this.splashBaseColor).multiplyScalar(1 - t));
+      this.splashes.setColorAt(
+        i,
+        this.splashColor.copy(this.splashBaseColor).multiplyScalar(1 - t)
+      );
       if (t < 1) {
         alive++;
       }

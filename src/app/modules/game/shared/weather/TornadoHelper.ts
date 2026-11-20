@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { LEAF_PALETTES, makeLeafTexture } from './LeafHelper';
-import { registerUnlitMaterial } from './weather-shader';
-import { makeSmokeTexture } from './GlowParticles';
+import * as THREE from "three";
+import { LEAF_PALETTES, makeLeafTexture } from "./LeafHelper";
+import { registerUnlitMaterial } from "./weather-shader";
+import { makeSmokeTexture } from "./GlowParticles";
 
 /** Funnel: dust puffs, height, radius at the bottom / top (world units), turning speed (rad / s). */
 const PUFFS = 650;
@@ -10,7 +10,7 @@ const RADIUS = [7, 70] as const;
 const SPIN = 2.2;
 /** Puff size at the bottom / top, colors (dusty grey-brown). */
 const PUFF_SIZE = [10, 46] as const;
-const PUFF_COLORS = [0xd8d0c4, 0xc0b8ac, 0xece4d8, 0xa8a094];
+const PUFF_COLORS = [0xd8_d0_c4, 0xc0_b8_ac, 0xec_e4_d8, 0xa8_a0_94];
 /** Debris (leaves, bits) whirling around the base: count, orbit radius, max height. */
 const DEBRIS = 160;
 const DEBRIS_RADIUS = [10, 45] as const;
@@ -28,7 +28,6 @@ const LEASH = 240;
 /** Further than this from the player (teleport...), it vanishes and appears again near them. */
 const LOST_DISTANCE = 600;
 
-
 /**
  * Tornado: a funnel of dust turning fast (narrow at the ground, wide at the top), a dust ring at its base,
  * leaves and debris sucked in and whirling around. It travels slowly across the area.
@@ -36,12 +35,15 @@ const LOST_DISTANCE = 600;
 export class TornadoHelper {
   private readonly funnel: THREE.InstancedMesh;
   private readonly debris: THREE.InstancedMesh;
-  private readonly puffs = Array.from({ length: PUFFS + RING_PUFFS }, (_, i) => ({
-    h: i < PUFFS ? Math.pow(Math.random(), 0.8) : 0,
-    angle: Math.random() * Math.PI * 2,
-    jitter: Math.random(),
-    ring: i >= PUFFS,
-  }));
+  private readonly puffs = Array.from(
+    { length: PUFFS + RING_PUFFS },
+    (_, i) => ({
+      h: i < PUFFS ? Math.pow(Math.random(), 0.8) : 0,
+      angle: Math.random() * Math.PI * 2,
+      jitter: Math.random(),
+      ring: i >= PUFFS,
+    })
+  );
   private heading = Math.random() * Math.PI * 2;
   private placed = false;
   private readonly bits = Array.from({ length: DEBRIS }, () => ({
@@ -67,20 +69,44 @@ export class TornadoHelper {
   private readonly color = new THREE.Color();
 
   constructor(scene: THREE.Scene) {
-    const puffMaterial = registerUnlitMaterial(new THREE.MeshBasicMaterial({
-      // Smoke puffs (cloudy outline) rather than round blobs: the funnel looks like a whirl of dust
-      map: makeSmokeTexture(), transparent: true, opacity: 0.95, depthWrite: false,
-    }));
-    this.funnel = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), puffMaterial, PUFFS + RING_PUFFS);
+    const puffMaterial = registerUnlitMaterial(
+      new THREE.MeshBasicMaterial({
+        // Smoke puffs (cloudy outline) rather than round blobs: the funnel looks like a whirl of dust
+        map: makeSmokeTexture(),
+        transparent: true,
+        opacity: 0.95,
+        depthWrite: false,
+      })
+    );
+    this.funnel = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      puffMaterial,
+      PUFFS + RING_PUFFS
+    );
     this.funnel.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.puffs.forEach((_, i) => this.funnel.setColorAt(i, this.color.set(PUFF_COLORS[i % PUFF_COLORS.length])));
-    const debrisMaterial = registerUnlitMaterial(new THREE.MeshBasicMaterial({
-      map: makeLeafTexture('autumn'), alphaTest: 0.5, side: THREE.DoubleSide,
-    }));
-    this.debris = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), debrisMaterial, DEBRIS);
+    this.puffs.forEach((_, i) =>
+      this.funnel.setColorAt(
+        i,
+        this.color.set(PUFF_COLORS[i % PUFF_COLORS.length])
+      )
+    );
+    const debrisMaterial = registerUnlitMaterial(
+      new THREE.MeshBasicMaterial({
+        map: makeLeafTexture("autumn"),
+        alphaTest: 0.5,
+        side: THREE.DoubleSide,
+      })
+    );
+    this.debris = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      debrisMaterial,
+      DEBRIS
+    );
     this.debris.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     const palette = LEAF_PALETTES.autumn;
-    this.bits.forEach((_, i) => this.debris.setColorAt(i, this.color.set(palette[i % palette.length])));
+    this.bits.forEach((_, i) =>
+      this.debris.setColorAt(i, this.color.set(palette[i % palette.length]))
+    );
     for (const mesh of [this.funnel, this.debris]) {
       mesh.frustumCulled = false;
       mesh.visible = false;
@@ -99,9 +125,22 @@ export class TornadoHelper {
    * @param player where the player is (the tornado wanders around them)
    * @param groundY ground height under the tornado
    */
-  update(dt: number, player: THREE.Vector3, intensity: number, camera: THREE.Camera, windX: number) {
-    const lost = this.placed && Math.hypot(this.position.x - player.x, this.position.z - player.z) > LOST_DISTANCE;
-    this.presence = THREE.MathUtils.clamp(this.presence + (intensity > 0.5 && !lost ? dt : -dt) * 0.25, 0, 1);
+  update(
+    dt: number,
+    player: THREE.Vector3,
+    intensity: number,
+    camera: THREE.Camera,
+    windX: number
+  ) {
+    const lost =
+      this.placed &&
+      Math.hypot(this.position.x - player.x, this.position.z - player.z) >
+        LOST_DISTANCE;
+    this.presence = THREE.MathUtils.clamp(
+      this.presence + (intensity > 0.5 && !lost ? dt : -dt) * 0.25,
+      0,
+      1
+    );
     if (this.presence <= 0) {
       this.funnel.visible = this.debris.visible = false;
       this.placed = false;
@@ -126,7 +165,9 @@ export class TornadoHelper {
         size = 14 + puff.jitter * 10;
       } else {
         const h = puff.h;
-        const r = (RADIUS[0] + (RADIUS[1] - RADIUS[0]) * Math.pow(h, 1.6)) * (0.8 + 0.4 * puff.jitter);
+        const r =
+          (RADIUS[0] + (RADIUS[1] - RADIUS[0]) * Math.pow(h, 1.6)) *
+          (0.8 + 0.4 * puff.jitter);
         const angle = puff.angle + t * SPIN * (1.3 - 0.6 * h);
         const bend = Math.sin(t * 0.4 + h * 2.5) * 25 * h;
         x = Math.cos(angle) * r + bend;
@@ -134,11 +175,22 @@ export class TornadoHelper {
         y = h * HEIGHT;
         size = THREE.MathUtils.lerp(PUFF_SIZE[0], PUFF_SIZE[1], h);
       }
-      this.pos.set(this.position.x + x, this.position.y + y, this.position.z + z);
+      this.pos.set(
+        this.position.x + x,
+        this.position.y + y,
+        this.position.z + z
+      );
       this.scale.setScalar(size * p);
       // Each puff turns on itself (faster low in the funnel), facing the camera
-      this.spin.setFromAxisAngle(TornadoHelper.FORWARD, puff.jitter * 20 + t * SPIN * (puff.ring ? 1.5 : 1.6 - puff.h));
-      this.matrix.compose(this.pos, this.turned.copy(camera.quaternion).multiply(this.spin), this.scale);
+      this.spin.setFromAxisAngle(
+        TornadoHelper.FORWARD,
+        puff.jitter * 20 + t * SPIN * (puff.ring ? 1.5 : 1.6 - puff.h)
+      );
+      this.matrix.compose(
+        this.pos,
+        this.turned.copy(camera.quaternion).multiply(this.spin),
+        this.scale
+      );
       this.funnel.setMatrixAt(i, this.matrix);
     });
     // Debris: orbiting fast around the base, climbing then falling back in
@@ -151,7 +203,7 @@ export class TornadoHelper {
       this.pos.set(
         this.position.x + Math.cos(angle) * r,
         this.position.y + 1 + Math.sin(Math.PI * h) * DEBRIS_HEIGHT,
-        this.position.z + Math.sin(angle) * r * 0.7,
+        this.position.z + Math.sin(angle) * r * 0.7
       );
       const tt = t * 5 + b.tumble;
       this.euler.set(tt, tt * 0.7, tt * 1.3);
@@ -169,20 +221,39 @@ export class TornadoHelper {
   private move(dt: number, player: THREE.Vector3, windX: number) {
     if (!this.placed) {
       const angle = THREE.MathUtils.randFloat(-Math.PI, 0); // ahead of the player (north) or on the sides
-      const dist = THREE.MathUtils.randFloat(APPEAR_DISTANCE[0], APPEAR_DISTANCE[1]);
-      this.position.set(player.x + Math.cos(angle) * dist, player.y, player.z + Math.sin(angle) * dist * 0.8);
+      const dist = THREE.MathUtils.randFloat(
+        APPEAR_DISTANCE[0],
+        APPEAR_DISTANCE[1]
+      );
+      this.position.set(
+        player.x + Math.cos(angle) * dist,
+        player.y,
+        player.z + Math.sin(angle) * dist * 0.8
+      );
       this.heading = Math.random() * Math.PI * 2;
       this.placed = true;
     }
     // Wandering: the heading slowly turns one way then the other
-    this.heading += Math.sin(this.time * 0.23) * Math.sin(this.time * 0.11 + 2) * TURN_SPEED * 2 * dt;
+    this.heading +=
+      Math.sin(this.time * 0.23) *
+      Math.sin(this.time * 0.11 + 2) *
+      TURN_SPEED *
+      2 *
+      dt;
     // Too far from the player: steer back towards them
     const dx = player.x - this.position.x;
     const dz = player.z - this.position.z;
     if (Math.hypot(dx, dz) > LEASH) {
       const back = Math.atan2(dz, dx);
-      const diff = Math.atan2(Math.sin(back - this.heading), Math.cos(back - this.heading));
-      this.heading += THREE.MathUtils.clamp(diff, -TURN_SPEED * dt, TURN_SPEED * dt);
+      const diff = Math.atan2(
+        Math.sin(back - this.heading),
+        Math.cos(back - this.heading)
+      );
+      this.heading += THREE.MathUtils.clamp(
+        diff,
+        -TURN_SPEED * dt,
+        TURN_SPEED * dt
+      );
     }
     this.position.x += (Math.cos(this.heading) * TRAVEL_SPEED + windX * 8) * dt;
     this.position.z += Math.sin(this.heading) * TRAVEL_SPEED * dt;

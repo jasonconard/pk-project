@@ -6,5 +6,7 @@ export const MIN_WINDOW_PIXELS = 50;
  * pixel-art textures; walls, roofs and outlines excluded) glows, keeping its shading (0..255); the rest stays dark (0).
  */
 export function windowGlow(r: number, g: number, b: number, a: number): number {
-  return a > 0 && b >= 200 && b - r >= 60 ? Math.round(140 + 115 * g / 255) : 0;
+  return a > 0 && b >= 200 && b - r >= 60
+    ? Math.round(140 + (115 * g) / 255)
+    : 0;
 }

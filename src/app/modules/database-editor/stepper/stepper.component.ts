@@ -1,19 +1,46 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { LucideMinus, LucidePlus } from '@lucide/angular';
-import { clampInt } from '../shared/database';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+} from "@angular/core";
+import { LucideMinus, LucidePlus } from "@lucide/angular";
+import { clampInt } from "../shared/database";
 
 /** − value + : a whole number between min and max, typed or stepped; signed shows « +25 ». */
 @Component({
-  selector: 'db-stepper',
+  selector: "db-stepper",
   imports: [LucideMinus, LucidePlus],
   template: `
-    <button type="button" aria-label="Moins" [disabled]="value() <= min()" (click)="set(value() - step())"><svg lucideMinus></svg></button>
+    <button
+      type="button"
+      aria-label="Moins"
+      [disabled]="value() <= min()"
+      (click)="set(value() - step())">
+      <svg lucideMinus></svg>
+    </button>
     <label>
-      <input type="text" inputmode="numeric" [attr.aria-label]="label()" [value]="shown()"
-             (change)="set(+$any($event.target).value.replace('+', '').replace(',', '.')); $any($event.target).value = shown()" />
-      @if (suffix()) { <span>{{ suffix() }}</span> }
+      <input
+        type="text"
+        inputmode="numeric"
+        [attr.aria-label]="label()"
+        [value]="shown()"
+        (change)="
+          set(+$any($event.target).value.replace('+', '').replace(',', '.'));
+          $any($event.target).value = shown()
+        " />
+      @if (suffix()) {
+        <span>{{ suffix() }}</span>
+      }
     </label>
-    <button type="button" aria-label="Plus" [disabled]="value() >= max()" (click)="set(value() + step())"><svg lucidePlus></svg></button>
+    <button
+      type="button"
+      aria-label="Plus"
+      [disabled]="value() >= max()"
+      (click)="set(value() + step())">
+      <svg lucidePlus></svg>
+    </button>
   `,
   styles: `
     :host {
@@ -37,7 +64,10 @@ import { clampInt } from '../shared/database';
       cursor: pointer;
       padding: 0;
       font-size: 15px;
-      &:disabled { opacity: 0.3; cursor: default; }
+      &:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
     }
     label {
       display: inline-flex;
@@ -54,9 +84,14 @@ import { clampInt } from '../shared/database';
       font: inherit;
       color: inherit;
       text-align: right;
-      &:focus { outline: none; }
+      &:focus {
+        outline: none;
+      }
     }
-    span { font-size: 12px; font-weight: 600; }
+    span {
+      font-size: 12px;
+      font-weight: 600;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -65,12 +100,14 @@ export class StepperComponent {
   readonly min = input(0);
   readonly max = input(100);
   readonly step = input(1);
-  readonly suffix = input('');
+  readonly suffix = input("");
   readonly signed = input(false);
-  readonly label = input('Valeur');
+  readonly label = input("Valeur");
   readonly changed = output<number>();
 
-  protected readonly shown = computed(() => this.signed() && this.value() > 0 ? `+${this.value()}` : `${this.value()}`);
+  protected readonly shown = computed(() =>
+    this.signed() && this.value() > 0 ? `+${this.value()}` : `${this.value()}`
+  );
 
   protected set(value: number): void {
     const next = clampInt(value, this.min(), this.max());

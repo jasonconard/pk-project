@@ -1,8 +1,21 @@
 <div class="backdrop" (click)="closed.emit()"></div>
-<section class="dialog" role="dialog" aria-modal="true" aria-labelledby="saves-title">
+<section
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="saves-title"
+>
   <header>
     <h2 id="saves-title">Sauvegardes</h2>
-    <button type="button" class="close" aria-label="Fermer" title="Fermer (Échap)" (click)="closed.emit()"><svg lucideX></svg></button>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer"
+      title="Fermer (Échap)"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
   </header>
   <div class="list">
     @for (save of slots(); track $index; let slot = $index) {
@@ -18,19 +31,49 @@
         </div>
         <div class="actions">
           @if (save) {
-            <button type="button" class="primary" [class.armed]="isArmed(slot, 'load')" (click)="load(slot)">
-              <svg lucideDownload></svg> {{ isArmed(slot, 'load') ? 'Charger ?' : 'Charger' }}
+            <button
+              type="button"
+              class="primary"
+              [class.armed]="isArmed(slot, 'load')"
+              (click)="load(slot)"
+            >
+              <svg lucideDownload></svg>
+              {{ isArmed(slot, "load") ? "Charger ?" : "Charger" }}
             </button>
-            <button type="button" [class.armed]="isArmed(slot, 'overwrite')" (click)="saveTo(slot)">
-              <svg lucideSave></svg> {{ isArmed(slot, 'overwrite') ? 'Écraser ?' : 'Écraser' }}
+            <button
+              type="button"
+              [class.armed]="isArmed(slot, 'overwrite')"
+              (click)="saveTo(slot)"
+            >
+              <svg lucideSave></svg>
+              {{ isArmed(slot, "overwrite") ? "Écraser ?" : "Écraser" }}
             </button>
-            <button type="button" class="icon" [class.armed]="isArmed(slot, 'delete')"
-                    [attr.aria-label]="isArmed(slot, 'delete') ? 'Appuyer encore pour supprimer' : 'Supprimer'"
-                    [title]="isArmed(slot, 'delete') ? 'Appuyer encore pour supprimer' : 'Supprimer'" (click)="remove(slot)">
-              @if (isArmed(slot, 'delete')) { Supprimer ? } @else { <svg lucideTrash></svg> }
+            <button
+              type="button"
+              class="icon"
+              [class.armed]="isArmed(slot, 'delete')"
+              [attr.aria-label]="
+                isArmed(slot, 'delete')
+                  ? 'Appuyer encore pour supprimer'
+                  : 'Supprimer'
+              "
+              [title]="
+                isArmed(slot, 'delete')
+                  ? 'Appuyer encore pour supprimer'
+                  : 'Supprimer'
+              "
+              (click)="remove(slot)"
+            >
+              @if (isArmed(slot, "delete")) {
+                Supprimer ?
+              } @else {
+                <svg lucideTrash></svg>
+              }
             </button>
           } @else {
-            <button type="button" class="primary" (click)="saveTo(slot)"><svg lucideSave></svg> Sauver ici</button>
+            <button type="button" class="primary" (click)="saveTo(slot)">
+              <svg lucideSave></svg> Sauver ici
+            </button>
           }
         </div>
       </article>
@@ -38,9 +81,13 @@
   </div>
   <p class="hint" role="status">
     @if (armed(); as a) {
-      {{ a.action === 'load' ? 'Appuyer encore pour charger : la partie en cours sera perdue si elle n\'est pas sauvée.'
-        : a.action === 'overwrite' ? 'Appuyer encore pour remplacer cette sauvegarde par la partie en cours.'
-        : 'Appuyer encore pour supprimer cette sauvegarde.' }}
+      {{
+        a.action === "load"
+          ? "Appuyer encore pour charger : la partie en cours sera perdue si elle n'est pas sauvée."
+          : a.action === "overwrite"
+            ? "Appuyer encore pour remplacer cette sauvegarde par la partie en cours."
+            : "Appuyer encore pour supprimer cette sauvegarde."
+      }}
     } @else if (message()) {
       {{ message() }}
     } @else {

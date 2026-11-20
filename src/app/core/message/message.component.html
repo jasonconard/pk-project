@@ -1,35 +1,51 @@
-<div class="message-container" [class.clickable]="!!message()" (touchend)="closeMessage()">
+<div
+  class="message-container"
+  [class.clickable]="!!message()"
+  (touchend)="closeMessage()"
+>
   <div class="message-content">
     @if (message(); as message) {
-      <div class="message-box" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+      <div
+        class="message-box"
+        animate.enter="anim-fade-in"
+        animate.leave="anim-fade-out"
+      >
         @if (message.pic) {
           <div class="box-portrait">
-            <img [src]="message.pic" alt="">
+            <img [src]="message.pic" alt="" />
           </div>
         }
         <div class="box-pokeball">
-          <img src="assets/svg/poke-ball.svg" alt="">
+          <img src="assets/svg/poke-ball.svg" alt="" />
         </div>
         <div class="box-text" aria-live="polite">
           {{ text() }}
         </div>
       </div>
       @if (message.name) {
-        <div class="message-name" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+        <div
+          class="message-name"
+          animate.enter="anim-fade-in"
+          animate.leave="anim-fade-out"
+        >
           {{ message.name }}
         </div>
       }
     }
     <div class="message-choices" role="listbox">
       @for (choice of choices(); track choice.key; let i = $index) {
-        <div class="message-choice" role="option"
-             animate.enter="message-choice-enter" animate.leave="message-choice-leave"
-             [style.--enter-delay.ms]="(i + 2) * 100"
-             [class.selected]="i === choiceId()"
-             [attr.aria-selected]="i === choiceId()"
-             (pointerdown)="selectChoice($event, i)"
-             (touchend)="$event.stopPropagation()"
-             (click)="confirmChoice($event, choice.key)">
+        <div
+          class="message-choice"
+          role="option"
+          animate.enter="message-choice-enter"
+          animate.leave="message-choice-leave"
+          [style.--enter-delay.ms]="(i + 2) * 100"
+          [class.selected]="i === choiceId()"
+          [attr.aria-selected]="i === choiceId()"
+          (pointerdown)="selectChoice($event, i)"
+          (touchend)="$event.stopPropagation()"
+          (click)="confirmChoice($event, choice.key)"
+        >
           {{ choice.text }}
         </div>
       }

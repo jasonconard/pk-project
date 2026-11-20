@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { makeSmokeTexture } from '../weather/GlowParticles';
-import { registerUnlitMaterial } from '../weather/weather-shader';
+import * as THREE from "three";
+import { makeSmokeTexture } from "../weather/GlowParticles";
+import { registerUnlitMaterial } from "../weather/weather-shader";
 
 /** Puffs per landing, their life (s), how far they spread and how big they get (world units). */
 const PUFFS = 7;
@@ -27,15 +27,23 @@ export class DustPuff {
     const texture = makeSmokeTexture();
     for (let i = 0; i < PUFFS; i++) {
       // Tinted by the scene light like the other sprites (dim at night)
-      const material = registerUnlitMaterial(new THREE.SpriteMaterial({
-        map: texture, color: 0xe8dcc8, transparent: true, depthWrite: false,
-      }));
+      const material = registerUnlitMaterial(
+        new THREE.SpriteMaterial({
+          map: texture,
+          color: 0xe8_dc_c8,
+          transparent: true,
+          depthWrite: false,
+        })
+      );
       const sprite = new THREE.Sprite(material);
       sprite.visible = false;
       sprite.renderOrder = 11;
       scene.add(sprite);
       const angle = (i / PUFFS) * Math.PI * 2 + Math.random() * 0.4;
-      this.puffs.push({ sprite, dir: new THREE.Vector2(Math.cos(angle), Math.sin(angle) * 0.6) });
+      this.puffs.push({
+        sprite,
+        dir: new THREE.Vector2(Math.cos(angle), Math.sin(angle) * 0.6),
+      });
     }
   }
 
@@ -60,7 +68,8 @@ export class DustPuff {
       sprite.position.set(
         this.origin.x + dir.x * SPREAD * ease,
         this.origin.y + 2 + 3 * ease,
-        this.origin.z + dir.y * SPREAD * ease);
+        this.origin.z + dir.y * SPREAD * ease
+      );
       const size = SIZE[0] + (SIZE[1] - SIZE[0]) * ease;
       sprite.scale.set(size, size, 1);
       (sprite.material as THREE.SpriteMaterial).opacity = 0.75 * (1 - t);

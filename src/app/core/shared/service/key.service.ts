@@ -1,12 +1,12 @@
-import { effect, inject, Service } from '@angular/core';
-import { isGameCovered } from '../app-visibility';
-import { BehaviorSubject, fromEvent } from 'rxjs';
-import { getKeyFromAxes, KeyCode, PressedKey } from '../model/PressedKey';
-import { GamepadService } from './gamepad.service';
-import { TouchService } from './touch.service';
-import { Stick, STICK_RADIUS } from '../model/Stick';
-import { CoreService } from './core.service';
-import { isTyping } from '../typing';
+import { effect, inject, Service } from "@angular/core";
+import { isGameCovered } from "../app-visibility";
+import { BehaviorSubject, fromEvent } from "rxjs";
+import { getKeyFromAxes, KeyCode, PressedKey } from "../model/PressedKey";
+import { GamepadService } from "./gamepad.service";
+import { TouchService } from "./touch.service";
+import { Stick, STICK_RADIUS } from "../model/Stick";
+import { CoreService } from "./core.service";
+import { isTyping } from "../typing";
 
 const KEYBOARD_MAPPING: Readonly<Record<string, KeyCode>> = {
   Enter: KeyCode.confirm,
@@ -21,7 +21,7 @@ const KEYBOARD_MAPPING: Readonly<Record<string, KeyCode>> = {
   d: KeyCode.right,
   a: KeyCode.cancel,
   e: KeyCode.confirm,
-  ' ': KeyCode.confirm,
+  " ": KeyCode.confirm,
   r: KeyCode.x,
   f: KeyCode.y,
   p: KeyCode.pause,
@@ -43,7 +43,9 @@ export class KeyService {
 
   pressedKeys: PressedKey[] = [];
   pressedCodes: KeyCode[] = [];
-  private readonly pressedSubject = new BehaviorSubject<PressedKey[]>(this.pressedKeys);
+  private readonly pressedSubject = new BehaviorSubject<PressedKey[]>(
+    this.pressedKeys
+  );
   /** Emits every time a key is pressed (or the pressed keys are cleared). */
   readonly pressedState = this.pressedSubject.asObservable();
 
@@ -52,8 +54,15 @@ export class KeyService {
 
   constructor() {
     // (an editor over the game: the keys are its own)
-    fromEvent<KeyboardEvent>(document, 'keydown').subscribe(ev => !isGameCovered() && !isTyping(ev) && this.setKeyDown(KeyService.getKeyCodeFromKeyboard(ev)));
-    fromEvent<KeyboardEvent>(document, 'keyup').subscribe(ev => this.setKeyUp(KeyService.getKeyCodeFromKeyboard(ev)));
+    fromEvent<KeyboardEvent>(document, "keydown").subscribe(
+      (ev) =>
+        !isGameCovered() &&
+        !isTyping(ev) &&
+        this.setKeyDown(KeyService.getKeyCodeFromKeyboard(ev))
+    );
+    fromEvent<KeyboardEvent>(document, "keyup").subscribe((ev) =>
+      this.setKeyUp(KeyService.getKeyCodeFromKeyboard(ev))
+    );
 
     effect(() => this.updateStick(this.touchService.stick()));
     effect(() => {
@@ -77,7 +86,7 @@ export class KeyService {
     if (stick) {
       const key = getKeyFromAxes({
         x: (stick.begin.x - stick.current.x) / -(STICK_RADIUS - 10),
-        y: (stick.begin.y - stick.current.y) / -(STICK_RADIUS - 10)
+        y: (stick.begin.y - stick.current.y) / -(STICK_RADIUS - 10),
       });
       if (key !== null) {
         activeKeys.push(key);
@@ -94,8 +103,12 @@ export class KeyService {
   }
 
   private syncKeys(previousKeys: KeyCode[], activeKeys: KeyCode[]): void {
-    previousKeys.filter(key => !activeKeys.includes(key)).forEach(key => this.setKeyUp(key));
-    activeKeys.filter(key => !previousKeys.includes(key)).forEach(key => this.setKeyDown(key));
+    previousKeys
+      .filter((key) => !activeKeys.includes(key))
+      .forEach((key) => this.setKeyUp(key));
+    activeKeys
+      .filter((key) => !previousKeys.includes(key))
+      .forEach((key) => this.setKeyDown(key));
   }
 
   clearPressedKey(): void {
@@ -129,6 +142,8 @@ export class KeyService {
 
   private static getKeyCodeFromKeyboard(ev: KeyboardEvent): KeyCode | null {
     // (Shift held for running: the letters come in capitals)
-    return KEYBOARD_MAPPING[ev.key] ?? KEYBOARD_MAPPING[ev.key.toLowerCase()] ?? null;
+    return (
+      KEYBOARD_MAPPING[ev.key] ?? KEYBOARD_MAPPING[ev.key.toLowerCase()] ?? null
+    );
   }
 }

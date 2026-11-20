@@ -1,13 +1,14 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { SwUpdate } from '@angular/service-worker';
-import { Capacitor } from '@capacitor/core';
-import { BundleInfo, CapacitorUpdater } from '@capgo/capacitor-updater';
-import { version } from '../../../../package.json';
-import { onAppVisibility } from '../shared/app-visibility';
+import { Component, DestroyRef, inject, OnInit, signal } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { SwUpdate } from "@angular/service-worker";
+import { Capacitor } from "@capacitor/core";
+import { BundleInfo, CapacitorUpdater } from "@capgo/capacitor-updater";
+import { version } from "../../../../package.json";
+import { onAppVisibility } from "../shared/app-visibility";
 
 /** Latest release of the game on GitHub: the Android app is attached to it (see .github/workflows/main.yml). */
-const LATEST_RELEASE = 'https://api.github.com/repos/jasonconard/pk-project/releases/latest';
+const LATEST_RELEASE =
+  "https://api.github.com/repos/jasonconard/pk-project/releases/latest";
 const CHECK_TIMEOUT = 8000;
 /** Android app: back on the screen, a new version is looked for again, at most this often (ms). */
 const RESUME_CHECK_GAP = 5 * 60 * 1000;
@@ -24,7 +25,7 @@ interface Update {
  * Game files of a release, for the live update: `pk-project-web-v0.0.19-apk0.0.19-<native fingerprint>.zip`.
  * The `apk` part is the oldest app that can run them (its native part — Android files, plugins — is the same).
  */
-const WEB_ZIP = /^pk-project-web-v([\d.]+)-apk([\d.]+)-[0-9a-f]+\.zip$/;
+const WEB_ZIP = /^pk-project-web-v([\d.]+)-apk([\d.]+)-[\da-f]+\.zip$/;
 
 interface ReleaseAsset {
   name: string;
@@ -36,8 +37,8 @@ interface ReleaseAsset {
 
 /** 1.2.3 > 1.2.0? (numbers compared part by part, a missing part is 0) */
 export function isNewer(candidate: string, current: string): boolean {
-  const a = candidate.replace(/^v/, '').split('.').map(Number);
-  const b = current.replace(/^v/, '').split('.').map(Number);
+  const a = candidate.replace(/^v/, "").split(".").map(Number);
+  const b = current.replace(/^v/, "").split(".").map(Number);
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const diff = (a[i] || 0) - (b[i] || 0);
     if (diff) {
@@ -62,9 +63,9 @@ export function isNewer(candidate: string, current: string): boolean {
  *   the app comes back to the screen and every 30 min; once downloaded, a reload is offered.
  */
 @Component({
-  selector: 'app-update-prompt',
-  templateUrl: './update-prompt.component.html',
-  styleUrl: './update-prompt.component.scss',
+  selector: "app-update-prompt",
+  templateUrl: "./update-prompt.component.html",
+  styleUrl: "./update-prompt.component.scss",
 })
 export class UpdatePromptComponent implements OnInit {
   private readonly swUpdate = inject(SwUpdate);
@@ -75,7 +76,7 @@ export class UpdatePromptComponent implements OnInit {
   /** Android app: the game files of a new version are downloaded (live update), used after a restart. */
   protected readonly bundleReady = signal<BundleInfo | null>(null);
   /** Android app: why the game files could not be updated without the APK (shown with the APK offer). */
-  protected readonly liveUpdateError = signal('');
+  protected readonly liveUpdateError = signal("");
   /** Android app: when the last check started (ms), whether one is running, the versions put off ("Plus tard"). */
   private lastCheck = 0;
   private checking = false;
@@ -88,7 +89,7 @@ export class UpdatePromptComponent implements OnInit {
       void CapacitorUpdater.notifyAppReady().catch(() => undefined);
       this.check();
       // Back on the screen (the app often stays open in the background): a version released meanwhile
-      const stop = onAppVisibility(hidden => {
+      const stop = onAppVisibility((hidden) => {
         if (!hidden && Date.now() - this.lastCheck > RESUME_CHECK_GAP) {
           this.check();
         }
@@ -127,19 +128,25 @@ export class UpdatePromptComponent implements OnInit {
   }
 
   private watchWebVersions() {
-    this.swUpdate.versionUpdates.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
-      if (event.type === 'VERSION_READY') {
-        this.webReady.set(true);
-      }
-    });
+    this.swUpdate.versionUpdates
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (event.type === "VERSION_READY") {
+          this.webReady.set(true);
+        }
+      });
     // Broken cache (files of the running version gone): only a reload can fix it
-    this.swUpdate.unrecoverable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => document.location.reload());
-    const lookForUpdate = () => this.swUpdate.checkForUpdate().catch(() => undefined);
-    const onVisible = () => document.visibilityState === 'visible' && lookForUpdate();
-    document.addEventListener('visibilitychange', onVisible);
+    this.swUpdate.unrecoverable
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => document.location.reload());
+    const lookForUpdate = () =>
+      this.swUpdate.checkForUpdate().catch(() => undefined);
+    const onVisible = () =>
+      document.visibilityState === "visible" && lookForUpdate();
+    document.addEventListener("visibilitychange", onVisible);
     const timer = setInterval(lookForUpdate, PWA_CHECK_EVERY);
     this.destroyRef.onDestroy(() => {
-      document.removeEventListener('visibilitychange', onVisible);
+      document.removeEventListener("visibilitychange", onVisible);
       clearInterval(timer);
     });
     lookForUpdate();
@@ -153,22 +160,27 @@ export class UpdatePromptComponent implements OnInit {
     this.checking = true;
     this.lastCheck = Date.now();
     try {
-      const response = await fetch(LATEST_RELEASE, { signal: AbortSignal.timeout(CHECK_TIMEOUT) });
+      const response = await fetch(LATEST_RELEASE, {
+        signal: AbortSignal.timeout(CHECK_TIMEOUT),
+      });
       if (!response.ok) {
         return;
       }
       const release = await response.json();
-      if (!isNewer(release.tag_name, version) || this.putOff.has(release.tag_name.replace(/^v/, ''))) {
+      if (
+        !isNewer(release.tag_name, version) ||
+        this.putOff.has(release.tag_name.replace(/^v/, ""))
+      ) {
         return;
       }
       const assets: ReleaseAsset[] = release.assets ?? [];
       if (await this.liveUpdate(assets)) {
         return;
       }
-      const apk = assets.find(asset => asset.name.endsWith('.apk'));
+      const apk = assets.find((asset) => asset.name.endsWith(".apk"));
       if (apk) {
         this.update.set({
-          version: release.tag_name.replace(/^v/, ''),
+          version: release.tag_name.replace(/^v/, ""),
           apkUrl: apk.browser_download_url,
           sizeMb: Math.round(apk.size / 1e5) / 10,
         });
@@ -185,32 +197,44 @@ export class UpdatePromptComponent implements OnInit {
    * on them. False when the release needs a new APK (or has no game files): the APK is offered instead.
    */
   private async liveUpdate(assets: ReleaseAsset[]): Promise<boolean> {
-    const zip = assets.map(asset => ({ asset, match: WEB_ZIP.exec(asset.name) })).find(z => z.match);
+    const zip = assets
+      .map((asset) => ({ asset, match: WEB_ZIP.exec(asset.name) }))
+      .find((z) => z.match);
     if (!zip?.match) {
       return false;
     }
     const [, target, minApk] = zip.match;
-    const checksum = zip.asset.digest?.startsWith('sha256:') ? zip.asset.digest.slice('sha256:'.length) : '';
+    const checksum = zip.asset.digest?.startsWith("sha256:")
+      ? zip.asset.digest.slice("sha256:".length)
+      : "";
     if (!checksum) {
-      this.liveUpdateError.set('somme de contrôle absente');
+      this.liveUpdateError.set("somme de contrôle absente");
       return false;
     }
     try {
-      const { version: apkVersion } = await CapacitorUpdater.getBuiltinVersion();
+      const { version: apkVersion } =
+        await CapacitorUpdater.getBuiltinVersion();
       if (isNewer(minApk, apkVersion)) {
         return false; // its native part changed: a new APK is needed
       }
       // Already downloaded (restart postponed last time)? Otherwise downloaded now
       const { bundles } = await CapacitorUpdater.list();
-      const bundle = bundles.find(b => b.version === target && b.status !== 'error')
-        ?? await CapacitorUpdater.download({ url: zip.asset.browser_download_url, version: target, checksum });
+      const bundle =
+        bundles.find((b) => b.version === target && b.status !== "error") ??
+        (await CapacitorUpdater.download({
+          url: zip.asset.browser_download_url,
+          version: target,
+          checksum,
+        }));
       // Used anyway the next time the app leaves the screen or starts
       await CapacitorUpdater.next({ id: bundle.id });
       this.bundleReady.set(bundle);
       return true;
     } catch (error) {
       // Download failed: the APK is offered, with the reason
-      this.liveUpdateError.set(error instanceof Error ? error.message : String(error));
+      this.liveUpdateError.set(
+        error instanceof Error ? error.message : String(error)
+      );
       return false;
     }
   }

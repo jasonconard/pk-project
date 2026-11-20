@@ -1,14 +1,14 @@
-import { Component, inject, input, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { InstructionTeleport } from '../shared/model/SceneEventInstruction';
-import { SequenceService } from '../shared/services/sequence.service';
-import { MapHelper } from '../shared/model/MapHelper';
-import { GameMapService } from '../shared/services/game-map.service';
+import { Component, inject, input, signal } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { InstructionTeleport } from "../shared/model/SceneEventInstruction";
+import { SequenceService } from "../shared/services/sequence.service";
+import { MapHelper } from "../shared/model/MapHelper";
+import { GameMapService } from "../shared/services/game-map.service";
 
 @Component({
-  selector: 'core-teleport',
-  templateUrl: './teleport.component.html',
-  styleUrl: './teleport.component.scss'
+  selector: "core-teleport",
+  templateUrl: "./teleport.component.html",
+  styleUrl: "./teleport.component.scss",
 })
 export class TeleportComponent {
   private readonly sequenceService = inject(SequenceService);
@@ -20,7 +20,7 @@ export class TeleportComponent {
   constructor() {
     this.sequenceService.teleport$
       .pipe(takeUntilDestroyed())
-      .subscribe(teleport => this.onTeleport(teleport));
+      .subscribe((teleport) => this.onTeleport(teleport));
   }
 
   private onTeleport(teleport: InstructionTeleport): void {

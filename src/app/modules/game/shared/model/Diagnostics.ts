@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { DrawCallGroup } from './DrawCallBreakdown';
+import * as THREE from "three";
+import { DrawCallGroup } from "./DrawCallBreakdown";
 
 /** One second of measures, shown by the diagnostic console (hidden menu of the temperature / fps tile). */
 export interface DiagnosticsReport {
@@ -44,7 +44,7 @@ export class Diagnostics {
   private triangles = 0;
 
   /** Times a piece of work (ms added to `key`), only while enabled. */
-  measure<T>(key: 'input' | 'weather' | 'render', work: () => T): T {
+  measure<T>(key: "input" | "weather" | "render", work: () => T): T {
     if (!this.enabled) {
       return work();
     }
@@ -79,8 +79,11 @@ export class Diagnostics {
   }
 
   /** Every second: the report of the second that ended, counters back to 0. */
-  flush(renderer: THREE.WebGLRenderer, state: { pixelRatio: number, shadowMapSize: number, detail: number },
-        breakdown: () => DrawCallGroup[]) {
+  flush(
+    renderer: THREE.WebGLRenderer,
+    state: { pixelRatio: number; shadowMapSize: number; detail: number },
+    breakdown: () => DrawCallGroup[]
+  ) {
     if (!this.enabled) {
       this.report = null;
       renderer.info.autoReset = true;
@@ -104,6 +107,13 @@ export class Diagnostics {
       textures: renderer.info.memory.textures,
       breakdown: breakdown(),
     };
-    this.input = this.weather = this.render = this.frames = this.frameMax = this.calls = this.triangles = 0;
+    this.input =
+      this.weather =
+      this.render =
+      this.frames =
+      this.frameMax =
+      this.calls =
+      this.triangles =
+        0;
   }
 }

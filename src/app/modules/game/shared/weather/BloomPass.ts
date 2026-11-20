@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 /** Glow strength at full night. */
 const BLOOM_STRENGTH = 1.6;
@@ -16,7 +16,7 @@ const BLUR_RESOLUTION = 0.25;
 /** Blur iterations (each one = horizontal + vertical), with a growing radius. */
 const BLUR_RADII = [1, 2, 3];
 
-const FULLSCREEN_VERTEX = /* glsl */`
+const FULLSCREEN_VERTEX = /* glsl */ `
 varying vec2 vUv;
 void main() {
   vUv = uv;
@@ -25,7 +25,7 @@ void main() {
 `;
 
 // Keeps only the bright pixels (the lit windows at night)
-const BRIGHT_FRAGMENT = /* glsl */`
+const BRIGHT_FRAGMENT = /* glsl */ `
 uniform sampler2D tScene;
 uniform float uThreshold;
 uniform float uKnee;
@@ -38,7 +38,7 @@ void main() {
 `;
 
 // 9-tap separable gaussian (linear sampling)
-const BLUR_FRAGMENT = /* glsl */`
+const BLUR_FRAGMENT = /* glsl */ `
 uniform sampler2D tInput;
 uniform vec2 uStep;
 varying vec2 vUv;
@@ -50,7 +50,7 @@ void main() {
 }
 `;
 
-const COMPOSITE_FRAGMENT = /* glsl */`
+const COMPOSITE_FRAGMENT = /* glsl */ `
 uniform sampler2D tScene;
 uniform sampler2D tBloom;
 uniform float uStrength;
@@ -70,18 +70,36 @@ void main() {
  * the scene directly (no extra cost).
  */
 export class BloomPass {
-  private readonly sceneTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
-  private readonly brightTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false });
+  private readonly sceneTarget = new THREE.WebGLRenderTarget(1, 1, {
+    type: THREE.HalfFloatType,
+  });
+  private readonly brightTarget = new THREE.WebGLRenderTarget(1, 1, {
+    type: THREE.HalfFloatType,
+    depthBuffer: false,
+  });
   private readonly blurTargets = [
-    new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false }),
-    new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false }),
+    new THREE.WebGLRenderTarget(1, 1, {
+      type: THREE.HalfFloatType,
+      depthBuffer: false,
+    }),
+    new THREE.WebGLRenderTarget(1, 1, {
+      type: THREE.HalfFloatType,
+      depthBuffer: false,
+    }),
   ];
   private readonly brightMaterial: THREE.ShaderMaterial;
   private readonly blurMaterial: THREE.ShaderMaterial;
   private readonly compositeMaterial: THREE.ShaderMaterial;
   private readonly quad: THREE.Mesh;
   private readonly quadScene = new THREE.Scene();
-  private readonly quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  private readonly quadCamera = new THREE.OrthographicCamera(
+    -1,
+    1,
+    1,
+    -1,
+    0,
+    1
+  );
   private readonly size = new THREE.Vector2();
 
   constructor() {
@@ -99,7 +117,10 @@ export class BloomPass {
     this.blurMaterial = new THREE.ShaderMaterial({
       vertexShader: FULLSCREEN_VERTEX,
       fragmentShader: BLUR_FRAGMENT,
-      uniforms: { tInput: { value: null }, uStep: { value: new THREE.Vector2() } },
+      uniforms: {
+        tInput: { value: null },
+        uStep: { value: new THREE.Vector2() },
+      },
       depthTest: false,
       depthWrite: false,
     });
@@ -114,14 +135,22 @@ export class BloomPass {
       depthTest: false,
       depthWrite: false,
     });
-    this.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.compositeMaterial);
+    this.quad = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      this.compositeMaterial
+    );
     this.quad.frustumCulled = false;
     this.quadScene.add(this.quad);
   }
 
   /** Renders the scene with the window glow on screen (or into `output`, for a following effect). */
-  render(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, intensity: number,
-         output: THREE.WebGLRenderTarget | null = null) {
+  render(
+    renderer: THREE.WebGLRenderer,
+    scene: THREE.Scene,
+    camera: THREE.Camera,
+    intensity: number,
+    output: THREE.WebGLRenderTarget | null = null
+  ) {
     this.resize(renderer);
 
     // 1. Normal scene
@@ -136,16 +165,19 @@ export class BloomPass {
     // 3. Blur (ping-pong between the two blur buffers)
     this.quad.material = this.blurMaterial;
     const u = this.blurMaterial.uniforms;
-    const texel = new THREE.Vector2(1 / this.blurTargets[0].width, 1 / this.blurTargets[0].height);
+    const texel = new THREE.Vector2(
+      1 / this.blurTargets[0].width,
+      1 / this.blurTargets[0].height
+    );
     let input: THREE.Texture = this.brightTarget.texture;
     for (const radius of BLUR_RADII) {
-      u['tInput'].value = input;
-      u['uStep'].value.set(texel.x * radius, 0);
+      u["tInput"].value = input;
+      u["uStep"].value.set(texel.x * radius, 0);
       renderer.setRenderTarget(this.blurTargets[0]);
       renderer.render(this.quadScene, this.quadCamera);
 
-      u['tInput'].value = this.blurTargets[0].texture;
-      u['uStep'].value.set(0, texel.y * radius);
+      u["tInput"].value = this.blurTargets[0].texture;
+      u["uStep"].value.set(0, texel.y * radius);
       renderer.setRenderTarget(this.blurTargets[1]);
       renderer.render(this.quadScene, this.quadCamera);
       input = this.blurTargets[1].texture;
@@ -153,7 +185,8 @@ export class BloomPass {
 
     // 4. Composite on screen
     this.quad.material = this.compositeMaterial;
-    this.compositeMaterial.uniforms['uStrength'].value = intensity * BLOOM_STRENGTH;
+    this.compositeMaterial.uniforms["uStrength"].value =
+      intensity * BLOOM_STRENGTH;
     renderer.setRenderTarget(output);
     renderer.render(this.quadScene, this.quadCamera);
     renderer.setRenderTarget(null);
@@ -165,9 +198,13 @@ export class BloomPass {
     if (this.sceneTarget.width === x && this.sceneTarget.height === y) {
       return;
     }
-    const scaled = (ratio: number) => [Math.max(1, Math.round(x * ratio)), Math.max(1, Math.round(y * ratio))] as const;
+    const scaled = (ratio: number) =>
+      [
+        Math.max(1, Math.round(x * ratio)),
+        Math.max(1, Math.round(y * ratio)),
+      ] as const;
     this.sceneTarget.setSize(x, y);
     this.brightTarget.setSize(...scaled(BRIGHT_RESOLUTION));
-    this.blurTargets.forEach(t => t.setSize(...scaled(BLUR_RESOLUTION)));
+    this.blurTargets.forEach((t) => t.setSize(...scaled(BLUR_RESOLUTION)));
   }
 }
