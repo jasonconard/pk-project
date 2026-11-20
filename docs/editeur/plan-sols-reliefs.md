@@ -106,7 +106,7 @@ Chaque terrain se présente sous forme de blocs 3×3 (centre, 4 bords, 4 coins e
 ## Fichiers principaux
 
 - `src/app/modules/game/shared/model/MapHelper.ts` : rendu du sol (canvas, grille, parois), `cellAt`, `paintCell`.
-- `src/app/modules/game/shared/services/map-editor.service.ts` : outils pinceau, remplissage, hauteur, escalier.
+- `src/app/modules/game/shared/services/map-editor/ground-painter.ts` : outils pinceau, remplissage, hauteur, escalier.
 - `src/app/modules/game/shared/services/map-storage.ts` : sauvegarde, export, migration.
 - `src/app/modules/game/shared/services/scene.service.ts` et `game-map.service.ts` : collisions, hauteurs, saut.
 - `src/app/modules/game/shared/model/SceneMap.ts` : `tiles`, `heights`.

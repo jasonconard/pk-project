@@ -22,7 +22,8 @@ Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction éta
 | Fichier | Rôle |
 |---|---|
 | `src/app/modules/game/editor-bar/` | Interface : bouton, historique, panneau de l'objet sélectionné, palette à onglets |
-| `shared/services/map-editor.service.ts` | Le cœur de l'éditeur : caméra libre, souris, outils, historique |
+| `shared/services/map-editor.service.ts` | Le cœur de l'éditeur : caméra libre, souris, sélection, objets, morceaux de carte |
+| `shared/services/map-editor/` | La grille des cases (`editor-grid`), l'historique annuler / rétablir (`edit-history`), les contours des morceaux et le point d'arrivée (`editor-markers`), la peinture du sol (`ground-painter`) |
 | `shared/services/map-storage.ts` | Sauvegarde navigateur, export en TypeScript |
 | `shared/model/MapHelper.ts` | La carte en 3D : objets, sol peint (canvas), sol en relief |
 | `shared/model/Terrain.ts` | Catalogue des terrains et calcul des raccords (`autotile`) |

@@ -36,7 +36,9 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `event-conditions/` and `event-action/` (one action's fields) components, `event-editor-data.ts` (`EventEditorData`,
   provided by the window: variables and database read once; field helpers), `_fields.scss` the shared fields (global,
   in `styles.scss`)); small windows over the game share `shared/_dialog.scss`.
-  - `shared/services/`: `game.service` (settings, music, reload of models), `map-editor.service` (map editor logic),
+  - `shared/services/`: `game.service` (settings, music, reload of models), `map-editor.service` (map editor logic: input, selection, objects, chunks; `map-editor/`: `editor-grid`
+    (cells grid), `edit-history` (undo / redo), `editor-markers` (chunk outlines, arrival point), `ground-painter`
+    (terrain, height, stairs, bucket strokes)),
     `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
     `event` (`actionAt`, `armed`: enter / automatic events), `sequence` (plays the actions), `sfx` (synthesized sound
     effects), `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
@@ -66,7 +68,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
 **Big files — never read whole, grep the symbol then read a range:** `day-presets.ts` (~900 lines), `night-presets.ts` (~750), `WeatherAudio.ts`
-(~1350), `WeatherHelper.ts` (~1700), `map-editor.service.ts` (~1300), `model-editor.component.ts` (~1100),
+(~1350), `WeatherHelper.ts` (~1700), `map-editor.service.ts` (~1350), `model-editor.component.ts` (~1100),
 `GlowParticles.ts`, `MapHelper.ts`, `assets/map/world/world.ts`, `music-editor.component.ts`, `game.service.ts`.
 
 ## Conventions

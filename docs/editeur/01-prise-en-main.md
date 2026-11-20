@@ -62,7 +62,7 @@ La hauteur manque : les panneaux passent sur les côtés.
 
 ### Commun
 
-- **Grille** : trace le contour de chaque case (16 unités) au-dessus du sol, à la hauteur de la case et en pente sur les escaliers. Un jeu de lignes par zone de carte, construit quand elle entre dans la vue et refait quand ses reliefs changent (`MapEditorService.buildGrid`).
+- **Grille** : trace le contour de chaque case (16 unités) au-dessus du sol, à la hauteur de la case et en pente sur les escaliers. Un jeu de lignes par zone de carte, construit quand elle entre dans la vue et refait quand ses reliefs changent (`EditorGrid.build`, dans `map-editor/editor-grid.ts`).
 - La console de diagnostic (Réglages → Qualité graphique) s'affiche sous la barre, à droite du panneau d'outils en paysage et sur ordinateur.
 
 ## Raccourcis
