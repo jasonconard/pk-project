@@ -2,7 +2,7 @@ import { WeatherType } from '../../game/shared/weather/Weather';
 
 /**
  * The game's database (docs/idees.md, point 5): what the combat, the events and the menus read. Built table by
- * table: elements, weapon types, states, skills, items and characters so far; enemies and groups come next.
+ * table: elements, weapon types, states, skills, items, characters, enemies and groups.
  * Every row has an id that never changes (what refers to it keeps working when it is renamed).
  */
 
@@ -231,6 +231,74 @@ export interface DbCharacter {
 
 /** Pixel sizes of a character's pictures. */
 export const PICTURE_SIZES = { icon: { w: 16, h: 16 }, portrait: { w: 48, h: 48 }, sprite: { w: 32, h: 48 } };
+/** An enemy's combat sprite (wider: a bat, a slime). */
+export const ENEMY_SPRITE_SIZE = { w: 48, h: 48 };
+
+/** The moments of the day (the calendar, point 7, will use them too). */
+export type DayTime = 'morning' | 'afternoon' | 'evening' | 'night';
+export const DAY_TIMES: { id: DayTime, label: string }[] = [
+  { id: 'morning', label: 'Matin' },
+  { id: 'afternoon', label: 'Après-midi' },
+  { id: 'evening', label: 'Soir' },
+  { id: 'night', label: 'Nuit' },
+];
+
+/** How often an enemy uses a skill. */
+export const WEIGHTS: { id: number, label: string }[] = [
+  { id: 1, label: 'rarement' },
+  { id: 2, label: 'parfois' },
+  { id: 3, label: 'souvent' },
+];
+
+/** When an enemy may use a skill: always, under some PV, during a weather. */
+export type BehaviorCondition = { kind: 'hpBelow', percent: number } | { kind: 'weather', weather: `${WeatherType}` };
+
+export interface EnemyAction {
+  skill: string;
+  /** 1 rarely, 2 sometimes, 3 often. */
+  weight: number;
+  condition?: BehaviorCondition;
+}
+
+/** An enemy: looks, stats, how it takes each element, loot, what it does, and when it shows up. */
+export interface DbEnemy {
+  id: string;
+  name: string;
+  note?: string;
+  /** The action gauge's small picture (16×16) and the combat sprite (48×48). */
+  icon?: string;
+  sprite?: string;
+  /** Seen on the dungeon map before the fight. */
+  model?: string;
+  level: number;
+  stats: Record<StatId, number>;
+  /** Element id → how it takes it (missing: normal). */
+  resists: Record<string, ResistLevel>;
+  xp: number;
+  money: number;
+  drops: { item: string, chance: number }[];
+  /** Its skills (none: it only attacks). */
+  actions: EnemyAction[];
+  /** Weathers it appears in (only those, when some are « appears »), or is stronger in. */
+  weathers: { weather: `${WeatherType}`, effect: 'appears' | 'stronger' }[];
+  /** Moments it appears (none: all day). */
+  times: DayTime[];
+}
+
+/** A group of enemies met together, placed on the battlefield (x, y from 0 to 1 in the enemies' half). */
+export interface DbGroup {
+  id: string;
+  name: string;
+  /** (none: the list shows its first enemy's picture) */
+  icon?: string;
+  note?: string;
+  members: { enemy: string, x: number, y: number }[];
+  /** A song of the music editor (none: the combat music). */
+  music?: string;
+  canFlee: boolean;
+  /** The enemies may attack first (the team caught from behind). */
+  surprise: boolean;
+}
 
 /**
  * A level needed to learn a skill, Grandia style: in a simple element or a weapon type (the characters' levels grow
@@ -270,6 +338,8 @@ export interface GameDatabase {
   skills: DbSkill[];
   items: DbItem[];
   characters: DbCharacter[];
+  enemies: DbEnemy[];
+  groups: DbGroup[];
 }
 
 export type DbTable = keyof GameDatabase;
@@ -368,6 +438,33 @@ export function learnState(character: DbCharacter, skill: DbSkill): 'start' | 'l
     return 'never';
   }
   return skill.learn.every(l => growthOf(character, l.id).level >= l.level) ? 'start' : 'later';
+}
+
+export function newEnemy(name: string): DbEnemy {
+  return {
+    id: newId('en'), name, level: 1, stats: { hp: 40, mp: 10, str: 6, mag: 4, end: 5, agi: 4, luck: 3 },
+    resists: {}, xp: 10, money: 5, drops: [], actions: [], weathers: [], times: [],
+  };
+}
+
+export function newGroup(name: string, db: GameDatabase): DbGroup {
+  const enemy = db.enemies[0]?.id;
+  return { id: newId('gr'), name, members: enemy ? [{ enemy, x: 0.5, y: 0.5 }] : [], canFlee: true, surprise: true };
+}
+
+/** « Gluant ×2 · Chauve-souris » */
+export function groupLabel(group: DbGroup, enemies: DbEnemy[]): string {
+  const counts = new Map<string, number>();
+  group.members.forEach(m => counts.set(m.enemy, (counts.get(m.enemy) ?? 0) + 1));
+  return [...counts].map(([id, n]) => `${enemies.find(e => e.id === id)?.name ?? '?'}${n > 1 ? ` ×${n}` : ''}`).join(' · ');
+}
+
+/** A free place for one more enemy in a group (the least crowded of a few spots). */
+export function freeSpot(group: DbGroup): { x: number, y: number } {
+  const spots = [[0.5, 0.5], [0.2, 0.6], [0.8, 0.6], [0.35, 0.2], [0.65, 0.2], [0.1, 0.25], [0.9, 0.25], [0.5, 0.85]];
+  const crowd = ([x, y]: number[]) => Math.min(9, ...group.members.map(m => Math.hypot(m.x - x, m.y - y)));
+  const [x, y] = spots.reduce((best, spot) => crowd(spot) > crowd(best) ? spot : best);
+  return { x, y };
 }
 
 export function newItem(name: string): DbItem {
@@ -523,6 +620,24 @@ export function withoutRow(db: GameDatabase, table: DbTable, id: string): GameDa
   if (table === 'items') {
     next.characters = next.characters.map(c => Object.values(c.equipment).includes(id)
       ? { ...c, equipment: Object.fromEntries(Object.entries(c.equipment).filter(([, v]) => v !== id)) } : c);
+  }
+  if (table === 'elements') {
+    next.enemies = next.enemies.map(e => {
+      if (!(id in e.resists)) {
+        return e;
+      }
+      const { [id]: _, ...resists } = e.resists;
+      return { ...e, resists };
+    });
+  }
+  if (table === 'skills') {
+    next.enemies = next.enemies.map(e => e.actions.some(a => a.skill === id) ? { ...e, actions: e.actions.filter(a => a.skill !== id) } : e);
+  }
+  if (table === 'items') {
+    next.enemies = next.enemies.map(e => e.drops.some(d => d.item === id) ? { ...e, drops: e.drops.filter(d => d.item !== id) } : e);
+  }
+  if (table === 'enemies') {
+    next.groups = next.groups.map(g => g.members.some(m => m.enemy === id) ? { ...g, members: g.members.filter(m => m.enemy !== id) } : g);
   }
   if (table === 'skills') {
     next.characters = next.characters.map(c => {

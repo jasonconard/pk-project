@@ -18,6 +18,8 @@ function complete(database: Partial<GameDatabase>): GameDatabase {
     skills: Array.isArray(database.skills) ? database.skills : code.skills,
     items: Array.isArray(database.items) ? database.items : code.items,
     characters: Array.isArray(database.characters) ? database.characters : code.characters,
+    enemies: Array.isArray(database.enemies) ? database.enemies : code.enemies,
+    groups: Array.isArray(database.groups) ? database.groups : code.groups,
   };
 }
 

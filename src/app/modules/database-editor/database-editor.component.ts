@@ -1,14 +1,15 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, output, signal } from '@angular/core';
 import {
-  LucideActivity, LucideBackpack, LucideBan, LucideBox, LucideRotateCcw, LucideCheck, LucideLock, LucideSparkles, LucideUsers, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideFlame, LucideIcon, LucideInfo, LucidePencil,
+  LucideActivity, LucideBackpack, LucideBan, LucideSkull, LucideSwords, LucideEighthNotes, LucideCoins, LucideStar, LucideGitBranch, LucideBox, LucideRotateCcw, LucideCheck, LucideLock, LucideSparkles, LucideUsers, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideFlame, LucideIcon, LucideInfo, LucidePencil,
   LucidePlus, LucideSearch, LucideSword, LucideTrash, LucideX, LucideDynamicIcon, LucideArrowUp, LucideArrowDown, LucideSigma,
 } from '@lucide/angular';
 import { downloadFile } from '../game/shared/util/ts-source';
 import { WEATHER_CHOICES, WeatherType } from '../game/shared/weather/Weather';
 import { weatherScreenshot } from '../game/shared/weather/weather-catalog';
 import {
-  AFFINITIES, Affinity, BONUS_MAX, CAST_MAX, CharacterStat, DbCharacter, growthOf, learnState, newCharacter, PICTURE_SIZES, STAT_CURVES,
+  AFFINITIES, Affinity, BehaviorCondition, DAY_TIMES, DayTime, DbEnemy, DbGroup, ENEMY_SPRITE_SIZE, freeSpot, groupLabel, newEnemy,
+  newGroup, WEIGHTS, BONUS_MAX, CAST_MAX, CharacterStat, DbCharacter, growthOf, learnState, newCharacter, PICTURE_SIZES, STAT_CURVES,
   statAt, XP_CURVES, XpCurve, castLabel, clampInt, composableElements, DbElement, DbItem, DbSkill, DbState, DbTable, DbWeapon, defaultLearn,
   ELEMENT_COLORS, EQUIP_SLOTS, EquipSlot, ITEM_KINDS, ItemKind, newItem, PRICE_MAX, RESIST_LEVELS, ResistLevel, withItemKind, XP_MAX,
   formulaProblem, GameDatabase, LEARN_MAX, learnChoices, LEVEL_MAX, MP_MAX, newElement, newId, newSkill, newSkillEffect, newState,
@@ -20,16 +21,19 @@ import { PixelEditorComponent } from './pixel-editor/pixel-editor.component';
 import { StepperComponent } from './stepper/stepper.component';
 import { WeatherPickerComponent } from '../game/weather-picker/weather-picker.component';
 import { MODEL_CHOICES, modelLabel } from '../game/shared/model/ModelChoice';
+import { loadSongs } from '../music-editor/shared/song-storage';
 
-type Row = DbElement | DbWeapon | DbState | DbSkill | DbItem | DbCharacter;
+type Row = DbElement | DbWeapon | DbState | DbSkill | DbItem | DbCharacter | DbEnemy | DbGroup;
 /** A character's picture drawn in the pixel editor (icon: the small face). */
 type PictureField = keyof typeof PICTURE_SIZES;
 /** What has effects: skills and items. */
 type HasEffects = DbSkill | DbItem;
 
-/** In the mockup's order (enemies and groups will come after the characters). */
+/** In the mockup's order. */
 const TABLES: { id: DbTable, label: string, one: string, icon: LucideIcon }[] = [
   { id: 'characters', label: 'Personnages', one: 'Personnage', icon: LucideUsers },
+  { id: 'enemies', label: 'Ennemis', one: 'Ennemi', icon: LucideSkull },
+  { id: 'groups', label: 'Groupes', one: 'Groupe', icon: LucideSwords },
   { id: 'skills', label: 'Compétences', one: 'Compétence', icon: LucideSparkles },
   { id: 'items', label: 'Objets', one: 'Objet', icon: LucideBackpack },
   { id: 'states', label: 'États', one: 'État', icon: LucideActivity },
@@ -50,13 +54,13 @@ const SIDE_BY_SIDE = '(min-width: 760px)';
 /**
  * Database editor (docs/idees.md, point 5): one tab per table, the list then the row's sheet (side by side on wide
  * screens). Saved in the browser at every change; Exporter writes the game's file (src/assets/database/database.ts).
- * Tables so far: characters (looks, levels, stats, element and weapon levels, equipment), skills (cost, cast time, effects, the levels they are learned with), items (consumables, equipment,
+ * Tables: characters (looks, levels, stats, element and weapon levels, equipment), skills (cost, cast time, effects, the levels they are learned with), items (consumables, equipment,
  * key items, gifts), states, elements (with their weathers, simple or composed), weapon types.
  */
 @Component({
   selector: 'app-database-editor',
   imports: [
-    LucideBan, LucideBox, LucideCheck, LucideLock, LucideRotateCcw, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideDynamicIcon, LucideInfo, LucidePencil, LucidePlus,
+    LucideBan, LucideCoins, LucideStar, LucideGitBranch, LucideEighthNotes, LucideBox, LucideCheck, LucideLock, LucideRotateCcw, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideDynamicIcon, LucideInfo, LucidePencil, LucidePlus,
     LucideSearch, LucideTrash, LucideX, LucideArrowUp, LucideArrowDown, LucideSigma, NgTemplateOutlet, PixelEditorComponent, StepperComponent, WeatherPickerComponent,
   ],
   templateUrl: './database-editor.component.html',
@@ -97,6 +101,21 @@ export class DatabaseEditorComponent {
   protected readonly xpCurves = XP_CURVES;
   protected readonly models = MODEL_CHOICES.map(c => ({ id: c.model.id, label: modelLabel(c.model.id) }));
   protected readonly sizes = PICTURE_SIZES;
+  protected readonly dayTimes = DAY_TIMES;
+  protected readonly weights = WEIGHTS;
+  protected readonly resistChoices = [{ id: 'weak', label: 'Faible' }, { id: 'normal', label: 'Normal' }, { id: 'resist', label: 'Résiste' },
+    { id: 'null', label: 'Annule' }, { id: 'absorb', label: 'Absorbe' }];
+  /** The music editor's songs (a group's music). */
+  protected readonly songs = (() => {
+    try {
+      return loadSongs().songs.map(sg => ({ id: sg.id, name: sg.name }));
+    } catch {
+      return [];
+    }
+  })();
+  /** The group's enemy being moved (its place follows the finger, saved when let go), and the one chosen. */
+  protected readonly drag = signal<{ index: number, x: number, y: number } | null>(null);
+  protected readonly memberChosen = signal<number | null>(null);
   /** The character sheet's tab. */
   protected readonly charTab = signal<'general' | 'growth'>('general');
   /** Items list: only one kind (null: all). */
@@ -113,10 +132,19 @@ export class DatabaseEditorComponent {
   /** The picture being drawn: whose, which one (icon, or a character's portrait / sprite), its title and size. */
   protected readonly iconEdit = signal<{ id: string, field: PictureField, title: string, value?: string, w: number, h: number } | null>(null);
   /** The weather window: for which element, on which side (stronger / weaker). */
-  protected readonly weatherPick = signal<{ id: string, strong: boolean } | null>(null);
+  protected readonly weatherPick = signal<{ id: string, strong?: boolean, for: 'element' | 'enemy' | 'condition', index?: number } | null>(null);
   /** The weathers the element already has (not offered again). */
-  protected readonly pickExclude = computed(() =>
-    this.db().elements.find(e => e.id === this.weatherPick()?.id)?.weathers.map(w => w.weather) ?? []);
+  protected readonly pickExclude = computed(() => {
+    const pick = this.weatherPick();
+    if (pick?.for === 'element') {
+      return this.db().elements.find(e => e.id === pick.id)?.weathers.map(w => w.weather) ?? [];
+    }
+    return pick?.for === 'enemy' ? this.db().enemies.find(e => e.id === pick.id)?.weathers.map(w => w.weather) ?? [] : [];
+  });
+  protected readonly pickTitle = computed(() => {
+    const pick = this.weatherPick();
+    return pick?.for === 'element' ? (pick.strong ? 'Plus fort par' : 'Plus faible par') : pick?.for === 'enemy' ? 'Météo de l\'ennemi' : 'Pendant la météo';
+  });
 
   private readonly media = matchMedia(SIDE_BY_SIDE);
   protected readonly sideBySide = signal(this.media.matches);
@@ -140,6 +168,18 @@ export class DatabaseEditorComponent {
   protected readonly state = computed(() => this.table() === 'states' ? this.current() as DbState | null : null);
   protected readonly skill = computed(() => this.table() === 'skills' ? this.current() as DbSkill | null : null);
   protected readonly item = computed(() => this.table() === 'items' ? this.current() as DbItem | null : null);
+  protected readonly enemy = computed(() => this.table() === 'enemies' ? this.current() as DbEnemy | null : null);
+  protected readonly group = computed(() => this.table() === 'groups' ? this.current() as DbGroup | null : null);
+  /** The open group's enemies, with how many of each. */
+  protected readonly groupCounts = computed(() => {
+    const g = this.group();
+    if (!g) {
+      return [];
+    }
+    const counts = new Map<string, number>();
+    g.members.forEach(m => counts.set(m.enemy, (counts.get(m.enemy) ?? 0) + 1));
+    return [...counts].map(([id, count]) => ({ enemy: this.db().enemies.find(e => e.id === id), id, count }));
+  });
   protected readonly character = computed(() => this.table() === 'characters' ? this.current() as DbCharacter | null : null);
   protected readonly teamCharacters = computed(() => this.db().characters.filter(c => c.team));
   /** The character sheet's element and weapon rows: simple elements, composed ones (they follow their parts), weapon types. */
@@ -227,6 +267,7 @@ export class DatabaseEditorComponent {
     this.selectedId.set(id);
     this.formulaOpen.set(false);
     this.charTab.set('general');
+    this.memberChosen.set(null);
     this.deleting.set(null);
     this.host.nativeElement.querySelector('.sheet-pane')?.scrollTo({ top: 0 });
   }
@@ -237,7 +278,7 @@ export class DatabaseEditorComponent {
     const table = this.table();
     const base = {
       elements: 'Nouvel élément', weapons: 'Nouveau type d\'arme', states: 'Nouvel état', skills: 'Nouvelle compétence', items: 'Nouvel objet',
-      characters: 'Nouveau personnage',
+      characters: 'Nouveau personnage', enemies: 'Nouvel ennemi', groups: 'Nouveau groupe',
     }[table];
     const names = new Set(this.rows().map(r => norm(r.name)));
     let name = base;
@@ -246,7 +287,8 @@ export class DatabaseEditorComponent {
     }
     const row = table === 'elements' ? newElement(name) : table === 'weapons' ? newWeapon(name)
       : table === 'states' ? newState(name) : table === 'skills' ? newSkill(name, this.db())
-        : table === 'items' ? withItemKind(newItem(name), this.itemFilter() ?? 'consumable') : newCharacter(name);
+        : table === 'items' ? withItemKind(newItem(name), this.itemFilter() ?? 'consumable')
+          : table === 'characters' ? newCharacter(name) : table === 'enemies' ? newEnemy(name) : newGroup(name, this.db());
     this.commit({ ...this.db(), [table]: [...this.rows(), row] });
     this.search.set('');
     this.selectedId.set(row.id);
@@ -289,7 +331,7 @@ export class DatabaseEditorComponent {
     this.edit(row.id, r => ({ ...r, color }));
   }
 
-  protected setNote(row: DbWeapon | DbSkill | DbItem | DbCharacter, note: string): void {
+  protected setNote(row: DbWeapon | DbSkill | DbItem | DbCharacter | DbEnemy | DbGroup, note: string): void {
     this.edit(row.id, r => {
       const next = { ...r, note: note.trim() ? note : undefined } as DbWeapon;
       if (!next.note) {
@@ -303,13 +345,14 @@ export class DatabaseEditorComponent {
 
   protected editIcon(row: Row): void {
     const name = row.name.trim() || 'sans nom';
-    this.editPicture(row, 'icon', this.table() === 'characters' ? `Petite tête de ${name}` : `Icône de ${name}`);
+    this.editPicture(row, 'icon', this.table() === 'characters' || this.table() === 'enemies' ? `Petite image de ${name} (jauge)` : `Icône de ${name}`);
   }
 
   protected editPicture(row: Row, field: PictureField, title?: string): void {
     const name = row.name.trim() || 'sans nom';
     const titles = { icon: `Icône de ${name}`, portrait: `Portrait de ${name}`, sprite: `${name} en combat` };
-    this.iconEdit.set({ id: row.id, field, title: title ?? titles[field], value: (row as DbCharacter)[field], ...PICTURE_SIZES[field] });
+    const size = this.table() === 'enemies' && field === 'sprite' ? ENEMY_SPRITE_SIZE : PICTURE_SIZES[field];
+    this.iconEdit.set({ id: row.id, field, title: title ?? titles[field], value: (row as DbCharacter)[field], ...size });
   }
 
   protected iconDone(picture: string | undefined): void {
@@ -368,13 +411,19 @@ export class DatabaseEditorComponent {
   }
 
   protected openWeatherPick(element: DbElement, strong: boolean): void {
-    this.weatherPick.set({ id: element.id, strong });
+    this.weatherPick.set({ id: element.id, strong, for: 'element' });
   }
 
   protected pickWeather(weather: string): void {
     const pick = this.weatherPick();
     this.weatherPick.set(null);
-    if (pick) {
+    if (pick?.for === 'enemy') {
+      this.edit(pick.id, e => ({ ...e, weathers: [...(e as DbEnemy).weathers, { weather: weather as WeatherType, effect: 'appears' }] }));
+    } else if (pick?.for === 'condition') {
+      this.edit(pick.id, e => ({
+        ...e, actions: (e as DbEnemy).actions.map((a, i) => i === pick.index ? { ...a, condition: { kind: 'weather', weather: weather as WeatherType } } : a),
+      }));
+    } else if (pick) {
       this.edit(pick.id, e => ({
         ...e, weathers: [...(e as DbElement).weathers, { weather: weather as WeatherType, percent: pick.strong ? 25 : -25 }],
       }));
@@ -753,6 +802,216 @@ export class DatabaseEditorComponent {
     return [...db.elements, ...db.weapons].find(r => r.id === id)?.name ?? '?';
   }
 
+  // --- Enemies ---
+
+  protected setEnemy(enemy: DbEnemy, change: Partial<Pick<DbEnemy, 'level' | 'xp' | 'money' | 'model'>>): void {
+    this.edit(enemy.id, e => {
+      const next = { ...e, ...change } as DbEnemy;
+      if (!next.model) {
+        delete next.model;
+      }
+      return next;
+    });
+  }
+
+  protected setEnemyStat(enemy: DbEnemy, stat: StatId, value: number): void {
+    this.edit(enemy.id, e => ({ ...e, stats: { ...(e as DbEnemy).stats, [stat]: clampInt(value, 0, 99999) } }));
+  }
+
+  protected resistOf(enemy: DbEnemy, element: string): string {
+    return enemy.resists[element] ?? 'normal';
+  }
+
+  protected setResist(enemy: DbEnemy, element: string, level: string): void {
+    this.edit(enemy.id, e => {
+      const resists = { ...(e as DbEnemy).resists };
+      if (level === 'normal') {
+        delete resists[element];
+      } else {
+        resists[element] = level as ResistLevel;
+      }
+      return { ...e, resists };
+    });
+  }
+
+  protected addDrop(enemy: DbEnemy): void {
+    const used = new Set(enemy.drops.map(d => d.item));
+    const item = this.db().items.find(i => !used.has(i.id) && i.kind !== 'key') ?? this.db().items[0];
+    if (item) {
+      this.edit(enemy.id, e => ({ ...e, drops: [...(e as DbEnemy).drops, { item: item.id, chance: 20 }] }));
+    }
+  }
+
+  protected setDrop(enemy: DbEnemy, index: number, change: Partial<{ item: string, chance: number }>): void {
+    this.edit(enemy.id, e => ({ ...e, drops: (e as DbEnemy).drops.map((d, i) => i === index ? { ...d, ...change } : d) }));
+  }
+
+  protected removeDrop(enemy: DbEnemy, index: number): void {
+    this.edit(enemy.id, e => ({ ...e, drops: (e as DbEnemy).drops.filter((_, i) => i !== index) }));
+  }
+
+  protected addAction(enemy: DbEnemy): void {
+    const used = new Set(enemy.actions.map(a => a.skill));
+    const skill = this.db().skills.find(sk => !used.has(sk.id)) ?? this.db().skills[0];
+    if (skill) {
+      this.edit(enemy.id, e => ({ ...e, actions: [...(e as DbEnemy).actions, { skill: skill.id, weight: 2 }] }));
+    }
+  }
+
+  protected setAction(enemy: DbEnemy, index: number, change: Partial<{ skill: string, weight: number }>): void {
+    this.edit(enemy.id, e => ({ ...e, actions: (e as DbEnemy).actions.map((a, i) => i === index ? { ...a, ...change } : a) }));
+  }
+
+  protected setConditionKind(enemy: DbEnemy, index: number, kind: string): void {
+    if (kind === 'weather') {
+      this.weatherPick.set({ id: enemy.id, for: 'condition', index });
+      return;
+    }
+    this.edit(enemy.id, e => ({
+      ...e, actions: (e as DbEnemy).actions.map((a, i) => {
+        if (i !== index) {
+          return a;
+        }
+        const { condition: _, ...rest } = a;
+        return kind === 'hpBelow' ? { ...rest, condition: { kind: 'hpBelow', percent: 50 } as BehaviorCondition } : rest;
+      }),
+    }));
+  }
+
+  protected setConditionPercent(enemy: DbEnemy, index: number, percent: number): void {
+    this.edit(enemy.id, e => ({
+      ...e, actions: (e as DbEnemy).actions.map((a, i) => i === index ? { ...a, condition: { kind: 'hpBelow', percent } as BehaviorCondition } : a),
+    }));
+  }
+
+  protected removeAction(enemy: DbEnemy, index: number): void {
+    this.edit(enemy.id, e => ({ ...e, actions: (e as DbEnemy).actions.filter((_, i) => i !== index) }));
+  }
+
+  protected openEnemyWeather(enemy: DbEnemy): void {
+    this.weatherPick.set({ id: enemy.id, for: 'enemy' });
+  }
+
+  protected openConditionWeather(enemy: DbEnemy, index: number): void {
+    this.weatherPick.set({ id: enemy.id, for: 'condition', index });
+  }
+
+  protected setWeatherEffect(enemy: DbEnemy, weather: string, effect: 'appears' | 'stronger'): void {
+    this.edit(enemy.id, e => ({ ...e, weathers: (e as DbEnemy).weathers.map(w => w.weather === weather ? { ...w, effect } : w) }));
+  }
+
+  protected removeEnemyWeather(enemy: DbEnemy, weather: string): void {
+    this.edit(enemy.id, e => ({ ...e, weathers: (e as DbEnemy).weathers.filter(w => w.weather !== weather) }));
+  }
+
+  protected toggleTime(enemy: DbEnemy, time: DayTime): void {
+    this.edit(enemy.id, e => {
+      const times = (e as DbEnemy).times;
+      return { ...e, times: times.includes(time) ? times.filter(t => t !== time) : DAY_TIMES.map(d => d.id).filter(d => d === time || times.includes(d)) };
+    });
+  }
+
+  protected isSkill(id: string): boolean {
+    return this.db().skills.some(sk => sk.id === id);
+  }
+
+  protected skillName(id: string): string {
+    return this.db().skills.find(sk => sk.id === id)?.name ?? '(supprimée)';
+  }
+
+  // --- Groups ---
+
+  protected setGroup(group: DbGroup, change: Partial<Pick<DbGroup, 'music' | 'canFlee' | 'surprise'>>): void {
+    this.edit(group.id, g => {
+      const next = { ...g, ...change } as DbGroup;
+      if (!next.music) {
+        delete next.music;
+      }
+      return next;
+    });
+  }
+
+  protected addMember(group: DbGroup, enemy: string): void {
+    if (!enemy || group.members.length >= 8) {
+      return;
+    }
+    this.edit(group.id, g => ({ ...g, members: [...(g as DbGroup).members, { enemy, ...freeSpot(g as DbGroup) }] }));
+  }
+
+  /** −: the last one of this enemy goes. */
+  protected removeOne(group: DbGroup, enemy: string): void {
+    const index = group.members.map(m => m.enemy).lastIndexOf(enemy);
+    if (index >= 0) {
+      this.removeMember(group, index);
+    }
+  }
+
+  protected removeMember(group: DbGroup, index: number): void {
+    this.memberChosen.set(null);
+    this.edit(group.id, g => ({ ...g, members: (g as DbGroup).members.filter((_, i) => i !== index) }));
+  }
+
+  protected duplicateMember(group: DbGroup, index: number): void {
+    this.addMember(group, group.members[index].enemy);
+  }
+
+  /** Where a member is drawn (its place while moved). */
+  protected memberPos(index: number, member: { x: number, y: number }): { x: number, y: number } {
+    const drag = this.drag();
+    return drag?.index === index ? drag : member;
+  }
+
+  protected memberDown(ev: PointerEvent, index: number, member: { x: number, y: number }): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    (ev.currentTarget as HTMLElement).setPointerCapture(ev.pointerId);
+    this.memberChosen.set(index);
+    this.drag.set({ index, ...member });
+  }
+
+  protected memberMove(ev: PointerEvent): void {
+    const drag = this.drag();
+    if (!drag) {
+      return;
+    }
+    const zone = (ev.currentTarget as HTMLElement).closest('.battlefield')?.querySelector('.enemy-zone');
+    if (!zone) {
+      return;
+    }
+    const rect = zone.getBoundingClientRect();
+    const clamp = (v: number) => Math.round(Math.min(1, Math.max(0, v)) * 100) / 100;
+    this.drag.set({ index: drag.index, x: clamp((ev.clientX - rect.left) / rect.width), y: clamp((ev.clientY - rect.top) / rect.height) });
+  }
+
+  protected memberUp(group: DbGroup): void {
+    const drag = this.drag();
+    this.drag.set(null);
+    if (drag) {
+      this.edit(group.id, g => ({
+        ...g, members: (g as DbGroup).members.map((m, i) => i === drag.index ? { ...m, x: drag.x, y: drag.y } : m),
+      }));
+    }
+  }
+
+  protected enemyOf(id: string): DbEnemy | undefined {
+    return this.db().enemies.find(e => e.id === id);
+  }
+
+  /** The list's picture: the icon, else the sprite, else (a group) its first enemy's. */
+  protected rowIcon(row: Row): string | undefined {
+    if (row.icon) {
+      return row.icon;
+    }
+    if ('sprite' in row && row.sprite) {
+      return row.sprite;
+    }
+    if ('members' in row) {
+      const first = this.enemyOf(row.members[0]?.enemy ?? '');
+      return first?.icon ?? first?.sprite;
+    }
+    return undefined;
+  }
+
   // --- List texts ---
 
   protected rowMeta(row: Row): string {
@@ -767,6 +1026,13 @@ export class DatabaseEditorComponent {
       }
       case 'weapons':
         return (row as DbWeapon).note || 'Type d\'arme';
+      case 'enemies': {
+        const en = row as DbEnemy;
+        const weak = Object.entries(en.resists).filter(([, l]) => l === 'weak').map(([id]) => this.elementOf(id)?.name).filter(Boolean);
+        return [`Niv. ${en.level}`, weak.length ? `faible : ${weak.join(', ')}` : ''].filter(Boolean).join(' · ');
+      }
+      case 'groups':
+        return groupLabel(row as DbGroup, this.db().enemies) || 'Vide';
       case 'characters': {
         const ch = row as DbCharacter;
         return ch.team ? `Équipe · niv. ${ch.levelStart} · PV ${statAt(ch, 'hp', ch.levelStart)}` : 'Habitant';
@@ -810,7 +1076,7 @@ export class DatabaseEditorComponent {
     const source = `import { GameDatabase } from '../../app/modules/database-editor/shared/database';
 
 /**
- * The game's database (elements, weapon types, states, skills, items, characters…). Written by the database editor's export (editor →
+ * The game's database (elements, weapon types, states, skills, items, characters, enemies, groups). Written by the database editor's export (editor →
  * Éditeurs → Base de données → Exporter); the database saved in the browser replaces this one.
  */
 export const CODE_DATABASE: GameDatabase = ${JSON.stringify(this.db(), null, 2)};

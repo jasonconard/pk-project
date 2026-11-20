@@ -1,7 +1,7 @@
 import { GameDatabase } from '../../app/modules/database-editor/shared/database';
 
 /**
- * The game's database (elements, weapon types, states, skills, items, characters…). Written by the database editor's export (editor →
+ * The game's database (elements, weapon types, states, skills, items, characters, enemies, groups). Written by the database editor's export (editor →
  * Éditeurs → Base de données → Exporter); the database saved in the browser replaces this one.
  */
 export const CODE_DATABASE: GameDatabase = {
@@ -716,6 +716,247 @@ export const CODE_DATABASE: GameDatabase = {
       "equipment": {
         "accessory": "it-ice-amulet"
       }
+    }
+  ],
+  "enemies": [
+    {
+      "id": "en-slime",
+      "name": "Gluant",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACV0lEQVR42sWTvU9TYRjFf++97+1tUUor0JYigYqILYJAkagESAwOyOAfIDHGqAODo4urcdGVP8DZxETj4GaYMBowTgJtKaiApXwV6del974OZTCauPJMz0nOOcN5zgPHPeJPEI/HmZufB6U4G+tSsk4CUNgr8u3r0hE3Dsz9azAKzAChQBvh4SYVHm8kOtKBLiQ/ZtdZfJ0m+2VTrCSXGB2FmZm/DIQGdTLE1aeDauLuGEP2EC+XX7Fd3sZ0m/javLx9/J7EiyWxf7gJqqrTYsRAgO54GX5yRY3cusykOclOeYddew/T7cJwG+TS+wzc66H5ZovyqgYAYsSQFhYnIkH8Wq0K9wbJrm9x/80UNEA4EsIpOCTmU9QGTxLqCHIq6mMnnFWeXFBYeQstJZPklzP03u4m3B8k9WmVxLMVouY5hEewtrDB2vMM7a4IZatEz0Qnnp46DvIWSZFEKgO6r/Wr8KUA+WwBXWroaAhNoEmBJqu7AmzHQbd1OsZaKacPlLkohCYPJf4WP43d9eS3ijRHmzj9KMRCLkFprYy/0Udgqp50ZQWXcuFySZr6Aki/iZI68kw8qgYf9rKbyqEbGrZt03X9PB+nP/Ph3RxC1+icaCc8HmJ/4xfuWjeFn0V8Qz6cXUvJw7LNQamI11uDrRyEEBS3i/TducDAg4ugFLblUDmoUFPrwVVjYBg6mkdDNwzk1vdtZqfniNxoxdq3EJoAAcpRqKNbC0E1BwWaEBQPy5QWShRzhWqR6uublV7nwqlUEEL8t/vKcTA8Jk6uQiazKo79GfkNR3bib9uMBT8AAAAASUVORK5CYII=",
+      "sprite": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAPCAYAAADkmO9VAAAA2klEQVR42mNkIABEhGT+I/PfvHvCiE89IyGDorYFoYgv81qH12BGXIahG4QOlnmtw2ooEz7DmjSqGJo0qrAaKJemgBEcDAwMDCz4DGNgYGCou9GG1UCbACOGIwwMDAyzGP4ju5QFl5dwGUQIsOAKN1jg4xPD5komfLbduXeGKDGMSMEVqypKJgTFbAKMUCIIZxhis4BQUmJgYGBgIZTmYOFGyFC5NAUGhlkM/1kI2UiMqzDC8MiGcwzUAixv3j1hZJjF8P8IhQY9mvWA4c27J4yMuEoVUgEstwAA57RclG/WMeUAAAAASUVORK5CYII=",
+      "level": 3,
+      "stats": {
+        "hp": 60,
+        "mp": 12,
+        "str": 7,
+        "mag": 3,
+        "end": 6,
+        "agi": 4,
+        "luck": 2
+      },
+      "resists": {
+        "el-fire": "weak",
+        "el-ice": "null",
+        "el-wind": "resist",
+        "el-dark": "absorb"
+      },
+      "xp": 12,
+      "money": 8,
+      "drops": [
+        {
+          "item": "it-potion",
+          "chance": 30
+        },
+        {
+          "item": "it-strength-seed",
+          "chance": 5
+        }
+      ],
+      "actions": [
+        {
+          "skill": "sk-double",
+          "weight": 3
+        },
+        {
+          "skill": "sk-venom",
+          "weight": 2
+        },
+        {
+          "skill": "sk-lullaby",
+          "weight": 1,
+          "condition": {
+            "kind": "hpBelow",
+            "percent": 50
+          }
+        }
+      ],
+      "weathers": [
+        {
+          "weather": "drizzle",
+          "effect": "stronger"
+        },
+        {
+          "weather": "fog",
+          "effect": "appears"
+        },
+        {
+          "weather": "storm",
+          "effect": "appears"
+        }
+      ],
+      "times": [
+        "evening",
+        "night"
+      ]
+    },
+    {
+      "id": "en-bat",
+      "name": "Chauve-souris",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABc0lEQVR42u2SzU/TcByHn1/btYOWUTZRgaow2Awaiuwi2wWzQDgSD17kj/Hf4D/gyJWXhMCFCy9GSTTGyEuYQoLDZFSzlrZfTnDj5pHn+nlOTz5wDwC+Ny2+VxcAhXand7P5Xl18b1oADDvnMuK+ptcqIiD7jXUFUCgMECVtAEw9S7P5EyFlzKtL9dE85+EBP1o7GGV3Uvo6yuScLqryHku35fPFmqo+fCdXaQhARrNYjRaUn5+RSmGOfK4HIyhTdifFCNotSt4wfQ962f62zWg8xVO3Jr4KUXoeAEkuMIsfxJYMOSfLq5GXnP4+Z/W4hcpks7wpvZU4ueJvFPCia5bO+DFPKiaffm0CMN4/xclexD/jjC+XK9img6Fn2Pi+pIyiXWFtf1HdhEoGdXnWMUFnY5TudgmAZqPNWfyV48uP7B4t37rPCzUUgKY0kjRBUxqC4PQ4DFk1MQ0LgCgOOQy3VPAnQKFIJUXXdFJJ7y/8P7gGHsSAzbPyR+EAAAAASUVORK5CYII=",
+      "sprite": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAALCAYAAABlNU3NAAAA2ElEQVR42qWTsRGDMAxFv32pU3CUFBSZIBOkouYoGCJlSgZwxWWCTJAi5wmYhYKSo2ABUgTlhCIHLvkNQl9+xlgCZsVRMsVRMuFPSc6OknlaAQA83NQPnfkVLjlWFuVpBe0kPBfyCc5lNUNuQjV0/JCvMRYnyI7ZRwFfnKcVeCx9yQAAKw25CS2+7O/vPMXcDzFsP3TGtw4AcH6cXhc0v3Ndx1KNSRpjccnl7WD4U6puCvjWwbcOdVOoXaQxzJaWWxN9reaZtb6mfx0CA8C3uTFbB0jLbxnIJ1EbcJSrTf0CAAAAAElFTkSuQmCC",
+      "level": 5,
+      "stats": {
+        "hp": 45,
+        "mp": 20,
+        "str": 6,
+        "mag": 8,
+        "end": 4,
+        "agi": 12,
+        "luck": 6
+      },
+      "resists": {
+        "el-light": "weak",
+        "el-dark": "absorb",
+        "el-wind": "resist"
+      },
+      "xp": 18,
+      "money": 6,
+      "drops": [
+        {
+          "item": "it-remedy",
+          "chance": 20
+        }
+      ],
+      "actions": [
+        {
+          "skill": "sk-venom",
+          "weight": 3
+        }
+      ],
+      "weathers": [],
+      "times": [
+        "night"
+      ]
+    },
+    {
+      "id": "en-snow-slime",
+      "name": "Gluant des neiges",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACvElEQVR42q2TS2hcZRzFf993v7n3pnMzoYkNNjbJFDo0RkQwqBgfFUFFSH1g48ZCoVC77bZVqCAUfICCLlx1by1FSlEKjRFcdeGrTVo6pjZJ2zw6YW7uzNy5M/f1d2EWIt3p2Z5z4HA4B/5fnMS2C/dlLGOhtcXJM2eoNgS/K3I3ElH3Ex9857CUy6PESYptDEGjyRdffqoAtNZcrWXsLiFBumWYnp5Ga83kU/vk3LnzstkI5d84/c1Fee2tQzI8PAzAzPUa34nABBN/R1RFuVZdFBGRRETCKJaw3ZVmFEscJyIi8styW8bGHpd/ptXePg/b83h1aj9WzwO0OglZN8VvZ8xvJHiORZQqbq8FuAXDS1NvcOH7H+kf2YOIoLTW5HnO599elvFnnmQ0rLOaO9wKoWsZ9niKUtphIdIMWV0eqQzw2elZTh15USml0JbrMvXu+6LHx3nQpNRMkbmsiPQXyZXmSlMxF7u0+jyWnAHO/h6w4FSYeP2YWK6LSdptjLF5aMijsRlxtWPj/1nl+p1lHn3uBbYpiHKhemmG3p1ldu0e4ZXJXhYrH7O+cEX02GPPyvDkJDUfLt9L8EoW5z86jjP3A8YxWAVD7e5tZj88yqjt03YMrVaI74cUbBvt7Cpz+Inn2bG4iupxUYB2XJrtaKtnwTKGDE0jSnh5eZ2W32a9FmIshc4aAfN5gt9XwuTQqCe8/d4n7DhwhPnZGU69+TROwWb6qwv4zgjVwQFMj0PBKFAK04ng5/o2Kv0dikYRJrB/Yoh6MsSvKxVOnP0JpWDA3smgDdWVFhtBRC4WeQpWb+/2D4JNRWHwYaJU8Bspa37KZpBycyMjaGX4rYy1jRi6GTeWmqzULW5d/JrV3y6hALb3laU0spc8T1BAnEMu4BqQrd0pBXEq9LgGSxnqS39Qry+o/3zgvwCkaE4X5R5BFgAAAABJRU5ErkJggg==",
+      "sprite": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAASCAYAAAC0EpUuAAABWUlEQVR42q2Uv0rDUBSHvxsqgToIpQhKrdCudhMy1KGbgw/gMzh06QN0cNfFp/ABHOwkUocLdoqbJNBYFCSUdmihVrgOkpCkN2kqHgjk/s653z3n/jnwjzacKQUgsoLKpYrS6f54JHTAPRM+FinQAPb++aZdbH/3QAsfzpQ63BZCC/z6VpnfwJ2ogTtRaZVsDMwDNpKC7U3Jo2WZiGZ5//wSOhrVnRAmF0Uscx7TknZ6fBTucSHqkIsiAJY5x/am4TjwydcllhmPA7h69FczLZcq6vLJBeCsugXAnbfMXW5fegD0Oi388UgUdEGbAAFOrOrvz/UDvU5LGVnAbrNGt1lbgaTp4elHS9dZ2gNI6sEWxK7Uhexnvp40XTdPrMs0WjJAWmz0sIxk6lELbkIAy7N4rPw8YJ2vL71wriPt+D2tn99Qtxp/7qWOtHFu2/jjkRDreucmFrTCHz5n7Z+lnxEbAAAAAElFTkSuQmCC",
+      "level": 8,
+      "stats": {
+        "hp": 110,
+        "mp": 30,
+        "str": 9,
+        "mag": 12,
+        "end": 10,
+        "agi": 5,
+        "luck": 4
+      },
+      "resists": {
+        "el-fire": "weak",
+        "el-ice": "absorb"
+      },
+      "xp": 30,
+      "money": 15,
+      "drops": [
+        {
+          "item": "it-potion",
+          "chance": 40
+        },
+        {
+          "item": "it-ice-amulet",
+          "chance": 3
+        }
+      ],
+      "actions": [
+        {
+          "skill": "sk-double",
+          "weight": 2
+        },
+        {
+          "skill": "sk-ice-lance",
+          "weight": 2
+        }
+      ],
+      "weathers": [
+        {
+          "weather": "snow",
+          "effect": "appears"
+        },
+        {
+          "weather": "blizzard",
+          "effect": "stronger"
+        }
+      ],
+      "times": []
+    }
+  ],
+  "groups": [
+    {
+      "id": "gr-forest-slimes",
+      "name": "Gluants de la forêt",
+      "members": [
+        {
+          "enemy": "en-slime",
+          "x": 0.2,
+          "y": 0.55
+        },
+        {
+          "enemy": "en-slime",
+          "x": 0.78,
+          "y": 0.6
+        },
+        {
+          "enemy": "en-bat",
+          "x": 0.5,
+          "y": 0.2
+        }
+      ],
+      "canFlee": true,
+      "surprise": true
+    },
+    {
+      "id": "gr-bat-swarm",
+      "name": "Nuée",
+      "members": [
+        {
+          "enemy": "en-bat",
+          "x": 0.2,
+          "y": 0.3
+        },
+        {
+          "enemy": "en-bat",
+          "x": 0.4,
+          "y": 0.65
+        },
+        {
+          "enemy": "en-bat",
+          "x": 0.6,
+          "y": 0.3
+        },
+        {
+          "enemy": "en-bat",
+          "x": 0.8,
+          "y": 0.65
+        }
+      ],
+      "canFlee": true,
+      "surprise": true
+    },
+    {
+      "id": "gr-snow-slimes",
+      "name": "Gluants des neiges",
+      "note": "Dans la montagne enneigée.",
+      "members": [
+        {
+          "enemy": "en-snow-slime",
+          "x": 0.25,
+          "y": 0.6
+        },
+        {
+          "enemy": "en-snow-slime",
+          "x": 0.5,
+          "y": 0.3
+        },
+        {
+          "enemy": "en-snow-slime",
+          "x": 0.75,
+          "y": 0.6
+        }
+      ],
+      "canFlee": false,
+      "surprise": false
     }
   ]
 };

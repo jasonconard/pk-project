@@ -40,8 +40,8 @@
       @for (row of shownRows(); track row.id) {
         <button type="button" class="row" [class.on]="current()?.id === row.id" [style.--i]="$index" (click)="select(row.id)">
           <span class="icon-box">
-            @if (row.icon) {
-              <img class="pixel" [src]="row.icon" alt="" />
+            @if (rowIcon(row); as icon) {
+              <img class="pixel" [src]="icon" alt="" />
             } @else {
               <span class="no-icon" [style.background]="rowColor(row)"></span>
             }
@@ -83,7 +83,7 @@
       <div class="sheet">
         <div class="head">
           <button type="button" class="icon-edit" title="Dessiner l'icône" (click)="editIcon(row)">
-            @if (row.icon) { <img class="pixel" [src]="row.icon" alt="Icône" /> } @else { <span class="no-icon big" [style.background]="rowColor(row)"></span> }
+            @if (rowIcon(row); as icon) { <img class="pixel" [src]="icon" alt="Icône" /> } @else { <span class="no-icon big" [style.background]="rowColor(row)"></span> }
             <span class="pen" aria-hidden="true"><svg lucidePencil></svg></span>
           </button>
           <div class="head-fields">
@@ -157,6 +157,237 @@
             </div>
           }
           <p class="hint"><svg lucideInfo></svg> En combat, c'est la météo du donjon qui compte.</p>
+        }
+
+        <!-- Enemy -->
+        @if (enemy(); as en) {
+          <div class="block">
+            <h3>Apparence</h3>
+            <div class="tiles">
+              <button type="button" class="tile" title="Dessiner le sprite de combat" (click)="editPicture(en, 'sprite')">
+                <span class="tile-box">
+                  @if (en.sprite) { <img class="pixel enemy-sprite" [src]="en.sprite" alt="" /> } @else { <span class="no-icon big"></span> }
+                  <span class="pen" aria-hidden="true"><svg lucidePencil></svg></span>
+                </span>
+                <small>Combat · 48×48</small>
+              </button>
+              <label class="tile">
+                <span class="tile-box">
+                  <svg lucideBox class="model-icon"></svg>
+                  <select aria-label="Modèle 3D" (change)="setEnemy(en, { model: $any($event.target).value })">
+                    <option value="" [selected]="!en.model">Aucun</option>
+                    @for (m of models; track m.id) { <option [value]="m.id" [selected]="m.id === en.model">{{ m.label }}</option> }
+                  </select>
+                </span>
+                <small>Modèle 3D{{ en.model ? ' · ' + modelName(en.model) : '' }}</small>
+              </label>
+            </div>
+            <p class="note">L'icône à côté du nom est sa petite image dans la jauge d'action. Le modèle 3D se voit sur la carte du donjon.</p>
+          </div>
+
+          <div class="block">
+            <h3>Description</h3>
+            <input type="text" maxlength="120" placeholder="Facultatif" aria-label="Description" [value]="en.note ?? ''" (input)="setNote(en, $any($event.target).value)" />
+          </div>
+
+          <div class="block">
+            <div class="block-head">
+              <h3>Stats</h3>
+              <label class="inline-field"><small>Niveau</small>
+                <db-stepper [value]="en.level" [min]="1" [max]="levelMax" [label]="'Niveau'" (changed)="setEnemy(en, { level: $event })" />
+              </label>
+            </div>
+            <div class="stat-grid">
+              @for (st of stats; track st.id) {
+                <label class="stat-cell">
+                  <small>{{ st.label }}</small>
+                  <input type="text" inputmode="numeric" class="num" [attr.aria-label]="st.label" [value]="en.stats[st.id]"
+                         (change)="setEnemyStat(en, st.id, +$any($event.target).value); $any($event.target).value = en.stats[st.id]" />
+                </label>
+              }
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>Face aux éléments</h3>
+            <div class="stats">
+              @for (e of db().elements; track e.id) {
+                <div class="resist">
+                  <b><span class="dot" [style.background]="e.color"></span>{{ e.name }}</b>
+                  <div class="segmented resist-seg" role="group" [attr.aria-label]="e.name">
+                    @for (r of resistChoices; track r.id) {
+                      <button type="button" [class.on]="resistOf(en, e.id) === r.id" [attr.data-level]="r.id" [attr.aria-pressed]="resistOf(en, e.id) === r.id"
+                              (click)="setResist(en, e.id, r.id)">{{ r.label }}</button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            <p class="note">Faible : dégâts ×2. Résiste : ×½. Annule : aucun dégât. Absorbe : le soigne.</p>
+          </div>
+
+          <div class="block">
+            <h3>Butin</h3>
+            <div class="two">
+              <label class="field"><small><svg lucideStar></svg> Expérience</small>
+                <db-stepper [value]="en.xp" [min]="0" [max]="xpMax" [step]="5" [label]="'Expérience'" (changed)="setEnemy(en, { xp: $event })" />
+              </label>
+              <label class="field"><small><svg lucideCoins></svg> Argent</small>
+                <db-stepper [value]="en.money" [min]="0" [max]="priceMax" [step]="5" [label]="'Argent'" (changed)="setEnemy(en, { money: $event })" />
+              </label>
+            </div>
+            @for (d of en.drops; track $index; let i = $index) {
+              <div class="learn">
+                <select aria-label="Objet" (change)="setDrop(en, i, { item: $any($event.target).value })">
+                  @for (it of db().items; track it.id) { <option [value]="it.id" [selected]="it.id === d.item">{{ it.name }}</option> }
+                </select>
+                <db-stepper [value]="d.chance" [min]="1" [max]="100" [suffix]="'%'" [label]="'Chance'" (changed)="setDrop(en, i, { chance: $event })" />
+                <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeDrop(en, i)"><svg lucideX></svg></button>
+              </div>
+            }
+            <button type="button" class="add-select" (click)="addDrop(en)"><svg lucidePlus></svg> Objet</button>
+          </div>
+
+          <div class="block">
+            <h3>Comportement</h3>
+            @for (a of en.actions; track $index; let i = $index) {
+              <div class="fx">
+                <div class="fx-head">
+                  <select class="grow-select" aria-label="Compétence" (change)="setAction(en, i, { skill: $any($event.target).value })">
+                    @if (!isSkill(a.skill)) { <option [value]="a.skill" selected>(supprimée)</option> }
+                    @for (sk of db().skills; track sk.id) { <option [value]="sk.id" [selected]="sk.id === a.skill">{{ sk.name }}</option> }
+                  </select>
+                  <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeAction(en, i)"><svg lucideX></svg></button>
+                </div>
+                <div class="fx-fields">
+                  <div class="segmented" role="group" aria-label="Fréquence">
+                    @for (w of weights; track w.id) {
+                      <button type="button" [class.on]="a.weight === w.id" [attr.aria-pressed]="a.weight === w.id" (click)="setAction(en, i, { weight: w.id })">{{ w.label }}</button>
+                    }
+                  </div>
+                  <select aria-label="Quand" (change)="setConditionKind(en, i, $any($event.target).value)">
+                    <option value="" [selected]="!a.condition">Toujours</option>
+                    <option value="hpBelow" [selected]="a.condition?.kind === 'hpBelow'">Si ses PV &lt;</option>
+                    <option value="weather" [selected]="a.condition?.kind === 'weather'">Pendant une météo</option>
+                  </select>
+                  @if (a.condition; as c) {
+                    @if (c.kind === 'hpBelow') {
+                      <db-stepper [value]="c.percent" [min]="5" [max]="95" [step]="5" [suffix]="'%'" [label]="'PV'" (changed)="setConditionPercent(en, i, $event)" />
+                    } @else {
+                      <button type="button" class="pick-field" (click)="openConditionWeather(en, i)"><svg lucideGitBranch></svg> {{ weatherLabel(c.weather) }}</button>
+                    }
+                  }
+                </div>
+              </div>
+            } @empty {
+              <p class="note">Sans compétence, il attaque simplement.</p>
+            }
+            <button type="button" class="add-select" (click)="addAction(en)"><svg lucidePlus></svg> Compétence</button>
+          </div>
+
+          <div class="block">
+            <h3>Météo et heure</h3>
+            @for (w of en.weathers; track w.weather) {
+              <div class="weather">
+                <img [src]="weatherImage(w.weather)" alt="" (error)="weatherImageMissing($event, w.weather)" />
+                <b>{{ weatherLabel(w.weather) }}</b>
+                <div class="segmented" role="group" aria-label="Effet de la météo">
+                  <button type="button" [class.on]="w.effect === 'appears'" (click)="setWeatherEffect(en, w.weather, 'appears')">Apparaît</button>
+                  <button type="button" [class.on]="w.effect === 'stronger'" (click)="setWeatherEffect(en, w.weather, 'stronger')">Plus fort</button>
+                </div>
+                <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeEnemyWeather(en, w.weather)"><svg lucideX></svg></button>
+              </div>
+            }
+            <button type="button" class="add-select" (click)="openEnemyWeather(en)"><svg lucidePlus></svg> Météo</button>
+            <div class="chips times" role="group" aria-label="Heures">
+              <small>Heures</small>
+              @for (t of dayTimes; track t.id) {
+                <button type="button" class="chip plain" [class.on]="en.times.includes(t.id)" [attr.aria-pressed]="en.times.includes(t.id)" (click)="toggleTime(en, t.id)">{{ t.label }}</button>
+              }
+            </div>
+            <p class="note">« Apparaît » : seulement pendant ces météos. Aucune heure choisie : toute la journée.</p>
+          </div>
+        }
+
+        <!-- Group -->
+        @if (group(); as gr) {
+          <div class="block">
+            <h3>Description</h3>
+            <input type="text" maxlength="120" placeholder="Facultatif" aria-label="Description" [value]="gr.note ?? ''" (input)="setNote(gr, $any($event.target).value)" />
+          </div>
+
+          <div class="block">
+            <div class="block-head">
+              <h3>Terrain de combat (vu de dessus)</h3>
+              <small>glisser pour placer</small>
+            </div>
+            <div class="battlefield" (click)="memberChosen.set(null)">
+              <div class="enemy-zone"><span class="zone-label">Ennemis</span></div>
+              <div class="team-zone">
+                <span class="zone-label">Équipe</span>
+                @for (n of [0, 1, 2]; track n) { <span class="ally-slot"></span> }
+              </div>
+              @for (m of gr.members; track $index; let i = $index) {
+                @let pos = memberPos(i, m);
+                <button type="button" class="member" [class.chosen]="memberChosen() === i" [class.dragging]="drag()?.index === i"
+                        [style.left.%]="4 + pos.x * 92" [style.top.%]="4 + pos.y * 42" [attr.aria-label]="enemyOf(m.enemy)?.name ?? '?'"
+                        (pointerdown)="memberDown($event, i, m)" (pointermove)="memberMove($event)" (pointerup)="memberUp(gr)" (pointercancel)="memberUp(gr)"
+                        (click)="$event.stopPropagation()">
+                  @if (enemyOf(m.enemy)?.sprite; as sprite) { <img class="pixel" [src]="sprite" alt="" /> } @else { <span class="no-icon big"></span> }
+                </button>
+              }
+              @if (memberChosen() !== null && !drag() && gr.members[memberChosen()!]; as chosen) {
+                <div class="member-pop" [style.left.%]="4 + chosen.x * 92" [style.top.%]="4 + chosen.y * 42" (click)="$event.stopPropagation()">
+                  <button type="button" (click)="duplicateMember(gr, memberChosen()!)" [disabled]="gr.members.length >= 8"><svg lucideCopy></svg> Dupliquer</button>
+                  <button type="button" class="danger" (click)="removeMember(gr, memberChosen()!)"><svg lucideTrash></svg></button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="block">
+            <div class="block-head">
+              <h3>Ennemis du groupe</h3>
+              <small>{{ gr.members.length }} / 8</small>
+            </div>
+            @for (c of groupCounts(); track c.id) {
+              <div class="learn">
+                @if (c.enemy?.sprite; as sprite) { <img class="pixel member-thumb" [src]="sprite" alt="" /> }
+                <b class="grow-text">{{ c.enemy?.name ?? '(supprimé)' }}</b>
+                <db-stepper [value]="c.count" [min]="0" [max]="c.count + 8 - gr.members.length" [label]="'Nombre'"
+                            (changed)="$event > c.count ? addMember(gr, c.id) : removeOne(gr, c.id)" />
+              </div>
+            }
+            @if (gr.members.length < 8) {
+              <label class="add-select">
+                <svg lucidePlus></svg> Ennemi
+                <select aria-label="Ajouter un ennemi" (change)="addMember(gr, $any($event.target).value); $any($event.target).value = ''">
+                  <option value="" selected></option>
+                  @for (e of db().enemies; track e.id) { <option [value]="e.id">{{ e.name }}</option> }
+                </select>
+              </label>
+            }
+          </div>
+
+          <div class="block">
+            <h3>Combat</h3>
+            <label class="learn">
+              <svg lucideEighthNotes class="row-icon"></svg>
+              <span class="slot-label">Musique</span>
+              <select aria-label="Musique" (change)="setGroup(gr, { music: $any($event.target).value })">
+                <option value="" [selected]="!gr.music">Musique de combat</option>
+                @for (sg of songs; track sg.id) { <option [value]="sg.id" [selected]="sg.id === gr.music">{{ sg.name }}</option> }
+              </select>
+            </label>
+            <label class="switch">
+              <input type="checkbox" [checked]="gr.canFlee" (change)="setGroup(gr, { canFlee: $any($event.target).checked })" />
+              <span>On peut fuir</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" [checked]="gr.surprise" (change)="setGroup(gr, { surprise: $any($event.target).checked })" />
+              <span>Il peut attaquer par surprise</span>
+            </label>
+          </div>
         }
 
         <!-- Character -->
@@ -657,7 +888,7 @@
 </div>
 
 @if (weatherPick(); as pick) {
-  <game-weather-picker [title]="pick.strong ? 'Plus fort par' : 'Plus faible par'" [exclude]="pickExclude()"
+  <game-weather-picker [title]="pickTitle()" [exclude]="pickExclude()"
                        (picked)="pickWeather($event)" (closed)="weatherPick.set(null)" />
 }
 
