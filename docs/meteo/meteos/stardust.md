@@ -45,7 +45,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.STARDUST]` et `NIGHT_PRESETS[WeatherType.STARDUST]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.STARDUST]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.STARDUST]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.STARDUST]` dans `weather-catalog.ts`.
 - Style : `STARDUST_STYLE` dans `GlowParticles.ts`.
 - Capture day : `src/assets/weather/stardust-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

@@ -8,7 +8,7 @@ L'air est légèrement poussiéreux et calme… puis, toutes les 7 à 18 seconde
 
 ## Les paramètres
 
-Preset `EARTHQUAKE` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `EARTHQUAKE` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

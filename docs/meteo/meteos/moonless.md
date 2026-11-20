@@ -8,7 +8,7 @@ Une nuit sans lune ni étoiles : on ne voit presque rien. Seules les fenêtres a
 
 ## Les paramètres
 
-Preset `MOONLESS` dans `src/app/modules/game/shared/weather/Weather.ts` (seulement dans `NIGHT_PRESETS`) :
+Preset `MOONLESS` dans `src/app/modules/game/shared/weather/night-presets.ts` (seulement dans `NIGHT_PRESETS`) :
 
 | Paramètre | Valeur | Effet |
 |---|---|---|

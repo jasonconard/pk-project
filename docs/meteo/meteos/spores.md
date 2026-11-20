@@ -45,7 +45,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.SPORES]` et `NIGHT_PRESETS[WeatherType.SPORES]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.SPORES]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.SPORES]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.SPORES]` dans `weather-catalog.ts`.
 - Style : `SPORE_STYLE` dans `GlowParticles.ts`.
 - Capture day : `src/assets/weather/spores-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

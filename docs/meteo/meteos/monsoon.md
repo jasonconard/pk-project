@@ -8,7 +8,7 @@ Un déluge tropical chaud : la pluie est aussi dense qu'en [Orage](storm.md), so
 
 ## Les paramètres
 
-Preset `MONSOON` dans `src/app/modules/game/shared/weather/Weather.ts` (valeurs qui diffèrent de `DAY_BASE` / `NIGHT_BASE`) :
+Preset `MONSOON` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` (valeurs qui diffèrent de `DAY_BASE` / `NIGHT_BASE`) :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

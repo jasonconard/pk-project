@@ -8,7 +8,7 @@ Une brume jaune-brun, épaisse et pesante, noie le décor au loin. Le soleil est
 
 ## Les paramètres
 
-Preset `SMOG` dans `src/app/modules/game/shared/weather/Weather.ts` (valeurs qui diffèrent de `DAY_BASE` / `NIGHT_BASE`) :
+Preset `SMOG` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` (valeurs qui diffèrent de `DAY_BASE` / `NIGHT_BASE`) :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

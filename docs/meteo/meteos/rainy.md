@@ -42,7 +42,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.RAINY]` et `NIGHT_PRESETS[WeatherType.RAINY]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.RAINY]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.RAINY]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.RAINY]` dans `weather-catalog.ts`.
 - Capture day : `src/assets/weather/rainy-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).
 - Capture night : `src/assets/weather/rainy-night.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

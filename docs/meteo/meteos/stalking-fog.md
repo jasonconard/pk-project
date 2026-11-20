@@ -8,7 +8,7 @@ Un mur de brume, blanc le jour et bleu nuit la nuit, entoure le joueur. Quand il
 
 ## Les paramètres
 
-Preset `STALKING_FOG` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `STALKING_FOG` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

@@ -48,7 +48,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.HAUNTED]` et `NIGHT_PRESETS[WeatherType.HAUNTED]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.HAUNTED]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.HAUNTED]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.HAUNTED]` dans `weather-catalog.ts`.
 - Fantômes : `GhostHelper.ts`.
 - Capture day : `src/assets/weather/haunted-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

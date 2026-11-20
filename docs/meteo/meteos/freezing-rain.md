@@ -47,7 +47,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.FREEZING_RAIN]` et `NIGHT_PRESETS[WeatherType.FREEZING_RAIN]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.FREEZING_RAIN]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.FREEZING_RAIN]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.FREEZING_RAIN]` dans `weather-catalog.ts`.
 - Constantes : `ICE_GLAZE_TIME`, `ICE_MELT_TIME` dans `WeatherHelper.ts`.
 - Capture day : `src/assets/weather/freezing-rain-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

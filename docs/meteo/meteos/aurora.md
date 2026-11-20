@@ -38,7 +38,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.AURORA]` et `NIGHT_PRESETS[WeatherType.AURORA]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.AURORA]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.AURORA]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.AURORA]` dans `weather-catalog.ts`.
 - Uniforms `uAurora`, `uAuroraRed` mis à jour dans `WeatherHelper`.
 - Le shader qui lit ces uniforms : `weather-shader.ts`.

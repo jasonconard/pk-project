@@ -42,7 +42,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.SOLAR_STORM]` et `NIGHT_PRESETS[WeatherType.SOLAR_STORM]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.SOLAR_STORM]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.SOLAR_STORM]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.SOLAR_STORM]` dans `weather-catalog.ts`.
 - Creux de lumière : `updateDips` dans `WeatherHelper.ts`.
 - Capture day : `src/assets/weather/solar-storm-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

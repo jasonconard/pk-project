@@ -8,7 +8,7 @@ Le temps se dérègle : toute la météo tourne au ralenti, des poussières de l
 
 ## Les paramètres
 
-Preset `TIME_WARP` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `TIME_WARP` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

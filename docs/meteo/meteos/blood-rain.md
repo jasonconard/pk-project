@@ -49,7 +49,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.BLOOD_RAIN]` et `NIGHT_PRESETS[WeatherType.BLOOD_RAIN]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.BLOOD_RAIN]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.BLOOD_RAIN]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.BLOOD_RAIN]` dans `weather-catalog.ts`.
 - Style : `BLOOD_RAIN_STYLE` dans `RainHelper.ts` ; couleurs de taches : constantes en tête de `WeatherHelper.ts`.
 - Capture day : `src/assets/weather/blood-rain-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

@@ -46,7 +46,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.SEA_MIST]` et `NIGHT_PRESETS[WeatherType.SEA_MIST]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.SEA_MIST]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.SEA_MIST]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.SEA_MIST]` dans `weather-catalog.ts`.
 - Capture day : `src/assets/weather/sea-mist-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).
 - Capture night : `src/assets/weather/sea-mist-night.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

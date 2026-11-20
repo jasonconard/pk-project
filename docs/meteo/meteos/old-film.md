@@ -8,7 +8,7 @@ Le monde devient un vieux film muet. L'image est en noir et blanc légèrement s
 
 ## Les paramètres
 
-Preset `OLD_FILM` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `OLD_FILM` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

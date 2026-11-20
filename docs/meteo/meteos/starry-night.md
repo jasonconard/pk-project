@@ -8,7 +8,7 @@ Une nuit claire et fraîche : la lune est brillante et un peu bleutée, et les o
 
 ## Les paramètres
 
-Preset `STARRY_NIGHT` dans `src/app/modules/game/shared/weather/Weather.ts` (seulement dans `NIGHT_PRESETS`, d'où la disponibilité « nuit uniquement ») :
+Preset `STARRY_NIGHT` dans `src/app/modules/game/shared/weather/night-presets.ts` (seulement dans `NIGHT_PRESETS`, d'où la disponibilité « nuit uniquement ») :
 
 | Paramètre | Valeur | Effet |
 |---|---|---|

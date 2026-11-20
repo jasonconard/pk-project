@@ -44,7 +44,7 @@ Valeurs réelles du preset de nuit qui diffèrent de la base. La colonne « Base
 
 ## Où regarder dans le code
 
-- Preset : `NIGHT_PRESETS[WeatherType.RISING_ENERGY]` dans `Weather.ts` (pas de preset de jour = météo indisponible le jour).
+- Preset : `NIGHT_PRESETS[WeatherType.RISING_ENERGY]` dans `night-presets.ts` (pas de preset de jour = météo indisponible le jour).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.RISING_ENERGY]` dans `weather-catalog.ts`.
 - Style : `ENERGY_STYLE` dans `GlowParticles.ts`.
 - Capture night : `src/assets/weather/rising-energy-night.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

@@ -44,7 +44,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
     `SceneBuilding`, `SceneModel`, `ModelChoice` (`MODEL_CHOICES`, palette thumbnails), `ModelInstances`,
     `browser-models`, `Passage` (links between maps), `ObjectEvent` (editor events ↔ `SceneEvent`, `conditionsFit`),
     `Zone` (invisible zones, camera layer 1 shown only in the editor; `findModel`), `Quality`.
-  - `shared/weather/`: `Weather.ts` (enum, params, presets, temperature, `WEATHER_CHOICES`), `WeatherHelper.ts`
+  - `shared/weather/`: `Weather.ts` (entry: re-exports `weather-types` (enum, params), `day-presets`, `night-presets`,
+    `time-of-day`; temperature, `WEATHER_CHOICES`), `WeatherHelper.ts`
     (wiring), `GlowParticles.ts`, `weather-shader.ts`, `WeatherAudio.ts`, one `XxxHelper.ts` per effect, post passes
     (`BloomPass`, `GodRaysPass`, `HeatHazePass`), `weather-catalog.ts` (catalog texts). Details in `shared/weather/CLAUDE.md`.
 - `modules/model-editor/`: 3D model editor (one pixel grid per face, grayscale layers specular / night / bump).
@@ -64,7 +65,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
-**Big files — never read whole, grep the symbol then read a range:** `Weather.ts` (~2200 lines), `WeatherAudio.ts`
+**Big files — never read whole, grep the symbol then read a range:** `day-presets.ts` (~900 lines), `night-presets.ts` (~750), `WeatherAudio.ts`
 (~1950), `WeatherHelper.ts` (~1400), `map-editor.service.ts` (~1300), `model-editor.component.ts` (~1100),
 `GlowParticles.ts`, `MapHelper.ts`, `assets/map/world/world.ts`, `music-editor.component.ts`, `game.service.ts`.
 
@@ -89,7 +90,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 
 ## Recipe: add a weather
 
-Preset in `Weather.ts` (enum, param, preset, temperature, `WEATHER_CHOICES`) → style in `GlowParticles.ts` → wiring in
+Enum and param in `weather-types.ts`, presets in `day-presets.ts` / `night-presets.ts`, temperature and
+`WEATHER_CHOICES` in `Weather.ts` → style in `GlowParticles.ts` → wiring in
 `WeatherHelper.ts` → text in `weather-catalog.ts` → user tries it and asks tweaks → catalog image: hide UI, screenshot,
 `magick` crop to 1.61 and resize to 800x497 webp `src/assets/weather/<id>-<day|night>.webp`, restore the
 `pk-weather-settings` localStorage → after validation: `docs/meteo/meteos/<id>.md` + link in `docs/meteo/README.md`.

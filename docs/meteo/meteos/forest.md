@@ -49,7 +49,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.FOREST]` et `NIGHT_PRESETS[WeatherType.FOREST]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.FOREST]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.FOREST]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.FOREST]` dans `weather-catalog.ts`.
 - Style : `POLLEN_STYLE` dans `GlowParticles.ts` ; ombres : uniform `uCanopy` (`weather-shader.ts`).
 - Capture day : `src/assets/weather/forest-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

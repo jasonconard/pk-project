@@ -8,7 +8,7 @@ Une nuit bleu profond. Des vagues de lumière bleue balaient le sol, comme du pl
 
 ## Les paramètres
 
-Preset `LIGHT_TIDE` dans `src/app/modules/game/shared/weather/Weather.ts` (seulement dans `NIGHT_PRESETS`) :
+Preset `LIGHT_TIDE` dans `src/app/modules/game/shared/weather/night-presets.ts` (seulement dans `NIGHT_PRESETS`) :
 
 | Paramètre | Valeur | Effet |
 |---|---|---|

@@ -8,7 +8,7 @@ Un air tiède et brumeux. Quatre bouches de vapeur sont réparties dans le champ
 
 ## Les paramètres
 
-Preset `GEYSERS` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `GEYSERS` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

@@ -47,7 +47,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.SANDSTORM]` et `NIGHT_PRESETS[WeatherType.SANDSTORM]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.SANDSTORM]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.SANDSTORM]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.SANDSTORM]` dans `weather-catalog.ts`.
 - Sable : `SandHelper.ts` ; accumulation : `SAND_ACCUMULATION_TIME` dans `WeatherHelper.ts`.
 - Capture day : `src/assets/weather/sandstorm-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

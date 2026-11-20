@@ -42,7 +42,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.LEAVES]` et `NIGHT_PRESETS[WeatherType.LEAVES]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.LEAVES]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.LEAVES]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.LEAVES]` dans `weather-catalog.ts`.
 - Feuilles : `LeafHelper.ts` (`LEAF_PALETTES`, `LEAF_MODES` dans `Weather.ts`).
 - Capture day : `src/assets/weather/leaves-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

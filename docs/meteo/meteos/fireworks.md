@@ -8,7 +8,7 @@ Une nuit de fête : des fusées montent en sifflant puis éclatent en gerbes d'�
 
 ## Les paramètres
 
-Preset `FIREWORKS` dans `src/app/modules/game/shared/weather/Weather.ts` (seulement dans `NIGHT_PRESETS`) :
+Preset `FIREWORKS` dans `src/app/modules/game/shared/weather/night-presets.ts` (seulement dans `NIGHT_PRESETS`) :
 
 | Paramètre | Valeur | Effet |
 |---|---|---|

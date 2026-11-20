@@ -33,14 +33,14 @@ Le `dt` vient de `renderLoop` : `Math.min((now - this.lastFrameTime) / 1000, 0.1
 
 ## 2. `WeatherParams` : la carte d'identité d'une météo
 
-Dans `Weather.ts`, l'interface `WeatherParams` liste **tous** les réglages numériques ou colorés d'une météo : `litLevel`, `shadowLevel`, `ambientColor`, `sunColor`, `cloudCover`, `rain`, `snow`, `fog`, `fogColor`, `darkness`, `temperature`, etc. Une météo n'est *que* un objet de ce type : il n'y a pas de code `if (type === RAINY)` dans le moteur. C'est un choix de conception important : le moteur lit des **intensités continues** (0 = absent, 1 = maximum), ce qui rend possible le mélange entre deux météos.
+Dans `weather-types.ts`, l'interface `WeatherParams` liste **tous** les réglages numériques ou colorés d'une météo : `litLevel`, `shadowLevel`, `ambientColor`, `sunColor`, `cloudCover`, `rain`, `snow`, `fog`, `fogColor`, `darkness`, `temperature`, etc. Une météo n'est *que* un objet de ce type : il n'y a pas de code `if (type === RAINY)` dans le moteur. C'est un choix de conception important : le moteur lit des **intensités continues** (0 = absent, 1 = maximum), ce qui rend possible le mélange entre deux météos.
 
 ### Presets jour et nuit
 
 Deux bases existent : `DAY_BASE` (lumière blanche, tout à 0) et `NIGHT_BASE`, construite par `{ ...DAY_BASE, litLevel: 0.45, shadowLevel: 0.26, ambientColor: 0x6d7fb3, … windowGlow: 1 }`. Le helper `preset` ajoute des surcharges :
 
 ```ts
-// Weather.ts
+// day-presets.ts
 const preset = (base: WeatherParams, overrides: Partial<WeatherParams>): WeatherParams => ({ ...base, ...overrides });
 ```
 
@@ -50,7 +50,7 @@ Exemple : `[WeatherType.SUNNY]: preset(DAY_BASE, { specular: 1, sunGlow: 0.8, go
 
 ### `TEMPERATURES`
 
-`TEMPERATURES: Record<WeatherType, [number, number]>` donne `[jour, nuit]` en °C (ex. `SNOW: [-4, -10]`). Une boucle en bas de `Weather.ts` injecte la valeur dans chaque preset :
+`TEMPERATURES: Record<WeatherType, [number, number]>` donne `[jour, nuit]` en °C (ex. `SNOW: [-4, -10]`). Une boucle de `Weather.ts` injecte la valeur dans chaque preset :
 
 ```ts
 presets[type] = { ...presets[type]!, temperature: TEMPERATURES[type][index] };
@@ -125,8 +125,8 @@ La fusion par champ répond à un cas réel (commentaire du code) : avec le jeu 
 
 ## 5. Checklist : ajouter une météo
 
-1. `Weather.ts` : ajouter une entrée à l'enum `WeatherType`.
-2. `Weather.ts` : ajouter `preset(DAY_BASE, {...})` dans `DAY_PRESETS` et/ou `preset(NIGHT_BASE, {...})` dans `NIGHT_PRESETS` (au moins un des deux).
+1. `weather-types.ts` : ajouter une entrée à l'enum `WeatherType`.
+2. `day-presets.ts` / `night-presets.ts` : ajouter `preset(DAY_BASE, {...})` dans `DAY_PRESETS` et/ou `preset(NIGHT_BASE, {...})` dans `NIGHT_PRESETS` (au moins un des deux).
 3. `Weather.ts` : ajouter la paire `[jour, nuit]` dans `TEMPERATURES` (le type `Record<WeatherType, …>` force à la renseigner).
 4. `Weather.ts` : ajouter un `{ type, label, icon }` dans `WEATHER_CHOICES`.
 5. `weather-catalog.ts` : ajouter l'entrée de `WEATHER_INFO` (catégorie, résumé, description, effets) : le type `Record` l'impose aussi.

@@ -8,7 +8,7 @@ Le volcan se réveille. L'ambiance du [Volcanique](volcanic.md) (lumière orange
 
 ## Les paramètres
 
-Preset `ERUPTION` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `ERUPTION` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

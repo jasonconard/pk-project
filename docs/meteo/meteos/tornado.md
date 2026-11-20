@@ -51,7 +51,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.TORNADO]` et `NIGHT_PRESETS[WeatherType.TORNADO]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.TORNADO]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.TORNADO]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.TORNADO]` dans `weather-catalog.ts`.
 - Entonnoir : `TornadoHelper.ts` ; envol et constantes `TORNADO_*`/`FLIGHT_*` dans `WeatherHelper.ts`.
 - Capture day : `src/assets/weather/tornado-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

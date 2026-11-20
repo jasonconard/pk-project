@@ -47,7 +47,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.DARKNESS]` et `NIGHT_PRESETS[WeatherType.DARKNESS]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.DARKNESS]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.DARKNESS]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.DARKNESS]` dans `weather-catalog.ts`.
 - Uniform `uDarkness` : ligne `u.uDarkness.value = p.darkness` de `WeatherHelper`.
 - Capture day : `src/assets/weather/darkness-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

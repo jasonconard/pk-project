@@ -8,7 +8,7 @@ Une dimension parallèle : toute l'image passe en négatif. Les ombres deviennen
 
 ## Les paramètres
 
-Preset `INVERTED` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `INVERTED` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

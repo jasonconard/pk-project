@@ -5,7 +5,7 @@ Le cycle jour/nuit repose sur **une seule variable : l'heure** (`hour`, 0 à 24)
 ## 1. `daylightAt` : un interrupteur progressif
 
 ```ts
-// Weather.ts
+// time-of-day.ts
 export const DAWN = [6, 8];   export const DUSK = [18, 20];
 
 export function daylightAt(hour: number): number {
@@ -102,13 +102,13 @@ Calcul : un pas de 0,25 s avance de `0,25 × 24 / 720 ≈ 0,0083 h`, soit une jo
 
 `isWeatherAvailable(type, night)` teste la présence dans `NIGHT_PRESETS` / `DAY_PRESETS`. Deux chemins distincts dans `GameService` :
 
-- **Choix manuel** `setWeather(type)` : si la météo n'existe pas à l'heure actuelle, on **déplace l'horloge** : `this.setHour(isWeatherAvailable(type, true) ? NIGHT_ONLY_HOUR : DAY_ONLY_HOUR)` (`DAY_ONLY_HOUR = 12`, `NIGHT_ONLY_HOUR = 22`, dans `Weather.ts`). L'aurore choisie à midi te téléporte à 22 h.
+- **Choix manuel** `setWeather(type)` : si la météo n'existe pas à l'heure actuelle, on **déplace l'horloge** : `this.setHour(isWeatherAvailable(type, true) ? NIGHT_ONLY_HOUR : DAY_ONLY_HOUR)` (`DAY_ONLY_HOUR = 12`, `NIGHT_ONLY_HOUR = 22`, dans `time-of-day.ts`). L'aurore choisie à midi te téléporte à 22 h.
 - **Temps qui passe** (`advanceHour`) : la météo est conservée, on ne touche pas à `weatherState`. Le soleil devient simplement une nuit claire par le mélange de la section 2.
 - **Changement d'heure manuel** `setHour(hour)` : si la météo courante n'existe plus à cette heure, retour à `WeatherType.NEUTRAL`.
 
 ## Expériences à tenter
 
 - `DAY_DURATION` (`game.service.ts`) : mets `60` pour voir un jour en une minute, observe les teintes d'aube.
-- `DAWN` / `DUSK` (`Weather.ts`) : essaie `[6, 12]` pour un très long matin, la cloche de `twilightAt` suit.
+- `DAWN` / `DUSK` (`time-of-day.ts`) : essaie `[6, 12]` pour un très long matin, la cloche de `twilightAt` suit.
 - `SUN_LOW` : passe de `0.55` à `0.1` puis regarde la course du soleil et la longueur des ombres (`MIN_SUN_ELEVATION` les borne).
 - `TWILIGHT_STRENGTH` à `1` et `DUSK_TINT.sunColor` à `0xff0000` pour exagérer le couchant.

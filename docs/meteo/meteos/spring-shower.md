@@ -45,7 +45,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.SPRING_SHOWER]` et `NIGHT_PRESETS[WeatherType.SPRING_SHOWER]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.SPRING_SHOWER]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.SPRING_SHOWER]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.SPRING_SHOWER]` dans `weather-catalog.ts`.
 - Capture day : `src/assets/weather/spring-shower-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).
 - Mélange jour/nuit et aube/crépuscule : [02 · Jour et nuit](../concepts/02-jour-nuit.md) ; câblage dans `WeatherHelper` : [01 · Architecture](../concepts/01-architecture.md).

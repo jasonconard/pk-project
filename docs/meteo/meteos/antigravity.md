@@ -8,7 +8,7 @@ La gravité s'est inversée. Des cailloux et des mottes de terre montent lenteme
 
 ## Les paramètres
 
-Preset `ANTIGRAVITY` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `ANTIGRAVITY` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

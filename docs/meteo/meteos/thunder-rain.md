@@ -8,7 +8,7 @@ Une pluie battante sous un ciel noir. Toutes les quelques secondes, la foudre fr
 
 ## Les paramètres
 
-Preset `THUNDER_RAIN` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `THUNDER_RAIN` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

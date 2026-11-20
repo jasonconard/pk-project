@@ -8,7 +8,7 @@ Une chaleur écrasante, sous une lumière blanche et dorée. L'air tremble, les 
 
 ## Les paramètres
 
-Preset `MIRAGE` dans `src/app/modules/game/shared/weather/Weather.ts` (seulement dans `DAY_PRESETS`) :
+Preset `MIRAGE` dans `src/app/modules/game/shared/weather/day-presets.ts` (seulement dans `DAY_PRESETS`) :
 
 | Paramètre | Valeur | Effet |
 |---|---|---|

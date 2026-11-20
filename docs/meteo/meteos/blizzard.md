@@ -49,7 +49,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.BLIZZARD]` et `NIGHT_PRESETS[WeatherType.BLIZZARD]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.BLIZZARD]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.BLIZZARD]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.BLIZZARD]` dans `weather-catalog.ts`.
 - Dérive : paramètre `snowDrift` passé à `SnowHelper.update`.
 - Capture day : `src/assets/weather/blizzard-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

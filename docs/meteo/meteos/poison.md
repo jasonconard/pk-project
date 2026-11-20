@@ -51,7 +51,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.POISON]` et `NIGHT_PRESETS[WeatherType.POISON]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.POISON]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.POISON]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.POISON]` dans `weather-catalog.ts`.
 - Style : `POISON_RAIN_STYLE` dans `RainHelper.ts`.
 - Capture day : `src/assets/weather/poison-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

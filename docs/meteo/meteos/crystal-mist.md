@@ -8,7 +8,7 @@ Une brume glacée et lumineuse, bleutée, où flottent de minuscules éclats de 
 
 ## Les paramètres
 
-Preset `CRYSTAL_MIST` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `CRYSTAL_MIST` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

@@ -8,7 +8,7 @@ Un froid mordant. Le givre recouvre tout et grimpe peu à peu le long des murs. 
 
 ## Les paramètres
 
-Preset `DEEP_FREEZE` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `DEEP_FREEZE` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

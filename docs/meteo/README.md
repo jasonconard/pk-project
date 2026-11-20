@@ -109,7 +109,10 @@ Le catalogue (touche **M**) montre les catégories, les cartes et la fiche de la
 
 | Fichier | Rôle |
 |---|---|
-| `Weather.ts` | Liste des météos, paramètres (`WeatherParams`), presets jour et nuit, températures, heure |
+| `Weather.ts` | Point d'entrée des données : températures, liste proposée (`WEATHER_CHOICES`) ; il réexporte les fichiers ci-dessous |
+| `weather-types.ts` | Liste des météos (`WeatherType`) et paramètres (`WeatherParams`) |
+| `day-presets.ts`, `night-presets.ts` | Presets de jour et de nuit |
+| `time-of-day.ts` | Heures : aube, crépuscule, brume du matin |
 | `WeatherHelper.ts` | Le chef d'orchestre : chaque image, mélange les paramètres, règle les lumières et les uniforms, fait vivre les particules, les états accumulés (neige, flaques…) et le son |
 | `weather-shader.ts` | Tout le GLSL injecté dans les matériaux de three.js, et les uniforms partagés |
 | `cloud-texture.ts` | Texture de bruit fractal (nuages, flaques, feuillage) et sa lecture côté CPU |

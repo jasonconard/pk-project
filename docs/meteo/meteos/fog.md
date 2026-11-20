@@ -43,7 +43,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.FOG]` et `NIGHT_PRESETS[WeatherType.FOG]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.FOG]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.FOG]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.FOG]` dans `weather-catalog.ts`.
 - Capture day : `src/assets/weather/fog-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).
 - Capture night : `src/assets/weather/fog-night.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

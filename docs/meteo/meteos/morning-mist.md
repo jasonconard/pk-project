@@ -8,7 +8,7 @@ Le petit matin. De grandes nappes de brume pâle traînent au ras du sol et dér
 
 ## Les paramètres
 
-Preset `MORNING_MIST` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `MORNING_MIST` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|
@@ -23,7 +23,7 @@ Le brouillard, la rosée et les rayons ne sont **pas** dans le preset : ils sont
 ## Comment c'est fait
 
 ### 1. Une météo qui dépend de l'heure
-`mistAt(hour)` (`Weather.ts`) donne la force de la brume selon l'heure :
+`mistAt(hour)` (`time-of-day.ts`) donne la force de la brume selon l'heure :
 
 ```ts
 if (h < 3) return smoothstep(h, 0, 3);    // elle s'installe après minuit

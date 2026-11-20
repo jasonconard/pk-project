@@ -55,7 +55,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.JUNGLE]` et `NIGHT_PRESETS[WeatherType.JUNGLE]` dans `Weather.ts`.
+- Presets : `DAY_PRESETS[WeatherType.JUNGLE]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.JUNGLE]` (`night-presets.ts`).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.JUNGLE]` dans `weather-catalog.ts`.
 - Brume et yeux : `this.mist` et `this.eyes` dans `WeatherHelper.ts`.
 - Captures : `src/assets/weather/jungle-day.webp` et `jungle-night.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

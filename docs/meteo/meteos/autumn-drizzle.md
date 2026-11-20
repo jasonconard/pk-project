@@ -8,7 +8,7 @@ Une fin d'après-midi d'automne : lumière basse et dorée, façades qui rougeoi
 
 ## Les paramètres
 
-Preset `AUTUMN_DRIZZLE` dans `src/app/modules/game/shared/weather/Weather.ts` (valeurs qui diffèrent de `DAY_BASE` / `NIGHT_BASE`) :
+Preset `AUTUMN_DRIZZLE` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` (valeurs qui diffèrent de `DAY_BASE` / `NIGHT_BASE`) :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

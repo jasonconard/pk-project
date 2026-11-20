@@ -133,7 +133,7 @@ Un sprite transparent est un quad rectangulaire. Sans `alphaTest`, ses pixels vi
 
 ## Expériences à tenter
 
-- `SUNNY` dans `DAY_PRESETS` (`Weather.ts`) : `sunGlow: 3`, regarde les façades. Puis `godRays: 1` pour voir la variation `mix(1 − 0.35·g, 1 + 0.8·g, beam)`.
+- `SUNNY` dans `DAY_PRESETS` (`day-presets.ts`) : `sunGlow: 3`, regarde les façades. Puis `godRays: 1` pour voir la variation `mix(1 − 0.35·g, 1 + 0.8·g, beam)`.
 - Dans `FRAGMENT_BODY`, change `mix(0.72, 0.28, uCloudDensity)` en `mix(0.9, 0.1, …)` : les nuages deviennent soit rares, soit un plafond.
 - `LIGHTNING_INTERVAL` à `[0.5, 1]` et `LIGHTNING_SUN` à `2` sous la météo `STORM`.
 - `TRANSPARENT_ALPHA_TEST` (`material.service.ts`) à `0` : observe le rectangle autour des sprites derrière lesquels passent des particules. (Remets `0.1` ensuite.)

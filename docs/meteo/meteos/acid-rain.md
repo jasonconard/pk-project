@@ -8,7 +8,7 @@ Un ciel jaune-vert maladif et une pluie verdâtre qui ronge tout. Le sol se tach
 
 ## Les paramètres
 
-Preset `ACID_RAIN` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `ACID_RAIN` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

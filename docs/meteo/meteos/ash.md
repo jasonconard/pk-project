@@ -47,7 +47,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.ASH]` et `NIGHT_PRESETS[WeatherType.ASH]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.ASH]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.ASH]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.ASH]` dans `weather-catalog.ts`.
 - Style : `ASH_STYLE` dans `GlowParticles.ts`.
 - Capture day : `src/assets/weather/ash-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

@@ -42,7 +42,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.SNOW]` et `NIGHT_PRESETS[WeatherType.SNOW]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.SNOW]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.SNOW]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.SNOW]` dans `weather-catalog.ts`.
 - Flocons : `SnowHelper.ts` ; accumulation : `SNOW_ACCUMULATION_TIME` dans `WeatherHelper.ts`.
 - Capture day : `src/assets/weather/snow-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

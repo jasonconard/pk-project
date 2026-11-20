@@ -44,7 +44,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.DRIZZLE]` et `NIGHT_PRESETS[WeatherType.DRIZZLE]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.DRIZZLE]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.DRIZZLE]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.DRIZZLE]` dans `weather-catalog.ts`.
 - Capture day : `src/assets/weather/drizzle-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).
 - Capture night : `src/assets/weather/drizzle-night.webp` (`weatherScreenshot` dans `weather-catalog.ts`).

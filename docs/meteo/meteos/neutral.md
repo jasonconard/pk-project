@@ -41,7 +41,7 @@ Il n'y a rien de spécifique, et c'est justement l'intérêt de cette fiche : el
 
 ## Maths et code à retenir
 
-Dans `Weather.ts` :
+Dans `day-presets.ts` (`preset`) et `Weather.ts` (`getWeatherParams`) :
 
 ```ts
 const preset = (base: WeatherParams, overrides: Partial<WeatherParams>): WeatherParams => ({ ...base, ...overrides });

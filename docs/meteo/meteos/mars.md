@@ -8,7 +8,7 @@ Comme sur une autre planète : le ciel est couleur rouille, un vent permanent so
 
 ## Les paramètres
 
-Preset `MARS` dans `src/app/modules/game/shared/weather/Weather.ts` :
+Preset `MARS` dans `src/app/modules/game/shared/weather/day-presets.ts` et `night-presets.ts` :
 
 | Paramètre | Jour | Nuit | Effet |
 |---|---|---|---|

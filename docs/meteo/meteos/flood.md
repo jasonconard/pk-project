@@ -47,7 +47,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 
 ## Où regarder dans le code
 
-- Presets : `DAY_PRESETS[WeatherType.FLOOD]` et `NIGHT_PRESETS[WeatherType.FLOOD]` dans `Weather.ts` (un preset absent = météo indisponible à cette heure).
+- Presets : `DAY_PRESETS[WeatherType.FLOOD]` (`day-presets.ts`) et `NIGHT_PRESETS[WeatherType.FLOOD]` (`night-presets.ts`) (un preset absent = météo indisponible à cette heure).
 - Textes affichés dans le panneau : `WEATHER_INFO[WeatherType.FLOOD]` dans `weather-catalog.ts`.
 - Plan d'eau : `FloodHelper.ts` (constantes `MAX_LEVEL`, `RISE_SPEED`, `RECEDE_SPEED`).
 - Capture day : `src/assets/weather/flood-day.webp` (`weatherScreenshot` dans `weather-catalog.ts`).
