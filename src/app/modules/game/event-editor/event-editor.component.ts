@@ -10,10 +10,13 @@ import {
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  LucideArrowDown,
+  LucideArrowUp,
+  LucideBackpack,
   LucideChevronDown,
   LucideChevronRight,
-  LucideClock,
   LucideCloudSun,
+  LucideCoins,
   LucideCopy,
   LucideDoorOpen,
   LucideDynamicIcon,
@@ -21,25 +24,17 @@ import {
   LucideGitBranch,
   LucideHourglass,
   LucideIcon,
-  LucideImagePlus,
   LucideListChecks,
   LucideMessageSquareText,
   LucideOctagonX,
-  LucidePlay,
   LucidePlus,
+  LucideSwords,
   LucideTrash,
+  LucideUsers,
   LucideVariable,
   LucideVolume2,
   LucideX,
-  LucideArrowUp,
-  LucideArrowDown,
-  LucideBackpack,
-  LucideCoins,
-  LucideUsers,
-  LucideSwords,
 } from "@lucide/angular";
-import { loadDatabase } from "../../database-editor/shared/database-storage";
-import { ITEM_COUNT_MAX, MONEY_MAX } from "../../database-editor/shared/party";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import {
   EventAction,
@@ -47,19 +42,18 @@ import {
   EventConditions,
   EventTrigger,
   MAX_BRANCH_DEPTH,
-  MAX_CHOICE_OPTIONS,
   ObjectEvent,
-  PORTRAITS,
 } from "../shared/model/ObjectEvent";
-import { VariableTest } from "../shared/model/SceneEvent";
-import { WEATHER_CHOICES } from "../shared/weather/Weather";
 import { WeatherPickerComponent } from "../weather-picker/weather-picker.component";
-import { playSound, SOUND_CHOICES } from "../shared/services/sfx";
-import { loadVariables } from "../../variables-editor/shared/variable-storage";
+import { EventActionComponent } from "./event-action/event-action.component";
+import { EventConditionsComponent } from "./event-conditions/event-conditions.component";
 import {
-  clampCounter,
-  GameVariable,
-} from "../../variables-editor/shared/variables";
+  countConditions,
+  defaultTest,
+  EventEditorData,
+  fieldChecked,
+  plural,
+} from "./event-editor-data";
 
 const TRIGGERS: { id: EventTrigger; label: string; help: string }[] = [
   {
@@ -99,13 +93,6 @@ const ACTIONS: {
   { type: "money", label: "Argent", icon: LucideCoins },
   { type: "party", label: "Équipe", icon: LucideUsers },
   { type: "fight", label: "Combat", icon: LucideSwords, branches: true },
-];
-
-const COUNTER_TESTS: { op: VariableTest["op"]; label: string }[] = [
-  { op: "eq", label: "=" },
-  { op: "ne", label: "≠" },
-  { op: "gte", label: "≥" },
-  { op: "lte", label: "≤" },
 ];
 
 /** A branch of a choice (answer k: 'o0', 'o1'…) or of a condition. */
@@ -171,8 +158,14 @@ function countActions(list: EventAction[]): number {
   );
 }
 
-function plural(n: number, word: string): string {
-  return `${n} ${word}${n > 1 ? "s" : ""}`;
+/** A branch drawn under its action: its list, its key, its name, its colour. */
+interface Branch {
+  b: BranchKey;
+  list: EventAction[];
+  label: string;
+  /** For « Ajouter dans « … » ». */
+  name: string;
+  color: "orange" | "blue" | "red";
 }
 
 /**
@@ -186,28 +179,23 @@ function plural(n: number, word: string): string {
   imports: [
     NgTemplateOutlet,
     LucideDynamicIcon,
+    LucideArrowDown,
+    LucideArrowUp,
     LucideChevronDown,
     LucideChevronRight,
-    LucideClock,
-    LucideCloudSun,
     LucideCopy,
     LucideEllipsisVertical,
-    LucideImagePlus,
-    LucidePlay,
     LucidePlus,
     LucideTrash,
-    LucideVariable,
     LucideX,
-    LucideArrowUp,
-    LucideArrowDown,
-    LucideBackpack,
-    LucideCoins,
-    LucideUsers,
+    EventActionComponent,
+    EventConditionsComponent,
     WeatherPickerComponent,
   ],
   templateUrl: "./event-editor.component.html",
   styleUrl: "./event-editor.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [EventEditorData],
 })
 export class EventEditorComponent {
   readonly event = input.required<ObjectEvent>();
@@ -223,18 +211,9 @@ export class EventEditorComponent {
   protected readonly draft = linkedSignal(() => structuredClone(this.event()));
   protected readonly triggers = TRIGGERS;
   protected readonly actionTypes = ACTIONS;
-  protected readonly counterTests = COUNTER_TESTS;
-  protected readonly variables: GameVariable[] = loadVariables();
-  protected readonly sounds = SOUND_CHOICES;
-  protected readonly portraits = PORTRAITS;
-  protected readonly hourList = Array.from({ length: 24 }, (_, h) => h);
-  protected readonly maxOptions = MAX_CHOICE_OPTIONS;
   protected readonly root: ListPath = [];
-  /** The database: items, characters (of the team), groups of enemies. */
-  protected readonly db = loadDatabase();
-  protected readonly teamCharacters = this.db.characters.filter((c) => c.team);
-  protected readonly countMax = ITEM_COUNT_MAX;
-  protected readonly moneyMax = MONEY_MAX;
+  protected readonly checked = fieldChecked;
+  private readonly data = inject(EventEditorData);
 
   /** The trigger and conditions unfolded (folded into one line once the event has actions: room for the tree). */
   protected readonly headOpen = linkedSignal(() => {
@@ -261,14 +240,7 @@ export class EventEditorComponent {
     if (e.face && e.trigger === "action") {
       parts.push("se tourne vers le joueur");
     }
-    const c = e.conditions;
-    const n =
-      c.variables.length +
-      (c.hours ? 1 : 0) +
-      (c.weathers ? 1 : 0) +
-      (c.items?.length ?? 0) +
-      (c.money ? 1 : 0) +
-      (c.members?.length ?? 0);
+    const n = countConditions(e.conditions);
     parts.push(n ? plural(n, "condition") : "sans condition");
     return parts.join(" · ");
   });
@@ -387,14 +359,14 @@ export class EventEditorComponent {
       case "if":
         return {
           type,
-          conditions: this.variables[0]
-            ? { variables: [this.defaultTest(this.variables[0])] }
+          conditions: this.data.variables[0]
+            ? { variables: [defaultTest(this.data.variables[0])] }
             : { variables: [], hours: { from: 8, to: 18 } },
           then: [],
           else: [],
         };
       case "variable": {
-        const first = this.variables[0];
+        const first = this.data.variables[0];
         return first
           ? {
               type,
@@ -418,18 +390,24 @@ export class EventEditorComponent {
       case "stop":
         return { type };
       case "item":
-        return this.db.items[0]
-          ? { type, item: this.db.items[0].id, amount: 1 }
+        return this.data.db.items[0]
+          ? { type, item: this.data.db.items[0].id, amount: 1 }
           : null;
       case "money":
         return { type, amount: 100 };
       case "party":
-        return this.teamCharacters[0]
-          ? { type, character: this.teamCharacters[0].id, join: true }
+        return this.data.teamCharacters[0]
+          ? { type, character: this.data.teamCharacters[0].id, join: true }
           : null;
       case "fight":
-        return this.db.groups[0]
-          ? { type, group: this.db.groups[0].id, win: [], lose: [], flee: [] }
+        return this.data.db.groups[0]
+          ? {
+              type,
+              group: this.data.db.groups[0].id,
+              win: [],
+              lose: [],
+              flee: [],
+            }
           : null;
     }
   }
@@ -438,56 +416,18 @@ export class EventEditorComponent {
   protected canAdd(type: EventActionType): boolean {
     switch (type) {
       case "variable":
-        return this.variables.length > 0;
+        return this.data.variables.length > 0;
       case "item":
-        return this.db.items.length > 0;
+        return this.data.db.items.length > 0;
       case "party":
-        return this.teamCharacters.length > 0;
+        return this.data.teamCharacters.length > 0;
       case "fight":
-        return this.db.groups.length > 0;
+        return this.data.db.groups.length > 0;
+      case "teleport":
+        return this.maps().length > 0;
       default:
         return true;
     }
-  }
-
-  protected itemName(id: string): string | undefined {
-    return this.db.items.find((i) => i.id === id)?.name;
-  }
-
-  protected characterName(id: string): string | undefined {
-    return this.db.characters.find((c) => c.id === id)?.name;
-  }
-
-  protected group(id: string) {
-    return this.db.groups.find((g) => g.id === id);
-  }
-
-  /** « Gluant ×2 · Chauve-souris » */
-  protected groupMembers(id: string): string {
-    const group = this.group(id);
-    if (!group) {
-      return "";
-    }
-    const counts = new Map<string, number>();
-    group.members.forEach((m) =>
-      counts.set(m.enemy, (counts.get(m.enemy) ?? 0) + 1)
-    );
-    return [...counts]
-      .map(
-        ([e, n]) =>
-          `${this.db.enemies.find((en) => en.id === e)?.name ?? "?"}${n > 1 ? ` ×${n}` : ""}`
-      )
-      .join(" · ");
-  }
-
-  /** The same amount, given (+) or taken (−). */
-  protected signed(amount: number, take: boolean): number {
-    return (take ? -1 : 1) * Math.abs(amount);
-  }
-
-  protected wholeNumber(raw: string, min: number, max: number): number {
-    const n = Math.round(Number(raw));
-    return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : min;
   }
 
   protected setAction(
@@ -545,193 +485,84 @@ export class EventEditorComponent {
     return plural(countActions(list), "action");
   }
 
-  // --- Choices ---
-
-  protected setOption(
-    path: ListPath,
-    i: number,
-    k: number,
-    text: string
-  ): void {
-    this.change((e) => {
-      const action = listAt(e, path)[i];
-      if (action.type === "choice") {
-        action.options[k].text = text.trim() || `Réponse ${k + 1}`;
+  /** The branches drawn under an action (a choice's answers, a condition's Alors / Sinon, a fight's ends). */
+  protected branches(action: EventAction): Branch[] {
+    switch (action.type) {
+      case "choice":
+        return action.options.map((o, k) => ({
+          b: `o${k}`,
+          list: o.actions,
+          label: `Si « ${o.text} »`,
+          name: o.text,
+          color: "orange",
+        }));
+      case "if":
+        return [
+          {
+            b: "then",
+            list: action.then,
+            label: "Alors",
+            name: "Alors",
+            color: "blue",
+          },
+          {
+            b: "else",
+            list: action.else,
+            label: "Sinon",
+            name: "Sinon",
+            color: "blue",
+          },
+        ];
+      case "fight": {
+        const fight: [BranchKey, EventAction[], string][] = [
+          ["win", action.win, "Victoire"],
+          ["lose", action.lose, "Défaite"],
+        ];
+        // (no flight from a group that forbids it)
+        if (this.data.group(action.group)?.canFlee ?? true) {
+          fight.push(["flee", action.flee, "Fuite"]);
+        }
+        return fight.map(([b, list, label]) => ({
+          b,
+          list,
+          label,
+          name: label,
+          color: "red",
+        }));
       }
-    });
-  }
-
-  protected addOption(path: ListPath, i: number): void {
-    this.change((e) => {
-      const action = listAt(e, path)[i];
-      if (
-        action.type === "choice" &&
-        action.options.length < MAX_CHOICE_OPTIONS
-      ) {
-        action.options.push({
-          text: `Réponse ${action.options.length + 1}`,
-          actions: [],
-        });
-      }
-    });
-  }
-
-  /** An answer goes, with its actions (two answers at least). */
-  protected removeOption(path: ListPath, i: number, k: number): void {
-    this.change((e) => {
-      const action = listAt(e, path)[i];
-      if (action.type === "choice" && action.options.length > 2) {
-        action.options.splice(k, 1);
-      }
-    });
+      default:
+        return [];
+    }
   }
 
   // --- Conditions (the event's, or a condition action's) ---
 
+  /** The event's own conditions (null), or those of the condition action i of a list. */
   private changeConds(
     target: CondTarget,
-    fn: (c: EventConditions) => void
+    fn: (c: EventConditions) => EventConditions
   ): void {
     this.change((e) => {
       if (!target) {
-        fn(e.conditions);
+        e.conditions = fn(e.conditions);
         return;
       }
       const action = listAt(e, target.path)[target.i];
       if (action?.type === "if") {
-        fn(action.conditions);
+        action.conditions = fn(action.conditions);
       }
     });
+  }
+
+  protected setConditions(
+    target: CondTarget,
+    conditions: EventConditions
+  ): void {
+    this.changeConds(target, () => conditions);
   }
 
   protected condTarget(path: ListPath, i: number): CondTarget {
     return { path, i };
-  }
-
-  protected variable(id: string): GameVariable | undefined {
-    return this.variables.find((v) => v.id === id);
-  }
-
-  private defaultTest(variable: GameVariable): VariableTest {
-    return variable.kind === "flag"
-      ? { id: variable.id, op: "is", value: true }
-      : { id: variable.id, op: "gte", value: 1 };
-  }
-
-  protected addVariableTest(target: CondTarget): void {
-    const first = this.variables[0];
-    if (first) {
-      this.changeConds(target, (c) =>
-        c.variables.push(this.defaultTest(first))
-      );
-    }
-  }
-
-  protected setTestVariable(
-    target: CondTarget,
-    index: number,
-    id: string
-  ): void {
-    const variable = this.variable(id);
-    if (variable) {
-      this.changeConds(
-        target,
-        (c) => (c.variables[index] = this.defaultTest(variable))
-      );
-    }
-  }
-
-  protected setTest(
-    target: CondTarget,
-    index: number,
-    test: Partial<VariableTest>
-  ): void {
-    this.changeConds(
-      target,
-      (c) => (c.variables[index] = { ...c.variables[index], ...test })
-    );
-  }
-
-  protected removeTest(target: CondTarget, index: number): void {
-    this.changeConds(target, (c) => c.variables.splice(index, 1));
-  }
-
-  protected setHours(
-    target: CondTarget,
-    hours: { from: number; to: number } | undefined
-  ): void {
-    this.changeConds(target, (c) => {
-      if (hours) {
-        c.hours = hours;
-      } else {
-        delete c.hours;
-      }
-    });
-  }
-
-  // The team: items carried, money, members
-
-  protected addItemTest(target: CondTarget): void {
-    const first = this.db.items[0];
-    if (first) {
-      this.changeConds(
-        target,
-        (c) => (c.items = [...(c.items ?? []), { id: first.id, count: 1 }])
-      );
-    }
-  }
-
-  protected setItemTest(
-    target: CondTarget,
-    index: number,
-    change: Partial<{ id: string; count: number }>
-  ): void {
-    this.changeConds(
-      target,
-      (c) => (c.items![index] = { ...c.items![index], ...change })
-    );
-  }
-
-  protected removeItemTest(target: CondTarget, index: number): void {
-    this.changeConds(target, (c) => {
-      c.items!.splice(index, 1);
-      if (c.items!.length === 0) {
-        delete c.items;
-      }
-    });
-  }
-
-  protected setMoneyTest(target: CondTarget, money: number | undefined): void {
-    this.changeConds(target, (c) => {
-      if (money) {
-        c.money = money;
-      } else {
-        delete c.money;
-      }
-    });
-  }
-
-  protected addMemberTest(target: CondTarget): void {
-    const first = this.teamCharacters[0];
-    if (first) {
-      this.changeConds(
-        target,
-        (c) => (c.members = [...(c.members ?? []), first.id])
-      );
-    }
-  }
-
-  protected setMemberTest(target: CondTarget, index: number, id: string): void {
-    this.changeConds(target, (c) => (c.members![index] = id));
-  }
-
-  protected removeMemberTest(target: CondTarget, index: number): void {
-    this.changeConds(target, (c) => {
-      c.members!.splice(index, 1);
-      if (c.members!.length === 0) {
-        delete c.members;
-      }
-    });
   }
 
   protected readonly weatherPick = signal<WeatherPick | null>(null);
@@ -749,64 +580,12 @@ export class EventEditorComponent {
     }
   }
 
-  protected addWeather(target: CondTarget, type: string): void {
+  private addWeather(target: CondTarget, type: string): void {
     if (type) {
-      this.changeConds(
-        target,
-        (c) => (c.weathers = [...new Set([...(c.weathers ?? []), type])])
-      );
+      this.changeConds(target, (c) => ({
+        ...c,
+        weathers: [...new Set([...(c.weathers ?? []), type])],
+      }));
     }
-  }
-
-  protected removeWeather(target: CondTarget, type: string): void {
-    this.changeConds(target, (c) => {
-      c.weathers = (c.weathers ?? []).filter((w) => w !== type);
-      if (c.weathers.length === 0) {
-        delete c.weathers;
-      }
-    });
-  }
-
-  protected weatherLabel(type: string): string {
-    const choice = WEATHER_CHOICES.find((w) => w.type === type);
-    return choice ? `${choice.icon} ${choice.label}` : type;
-  }
-
-  // --- Fields ---
-
-  /** Another variable: its kind decides the change (a flag becomes true, a counter is set to 1). */
-  protected setActionVariable(path: ListPath, i: number, id: string): void {
-    const variable = this.variable(id);
-    if (variable) {
-      this.setAction(path, i, {
-        type: "variable",
-        id,
-        op: "set",
-        value: variable.kind === "flag" ? true : 1,
-      });
-    }
-  }
-
-  protected counterValue(raw: string): number {
-    return clampCounter(Number(raw));
-  }
-
-  protected play(sound: string): void {
-    playSound(sound, true);
-  }
-
-  protected seconds(raw: string): number {
-    const value = Math.round(Number(raw) * 10) / 10;
-    return Number.isFinite(value) ? Math.min(60, Math.max(0.1, value)) : 1;
-  }
-
-  protected value(event: Event): string {
-    return (
-      event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    ).value;
-  }
-
-  protected checked(event: Event): boolean {
-    return (event.target as HTMLInputElement).checked;
   }
 }

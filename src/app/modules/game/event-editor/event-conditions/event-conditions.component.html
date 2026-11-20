@@ -1,0 +1,256 @@
+@let c = conditions();
+@for (test of c.variables; track $index; let k = $index) {
+  @let v = data.variable(test.id);
+  <div class="row">
+    <svg lucideVariable class="row-icon"></svg>
+    <select aria-label="Variable" (change)="setTestVariable(k, value($event))">
+      @if (!v) {
+        <option value="" selected>(variable supprimée)</option>
+      }
+      @for (variable of data.variables; track variable.id) {
+        <option [value]="variable.id" [selected]="variable.id === test.id">
+          {{ variable.name }}
+        </option>
+      }
+    </select>
+    @if (v?.kind === "flag") {
+      <select
+        aria-label="Valeur"
+        class="narrow"
+        (change)="setTest(k, { op: 'is', value: value($event) === 'true' })"
+      >
+        <option value="true" [selected]="test.value === true">est vrai</option>
+        <option value="false" [selected]="test.value === false">
+          est faux
+        </option>
+      </select>
+    } @else if (v) {
+      <select
+        aria-label="Comparaison"
+        class="op"
+        (change)="setTest(k, { op: $any(value($event)) })"
+      >
+        @for (t of counterTests; track t.op) {
+          <option [value]="t.op" [selected]="test.op === t.op">
+            {{ t.label }}
+          </option>
+        }
+      </select>
+      <input
+        type="number"
+        class="num"
+        aria-label="Nombre"
+        [value]="test.value"
+        (change)="setTest(k, { value: counterValue(value($event)) })"
+      />
+    }
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer la condition"
+      title="Retirer"
+      (click)="removeTest(k)"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@if (c.hours; as hours) {
+  <div class="row">
+    <svg lucideClock class="row-icon"></svg>
+    <span>De</span>
+    <select
+      aria-label="De"
+      class="narrow"
+      (change)="setHours({ from: +value($event), to: hours.to })"
+    >
+      @for (h of hourList; track h) {
+        <option [value]="h" [selected]="h === hours.from">{{ h }} h</option>
+      }
+    </select>
+    <span>à</span>
+    <select
+      aria-label="À"
+      class="narrow"
+      (change)="setHours({ from: hours.from, to: +value($event) })"
+    >
+      @for (h of hourList; track h) {
+        <option [value]="h" [selected]="h === hours.to">{{ h }} h</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer l'heure"
+      title="Retirer"
+      (click)="setHours(undefined)"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@if (c.weathers; as weathers) {
+  <div class="row wrap">
+    <svg lucideCloudSun class="row-icon"></svg>
+    <span>Météo :</span>
+    @for (w of weathers; track w) {
+      <button
+        type="button"
+        class="chip"
+        [title]="'Retirer ' + weatherLabel(w)"
+        (click)="removeWeather(w)"
+      >
+        {{ weatherLabel(w) }} <svg lucideX></svg>
+      </button>
+    }
+    <button
+      type="button"
+      class="chip add"
+      title="Ajouter une météo"
+      (click)="pickWeather.emit(weathers)"
+    >
+      <svg lucidePlus></svg> ou…
+    </button>
+  </div>
+}
+@for (test of c.items ?? []; track $index; let k = $index) {
+  <div class="row">
+    <svg lucideBackpack class="row-icon"></svg>
+    <span>A</span>
+    <input
+      type="number"
+      class="num"
+      min="1"
+      [max]="countMax"
+      aria-label="Combien au moins"
+      [value]="test.count"
+      (change)="
+        setItemTest(k, { count: wholeNumber(value($event), 1, countMax) })
+      "
+    />
+    <select aria-label="Objet" (change)="setItemTest(k, { id: value($event) })">
+      @if (!data.itemName(test.id)) {
+        <option value="" selected>(objet supprimé)</option>
+      }
+      @for (it of data.db.items; track it.id) {
+        <option [value]="it.id" [selected]="it.id === test.id">
+          {{ it.name }}
+        </option>
+      }
+    </select>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer la condition"
+      title="Retirer"
+      (click)="removeItemTest(k)"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@if (c.money) {
+  <div class="row">
+    <svg lucideCoins class="row-icon"></svg>
+    <span>Argent ≥</span>
+    <input
+      type="number"
+      class="num"
+      min="1"
+      [max]="moneyMax"
+      aria-label="Argent au moins"
+      [value]="c.money"
+      (change)="setMoneyTest(wholeNumber(value($event), 1, moneyMax))"
+    />
+    <span>pièces</span>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer la condition"
+      title="Retirer"
+      (click)="setMoneyTest(undefined)"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@for (m of c.members ?? []; track $index; let k = $index) {
+  <div class="row">
+    <svg lucideUsers class="row-icon"></svg>
+    <select aria-label="Personnage" (change)="setMemberTest(k, value($event))">
+      @if (!data.characterName(m)) {
+        <option value="" selected>(personnage supprimé)</option>
+      }
+      @for (ch of data.teamCharacters; track ch.id) {
+        <option [value]="ch.id" [selected]="ch.id === m">
+          {{ ch.name }}
+        </option>
+      }
+    </select>
+    <span>est dans l'équipe</span>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer la condition"
+      title="Retirer"
+      (click)="removeMemberTest(k)"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@if (!countConditions(c)) {
+  <p class="help">{{ empty() }}</p>
+}
+<div class="add-row">
+  <button
+    type="button"
+    [disabled]="!data.variables.length"
+    [title]="
+      data.variables.length
+        ? 'Un drapeau ou un compteur'
+        : 'Crée d\'abord une variable (éditeur de variables)'
+    "
+    (click)="addVariableTest()"
+  >
+    <svg lucidePlus></svg> Variable
+  </button>
+  <button
+    type="button"
+    [disabled]="!!c.hours"
+    (click)="setHours({ from: 8, to: 18 })"
+  >
+    <svg lucidePlus></svg> Heure
+  </button>
+  <button
+    type="button"
+    [disabled]="!!c.weathers"
+    (click)="pickWeather.emit([])"
+  >
+    <svg lucidePlus></svg> Météo
+  </button>
+  <button
+    type="button"
+    [disabled]="!data.db.items.length"
+    title="L'équipe a un objet"
+    (click)="addItemTest()"
+  >
+    <svg lucidePlus></svg> Objet
+  </button>
+  <button
+    type="button"
+    [disabled]="!!c.money"
+    title="L'équipe a assez d'argent"
+    (click)="setMoneyTest(100)"
+  >
+    <svg lucidePlus></svg> Argent
+  </button>
+  <button
+    type="button"
+    [disabled]="!data.teamCharacters.length"
+    title="Un personnage est dans l'équipe"
+    (click)="addMemberTest()"
+  >
+    <svg lucidePlus></svg> Équipe
+  </button>
+</div>

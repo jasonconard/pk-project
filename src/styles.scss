@@ -1,4 +1,5 @@
 @use "app/modules/database-editor/sheets" as database-editor;
+@use "app/modules/game/event-editor/fields" as event-editor;
 
 /* You can add global styles to this file, and also import other style files */
 
@@ -124,4 +125,9 @@ svg.lucide {
 // The database editor's sheets: their shared fields (see that file)
 app-database-editor {
   @include database-editor.sheets;
+}
+
+// The event window's fields (in the window, not the weather list over it)
+:where(game-event-editor .event-editor) {
+  @include event-editor.fields;
 }
