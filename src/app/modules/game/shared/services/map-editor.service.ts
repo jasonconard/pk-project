@@ -7,9 +7,8 @@ import { KeyService } from "../../../../core/shared/service/key.service";
 import { TouchService } from "../../../../core/shared/service/touch.service";
 import { BasicMeshService } from "./basic-mesh.service";
 import { SceneBuilding } from "../model/SceneBuilding";
-import { SceneChunk, StairsSide, stairsSide } from "../model/SceneMap";
+import { SceneChunk } from "../model/SceneMap";
 import { TILE_SIZE } from "../model/Terrain";
-import { LEVEL_HEIGHT } from "../model/GroundMesh";
 import { CHUNK_SIZE, downloadMapFile, newChunk, saveMap } from "./map-storage";
 import { eventsWithPassage, Passage, passageOf } from "../model/Passage";
 import {
@@ -26,6 +25,10 @@ import {
 } from "../model/Zone";
 import { Vec3 } from "../model/SceneUtils";
 import { SceneEvent } from "../model/SceneEvent";
+import { EditAction, EditHistory } from "./map-editor/edit-history";
+import { EditorGrid } from "./map-editor/editor-grid";
+import { EditorMarkers, slotKey } from "./map-editor/editor-markers";
+import { GroundPainter } from "./map-editor/ground-painter";
 
 /** Camera zoom range in the editor (1 = normal game view, lower = closer). */
 const ZOOM_MIN = 0.4;
@@ -42,20 +45,12 @@ const GRID = 8;
 const CLICK_TOLERANCE = 5;
 /** Same for a finger (less steady than a mouse): below is a tap, above a drag. */
 const TAP_TOLERANCE = 10;
-/** Cells grid: color, opacity, and height above the ground (world units). */
-const GRID_COLOR = 0xff_ff_ff;
-const GRID_OPACITY = 0.35;
-const GRID_LIFT = 0.4;
 /** Opacity of the preview of the model to place. */
 const GHOST_OPACITY = 0.55;
 /** Color of the box around the selected object. */
 const SELECTION_COLOR = 0xff_b0_4a;
-/** Max undo steps kept. */
-const HISTORY_SIZE = 100;
 /** Delay before saving the map in the browser after a change (ms: a burst of changes is saved once). */
 const SAVE_DELAY = 400;
-/** Max cells painted by one bucket fill. */
-const FILL_MAX = 4096;
 /** Buildings fading / hiding: every this many input ticks (120 Hz → 30 Hz, like in the game), when the view moved. */
 const VISIBILITY_EVERY = 4;
 
@@ -72,10 +67,10 @@ export interface EditSelection {
   zoneSize: { x: number; z: number } | null;
 }
 
-/** Editor command sent by the UI (keyboard shortcuts, buttons). */
 /** Ground brush: size in cells, or the bucket. */
 export type EditBrush = 1 | 2 | 3 | "fill";
 
+/** Editor command sent by the UI (keyboard shortcuts, buttons). */
 export type EditCommand =
   | "undo"
   | "redo"
@@ -89,56 +84,8 @@ export type EditCommand =
   | "export"
   | "reset";
 
-interface EditAction {
-  undo(): void;
-  redo(): void;
-}
-
-/** One painting stroke: each painted cell with its tile before and after (for undo / redo). */
-interface Stroke {
-  cells: Map<
-    string,
-    {
-      chunk: SceneChunk;
-      col: number;
-      row: number;
-      before: string | null;
-      after: string | null;
-    }
-  >;
-  /** Height tool: each cell's level before / after (each cell moves one level per stroke). */
-  levels: Map<
-    string,
-    {
-      chunk: SceneChunk;
-      col: number;
-      row: number;
-      before: number;
-      after: number;
-    }
-  >;
-  /** Stairs tool / eraser: each cell's stairs before / after. */
-  stairs: Map<
-    string,
-    {
-      chunk: SceneChunk;
-      col: number;
-      row: number;
-      before: StairsSide | null;
-      after: StairsSide | null;
-    }
-  >;
-  /** Chunk tools: done once per stroke. */
-  chunkDone?: boolean;
-}
-
 /** Chunk tools of the palette: add a chunk on a free place next to the map, take one away. */
 const CHUNK_TOOLS = new Set(["chunk-add", "chunk-remove", "spawn"]);
-/** Arrival point marker (editor only). */
-const SPAWN_COLOR = 0xff_d3_4d;
-/** Outlines of the chunks (white) and of the free places next to them (green) while a chunk tool is selected. */
-const CHUNK_LINE_COLOR = 0xff_ff_ff;
-const SLOT_LINE_COLOR = 0x6b_cb_77;
 
 interface Picked {
   chunk: SceneChunk;
@@ -192,12 +139,9 @@ export class MapEditorService {
     this.selectionBox,
     SELECTION_COLOR
   );
-  private readonly undoStack: EditAction[] = [];
-  private readonly redoStack: EditAction[] = [];
   private saveTimer?: ReturnType<typeof setTimeout>;
   private savePending = false;
-  /** Ground painting: the stroke being painted, and the square showing the cell under the mouse. */
-  private stroke: Stroke | null = null;
+  /** The square showing the cell under the mouse (ground painting). */
   private readonly brush = new THREE.LineLoop(
     new THREE.BufferGeometry().setFromPoints(
       [
@@ -213,13 +157,12 @@ export class MapEditorService {
   /** Fingers on the screen (pointer id → position), and the pinch of two of them (their distance and the zoom at its start). */
   private readonly touches = new Map<number, { x: number; y: number }>();
   private pinch: { distance: number; zoom: number } | null = null;
-  /** Cells grid: one set of lines per chunk (built when the chunk is seen). */
-  private readonly grids = new Map<string, THREE.LineSegments>();
-  private readonly gridMaterial = new THREE.LineBasicMaterial({
-    color: GRID_COLOR,
-    transparent: true,
-    opacity: GRID_OPACITY,
-  });
+  private readonly grid = new EditorGrid();
+  private readonly markers = new EditorMarkers();
+  private readonly history = new EditHistory();
+  private readonly painter = new GroundPainter(this.grid, (game, action) =>
+    this.record(game, action)
+  );
   /** Buildings fading: input ticks counter, and the camera target / zoom they were last computed for (null = to do). */
   private visibilityTick = 0;
   private visibilityAt: { target: THREE.Vector3; zoom: number } | null = null;
@@ -275,11 +218,7 @@ export class MapEditorService {
       }
       if (game.editTileId && !touch && !this.groundPick) {
         // Painting the ground with the mouse: the press and every move paint (a finger paints on a tap)
-        this.stroke = {
-          cells: new Map(),
-          levels: new Map(),
-          stairs: new Map(),
-        };
+        this.painter.begin();
         this.paintAt(game, ev.clientX, ev.clientY);
         el.setPointerCapture(ev.pointerId);
         return;
@@ -337,7 +276,7 @@ export class MapEditorService {
           return;
         }
       }
-      if (this.stroke) {
+      if (this.painter.painting) {
         this.hover(game, ev.clientX, ev.clientY);
         this.paintAt(game, ev.clientX, ev.clientY);
         return;
@@ -376,8 +315,8 @@ export class MapEditorService {
           this.pinch = null;
         }
       }
-      if (this.stroke) {
-        this.endStroke(game);
+      if (this.painter.painting) {
+        this.painter.end(game);
       }
       if (!this.drag || cancelled) {
         this.cancelDrag(game);
@@ -407,13 +346,9 @@ export class MapEditorService {
         } else if (game.editTileId) {
           // Tap (finger): one press of the brush
           haptic("tick");
-          this.stroke = {
-            cells: new Map(),
-            levels: new Map(),
-            stairs: new Map(),
-          };
+          this.painter.begin();
           this.paintAt(game, ev.clientX, ev.clientY);
-          this.endStroke(game);
+          this.painter.end(game);
         } else if (game.editModelId) {
           // (a finger doesn't hover: the preview goes where it tapped, and doesn't stay over the placed model)
           this.moveGhost(game, ev.clientX, ev.clientY);
@@ -460,8 +395,8 @@ export class MapEditorService {
     game.raycaster.layers.enable(ZONE_LAYER);
     game.mapHelper?.resetFacing();
     this.visibilityAt = null;
-    this.refreshChunkOutlines(game);
-    this.refreshSpawnMarker(game);
+    this.markers.refreshChunkOutlines(game);
+    this.markers.refreshSpawnMarker(game);
     // Touch screens: no stick nor buttons while editing, the fingers move the view and edit the map
     this.touchService.setGameControls(false);
     this.updateHistoryFlags(game);
@@ -476,16 +411,16 @@ export class MapEditorService {
     game.raycaster.layers.disable(ZONE_LAYER);
     this.touchService.setGameControls(true);
     this.cancelDrag(game);
-    this.stroke = null;
+    this.painter.cancel();
     this.pinch = null;
     this.touches.clear();
-    this.clearGrid();
+    this.grid.clear();
     this.showGhostAt(null);
     this.brush.visible = false;
     this.select(game, null);
     this.groundPick = null;
-    this.refreshChunkOutlines(game);
-    this.refreshSpawnMarker(game);
+    this.markers.refreshChunkOutlines(game);
+    this.markers.refreshSpawnMarker(game);
     game.cameraZoom = this.savedZoom;
     game.camera.position.copy(this.savedPosition);
     this.updateFar(game);
@@ -538,7 +473,7 @@ export class MapEditorService {
     }
     game.editTileId = tileId;
     this.brush.visible = false;
-    this.refreshChunkOutlines(game);
+    this.markers.refreshChunkOutlines(game);
     if (
       game.editMode &&
       game.cameraZoom > ZOOM_MAX &&
@@ -549,138 +484,6 @@ export class MapEditorService {
   }
 
   // --- Chunks ---
-
-  private chunkOutlines?: THREE.Group;
-
-  /** With a chunk tool: the chunks' outlines, and the free places around them where one can be added. */
-  private refreshChunkOutlines(game: Game) {
-    if (this.chunkOutlines) {
-      this.chunkOutlines.removeFromParent();
-      this.chunkOutlines.children.forEach((line) =>
-        (line as THREE.LineSegments).geometry.dispose()
-      );
-      this.chunkOutlines = undefined;
-    }
-    const chunks = game.mapHelper?.sceneMap.chunks;
-    if (
-      !game.editMode ||
-      !["chunk-add", "chunk-remove"].includes(game.editTileId ?? "") ||
-      !chunks
-    ) {
-      return;
-    }
-    const taken = new Set(chunks.map((c) => this.slotKey(c.pos.x, c.pos.z)));
-    const free = new Map<string, [number, number]>();
-    chunks.forEach((c) => {
-      const col = Math.round(c.pos.x / CHUNK_SIZE);
-      const row = Math.round(c.pos.z / CHUNK_SIZE);
-      for (const [dc, dr] of [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ]) {
-        const key = col + dc + "," + (row + dr);
-        if (!taken.has(key)) {
-          free.set(key, [col + dc, row + dr]);
-        }
-      }
-    });
-    const squares = (centers: [number, number][], inset: number) => {
-      const points: THREE.Vector3[] = [];
-      centers.forEach(([x, z]) => {
-        const h = CHUNK_SIZE / 2 - inset;
-        const corners = [
-          [-h, -h],
-          [h, -h],
-          [h, h],
-          [-h, h],
-        ].map(([dx, dz]) => new THREE.Vector3(x + dx, 0.5, z + dz));
-        corners.forEach((corner, i) =>
-          points.push(corner, corners[(i + 1) % 4])
-        );
-        if (inset) {
-          // A plus in the middle of a free place
-          points.push(
-            new THREE.Vector3(x - 24, 0.5, z),
-            new THREE.Vector3(x + 24, 0.5, z),
-            new THREE.Vector3(x, 0.5, z - 24),
-            new THREE.Vector3(x, 0.5, z + 24)
-          );
-        }
-      });
-      return new THREE.BufferGeometry().setFromPoints(points);
-    };
-    const group = new THREE.Group();
-    group.add(
-      new THREE.LineSegments(
-        squares(
-          chunks.map((c) => [c.pos.x, c.pos.z]),
-          0
-        ),
-        new THREE.LineBasicMaterial({
-          color: CHUNK_LINE_COLOR,
-          transparent: true,
-          opacity: 0.6,
-          depthTest: false,
-        })
-      )
-    );
-    if (game.editTileId === "chunk-add") {
-      group.add(
-        new THREE.LineSegments(
-          squares(
-            [...free.values()].map(([c, r]) => [
-              c * CHUNK_SIZE,
-              r * CHUNK_SIZE,
-            ]),
-            8
-          ),
-          new THREE.LineBasicMaterial({
-            color: SLOT_LINE_COLOR,
-            depthTest: false,
-          })
-        )
-      );
-    }
-    group.children.forEach((line) => (line.renderOrder = 19));
-    this.chunkOutlines = group;
-    game.scene.add(group);
-  }
-
-  private spawnMarker?: THREE.Group;
-
-  /** The map's arrival point while editing: a yellow ring and a post. */
-  refreshSpawnMarker(game: Game) {
-    const spawn = game.mapHelper?.sceneMap.spawn ?? { x: 0, y: 0, z: 0 };
-    if (!this.spawnMarker) {
-      const material = new THREE.MeshBasicMaterial({
-        color: SPAWN_COLOR,
-        depthTest: false,
-        transparent: true,
-        opacity: 0.9,
-        side: THREE.DoubleSide,
-      });
-      const ring = new THREE.Mesh(new THREE.RingGeometry(6, 9, 24), material);
-      ring.rotation.x = -Math.PI / 2;
-      const post = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 22, 1.5),
-        material
-      );
-      post.position.y = 11;
-      this.spawnMarker = new THREE.Group();
-      this.spawnMarker.add(ring, post);
-      this.spawnMarker.children.forEach((part) => (part.renderOrder = 21));
-      game.scene.add(this.spawnMarker);
-    }
-    const level = game.mapHelper?.levelAtWorld(spawn.x, spawn.z) ?? 0;
-    this.spawnMarker.position.set(spawn.x, level * LEVEL_HEIGHT + 0.5, spawn.z);
-    this.spawnMarker.visible = game.editMode;
-  }
-
-  private slotKey(x: number, z: number): string {
-    return Math.round(x / CHUNK_SIZE) + "," + Math.round(z / CHUNK_SIZE);
-  }
 
   /** Point of the ground level 0 under the mouse (also where there is no ground: free places). */
   private planeAt(
@@ -717,18 +520,16 @@ export class MapEditorService {
       };
       const set = (spawn: Vec3 | undefined) => {
         map.spawn = spawn;
-        this.refreshSpawnMarker(game);
+        this.markers.refreshSpawnMarker(game);
       };
       set(after);
       haptic("success");
       this.record(game, { undo: () => set(before), redo: () => set(after) });
       return;
     }
-    const key = this.slotKey(point.x, point.z);
+    const key = slotKey(point.x, point.z);
     const [col, row] = key.split(",").map(Number);
-    const existing = map.chunks.find(
-      (c) => this.slotKey(c.pos.x, c.pos.z) === key
-    );
+    const existing = map.chunks.find((c) => slotKey(c.pos.x, c.pos.z) === key);
     if (game.editTileId === "chunk-add") {
       const touches = map.chunks.some(
         (c) =>
@@ -781,13 +582,13 @@ export class MapEditorService {
 
   private putChunk(game: Game, chunk: SceneChunk) {
     game.mapHelper?.addChunk(chunk);
-    this.refreshChunkOutlines(game);
+    this.markers.refreshChunkOutlines(game);
   }
 
   private takeChunk(game: Game, chunk: SceneChunk) {
-    this.removeGrid(chunk.id);
+    this.grid.remove(chunk.id);
     game.mapHelper?.removeChunk(chunk);
-    this.refreshChunkOutlines(game);
+    this.markers.refreshChunkOutlines(game);
   }
 
   /** Brush size in cells (1 to 3), or 'fill' (bucket). */
@@ -828,7 +629,7 @@ export class MapEditorService {
       case "toggleGrid":
         game.editGrid = !game.editGrid;
         if (!game.editGrid) {
-          this.clearGrid();
+          this.grid.clear();
         }
         break;
       case "export":
@@ -858,16 +659,7 @@ export class MapEditorService {
     // Buildings fading / hiding follow the camera target instead of the (frozen) player
     const mapHelper = game.mapHelper;
     if (mapHelper && game.editGrid) {
-      // Grid of the chunks coming into view
-      mapHelper.sceneMap.chunks.forEach((chunk) => {
-        const grid = this.grids.get(chunk.id);
-        if (grid && grid.parent !== chunk.group) {
-          this.removeGrid(chunk.id); // (its chunk was taken down: far away)
-        }
-        if (chunk.visible && !this.grids.has(chunk.id)) {
-          this.buildGrid(game, chunk);
-        }
-      });
+      this.grid.follow(game);
     }
     // (every building's box is computed: only 30 times per second, and only when the view moved or the map changed)
     if (mapHelper && ++this.visibilityTick % VISIBILITY_EVERY === 0) {
@@ -914,73 +706,6 @@ export class MapEditorService {
   }
 
   // --- Grid ---
-
-  /**
-   * Lines around every cell of a chunk, just above its ground: at the cell level, sloped on stairs. Rebuilt when the
-   * reliefs of the chunk change.
-   */
-  private buildGrid(game: Game, chunk: SceneChunk) {
-    const mapHelper = game.mapHelper;
-    if (!mapHelper || !chunk.group) {
-      return;
-    }
-    this.removeGrid(chunk.id);
-    const cols = chunk.size.x / TILE_SIZE;
-    const rows = chunk.size.y / TILE_SIZE;
-    const points: number[] = [];
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        const y = mapHelper.levelAt(chunk, col, row) * LEVEL_HEIGHT + GRID_LIFT;
-        const stairs = stairsSide(chunk.stairs?.[col + "," + row]);
-        const x0 = col * TILE_SIZE - chunk.size.x / 2;
-        const z0 = row * TILE_SIZE - chunk.size.y / 2;
-        const x1 = x0 + TILE_SIZE;
-        const z1 = z0 + TILE_SIZE;
-        const h = (high: boolean) => (high ? y + LEVEL_HEIGHT : y);
-        // Corners: north-west, north-east, south-east, south-west (stairs: the side they rise towards is higher)
-        const corners = [
-          [x0, h(stairs === "n" || stairs === "w"), z0],
-          [x1, h(stairs === "n" || stairs === "e"), z0],
-          [x1, h(stairs === "s" || stairs === "e"), z1],
-          [x0, h(stairs === "s" || stairs === "w"), z1],
-        ];
-        corners.forEach((corner, i) =>
-          points.push(...corner, ...corners[(i + 1) % 4])
-        );
-      }
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(points, 3)
-    );
-    const grid = new THREE.LineSegments(geometry, this.gridMaterial);
-    grid.position.set(chunk.pos.x, chunk.pos.y, chunk.pos.z);
-    chunk.group.add(grid);
-    this.grids.set(chunk.id, grid);
-  }
-
-  private removeGrid(chunkId: string) {
-    const grid = this.grids.get(chunkId);
-    if (grid) {
-      grid.removeFromParent();
-      grid.geometry.dispose();
-      this.grids.delete(chunkId);
-    }
-  }
-
-  private clearGrid() {
-    [...this.grids.keys()].forEach((id) => this.removeGrid(id));
-  }
-
-  /** The reliefs of these chunks changed: their grid follows (if shown). */
-  private refreshGrid(game: Game, chunks: Iterable<SceneChunk>) {
-    new Set(chunks).forEach((chunk) => {
-      if (this.grids.has(chunk.id)) {
-        this.buildGrid(game, chunk);
-      }
-    });
-  }
 
   // --- Selection, move, delete, options ---
 
@@ -1331,30 +1056,20 @@ export class MapEditorService {
 
   // --- Undo / redo ---
 
-  /** Keeps a change that was just done (a new change forgets the undone ones). */
+  /** Keeps a change that was just done. */
   private record(game: Game, action: EditAction) {
-    this.undoStack.push(action);
-    if (this.undoStack.length > HISTORY_SIZE) {
-      this.undoStack.shift();
-    }
-    this.redoStack.length = 0;
+    this.history.record(action);
     this.updateHistoryFlags(game);
   }
 
   private undo(game: Game) {
-    const action = this.undoStack.pop();
-    if (action) {
-      action.undo();
-      this.redoStack.push(action);
+    if (this.history.undo()) {
       this.updateHistoryFlags(game);
     }
   }
 
   private redo(game: Game) {
-    const action = this.redoStack.pop();
-    if (action) {
-      action.redo();
-      this.undoStack.push(action);
+    if (this.history.redo()) {
       this.updateHistoryFlags(game);
     }
   }
@@ -1362,13 +1077,13 @@ export class MapEditorService {
   /** Also the moment the map changed (a change, an undo, a redo): it is saved in the browser. */
   private updateHistoryFlags(game: Game) {
     this.visibilityAt = null; // (objects placed, moved, removed: their fading is computed again)
-    game.editCanUndo = this.undoStack.length > 0;
-    game.editCanRedo = this.redoStack.length > 0;
+    game.editCanUndo = this.history.canUndo;
+    game.editCanRedo = this.history.canRedo;
     this.scheduleSave(game);
   }
 
   private scheduleSave(game: Game) {
-    if (this.undoStack.length === 0 && this.redoStack.length === 0) {
+    if (this.history.empty) {
       return; // nothing edited yet (just opened the editor)
     }
     clearTimeout(this.saveTimer);
@@ -1405,12 +1120,11 @@ export class MapEditorService {
     this.saveNow(game);
     setTimeout(() => {
       // (once the new map is there)
-      this.refreshChunkOutlines(game);
-      this.refreshSpawnMarker(game);
+      this.markers.refreshChunkOutlines(game);
+      this.markers.refreshSpawnMarker(game);
     });
-    this.undoStack.length = 0;
-    this.redoStack.length = 0;
-    this.clearGrid();
+    this.history.clear();
+    this.grid.clear();
     this.select(game, null);
     game.editCanUndo = false;
     game.editCanRedo = false;
@@ -1514,9 +1228,7 @@ export class MapEditorService {
       const point = this.planeAt(game, clientX, clientY);
       this.brush.visible = !!point;
       if (point) {
-        const [col, row] = this.slotKey(point.x, point.z)
-          .split(",")
-          .map(Number);
+        const [col, row] = slotKey(point.x, point.z).split(",").map(Number);
         const scale = CHUNK_SIZE / TILE_SIZE;
         this.brush.scale.set(scale, 1, scale);
         this.brush.position.set(
@@ -1545,200 +1257,19 @@ export class MapEditorService {
   }
 
   /**
-   * Paints the cells under the brush: a square of `editBrush` cells (from the one under the mouse), or with the
-   * bucket ('fill', terrains only), the whole area of the same terrain around it (once per stroke).
+   * Paints the cells under the brush (see GroundPainter.paint); a chunk tool acts once per stroke.
    */
   private paintAt(game: Game, clientX: number, clientY: number) {
     if (CHUNK_TOOLS.has(game.editTileId ?? "")) {
-      if (this.stroke && !this.stroke.chunkDone) {
-        this.stroke.chunkDone = true;
+      if (this.painter.chunkTurn()) {
         this.chunkToolAt(game, clientX, clientY);
       }
       return;
     }
     const ground = this.groundAt(game, clientX, clientY);
-    const mapHelper = game.mapHelper;
-    if (!ground || !this.stroke || !mapHelper) {
-      return;
+    if (ground) {
+      this.painter.paint(game, ground);
     }
-    const terrainTool = !["raise", "lower", "stairs", "unstairs"].includes(
-      game.editTileId ?? ""
-    );
-    if (game.editBrush === "fill" && terrainTool) {
-      if (this.stroke.cells.size === 0) {
-        this.fillCells(game, ground.x, ground.z).forEach((cell) =>
-          this.paintCell(game, cell)
-        );
-      }
-      return;
-    }
-    const size = game.editBrush === "fill" ? 1 : game.editBrush;
-    for (let i = 0; i < size; i++) {
-      for (let j = 0; j < size; j++) {
-        const cell = mapHelper.cellAt(
-          ground.x + i * TILE_SIZE,
-          ground.z + j * TILE_SIZE
-        );
-        if (cell) {
-          this.paintCell(game, cell);
-        }
-      }
-    }
-  }
-
-  /** Bucket: the cells of the same terrain connected to the one at (x, z) (4 neighbors, at most FILL_MAX). */
-  private fillCells(
-    game: Game,
-    x: number,
-    z: number
-  ): { chunk: SceneChunk; col: number; row: number }[] {
-    const mapHelper = game.mapHelper!;
-    const start = mapHelper.cellAt(x, z);
-    if (!start) {
-      return [];
-    }
-    const terrainOf = (cell: { chunk: SceneChunk; col: number; row: number }) =>
-      cell.chunk.tiles?.[cell.col + "," + cell.row];
-    const target = terrainOf(start);
-    const centerOf = (cell: {
-      chunk: SceneChunk;
-      col: number;
-      row: number;
-    }) => [
-      cell.chunk.pos.x - cell.chunk.size.x / 2 + (cell.col + 0.5) * TILE_SIZE,
-      cell.chunk.pos.z - cell.chunk.size.y / 2 + (cell.row + 0.5) * TILE_SIZE,
-    ];
-    const seen = new Set<string>();
-    const result: { chunk: SceneChunk; col: number; row: number }[] = [];
-    const queue = [start];
-    while (queue.length > 0 && result.length < FILL_MAX) {
-      const cell = queue.shift()!;
-      const key = cell.chunk.id + ":" + cell.col + "," + cell.row;
-      if (seen.has(key) || terrainOf(cell) !== target) {
-        continue;
-      }
-      seen.add(key);
-      result.push(cell);
-      const [cx, cz] = centerOf(cell);
-      for (const [dx, dz] of [
-        [TILE_SIZE, 0],
-        [-TILE_SIZE, 0],
-        [0, TILE_SIZE],
-        [0, -TILE_SIZE],
-      ]) {
-        const next = mapHelper.cellAt(cx + dx, cz + dz);
-        if (next) {
-          queue.push(next);
-        }
-      }
-    }
-    return result;
-  }
-
-  /** One cell of a stroke, with the current tool (terrain, eraser, height, stairs). */
-  private paintCell(
-    game: Game,
-    cell: { chunk: SceneChunk; col: number; row: number }
-  ) {
-    if (!this.stroke || !game.mapHelper) {
-      return;
-    }
-    const key = cell.chunk.id + ":" + cell.col + "," + cell.row;
-    if (game.editTileId === "raise" || game.editTileId === "lower") {
-      // Height tool: one level up / down per cell and per stroke
-      if (!this.stroke.levels.has(key)) {
-        const before = game.mapHelper.levelAt(cell.chunk, cell.col, cell.row);
-        const after = before + (game.editTileId === "raise" ? 1 : -1);
-        game.mapHelper.setLevel(cell.chunk, cell.col, cell.row, after);
-        this.stroke.levels.set(key, {
-          ...cell,
-          before,
-          after: game.mapHelper.levelAt(cell.chunk, cell.col, cell.row),
-        });
-        this.refreshGrid(game, [cell.chunk]);
-      }
-      return;
-    }
-    // Stairs tool puts stairs; "no stairs" removes them, and so does the eraser (with the painted terrain)
-    if (
-      game.editTileId === "stairs" ||
-      game.editTileId === "unstairs" ||
-      game.editTileId === "erase"
-    ) {
-      const before = stairsSide(cell.chunk.stairs?.[cell.col + "," + cell.row]);
-      if (
-        !this.stroke.stairs.has(key) &&
-        (before || game.editTileId === "stairs")
-      ) {
-        game.mapHelper.setStairs(
-          cell.chunk,
-          cell.col,
-          cell.row,
-          game.editTileId === "stairs" ? "auto" : null
-        );
-        const after = stairsSide(
-          cell.chunk.stairs?.[cell.col + "," + cell.row]
-        );
-        this.stroke.stairs.set(key, { ...cell, before, after });
-        this.refreshGrid(game, [cell.chunk]);
-      }
-      if (game.editTileId !== "erase") {
-        return;
-      }
-    }
-    const after = game.editTileId === "erase" ? null : game.editTileId;
-    const before = cell.chunk.tiles?.[cell.col + "," + cell.row] ?? null;
-    if (before === after) {
-      return;
-    }
-    if (!this.stroke.cells.has(key)) {
-      this.stroke.cells.set(key, { ...cell, before, after });
-    }
-    game.mapHelper.paintCell(cell.chunk, cell.col, cell.row, after);
-  }
-
-  /** A stroke is undone / redone as a whole. */
-  private endStroke(game: Game) {
-    const cells = [...(this.stroke?.cells.values() ?? [])];
-    const levels = [...(this.stroke?.levels.values() ?? [])].filter(
-      (l) => l.before !== l.after
-    );
-    const stairs = [...(this.stroke?.stairs.values() ?? [])];
-    this.stroke = null;
-    if (
-      (cells.length === 0 && levels.length === 0 && stairs.length === 0) ||
-      !game.mapHelper
-    ) {
-      return;
-    }
-    const mapHelper = game.mapHelper;
-    const reliefChunks = [...levels, ...stairs].map((c) => c.chunk);
-    this.record(game, {
-      undo: () => {
-        cells.forEach((c) =>
-          mapHelper.paintCell(c.chunk, c.col, c.row, c.before)
-        );
-        levels.forEach((l) =>
-          mapHelper.setLevel(l.chunk, l.col, l.row, l.before)
-        );
-        stairs.forEach((s) =>
-          mapHelper.setStairs(s.chunk, s.col, s.row, s.before)
-        );
-        this.refreshGrid(game, reliefChunks);
-      },
-      redo: () => {
-        cells.forEach((c) =>
-          mapHelper.paintCell(c.chunk, c.col, c.row, c.after)
-        );
-        levels.forEach((l) =>
-          mapHelper.setLevel(l.chunk, l.col, l.row, l.after)
-        );
-        stairs.forEach((s) =>
-          mapHelper.setStairs(s.chunk, s.col, s.row, s.after)
-        );
-        this.refreshGrid(game, reliefChunks);
-      },
-    });
   }
 
   // --- Mouse rays, camera ---
