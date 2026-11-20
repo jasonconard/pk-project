@@ -1,14 +1,17 @@
 # Weather module
 
-Big files: grep the symbol, then read only that range. Never read `Weather.ts`, `WeatherHelper.ts` or
-`WeatherAudio.ts` whole.
+Big files: grep the symbol, then read only that range. Never read `day-presets.ts`, `night-presets.ts`,
+`WeatherHelper.ts` or `WeatherAudio.ts` whole.
 
 ## How it fits together
 
-- `Weather.ts` = **data only**. `WeatherType` enum (top) → `WeatherParams` interface (~line 74, every knob documented,
-  0 = off) → `DAY_BASE` / `NIGHT_BASE` → `DAY_PRESETS` / `NIGHT_PRESETS` (`preset(BASE, { overrides })`; a missing
-  entry = not available at that time, see `isWeatherAvailable`) → `TEMPERATURES` → hours (`DAWN`, `DUSK`, `mistAt`)
-  → `WEATHER_CHOICES` (label + emoji shown in the picker; the emoji is content, not a UI icon).
+- Data only, imported through `Weather.ts` (the entry: it re-exports everything below, plus `TEMPERATURES`,
+  `getWeatherParams`, `isWeatherAvailable`, `WEATHER_CHOICES` (label + emoji shown in the picker; the emoji is content,
+  not a UI icon), fireflies / leaves / wind options, `cloneWeatherParams`):
+  - `weather-types.ts`: `WeatherType` enum → `WeatherParams` interface (every knob documented, 0 = off);
+  - `day-presets.ts`: `DAY_BASE`, `preset(BASE, { overrides })`, `DAY_PRESETS`; `night-presets.ts`: `NIGHT_BASE`,
+    `NIGHT_PRESETS` (a missing entry = not available at that time, see `isWeatherAvailable`);
+  - `time-of-day.ts`: hours (`DAWN`, `DUSK`, `mistAt`, `daylightAt`, twilight tints, `formatHour`).
 - `WeatherHelper.ts` = **the engine**, one instance owned by `Game` (`model/Game.ts`: `weather.update(dt)` each frame,
   `renderPostEffects()` for the passes). Setters called by `GameService` (`setWeather`, `setHour`, `setWind`,
   `setCloudDensity`…). Each frame `update()`:
@@ -37,6 +40,7 @@ Big files: grep the symbol, then read only that range. Never read `Weather.ts`, 
 
 ## Adding a weather
 
-Recipe in the root `CLAUDE.md`. Usual touch points: enum + presets + temperature + choice in `Weather.ts`, a
-param if the effect is new (`WeatherParams` + `DAY_BASE` + `NIGHT_BASE`), a style or helper, its wiring in
+Recipe in the root `CLAUDE.md`. Usual touch points: enum (`weather-types.ts`), presets (`day-presets.ts`,
+`night-presets.ts`), temperature + choice (`Weather.ts`), a param if the effect is new (`WeatherParams` + `DAY_BASE` +
+`NIGHT_BASE`), a style or helper, its wiring in
 `WeatherHelper` (field, constructor, `update`, audio levels if it makes sound), `WEATHER_INFO` in `weather-catalog.ts`.
