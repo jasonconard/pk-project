@@ -1,14 +1,15 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, output, signal } from '@angular/core';
 import {
-  LucideActivity, LucideBackpack, LucideSparkles, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideFlame, LucideIcon, LucideInfo, LucidePencil,
+  LucideActivity, LucideBackpack, LucideBan, LucideBox, LucideRotateCcw, LucideCheck, LucideLock, LucideSparkles, LucideUsers, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideFlame, LucideIcon, LucideInfo, LucidePencil,
   LucidePlus, LucideSearch, LucideSword, LucideTrash, LucideX, LucideDynamicIcon, LucideArrowUp, LucideArrowDown, LucideSigma,
 } from '@lucide/angular';
 import { downloadFile } from '../game/shared/util/ts-source';
 import { WEATHER_CHOICES, WeatherType } from '../game/shared/weather/Weather';
 import { weatherScreenshot } from '../game/shared/weather/weather-catalog';
 import {
-  BONUS_MAX, CAST_MAX, castLabel, clampInt, composableElements, DbElement, DbItem, DbSkill, DbState, DbTable, DbWeapon, defaultLearn,
+  AFFINITIES, Affinity, BONUS_MAX, CAST_MAX, CharacterStat, DbCharacter, growthOf, learnState, newCharacter, PICTURE_SIZES, STAT_CURVES,
+  statAt, XP_CURVES, XpCurve, castLabel, clampInt, composableElements, DbElement, DbItem, DbSkill, DbState, DbTable, DbWeapon, defaultLearn,
   ELEMENT_COLORS, EQUIP_SLOTS, EquipSlot, ITEM_KINDS, ItemKind, newItem, PRICE_MAX, RESIST_LEVELS, ResistLevel, withItemKind, XP_MAX,
   formulaProblem, GameDatabase, LEARN_MAX, learnChoices, LEVEL_MAX, MP_MAX, newElement, newId, newSkill, newSkillEffect, newState,
   newStateEffect, newWeapon, partsLabel, PERCENT_MAX, POWER_MAX, SKILL_TARGETS, SKILL_USES, SkillEffect, SkillEffectKind, SkillTarget,
@@ -18,13 +19,17 @@ import { loadDatabase, saveDatabase } from './shared/database-storage';
 import { PixelEditorComponent } from './pixel-editor/pixel-editor.component';
 import { StepperComponent } from './stepper/stepper.component';
 import { WeatherPickerComponent } from '../game/weather-picker/weather-picker.component';
+import { MODEL_CHOICES, modelLabel } from '../game/shared/model/ModelChoice';
 
-type Row = DbElement | DbWeapon | DbState | DbSkill | DbItem;
+type Row = DbElement | DbWeapon | DbState | DbSkill | DbItem | DbCharacter;
+/** A character's picture drawn in the pixel editor (icon: the small face). */
+type PictureField = keyof typeof PICTURE_SIZES;
 /** What has effects: skills and items. */
 type HasEffects = DbSkill | DbItem;
 
-/** In the mockup's order (characters, enemies and items will come before). */
+/** In the mockup's order (enemies and groups will come after the characters). */
 const TABLES: { id: DbTable, label: string, one: string, icon: LucideIcon }[] = [
+  { id: 'characters', label: 'Personnages', one: 'Personnage', icon: LucideUsers },
   { id: 'skills', label: 'Compétences', one: 'Compétence', icon: LucideSparkles },
   { id: 'items', label: 'Objets', one: 'Objet', icon: LucideBackpack },
   { id: 'states', label: 'États', one: 'État', icon: LucideActivity },
@@ -45,13 +50,13 @@ const SIDE_BY_SIDE = '(min-width: 760px)';
 /**
  * Database editor (docs/idees.md, point 5): one tab per table, the list then the row's sheet (side by side on wide
  * screens). Saved in the browser at every change; Exporter writes the game's file (src/assets/database/database.ts).
- * Tables so far: skills (cost, cast time, effects, the levels they are learned with), items (consumables, equipment,
+ * Tables so far: characters (looks, levels, stats, element and weapon levels, equipment), skills (cost, cast time, effects, the levels they are learned with), items (consumables, equipment,
  * key items, gifts), states, elements (with their weathers, simple or composed), weapon types.
  */
 @Component({
   selector: 'app-database-editor',
   imports: [
-    LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideDynamicIcon, LucideInfo, LucidePencil, LucidePlus,
+    LucideBan, LucideBox, LucideCheck, LucideLock, LucideRotateCcw, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideCopy, LucideDownload, LucideDynamicIcon, LucideInfo, LucidePencil, LucidePlus,
     LucideSearch, LucideTrash, LucideX, LucideArrowUp, LucideArrowDown, LucideSigma, NgTemplateOutlet, PixelEditorComponent, StepperComponent, WeatherPickerComponent,
   ],
   templateUrl: './database-editor.component.html',
@@ -88,19 +93,25 @@ export class DatabaseEditorComponent {
   protected readonly priceMax = PRICE_MAX;
   protected readonly bonusMax = BONUS_MAX;
   protected readonly xpMax = XP_MAX;
+  protected readonly affinities = AFFINITIES;
+  protected readonly xpCurves = XP_CURVES;
+  protected readonly models = MODEL_CHOICES.map(c => ({ id: c.model.id, label: modelLabel(c.model.id) }));
+  protected readonly sizes = PICTURE_SIZES;
+  /** The character sheet's tab. */
+  protected readonly charTab = signal<'general' | 'growth'>('general');
   /** Items list: only one kind (null: all). */
   protected readonly itemFilter = signal<ItemKind | null>(null);
 
   protected readonly db = signal<GameDatabase>(loadDatabase());
-  protected readonly table = signal<DbTable>('skills');
+  protected readonly table = signal<DbTable>('characters');
   protected readonly selectedId = signal<string | null>(null);
   protected readonly search = signal('');
   protected readonly saveFailed = signal(false);
   protected readonly message = signal('');
   /** The row whose Supprimer was pressed once (pressed again within 3 s: deleted). */
   protected readonly deleting = signal<string | null>(null);
-  /** The icon being drawn: whose, and its title. */
-  protected readonly iconEdit = signal<{ id: string, title: string, value?: string } | null>(null);
+  /** The picture being drawn: whose, which one (icon, or a character's portrait / sprite), its title and size. */
+  protected readonly iconEdit = signal<{ id: string, field: PictureField, title: string, value?: string, w: number, h: number } | null>(null);
   /** The weather window: for which element, on which side (stronger / weaker). */
   protected readonly weatherPick = signal<{ id: string, strong: boolean } | null>(null);
   /** The weathers the element already has (not offered again). */
@@ -129,6 +140,27 @@ export class DatabaseEditorComponent {
   protected readonly state = computed(() => this.table() === 'states' ? this.current() as DbState | null : null);
   protected readonly skill = computed(() => this.table() === 'skills' ? this.current() as DbSkill | null : null);
   protected readonly item = computed(() => this.table() === 'items' ? this.current() as DbItem | null : null);
+  protected readonly character = computed(() => this.table() === 'characters' ? this.current() as DbCharacter | null : null);
+  protected readonly teamCharacters = computed(() => this.db().characters.filter(c => c.team));
+  /** The character sheet's element and weapon rows: simple elements, composed ones (they follow their parts), weapon types. */
+  protected readonly growthRows = computed(() => {
+    const db = this.db();
+    return {
+      elements: db.elements.filter(e => !e.physical),
+      weapons: db.weapons,
+    };
+  });
+  /** The skills the open character knows from the start, will learn, or never. */
+  protected readonly learnables = computed(() => {
+    const ch = this.character();
+    if (!ch) {
+      return [];
+    }
+    const order = { start: 0, later: 1, never: 2, excluded: 3 };
+    return this.db().skills.filter(s => s.learn.length)
+      .map(skill => ({ skill, state: learnState(ch, skill), progress: skill.learn.map(l => `${this.learnName(l.id)} ${growthOf(ch, l.id).level}/${l.level}`).join(' · ') }))
+      .sort((a, b) => order[a.state] - order[b.state]);
+  });
   protected readonly learnChoices = computed(() => learnChoices(this.db()));
   /** The formula's problem, if any (shown under it). */
   protected readonly formulaProblem = computed(() => formulaProblem(this.skill()?.formula ?? ''));
@@ -194,6 +226,7 @@ export class DatabaseEditorComponent {
   protected select(id: string): void {
     this.selectedId.set(id);
     this.formulaOpen.set(false);
+    this.charTab.set('general');
     this.deleting.set(null);
     this.host.nativeElement.querySelector('.sheet-pane')?.scrollTo({ top: 0 });
   }
@@ -204,6 +237,7 @@ export class DatabaseEditorComponent {
     const table = this.table();
     const base = {
       elements: 'Nouvel élément', weapons: 'Nouveau type d\'arme', states: 'Nouvel état', skills: 'Nouvelle compétence', items: 'Nouvel objet',
+      characters: 'Nouveau personnage',
     }[table];
     const names = new Set(this.rows().map(r => norm(r.name)));
     let name = base;
@@ -212,7 +246,7 @@ export class DatabaseEditorComponent {
     }
     const row = table === 'elements' ? newElement(name) : table === 'weapons' ? newWeapon(name)
       : table === 'states' ? newState(name) : table === 'skills' ? newSkill(name, this.db())
-        : withItemKind(newItem(name), this.itemFilter() ?? 'consumable');
+        : table === 'items' ? withItemKind(newItem(name), this.itemFilter() ?? 'consumable') : newCharacter(name);
     this.commit({ ...this.db(), [table]: [...this.rows(), row] });
     this.search.set('');
     this.selectedId.set(row.id);
@@ -255,7 +289,7 @@ export class DatabaseEditorComponent {
     this.edit(row.id, r => ({ ...r, color }));
   }
 
-  protected setNote(row: DbWeapon | DbSkill | DbItem, note: string): void {
+  protected setNote(row: DbWeapon | DbSkill | DbItem | DbCharacter, note: string): void {
     this.edit(row.id, r => {
       const next = { ...r, note: note.trim() ? note : undefined } as DbWeapon;
       if (!next.note) {
@@ -268,17 +302,24 @@ export class DatabaseEditorComponent {
   // --- Icons ---
 
   protected editIcon(row: Row): void {
-    this.iconEdit.set({ id: row.id, title: `Icône de ${row.name.trim() || 'sans nom'}`, value: row.icon });
+    const name = row.name.trim() || 'sans nom';
+    this.editPicture(row, 'icon', this.table() === 'characters' ? `Petite tête de ${name}` : `Icône de ${name}`);
   }
 
-  protected iconDone(icon: string | undefined): void {
+  protected editPicture(row: Row, field: PictureField, title?: string): void {
+    const name = row.name.trim() || 'sans nom';
+    const titles = { icon: `Icône de ${name}`, portrait: `Portrait de ${name}`, sprite: `${name} en combat` };
+    this.iconEdit.set({ id: row.id, field, title: title ?? titles[field], value: (row as DbCharacter)[field], ...PICTURE_SIZES[field] });
+  }
+
+  protected iconDone(picture: string | undefined): void {
     const target = this.iconEdit();
     this.iconEdit.set(null);
     if (target) {
       this.edit(target.id, r => {
-        const next = { ...r, icon };
-        if (!icon) {
-          delete next.icon;
+        const next = { ...r, [target.field]: picture } as Row;
+        if (!picture) {
+          delete (next as DbCharacter)[target.field];
         }
         return next;
       });
@@ -584,6 +625,134 @@ export class DatabaseEditorComponent {
     return ITEM_KINDS.find(k => k.id === kind)?.label ?? kind;
   }
 
+  // --- Characters ---
+
+  protected setCharacter(ch: DbCharacter, change: Partial<Pick<DbCharacter, 'team' | 'xpCurve' | 'model'>>): void {
+    this.edit(ch.id, c => {
+      const next = { ...c, ...change } as DbCharacter;
+      if (!next.model) {
+        delete next.model;
+      }
+      return next;
+    });
+  }
+
+  protected setXpCurve(ch: DbCharacter, curve: XpCurve): void {
+    this.setCharacter(ch, { xpCurve: curve });
+  }
+
+  /** First and last level (the first one never above the last). */
+  protected setLevels(ch: DbCharacter, change: { levelStart?: number, levelMax?: number }): void {
+    this.edit(ch.id, c => {
+      const next = { ...c, ...change } as DbCharacter;
+      next.levelMax = clampInt(next.levelMax, 1, LEVEL_MAX);
+      next.levelStart = clampInt(next.levelStart, 1, next.levelMax);
+      return next;
+    });
+  }
+
+  protected setStat(ch: DbCharacter, stat: StatId, change: Partial<CharacterStat>): void {
+    this.edit(ch.id, c => {
+      const stats = { ...(c as DbCharacter).stats };
+      const next = { ...stats[stat], ...change };
+      next.start = clampInt(next.start, 0, 9999);
+      next.max = clampInt(next.max, 0, 9999);
+      stats[stat] = next;
+      return { ...c, stats };
+    });
+  }
+
+  /** Tapping the curve: evenly → mostly early → mostly late. */
+  protected cycleCurve(ch: DbCharacter, stat: StatId): void {
+    const order = STAT_CURVES.map(c => c.id);
+    this.setStat(ch, stat, { curve: order[(order.indexOf(ch.stats[stat].curve) + 1) % order.length] });
+  }
+
+  protected curveLabel(ch: DbCharacter, stat: StatId): string {
+    return STAT_CURVES.find(c => c.id === ch.stats[stat].curve)?.label ?? '';
+  }
+
+  /** The curve's preview: 8 bars from the first level to the last (0 to 1). */
+  protected curveBars(ch: DbCharacter, stat: StatId): number[] {
+    const { start, max } = ch.stats[stat];
+    return Array.from({ length: 8 }, (_, i) => {
+      const level = 1 + (ch.levelMax - 1) * (i + 1) / 8;
+      const value = statAt(ch, stat, level);
+      return max > start ? Math.max(0.08, (value - start) / (max - start) * 0.92 + 0.08) : 1;
+    });
+  }
+
+  protected growth(ch: DbCharacter, id: string): { level: number, affinity: Affinity } {
+    return growthOf(ch, id);
+  }
+
+  protected setGrowth(ch: DbCharacter, id: string, change: Partial<{ level: number, affinity: Affinity }>): void {
+    this.edit(ch.id, c => {
+      const next = { ...growthOf(c as DbCharacter, id), ...change };
+      next.level = clampInt(next.level, 0, LEVEL_MAX);
+      return { ...c, growth: { ...(c as DbCharacter).growth, [id]: next } };
+    });
+  }
+
+  protected setAffinity(ch: DbCharacter, id: string, affinity: string): void {
+    this.setGrowth(ch, id, { affinity: affinity as Affinity });
+  }
+
+  protected modelName(id: string): string {
+    return modelLabel(id);
+  }
+
+  protected affinityLabel(affinity: Affinity): string {
+    return AFFINITIES.find(a => a.id === affinity)?.label ?? affinity;
+  }
+
+  /** The equipment of a slot this character can wear. */
+  protected equipChoices(ch: DbCharacter, slot: EquipSlot): DbItem[] {
+    return this.db().items.filter(it => it.kind === 'equipment' && it.slot === slot && (!it.wearers?.length || it.wearers.includes(ch.id)));
+  }
+
+  protected setEquip(ch: DbCharacter, slot: EquipSlot, itemId: string): void {
+    this.edit(ch.id, c => {
+      const equipment = { ...(c as DbCharacter).equipment };
+      if (itemId) {
+        equipment[slot] = itemId;
+      } else {
+        delete equipment[slot];
+      }
+      return { ...c, equipment };
+    });
+  }
+
+  protected toggleWearer(item: DbItem, chId: string): void {
+    this.edit(item.id, i => {
+      const wearers = (i as DbItem).wearers ?? [];
+      const next = { ...i, wearers: wearers.includes(chId) ? wearers.filter(w => w !== chId) : [...wearers, chId] } as DbItem;
+      if (!next.wearers!.length) {
+        delete next.wearers;
+      }
+      return next;
+    });
+  }
+
+  /** A skill kept for other characters: this one never learns it (or learns it again). */
+  protected toggleExcluded(ch: DbCharacter, skillId: string): void {
+    this.edit(ch.id, c => {
+      const excluded = (c as DbCharacter).excludedSkills ?? [];
+      const next = {
+        ...c, excludedSkills: excluded.includes(skillId) ? excluded.filter(s => s !== skillId) : [...excluded, skillId],
+      } as DbCharacter;
+      if (!next.excludedSkills!.length) {
+        delete next.excludedSkills;
+      }
+      return next;
+    });
+  }
+
+  private learnName(id: string): string {
+    const db = this.db();
+    return [...db.elements, ...db.weapons].find(r => r.id === id)?.name ?? '?';
+  }
+
   // --- List texts ---
 
   protected rowMeta(row: Row): string {
@@ -598,6 +767,10 @@ export class DatabaseEditorComponent {
       }
       case 'weapons':
         return (row as DbWeapon).note || 'Type d\'arme';
+      case 'characters': {
+        const ch = row as DbCharacter;
+        return ch.team ? `Équipe · niv. ${ch.levelStart} · PV ${statAt(ch, 'hp', ch.levelStart)}` : 'Habitant';
+      }
       case 'items': {
         const it = row as DbItem;
         const kind = it.kind === 'equipment' ? EQUIP_SLOTS.find(sl => sl.id === it.slot)?.label ?? 'Équipement' : this.itemKindLabel(it.kind);
@@ -637,7 +810,7 @@ export class DatabaseEditorComponent {
     const source = `import { GameDatabase } from '../../app/modules/database-editor/shared/database';
 
 /**
- * The game's database (elements, weapon types, states, skills, items…). Written by the database editor's export (editor →
+ * The game's database (elements, weapon types, states, skills, items, characters…). Written by the database editor's export (editor →
  * Éditeurs → Base de données → Exporter); the database saved in the browser replaces this one.
  */
 export const CODE_DATABASE: GameDatabase = ${JSON.stringify(this.db(), null, 2)};

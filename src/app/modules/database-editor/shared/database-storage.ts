@@ -17,6 +17,7 @@ function complete(database: Partial<GameDatabase>): GameDatabase {
     states: Array.isArray(database.states) ? database.states : code.states,
     skills: Array.isArray(database.skills) ? database.skills : code.skills,
     items: Array.isArray(database.items) ? database.items : code.items,
+    characters: Array.isArray(database.characters) ? database.characters : code.characters,
   };
 }
 

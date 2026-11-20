@@ -2,7 +2,7 @@ import { WeatherType } from '../../game/shared/weather/Weather';
 
 /**
  * The game's database (docs/idees.md, point 5): what the combat, the events and the menus read. Built table by
- * table: elements, weapon types, states, skills and items so far; characters, enemies and groups come next.
+ * table: elements, weapon types, states, skills, items and characters so far; enemies and groups come next.
  * Every row has an id that never changes (what refers to it keeps working when it is renamed).
  */
 
@@ -168,7 +168,69 @@ export interface DbItem {
   resists?: { element: string, level: ResistLevel }[];
   /** An element's or weapon type's experience gained faster while worn, in %. */
   growth?: { id: string, percent: number }[];
+  /** Equipment: the characters who can wear it (none: everyone). */
+  wearers?: string[];
 }
+
+/** How fast a character grows in an element or a weapon type. */
+export type Affinity = 'fast' | 'normal' | 'slow' | 'never';
+export const AFFINITIES: { id: Affinity, label: string }[] = [
+  { id: 'fast', label: 'Rapide' },
+  { id: 'normal', label: 'Normal' },
+  { id: 'slow', label: 'Lent' },
+  { id: 'never', label: 'Jamais' },
+];
+
+/** How fast the levels come (the experience needed). */
+export type XpCurve = 'fast' | 'normal' | 'slow';
+export const XP_CURVES: { id: XpCurve, label: string }[] = [
+  { id: 'fast', label: 'Monte vite' },
+  { id: 'normal', label: 'Normal' },
+  { id: 'slow', label: 'Monte lentement' },
+];
+
+/** How a stat goes from the first level to the last: evenly, mostly early, mostly late. */
+export type StatCurve = 'linear' | 'early' | 'late';
+export const STAT_CURVES: { id: StatCurve, label: string }[] = [
+  { id: 'linear', label: 'Régulière' },
+  { id: 'early', label: 'Monte tôt' },
+  { id: 'late', label: 'Monte tard' },
+];
+
+export interface CharacterStat {
+  /** At the first level. */
+  start: number;
+  /** At the last level. */
+  max: number;
+  curve: StatCurve;
+}
+
+/** A character: a team member (levels, stats, element and weapon levels, equipment) or a villager (looks only). */
+export interface DbCharacter {
+  id: string;
+  name: string;
+  note?: string;
+  team: boolean;
+  /** Pixel art: the menus' and action gauge's small face (also the list's icon), the dialogues' portrait, the combat sprite. */
+  icon?: string;
+  portrait?: string;
+  sprite?: string;
+  /** The 3D model on the map. */
+  model?: string;
+  levelStart: number;
+  levelMax: number;
+  xpCurve: XpCurve;
+  stats: Record<StatId, CharacterStat>;
+  /** Level at the start and affinity in each simple element and weapon type (missing: level 0, normal). */
+  growth: Record<string, { level: number, affinity: Affinity }>;
+  /** Worn at the start. */
+  equipment: Partial<Record<EquipSlot, string>>;
+  /** Skills this character never learns, even with the levels (other characters' own skills). */
+  excludedSkills?: string[];
+}
+
+/** Pixel sizes of a character's pictures. */
+export const PICTURE_SIZES = { icon: { w: 16, h: 16 }, portrait: { w: 48, h: 48 }, sprite: { w: 32, h: 48 } };
 
 /**
  * A level needed to learn a skill, Grandia style: in a simple element or a weapon type (the characters' levels grow
@@ -207,6 +269,7 @@ export interface GameDatabase {
   states: DbState[];
   skills: DbSkill[];
   items: DbItem[];
+  characters: DbCharacter[];
 }
 
 export type DbTable = keyof GameDatabase;
@@ -268,6 +331,43 @@ export function newSkillEffect(kind: SkillEffectKind, db: GameDatabase): SkillEf
     case 'statUp': return { kind, stat: 'str', amount: 1 };
     case 'xp': return { kind, id: learnChoices(db)[0]?.id ?? '', amount: 50 };
   }
+}
+
+export function newCharacter(name: string): DbCharacter {
+  const stat = (start: number, max: number): CharacterStat => ({ start, max, curve: 'linear' });
+  return {
+    id: newId('ch'), name, team: true, levelStart: 1, levelMax: 99, xpCurve: 'normal',
+    stats: { hp: stat(40, 900), mp: stat(15, 400), str: stat(6, 80), mag: stat(6, 80), end: stat(5, 75), agi: stat(6, 80), luck: stat(4, 60) },
+    growth: {}, equipment: {},
+  };
+}
+
+/** A stat's value at a level (the curve between the first and the last level). */
+export function statAt(character: DbCharacter, stat: StatId, level: number): number {
+  const { start, max, curve } = character.stats[stat];
+  const t = character.levelMax > 1 ? Math.min(1, Math.max(0, (level - 1) / (character.levelMax - 1))) : 1;
+  const f = curve === 'early' ? Math.sqrt(t) : curve === 'late' ? t * t : t;
+  return Math.round(start + (max - start) * f);
+}
+
+/** The character's level and affinity in an element or a weapon type. */
+export function growthOf(character: DbCharacter, id: string): { level: number, affinity: Affinity } {
+  return character.growth[id] ?? { level: 0, affinity: 'normal' };
+}
+
+/**
+ * Where a character stands with a skill: known from the start, to be learned (what is missing), never (an affinity
+ * « jamais » in one of its levels), or excluded (kept for other characters). Skills without levels are not listed
+ * (given by events or items).
+ */
+export function learnState(character: DbCharacter, skill: DbSkill): 'start' | 'later' | 'never' | 'excluded' {
+  if (character.excludedSkills?.includes(skill.id)) {
+    return 'excluded';
+  }
+  if (skill.learn.some(l => growthOf(character, l.id).affinity === 'never')) {
+    return 'never';
+  }
+  return skill.learn.every(l => growthOf(character, l.id).level >= l.level) ? 'start' : 'later';
 }
 
 export function newItem(name: string): DbItem {
@@ -409,6 +509,39 @@ export function withoutRow(db: GameDatabase, table: DbTable, id: string): GameDa
         delete fixed.attackElement;
       }
       return fixed;
+    });
+  }
+  if (table === 'elements' || table === 'weapons') {
+    next.characters = next.characters.map(c => {
+      if (!(id in c.growth)) {
+        return c;
+      }
+      const { [id]: _, ...growth } = c.growth;
+      return { ...c, growth };
+    });
+  }
+  if (table === 'items') {
+    next.characters = next.characters.map(c => Object.values(c.equipment).includes(id)
+      ? { ...c, equipment: Object.fromEntries(Object.entries(c.equipment).filter(([, v]) => v !== id)) } : c);
+  }
+  if (table === 'skills') {
+    next.characters = next.characters.map(c => {
+      if (!c.excludedSkills?.includes(id)) {
+        return c;
+      }
+      const { excludedSkills, ...rest } = c;
+      const left = excludedSkills.filter(s => s !== id);
+      return left.length ? { ...rest, excludedSkills: left } : rest;
+    });
+  }
+  if (table === 'characters') {
+    next.items = next.items.map(it => {
+      if (!it.wearers?.includes(id)) {
+        return it;
+      }
+      const { wearers, ...rest } = it;
+      const left = wearers.filter(w => w !== id);
+      return left.length ? { ...rest, wearers: left } : rest;
     });
   }
   return next;

@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   LucideEraser, LucideFlipHorizontal2, LucideImageUp, LucidePaintBucket, LucidePencil, LucidePipette, LucidePlus, LucideTrash, LucideUndo2,
   LucideZoomIn, LucideZoomOut,
 } from '@lucide/angular';
 
-const SIZE = 16;
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 4;
 type Tool = 'pencil' | 'eraser' | 'fill' | 'pick';
@@ -17,8 +16,9 @@ const PALETTE = ['#14121c', '#f0f0e8', '#bec3d2', '#6e7387', '#d64040', '#8c1e28
 type Pixels = string[];
 
 /**
- * Draws a 16×16 pixel art icon (elements, weapon types, states…), or imports a PNG (shrunk to 16×16). Gives back a
- * PNG data URL, or undefined when everything was erased. Zoom: − / +, two fingers (pinch, and move), Ctrl + wheel.
+ * Draws a pixel art image (16×16 icons, character portraits and combat sprites…), or imports a PNG (shrunk to fit).
+ * Gives back a PNG data URL, or undefined when everything was erased. Zoom: − / +, two fingers (pinch, and move),
+ * Ctrl + wheel. The grid is a canvas (a 48×48 portrait has 2304 pixels).
  */
 @Component({
   selector: 'db-pixel-editor',
@@ -33,21 +33,22 @@ type Pixels = string[];
 export class PixelEditorComponent implements OnInit {
   readonly title = input('Icône');
   readonly value = input<string | undefined>(undefined);
+  readonly width = input(16);
+  readonly height = input(16);
   readonly done = output<string | undefined>();
   readonly cancel = output<void>();
 
-  protected readonly size = SIZE;
-  protected readonly cells = Array.from({ length: SIZE * SIZE }, (_, i) => i);
-  protected readonly pixels = signal<Pixels>(Array(SIZE * SIZE).fill(''));
+  protected readonly pixels = signal<Pixels>([]);
   protected readonly tool = signal<Tool>('pencil');
   protected readonly color = signal(PALETTE[6]);
   private readonly history = signal<Pixels[]>([]);
   protected readonly canUndo = computed(() => this.history().length > 0);
   protected readonly message = signal('');
-  /** The palette, then the icon's other colors (to pick them again). */
+  /** The palette, then the image's other colors, the most used first (to pick them again). */
   protected readonly palette = computed(() => {
-    const used = this.pixels().filter(c => c && !PALETTE.includes(c));
-    return [...PALETTE, ...new Set(used)];
+    const counts = new Map<string, number>();
+    this.pixels().forEach(c => c && !PALETTE.includes(c) && counts.set(c, (counts.get(c) ?? 0) + 1));
+    return [...PALETTE, ...[...counts].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([c]) => c)];
   });
   protected readonly tools: { id: Tool, label: string }[] = [
     { id: 'pencil', label: 'Crayon' }, { id: 'eraser', label: 'Gomme' },
@@ -58,6 +59,7 @@ export class PixelEditorComponent implements OnInit {
   protected readonly zoomMin = ZOOM_MIN;
   protected readonly zoomMax = ZOOM_MAX;
   private readonly wrap = viewChild.required<ElementRef<HTMLElement>>('wrap');
+  private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   /** The fingers (or mouse) on the grid. */
   private readonly pointers = new Map<number, { x: number, y: number }>();
   /** This gesture changed the pixels with its first finger (undone if a second finger comes: it was a pinch). */
@@ -67,12 +69,38 @@ export class PixelEditorComponent implements OnInit {
   constructor() {
     // Escape and the back button close it first (the latest layer)
     inject(EscapeService).whileAlive(() => this.cancel.emit());
+    effect(() => this.draw(this.pixels()));
   }
 
   ngOnInit(): void {
+    this.pixels.set(Array(this.width() * this.height()).fill(''));
     const value = this.value();
     if (value) {
-      void loadImage(value).then(img => this.pixels.set(imageToPixels(img)));
+      void loadImage(value).then(img => this.pixels.set(imageToPixels(img, this.width(), this.height())));
+    }
+  }
+
+  /** Each pixel as a 10×10 square of the canvas, with a thin grid. */
+  private draw(pixels: Pixels): void {
+    const canvas = this.canvas().nativeElement;
+    const w = this.width();
+    const h = this.height();
+    const cell = 10;
+    canvas.width = w * cell;
+    canvas.height = h * cell;
+    const ctx = canvas.getContext('2d')!;
+    pixels.forEach((c, i) => {
+      if (c) {
+        ctx.fillStyle = c;
+        ctx.fillRect(i % w * cell, Math.floor(i / w) * cell, cell, cell);
+      }
+    });
+    ctx.fillStyle = '#0000002a';
+    for (let x = 1; x < w; x++) {
+      ctx.fillRect(x * cell, 0, 1, h * cell);
+    }
+    for (let y = 1; y < h; y++) {
+      ctx.fillRect(0, y * cell, w * cell, 1);
     }
   }
 
@@ -120,7 +148,7 @@ export class PixelEditorComponent implements OnInit {
     this.remember();
     this.gestureEdited = true;
     if (tool === 'fill') {
-      this.pixels.set(flood(this.pixels(), cell, this.color()));
+      this.pixels.set(flood(this.pixels(), cell, this.color(), this.width(), this.height()));
       return;
     }
     this.drawing = true;
@@ -218,12 +246,13 @@ export class PixelEditorComponent implements OnInit {
   protected flip(): void {
     this.remember();
     const p = this.pixels();
-    this.pixels.set(p.map((_, i) => p[Math.floor(i / SIZE) * SIZE + SIZE - 1 - i % SIZE]));
+    const w = this.width();
+    this.pixels.set(p.map((_, i) => p[Math.floor(i / w) * w + w - 1 - i % w]));
   }
 
   protected clear(): void {
     this.remember();
-    this.pixels.set(Array(SIZE * SIZE).fill(''));
+    this.pixels.set(Array(this.width() * this.height()).fill(''));
   }
 
   protected async importPng(ev: Event): Promise<void> {
@@ -237,8 +266,10 @@ export class PixelEditorComponent implements OnInit {
     try {
       const img = await loadImage(url);
       this.remember();
-      this.pixels.set(imageToPixels(img));
-      this.message.set(img.width > SIZE || img.height > SIZE ? `Image réduite à ${SIZE} × ${SIZE} pixels.` : '');
+      const w = this.width();
+      const h = this.height();
+      this.pixels.set(imageToPixels(img, w, h));
+      this.message.set(img.width > w || img.height > h ? `Image réduite à ${w} × ${h} pixels.` : '');
     } catch {
       this.message.set('Cette image n\'a pas pu être lue.');
     } finally {
@@ -248,7 +279,7 @@ export class PixelEditorComponent implements OnInit {
 
   protected ok(): void {
     const pixels = this.pixels();
-    this.done.emit(pixels.some(c => c) ? pixelsToDataUrl(pixels) : undefined);
+    this.done.emit(pixels.some(c => c) ? pixelsToDataUrl(pixels, this.width(), this.height()) : undefined);
   }
 
   private paint(cell: number): void {
@@ -264,9 +295,11 @@ export class PixelEditorComponent implements OnInit {
 
   private cellAt(ev: PointerEvent): number {
     const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = Math.floor((ev.clientX - rect.left) / rect.width * SIZE);
-    const y = Math.floor((ev.clientY - rect.top) / rect.height * SIZE);
-    return x < 0 || y < 0 || x >= SIZE || y >= SIZE ? -1 : y * SIZE + x;
+    const w = this.width();
+    const h = this.height();
+    const x = Math.floor((ev.clientX - rect.left) / rect.width * w);
+    const y = Math.floor((ev.clientY - rect.top) / rect.height * h);
+    return x < 0 || y < 0 || x >= w || y >= h ? -1 : y * w + x;
   }
 }
 
@@ -279,36 +312,42 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-/** The image shrunk to fit 16×16 (centered, no smoothing); half transparent pixels become transparent. */
-function imageToPixels(img: HTMLImageElement): Pixels {
+/**
+ * The image shrunk to fit w×h (centered; smoothed when shrunk a lot, like a portrait photo, sharp otherwise); half
+ * transparent pixels become transparent.
+ */
+function imageToPixels(img: HTMLImageElement, w: number, h: number): Pixels {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = SIZE;
+  canvas.width = w;
+  canvas.height = h;
   const ctx = canvas.getContext('2d')!;
-  ctx.imageSmoothingEnabled = false;
-  const scale = Math.min(SIZE / img.width, SIZE / img.height, 1);
-  const w = Math.max(1, Math.round(img.width * scale));
-  const h = Math.max(1, Math.round(img.height * scale));
-  ctx.drawImage(img, Math.floor((SIZE - w) / 2), Math.floor((SIZE - h) / 2), w, h);
-  const data = ctx.getImageData(0, 0, SIZE, SIZE).data;
-  return Array.from({ length: SIZE * SIZE }, (_, i) => data[i * 4 + 3] < 128 ? ''
+  const scale = Math.min(w / img.width, h / img.height, 1);
+  ctx.imageSmoothingEnabled = scale < 0.5;
+  ctx.imageSmoothingQuality = 'high';
+  const dw = Math.max(1, Math.round(img.width * scale));
+  const dh = Math.max(1, Math.round(img.height * scale));
+  ctx.drawImage(img, Math.floor((w - dw) / 2), Math.floor((h - dh) / 2), dw, dh);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  return Array.from({ length: w * h }, (_, i) => data[i * 4 + 3] < 128 ? ''
     : '#' + [0, 1, 2].map(k => data[i * 4 + k].toString(16).padStart(2, '0')).join(''));
 }
 
-function pixelsToDataUrl(pixels: Pixels): string {
+function pixelsToDataUrl(pixels: Pixels, w: number, h: number): string {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = SIZE;
+  canvas.width = w;
+  canvas.height = h;
   const ctx = canvas.getContext('2d')!;
   pixels.forEach((c, i) => {
     if (c) {
       ctx.fillStyle = c;
-      ctx.fillRect(i % SIZE, Math.floor(i / SIZE), 1, 1);
+      ctx.fillRect(i % w, Math.floor(i / w), 1, 1);
     }
   });
   return canvas.toDataURL('image/png');
 }
 
 /** Paint bucket: the touching cells of the same color take the new one. */
-function flood(pixels: Pixels, start: number, color: string): Pixels {
+function flood(pixels: Pixels, start: number, color: string, w: number, h: number): Pixels {
   const from = pixels[start];
   if (from === color) {
     return pixels;
@@ -321,11 +360,11 @@ function flood(pixels: Pixels, start: number, color: string): Pixels {
       continue;
     }
     next[i] = color;
-    const x = i % SIZE;
+    const x = i % w;
     if (x > 0) stack.push(i - 1);
-    if (x < SIZE - 1) stack.push(i + 1);
-    if (i >= SIZE) stack.push(i - SIZE);
-    if (i < SIZE * (SIZE - 1)) stack.push(i + SIZE);
+    if (x < w - 1) stack.push(i + 1);
+    if (i >= w) stack.push(i - w);
+    if (i < w * (h - 1)) stack.push(i + w);
   }
   return next;
 }

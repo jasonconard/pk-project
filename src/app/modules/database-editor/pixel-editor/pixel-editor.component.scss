@@ -141,10 +141,9 @@ header {
 
 .grid-wrap {
   align-self: center;
-  width: min(100%, 330px, calc(100vh - 380px));
-  min-width: 200px;
-  aspect-ratio: 1;
-  padding: 6px;
+  /* (--ratio: width / height of the image: a tall sprite stays in the screen) */
+  width: min(100%, 330px, calc((100dvh - 380px) * var(--ratio, 1)));
+  min-width: 160px;
   box-sizing: border-box;
   border-radius: 10px;
   background: var(--field);
@@ -154,18 +153,12 @@ header {
 }
 
 .grid {
-  flex-shrink: 0;
-  display: grid;
-  grid-template-columns: repeat(16, 1fr);
-  aspect-ratio: 1;
+  display: block;
   touch-action: none;
   cursor: crosshair;
-  /* The checkerboard: transparent pixels */
-  background: repeating-conic-gradient(#3b3d48 0 25%, #33353f 0 50%) 0 0 / 12.5% 12.5%;
-
-  span {
-    box-shadow: inset 0 0 0 0.5px #0003;
-  }
+  image-rendering: pixelated;
+  /* The checkerboard: transparent pixels (one square = one pixel, size set in the template) */
+  background: repeating-conic-gradient(#3b3d48 0 25%, #33353f 0 50%) 0 0;
 }
 
 .zoom {
