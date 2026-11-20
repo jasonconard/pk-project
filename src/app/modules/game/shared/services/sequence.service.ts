@@ -9,6 +9,7 @@ import {
 import { currentVariableValues, setVariableValue } from '../../../variables-editor/shared/variable-values';
 import { clampCounter } from '../../../variables-editor/shared/variables';
 import { playSound } from './sfx';
+import { conditionsFit, EventContext } from '../model/ObjectEvent';
 import { KeyService } from '../../../../core/shared/service/key.service';
 
 @Service()
@@ -30,12 +31,16 @@ export class SequenceService {
   /** Emits each weather change asked by an event (WeatherType); the game applies it. */
   readonly weather$: Observable<string> = this.weatherSubject.asObservable();
 
+  /** What the branches of the event being played check (hour, weather, variables now), given by the game. */
+  private context: (() => EventContext) | null = null;
+
   /** `true` while an event sequence is being played (player inputs are frozen). */
   get isRunning(): boolean {
     return this.sequence !== null;
   }
 
-  launchSequence(event: SceneEvent): void {
+  launchSequence(event: SceneEvent, context?: () => EventContext): void {
+    this.context = context ?? null;
     this.keyService.clearKeys();
     this.sequence = new SceneEventSequence(event.instructions.map(i => ({ ...i })));
     this.nextSequence();
@@ -80,6 +85,16 @@ export class SequenceService {
           playSound(instruction.sound.id);
         }
         this.nextSequence();
+        break;
+      case InstructionType.BRANCH: {
+        // (the sub-instructions 'then' or 'else' come next)
+        const ctx = this.context?.();
+        const fits = !!ctx && conditionsFit(instruction.branch ?? {}, { ...ctx, values: currentVariableValues() });
+        this.nextSequence(fits ? 'then' : 'else');
+        break;
+      }
+      case InstructionType.STOP:
+        this.sequence = null;
         break;
       default: this.nextSequence();
     }

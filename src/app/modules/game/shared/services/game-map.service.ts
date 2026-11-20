@@ -207,7 +207,7 @@ export class GameMapService {
     if (found.evt.face) {
       mapHelper.faceTowards(found.chunk, found.building, sprite.position);
     }
-    this.sequenceService.launchSequence(found.evt);
+    this.sequenceService.launchSequence(found.evt, () => this.eventContext(mapHelper.originGame));
   }
 
   inputLoop(game: Game) {

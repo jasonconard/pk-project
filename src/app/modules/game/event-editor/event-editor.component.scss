@@ -118,6 +118,10 @@ header h2 small {
   width: 16px;
   height: 16px;
   color: #ffb04a;
+
+  &.blue {
+    color: #6f9be6;
+  }
 }
 
 select,
@@ -219,10 +223,24 @@ textarea {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 
   b {
-    flex: 1;
+    flex-shrink: 0;
     font-size: 13px;
+  }
+
+  .folded {
+    min-width: 0;
+    overflow: hidden;
+    color: #b8bbc8;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .grow {
+    flex: 1;
   }
 }
 
@@ -282,5 +300,333 @@ footer {
     background: #ffb04a;
     color: #22232a;
     font-weight: 600;
+  }
+}
+
+// --- The head (trigger and conditions), folded into one line ---
+
+.block-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  text-align: left;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: #b8bbc8;
+  }
+}
+
+h4 {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+
+  small {
+    margin-left: 6px;
+    color: #b8bbc8;
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
+
+// --- The tree: branches (a coloured line on the left), folding, the ⋮ menu ---
+
+.action.branching {
+  gap: 8px;
+}
+
+.fold {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: none;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: #b8bbc8;
+  }
+}
+
+.branch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 0 2px 10px;
+  border-left: 3px solid #ffb04a;
+
+  &.blue {
+    border-left-color: #6f9be6;
+
+    .branch-label b {
+      color: #6f9be6;
+    }
+  }
+}
+
+.branch-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  background: none;
+  text-align: left;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: #b8bbc8;
+  }
+
+  b {
+    color: #ffb04a;
+    font-size: 12px;
+  }
+
+  small {
+    color: #b8bbc8;
+    font-size: 12px;
+  }
+}
+
+.add-small,
+.add-action {
+  align-self: flex-start;
+  height: 28px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 14px;
+  background: none;
+  box-shadow: inset 0 0 0 1px #4a4c5a;
+  color: #b8bbc8;
+  font-size: 12px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: white;
+  }
+}
+
+.add-action {
+  height: 32px;
+  color: white;
+  font-size: 13px;
+}
+
+.answer {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 4px 0 2px;
+  border-radius: 14px;
+  background: rgba(255, 176, 74, 0.2);
+
+  input {
+    height: 26px;
+    min-width: 4ch;
+    max-width: 18ch;
+    padding: 0 6px;
+    border: none;
+    background: none;
+    font-size: 12px;
+  }
+
+  button {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: none;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+}
+
+.icon-btn.ghost {
+  background: none;
+}
+
+.menu-anchor {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  z-index: 5;
+  min-width: 160px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: #34353e;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  button {
+    height: 34px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 6px;
+    background: none;
+    font-size: 13px;
+    text-align: left;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    &.danger {
+      color: #ff9a92;
+    }
+  }
+}
+
+// The portrait of a message: its picture, the list of portraits over it (invisible, opened by a touch)
+.portrait {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #2a2b33;
+  box-shadow: inset 0 0 0 1px #4a4c5a;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: #b8bbc8;
+  }
+
+  select {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.row > input[type='text'] {
+  flex: 1;
+}
+
+// --- The add sheet: from the bottom of the window ---
+
+.sheet-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  border-radius: inherit;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.add-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 11;
+  padding: 14px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 16px 16px 0 0;
+  background: #2c2d35;
+  animation: sheet-up 160ms ease-out both;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+  }
+}
+
+@keyframes sheet-up {
+  from { translate: 0 40px; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .add-sheet {
+    animation: none;
+  }
+}
+
+.types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.type {
+  padding: 12px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-radius: 12px;
+  background: #1b1c22;
+  font-size: 12px;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: #ffb04a;
+  }
+
+  &.blue svg {
+    color: #6f9be6;
+  }
+
+  &:hover:not(:disabled) {
+    background: #24252d;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
 }

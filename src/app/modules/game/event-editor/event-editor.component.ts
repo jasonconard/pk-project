@@ -1,10 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
-  LucideArrowDown, LucideArrowUp, LucideClock, LucideCloudSun, LucideDoorOpen, LucideDynamicIcon, LucideHourglass, LucideIcon,
-  LucideMessageSquareText, LucidePlay, LucidePlus, LucideTrash, LucideVariable, LucideVolume2, LucideX,
+  LucideChevronDown, LucideChevronRight, LucideClock, LucideCloudSun, LucideCopy, LucideDoorOpen, LucideDynamicIcon,
+  LucideEllipsisVertical, LucideGitBranch, LucideHourglass, LucideIcon, LucideImagePlus, LucideListChecks, LucideMessageSquareText,
+  LucideOctagonX, LucidePlay, LucidePlus, LucideTrash, LucideVariable, LucideVolume2, LucideX, LucideArrowUp, LucideArrowDown,
 } from '@lucide/angular';
 import { EscapeService } from '../../../core/shared/service/escape.service';
-import { EventAction, EventActionType, EventTrigger, ObjectEvent } from '../shared/model/ObjectEvent';
+import {
+  EventAction, EventActionType, EventConditions, EventTrigger, MAX_BRANCH_DEPTH, MAX_CHOICE_OPTIONS, ObjectEvent, PORTRAITS,
+} from '../shared/model/ObjectEvent';
 import { VariableTest } from '../shared/model/SceneEvent';
 import { WEATHER_CHOICES } from '../shared/weather/Weather';
 import { playSound, SOUND_CHOICES } from '../shared/services/sfx';
@@ -17,28 +21,74 @@ const TRIGGERS: { id: EventTrigger, label: string, help: string }[] = [
   { id: 'auto', label: 'Automatique', help: 'Dès que les conditions deviennent vraies, où que soit le joueur sur la carte. Rejoué seulement après qu\'elles sont redevenues fausses.' },
 ];
 
-const ACTIONS: { type: EventActionType, label: string, icon: LucideIcon }[] = [
+/** The sorts of action, in the add sheet's order. Choix, Condition: branches (not deeper than MAX_BRANCH_DEPTH). */
+const ACTIONS: { type: EventActionType, label: string, icon: LucideIcon, branches?: boolean }[] = [
   { type: 'message', label: 'Message', icon: LucideMessageSquareText },
+  { type: 'choice', label: 'Choix', icon: LucideListChecks, branches: true },
+  { type: 'if', label: 'Condition', icon: LucideGitBranch, branches: true },
   { type: 'variable', label: 'Variable', icon: LucideVariable },
   { type: 'teleport', label: 'Téléporter', icon: LucideDoorOpen },
   { type: 'weather', label: 'Météo', icon: LucideCloudSun },
   { type: 'sound', label: 'Son', icon: LucideVolume2 },
   { type: 'wait', label: 'Attendre', icon: LucideHourglass },
+  { type: 'stop', label: 'Arrêter', icon: LucideOctagonX },
 ];
 
 const COUNTER_TESTS: { op: VariableTest['op'], label: string }[] = [
   { op: 'eq', label: '=' }, { op: 'ne', label: '≠' }, { op: 'gte', label: '≥' }, { op: 'lte', label: '≤' },
 ];
 
+/** A branch of a choice (answer k: 'o0', 'o1'…) or of a condition. */
+export type BranchKey = string;
+/** Where a list of actions is in the tree: from the event's list, the action i of each list and the branch taken. */
+export type ListPath = { i: number, b: BranchKey }[];
+/** The event's own conditions (null), or those of a condition action. */
+type CondTarget = { path: ListPath, i: number } | null;
+
+/** The list of actions of a branch of an action (null: it has no such branch). */
+function branchList(action: EventAction, b: BranchKey): EventAction[] | null {
+  if (action.type === 'choice' && b.startsWith('o')) {
+    return action.options[Number(b.slice(1))]?.actions ?? null;
+  }
+  if (action.type === 'if') {
+    return b === 'then' ? action.then : b === 'else' ? action.else : null;
+  }
+  return null;
+}
+
+function listAt(event: ObjectEvent, path: ListPath): EventAction[] {
+  let list = event.actions;
+  for (const step of path) {
+    const next = list[step.i] && branchList(list[step.i], step.b);
+    if (!next) {
+      return [];
+    }
+    list = next;
+  }
+  return list;
+}
+
+/** Actions of a list, those of its branches counted. */
+function countActions(list: EventAction[]): number {
+  return list.reduce((n, a) => n + 1 + (a.type === 'choice' ? a.options.reduce((m, o) => m + countActions(o.actions), 0)
+    : a.type === 'if' ? countActions(a.then) + countActions(a.else) : 0), 0);
+}
+
+function plural(n: number, word: string): string {
+  return `${n} ${word}${n > 1 ? 's' : ''}`;
+}
+
 /**
  * The event window of the map editor (an object's event): what starts it, the conditions that must be true, the
- * actions played one after the other. Works on a copy, given back when the window closes (✕, Terminé, Escape, the
- * backdrop): one undo step in the editor.
+ * actions played one after the other. Choices and conditions hold branches, each its own list of actions (a tree, as
+ * in RPG Maker). Works on a copy, given back when the window closes (✕, Terminé, Escape, the backdrop): one undo step
+ * in the editor.
  */
 @Component({
   selector: 'game-event-editor',
-  imports: [LucideDynamicIcon, LucideArrowDown, LucideArrowUp, LucideClock, LucideCloudSun, LucidePlay, LucidePlus, LucideTrash,
-    LucideVariable, LucideX],
+  imports: [NgTemplateOutlet, LucideDynamicIcon, LucideChevronDown, LucideChevronRight, LucideClock, LucideCloudSun, LucideCopy,
+    LucideEllipsisVertical, LucideImagePlus, LucidePlay, LucidePlus, LucideTrash, LucideVariable, LucideX, LucideArrowUp,
+    LucideArrowDown],
   templateUrl: './event-editor.component.html',
   styleUrl: './event-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,10 +111,45 @@ export class EventEditorComponent {
   protected readonly variables: GameVariable[] = loadVariables();
   protected readonly weatherList = WEATHER_CHOICES;
   protected readonly sounds = SOUND_CHOICES;
+  protected readonly portraits = PORTRAITS;
   protected readonly hourList = Array.from({ length: 24 }, (_, h) => h);
+  protected readonly maxOptions = MAX_CHOICE_OPTIONS;
+  protected readonly root: ListPath = [];
+
+  /** The trigger and conditions unfolded (folded into one line once the event has actions: room for the tree). */
+  protected readonly headOpen = linkedSignal(() => {
+    const actions = this.event().actions;
+    return actions.length === 0 || (actions.length === 1 && actions[0].type === 'message' && !actions[0].text);
+  });
+  /** Folded actions and branches (keys, see foldKey). */
+  protected readonly folded = signal(new Set<string>());
+  /** The action whose ⋮ menu is open (key). */
+  protected readonly menuOpen = signal<string | null>(null);
+  /** The add sheet: the list it adds to, and its name. */
+  protected readonly adding = signal<{ path: ListPath, label: string } | null>(null);
+
+  protected readonly headSummary = computed(() => {
+    const e = this.draft();
+    const parts = [TRIGGERS.find(t => t.id === e.trigger)?.label ?? ''];
+    if (e.face && e.trigger === 'action') {
+      parts.push('se tourne vers le joueur');
+    }
+    const n = e.conditions.variables.length + (e.conditions.hours ? 1 : 0) + (e.conditions.weathers ? 1 : 0);
+    parts.push(n ? plural(n, 'condition') : 'sans condition');
+    return parts.join(' · ');
+  });
 
   constructor() {
-    inject(EscapeService).whileAlive(() => this.close());
+    // Escape: the add sheet or the ⋮ menu first, then the window
+    inject(EscapeService).whileAlive(() => {
+      if (this.adding()) {
+        this.adding.set(null);
+      } else if (this.menuOpen()) {
+        this.menuOpen.set(null);
+      } else {
+        this.close();
+      }
+    });
   }
 
   protected close(): void {
@@ -80,100 +165,76 @@ export class EventEditorComponent {
     });
   }
 
-  protected triggerHelp(): string {
-    return TRIGGERS.find(t => t.id === this.draft().trigger)?.help ?? '';
-  }
-
   protected setTrigger(trigger: EventTrigger): void {
     this.change(e => e.trigger = trigger);
+  }
+
+  protected triggerHelp(): string {
+    return TRIGGERS.find(t => t.id === this.draft().trigger)?.help ?? '';
   }
 
   protected setFace(face: boolean): void {
     this.change(e => e.face = face);
   }
 
-  // --- Conditions ---
+  // --- Tree ---
 
-  protected variable(id: string): GameVariable | undefined {
-    return this.variables.find(v => v.id === id);
+  /** The path of a branch of the action i of a list. */
+  protected sub(path: ListPath, i: number, b: BranchKey): ListPath {
+    return [...path, { i, b }];
   }
 
-  protected addVariableTest(): void {
-    const first = this.variables[0];
-    if (first) {
-      this.change(e => e.conditions.variables.push(this.defaultTest(first)));
-    }
+  protected foldKey(path: ListPath, i: number, b = ''): string {
+    return path.map(s => `${s.i}${s.b}`).join('/') + `/${i}${b}`;
   }
 
-  private defaultTest(variable: GameVariable): VariableTest {
-    return variable.kind === 'flag' ? { id: variable.id, op: 'is', value: true } : { id: variable.id, op: 'gte', value: 1 };
+  protected isFolded(key: string): boolean {
+    return this.folded().has(key);
   }
 
-  protected setTestVariable(index: number, id: string): void {
-    const variable = this.variable(id);
-    if (variable) {
-      this.change(e => e.conditions.variables[index] = this.defaultTest(variable));
-    }
-  }
-
-  protected setTest(index: number, test: Partial<VariableTest>): void {
-    this.change(e => e.conditions.variables[index] = { ...e.conditions.variables[index], ...test });
-  }
-
-  protected removeTest(index: number): void {
-    this.change(e => e.conditions.variables.splice(index, 1));
-  }
-
-  protected setHours(hours: { from: number, to: number } | undefined): void {
-    this.change(e => {
-      if (hours) {
-        e.conditions.hours = hours;
-      } else {
-        delete e.conditions.hours;
-      }
+  protected toggleFold(key: string): void {
+    this.folded.update(set => {
+      const copy = new Set(set);
+      copy.has(key) ? copy.delete(key) : copy.add(key);
+      return copy;
     });
   }
 
-  protected addWeather(type: string): void {
-    if (type) {
-      this.change(e => e.conditions.weathers = [...new Set([...(e.conditions.weathers ?? []), type])]);
-    }
+  protected canBranch(path: ListPath): boolean {
+    return path.length < MAX_BRANCH_DEPTH;
   }
 
-  protected removeWeather(type: string): void {
-    this.change(e => {
-      e.conditions.weathers = (e.conditions.weathers ?? []).filter(w => w !== type);
-      if (!e.conditions.weathers.length) {
-        delete e.conditions.weathers;
-      }
-    });
-  }
-
-  protected weatherLabel(type: string): string {
-    const choice = WEATHER_CHOICES.find(w => w.type === type);
-    return choice ? `${choice.icon} ${choice.label}` : type;
-  }
-
-  // --- Actions ---
-
-  protected actionInfo(type: EventActionType) {
+  protected info(type: EventActionType) {
     return ACTIONS.find(a => a.type === type)!;
   }
 
+  protected openAdd(path: ListPath, label: string): void {
+    this.menuOpen.set(null);
+    this.adding.set({ path, label });
+  }
+
   protected addAction(type: EventActionType): void {
-    const action = this.newAction(type);
-    if (action) {
-      this.change(e => e.actions.push(action));
+    const target = this.adding();
+    const action = target && this.newAction(type, target.path);
+    this.adding.set(null);
+    if (target && action) {
+      this.change(e => listAt(e, target.path).push(action));
     }
   }
 
-  private newAction(type: EventActionType): EventAction | null {
+  private newAction(type: EventActionType, path: ListPath): EventAction | null {
     switch (type) {
       case 'message': {
-        // (said by the same one as the last message)
-        const last = [...this.draft().actions].reverse().find(a => a.type === 'message');
-        return { type, ...(last?.type === 'message' && last.name ? { name: last.name } : {}), text: '' };
+        // (said by the same one, with the same face, as the last message of the list)
+        const last = [...listAt(this.draft(), path)].reverse().find(a => a.type === 'message');
+        return last?.type === 'message'
+          ? { type, ...(last.name ? { name: last.name } : {}), ...(last.pic ? { pic: last.pic } : {}), text: '' }
+          : { type, text: '' };
       }
+      case 'choice':
+        return { type, options: [{ text: 'Oui', actions: [] }, { text: 'Non', actions: [] }] };
+      case 'if':
+        return { type, conditions: this.variables[0] ? { variables: [this.defaultTest(this.variables[0])] } : { variables: [], hours: { from: 8, to: 18 } }, then: [], else: [] };
       case 'variable': {
         const first = this.variables[0];
         return first ? { type, id: first.id, op: 'set', value: first.kind === 'flag' ? true : 1 } : null;
@@ -185,34 +246,175 @@ export class EventEditorComponent {
       case 'weather': return { type, weather: 'rainy' };
       case 'sound': return { type, sound: 'bip' };
       case 'wait': return { type, seconds: 1 };
+      case 'stop': return { type };
     }
   }
 
-  protected setAction(index: number, patch: Partial<EventAction>): void {
-    this.change(e => e.actions[index] = { ...e.actions[index], ...patch } as EventAction);
+  protected setAction(path: ListPath, i: number, patch: Partial<EventAction>): void {
+    this.change(e => {
+      const list = listAt(e, path);
+      list[i] = { ...list[i], ...patch } as EventAction;
+    });
   }
 
-  /** Another variable: its kind decides the change (a flag becomes true, a counter is set to 1). */
-  protected setActionVariable(index: number, id: string): void {
+  protected moveAction(path: ListPath, i: number, by: -1 | 1): void {
+    this.menuOpen.set(null);
+    this.change(e => {
+      const list = listAt(e, path);
+      const [action] = list.splice(i, 1);
+      list.splice(i + by, 0, action);
+    });
+  }
+
+  protected duplicateAction(path: ListPath, i: number): void {
+    this.menuOpen.set(null);
+    this.change(e => {
+      const list = listAt(e, path);
+      list.splice(i + 1, 0, structuredClone(list[i]));
+    });
+  }
+
+  protected removeAction(path: ListPath, i: number): void {
+    this.menuOpen.set(null);
+    this.change(e => listAt(e, path).splice(i, 1));
+  }
+
+  /** « « Oui » · 2 actions · « Non » · 1 action » (a folded choice), « Alors : 1 action · Sinon : 0 action ». */
+  protected foldedSummary(action: EventAction): string {
+    if (action.type === 'choice') {
+      return action.options.map(o => `« ${o.text} » · ${plural(countActions(o.actions), 'action')}`).join(' · ');
+    }
+    if (action.type === 'if') {
+      return `Alors : ${plural(countActions(action.then), 'action')} · Sinon : ${plural(countActions(action.else), 'action')}`;
+    }
+    return '';
+  }
+
+  protected count(list: EventAction[]): string {
+    return plural(countActions(list), 'action');
+  }
+
+  // --- Choices ---
+
+  protected setOption(path: ListPath, i: number, k: number, text: string): void {
+    this.change(e => {
+      const action = listAt(e, path)[i];
+      if (action.type === 'choice') {
+        action.options[k].text = text.trim() || `Réponse ${k + 1}`;
+      }
+    });
+  }
+
+  protected addOption(path: ListPath, i: number): void {
+    this.change(e => {
+      const action = listAt(e, path)[i];
+      if (action.type === 'choice' && action.options.length < MAX_CHOICE_OPTIONS) {
+        action.options.push({ text: `Réponse ${action.options.length + 1}`, actions: [] });
+      }
+    });
+  }
+
+  /** An answer goes, with its actions (two answers at least). */
+  protected removeOption(path: ListPath, i: number, k: number): void {
+    this.change(e => {
+      const action = listAt(e, path)[i];
+      if (action.type === 'choice' && action.options.length > 2) {
+        action.options.splice(k, 1);
+      }
+    });
+  }
+
+  // --- Conditions (the event's, or a condition action's) ---
+
+  private changeConds(target: CondTarget, fn: (c: EventConditions) => void): void {
+    this.change(e => {
+      if (!target) {
+        fn(e.conditions);
+        return;
+      }
+      const action = listAt(e, target.path)[target.i];
+      if (action?.type === 'if') {
+        fn(action.conditions);
+      }
+    });
+  }
+
+  protected condTarget(path: ListPath, i: number): CondTarget {
+    return { path, i };
+  }
+
+  protected variable(id: string): GameVariable | undefined {
+    return this.variables.find(v => v.id === id);
+  }
+
+  private defaultTest(variable: GameVariable): VariableTest {
+    return variable.kind === 'flag' ? { id: variable.id, op: 'is', value: true } : { id: variable.id, op: 'gte', value: 1 };
+  }
+
+  protected addVariableTest(target: CondTarget): void {
+    const first = this.variables[0];
+    if (first) {
+      this.changeConds(target, c => c.variables.push(this.defaultTest(first)));
+    }
+  }
+
+  protected setTestVariable(target: CondTarget, index: number, id: string): void {
     const variable = this.variable(id);
     if (variable) {
-      this.change(e => e.actions[index] = { type: 'variable', id, op: 'set', value: variable.kind === 'flag' ? true : 1 });
+      this.changeConds(target, c => c.variables[index] = this.defaultTest(variable));
+    }
+  }
+
+  protected setTest(target: CondTarget, index: number, test: Partial<VariableTest>): void {
+    this.changeConds(target, c => c.variables[index] = { ...c.variables[index], ...test });
+  }
+
+  protected removeTest(target: CondTarget, index: number): void {
+    this.changeConds(target, c => c.variables.splice(index, 1));
+  }
+
+  protected setHours(target: CondTarget, hours: { from: number, to: number } | undefined): void {
+    this.changeConds(target, c => {
+      if (hours) {
+        c.hours = hours;
+      } else {
+        delete c.hours;
+      }
+    });
+  }
+
+  protected addWeather(target: CondTarget, type: string): void {
+    if (type) {
+      this.changeConds(target, c => c.weathers = [...new Set([...(c.weathers ?? []), type])]);
+    }
+  }
+
+  protected removeWeather(target: CondTarget, type: string): void {
+    this.changeConds(target, c => {
+      c.weathers = (c.weathers ?? []).filter(w => w !== type);
+      if (!c.weathers.length) {
+        delete c.weathers;
+      }
+    });
+  }
+
+  protected weatherLabel(type: string): string {
+    const choice = WEATHER_CHOICES.find(w => w.type === type);
+    return choice ? `${choice.icon} ${choice.label}` : type;
+  }
+
+  // --- Fields ---
+
+  /** Another variable: its kind decides the change (a flag becomes true, a counter is set to 1). */
+  protected setActionVariable(path: ListPath, i: number, id: string): void {
+    const variable = this.variable(id);
+    if (variable) {
+      this.setAction(path, i, { type: 'variable', id, op: 'set', value: variable.kind === 'flag' ? true : 1 });
     }
   }
 
   protected counterValue(raw: string): number {
     return clampCounter(Number(raw));
-  }
-
-  protected moveAction(index: number, by: -1 | 1): void {
-    this.change(e => {
-      const [action] = e.actions.splice(index, 1);
-      e.actions.splice(index + by, 0, action);
-    });
-  }
-
-  protected removeAction(index: number): void {
-    this.change(e => e.actions.splice(index, 1));
   }
 
   protected play(sound: string): void {

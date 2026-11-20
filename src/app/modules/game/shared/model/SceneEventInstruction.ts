@@ -1,7 +1,8 @@
+import { VariableTest } from './SceneEvent';
 import { Vec3 } from './SceneUtils';
 
 export enum InstructionType {
-  LOG, MESSAGE, WAIT, TELEPORT, VARIABLE, WEATHER, SOUND
+  LOG, MESSAGE, WAIT, TELEPORT, VARIABLE, WEATHER, SOUND, BRANCH, STOP
 }
 
 export interface SceneEventInstruction {
@@ -13,6 +14,8 @@ export interface SceneEventInstruction {
   variable?: InstructionVariable,
   weather?: InstructionWeather,
   sound?: InstructionSound,
+  /** BRANCH: plays its sub-instructions 'then' when these conditions are true, else 'else'. */
+  branch?: InstructionBranch,
   subInstructions?: SceneEventSubInstruction[]
 }
 
@@ -61,4 +64,11 @@ export interface InstructionWeather {
 export interface InstructionSound {
   /** SoundId (see sfx.ts). */
   id: string
+}
+
+/** What a branch checks (all must be true), like an event's conditions. */
+export interface InstructionBranch {
+  variables?: VariableTest[],
+  hours?: { from: number, to: number },
+  weathers?: string[]
 }

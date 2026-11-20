@@ -6,194 +6,38 @@
   </header>
 
   @let e = draft();
-  <div class="body">
-    <!-- What starts it -->
+  <div class="body" (click)="menuOpen.set(null)">
+    <!-- What starts it, when it may play: folded into one line to make room for the actions -->
     <section class="block">
-      <h3>Déclencheur</h3>
-      <div class="segmented" role="radiogroup" aria-label="Déclencheur">
-        @for (t of triggers; track t.id) {
-          <button type="button" role="radio" [attr.aria-checked]="e.trigger === t.id" (click)="setTrigger(t.id)">{{ t.label }}</button>
+      <button type="button" class="block-toggle" [attr.aria-expanded]="headOpen()" (click)="headOpen.set(!headOpen())">
+        @if (headOpen()) { <svg lucideChevronDown></svg> } @else { <svg lucideChevronRight></svg> }
+        <h3>Déclencheur et conditions</h3>
+      </button>
+      @if (!headOpen()) {
+        <p class="help">{{ headSummary() }}</p>
+      } @else {
+        <div class="segmented" role="radiogroup" aria-label="Déclencheur">
+          @for (t of triggers; track t.id) {
+            <button type="button" role="radio" [attr.aria-checked]="e.trigger === t.id" (click)="setTrigger(t.id)">{{ t.label }}</button>
+          }
+        </div>
+        <p class="help">{{ triggerHelp() }}</p>
+        @if (e.trigger === 'action') {
+          <label class="check-row">
+            <input type="checkbox" [checked]="!!e.face" (change)="setFace(checked($event))" />
+            <span>Se tourner vers le joueur (un personnage)</span>
+          </label>
         }
-      </div>
-      <p class="help">{{ triggerHelp() }}</p>
-      @if (e.trigger === 'action') {
-        <label class="check-row">
-          <input type="checkbox" [checked]="!!e.face" (change)="setFace(checked($event))" />
-          <span>Se tourner vers le joueur (un personnage)</span>
-        </label>
+        <h4>Conditions <small>toutes doivent être vraies</small></h4>
+        <ng-container *ngTemplateOutlet="condsTpl; context: { $implicit: e.conditions, target: null, empty: 'Aucune : l\'événement se joue toujours.' }" />
       }
-    </section>
-
-    <!-- When it may play -->
-    <section class="block">
-      <h3>Conditions <small>toutes doivent être vraies</small></h3>
-      @for (test of e.conditions.variables; track $index; let i = $index) {
-        @let v = variable(test.id);
-        <div class="row">
-          <svg lucideVariable class="row-icon"></svg>
-          <select aria-label="Variable" (change)="setTestVariable(i, value($event))">
-            @if (!v) {
-              <option value="" selected>(variable supprimée)</option>
-            }
-            @for (variable of variables; track variable.id) {
-              <option [value]="variable.id" [selected]="variable.id === test.id">{{ variable.name }}</option>
-            }
-          </select>
-          @if (v?.kind === 'flag') {
-            <select aria-label="Valeur" class="narrow" (change)="setTest(i, { op: 'is', value: value($event) === 'true' })">
-              <option value="true" [selected]="test.value === true">est vrai</option>
-              <option value="false" [selected]="test.value === false">est faux</option>
-            </select>
-          } @else if (v) {
-            <select aria-label="Comparaison" class="op" (change)="setTest(i, { op: $any(value($event)) })">
-              @for (c of counterTests; track c.op) {
-                <option [value]="c.op" [selected]="test.op === c.op">{{ c.label }}</option>
-              }
-            </select>
-            <input type="number" class="num" aria-label="Nombre" [value]="test.value" (change)="setTest(i, { value: counterValue(value($event)) })" />
-          }
-          <button type="button" class="icon-btn" aria-label="Retirer la condition" title="Retirer" (click)="removeTest(i)"><svg lucideX></svg></button>
-        </div>
-      }
-      @if (e.conditions.hours; as hours) {
-        <div class="row">
-          <svg lucideClock class="row-icon"></svg>
-          <span>De</span>
-          <select aria-label="De" class="narrow" (change)="setHours({ from: +value($event), to: hours.to })">
-            @for (h of hourList; track h) { <option [value]="h" [selected]="h === hours.from">{{ h }} h</option> }
-          </select>
-          <span>à</span>
-          <select aria-label="À" class="narrow" (change)="setHours({ from: hours.from, to: +value($event) })">
-            @for (h of hourList; track h) { <option [value]="h" [selected]="h === hours.to">{{ h }} h</option> }
-          </select>
-          <button type="button" class="icon-btn" aria-label="Retirer l'heure" title="Retirer" (click)="setHours(undefined)"><svg lucideX></svg></button>
-        </div>
-      }
-      @if (e.conditions.weathers; as weathers) {
-        <div class="row wrap">
-          <svg lucideCloudSun class="row-icon"></svg>
-          <span>Météo :</span>
-          @for (w of weathers; track w) {
-            <button type="button" class="chip" [title]="'Retirer ' + weatherLabel(w)" (click)="removeWeather(w)">{{ weatherLabel(w) }} <svg lucideX></svg></button>
-          }
-          <select aria-label="Ajouter une météo" class="narrow" (change)="addWeather(value($event)); $any($event.target).value = ''">
-            <option value="" selected>+ ou…</option>
-            @for (w of weatherList; track w.type) {
-              @if (!weathers.includes(w.type)) { <option [value]="w.type">{{ w.icon }} {{ w.label }}</option> }
-            }
-          </select>
-        </div>
-      }
-      @if (!e.conditions.variables.length && !e.conditions.hours && !e.conditions.weathers) {
-        <p class="help">Aucune : l'événement se joue toujours.</p>
-      }
-      <div class="add-row">
-        <button type="button" [disabled]="!variables.length" [title]="variables.length ? 'Un drapeau ou un compteur' : 'Crée d\'abord une variable (éditeur de variables)'"
-                (click)="addVariableTest()"><svg lucidePlus></svg> Variable</button>
-        <button type="button" [disabled]="!!e.conditions.hours" (click)="setHours({ from: 8, to: 18 })"><svg lucidePlus></svg> Heure</button>
-        <button type="button" [disabled]="!!e.conditions.weathers" (click)="addWeather('rainy')"><svg lucidePlus></svg> Météo</button>
-      </div>
     </section>
 
     <!-- What it does -->
     <section class="block">
       <h3>Actions <small>l'une après l'autre</small></h3>
-      @for (action of e.actions; track $index; let i = $index; let first = $first; let last = $last) {
-        @let info = actionInfo(action.type);
-        <article class="action">
-          <div class="action-head">
-            <svg [lucideIcon]="info.icon" class="row-icon"></svg>
-            <b>{{ info.label }}</b>
-            <button type="button" class="icon-btn" aria-label="Monter" title="Monter" [disabled]="first" (click)="moveAction(i, -1)"><svg lucideArrowUp></svg></button>
-            <button type="button" class="icon-btn" aria-label="Descendre" title="Descendre" [disabled]="last" (click)="moveAction(i, 1)"><svg lucideArrowDown></svg></button>
-            <button type="button" class="icon-btn" aria-label="Retirer l'action" title="Retirer" (click)="removeAction(i)"><svg lucideX></svg></button>
-          </div>
-          @switch (action.type) {
-            @case ('message') {
-              <input type="text" aria-label="Qui parle" placeholder="Qui parle (facultatif)" maxlength="40" [value]="action.name ?? ''"
-                     (change)="setAction(i, { name: value($event) })" />
-              <textarea aria-label="Ce qui est dit" placeholder="Ce qui est dit…" rows="2" maxlength="400" [value]="action.text"
-                        (change)="setAction(i, { text: value($event) })"></textarea>
-            }
-            @case ('variable') {
-              @let v = variable(action.id);
-              <div class="row">
-                <select aria-label="Variable" (change)="setActionVariable(i, value($event))">
-                  @if (!v) { <option value="" selected>(variable supprimée)</option> }
-                  @for (variable of variables; track variable.id) {
-                    <option [value]="variable.id" [selected]="variable.id === action.id">{{ variable.name }}</option>
-                  }
-                </select>
-              </div>
-              @if (v?.kind === 'flag') {
-                <div class="row">
-                  <span>devient</span>
-                  <select aria-label="Nouvelle valeur" class="narrow" (change)="setAction(i, { op: 'set', value: value($event) === 'true' })">
-                    <option value="true" [selected]="action.value === true">vrai</option>
-                    <option value="false" [selected]="action.value === false">faux</option>
-                  </select>
-                </div>
-              } @else if (v) {
-                <div class="row">
-                  <select aria-label="Changement" class="narrow" (change)="setAction(i, { op: $any(value($event)) })">
-                    <option value="set" [selected]="action.op === 'set'">devient</option>
-                    <option value="add" [selected]="action.op === 'add'">augmente de</option>
-                  </select>
-                  <input type="number" class="num" aria-label="Nombre" [value]="action.value" (change)="setAction(i, { value: counterValue(value($event)) })" />
-                  @if (action.op === 'add') { <small class="help">(négatif : diminue)</small> }
-                </div>
-              }
-            }
-            @case ('teleport') {
-              <div class="row">
-                <span>Vers</span>
-                <select aria-label="Carte" (change)="setAction(i, { map: value($event), pos: undefined })">
-                  @for (map of maps(); track map.id) {
-                    <option [value]="map.id" [selected]="map.id === action.map">{{ map.name }}{{ map.id === currentMap() ? ' (cette carte)' : '' }}</option>
-                  }
-                </select>
-              </div>
-              <p class="help">Arrivée : le point d'arrivée de la carte.</p>
-            }
-            @case ('weather') {
-              <div class="row">
-                <span>Devient</span>
-                <select aria-label="Météo" (change)="setAction(i, { weather: value($event) })">
-                  @for (w of weatherList; track w.type) {
-                    <option [value]="w.type" [selected]="w.type === action.weather">{{ w.icon }} {{ w.label }}</option>
-                  }
-                </select>
-              </div>
-            }
-            @case ('sound') {
-              <div class="row">
-                <select aria-label="Son" (change)="setAction(i, { sound: value($event) }); play(value($event))">
-                  @for (s of sounds; track s.id) {
-                    <option [value]="s.id" [selected]="s.id === action.sound">{{ s.label }}</option>
-                  }
-                </select>
-                <button type="button" class="icon-btn" aria-label="Écouter" title="Écouter" (click)="play(action.sound)"><svg lucidePlay></svg></button>
-              </div>
-            }
-            @case ('wait') {
-              <div class="row">
-                <input type="number" class="num" min="0.1" max="60" step="0.5" aria-label="Secondes" [value]="action.seconds"
-                       (change)="setAction(i, { seconds: seconds(value($event)) })" />
-                <span>secondes</span>
-              </div>
-            }
-          }
-        </article>
-      } @empty {
-        <p class="help">Aucune action : l'événement ne fait rien.</p>
-      }
-      <div class="add-row">
-        @for (a of actionTypes; track a.type) {
-          <button type="button" [disabled]="(a.type === 'variable' && !variables.length) || (a.type === 'teleport' && !maps().length)" (click)="addAction(a.type)">
-            <svg lucidePlus></svg> {{ a.label }}
-          </button>
-        }
-      </div>
+      <ng-container *ngTemplateOutlet="actionsTpl; context: { $implicit: e.actions, path: root }" />
+      <button type="button" class="add-action" (click)="$event.stopPropagation(); openAdd(root, 'Ajouter une action')"><svg lucidePlus></svg> Action</button>
     </section>
   </div>
 
@@ -201,4 +45,263 @@
     <button type="button" class="danger" data-haptic="warning" (click)="removed.emit()"><svg lucideTrash></svg> Supprimer l'événement</button>
     <button type="button" class="primary" (click)="close()">Terminé</button>
   </footer>
+
+  @if (adding(); as add) {
+    <div class="sheet-veil" (click)="adding.set(null)"></div>
+    <div class="add-sheet" role="dialog" aria-label="Ajouter une action">
+      <h3>{{ add.label }}</h3>
+      <div class="types">
+        @for (a of actionTypes; track a.type) {
+          <button type="button" class="type" [class.blue]="a.type === 'if'"
+                  [disabled]="(a.branches && !canBranch(add.path)) || (a.type === 'variable' && !variables.length) || (a.type === 'teleport' && !maps().length)"
+                  [title]="a.branches && !canBranch(add.path) ? 'Pas plus de 3 niveaux de branches' : a.label"
+                  (click)="addAction(a.type)">
+            <svg [lucideIcon]="a.icon"></svg>
+            <span>{{ a.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
 </section>
+
+<!-- A list of actions (the event's, or a branch's): recursive through the branches -->
+<ng-template #actionsTpl let-list let-path="path">
+  @for (action of list; track $index; let i = $index; let first = $first; let last = $last) {
+    @let meta = info(action.type);
+    @let key = foldKey(path, i);
+    @let branching = action.type === 'choice' || action.type === 'if';
+    <article class="action" [class.branching]="branching">
+      <div class="action-head">
+        @if (branching) {
+          <button type="button" class="fold" [attr.aria-label]="isFolded(key) ? 'Déplier' : 'Replier'" (click)="toggleFold(key)">
+            @if (isFolded(key)) { <svg lucideChevronRight></svg> } @else { <svg lucideChevronDown></svg> }
+          </button>
+        }
+        <svg [lucideIcon]="meta.icon" class="row-icon" [class.blue]="action.type === 'if'"></svg>
+        <b>{{ meta.label }}</b>
+        @if (branching && isFolded(key)) {
+          <small class="folded">{{ foldedSummary(action) }}</small>
+        }
+        <span class="grow"></span>
+        <div class="menu-anchor">
+          <button type="button" class="icon-btn ghost" aria-label="Plus d'options" title="Monter, descendre, dupliquer, retirer"
+                  (click)="$event.stopPropagation(); menuOpen.set(menuOpen() === key ? null : key)"><svg lucideEllipsisVertical></svg></button>
+          @if (menuOpen() === key) {
+            <div class="menu" role="menu" (click)="$event.stopPropagation()">
+              <button type="button" role="menuitem" [disabled]="first" (click)="moveAction(path, i, -1)"><svg lucideArrowUp></svg> Monter</button>
+              <button type="button" role="menuitem" [disabled]="last" (click)="moveAction(path, i, 1)"><svg lucideArrowDown></svg> Descendre</button>
+              <button type="button" role="menuitem" (click)="duplicateAction(path, i)"><svg lucideCopy></svg> Dupliquer</button>
+              <button type="button" role="menuitem" class="danger" (click)="removeAction(path, i)"><svg lucideTrash></svg> Retirer</button>
+            </div>
+          }
+        </div>
+      </div>
+      @if (!isFolded(key)) {
+        @switch (action.type) {
+          @case ('message') {
+            <div class="row">
+              <label class="portrait" [title]="action.pic ? 'Changer le portrait' : 'Ajouter un portrait'">
+                @if (action.pic) { <img [src]="action.pic" alt="" /> } @else { <svg lucideImagePlus></svg> }
+                <select aria-label="Portrait" (change)="setAction(path, i, { pic: value($event) || undefined })">
+                  <option value="" [selected]="!action.pic">Sans portrait</option>
+                  @for (p of portraits; track p.pic) {
+                    <option [value]="p.pic" [selected]="p.pic === action.pic">{{ p.label }}</option>
+                  }
+                </select>
+              </label>
+              <input type="text" aria-label="Qui parle" placeholder="Qui parle (facultatif)" maxlength="40" [value]="action.name ?? ''"
+                     (change)="setAction(path, i, { name: value($event) })" />
+            </div>
+            <textarea aria-label="Ce qui est dit" placeholder="Ce qui est dit…" rows="2" maxlength="400" [value]="action.text"
+                      (change)="setAction(path, i, { text: value($event) })"></textarea>
+          }
+          @case ('choice') {
+            <div class="row wrap">
+              @for (option of action.options; track $index; let k = $index) {
+                <span class="answer">
+                  <input type="text" aria-label="Réponse" maxlength="30" [value]="option.text" [style.width.ch]="option.text.length + 2"
+                         (change)="setOption(path, i, k, value($event))" />
+                  @if (action.options.length > 2) {
+                    <button type="button" aria-label="Retirer cette réponse et ses actions" title="Retirer cette réponse et ses actions"
+                            (click)="removeOption(path, i, k)"><svg lucideX></svg></button>
+                  }
+                </span>
+              }
+              @if (action.options.length < maxOptions) {
+                <button type="button" class="add-small" (click)="addOption(path, i)"><svg lucidePlus></svg> Réponse</button>
+              }
+            </div>
+            @for (option of action.options; track $index; let k = $index) {
+              <ng-container *ngTemplateOutlet="branchTpl; context: { $implicit: option.actions, path: sub(path, i, 'o' + k), label: 'Si « ' + option.text + ' »', name: option.text, key: foldKey(path, i, 'o' + k), color: 'orange' }" />
+            }
+          }
+          @case ('if') {
+            <ng-container *ngTemplateOutlet="condsTpl; context: { $implicit: action.conditions, target: condTarget(path, i), empty: 'Aucune condition : toujours « Alors ».' }" />
+            <ng-container *ngTemplateOutlet="branchTpl; context: { $implicit: action.then, path: sub(path, i, 'then'), label: 'Alors', name: 'Alors', key: foldKey(path, i, 'then'), color: 'blue' }" />
+            <ng-container *ngTemplateOutlet="branchTpl; context: { $implicit: action.else, path: sub(path, i, 'else'), label: 'Sinon', name: 'Sinon', key: foldKey(path, i, 'else'), color: 'blue' }" />
+          }
+          @case ('variable') {
+            @let v = variable(action.id);
+            <div class="row">
+              <select aria-label="Variable" (change)="setActionVariable(path, i, value($event))">
+                @if (!v) { <option value="" selected>(variable supprimée)</option> }
+                @for (variable of variables; track variable.id) {
+                  <option [value]="variable.id" [selected]="variable.id === action.id">{{ variable.name }}</option>
+                }
+              </select>
+            </div>
+            @if (v?.kind === 'flag') {
+              <div class="row">
+                <span>devient</span>
+                <select aria-label="Nouvelle valeur" class="narrow" (change)="setAction(path, i, { op: 'set', value: value($event) === 'true' })">
+                  <option value="true" [selected]="action.value === true">vrai</option>
+                  <option value="false" [selected]="action.value === false">faux</option>
+                </select>
+              </div>
+            } @else if (v) {
+              <div class="row">
+                <select aria-label="Changement" class="narrow" (change)="setAction(path, i, { op: $any(value($event)) })">
+                  <option value="set" [selected]="action.op === 'set'">devient</option>
+                  <option value="add" [selected]="action.op === 'add'">augmente de</option>
+                </select>
+                <input type="number" class="num" aria-label="Nombre" [value]="action.value" (change)="setAction(path, i, { value: counterValue(value($event)) })" />
+              </div>
+              @if (action.op === 'add') { <small class="help">(négatif : diminue)</small> }
+            }
+          }
+          @case ('teleport') {
+            <div class="row">
+              <span>Vers</span>
+              <select aria-label="Carte" (change)="setAction(path, i, { map: value($event), pos: undefined })">
+                @for (map of maps(); track map.id) {
+                  <option [value]="map.id" [selected]="map.id === action.map">{{ map.name }}{{ map.id === currentMap() ? ' (cette carte)' : '' }}</option>
+                }
+              </select>
+            </div>
+            <p class="help">Arrivée : le point d'arrivée de la carte.</p>
+          }
+          @case ('weather') {
+            <div class="row">
+              <span>Devient</span>
+              <select aria-label="Météo" (change)="setAction(path, i, { weather: value($event) })">
+                @for (w of weatherList; track w.type) {
+                  <option [value]="w.type" [selected]="w.type === action.weather">{{ w.icon }} {{ w.label }}</option>
+                }
+              </select>
+            </div>
+          }
+          @case ('sound') {
+            <div class="row">
+              <select aria-label="Son" (change)="setAction(path, i, { sound: value($event) }); play(value($event))">
+                @for (s of sounds; track s.id) {
+                  <option [value]="s.id" [selected]="s.id === action.sound">{{ s.label }}</option>
+                }
+              </select>
+              <button type="button" class="icon-btn" aria-label="Écouter" title="Écouter" (click)="play(action.sound)"><svg lucidePlay></svg></button>
+            </div>
+          }
+          @case ('wait') {
+            <div class="row">
+              <input type="number" class="num" min="0.1" max="60" step="0.5" aria-label="Secondes" [value]="action.seconds"
+                     (change)="setAction(path, i, { seconds: seconds(value($event)) })" />
+              <span>secondes</span>
+            </div>
+          }
+          @case ('stop') {
+            <p class="help">L'événement s'arrête ici : les actions suivantes ne sont pas jouées.</p>
+          }
+        }
+      }
+    </article>
+  } @empty {
+    @if (!path.length) {
+      <p class="help">Aucune action : l'événement ne fait rien.</p>
+    }
+  }
+</ng-template>
+
+<!-- A branch: its label (folds it), its actions, + Action -->
+<ng-template #branchTpl let-list let-path="path" let-label="label" let-name="name" let-key="key" let-color="color">
+  <div class="branch" [class.blue]="color === 'blue'">
+    <button type="button" class="branch-label" [attr.aria-expanded]="!isFolded(key)" (click)="toggleFold(key)">
+      @if (isFolded(key)) { <svg lucideChevronRight></svg> } @else { <svg lucideChevronDown></svg> }
+      <b>{{ label }}</b>
+      <small>{{ count(list) }}</small>
+    </button>
+    @if (!isFolded(key)) {
+      <ng-container *ngTemplateOutlet="actionsTpl; context: { $implicit: list, path: path }" />
+      <button type="button" class="add-small" (click)="$event.stopPropagation(); openAdd(path, 'Ajouter dans « ' + name + ' »')">
+        <svg lucidePlus></svg> Action
+      </button>
+    }
+  </div>
+</ng-template>
+
+<!-- Conditions (the event's, or a condition action's): variables, hour, weather -->
+<ng-template #condsTpl let-c let-target="target" let-empty="empty">
+  @for (test of c.variables; track $index; let k = $index) {
+    @let v = variable(test.id);
+    <div class="row">
+      <svg lucideVariable class="row-icon"></svg>
+      <select aria-label="Variable" (change)="setTestVariable(target, k, value($event))">
+        @if (!v) { <option value="" selected>(variable supprimée)</option> }
+        @for (variable of variables; track variable.id) {
+          <option [value]="variable.id" [selected]="variable.id === test.id">{{ variable.name }}</option>
+        }
+      </select>
+      @if (v?.kind === 'flag') {
+        <select aria-label="Valeur" class="narrow" (change)="setTest(target, k, { op: 'is', value: value($event) === 'true' })">
+          <option value="true" [selected]="test.value === true">est vrai</option>
+          <option value="false" [selected]="test.value === false">est faux</option>
+        </select>
+      } @else if (v) {
+        <select aria-label="Comparaison" class="op" (change)="setTest(target, k, { op: $any(value($event)) })">
+          @for (t of counterTests; track t.op) {
+            <option [value]="t.op" [selected]="test.op === t.op">{{ t.label }}</option>
+          }
+        </select>
+        <input type="number" class="num" aria-label="Nombre" [value]="test.value" (change)="setTest(target, k, { value: counterValue(value($event)) })" />
+      }
+      <button type="button" class="icon-btn" aria-label="Retirer la condition" title="Retirer" (click)="removeTest(target, k)"><svg lucideX></svg></button>
+    </div>
+  }
+  @if (c.hours; as hours) {
+    <div class="row">
+      <svg lucideClock class="row-icon"></svg>
+      <span>De</span>
+      <select aria-label="De" class="narrow" (change)="setHours(target, { from: +value($event), to: hours.to })">
+        @for (h of hourList; track h) { <option [value]="h" [selected]="h === hours.from">{{ h }} h</option> }
+      </select>
+      <span>à</span>
+      <select aria-label="À" class="narrow" (change)="setHours(target, { from: hours.from, to: +value($event) })">
+        @for (h of hourList; track h) { <option [value]="h" [selected]="h === hours.to">{{ h }} h</option> }
+      </select>
+      <button type="button" class="icon-btn" aria-label="Retirer l'heure" title="Retirer" (click)="setHours(target, undefined)"><svg lucideX></svg></button>
+    </div>
+  }
+  @if (c.weathers; as weathers) {
+    <div class="row wrap">
+      <svg lucideCloudSun class="row-icon"></svg>
+      <span>Météo :</span>
+      @for (w of weathers; track w) {
+        <button type="button" class="chip" [title]="'Retirer ' + weatherLabel(w)" (click)="removeWeather(target, w)">{{ weatherLabel(w) }} <svg lucideX></svg></button>
+      }
+      <select aria-label="Ajouter une météo" class="narrow" (change)="addWeather(target, value($event)); $any($event.target).value = ''">
+        <option value="" selected>+ ou…</option>
+        @for (w of weatherList; track w.type) {
+          @if (!weathers.includes(w.type)) { <option [value]="w.type">{{ w.icon }} {{ w.label }}</option> }
+        }
+      </select>
+    </div>
+  }
+  @if (!c.variables.length && !c.hours && !c.weathers) {
+    <p class="help">{{ empty }}</p>
+  }
+  <div class="add-row">
+    <button type="button" [disabled]="!variables.length" [title]="variables.length ? 'Un drapeau ou un compteur' : 'Crée d\'abord une variable (éditeur de variables)'"
+            (click)="addVariableTest(target)"><svg lucidePlus></svg> Variable</button>
+    <button type="button" [disabled]="!!c.hours" (click)="setHours(target, { from: 8, to: 18 })"><svg lucidePlus></svg> Heure</button>
+    <button type="button" [disabled]="!!c.weathers" (click)="addWeather(target, 'rainy')"><svg lucidePlus></svg> Météo</button>
+  </div>
+</ng-template>

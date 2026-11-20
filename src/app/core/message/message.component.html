@@ -27,9 +27,9 @@
              [style.--enter-delay.ms]="(i + 2) * 100"
              [class.selected]="i === choiceId()"
              [attr.aria-selected]="i === choiceId()"
-             (click)="$event.stopPropagation()"
-             (touchstart)="selectChoice($event, i)"
-             (touchend)="confirmChoice($event, choice.key)">
+             (pointerdown)="selectChoice($event, i)"
+             (touchend)="$event.stopPropagation()"
+             (click)="confirmChoice($event, choice.key)">
           {{ choice.text }}
         </div>
       }
