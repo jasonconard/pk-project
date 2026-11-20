@@ -1,12 +1,12 @@
 # Base de données
 
-La base de données rassemble ce que le combat, les événements et les menus vont lire : les éléments, les types d'armes, les états. Les compétences, les objets, les personnages, les ennemis et les groupes arrivent ensuite (voir la [feuille de route](../idees.md)).
+La base de données rassemble ce que le combat, les événements et les menus vont lire : les compétences, les états, les éléments, les types d'armes. Les objets, les personnages, les ennemis et les groupes arrivent ensuite (voir la [feuille de route](../idees.md)).
 
 ## Ouvrir l'éditeur
 
 En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en paysage) ou **⋮ → Base de données** (téléphone en portrait). L'éditeur s'ouvre par-dessus le jeu ; **Jeu** le ferme.
 
-- **Sur téléphone en portrait** : les tables en onglets en haut (Éléments, Armes, États), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
+- **Sur téléphone en portrait** : les tables en onglets en haut (Compétences, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
 - Sur les écrans larges, **Dupliquer** et **Supprimer** sont à droite du nom.
@@ -15,7 +15,7 @@ En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en 
 ## La liste
 
 - **Chercher** filtre par nom (les accents et les majuscules ne comptent pas).
-- **+ Élément** (ou + Type d'arme, + État), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
+- **+ Compétence** (ou + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
 - Dans la fiche : **Dupliquer** (copie juste en dessous) et **Supprimer** (la corbeille : appuyer deux fois, « Supprimer ? » pendant 3 secondes).
 
 Renommer ne casse rien : ce qui utilise une ligne la retrouve par un identifiant qui ne change jamais.
@@ -31,6 +31,23 @@ Chaque ligne a une icône de 16 × 16 pixels. Toucher l'icône de la fiche ouvre
 - **Importer un PNG** : l'image est réduite à 16 × 16, sans flou.
 - **Tout effacer** : une icône vide redevient une pastille de couleur.
 - **OK** garde le dessin ; **Fermer** (ou toucher à côté) l'oublie.
+
+## Compétences
+
+- **Description** : facultative.
+- **Élément** : celui de ses dégâts (les faiblesses et la météo en dépendent).
+- **S'apprend quand**, à la Grandia : le niveau qu'un personnage doit avoir dans un élément simple ou un type d'arme (« Feu niv. 2 », « Épée niv. 4 »), deux au plus. Une compétence d'un élément composé demande un niveau dans ses deux éléments (Orage : Feu 5 + Vent 3). En choisissant l'élément d'une compétence qui n'a pas encore de niveau, le jeu en propose : les deux éléments d'un élément composé, l'élément lui-même, ou le premier type d'arme pour le Physique. Sans niveau, la compétence ne s'apprend pas toute seule (un événement ou un objet la donnera).
+- **Coût en PM** et **Cible** (un ennemi, tous les ennemis, un allié, toute l'équipe, soi-même).
+- **Temps d'incantation** : de 0 (immédiat) à 5 secondes, par demi-seconde. La jauge montre la part de l'incantation avant l'action : plus c'est lent, plus un ennemi a le temps de l'interrompre en frappant.
+- **Utilisable** : en combat, hors combat, ou les deux (un soin).
+- **Effets**, dans l'ordre (les flèches les déplacent) :
+  - **Dégâts** de l'élément de la compétence, selon la Force ou la Magie de celui qui l'utilise, avec une puissance ;
+  - **Soin** : rend des PV ou des PM, avec une puissance ;
+  - **Donner un état**, avec une chance en % ; **Guérir un état** ;
+  - **Stat** : une stat montée ou baissée en %, pendant quelques tours.
+- **Formule (pour les cas spéciaux)** : remplace la puissance des dégâts et des soins, par exemple `a.mag * 2 - b.end` (a = celui qui l'utilise, b = la cible ; stats : hp, mp, str, mag, end, agi, luck, level). Une formule mal écrite est signalée en orange.
+
+Supprimer un élément fait passer ses compétences en Physique ; supprimer un élément, un type d'arme ou un état retire les niveaux et les effets qui le nommaient.
 
 ## Éléments
 
@@ -55,7 +72,7 @@ Chaque ligne a une icône de 16 × 16 pixels. Toucher l'icône de la fiche ouvre
 
 ## Au départ
 
-Sans rien changer, la base contient 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
+Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
 
 ## Sauvegarde et export
 
@@ -70,6 +87,6 @@ Sans rien changer, la base contient 7 éléments (Physique, Feu, Glace, Vent, Fo
 | `src/app/modules/database-editor/database-editor.component.*` | L'éditeur (onglets, liste, fiches) |
 | `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel 16 × 16 |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
-| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, suppression) |
+| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbSkill`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |
 | `src/assets/database/database.ts` | La base du jeu (`CODE_DATABASE`), écrite par l'export |
