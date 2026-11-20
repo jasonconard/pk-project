@@ -40,16 +40,38 @@ Toutes doivent être vraies. Sans condition, l'événement se joue toujours.
 
 ## Actions
 
-Jouées l'une après l'autre ; ↑ et ↓ changent leur ordre.
+Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'action. Le **⋮** d'une action : Monter, Descendre, Dupliquer, Retirer.
 
 | Action | Ce qu'elle fait |
 |---|---|
-| **Message** | Une réplique, avec qui parle (facultatif). Le joueur la ferme pour passer à la suite. |
+| **Message** | Une réplique, avec qui parle (facultatif) et un portrait (touche le carré à gauche du nom). Le joueur la ferme pour passer à la suite. |
+| **Choix** | Des réponses (2 à 4) affichées avec le message juste avant. Chaque réponse a sa branche d'actions, jouée si le joueur la choisit. |
+| **Condition** | Teste des variables, l'heure ou la météo (comme les conditions de l'événement) : joue la branche **Alors** si tout est vrai, sinon la branche **Sinon**. |
 | **Variable** | Un drapeau devient vrai / faux ; un compteur devient un nombre ou augmente de (négatif : diminue). |
 | **Téléporter** | Vers une carte, à son point d'arrivée. |
 | **Météo** | Change la météo (comme le panneau Ambiance : une météo de jour la nuit fait passer au jour). |
 | **Son** | Un petit son : bip, pièce, objet trouvé, réussite, erreur, porte, coffre, cloche, magie, saut, coup, pas. ▶ l'écoute. |
 | **Attendre** | Une pause, en secondes. |
+| **Arrêter** | L'événement s'arrête là : les actions suivantes ne sont pas jouées. |
+
+## L'arbre d'actions
+
+Choix et Condition contiennent des **branches** (comme dans RPG Maker) : un trait de couleur à gauche (orange pour les réponses d'un choix, bleu pour Alors / Sinon), décalé vers la droite. Chaque branche a son **+ Action**.
+
+- Le chevron **plie** une action à branches (il reste un résumé : « « Oui » · 2 actions ») ou une seule branche.
+- On peut mettre un choix dans un choix, mais pas plus de **3 niveaux** : au-delà, Choix et Condition sont grisés dans la feuille.
+- Sur téléphone, **Déclencheur et conditions** se plie en une ligne de résumé (plié d'office quand l'événement a déjà des actions).
+
+Exemple :
+
+```
+Message     Le maire : « Tu veux m'aider ? »
+Choix       Oui / Non
+  Si « Oui »   Message « Merci ! »
+  Si « Non »   Condition  si Pièces ≥ 10
+                 Alors    Message « Tu es riche ! »
+                 Sinon    Message « Dommage… »
+```
 
 ## Zones invisibles
 
@@ -65,11 +87,11 @@ Dans l'éditeur, une zone est une boîte orange transparente ; dans le jeu elle 
 
 | Fichier | Rôle |
 |---|---|
-| `shared/model/ObjectEvent.ts` | L'événement de l'éditeur (déclencheur, conditions, actions), sa conversion en `SceneEvent` (marqué `edited`), les conditions (`conditionsFit`) |
-| `event-editor/` | La fenêtre de l'événement |
+| `shared/model/ObjectEvent.ts` | L'événement de l'éditeur (déclencheur, conditions, arbre d'actions), sa conversion en `SceneEvent` (marqué `edited` ; un choix devient les réponses du message d'avant, une condition une instruction `BRANCH`), les conditions (`conditionsFit`), les portraits |
+| `event-editor/` | La fenêtre de l'événement (l'arbre : un modèle qui s'appelle lui-même pour chaque branche) |
 | `shared/services/event.service.ts` | Quel événement se joue : touche d'action, `armed` (entrer dessus, automatique) |
 | `shared/services/game-map.service.ts` | Déclenche les événements (une fois, puis attend qu'ils redeviennent impossibles), tourne l'objet vers le joueur |
-| `shared/services/sequence.service.ts` | Joue les actions |
+| `shared/services/sequence.service.ts` | Joue les actions (les branches : `SceneEventSequence`) |
 | `shared/services/sfx.ts` | Les sons, fabriqués en direct |
 | `shared/model/Zone.ts` | La zone invisible (calque de caméra à part, vu seulement dans l'éditeur) |
 
