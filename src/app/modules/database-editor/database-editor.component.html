@@ -1,0 +1,231 @@
+<header class="top">
+  <a href="#/" class="back" title="Retour au jeu" (click)="backToGame($event)"><svg lucideChevronLeft></svg> Jeu</a>
+  <div class="title">
+    <strong>Base de données</strong>
+    <span>{{ saveFailed() ? 'Pas enregistré (plus de place ?)' : 'Enregistré' }}</span>
+  </div>
+  <button type="button" class="square-btn" title="Exporter database.ts (pour le code du jeu)" aria-label="Exporter" (click)="exportDatabase()">
+    <svg lucideDownload></svg>
+  </button>
+</header>
+
+<div class="body" [class.sheet-open]="!!current()">
+  <nav class="tables" aria-label="Tables">
+    @for (t of tables; track t.id) {
+      <button type="button" [class.on]="table() === t.id" [attr.aria-pressed]="table() === t.id" (click)="openTable(t.id)">
+        <svg [lucideIcon]="t.icon"></svg>
+        <span class="label">{{ t.label }}</span>
+        <small>{{ db()[t.id].length }}</small>
+      </button>
+    }
+  </nav>
+
+  <section class="list-pane" [attr.aria-label]="tableInfo().label">
+    <label class="search">
+      <svg lucideSearch></svg>
+      <input type="search" placeholder="Chercher" aria-label="Chercher" [value]="search()" (input)="search.set($any($event.target).value)" />
+    </label>
+    @if (message()) {
+      <p class="message" role="status">{{ message() }}</p>
+    }
+    <div class="rows">
+      @for (row of shownRows(); track row.id) {
+        <button type="button" class="row" [class.on]="current()?.id === row.id" [style.--i]="$index" (click)="select(row.id)">
+          <span class="icon-box">
+            @if (row.icon) {
+              <img class="pixel" [src]="row.icon" alt="" />
+            } @else {
+              <span class="no-icon" [style.background]="$any(row).color ?? null"></span>
+            }
+          </span>
+          <span class="texts">
+            <b>{{ row.name.trim() || 'Sans nom' }}</b>
+            <small>{{ rowMeta(row) }}</small>
+          </span>
+          <svg lucideChevronRight class="chevron"></svg>
+        </button>
+      } @empty {
+        <p class="empty">{{ search() ? 'Rien ne correspond.' : 'Rien pour l\'instant.' }}</p>
+      }
+    </div>
+    <footer class="add">
+      <button type="button" (click)="add()"><svg lucidePlus></svg> {{ tableInfo().one }}</button>
+    </footer>
+  </section>
+
+  <section class="sheet-pane" aria-label="Fiche">
+    @if (current(); as row) {
+      <ng-template #actions>
+        <button type="button" class="square-btn" title="Dupliquer" aria-label="Dupliquer" (click)="duplicate(row)"><svg lucideCopy></svg></button>
+        @if (!element()?.physical) {
+          <button type="button" class="square-btn delete" [class.armed]="deleting() === row.id"
+                  [title]="deleting() === row.id ? 'Appuyer encore pour supprimer' : 'Supprimer'" aria-label="Supprimer" (click)="remove(row)">
+            @if (deleting() === row.id) { <span>Supprimer ?</span> } @else { <svg lucideTrash></svg> }
+          </button>
+        }
+      </ng-template>
+      @if (!sideBySide()) {
+        <header class="sheet-top">
+          <button type="button" class="sheet-back" (click)="selectedId.set(null)"><svg lucideChevronLeft></svg> {{ tableInfo().label }}</button>
+          <span class="spacer"></span>
+          <ng-container [ngTemplateOutlet]="actions" />
+        </header>
+      }
+
+      <div class="sheet">
+        <div class="head">
+          <button type="button" class="icon-edit" title="Dessiner l'icône" (click)="editIcon(row)">
+            @if (row.icon) { <img class="pixel" [src]="row.icon" alt="Icône" /> } @else { <span class="no-icon big" [style.background]="$any(row).color ?? null"></span> }
+            <span class="pen" aria-hidden="true"><svg lucidePencil></svg></span>
+          </button>
+          <div class="head-fields">
+            <div class="name-row">
+              <input class="name" type="text" maxlength="40" aria-label="Nom" [value]="row.name" (input)="rename(row, $any($event.target).value)" />
+              @if (sideBySide()) { <ng-container [ngTemplateOutlet]="actions" /> }
+            </div>
+            @if (!row.name.trim()) { <p class="warning">Donnez-lui un nom.</p> }
+            @if (element() || state()) {
+              <div class="colors" role="group" aria-label="Couleur">
+                <small>Couleur</small>
+                <div class="swatches">
+                  @for (c of colors; track c) {
+                    <button type="button" [style.background]="c" [class.on]="$any(row).color === c" [attr.aria-label]="'Couleur ' + c" (click)="setColor($any(row), c)"></button>
+                  }
+                  <label class="custom" title="Autre couleur" [style.background]="colors.includes($any(row).color) ? null : $any(row).color">
+                    <svg lucidePlus></svg>
+                    <input type="color" aria-label="Autre couleur" [value]="$any(row).color" (change)="setColor($any(row), $any($event.target).value)" />
+                  </label>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Element -->
+        @if (element(); as el) {
+          @if (el.physical) {
+            <p class="hint"><svg lucideInfo></svg> Le Physique sert aux dégâts et aux résistances. Les compétences physiques s'apprennent avec les types d'armes.</p>
+          } @else {
+            <div class="block">
+              <h3>Sorte d'élément</h3>
+              <div class="segmented wide" role="group" aria-label="Sorte d'élément">
+                <button type="button" [class.on]="!el.parts" [attr.aria-pressed]="!el.parts" (click)="setComposed(el, false)">Simple</button>
+                <button type="button" [class.on]="!!el.parts" [attr.aria-pressed]="!!el.parts" (click)="setComposed(el, true)">Composé</button>
+              </div>
+              @if (el.parts; as parts) {
+                <div class="equation">
+                  @for (i of [0, 1]; track i) {
+                    @if (i) { <b class="op">+</b> }
+                    <select [attr.aria-label]="'Élément ' + (i + 1)" (change)="setPart(el, $any(i), $any($event.target).value)">
+                      @for (c of composable(); track c.id) {
+                        <option [value]="c.id" [selected]="c.id === parts[i]">{{ c.name }}</option>
+                      }
+                    </select>
+                  }
+                  <b class="op">=</b>
+                  @if (el.icon) { <img class="pixel result" [src]="el.icon" alt="" /> } @else { <span class="no-icon" [style.background]="el.color"></span> }
+                </div>
+                <p class="note">Ses compétences s'apprennent avec un niveau dans les deux éléments, et les font monter tous les deux.</p>
+              }
+            </div>
+          }
+
+          @for (side of [true, false]; track side) {
+            <div class="block">
+              <div class="block-head">
+                <h3>{{ side ? 'Plus fort par' : 'Plus faible par' }}</h3>
+                <small>dégâts {{ el.name.trim() ? 'de « ' + el.name.trim() + ' »' : '' }}</small>
+              </div>
+              @for (w of side ? strong(el) : weak(el); track w.weather) {
+                <div class="weather">
+                  <img [src]="weatherImage(w.weather)" alt="" (error)="weatherImageMissing($event, w.weather)" />
+                  <b>{{ weatherLabel(w.weather) }}</b>
+                  <db-stepper [class]="side ? 'plus' : 'minus'" [value]="side ? w.percent : -w.percent" [min]="5" [max]="percentMax" [step]="5"
+                              [suffix]="'%'" [label]="'Pourcentage'" (changed)="setWeatherPercent(el, w.weather, $event, side)" />
+                  <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeWeather(el, w.weather)"><svg lucideX></svg></button>
+                </div>
+              }
+              <button type="button" class="add-select" (click)="openWeatherPick(el, side)"><svg lucidePlus></svg> Météo</button>
+            </div>
+          }
+          <p class="hint"><svg lucideInfo></svg> En combat, c'est la météo du donjon qui compte.</p>
+        }
+
+        <!-- Weapon type -->
+        @if (weapon(); as wp) {
+          <div class="block">
+            <h3>Description</h3>
+            <input type="text" maxlength="120" placeholder="Facultatif" aria-label="Description" [value]="wp.note ?? ''" (input)="setNote(wp, $any($event.target).value)" />
+          </div>
+          <p class="hint"><svg lucideInfo></svg> Frapper avec ce type d'arme fait monter son niveau, qui débloque des coups spéciaux (les compétences arrivent bientôt).</p>
+        }
+
+        <!-- State -->
+        @if (state(); as st) {
+          <div class="block">
+            <h3>Durée</h3>
+            <div class="line">
+              <db-stepper [value]="st.turns" [min]="0" [max]="turnsMax" [label]="'Tours'" (changed)="setTurns(st, $event)" />
+              <span class="muted">{{ turnsLabel(st.turns) }}</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [checked]="st.staysAfterFight" (change)="setFlag(st, 'staysAfterFight', $any($event.target).checked)" />
+              <span>Reste après le combat (jusqu'à être soigné)</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" [checked]="st.endsOnHit" (change)="setFlag(st, 'endsOnHit', $any($event.target).checked)" />
+              <span>Se termine quand on est touché</span>
+            </label>
+          </div>
+
+          <div class="block">
+            <h3>Effets</h3>
+            @for (fx of st.effects; track $index; let i = $index) {
+              <div class="effect">
+                <b>{{ effectLabels[fx.kind] }}</b>
+                @switch (fx.kind) {
+                  @case ('stat') {
+                    <select aria-label="Stat" (change)="setEffectStat(st, i, $any($event.target).value)">
+                      @for (s of stats; track s.id) {
+                        <option [value]="s.id" [selected]="s.id === fx.stat">{{ s.label }}</option>
+                      }
+                    </select>
+                    <db-stepper [class]="fx.percent < 0 ? 'minus' : 'plus'" [value]="fx.percent" [min]="-percentMax" [max]="percentMax" [step]="5"
+                                [signed]="true" [suffix]="'%'" [label]="'Pourcentage'" (changed)="setEffect(st, i, { percent: $event })" />
+                  }
+                  @case ('skip') {
+                    <db-stepper [value]="fx.chance" [min]="0" [max]="100" [step]="5" [suffix]="'%'" [label]="'Chance'" (changed)="setEffect(st, i, { chance: $event })" />
+                  }
+                  @default {
+                    <db-stepper [class]="fx.percent < 0 ? 'minus' : 'plus'" [value]="fx.percent" [min]="-percentMax" [max]="percentMax" [step]="5"
+                                [signed]="true" [suffix]="'%'" [label]="'Pourcentage'" (changed)="setEffect(st, i, { percent: $event })" />
+                  }
+                }
+                <button type="button" class="remove" title="Retirer" aria-label="Retirer" (click)="removeEffect(st, i)"><svg lucideX></svg></button>
+              </div>
+            } @empty {
+              <p class="note">Aucun effet : l'état ne fait rien pour l'instant.</p>
+            }
+            <div class="add-effects">
+              @for (k of effectKinds; track k) {
+                <button type="button" (click)="addEffect(st, k)"><svg lucidePlus></svg> {{ effectLabels[k] }}</button>
+              }
+            </div>
+            <p class="note">PV et PM : en % du maximum, perdus (−) ou gagnés (+) à chaque tour.</p>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="empty">Choisissez une ligne de la liste.</p>
+    }
+  </section>
+</div>
+
+@if (weatherPick(); as pick) {
+  <game-weather-picker [title]="pick.strong ? 'Plus fort par' : 'Plus faible par'" [exclude]="pickExclude()"
+                       (picked)="pickWeather($event)" (closed)="weatherPick.set(null)" />
+}
+
+@if (iconEdit(); as target) {
+  <db-pixel-editor [title]="target.title" [value]="target.value" (done)="iconDone($event)" (cancel)="iconEdit.set(null)" />
+}

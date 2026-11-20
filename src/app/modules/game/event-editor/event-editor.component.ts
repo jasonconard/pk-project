@@ -11,6 +11,7 @@ import {
 } from '../shared/model/ObjectEvent';
 import { VariableTest } from '../shared/model/SceneEvent';
 import { WEATHER_CHOICES } from '../shared/weather/Weather';
+import { WeatherPickerComponent } from '../weather-picker/weather-picker.component';
 import { playSound, SOUND_CHOICES } from '../shared/services/sfx';
 import { loadVariables } from '../../variables-editor/shared/variable-storage';
 import { clampCounter, GameVariable } from '../../variables-editor/shared/variables';
@@ -44,6 +45,8 @@ export type BranchKey = string;
 export type ListPath = { i: number, b: BranchKey }[];
 /** The event's own conditions (null), or those of a condition action. */
 type CondTarget = { path: ListPath, i: number } | null;
+/** The weather window: for a « Météo » action, or for conditions. */
+type WeatherPick = { kind: 'action', path: ListPath, i: number, current: string } | { kind: 'cond', target: CondTarget, exclude: string[] };
 
 /** The list of actions of a branch of an action (null: it has no such branch). */
 function branchList(action: EventAction, b: BranchKey): EventAction[] | null {
@@ -88,7 +91,7 @@ function plural(n: number, word: string): string {
   selector: 'game-event-editor',
   imports: [NgTemplateOutlet, LucideDynamicIcon, LucideChevronDown, LucideChevronRight, LucideClock, LucideCloudSun, LucideCopy,
     LucideEllipsisVertical, LucideImagePlus, LucidePlay, LucidePlus, LucideTrash, LucideVariable, LucideX, LucideArrowUp,
-    LucideArrowDown],
+    LucideArrowDown, WeatherPickerComponent],
   templateUrl: './event-editor.component.html',
   styleUrl: './event-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,7 +112,6 @@ export class EventEditorComponent {
   protected readonly actionTypes = ACTIONS;
   protected readonly counterTests = COUNTER_TESTS;
   protected readonly variables: GameVariable[] = loadVariables();
-  protected readonly weatherList = WEATHER_CHOICES;
   protected readonly sounds = SOUND_CHOICES;
   protected readonly portraits = PORTRAITS;
   protected readonly hourList = Array.from({ length: 24 }, (_, h) => h);
@@ -381,6 +383,21 @@ export class EventEditorComponent {
         delete c.hours;
       }
     });
+  }
+
+  protected readonly weatherPick = signal<WeatherPick | null>(null);
+
+  protected openWeatherPick(pick: WeatherPick): void {
+    this.weatherPick.set(pick);
+  }
+
+  protected weatherPicked(type: string): void {
+    const pick = this.weatherPick();
+    if (pick?.kind === 'action') {
+      this.setAction(pick.path, pick.i, { weather: type });
+    } else if (pick) {
+      this.addWeather(pick.target, type);
+    }
   }
 
   protected addWeather(target: CondTarget, type: string): void {

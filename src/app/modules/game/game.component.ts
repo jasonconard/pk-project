@@ -14,6 +14,7 @@ import { FightUiComponent } from '../fight/fight-ui/fight-ui.component';
 import { EditorBarComponent, EditorPanel } from './editor-bar/editor-bar.component';
 import { MusicEditorComponent } from '../music-editor/music-editor.component';
 import { VariablesEditorComponent } from '../variables-editor/variables-editor.component';
+import { DatabaseEditorComponent } from '../database-editor/database-editor.component';
 import { ModelEditorComponent } from '../model-editor/model-editor.component';
 import { ReleaseNotesComponent } from './release-notes/release-notes.component';
 import { temperatureColor } from './shared/util/temperature-color';
@@ -33,7 +34,7 @@ import { isTyping } from '../../core/shared/typing';
 
 @Component({
   selector: 'game-main',
-  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, GameSavesComponent, VariablesTestComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, VariablesEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
+  imports: [StickComponent, TouchPadComponent, MessageComponent, TeleportComponent, FightUiComponent, WeatherPanelComponent, EditorBarComponent, ReleaseNotesComponent, GameMenuComponent, GameSavesComponent, VariablesTestComponent, MapControlsComponent, MusicEditorComponent, ModelEditorComponent, VariablesEditorComponent, DatabaseEditorComponent, DecimalPipe, LucideMenu, LucidePencilRuler],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -45,6 +46,7 @@ export class GameComponent {
   private readonly weatherPanel = viewChild.required<WeatherPanelComponent>('weatherPanel');
   private readonly musicEditor = viewChild(MusicEditorComponent);
   private readonly modelEditor = viewChild(ModelEditorComponent);
+  private readonly databaseEditor = viewChild(DatabaseEditorComponent);
 
   protected readonly hud = this.gameService.hud;
   protected readonly weather = this.gameService.weather;
@@ -95,7 +97,7 @@ export class GameComponent {
     effect(() => setGameCovered(!!this.editorPanel()));
     // The back button closes the editor like its Jeu (saved first); the Escape key stays the editor's own
     inject(EscapeService).track(() => this.editorPanel(), () => {
-      const editor = this.musicEditor() ?? this.modelEditor();
+      const editor = this.musicEditor() ?? this.modelEditor() ?? this.databaseEditor();
       if (editor) {
         void editor.requestClose();
       } else {

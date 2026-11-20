@@ -221,7 +221,7 @@ function projectLabel(project: ProjectFile, withDate = true): string {
   const s = summarize(project);
   const count = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
   const date = new Date(s.savedAt).toLocaleDateString('fr-FR');
-  const label = `${count(s.maps, 'carte')} · ${count(s.models, 'modèle')} · ${count(s.songs, 'musique')} · ${count(s.variables, 'variable')}`;
+  const label = `${count(s.maps, 'carte')} · ${count(s.models, 'modèle')} · ${count(s.songs, 'musique')} · ${count(s.variables, 'variable')}${s.database ? ' · base de données' : ''}`;
   return withDate ? `${label} · du ${date}` : label;
 }
 

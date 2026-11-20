@@ -1,0 +1,23 @@
+<div class="dim" (click)="closed.emit()"></div>
+<section class="picker" role="dialog" aria-modal="true" [attr.aria-label]="title()">
+  <header>
+    <strong>{{ title() }}</strong>
+    <button type="button" class="close" title="Fermer" aria-label="Fermer" (click)="closed.emit()"><svg lucideX></svg></button>
+  </header>
+  <label class="search">
+    <svg lucideSearch></svg>
+    <input type="search" placeholder="Chercher une météo" aria-label="Chercher une météo" [value]="search()"
+           (input)="search.set($any($event.target).value)" (keydown.enter)="pickFirst()" (keydown.escape)="escape($event)" />
+  </label>
+  <div class="list">
+    @for (w of weathers(); track w.type) {
+      <button type="button" class="row" [class.on]="w.type === current()" (click)="pick(w.type)">
+        <img [src]="image(w.type)" alt="" loading="lazy" (error)="imageMissing($event, w.type)" />
+        <span>{{ w.label }}</span>
+        @if (w.type === current()) { <svg lucideCheck></svg> }
+      </button>
+    } @empty {
+      <p class="empty">Aucune météo ne correspond.</p>
+    }
+  </div>
+</section>

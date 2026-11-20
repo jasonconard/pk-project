@@ -188,6 +188,42 @@ textarea {
   }
 }
 
+.chip.add {
+  background: none;
+  border: 1px dashed #4a4c5a;
+  color: #9fc3ff;
+}
+
+// A field that opens a window (the weather): looks like a select
+.pick-field {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid #4a4c5a;
+  border-radius: 6px;
+  background: #2a2b33;
+  font-size: 13px;
+  text-align: left;
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: #8a8d9c;
+  }
+}
+
 .chip {
   display: inline-flex;
   align-items: center;

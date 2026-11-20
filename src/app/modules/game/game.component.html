@@ -107,6 +107,9 @@
         @case ('variables') {
           <app-variables-editor [embedded]="true" (closed)="closeEditorPanel()" />
         }
+        @case ('database') {
+          <app-database-editor [embedded]="true" (closed)="closeEditorPanel()" />
+        }
         @case ('models') {
           <app-model-editor [embedded]="true" [modelId]="panel.kind === 'models' ? panel.modelId ?? null : null" (closed)="closeEditorPanel()" />
         }
