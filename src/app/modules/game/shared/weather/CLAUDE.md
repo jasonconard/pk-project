@@ -31,8 +31,11 @@ Big files: grep the symbol, then read only that range. Never read `day-presets.t
     `GeyserHelper`, `GhostHelper`, `EyesHelper`, `TornadoHelper`, `WhirlHelper`, `WispHelper`.
   - `SurfaceHeights.ts`: cached raycast heights so rain / snow stop on roofs.
 - Post passes (screen space): `BloomPass`, `GodRaysPass`, `HeatHazePass` (`PostEffects`).
-- `WeatherAudio.ts`: Web Audio, all synthesized (rain / wind / sand from noise, thunder, footsteps per surface,
-  ambiences). Entry points: `update(dt, AmbienceLevels)`, `setVolume`, one-shot `playXxx`.
+- `WeatherAudio.ts`: Web Audio, all synthesized (rain / wind / sand from noise loops, ambiences per weather with their
+  timers, footsteps per surface, zaps). Entry points: `update(dt, AmbienceLevels)`, `setVolume`, one-shot `playXxx`.
+  `audio/`: `audio-kit.ts` (`AudioKit`: context, master, noise buffers, rain bus, panner / filter makers, made at
+  start), `mix.ts` (every level, rate and interval: tune the mix there), the one-shot sounds as functions taking the
+  kit: `animal-voices`, `eerie-voices`, `sound-effects`, `thunder`.
 - `weather-catalog.ts`: catalog popup data (`WEATHER_CATEGORIES`, `WEATHER_INFO` texts per type, screenshots
   `src/assets/weather/<id>-<day|night>.webp` via `weatherScreenshot`). `WEATHER_INFO` is a full `Record`: a new
   `WeatherType` must get an entry or the build fails.

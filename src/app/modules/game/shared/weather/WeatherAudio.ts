@@ -1,3 +1,103 @@
+import { AudioKit } from "./audio/audio-kit";
+import {
+  bird,
+  cricket,
+  croak,
+  gull,
+  owl,
+  wolfHowl,
+} from "./audio/animal-voices";
+import {
+  chime,
+  creak,
+  ghostMoan,
+  heartbeat,
+  knocks,
+  whisper,
+} from "./audio/eerie-voices";
+import {
+  bubbles,
+  crackle,
+  fireworkBang,
+  geyserBurst,
+  hailTick,
+  horn,
+  ledgeHop,
+  plink,
+  rocketWhistle,
+  scurry,
+  siren,
+  thud,
+} from "./audio/sound-effects";
+import { thunder } from "./audio/thunder";
+import {
+  AMBIENCE_SMOOTHING,
+  ASH_CRACKLE_LEVEL,
+  ASH_CRACKLE_RATE,
+  BIRD_INTERVAL,
+  BLOOD_DRONE_GAIN,
+  BLOOD_HEART_INTERVAL,
+  BLOOD_HOWL_INTERVAL,
+  BREATH_GAIN,
+  BUBBLE_RATE,
+  CHIME_NOTES,
+  CHIME_RATE,
+  CRACKLE_RATE,
+  CRACK_GAIN,
+  CRACK_RATE,
+  DREAD_INTERVAL,
+  DRIZZLE_GAIN,
+  DRONE_GAIN,
+  FILM_CRACKLE_GAIN,
+  FILM_CRACKLE_RATE,
+  FLOAT_GAIN,
+  FLOAT_SWEEP,
+  FLOAT_SWEEP_RATE,
+  FROG_INTERVAL,
+  GULL_INTERVAL,
+  HAIL_GAIN,
+  HAIL_TICKS,
+  HORN_INTERVAL,
+  HOWL_GAIN,
+  HOWL_VOICES,
+  HUM_GAIN,
+  ICE_CRACK_GAIN,
+  ICE_CRACK_RATE,
+  MAX_ZAPS_PER_SECOND,
+  MIRAGE_GAIN,
+  MOAN_INTERVAL,
+  OWL_INTERVAL,
+  PLINK_GAIN,
+  PROJECTOR_GAIN,
+  QUAKE_GAIN,
+  RAIN_GAIN,
+  RATTLE_RATE,
+  REVERSE_GAIN,
+  REVERSE_INTERVAL,
+  ROAR_GAIN,
+  RUMBLE_GAIN,
+  RUSTLE_GAIN,
+  SAND_GAIN,
+  SHUTTER_RATE,
+  SIREN_CHANCE,
+  SIZZLE_GAIN,
+  SPLASH_GAIN,
+  STATIC_GAIN,
+  STEAM_GAIN,
+  SWAMP_GAIN,
+  TICK_GAIN,
+  TICK_PERIOD,
+  TRAFFIC_GAIN,
+  WARP_DRONE_GAIN,
+  WAVE_GAIN,
+  WAVE_PERIOD,
+  WET_GROUND_LAYER,
+  WHIRL_GAIN,
+  WHISPER_INTERVAL,
+  WIND_GAIN,
+  ZAP_GAIN,
+  rand,
+} from "./audio/mix";
 import { applySilentMode } from "./silent-mode";
 import {
   isGameAsleep,
@@ -43,8 +143,6 @@ export interface ThunderBolt {
   distance: number;
   pan: number;
 }
-
-const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
 /** Live weather values driving the ambiences (0..1, wind can go a bit above 1 in a gust). */
 export interface AmbienceLevels {
@@ -119,129 +217,14 @@ const STEP_GAIN: Record<StepSurface, number> = {
   snow: 0.5,
   water: 0.3,
 };
-const RAIN_GAIN = 0.2;
-/** The rain gets quieter while it thunders (share of its volume at the loudest of the thunder). */
-const THUNDER_DUCKING = 0.45;
-const DRIZZLE_GAIN = 0.16;
-const WIND_GAIN = 0.22;
-const SAND_GAIN = 0.12;
-const THUNDER_GAIN = 1.3;
-const THUNDER_CRACK_GAIN = 0.8;
-/** Wet layer: splash noise in a puddle, and the water drop "plinks" (lighter on wet ground). */
-const SPLASH_GAIN = 0.22;
-/** Volcanic: deep rumble loudness, crackles per second and their loudness. */
-const RUMBLE_GAIN = 0.5;
-const CRACKLE_RATE = 7;
-const CRACKLE_GAIN = 0.16;
-/** Poison: bubble bursts per second, bubble loudness, low bubbling bed loudness. */
-const BUBBLE_RATE = 3.5;
-const BUBBLE_GAIN = 0.28;
-const SWAMP_GAIN = 0.12;
-/** Blizzard howl: loudness, and the whistles (base pitch Hz, how far they glide, resonance sharpness). */
-const HOWL_GAIN = 0.8;
-/** Darkness: drone, breathing and distant sounds loudness; seconds between two distant sounds. */
-/** Electric arcs: zap loudness, buzzing hum loudness (follows the nearby activity), max zaps per second. */
-const ZAP_GAIN = 0.3;
-const HUM_GAIN = 0.1;
-const MAX_ZAPS_PER_SECOND = 14;
-/** Hail: ticks per second at hail = 1 and their loudness. */
-const HAIL_TICKS = 14;
-const HAIL_GAIN = 0.13;
-/** Sea: waves loudness (a slow swell every WAVE_PERIOD s), gulls loudness and seconds between two. */
-const WAVE_GAIN = 0.3;
-const WAVE_PERIOD = 8;
-const GULL_GAIN = 0.1;
-const GULL_INTERVAL = [4, 12] as const;
-/** Chimes per second (at 1) and loudness; radio static loudness; seconds between whispers. */
-const CHIME_RATE = 1.6;
-const CHIME_GAIN = 0.07;
-const CHIME_NOTES = [1047, 1175, 1319, 1568, 1760, 2093, 2349, 2637, 3136];
-const STATIC_GAIN = 0.12;
-const WHISPER_INTERVAL = [4, 10] as const;
-/** Ice cracks per second at 1, moan loudness / seconds between two, tornado roar loudness. */
-const CRACK_RATE = 2.5;
-/** Ash fall: crackles per second and their loudness (share of the volcanic crackles). */
-const ASH_CRACKLE_RATE = 3;
-const ASH_CRACKLE_LEVEL = 0.45;
-/** Petal whirlwind: swirling wind loudness at the closest. */
-const WHIRL_GAIN = 0.35;
-const CRACK_GAIN = 0.12;
-const MOAN_GAIN = 0.16;
-const MOAN_INTERVAL = [5, 12] as const;
-const ROAR_GAIN = 0.7;
-/** Earthquake: rumble loudness and rattles per second at full strength. */
-const QUAKE_GAIN = 0.8;
-/** Geysers: steam hiss loudness, eruption burst loudness. */
-const STEAM_GAIN = 0.3;
-/** Time warp: slowed clock tick loudness and period (s), drone loudness. */
-const TICK_GAIN = 0.25;
-/** Inverted world: backwards sounds loudness and seconds between two. */
-const REVERSE_GAIN = 0.18;
-const REVERSE_INTERVAL = [2, 5] as const;
-const TICK_PERIOD = 1.6;
-const WARP_DRONE_GAIN = 0.12;
-/** Reversed gravity: rising whoosh loudness, sweeps per second, and its filter sweep (Hz, center ± depth). */
-const FLOAT_GAIN = 0.1;
-/** Old film: projector whirr loudness, shutter rate (Hz), crackles per second and their loudness. */
-const PROJECTOR_GAIN = 0.07;
-/** Moonless night: loudness of something running away in the dark. */
-const SCURRY_GAIN = 0.12;
-/** Deep freeze: ice cracks per second and their loudness. */
-const ICE_CRACK_RATE = 0.3;
-const ICE_CRACK_GAIN = 0.1;
-/** Mirage: loudness of the high shimmering tone. */
-const MIRAGE_GAIN = 0.018;
-const SHUTTER_RATE = 18;
-const FILM_CRACKLE_RATE = 7;
-const FILM_CRACKLE_GAIN = 0.12;
-const FLOAT_SWEEP_RATE = 0.22;
-const FLOAT_SWEEP = [1300, 900] as const;
-const GEYSER_BURST_GAIN = 0.5;
-const RATTLE_RATE = 18;
-/** Blood moon: drone loudness, seconds between two heartbeat bouts / two howls, howl loudness. */
-const BLOOD_DRONE_GAIN = 0.2;
-const BLOOD_HEART_INTERVAL = [9, 18] as const;
-const BLOOD_HOWL_INTERVAL = [14, 28] as const;
-const HOWL_CALL_GAIN = 0.1;
-/** Frogs: croak loudness, seconds between two croaks of a frog. */
-const FROG_GAIN = 0.09;
-const FROG_INTERVAL = [0.8, 3.5] as const;
-/** Distant city: traffic rumble loudness, seconds between two horns, chance that the event is a siren. */
-const TRAFFIC_GAIN = 0.16;
-const HORN_GAIN = 0.05;
-const HORN_INTERVAL = [4, 11] as const;
-const SIREN_CHANCE = 0.15;
-/** Fireworks: whistle and bang loudness. */
-const ROCKET_GAIN = 0.035;
-const BANG_GAIN = 0.55;
-/** Acid rain: sizzling loudness. */
-const SIZZLE_GAIN = 0.09;
-const DRONE_GAIN = 0.22;
-const BREATH_GAIN = 0.16;
-const DREAD_GAIN = 0.35;
-const DREAD_INTERVAL = [6, 16] as const;
-/** Forest: leaves rustle loudness, birds / owl loudness and seconds between two songs, crickets loudness. */
-const RUSTLE_GAIN = 0.14;
-const BIRD_GAIN = 0.12;
-const BIRD_INTERVAL = [0.8, 4] as const;
-const CRICKET_GAIN = 0.035;
-const OWL_GAIN = 0.2;
-const OWL_INTERVAL = [12, 28] as const;
-const HOWL_VOICES = [
-  { freq: 520, glide: 0.35, q: 18, speed: 0.23 },
-  { freq: 780, glide: 0.3, q: 22, speed: 0.31 },
-  { freq: 340, glide: 0.25, q: 12, speed: 0.17 },
-] as const;
-const PLINK_GAIN = 0.12;
-const WET_GROUND_LAYER = 0.35;
-/** How fast the ambiences follow the weather (s, time constant). */
-const AMBIENCE_SMOOTHING = 0.4;
 
 export class WeatherAudio {
   private ctx?: AudioContext;
   private master?: GainNode;
   /** Rain and drizzle go through this bus, lowered while it thunders. */
   private rainBus?: GainNode;
+  /** The context, master, noise and node makers the one-shot sounds use (made at start). */
+  private kit?: AudioKit;
   private noise?: AudioBuffer;
   private brownNoise?: AudioBuffer;
   private rainGain?: GainNode;
@@ -412,7 +395,7 @@ export class WeatherAudio {
       AMBIENCE_SMOOTHING
     );
     if (levels.lava > 0.05 && Math.random() < CRACKLE_RATE * levels.lava * dt) {
-      this.crackle(levels.lava);
+      crackle(this.kit!, levels.lava);
     }
 
     // Poison: a low wobbling bubbling bed, and bubbles popping here and there
@@ -424,7 +407,7 @@ export class WeatherAudio {
       levels.poison > 0.05 &&
       Math.random() < BUBBLE_RATE * levels.poison * dt
     ) {
-      this.bubbles(levels.poison);
+      bubbles(this.kit!, levels.poison);
     }
 
     this.updateDarkness(dt, levels.darkness, now);
@@ -512,7 +495,7 @@ export class WeatherAudio {
       this.birdTimer -= dt * day;
       if (this.birdTimer <= 0) {
         this.birdTimer = rand(BIRD_INTERVAL[0], BIRD_INTERVAL[1]);
-        this.bird(birds * day);
+        bird(this.kit!, birds * day);
       }
     }
     // Night: crickets (forest or starry night), an owl now and then in the forest
@@ -523,7 +506,7 @@ export class WeatherAudio {
         c.timer -= dt;
         if (c.timer <= 0) {
           c.timer = c.period * rand(0.9, 1.1);
-          this.cricket(c.freq, c.side, crickets * night);
+          cricket(this.kit!, c.freq, c.side, crickets * night);
         }
       }
     }
@@ -534,181 +517,9 @@ export class WeatherAudio {
       this.owlTimer -= dt * night;
       if (this.owlTimer <= 0) {
         this.owlTimer = rand(OWL_INTERVAL[0], OWL_INTERVAL[1]);
-        this.owl(f * night);
+        owl(this.kit!, f * night);
       }
     }
-  }
-
-  /** A random bird: trill, two-note whistle, a few chirps, rarely a far cuckoo or a woodpecker. */
-  private bird(level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(rand(-0.9, 0.9));
-    const far = rand(0.4, 1);
-    const at0 = ctx.currentTime;
-    const note = (
-      at: number,
-      from: number,
-      to: number,
-      length: number,
-      gain: number
-    ) => {
-      const osc = ctx.createOscillator();
-      osc.frequency.setValueAtTime(from, at);
-      osc.frequency.exponentialRampToValueAtTime(to, at + length);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(
-        BIRD_GAIN * level * far * gain,
-        at + Math.min(0.01, length * 0.3)
-      );
-      g.gain.linearRampToValueAtTime(0, at + length);
-      osc.connect(g).connect(out);
-      osc.start(at);
-      osc.stop(at + length + 0.02);
-    };
-    const r = Math.random();
-    if (r < 0.35) {
-      // Trill: fast repeated notes
-      const base = rand(3500, 5500);
-      const n = 6 + Math.floor(Math.random() * 10);
-      for (let i = 0; i < n; i++) {
-        note(at0 + i * 0.055, base * 1.15, base * 0.9, 0.04, 0.8);
-      }
-    } else if (r < 0.65) {
-      // Whistle: two or three sliding notes
-      const base = rand(2200, 3400);
-      let at = at0;
-      for (let i = 0; i < 2 + Math.floor(Math.random() * 2); i++) {
-        const length = rand(0.12, 0.3);
-        note(at, base * rand(0.9, 1.3), base * rand(0.75, 1.2), length, 1);
-        at += length + rand(0.05, 0.12);
-      }
-    } else if (r < 0.88) {
-      // Chirps: a few short quick notes going up
-      const base = rand(3000, 6000);
-      for (let i = 0; i < 2 + Math.floor(Math.random() * 4); i++) {
-        note(at0 + i * rand(0.1, 0.18), base * 0.8, base * 1.3, 0.05, 0.9);
-      }
-    } else if (r < 0.95) {
-      // Cuckoo, far away: two soft low notes, repeated
-      for (let k = 0; k < 2; k++) {
-        const at = at0 + k * 0.9;
-        note(at, 680, 660, 0.25, 0.7);
-        note(at + 0.32, 545, 530, 0.35, 0.7);
-      }
-    } else {
-      // Woodpecker: a fast burst of dry knocks, slowing down
-      let at = at0;
-      for (let i = 0; i < 12 + Math.floor(Math.random() * 8); i++) {
-        const src = ctx.createBufferSource();
-        src.buffer = this.noise!;
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(BIRD_GAIN * 2 * level * far * (1 - i * 0.03), at);
-        g.gain.exponentialRampToValueAtTime(0.001, at + 0.03);
-        src.connect(this.bandpass(1300, 4)).connect(g).connect(out);
-        src.start(at, Math.random() * 3, 0.04);
-        at += 0.05 + i * 0.002;
-      }
-    }
-  }
-
-  /** One cricket chirp: 3 very short high pulses. */
-  private cricket(freq: number, side: number, level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(side);
-    for (let i = 0; i < 3; i++) {
-      const at = ctx.currentTime + i * 0.035;
-      const osc = ctx.createOscillator();
-      osc.frequency.value = freq;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(CRICKET_GAIN * level, at + 0.004);
-      g.gain.linearRampToValueAtTime(0, at + 0.022);
-      osc.connect(g).connect(out);
-      osc.start(at);
-      osc.stop(at + 0.03);
-    }
-  }
-
-  /**
-   * An owl far away: "rrrou... rrrrou". Each hoot starts with a throaty roll (fast tremolo, the "rrr")
-   * melting into a round, breathy "ou" whose pitch rises a little then falls.
-   */
-  private owl(level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(rand(-0.8, 0.8));
-    const pitch = rand(320, 370);
-    let at = ctx.currentTime;
-    const hoots = Math.random() < 0.6 ? [0.7, 1.1] : [0.6];
-    for (const length of hoots) {
-      this.hoot(at, length, pitch * rand(0.97, 1.03), OWL_GAIN * level, out);
-      at += length + rand(0.35, 0.7);
-    }
-  }
-
-  private hoot(
-    at: number,
-    length: number,
-    pitch: number,
-    level: number,
-    out: AudioNode
-  ) {
-    const ctx = this.ctx!;
-    const roll = Math.min(length * 0.2, 0.18);
-    // Voice: round tone + its first overtones (a clear "ou", not muffled)
-    const voice = ctx.createGain();
-    for (const [mult, amount] of [
-      [1, 1],
-      [2, 0.32],
-      [3, 0.1],
-    ] as const) {
-      const osc = ctx.createOscillator();
-      osc.frequency.setValueAtTime(pitch * mult * 0.9, at);
-      osc.frequency.linearRampToValueAtTime(pitch * mult, at + length * 0.3);
-      osc.frequency.linearRampToValueAtTime(pitch * mult * 0.88, at + length);
-      const g = ctx.createGain();
-      g.gain.value = amount;
-      osc.connect(g).connect(voice);
-      osc.start(at);
-      osc.stop(at + length + 0.05);
-    }
-    // Breath: a little filtered noise around the voice
-    const breath = ctx.createBufferSource();
-    breath.buffer = this.noise!;
-    const breathGain = ctx.createGain();
-    breathGain.gain.value = 0.08;
-    breath
-      .connect(this.bandpass(pitch * 3, 2))
-      .connect(breathGain)
-      .connect(voice);
-    breath.start(at, Math.random() * 3, length + 0.05);
-
-    // The "rrr": a fast tremolo (throat roll), fading out into the pure "ou"
-    const tremolo = ctx.createGain();
-    tremolo.gain.setValueAtTime(0.5, at);
-    tremolo.gain.setValueAtTime(0.5, at + roll * 0.6);
-    tremolo.gain.linearRampToValueAtTime(1, at + roll);
-    const lfo = ctx.createOscillator();
-    lfo.frequency.value = rand(24, 32);
-    const depth = ctx.createGain();
-    depth.gain.setValueAtTime(0.5, at);
-    depth.gain.setValueAtTime(0.5, at + roll * 0.6);
-    depth.gain.linearRampToValueAtTime(0, at + roll);
-    lfo.connect(depth).connect(tremolo.gain);
-    lfo.start(at);
-    lfo.stop(at + roll + 0.05);
-
-    // Envelope: soft start, swell, long fade
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0, at);
-    env.gain.linearRampToValueAtTime(level * 0.7, at + 0.06);
-    env.gain.linearRampToValueAtTime(level, at + length * 0.4);
-    env.gain.linearRampToValueAtTime(0, at + length);
-    voice
-      .connect(tremolo)
-      .connect(this.lowpass(2000))
-      .connect(env)
-      .connect(out);
   }
 
   /**
@@ -727,7 +538,7 @@ export class WeatherAudio {
       return;
     }
     this.zapBudget--;
-    const out = this.panned(side);
+    const out = this.kit!.panned(side);
     const at = ctx.currentTime;
     const level = ZAP_GAIN * closeness * rand(0.6, 1);
     // Snap
@@ -736,7 +547,7 @@ export class WeatherAudio {
     const snapGain = ctx.createGain();
     snapGain.gain.setValueAtTime(level, at);
     snapGain.gain.exponentialRampToValueAtTime(0.001, at + 0.03);
-    snap.connect(this.highpass(2500)).connect(snapGain).connect(out);
+    snap.connect(this.kit!.highpass(2500)).connect(snapGain).connect(out);
     snap.start(at, Math.random() * 3, 0.04);
     // Crackle: noise chopped into tiny irregular sparks, with a buzzing tone under it
     const length = Math.max(0.06, life * rand(0.6, 1));
@@ -758,7 +569,7 @@ export class WeatherAudio {
     }
     crackleGain.gain.linearRampToValueAtTime(0, t + 0.01);
     crackle
-      .connect(this.bandpass(rand(3000, 6000), 1.2))
+      .connect(this.kit!.bandpass(rand(3000, 6000), 1.2))
       .connect(crackleGain)
       .connect(out);
     crackle.start(at, Math.random() * 3, length + 0.05);
@@ -770,7 +581,7 @@ export class WeatherAudio {
     buzzGain.gain.linearRampToValueAtTime(level * 0.25, at + 0.01);
     buzzGain.gain.linearRampToValueAtTime(0, at + length);
     buzz
-      .connect(this.bandpass(rand(900, 1600), 2))
+      .connect(this.kit!.bandpass(rand(900, 1600), 2))
       .connect(buzzGain)
       .connect(out);
     buzz.start(at);
@@ -795,58 +606,16 @@ export class WeatherAudio {
       ticks--;
       const roof = Math.random() < 0.3;
       const freq = roof ? rand(650, 1250) : rand(1700, 3300);
-      const out = this.panned(rand(-1, 1));
+      const out = this.kit!.panned(rand(-1, 1));
       let at = ctx.currentTime + Math.random() * dt;
       let level = HAIL_GAIN * hail * rand(0.3, 1);
       const bounces =
         Math.random() < 0.6 ? 1 + Math.floor(Math.random() * 2) : 0;
       for (let k = 0; k <= bounces; k++) {
-        this.hailTick(at, freq * (1 + k * 0.06), level, roof, out);
+        hailTick(this.kit!, at, freq * (1 + k * 0.06), level, roof, out);
         at += rand(0.04, 0.09) / (k + 1);
         level *= rand(0.3, 0.5);
       }
-    }
-  }
-
-  /**
-   * One pellet impact: a tiny hard click plus a very short "knock" of the pellet itself. The knock keeps
-   * a fixed pitch and mixes two inharmonic tones (a hard little object), unlike a water drop whose pure tone slides.
-   */
-  private hailTick(
-    at: number,
-    freq: number,
-    level: number,
-    roof: boolean,
-    out: AudioNode
-  ) {
-    const ctx = this.ctx!;
-    // Click
-    const src = ctx.createBufferSource();
-    src.buffer = this.noise!;
-    const click = ctx.createGain();
-    click.gain.setValueAtTime(level * 0.6, at);
-    click.gain.exponentialRampToValueAtTime(0.001, at + 0.005);
-    src
-      .connect(this.highpass(roof ? 1000 : 1800))
-      .connect(this.lowpass(7000))
-      .connect(click)
-      .connect(out);
-    src.start(at, Math.random() * 3, 0.01);
-    // Knock: two inharmonic partials, fixed pitch, dying very fast
-    const length = roof ? rand(0.02, 0.035) : rand(0.008, 0.016);
-    for (const [mult, amount] of [
-      [1, 0.25],
-      [2.37, 0.15],
-    ] as const) {
-      const osc = ctx.createOscillator();
-      osc.type = "triangle";
-      osc.frequency.value = freq * mult;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(level * amount, at);
-      g.gain.exponentialRampToValueAtTime(0.001, at + length);
-      osc.connect(g).connect(out);
-      osc.start(at);
-      osc.stop(at + length + 0.01);
     }
   }
 
@@ -877,42 +646,7 @@ export class WeatherAudio {
     this.gullTimer -= dt;
     if (this.gullTimer <= 0) {
       this.gullTimer = rand(GULL_INTERVAL[0], GULL_INTERVAL[1]);
-      this.gull(sea);
-    }
-  }
-
-  /** A gull far away: 2 to 4 harsh "kiaa" cries falling in pitch. */
-  private gull(level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(rand(-0.9, 0.9));
-    const pitch = rand(1100, 1500);
-    let at = ctx.currentTime;
-    for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++) {
-      const length = rand(0.25, 0.45);
-      const osc = ctx.createOscillator();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(pitch * 1.1, at);
-      osc.frequency.linearRampToValueAtTime(pitch * 1.25, at + length * 0.2);
-      osc.frequency.exponentialRampToValueAtTime(pitch * 0.7, at + length);
-      const vibrato = ctx.createOscillator();
-      vibrato.frequency.value = rand(8, 12);
-      const vibratoDepth = ctx.createGain();
-      vibratoDepth.gain.value = pitch * 0.03;
-      vibrato.connect(vibratoDepth).connect(osc.frequency);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(GULL_GAIN * level, at + 0.04);
-      g.gain.linearRampToValueAtTime(0, at + length);
-      osc
-        .connect(this.bandpass(pitch * 1.4, 2))
-        .connect(this.lowpass(3500))
-        .connect(g)
-        .connect(out);
-      osc.start(at);
-      vibrato.start(at);
-      osc.stop(at + length + 0.02);
-      vibrato.stop(at + length + 0.02);
-      at += length + rand(0.08, 0.2);
+      gull(this.kit!, sea);
     }
   }
 
@@ -923,7 +657,7 @@ export class WeatherAudio {
       levels.chimes > 0.05 &&
       Math.random() < CHIME_RATE * levels.chimes * dt
     ) {
-      this.chime(levels.chimes);
+      chime(this.kit!, levels.chimes);
     }
     // Radio static: a faint crackling bed, with bursts now and then
     this.staticBurst = Math.max(0, this.staticBurst - dt * 2);
@@ -949,7 +683,7 @@ export class WeatherAudio {
       this.whisperTimer -= dt;
       if (this.whisperTimer <= 0) {
         this.whisperTimer = rand(WHISPER_INTERVAL[0], WHISPER_INTERVAL[1]);
-        this.whisper(levels.whispers * 0.8, rand(-0.9, 0.9));
+        whisper(this.kit!, levels.whispers * 0.8, rand(-0.9, 0.9));
       }
     }
   }
@@ -963,7 +697,7 @@ export class WeatherAudio {
     ) {
       // A tiny sharp crack, sometimes a short creaking series
       let at = ctx.currentTime;
-      const out = this.panned(rand(-0.9, 0.9));
+      const out = this.kit!.panned(rand(-0.9, 0.9));
       for (
         let i = 0;
         i < 1 + Math.floor(Math.random() * Math.random() * 4);
@@ -975,7 +709,7 @@ export class WeatherAudio {
         g.gain.setValueAtTime(CRACK_GAIN * levels.crackle * rand(0.4, 1), at);
         g.gain.exponentialRampToValueAtTime(0.001, at + rand(0.01, 0.04));
         src
-          .connect(this.bandpass(rand(2500, 7000), rand(3, 8)))
+          .connect(this.kit!.bandpass(rand(2500, 7000), rand(3, 8)))
           .connect(g)
           .connect(out);
         src.start(at, Math.random() * 3, 0.06);
@@ -986,13 +720,13 @@ export class WeatherAudio {
       levels.ashCrackle > 0.05 &&
       Math.random() < ASH_CRACKLE_RATE * levels.ashCrackle * dt
     ) {
-      this.crackle(ASH_CRACKLE_LEVEL * levels.ashCrackle);
+      crackle(this.kit!, ASH_CRACKLE_LEVEL * levels.ashCrackle);
     }
     if (levels.moan > 0.05) {
       this.moanTimer -= dt;
       if (this.moanTimer <= 0) {
         this.moanTimer = rand(MOAN_INTERVAL[0], MOAN_INTERVAL[1]);
-        this.ghostMoan(levels.moan);
+        ghostMoan(this.kit!, levels.moan);
       }
     }
     // Petal whirlwind: a whooshing gust whose pitch swirls up and down quickly (the air turning)
@@ -1020,9 +754,9 @@ export class WeatherAudio {
       g.gain.setValueAtTime(0.12 * q * rand(0.4, 1), at);
       g.gain.exponentialRampToValueAtTime(0.001, at + rand(0.02, 0.06));
       src
-        .connect(this.bandpass(rand(400, 1800), rand(3, 7)))
+        .connect(this.kit!.bandpass(rand(400, 1800), rand(3, 7)))
         .connect(g)
-        .connect(this.panned(rand(-1, 1)));
+        .connect(this.kit!.panned(rand(-1, 1)));
       src.start(at, Math.random() * 3, 0.08);
     }
     // Geysers: steam hissing (a broad high hiss, fluttering)
@@ -1038,69 +772,6 @@ export class WeatherAudio {
       0.3
     );
     this.roarFilter?.frequency.setTargetAtTime(150 + 600 * r, now, 0.3);
-  }
-
-  /** A ghostly "oooooh": a wavering voice-like tone sliding down, with a soft echo. */
-  private ghostMoan(level: number) {
-    const ctx = this.ctx!;
-    const side = rand(-0.9, 0.9);
-    const pitch = rand(230, 320);
-    const length = rand(1.6, 3);
-    for (const [delay, gain] of [
-      [0, 1],
-      [0.35, 0.35],
-    ] as const) {
-      const at = ctx.currentTime + delay;
-      const osc = ctx.createOscillator();
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(pitch * 1.1, at);
-      osc.frequency.linearRampToValueAtTime(pitch * 1.2, at + length * 0.3);
-      osc.frequency.exponentialRampToValueAtTime(pitch * 0.7, at + length);
-      const vibrato = ctx.createOscillator();
-      vibrato.frequency.value = rand(4, 6);
-      const depth = ctx.createGain();
-      depth.gain.value = pitch * 0.025;
-      vibrato.connect(depth).connect(osc.frequency);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(
-        MOAN_GAIN * level * gain,
-        at + length * 0.35
-      );
-      g.gain.linearRampToValueAtTime(0, at + length);
-      osc
-        .connect(this.lowpass(900))
-        .connect(g)
-        .connect(this.panned(side * (delay ? -0.5 : 1)));
-      osc.start(at);
-      vibrato.start(at);
-      osc.stop(at + length + 0.05);
-      vibrato.stop(at + length + 0.05);
-    }
-  }
-
-  /** One crystal bell note (with its inharmonic overtone), ringing out. */
-  private chime(level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(rand(-0.8, 0.8));
-    const at = ctx.currentTime;
-    const f = CHIME_NOTES[Math.floor(Math.random() * CHIME_NOTES.length)];
-    const length = rand(1.2, 2.5);
-    for (const [mult, amount] of [
-      [1, 1],
-      [2.76, 0.3],
-      [5.4, 0.1],
-    ] as const) {
-      const osc = ctx.createOscillator();
-      osc.frequency.value = f * mult;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(CHIME_GAIN * level * amount, at + 0.005);
-      g.gain.exponentialRampToValueAtTime(0.0005, at + length / mult);
-      osc.connect(g).connect(out);
-      osc.start(at);
-      osc.stop(at + length + 0.05);
-    }
   }
 
   /**
@@ -1129,7 +800,7 @@ export class WeatherAudio {
         BLOOD_HEART_INTERVAL[0],
         BLOOD_HEART_INTERVAL[1]
       );
-      this.heartbeat(level * 0.8);
+      heartbeat(this.kit!, level * 0.8);
     }
     this.bloodHowlTimer -= dt;
     if (this.bloodHowlTimer <= 0) {
@@ -1137,7 +808,7 @@ export class WeatherAudio {
         BLOOD_HOWL_INTERVAL[0],
         BLOOD_HOWL_INTERVAL[1]
       );
-      this.wolfHowl(level);
+      wolfHowl(this.kit!, level);
     }
   }
 
@@ -1154,9 +825,9 @@ export class WeatherAudio {
     g.gain.setValueAtTime(FILM_CRACKLE_GAIN * level * rand(0.3, 1), at);
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.006);
     src
-      .connect(this.highpass(1500))
+      .connect(this.kit!.highpass(1500))
       .connect(g)
-      .connect(this.panned(rand(-0.5, 0.5)));
+      .connect(this.kit!.panned(rand(-0.5, 0.5)));
     src.start(at, Math.random() * 2, 0.01);
   }
 
@@ -1176,7 +847,7 @@ export class WeatherAudio {
     const ctx = this.ctx!;
     const at = ctx.currentTime;
     const length = rand(1, 2.2);
-    const out = this.panned(rand(-0.8, 0.8));
+    const out = this.kit!.panned(rand(-0.8, 0.8));
     const g = ctx.createGain();
     // Backwards envelope: slow exponential rise, sudden cut
     g.gain.setValueAtTime(0.0005, at);
@@ -1187,7 +858,7 @@ export class WeatherAudio {
       // Reversed cymbal / whoosh: noise getting brighter
       const src = ctx.createBufferSource();
       src.buffer = this.noise!;
-      const band = this.bandpass(800, 0.7);
+      const band = this.kit!.bandpass(800, 0.7);
       band.frequency.setValueAtTime(800, at);
       band.frequency.exponentialRampToValueAtTime(6000, at + length);
       src.connect(band).connect(g);
@@ -1229,7 +900,7 @@ export class WeatherAudio {
     this.tock = !this.tock;
     const ctx = this.ctx!;
     const at = ctx.currentTime;
-    const out = this.panned(this.tock ? 0.3 : -0.3);
+    const out = this.kit!.panned(this.tock ? 0.3 : -0.3);
     // The tick: a short knock, low and stretched (as if slowed down)
     const osc = ctx.createOscillator();
     osc.frequency.setValueAtTime(this.tock ? 220 : 260, at);
@@ -1242,7 +913,7 @@ export class WeatherAudio {
     g.gain.linearRampToValueAtTime(TICK_GAIN * level, at + 0.01);
     g.gain.exponentialRampToValueAtTime(0.001, at + 0.35);
     osc
-      .connect(this.bandpass(this.tock ? 400 : 480, 3))
+      .connect(this.kit!.bandpass(this.tock ? 400 : 480, 3))
       .connect(g)
       .connect(out);
     osc.start(at);
@@ -1278,63 +949,11 @@ export class WeatherAudio {
     if (this.hornTimer <= 0) {
       this.hornTimer = rand(HORN_INTERVAL[0], HORN_INTERVAL[1]);
       if (Math.random() < SIREN_CHANCE) {
-        this.siren(level);
+        siren(this.kit!, level);
       } else {
-        this.horn(level);
+        horn(this.kit!, level);
       }
     }
-  }
-
-  /** A car horn far away: one or two short honks, two notes together, muffled by the distance. */
-  private horn(level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(rand(-0.9, 0.9));
-    const base = rand(330, 440);
-    let at = ctx.currentTime;
-    for (let i = 0; i < (Math.random() < 0.5 ? 1 : 2); i++) {
-      const length = rand(0.15, 0.4);
-      for (const mult of [1, 1.26]) {
-        const osc = ctx.createOscillator();
-        osc.type = "square";
-        osc.frequency.value = base * mult;
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(0, at);
-        g.gain.linearRampToValueAtTime(HORN_GAIN * level, at + 0.02);
-        g.gain.setValueAtTime(HORN_GAIN * level, at + length - 0.03);
-        g.gain.linearRampToValueAtTime(0, at + length);
-        osc.connect(this.lowpass(900)).connect(g).connect(out);
-        osc.start(at);
-        osc.stop(at + length + 0.02);
-      }
-      at += length + rand(0.08, 0.15);
-    }
-  }
-
-  /** A siren far away: a tone slowly sweeping up and down a few times, very muffled. */
-  private siren(level: number) {
-    const ctx = this.ctx!;
-    const at = ctx.currentTime;
-    const length = rand(4, 7);
-    const osc = ctx.createOscillator();
-    osc.type = "triangle";
-    const sweep = ctx.createOscillator();
-    sweep.frequency.value = rand(0.4, 0.7);
-    const depth = ctx.createGain();
-    depth.gain.value = 160;
-    osc.frequency.value = 720;
-    sweep.connect(depth).connect(osc.frequency);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, at);
-    g.gain.linearRampToValueAtTime(HORN_GAIN * 0.7 * level, at + length * 0.4);
-    g.gain.linearRampToValueAtTime(0, at + length);
-    osc
-      .connect(this.lowpass(1100))
-      .connect(g)
-      .connect(this.panned(rand(-0.8, 0.8)));
-    osc.start(at);
-    sweep.start(at);
-    osc.stop(at + length + 0.05);
-    sweep.stop(at + length + 0.05);
   }
 
   /** Monsoon frogs: each one croaks now and then on its own rhythm (sometimes twice in a row). */
@@ -1346,79 +965,8 @@ export class WeatherAudio {
       frog.timer -= dt;
       if (frog.timer <= 0) {
         frog.timer = rand(FROG_INTERVAL[0], FROG_INTERVAL[1]);
-        this.croak(frog.pitch, frog.side, level * rand(0.5, 1));
+        croak(this.kit!, frog.pitch, frog.side, level * rand(0.5, 1));
       }
-    }
-  }
-
-  /** "Croâ": a buzzy low tone chopped into 2-3 quick pulses (the vocal sac), through a nasal band. */
-  private croak(pitch: number, side: number, level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(side);
-    let at = ctx.currentTime;
-    const pulses = 2 + Math.floor(Math.random() * 2);
-    for (let i = 0; i < pulses; i++) {
-      const length = rand(0.05, 0.08);
-      const osc = ctx.createOscillator();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(pitch * 0.9, at);
-      osc.frequency.linearRampToValueAtTime(pitch * 1.1, at + length);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(FROG_GAIN * level, at + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.001, at + length);
-      osc
-        .connect(this.bandpass(pitch * 3.5, 4))
-        .connect(this.lowpass(2200))
-        .connect(g)
-        .connect(out);
-      osc.start(at);
-      osc.stop(at + length + 0.02);
-      at += length + rand(0.03, 0.06);
-    }
-  }
-
-  /** A wolf howling far away: rises slowly, holds with a wavering voice, falls; sometimes a second one answers. */
-  private wolfHowl(level: number) {
-    const ctx = this.ctx!;
-    const wolves = Math.random() < 0.4 ? 2 : 1;
-    for (let w = 0; w < wolves; w++) {
-      const at = ctx.currentTime + w * rand(0.8, 1.6);
-      const length = rand(2.2, 3.5);
-      const base = rand(380, 460) * (w ? rand(1.08, 1.2) : 1);
-      const osc = ctx.createOscillator();
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(base * 0.7, at);
-      osc.frequency.linearRampToValueAtTime(base * 1.25, at + length * 0.3);
-      osc.frequency.linearRampToValueAtTime(base * 1.2, at + length * 0.7);
-      osc.frequency.linearRampToValueAtTime(base * 0.8, at + length);
-      const vibrato = ctx.createOscillator();
-      vibrato.frequency.value = rand(5, 6.5);
-      const depth = ctx.createGain();
-      depth.gain.setValueAtTime(0, at);
-      depth.gain.linearRampToValueAtTime(base * 0.02, at + length * 0.5);
-      vibrato.connect(depth).connect(osc.frequency);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(
-        HOWL_CALL_GAIN * level,
-        at + length * 0.25
-      );
-      g.gain.setValueAtTime(HOWL_CALL_GAIN * level, at + length * 0.7);
-      g.gain.linearRampToValueAtTime(0, at + length);
-      // Far away: muffled, a soft echo
-      const out = this.panned(rand(-0.9, 0.9));
-      const muffle = this.lowpass(1400);
-      osc.connect(muffle).connect(g).connect(out);
-      const echo = ctx.createDelay(1);
-      echo.delayTime.value = 0.35;
-      const echoGain = ctx.createGain();
-      echoGain.gain.value = 0.3;
-      g.connect(echo).connect(echoGain).connect(out);
-      osc.start(at);
-      vibrato.start(at);
-      osc.stop(at + length + 0.05);
-      vibrato.stop(at + length + 0.05);
     }
   }
 
@@ -1447,206 +995,14 @@ export class WeatherAudio {
       const r = Math.random();
       const side = rand(-0.9, 0.9);
       if (r < 0.3) {
-        this.knocks(level, side);
+        knocks(this.kit!, level, side);
       } else if (r < 0.55) {
-        this.creak(level, side);
+        creak(this.kit!, level, side);
       } else if (r < 0.8) {
-        this.whisper(level, side);
+        whisper(this.kit!, level, side);
       } else {
-        this.heartbeat(level);
+        heartbeat(this.kit!, level);
       }
-    }
-  }
-
-  private panned(side: number): StereoPannerNode {
-    const pan = this.ctx!.createStereoPanner();
-    pan.pan.value = side;
-    pan.connect(this.master!);
-    return pan;
-  }
-
-  /** 1 to 3 dull knocks far away (a door? something walking?). */
-  private knocks(level: number, side: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(side);
-    const count = 1 + Math.floor(Math.random() * 3);
-    let at = ctx.currentTime;
-    for (let i = 0; i < count; i++) {
-      const osc = ctx.createOscillator();
-      osc.frequency.setValueAtTime(rand(70, 95), at);
-      osc.frequency.exponentialRampToValueAtTime(45, at + 0.25);
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0, at);
-      gain.gain.linearRampToValueAtTime(DREAD_GAIN * level, at + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, at + 0.35);
-      osc.connect(gain).connect(this.lowpass(300)).connect(out);
-      osc.start(at);
-      osc.stop(at + 0.4);
-      at += rand(0.35, 0.8);
-    }
-  }
-
-  /** A slow creak (old wood / metal under weight): a buzzing tone whose pitch wavers, far away. */
-  private creak(level: number, side: number) {
-    const ctx = this.ctx!;
-    const at = ctx.currentTime;
-    const length = rand(0.8, 1.8);
-    const osc = ctx.createOscillator();
-    osc.type = "sawtooth";
-    const f = rand(90, 160);
-    osc.frequency.setValueAtTime(f, at);
-    osc.frequency.linearRampToValueAtTime(
-      f * rand(0.7, 1.4),
-      at + length * 0.5
-    );
-    osc.frequency.linearRampToValueAtTime(f * rand(0.8, 1.2), at + length);
-    const band = this.bandpass(rand(700, 1300), 6);
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, at);
-    gain.gain.linearRampToValueAtTime(
-      DREAD_GAIN * 0.35 * level,
-      at + length * 0.3
-    );
-    gain.gain.linearRampToValueAtTime(0, at + length);
-    osc
-      .connect(band)
-      .connect(gain)
-      .connect(this.lowpass(2500))
-      .connect(this.panned(side));
-    osc.start(at);
-    osc.stop(at + length + 0.05);
-  }
-
-  /** An unintelligible whisper: breathy noise through moving "vowel" resonances, in short syllables. */
-  private whisper(level: number, side: number) {
-    const ctx = this.ctx!;
-    const start = ctx.currentTime;
-    const out = this.panned(side);
-    const syllables = 3 + Math.floor(Math.random() * 5);
-    let at = start;
-    for (let i = 0; i < syllables; i++) {
-      const length = rand(0.12, 0.3);
-      const src = ctx.createBufferSource();
-      src.buffer = this.noise!;
-      const f1 = this.bandpass(rand(600, 1100), 5);
-      const f2 = this.bandpass(rand(1600, 2800), 7);
-      f2.frequency.linearRampToValueAtTime(rand(1400, 3000), at + length);
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0, at);
-      gain.gain.linearRampToValueAtTime(
-        DREAD_GAIN * 0.5 * level * rand(0.5, 1),
-        at + length * 0.3
-      );
-      gain.gain.linearRampToValueAtTime(0, at + length);
-      src.connect(f1).connect(gain);
-      src.connect(f2).connect(gain);
-      gain.connect(out);
-      src.start(at, Math.random() * 3, length + 0.05);
-      at += length + rand(0.02, 0.15);
-    }
-  }
-
-  /** A slow heartbeat (lub-dub), getting slightly louder then fading. */
-  private heartbeat(level: number) {
-    const ctx = this.ctx!;
-    const out = this.panned(0);
-    const beats = 5 + Math.floor(Math.random() * 5);
-    const period = rand(0.9, 1.15);
-    for (let i = 0; i < beats; i++) {
-      const at = ctx.currentTime + i * period;
-      const swell = Math.sin((Math.PI * (i + 0.5)) / beats);
-      for (const [delay, strength] of [
-        [0, 1],
-        [0.18, 0.7],
-      ] as const) {
-        const osc = ctx.createOscillator();
-        osc.frequency.setValueAtTime(60, at + delay);
-        osc.frequency.exponentialRampToValueAtTime(38, at + delay + 0.12);
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0, at + delay);
-        gain.gain.linearRampToValueAtTime(
-          DREAD_GAIN * 1.2 * level * strength * swell,
-          at + delay + 0.015
-        );
-        gain.gain.exponentialRampToValueAtTime(0.001, at + delay + 0.16);
-        osc.connect(gain).connect(out);
-        osc.start(at + delay);
-        osc.stop(at + delay + 0.2);
-      }
-    }
-  }
-
-  /** Toxic bubbles: one big "blop", or a gurgling burst of smaller ones. */
-  private bubbles(amount: number) {
-    const ctx = this.ctx!;
-    const gurgle = Math.random() < 0.35;
-    const count = gurgle ? 3 + Math.floor(Math.random() * 5) : 1;
-    let at = ctx.currentTime + Math.random() * 0.05;
-    for (let i = 0; i < count; i++) {
-      const big = !gurgle && Math.random() < 0.6;
-      this.blop(
-        at,
-        big ? rand(110, 200) : rand(220, 520),
-        big ? rand(0.12, 0.2) : rand(0.05, 0.1),
-        BUBBLE_GAIN * amount * (big ? 1 : rand(0.4, 0.8)),
-        rand(-0.7, 0.7)
-      );
-      at += rand(0.04, 0.14);
-    }
-  }
-
-  /** One thick bubble popping: a muffled tone sliding up, a tiny "plop" at the end. */
-  private blop(
-    at: number,
-    freq: number,
-    length: number,
-    level: number,
-    side: number
-  ) {
-    const ctx = this.ctx!;
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, at);
-    osc.frequency.exponentialRampToValueAtTime(
-      freq * rand(2, 3.2),
-      at + length
-    );
-    const lowpass = this.lowpass(1200);
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, at);
-    gain.gain.linearRampToValueAtTime(level, at + length * 0.25);
-    gain.gain.exponentialRampToValueAtTime(0.001, at + length);
-    const pan = ctx.createStereoPanner();
-    pan.pan.value = side;
-    osc.connect(lowpass).connect(gain).connect(pan).connect(this.master!);
-    osc.start(at);
-    osc.stop(at + length + 0.02);
-  }
-
-  /** Ember crackle: one or a few tiny clicks of bright noise (sometimes a deeper pop). */
-  private crackle(amount: number) {
-    const ctx = this.ctx!;
-    const clicks = 1 + Math.floor(Math.random() * Math.random() * 5);
-    let at = ctx.currentTime;
-    for (let i = 0; i < clicks; i++) {
-      const pop = Math.random() < 0.2;
-      const length = pop
-        ? 0.03 + Math.random() * 0.03
-        : 0.006 + Math.random() * 0.014;
-      const src = ctx.createBufferSource();
-      src.buffer = this.noise!;
-      const band = this.bandpass(
-        pop ? 600 + Math.random() * 600 : 2000 + Math.random() * 4000,
-        pop ? 2 : 1
-      );
-      const gain = ctx.createGain();
-      const level =
-        CRACKLE_GAIN * amount * (pop ? 1.3 : 0.4 + 0.6 * Math.random());
-      gain.gain.setValueAtTime(level, at);
-      gain.gain.exponentialRampToValueAtTime(0.001, at + length);
-      src.connect(band).connect(gain).connect(this.master!);
-      src.start(at, Math.random() * 3, length + 0.02);
-      at += 0.02 + Math.random() * 0.07;
     }
   }
 
@@ -1655,52 +1011,16 @@ export class WeatherAudio {
    * @param closeness 0..1
    */
   geyserBurst(closeness: number, side: number) {
-    const ctx = this.ctx;
-    if (
-      !ctx ||
-      !this.master ||
-      !this.noise ||
-      ctx.state !== "running" ||
-      closeness <= 0
-    ) {
-      return;
+    if (this.kit) {
+      geyserBurst(this.kit, closeness, side);
     }
-    this.bubbles(closeness);
-    const at = ctx.currentTime + 0.25;
-    const src = ctx.createBufferSource();
-    src.buffer = this.noise;
-    const band = this.bandpass(600, 0.8);
-    band.frequency.setValueAtTime(400, at);
-    band.frequency.exponentialRampToValueAtTime(2500, at + 0.6);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, at);
-    g.gain.linearRampToValueAtTime(GEYSER_BURST_GAIN * closeness, at + 0.15);
-    g.gain.exponentialRampToValueAtTime(0.001, at + 1.6);
-    src
-      .connect(band)
-      .connect(g)
-      .connect(this.panned(side * 0.8));
-    src.start(at, Math.random() * 2, 1.7);
   }
 
   /** A rocket climbing: a thin whistle rising in pitch for the climb time. */
   rocketWhistle(climb: number, side: number) {
-    const ctx = this.ctx;
-    if (!ctx || !this.master || ctx.state !== "running") {
-      return;
+    if (this.kit) {
+      rocketWhistle(this.kit, climb, side);
     }
-    const at = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    osc.frequency.setValueAtTime(rand(500, 700), at);
-    osc.frequency.exponentialRampToValueAtTime(rand(1800, 2600), at + climb);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, at);
-    g.gain.linearRampToValueAtTime(ROCKET_GAIN, at + 0.1);
-    g.gain.linearRampToValueAtTime(ROCKET_GAIN * 0.4, at + climb);
-    g.gain.linearRampToValueAtTime(0, at + climb + 0.05);
-    osc.connect(g).connect(this.panned(side * 0.8));
-    osc.start(at);
-    osc.stop(at + climb + 0.1);
   }
 
   /**
@@ -1708,99 +1028,23 @@ export class WeatherAudio {
    * @param closeness 0..1 (louder and sooner when close)
    */
   fireworkBang(closeness: number, side: number) {
-    const ctx = this.ctx;
-    if (!ctx || !this.master || !this.noise || ctx.state !== "running") {
-      return;
+    if (this.kit) {
+      fireworkBang(this.kit, closeness, side);
     }
-    const at = ctx.currentTime + 0.15 + (1 - closeness) * 0.5;
-    const out = this.panned(side * 0.8);
-    // Bang: a short low noise burst + a falling low tone
-    const src = ctx.createBufferSource();
-    src.buffer = this.noise;
-    const g = ctx.createGain();
-    const level = BANG_GAIN * (0.4 + 0.6 * closeness);
-    g.gain.setValueAtTime(level, at);
-    g.gain.exponentialRampToValueAtTime(0.001, at + 0.5);
-    src.connect(this.lowpass(700)).connect(g).connect(out);
-    src.start(at, Math.random() * 3, 0.55);
-    const osc = ctx.createOscillator();
-    osc.frequency.setValueAtTime(90, at);
-    osc.frequency.exponentialRampToValueAtTime(35, at + 0.4);
-    const og = ctx.createGain();
-    og.gain.setValueAtTime(level * 0.8, at);
-    og.gain.exponentialRampToValueAtTime(0.001, at + 0.45);
-    osc.connect(og).connect(out);
-    osc.start(at);
-    osc.stop(at + 0.5);
-    // Echo off the buildings
-    const echo = ctx.createDelay(1);
-    echo.delayTime.value = rand(0.25, 0.4);
-    const eg = ctx.createGain();
-    eg.gain.value = 0.25;
-    g.connect(echo).connect(eg).connect(out);
-    // Crackling sparks a moment later
-    if (Math.random() < 0.6) {
-      let t = at + 0.3;
-      for (let i = 0; i < 14; i++) {
-        const c = ctx.createBufferSource();
-        c.buffer = this.noise;
-        const cg = ctx.createGain();
-        cg.gain.setValueAtTime(level * 0.15 * rand(0.4, 1), t);
-        cg.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
-        c.connect(this.bandpass(rand(2500, 5000), 3))
-          .connect(cg)
-          .connect(out);
-        c.start(t, Math.random() * 3, 0.03);
-        t += rand(0.03, 0.12);
-      }
+  }
+
+  /** Ledge hop: a short airy whoosh falling in pitch (the player drops). */
+  ledgeHop() {
+    if (this.kit) {
+      ledgeHop(this.kit);
     }
   }
 
   /** The player falling back on the ground: a dull thud. */
-  /** Ledge hop: a short airy whoosh falling in pitch (the player drops). */
-  ledgeHop() {
-    const ctx = this.ctx;
-    if (!ctx || !this.master || !this.noise || ctx.state !== "running") {
-      return;
-    }
-    const at = ctx.currentTime;
-    const src = ctx.createBufferSource();
-    src.buffer = this.noise;
-    const band = this.bandpass(1400, 1.2);
-    band.frequency.setValueAtTime(1400, at);
-    band.frequency.exponentialRampToValueAtTime(300, at + 0.3);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, at);
-    g.gain.exponentialRampToValueAtTime(0.12, at + 0.06);
-    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.32);
-    src.connect(band).connect(g).connect(this.master);
-    src.start(at, Math.random() * 2, 0.35);
-  }
-
   thud() {
-    const ctx = this.ctx;
-    if (!ctx || !this.master || ctx.state !== "running") {
-      return;
+    if (this.kit) {
+      thud(this.kit);
     }
-    const at = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    osc.frequency.setValueAtTime(110, at);
-    osc.frequency.exponentialRampToValueAtTime(40, at + 0.18);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, at);
-    g.gain.linearRampToValueAtTime(0.6, at + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.001, at + 0.25);
-    osc.connect(g).connect(this.master);
-    osc.start(at);
-    osc.stop(at + 0.3);
-    // Dust: a short muffled noise burst
-    const src = ctx.createBufferSource();
-    src.buffer = this.noise!;
-    const dust = ctx.createGain();
-    dust.gain.setValueAtTime(0.2, at);
-    dust.gain.exponentialRampToValueAtTime(0.001, at + 0.2);
-    src.connect(this.lowpass(900)).connect(dust).connect(this.master);
-    src.start(at, Math.random() * 3, 0.25);
   }
 
   /**
@@ -1820,14 +1064,14 @@ export class WeatherAudio {
     }
     const ctx = this.ctx!;
     const at = ctx.currentTime;
-    const out = this.panned(rand(-0.9, 0.9));
+    const out = this.kit!.panned(rand(-0.9, 0.9));
     const loud = ICE_CRACK_GAIN * level * rand(0.4, 1);
     const snap = ctx.createBufferSource();
     snap.buffer = this.noise!;
     const sg = ctx.createGain();
     sg.gain.setValueAtTime(loud, at);
     sg.gain.exponentialRampToValueAtTime(0.0001, at + 0.04);
-    snap.connect(this.highpass(2000)).connect(sg).connect(out);
+    snap.connect(this.kit!.highpass(2000)).connect(sg).connect(out);
     snap.start(at, Math.random() * 2, 0.05);
     const osc = ctx.createOscillator();
     const f = rand(1800, 3200);
@@ -1847,124 +1091,16 @@ export class WeatherAudio {
    * irregular like small steps), from its side.
    */
   scurry(side: number) {
-    const ctx = this.ctx;
-    if (!ctx || !this.master || !this.noise || ctx.state !== "running") {
-      return;
-    }
-    const out = this.panned(side);
-    const at = ctx.currentTime;
-    const steps = 4 + Math.floor(Math.random() * 5);
-    let t = 0;
-    for (let k = 0; k < steps; k++) {
-      const src = ctx.createBufferSource();
-      src.buffer = this.noise;
-      const g = ctx.createGain();
-      const level = SCURRY_GAIN * rand(0.5, 1) * (1 - (k / steps) * 0.6);
-      g.gain.setValueAtTime(level, at + t);
-      g.gain.exponentialRampToValueAtTime(0.0001, at + t + 0.07);
-      src
-        .connect(this.bandpass(rand(1800, 3500), 1.2))
-        .connect(g)
-        .connect(out);
-      src.start(at + t, Math.random() * 2, 0.08);
-      t += rand(0.05, 0.12);
+    if (this.kit) {
+      scurry(this.kit, side);
     }
   }
 
+  /** The thunder of a strike's bolts (each at its time, distance and side). */
   thunder(bolts: ThunderBolt[]) {
-    const ctx = this.ctx;
-    if (!ctx || !this.master || !this.brownNoise || ctx.state !== "running") {
-      return;
+    if (this.kit) {
+      thunder(this.kit, bolts);
     }
-    for (const bolt of bolts) {
-      const near = 1 - bolt.distance;
-      const delay = bolt.at + 0.05 + bolt.distance * 5 + Math.random() * 0.6;
-      const start = ctx.currentTime + delay;
-      const pan = ctx.createStereoPanner();
-      pan.pan.value = bolt.pan;
-      pan.connect(this.master);
-      if (bolt.distance < 0.35) {
-        this.thunderCrack(start, near, pan);
-      }
-      this.thunderRumble(start, bolt.distance, pan);
-    }
-  }
-
-  /**
-   * Close strike: a loud sharp clap (like a huge whip crack / a tree splitting), with one or two
-   * smaller echoes right after. Full-band but not too bright, smooth envelopes (no buzzing).
-   */
-  private thunderCrack(start: number, near: number, out: AudioNode) {
-    const ctx = this.ctx!;
-    const clap = (at: number, level: number, length: number) => {
-      const src = ctx.createBufferSource();
-      src.buffer = this.noise!;
-      const lowpass = this.lowpass(rand(2200, 3500));
-      const highpass = this.highpass(120);
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0, at);
-      gain.gain.linearRampToValueAtTime(level, at + 0.006);
-      gain.gain.exponentialRampToValueAtTime(level * 0.25, at + length * 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.001, at + length);
-      src.connect(highpass).connect(lowpass).connect(gain).connect(out);
-      src.start(at, Math.random() * 3, length + 0.05);
-    };
-    const level = THUNDER_CRACK_GAIN * near;
-    clap(start, level, rand(0.4, 0.7));
-    const echoes = Math.floor(rand(0, 3));
-    let t = start;
-    for (let i = 0; i < echoes; i++) {
-      t += rand(0.08, 0.25);
-      clap(t, level * rand(0.3, 0.6), rand(0.3, 0.5));
-    }
-  }
-
-  /** The boom and its rolling echoes. */
-  private thunderRumble(start: number, distance: number, out: AudioNode) {
-    const ctx = this.ctx!;
-    const near = 1 - distance;
-    const duration = 2.5 + distance * 4 + Math.random() * 2.5;
-    const src = ctx.createBufferSource();
-    src.buffer = this.brownNoise!;
-    src.playbackRate.value = rand(0.7, 1);
-    const lowpass = ctx.createBiquadFilter();
-    lowpass.type = "lowpass";
-    lowpass.frequency.setValueAtTime(
-      550 + 1800 * near * near + Math.random() * 300,
-      start
-    );
-    lowpass.frequency.exponentialRampToValueAtTime(
-      160 + 80 * Math.random(),
-      start + duration
-    );
-    const gain = ctx.createGain();
-    const peak = THUNDER_GAIN * (0.55 + 0.45 * near);
-    gain.gain.setValueAtTime(0, start);
-    // Close: immediate boom; far: slow swelling rumble
-    gain.gain.linearRampToValueAtTime(
-      peak,
-      start + rand(0.03, 0.08) + distance * 0.6
-    );
-    // Rolling: swells getting weaker, more and slower when far
-    let t = start + 0.3 + distance * 0.5;
-    let level = 1;
-    while (t < start + duration - 0.5) {
-      level *= rand(0.85, 1);
-      gain.gain.linearRampToValueAtTime(peak * level * rand(0.45, 0.95), t);
-      t += rand(0.2, 0.5) + distance * rand(0.2, 0.7);
-    }
-    gain.gain.linearRampToValueAtTime(0, start + duration);
-    src.connect(lowpass).connect(gain).connect(out);
-
-    // The rain steps back while it thunders (more for the close, loud ones)
-    const duck = this.rainBus!.gain;
-    const low = 1 - (1 - THUNDER_DUCKING) * (0.5 + 0.5 * near);
-    duck.cancelScheduledValues(start);
-    duck.setTargetAtTime(low, start, 0.08);
-    duck.setTargetAtTime(1, start + duration * 0.6, duration * 0.25);
-    // Looped: a long rumble would otherwise run past the end of the 4 s buffer and stop dead (a click)
-    src.loop = true;
-    src.start(start, Math.random() * 2, duration + 0.1);
   }
 
   /** One footstep on a surface (a random sample, slightly varied); `splash`: stepping in a puddle. */
@@ -1983,7 +1119,7 @@ export class WeatherAudio {
     gain.gain.value =
       STEP_GAIN[surface] * (running ? 1.15 : 1) * (0.8 + Math.random() * 0.4);
     if (surface === "water") {
-      src.connect(this.lowpass(2200)).connect(gain).connect(this.master);
+      src.connect(this.kit!.lowpass(2200)).connect(gain).connect(this.master);
     } else {
       src.connect(gain).connect(this.master);
     }
@@ -2012,8 +1148,8 @@ export class WeatherAudio {
     noiseGain.gain.linearRampToValueAtTime(SPLASH_GAIN * level, now + 0.012);
     noiseGain.gain.exponentialRampToValueAtTime(0.001, now + length);
     noise
-      .connect(this.highpass(1800))
-      .connect(this.lowpass(7500))
+      .connect(this.kit!.highpass(1800))
+      .connect(this.kit!.lowpass(7500))
       .connect(noiseGain)
       .connect(this.master!);
     noise.start(now, Math.random() * 3, length + 0.05);
@@ -2024,32 +1160,12 @@ export class WeatherAudio {
         ? 3 + Math.floor(Math.random() * 3)
         : Math.floor(Math.random() * 3);
     for (let i = 0; i < drops; i++) {
-      this.plink(
+      plink(
+        this.kit!,
         now + 0.02 + Math.random() * (0.08 + 0.12 * amount),
         PLINK_GAIN * level * (0.5 + 0.5 * Math.random())
       );
     }
-  }
-
-  /** One water drop: a sine rising in pitch, very short. */
-  private plink(at: number, level: number) {
-    const ctx = this.ctx!;
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    const f0 = 700 + Math.random() * 900;
-    const length = 0.04 + Math.random() * 0.05;
-    osc.frequency.setValueAtTime(f0, at);
-    osc.frequency.exponentialRampToValueAtTime(
-      f0 * (1.8 + Math.random() * 1.2),
-      at + length
-    );
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, at);
-    gain.gain.linearRampToValueAtTime(level, at + 0.003);
-    gain.gain.exponentialRampToValueAtTime(0.001, at + length);
-    osc.connect(gain).connect(this.master!);
-    osc.start(at);
-    osc.stop(at + length + 0.02);
   }
 
   private start() {
@@ -2077,32 +1193,39 @@ export class WeatherAudio {
     this.rainFilter.type = "lowpass";
     this.rainBus = ctx.createGain();
     this.rainBus.connect(this.master);
+    this.kit = new AudioKit(
+      ctx,
+      this.master,
+      this.noise,
+      this.brownNoise,
+      this.rainBus
+    );
     this.rainGain = this.loop(
       this.noise,
-      [this.highpass(400), this.rainFilter],
+      [this.kit!.highpass(400), this.rainFilter],
       this.rainBus
     );
     this.dropsGain = this.loop(
       this.noise,
-      [this.bandpass(4500, 0.9)],
+      [this.kit!.bandpass(4500, 0.9)],
       this.rainBus
     );
     // Drizzle: soft, high, airy
     this.drizzleGain = this.loop(
       this.noise,
-      [this.highpass(2500), this.lowpass(9000)],
+      [this.kit!.highpass(2500), this.kit!.lowpass(9000)],
       this.rainBus
     );
     // Wind: resonant band of brown noise
-    this.windFilter = this.bandpass(400, 0.9);
+    this.windFilter = this.kit!.bandpass(400, 0.9);
     this.windGain = this.loop(this.brownNoise, [this.windFilter]);
     // Sand: thin high hiss riding the wind
-    this.sandGain = this.loop(this.noise, [this.bandpass(6000, 0.7)]);
+    this.sandGain = this.loop(this.noise, [this.kit!.bandpass(6000, 0.7)]);
     // Volcanic rumble: very low brown noise
-    this.rumbleFilter = this.lowpass(100);
+    this.rumbleFilter = this.kit!.lowpass(100);
     this.rumbleGain = this.loop(this.brownNoise, [
       this.rumbleFilter,
-      this.lowpass(160),
+      this.kit!.lowpass(160),
     ]);
     // Electric hum: mains-like buzz (100 Hz sawtooth, muffled), heard while arcs crackle nearby
     this.humGain = ctx.createGain();
@@ -2110,25 +1233,28 @@ export class WeatherAudio {
     const hum = ctx.createOscillator();
     hum.type = "sawtooth";
     hum.frequency.value = 100;
-    hum.connect(this.lowpass(700)).connect(this.humGain).connect(this.master);
+    hum
+      .connect(this.kit!.lowpass(700))
+      .connect(this.humGain)
+      .connect(this.master);
     hum.start();
     // Sea: low swell of brown noise + the hiss of the wash
-    this.waveFilter = this.lowpass(400);
+    this.waveFilter = this.kit!.lowpass(400);
     this.waveGain = this.loop(this.brownNoise, [this.waveFilter]);
     this.washGain = this.loop(this.noise, [
-      this.highpass(1200),
-      this.lowpass(6000),
+      this.kit!.highpass(1200),
+      this.kit!.lowpass(6000),
     ]);
     // Solar storm radio static: narrow band of noise, its pitch jumping
-    this.staticFilter = this.bandpass(2000, 1.5);
+    this.staticFilter = this.kit!.bandpass(2000, 1.5);
     this.staticGain = this.loop(this.noise, [this.staticFilter]);
     // Petal whirlwind: band of noise, its pitch swirling
-    this.whirlFilter = this.bandpass(800, 1.4);
+    this.whirlFilter = this.kit!.bandpass(800, 1.4);
     this.whirlGain = this.loop(this.noise, [this.whirlFilter]);
     // Geyser steam hiss: broad band of white noise
     this.steamGain = this.loop(this.noise, [
-      this.highpass(1500),
-      this.lowpass(7000),
+      this.kit!.highpass(1500),
+      this.kit!.lowpass(7000),
     ]);
     // Time warp drone: two low tones a little apart, beating slowly
     this.warpDroneGain = ctx.createGain();
@@ -2144,7 +1270,7 @@ export class WeatherAudio {
     }
     // Reversed gravity: noise through a band-pass whose frequency is driven by a sawtooth: it rises slowly, drops back
     // at once and rises again, an endless upward whoosh
-    const sweep = this.bandpass(FLOAT_SWEEP[0], 1.4);
+    const sweep = this.kit!.bandpass(FLOAT_SWEEP[0], 1.4);
     const lfo = ctx.createOscillator();
     lfo.type = "sawtooth";
     lfo.frequency.value = FLOAT_SWEEP_RATE;
@@ -2176,18 +1302,18 @@ export class WeatherAudio {
     shutterLfo.connect(shutterDepth).connect(shutter.gain);
     shutterLfo.start();
     this.projectorGain = this.loop(this.noise, [
-      this.bandpass(1600, 1.5),
+      this.kit!.bandpass(1600, 1.5),
       shutter,
     ]);
     // Earthquake rumble: very deep brown noise
-    this.quakeGain = this.loop(this.brownNoise, [this.lowpass(110)]);
+    this.quakeGain = this.loop(this.brownNoise, [this.kit!.lowpass(110)]);
     // Tornado roar: deep rumbling brown noise, brighter when close
-    this.roarFilter = this.lowpass(300);
+    this.roarFilter = this.kit!.lowpass(300);
     this.roarGain = this.loop(this.brownNoise, [this.roarFilter]);
     // Blood moon drone: low sawtooth tones a semitone apart (grating), muffled
     this.bloodDroneGain = ctx.createGain();
     this.bloodDroneGain.gain.value = 0;
-    this.bloodDroneFilter = this.lowpass(220);
+    this.bloodDroneFilter = this.kit!.lowpass(220);
     this.bloodDroneFilter.connect(this.bloodDroneGain).connect(this.master);
     for (const [freq, amount] of [
       [41.2, 1],
@@ -2203,17 +1329,17 @@ export class WeatherAudio {
       osc.start();
     }
     // Smog: distant traffic rumble (low brown noise)
-    this.trafficFilter = this.lowpass(280);
+    this.trafficFilter = this.kit!.lowpass(280);
     this.trafficGain = this.loop(this.brownNoise, [this.trafficFilter]);
     // Acid rain sizzling: high band of white noise, its level flickering (see updateMagic)
     this.sizzleGain = this.loop(this.noise, [
-      this.highpass(3500),
-      this.lowpass(9000),
+      this.kit!.highpass(3500),
+      this.kit!.lowpass(9000),
     ]);
     // Darkness drone: low tones slightly out of tune (slow beating) + a faint tritone above, all muffled
     this.droneGain = ctx.createGain();
     this.droneGain.gain.value = 0;
-    const droneFilter = this.lowpass(400);
+    const droneFilter = this.kit!.lowpass(400);
     droneFilter.connect(this.droneGain).connect(this.master);
     for (const [freq, level] of [
       [55, 1],
@@ -2230,22 +1356,22 @@ export class WeatherAudio {
       osc.start();
     }
     // Forest: rustling leaves (bright band of noise, flickering)
-    this.rustleFilter = this.bandpass(4000, 0.7);
+    this.rustleFilter = this.kit!.bandpass(4000, 0.7);
     this.rustleGain = this.loop(this.noise, [
-      this.highpass(1500),
+      this.kit!.highpass(1500),
       this.rustleFilter,
     ]);
     // Darkness breathing: low brown noise swelling slowly
-    this.breathFilter = this.lowpass(250);
+    this.breathFilter = this.kit!.lowpass(250);
     this.breathGain = this.loop(this.brownNoise, [this.breathFilter]);
 
     // Blizzard: narrow resonances on the noise = whistling, howling wind
     for (const v of HOWL_VOICES) {
-      const filter = this.bandpass(v.freq, v.q);
+      const filter = this.kit!.bandpass(v.freq, v.q);
       this.howls.push({ gain: this.loop(this.noise, [filter]), filter });
     }
     // Poison: low bubbling bed (resonant band of brown noise, its pitch wobbling)
-    this.swampFilter = this.bandpass(300, 3);
+    this.swampFilter = this.kit!.bandpass(300, 3);
     this.swampGain = this.loop(this.brownNoise, [this.swampFilter]);
 
     (Object.keys(STEP_FILES) as SampledSurface[]).forEach((surface) => {
@@ -2283,28 +1409,6 @@ export class WeatherAudio {
     // Random start so the loops of the same buffer don't play in phase
     src.start(0, Math.random() * buffer.duration);
     return gain;
-  }
-
-  private highpass(freq: number) {
-    const f = this.ctx!.createBiquadFilter();
-    f.type = "highpass";
-    f.frequency.value = freq;
-    return f;
-  }
-
-  private lowpass(freq: number) {
-    const f = this.ctx!.createBiquadFilter();
-    f.type = "lowpass";
-    f.frequency.value = freq;
-    return f;
-  }
-
-  private bandpass(freq: number, q: number) {
-    const f = this.ctx!.createBiquadFilter();
-    f.type = "bandpass";
-    f.frequency.value = freq;
-    f.Q.value = q;
-    return f;
   }
 
   /** 4 s of white noise, or brown noise (deep rumble) for the wind and thunder. */
