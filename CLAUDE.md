@@ -32,8 +32,10 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
   landscape/desktop), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
   `release-notes`, `game-saves` (saved games dialog), `variables-test` (change the variables' values while playing),
-  `teleport`, `event-editor` (an object's event window: trigger, conditions, actions); small windows over the game share
-  `shared/_dialog.scss`.
+  `teleport`, `event-editor` (an object's event window: trigger, conditions, the tree of actions and branches;
+  `event-conditions/` and `event-action/` (one action's fields) components, `event-editor-data.ts` (`EventEditorData`,
+  provided by the window: variables and database read once; field helpers), `_fields.scss` the shared fields (global,
+  in `styles.scss`)); small windows over the game share `shared/_dialog.scss`.
   - `shared/services/`: `game.service` (settings, music, reload of models), `map-editor.service` (map editor logic),
     `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
     `event` (`actionAt`, `armed`: enter / automatic events), `sequence` (plays the actions), `sfx` (synthesized sound
