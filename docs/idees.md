@@ -30,7 +30,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 2 | **Variables et sauvegarde de partie** (fait : l'éditeur de variables et le test des variables, voir [08](editeur/08-variables.md), la sauvegarde de partie sur trois emplacements, voir [05](editeur/05-sauvegarde-export.md#sauvegarde-de-partie)) | Drapeaux d'histoire (« a parlé au maire »), compteurs, jour courant ; sauvegarde sur plusieurs emplacements | Tout |
 | 3 | **Personnages et événements** (fait : déclencheurs parler / entrer dessus / automatique, conditions variables / heure / météo, actions message / variable / téléporter / météo / son / attendre, se tourner vers le joueur, zones invisibles, voir [09](editeur/09-evenements.md) ; restent : téléporter vers un point choisi, donner un objet et lancer un combat, qui attendent la base de données et le combat) | Poser un PNJ, un panneau, une zone ; déclencheurs (parler, entrer, heure, météo, drapeau) et actions | Jour et nuit |
 | 4 | **Dialogues** (fait : arbre d'actions dans la fenêtre des événements, choix et conditions Si / Sinon avec leurs branches, arrêter, portrait et nom, voir [09](editeur/09-evenements.md#larbre-dactions) ; restent : conditions sur les liens (point 8), événements communs réutilisables, portraits dessinés (point 6)) | Répliques, choix, conditions (drapeaux, liens), effets ; portrait et nom de qui parle | Jour |
-| 5 | **Base de données** | Personnages (stats, portrait), objets, compétences, ennemis et groupes, éléments et faiblesses | Tout |
+| 5 | **Base de données** (décidée, maquette à faire, voir [plus bas](#base-de-données-point-5--décidée-maquette-à-faire)) | Personnages (stats, portrait), objets, compétences, ennemis et groupes, éléments et faiblesses | Tout |
 | 6 | **Portraits et sprites** | Dessiner en pixel art les portraits de dialogue et les personnages (avec la vue 2D de l'éditeur de modèles) | Jour et nuit |
 | 7 | **Temps et calendrier** | Jours, périodes (matin, après-midi, soir, nuit), activités qui prennent du temps, emplois du temps des habitants | Jour |
 | 8 | **Liens sociaux** | Un niveau de lien par personnage, les scènes débloquées à chaque niveau, les bonus en combat | Jour → nuit |
@@ -69,6 +69,24 @@ Une musique d'ambiance par zone, qui change avec la météo et l'heure, composé
 - **Variantes** : la même musique jour / nuit / pluie (instruments ou filtre qui changent), avec un fondu entre elles.
 - Export en fichier du jeu (comme les modèles) ; plus tard, import d'un fichier MIDI.
 - Utilisable sur téléphone, comme l'éditeur de modèles.
+
+### Base de données (point 5) — décidée, maquette à faire
+
+Une page à part (`/#/base`), comme les variables ou la musique : un onglet par table, la liste puis la fiche.
+
+- **Tables** : Éléments, Types d'armes, États, Compétences, Objets, Personnages, Ennemis, Groupes.
+- **Stats fixes** (comme Persona) : PV, PM, Force, Magie, Endurance, Agilité, Chance.
+- **Éléments** : on les crée soi-même ; pour chacun, les météos qui le renforcent ou l'affaiblissent. Un élément peut être **composé** de deux autres (Feu + Vent = Foudre).
+- **Types d'armes** : épée, arc, poings… Ils jouent pour les compétences physiques le rôle des éléments pour la magie. L'élément Physique ne sert plus à apprendre : il reste seulement pour les dégâts et les résistances.
+- **États** : nom, icône, durée, effet (dégâts par tour, stat modifiée, passe son tour) ; compétences et objets en donnent ou en guérissent.
+- **Compétences** : coût en PM et temps d'incantation sur la jauge d'action (à la Grandia). Effet = une liste d'effets simples (dégâts avec élément et puissance, soin, état, stat, cible), avec une formule en option pour les cas spéciaux.
+- **Apprendre les compétences, à la Grandia** : on progresse dans les éléments et les armes qu'on utilise. Chaque élément et chaque type d'arme a son niveau, par personnage. Une compétence s'apprend quand le niveau demandé est atteint, dans un élément ou une arme (Épée 4), ou dans les deux éléments d'un élément composé (Foudre : Feu 5 + Vent 3). On gagne de l'expérience d'élément en utilisant ses compétences (une compétence composée en donne aux deux), avec des objets, avec l'équipement (donner un élément ou le faire monter plus vite) et avec les liens sociaux. Chaque personnage a une affinité par élément et par arme : rapide, normal, lent ou jamais. Une même courbe d'expérience pour tous les niveaux d'élément et d'arme ; l'affinité la rend plus rapide ou plus lente.
+- **Objets** : consommables (dont amélioration permanente d'une stat), équipement (bonus, résistances, qui peut le porter), objets clés, cadeaux.
+- **Personnages** : niveaux et expérience ; pour chaque stat une valeur au niveau 1 et au niveau max (courbe) ; niveau de départ dans chaque élément et chaque arme, et son affinité. Apparence : modèle 3D (carte), sprite de combat 2D plat à la Grandia, petite image pour la jauge d'action et les menus, portrait.
+- **Ennemis** : stats, faiblesses, butin (expérience, argent, objets avec une chance en %), comportement (compétences avec un poids et des conditions simples), météos et heures où il apparaît ou devient plus fort. **Groupes** : on place les ennemis sur le terrain (vue de dessus).
+- **Images** : un petit éditeur pixel dans les fiches pour les icônes (16×16), les portraits et les sprites de combat, avec import d'un PNG possible.
+- **Événements** : donner / retirer un objet, donner de l'argent ; conditions « a l'objet », « argent ≥ » ; faire entrer / sortir un personnage de l'équipe, soigner l'équipe ; lancer un combat avec les branches Victoire / Défaite / Fuite.
+- **Étapes** (une par session, validée) : 1) maquette `design/database.pen` (téléphone et ordinateur) ; 2) la page, Éléments, Types d'armes et États ; 3) Compétences ; 4) Objets ; 5) Personnages ; 6) Ennemis et groupes ; 7) les liens avec les événements.
 
 ### Zones d'action sur les objets
 
