@@ -1,12 +1,12 @@
 # Base de données
 
-La base de données rassemble ce que le combat, les événements et les menus vont lire : les compétences, les objets, les états, les éléments, les types d'armes. Les personnages, les ennemis et les groupes arrivent ensuite (voir la [feuille de route](../idees.md)).
+La base de données rassemble ce que le combat, les événements et les menus vont lire : les personnages, les compétences, les objets, les états, les éléments, les types d'armes. Les ennemis et les groupes arrivent ensuite (voir la [feuille de route](../idees.md)).
 
 ## Ouvrir l'éditeur
 
 En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en paysage) ou **⋮ → Base de données** (téléphone en portrait). L'éditeur s'ouvre par-dessus le jeu ; **Jeu** le ferme.
 
-- **Sur téléphone en portrait** : les tables en onglets en haut (Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
+- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
 - Sur les écrans larges, **Dupliquer** et **Supprimer** sont à droite du nom.
@@ -15,22 +15,36 @@ En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en 
 ## La liste
 
 - **Chercher** filtre par nom (les accents et les majuscules ne comptent pas).
-- **+ Compétence** (ou + Objet, + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
+- **+ Personnage** (ou + Compétence, + Objet, + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
 - Dans la fiche : **Dupliquer** (copie juste en dessous) et **Supprimer** (la corbeille : appuyer deux fois, « Supprimer ? » pendant 3 secondes).
 
 Renommer ne casse rien : ce qui utilise une ligne la retrouve par un identifiant qui ne change jamais.
 
 ## L'icône (éditeur pixel)
 
-Chaque ligne a une icône de 16 × 16 pixels. Toucher l'icône de la fiche ouvre l'éditeur pixel :
+Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tête). Toucher l'icône de la fiche ouvre l'éditeur pixel ; il sert aussi aux portraits (48 × 48) et aux sprites de combat (32 × 48) des personnages :
 
 - **Crayon**, **Gomme**, **Remplir** (pot de peinture), **Pipette** (reprend une couleur du dessin), **Miroir** (retourne gauche / droite).
 - **La palette** : 20 couleurs, puis les autres couleurs déjà dans le dessin ; **+** choisit n'importe quelle couleur.
 - **Annuler** (la flèche) défait le dernier trait.
 - **Zoomer** : − et + sous les outils, deux doigts écartés ou rapprochés (téléphone), Ctrl + molette (ordinateur). Une fois zoomé, deux doigts déplacent la grille.
-- **Importer un PNG** : l'image est réduite à 16 × 16, sans flou.
+- **Importer un PNG** : l'image est réduite à la taille du dessin, centrée (adoucie si elle est beaucoup plus grande, comme une photo de portrait, nette sinon).
 - **Tout effacer** : une icône vide redevient une pastille de couleur.
 - **OK** garde le dessin ; **Fermer** (ou toucher à côté) l'oublie.
+
+## Personnages
+
+- **Équipe** ou **Habitant** : un habitant ne se bat pas, il n'a que son apparence (son emploi du temps et ses liens viendront plus tard).
+- **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (48 × 48), le **sprite de combat** (32 × 48, une image plate face à la caméra, à la Grandia) et le **modèle 3D** sur la carte.
+- Un membre de l'équipe a deux onglets :
+  - **Général** :
+    - **Niveaux et expérience** : niveau de départ, niveau max, et si les niveaux montent vite, normalement ou lentement ;
+    - **Stats** : la valeur au niveau 1 et au niveau max ; toucher la **courbe** la change (régulière, monte tôt, monte tard) ;
+    - **Équipement de départ** : arme, armure, accessoire (seulement ce qu'il peut porter).
+  - **Éléments et armes**, à la Grandia :
+    - pour chaque élément simple et chaque type d'arme : son **niveau au départ** et sa **progression** (rapide, normal, lent, jamais) ; un élément composé suit ses deux éléments ;
+    - **Ce qu'il apprendra** : les compétences qu'il connaît dès le départ, celles qu'il apprendra (ce qui manque : « Feu 2/5 · Vent 1/3 ») et celles qu'il n'apprendra jamais.
+    - le bouton **Exclure** (⊘) d'une compétence la réserve aux autres personnages : celui-ci ne l'apprendra jamais, même avec les niveaux. Elle passe en bas, marquée « exclue » ; la flèche la rend de nouveau possible.
 
 ## Compétences
 
@@ -47,7 +61,7 @@ Chaque ligne a une icône de 16 × 16 pixels. Toucher l'icône de la fiche ouvre
   - **Stat** : une stat montée ou baissée en %, pendant quelques tours.
 - **Formule (pour les cas spéciaux)** : remplace la puissance des dégâts et des soins, par exemple `a.mag * 2 - b.end` (a = celui qui l'utilise, b = la cible ; stats : hp, mp, str, mag, end, agi, luck, level). Une formule mal écrite est signalée en orange.
 
-Supprimer un élément fait passer ses compétences en Physique ; supprimer un élément, un type d'arme ou un état retire les niveaux, les effets, les résistances et les bonus qui le nommaient (dans les compétences et les objets).
+Supprimer un élément fait passer ses compétences en Physique ; supprimer un élément, un type d'arme ou un état retire les niveaux, les effets, les résistances et les bonus qui le nommaient (dans les compétences, les objets et les personnages). Supprimer un objet le retire de l'équipement de départ ; supprimer un personnage le retire de « Qui peut le porter » ; supprimer une compétence la retire des compétences exclues.
 
 ## Objets
 
@@ -63,7 +77,7 @@ Supprimer un élément fait passer ses compétences en Physique ; supprimer un �
   - **Bonus de stats** (+ ou −) ;
   - **Face aux éléments** : Faible ×2, Résiste ×½, Annule ou Absorbe ;
   - **Progresse plus vite** : un élément ou un type d'arme qui gagne plus d'expérience tant qu'on porte l'objet (en %).
-  - Qui peut le porter arrivera avec les personnages.
+  - **Qui peut le porter** : les membres de l'équipe choisis (personne de choisi : tout le monde).
 - **Objet clé** : pour l'histoire, il ne se vend pas et ne s'utilise pas ; les événements pourront le donner et vérifier qu'on l'a.
 - **Cadeau** : à offrir aux habitants ; ce que chacun aime arrivera avec les liens sociaux.
 
@@ -90,7 +104,7 @@ Supprimer un élément fait passer ses compétences en Physique ; supprimer un �
 
 ## Au départ
 
-Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 9 objets (Potion, Remède, Graine de force, Cristal de feu, Épée courte, Bouclier de bois, Amulette de glace, Clé rouillée, Boîte à musique), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
+Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace, Orage, Soin, Venin, Coup double, Berceuse), 9 objets (Potion, Remède, Graine de force, Cristal de feu, Épée courte, Bouclier de bois, Amulette de glace, Clé rouillée, Boîte à musique), 2 personnages (Hugo et Jason), 7 éléments (Physique, Feu, Glace, Vent, Foudre = Feu + Vent, Lumière, Ténèbres), 4 types d'armes (Épée, Arc, Poings, Bâton) et 5 états (Poison, Brûlure, Sommeil, Paralysie, Force +), avec leurs icônes.
 
 ## Sauvegarde et export
 
@@ -103,8 +117,8 @@ Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace
 | Fichier | Rôle |
 |---|---|
 | `src/app/modules/database-editor/database-editor.component.*` | L'éditeur (onglets, liste, fiches) |
-| `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel 16 × 16 |
+| `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel (icônes 16 × 16, portraits, sprites) |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
-| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
+| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |
 | `src/assets/database/database.ts` | La base du jeu (`CODE_DATABASE`), écrite par l'export |
