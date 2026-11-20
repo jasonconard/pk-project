@@ -53,7 +53,7 @@
       <div class="types">
         @for (a of actionTypes; track a.type) {
           <button type="button" class="type" [class.blue]="a.type === 'if'"
-                  [disabled]="(a.branches && !canBranch(add.path)) || (a.type === 'variable' && !variables.length) || (a.type === 'teleport' && !maps().length)"
+                  [disabled]="(a.branches && !canBranch(add.path)) || !canAdd(a.type) || (a.type === 'teleport' && !maps().length)"
                   [title]="a.branches && !canBranch(add.path) ? 'Pas plus de 3 niveaux de branches' : a.label"
                   (click)="addAction(a.type)">
             <svg [lucideIcon]="a.icon"></svg>
@@ -70,7 +70,7 @@
   @for (action of list; track $index; let i = $index; let first = $first; let last = $last) {
     @let meta = info(action.type);
     @let key = foldKey(path, i);
-    @let branching = action.type === 'choice' || action.type === 'if';
+    @let branching = action.type === 'choice' || action.type === 'if' || action.type === 'fight';
     <article class="action" [class.branching]="branching">
       <div class="action-head">
         @if (branching) {
@@ -209,6 +209,59 @@
           @case ('stop') {
             <p class="help">L'événement s'arrête ici : les actions suivantes ne sont pas jouées.</p>
           }
+          @case ('item') {
+            <div class="row">
+              <select aria-label="Donner ou retirer" class="narrow" (change)="setAction(path, i, { amount: signed(action.amount, value($event) === 'take') })">
+                <option value="give" [selected]="action.amount > 0">Donner</option>
+                <option value="take" [selected]="action.amount < 0">Retirer</option>
+              </select>
+              <input type="number" class="num" min="1" [max]="countMax" aria-label="Combien" [value]="action.amount < 0 ? -action.amount : action.amount"
+                     (change)="setAction(path, i, { amount: (action.amount < 0 ? -1 : 1) * wholeNumber(value($event), 1, countMax) })" />
+              <select aria-label="Objet" (change)="setAction(path, i, { item: value($event) })">
+                @if (!itemName(action.item)) { <option value="" selected>(objet supprimé)</option> }
+                @for (it of db.items; track it.id) { <option [value]="it.id" [selected]="it.id === action.item">{{ it.name }}</option> }
+              </select>
+            </div>
+          }
+          @case ('money') {
+            <div class="row">
+              <select aria-label="Donner ou retirer" class="narrow" (change)="setAction(path, i, { amount: signed(action.amount, value($event) === 'take') })">
+                <option value="give" [selected]="action.amount > 0">Donner</option>
+                <option value="take" [selected]="action.amount < 0">Retirer</option>
+              </select>
+              <input type="number" class="num" min="1" [max]="moneyMax" aria-label="Combien" [value]="action.amount < 0 ? -action.amount : action.amount"
+                     (change)="setAction(path, i, { amount: (action.amount < 0 ? -1 : 1) * wholeNumber(value($event), 1, moneyMax) })" />
+              <span>pièces</span>
+            </div>
+          }
+          @case ('party') {
+            <div class="row">
+              <select aria-label="Personnage" (change)="setAction(path, i, { character: value($event) })">
+                @if (!characterName(action.character)) { <option value="" selected>(personnage supprimé)</option> }
+                @for (c of teamCharacters; track c.id) { <option [value]="c.id" [selected]="c.id === action.character">{{ c.name }}</option> }
+              </select>
+              <select aria-label="Entre ou sort" class="narrow" (change)="setAction(path, i, { join: value($event) === 'join' })">
+                <option value="join" [selected]="action.join">entre dans l'équipe</option>
+                <option value="leave" [selected]="!action.join">sort de l'équipe</option>
+              </select>
+            </div>
+          }
+          @case ('fight') {
+            @let g = group(action.group);
+            <div class="row">
+              <span>Contre</span>
+              <select aria-label="Groupe d'ennemis" (change)="setAction(path, i, { group: value($event) })">
+                @if (!g) { <option value="" selected>(groupe supprimé)</option> }
+                @for (gr of db.groups; track gr.id) { <option [value]="gr.id" [selected]="gr.id === action.group">{{ gr.name }}</option> }
+              </select>
+            </div>
+            @if (g) { <p class="help">{{ groupMembers(action.group) }}{{ g.canFlee ? '' : ' · on ne peut pas fuir' }}</p> }
+            <ng-container *ngTemplateOutlet="branchTpl; context: { $implicit: action.win, path: sub(path, i, 'win'), label: 'Victoire', name: 'Victoire', key: foldKey(path, i, 'win'), color: 'red' }" />
+            <ng-container *ngTemplateOutlet="branchTpl; context: { $implicit: action.lose, path: sub(path, i, 'lose'), label: 'Défaite', name: 'Défaite', key: foldKey(path, i, 'lose'), color: 'red' }" />
+            @if (!g || g.canFlee) {
+              <ng-container *ngTemplateOutlet="branchTpl; context: { $implicit: action.flee, path: sub(path, i, 'flee'), label: 'Fuite', name: 'Fuite', key: foldKey(path, i, 'flee'), color: 'red' }" />
+            }
+          }
         }
       }
     </article>
@@ -221,7 +274,7 @@
 
 <!-- A branch: its label (folds it), its actions, + Action -->
 <ng-template #branchTpl let-list let-path="path" let-label="label" let-name="name" let-key="key" let-color="color">
-  <div class="branch" [class.blue]="color === 'blue'">
+  <div class="branch" [class.blue]="color === 'blue'" [class.red]="color === 'red'">
     <button type="button" class="branch-label" [attr.aria-expanded]="!isFolded(key)" (click)="toggleFold(key)">
       @if (isFolded(key)) { <svg lucideChevronRight></svg> } @else { <svg lucideChevronDown></svg> }
       <b>{{ label }}</b>
@@ -288,7 +341,41 @@
       <button type="button" class="chip add" title="Ajouter une météo" (click)="openWeatherPick({ kind: 'cond', target, exclude: weathers })"><svg lucidePlus></svg> ou…</button>
     </div>
   }
-  @if (!c.variables.length && !c.hours && !c.weathers) {
+  @for (test of c.items ?? []; track $index; let k = $index) {
+    <div class="row">
+      <svg lucideBackpack class="row-icon"></svg>
+      <span>A</span>
+      <input type="number" class="num" min="1" [max]="countMax" aria-label="Combien au moins" [value]="test.count"
+             (change)="setItemTest(target, k, { count: wholeNumber(value($event), 1, countMax) })" />
+      <select aria-label="Objet" (change)="setItemTest(target, k, { id: value($event) })">
+        @if (!itemName(test.id)) { <option value="" selected>(objet supprimé)</option> }
+        @for (it of db.items; track it.id) { <option [value]="it.id" [selected]="it.id === test.id">{{ it.name }}</option> }
+      </select>
+      <button type="button" class="icon-btn" aria-label="Retirer la condition" title="Retirer" (click)="removeItemTest(target, k)"><svg lucideX></svg></button>
+    </div>
+  }
+  @if (c.money) {
+    <div class="row">
+      <svg lucideCoins class="row-icon"></svg>
+      <span>Argent ≥</span>
+      <input type="number" class="num" min="1" [max]="moneyMax" aria-label="Argent au moins" [value]="c.money"
+             (change)="setMoneyTest(target, wholeNumber(value($event), 1, moneyMax))" />
+      <span>pièces</span>
+      <button type="button" class="icon-btn" aria-label="Retirer la condition" title="Retirer" (click)="setMoneyTest(target, undefined)"><svg lucideX></svg></button>
+    </div>
+  }
+  @for (m of c.members ?? []; track $index; let k = $index) {
+    <div class="row">
+      <svg lucideUsers class="row-icon"></svg>
+      <select aria-label="Personnage" (change)="setMemberTest(target, k, value($event))">
+        @if (!characterName(m)) { <option value="" selected>(personnage supprimé)</option> }
+        @for (ch of teamCharacters; track ch.id) { <option [value]="ch.id" [selected]="ch.id === m">{{ ch.name }}</option> }
+      </select>
+      <span>est dans l'équipe</span>
+      <button type="button" class="icon-btn" aria-label="Retirer la condition" title="Retirer" (click)="removeMemberTest(target, k)"><svg lucideX></svg></button>
+    </div>
+  }
+  @if (!c.variables.length && !c.hours && !c.weathers && !c.items?.length && !c.money && !c.members?.length) {
     <p class="help">{{ empty }}</p>
   }
   <div class="add-row">
@@ -296,6 +383,9 @@
             (click)="addVariableTest(target)"><svg lucidePlus></svg> Variable</button>
     <button type="button" [disabled]="!!c.hours" (click)="setHours(target, { from: 8, to: 18 })"><svg lucidePlus></svg> Heure</button>
     <button type="button" [disabled]="!!c.weathers" (click)="openWeatherPick({ kind: 'cond', target, exclude: [] })"><svg lucidePlus></svg> Météo</button>
+    <button type="button" [disabled]="!db.items.length" title="L'équipe a un objet" (click)="addItemTest(target)"><svg lucidePlus></svg> Objet</button>
+    <button type="button" [disabled]="!!c.money" title="L'équipe a assez d'argent" (click)="setMoneyTest(target, 100)"><svg lucidePlus></svg> Argent</button>
+    <button type="button" [disabled]="!teamCharacters.length" title="Un personnage est dans l'équipe" (click)="addMemberTest(target)"><svg lucidePlus></svg> Équipe</button>
   </div>
 </ng-template>
 

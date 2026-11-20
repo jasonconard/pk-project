@@ -397,6 +397,10 @@
             <button type="button" [class.on]="!ch.team" [attr.aria-pressed]="!ch.team" (click)="setCharacter(ch, { team: false })">Habitant</button>
           </div>
           @if (ch.team) {
+            <label class="switch">
+              <input type="checkbox" [checked]="!!ch.startsInTeam" (change)="setCharacter(ch, { startsInTeam: $any($event.target).checked })" />
+              <span>Dans l'équipe au début de la partie (sinon un événement le fait entrer)</span>
+            </label>
             <div class="sheet-tabs" role="tablist">
               <button type="button" role="tab" [class.on]="charTab() === 'general'" [attr.aria-selected]="charTab() === 'general'" (click)="charTab.set('general')">Général</button>
               <button type="button" role="tab" [class.on]="charTab() === 'growth'" [attr.aria-selected]="charTab() === 'growth'" (click)="charTab.set('growth')">Éléments et armes</button>

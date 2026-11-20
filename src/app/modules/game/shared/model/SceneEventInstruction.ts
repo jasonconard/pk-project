@@ -1,8 +1,9 @@
 import { VariableTest } from './SceneEvent';
 import { Vec3 } from './SceneUtils';
 
+/** (new types at the end: the maps store the numbers) */
 export enum InstructionType {
-  LOG, MESSAGE, WAIT, TELEPORT, VARIABLE, WEATHER, SOUND, BRANCH, STOP
+  LOG, MESSAGE, WAIT, TELEPORT, VARIABLE, WEATHER, SOUND, BRANCH, STOP, ITEM, MONEY, PARTY, FIGHT
 }
 
 export interface SceneEventInstruction {
@@ -16,6 +17,14 @@ export interface SceneEventInstruction {
   sound?: InstructionSound,
   /** BRANCH: plays its sub-instructions 'then' when these conditions are true, else 'else'. */
   branch?: InstructionBranch,
+  /** ITEM: items given (+) or taken (−). */
+  item?: { id: string, amount: number },
+  /** MONEY: money given (+) or taken (−). */
+  money?: { amount: number },
+  /** PARTY: a character joins or leaves the team. */
+  party?: { id: string, join: boolean },
+  /** FIGHT: a fight against a group; its sub-instructions 'win', 'lose' or 'flee' follow. */
+  fight?: { group: string },
   subInstructions?: SceneEventSubInstruction[]
 }
 
@@ -70,5 +79,8 @@ export interface InstructionSound {
 export interface InstructionBranch {
   variables?: VariableTest[],
   hours?: { from: number, to: number },
-  weathers?: string[]
+  weathers?: string[],
+  items?: { id: string, count: number }[],
+  money?: number,
+  members?: string[]
 }

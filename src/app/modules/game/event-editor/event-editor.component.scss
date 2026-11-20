@@ -406,6 +406,13 @@ h4 {
       color: #6f9be6;
     }
   }
+  &.red {
+    border-left-color: #ff7b7b;
+
+    .branch-label b {
+      color: #ff7b7b;
+    }
+  }
 }
 
 .branch-label {

@@ -11,6 +11,8 @@ import { clampCounter } from '../../../variables-editor/shared/variables';
 import { playSound } from './sfx';
 import { conditionsFit, EventContext } from '../model/ObjectEvent';
 import { KeyService } from '../../../../core/shared/service/key.service';
+import { giveItem, giveMoney, setInTeam } from '../../../database-editor/shared/party';
+import { loadDatabase } from '../../../database-editor/shared/database-storage';
 
 @Service()
 export class SequenceService {
@@ -34,6 +36,12 @@ export class SequenceService {
   /** What the branches of the event being played check (hour, weather, variables now), given by the game. */
   private context: (() => EventContext) | null = null;
 
+  /**
+   * The fight being played. The combat doesn't exist yet (docs/idees.md, point 9): the player chooses how it ends,
+   * to try the event's branches; a victory gives the loot (shown in a message, then the 'win' branch).
+   */
+  private fight: { group: string, result?: string } | null = null;
+
   /** `true` while an event sequence is being played (player inputs are frozen). */
   get isRunning(): boolean {
     return this.sequence !== null;
@@ -49,12 +57,31 @@ export class SequenceService {
   /** Stops the event being played (opening the map editor): its message closes, the rest is not played. */
   stop(): void {
     this.sequence = null;
+    this.fight = null;
     this.messageState.set(null);
   }
 
   /** Closes the current message and resumes the sequence with the (optional) chosen answer. */
   closeMessage(choiceKey?: string): void {
     this.messageState.set(null);
+    const fight = this.fight;
+    if (fight) {
+      // The loot message closed: the 'win' branch
+      if (fight.result) {
+        this.fight = null;
+        this.nextSequence(fight.result);
+        return;
+      }
+      if (choiceKey === 'win') {
+        const loot = this.giveLoot(fight.group);
+        if (loot) {
+          fight.result = 'win';
+          this.messageState.set({ text: loot });
+          return;
+        }
+      }
+      this.fight = null;
+    }
     this.nextSequence(choiceKey);
   }
 
@@ -96,8 +123,73 @@ export class SequenceService {
       case InstructionType.STOP:
         this.sequence = null;
         break;
+      case InstructionType.ITEM:
+        if (instruction.item) {
+          giveItem(instruction.item.id, instruction.item.amount);
+        }
+        this.nextSequence();
+        break;
+      case InstructionType.MONEY:
+        if (instruction.money) {
+          giveMoney(instruction.money.amount);
+        }
+        this.nextSequence();
+        break;
+      case InstructionType.PARTY:
+        if (instruction.party) {
+          setInTeam(instruction.party.id, instruction.party.join);
+        }
+        this.nextSequence();
+        break;
+      case InstructionType.FIGHT:
+        this.startFight(instruction.fight?.group ?? '');
+        break;
       default: this.nextSequence();
     }
+  }
+
+  /** For now: asks how the fight ends (Victoire, Défaite, and Fuite when the group allows it). */
+  private startFight(groupId: string): void {
+    const group = loadDatabase().groups.find(g => g.id === groupId);
+    this.fight = { group: groupId };
+    this.messageState.set({
+      name: 'Combat',
+      text: `${group?.name ?? 'Des ennemis'} ! (Le combat arrive bientôt : choisis comment il se termine.)`,
+      choices: [
+        { key: 'win', text: 'Victoire' },
+        { key: 'lose', text: 'Défaite' },
+        ...(group?.canFlee ?? true ? [{ key: 'flee', text: 'Fuite' }] : []),
+      ],
+    });
+  }
+
+  /** A victory's loot: the enemies' money, and their items by chance. « Victoire ! 16 pièces, Potion. » (null: nothing). */
+  private giveLoot(groupId: string): string | null {
+    const db = loadDatabase();
+    const group = db.groups.find(g => g.id === groupId);
+    if (!group) {
+      return null;
+    }
+    let money = 0;
+    const items = new Map<string, number>();
+    for (const member of group.members) {
+      const enemy = db.enemies.find(e => e.id === member.enemy);
+      money += enemy?.money ?? 0;
+      enemy?.drops.forEach(drop => {
+        if (Math.random() * 100 < drop.chance) {
+          items.set(drop.item, (items.get(drop.item) ?? 0) + 1);
+        }
+      });
+    }
+    if (money) {
+      giveMoney(money);
+    }
+    items.forEach((n, id) => giveItem(id, n));
+    const parts = [
+      ...(money ? [`${money} pièce${money > 1 ? 's' : ''}`] : []),
+      ...[...items].map(([id, n]) => `${db.items.find(i => i.id === id)?.name ?? '?'}${n > 1 ? ` ×${n}` : ''}`),
+    ];
+    return parts.length ? `Victoire ! ${parts.join(', ')}.` : null;
   }
 
   private setLogs(log: InstructionLog | undefined): void {

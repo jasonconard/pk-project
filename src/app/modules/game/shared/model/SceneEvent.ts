@@ -29,7 +29,13 @@ export interface SceneEventCondition {
   /** Game hours (from included, to excluded; from > to goes over midnight, e.g. 20 → 6). */
   hours?: { from: number, to: number },
   /** One of these weathers (WeatherType). */
-  weathers?: string[]
+  weathers?: string[],
+  /** Items the team must carry (at least `count` of each; database ids). */
+  items?: { id: string, count: number }[],
+  /** Money the team must have, at least. */
+  money?: number,
+  /** Characters who must be in the team (database ids). */
+  members?: string[]
 }
 
 /** A flag is true / false ('is'); a counter compared with a number. */

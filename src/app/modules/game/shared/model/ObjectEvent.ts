@@ -4,6 +4,7 @@ import { InstructionType, SceneEventInstruction } from './SceneEventInstruction'
 import { KeyCode } from '../../../../core/shared/model/PressedKey';
 import { isPassageEvent } from './Passage';
 import { Vec3 } from './SceneUtils';
+import { currentParty } from '../../../database-editor/shared/party';
 
 /**
  * An event set on an object in the map editor's event window: what starts it (talking to the object, stepping on it,
@@ -27,6 +28,12 @@ export interface EventConditions {
   hours?: { from: number, to: number };
   /** WeatherType ids. */
   weathers?: string[];
+  /** The team carries at least `count` of these items (database ids). */
+  items?: { id: string, count: number }[];
+  /** The team has at least this money. */
+  money?: number;
+  /** These characters are in the team. */
+  members?: string[];
 }
 
 export type EventAction =
@@ -38,7 +45,13 @@ export type EventAction =
   | { type: 'weather', weather: string }
   | { type: 'sound', sound: string }
   | { type: 'wait', seconds: number }
-  | { type: 'stop' };
+  | { type: 'stop' }
+  /** Items given (+) or taken (−) (database id). */
+  | { type: 'item', item: string, amount: number }
+  | { type: 'money', amount: number }
+  | { type: 'party', character: string, join: boolean }
+  /** A fight against a group of the database, then the branch of how it ended. */
+  | { type: 'fight', group: string, win: EventAction[], lose: EventAction[], flee: EventAction[] };
 
 /** One answer of a choice, and what happens when the player picks it. */
 export interface ChoiceOption {
@@ -122,6 +135,12 @@ function toInstructions(actions: EventAction[]): SceneEventInstruction[] {
       }
       target.message!.choices = action.options.map((option, k) => ({ key: 'c' + k, text: option.text }));
       target.subInstructions = action.options.map((option, k) => ({ condition: 'c' + k, instructions: toInstructions(option.actions) }));
+    } else if (action.type === 'fight') {
+      out.push({
+        type: InstructionType.FIGHT,
+        fight: { group: action.group },
+        subInstructions: (['win', 'lose', 'flee'] as const).map(key => ({ condition: key, instructions: toInstructions(action[key]) })),
+      });
     } else if (action.type === 'if') {
       out.push({
         type: InstructionType.BRANCH,
@@ -142,12 +161,22 @@ function toInstructions(actions: EventAction[]): SceneEventInstruction[] {
 function conditionsData(c: EventConditions) {
   return {
     ...(c.variables.length ? { variables: c.variables.map(v => ({ ...v })) } : {}),
-    ...(c.hours ? { hours: { ...c.hours } } : {}),
-    ...(c.weathers?.length ? { weathers: [...c.weathers] } : {}),
+    ...partyConditions(c),
   };
 }
 
-function toInstruction(action: Exclude<EventAction, { type: 'choice' | 'if' }>): SceneEventInstruction {
+/** The hour, weather and team conditions, copied (only what is set): both ways, editor ↔ game. */
+function partyConditions(c: Omit<EventConditions, 'variables'>) {
+  return {
+    ...(c.hours ? { hours: { ...c.hours } } : {}),
+    ...(c.weathers?.length ? { weathers: [...c.weathers] } : {}),
+    ...(c.items?.length ? { items: c.items.map(i => ({ ...i })) } : {}),
+    ...(c.money ? { money: c.money } : {}),
+    ...(c.members?.length ? { members: [...c.members] } : {}),
+  };
+}
+
+function toInstruction(action: Exclude<EventAction, { type: 'choice' | 'if' | 'fight' }>): SceneEventInstruction {
   switch (action.type) {
     case 'message':
       return {
@@ -166,6 +195,12 @@ function toInstruction(action: Exclude<EventAction, { type: 'choice' | 'if' }>):
       return { type: InstructionType.WAIT, wait: { time: Math.round(action.seconds * 1000) } };
     case 'stop':
       return { type: InstructionType.STOP };
+    case 'item':
+      return { type: InstructionType.ITEM, item: { id: action.item, amount: action.amount } };
+    case 'money':
+      return { type: InstructionType.MONEY, money: { amount: action.amount } };
+    case 'party':
+      return { type: InstructionType.PARTY, party: { id: action.character, join: action.join } };
   }
 }
 
@@ -177,8 +212,7 @@ function toObjectEvent(event: SceneEvent): ObjectEvent {
     ...(event.face ? { face: true } : {}),
     conditions: {
       variables: (c.variables ?? []).map(v => ({ ...v })),
-      ...(c.hours ? { hours: { ...c.hours } } : {}),
-      ...(c.weathers?.length ? { weathers: [...c.weathers] } : {}),
+      ...partyConditions(c),
     },
     actions: toActions(event.instructions),
   };
@@ -206,12 +240,15 @@ function toActions(instructions: SceneEventInstruction[]): EventAction[] {
         type: 'if' as const,
         conditions: {
           variables: (b.variables ?? []).map(v => ({ ...v })),
-          ...(b.hours ? { hours: { ...b.hours } } : {}),
-          ...(b.weathers?.length ? { weathers: [...b.weathers] } : {}),
+          ...partyConditions(b),
         },
         then: sub('then'),
         else: sub('else'),
       }];
+    }
+    if (instruction.type === InstructionType.FIGHT) {
+      const sub = (key: string) => toActions(instruction.subInstructions?.find(s => s.condition === key)?.instructions ?? []);
+      return [{ type: 'fight' as const, group: instruction.fight?.group ?? '', win: sub('win'), lose: sub('lose'), flee: sub('flee') }];
     }
     const action = toAction(instruction);
     return action ? [action] : [];
@@ -239,6 +276,12 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
       return { type: 'wait', seconds: (instruction.wait?.time ?? 0) / 1000 };
     case InstructionType.STOP:
       return { type: 'stop' };
+    case InstructionType.ITEM:
+      return instruction.item ? { type: 'item', item: instruction.item.id, amount: instruction.item.amount } : null;
+    case InstructionType.MONEY:
+      return instruction.money ? { type: 'money', amount: instruction.money.amount } : null;
+    case InstructionType.PARTY:
+      return instruction.party ? { type: 'party', character: instruction.party.id, join: instruction.party.join } : null;
     default:
       return null;
   }
@@ -251,7 +294,8 @@ export interface EventContext {
   values: Record<string, boolean | number>;
 }
 
-export function conditionsFit(conditions: Pick<SceneEvent['conditions'], 'variables' | 'hours' | 'weathers'>, ctx: EventContext): boolean {
+export function conditionsFit(conditions: Pick<SceneEvent['conditions'], 'variables' | 'hours' | 'weathers' | 'items' | 'money' | 'members'>,
+                              ctx: EventContext): boolean {
   const hours = conditions.hours;
   if (hours && hours.from !== hours.to) {
     const h = ctx.hour;
@@ -262,6 +306,13 @@ export function conditionsFit(conditions: Pick<SceneEvent['conditions'], 'variab
   }
   if (conditions.weathers?.length && !conditions.weathers.includes(ctx.weather)) {
     return false;
+  }
+  if (conditions.items?.length || conditions.money || conditions.members?.length) {
+    const party = currentParty();
+    if ((conditions.items ?? []).some(i => (party.items[i.id] ?? 0) < i.count) || party.money < (conditions.money ?? 0)
+      || (conditions.members ?? []).some(m => !party.team.includes(m))) {
+      return false;
+    }
   }
   return (conditions.variables ?? []).every(test => {
     const value = ctx.values[test.id];

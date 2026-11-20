@@ -5,6 +5,7 @@ import { GameService } from '../shared/services/game.service';
 import { GameSave, loadSaves, writeSave } from '../shared/services/game-saves';
 import { WEATHER_CHOICES } from '../shared/weather/Weather';
 import { currentVariableValues, restoreVariableValues } from '../../variables-editor/shared/variable-values';
+import { currentParty, restoreParty } from '../../database-editor/shared/party';
 
 type SlotAction = 'load' | 'overwrite' | 'delete';
 
@@ -58,6 +59,7 @@ export class GameSavesComponent {
       hour: this.gameService.hour(),
       weather: this.gameService.weather(),
       variables: currentVariableValues(),
+      party: structuredClone(currentParty()),
     };
     this.message.set(writeSave(slot, save) ? `Partie sauvée dans l'emplacement ${slot + 1}.` : 'La sauvegarde a échoué (plus de place ?).');
     this.slots.set(loadSaves());
@@ -69,6 +71,7 @@ export class GameSavesComponent {
       return;
     }
     restoreVariableValues(save.variables ?? {});
+    restoreParty(save.party);
     if (!this.gameService.restoreSpot(save.map, save.pos, save.hour, save.weather)) {
       this.message.set(`La carte « ${save.mapName} » n'existe plus : retour à la carte de départ.`);
       this.slots.set(loadSaves());

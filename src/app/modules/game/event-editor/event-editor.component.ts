@@ -4,7 +4,10 @@ import {
   LucideChevronDown, LucideChevronRight, LucideClock, LucideCloudSun, LucideCopy, LucideDoorOpen, LucideDynamicIcon,
   LucideEllipsisVertical, LucideGitBranch, LucideHourglass, LucideIcon, LucideImagePlus, LucideListChecks, LucideMessageSquareText,
   LucideOctagonX, LucidePlay, LucidePlus, LucideTrash, LucideVariable, LucideVolume2, LucideX, LucideArrowUp, LucideArrowDown,
+  LucideBackpack, LucideCoins, LucideUsers, LucideSwords,
 } from '@lucide/angular';
+import { loadDatabase } from '../../database-editor/shared/database-storage';
+import { ITEM_COUNT_MAX, MONEY_MAX } from '../../database-editor/shared/party';
 import { EscapeService } from '../../../core/shared/service/escape.service';
 import {
   EventAction, EventActionType, EventConditions, EventTrigger, MAX_BRANCH_DEPTH, MAX_CHOICE_OPTIONS, ObjectEvent, PORTRAITS,
@@ -22,7 +25,7 @@ const TRIGGERS: { id: EventTrigger, label: string, help: string }[] = [
   { id: 'auto', label: 'Automatique', help: 'Dès que les conditions deviennent vraies, où que soit le joueur sur la carte. Rejoué seulement après qu\'elles sont redevenues fausses.' },
 ];
 
-/** The sorts of action, in the add sheet's order. Choix, Condition: branches (not deeper than MAX_BRANCH_DEPTH). */
+/** The sorts of action, in the add sheet's order. Choix, Condition, Combat: branches (not deeper than MAX_BRANCH_DEPTH). */
 const ACTIONS: { type: EventActionType, label: string, icon: LucideIcon, branches?: boolean }[] = [
   { type: 'message', label: 'Message', icon: LucideMessageSquareText },
   { type: 'choice', label: 'Choix', icon: LucideListChecks, branches: true },
@@ -33,6 +36,10 @@ const ACTIONS: { type: EventActionType, label: string, icon: LucideIcon, branche
   { type: 'sound', label: 'Son', icon: LucideVolume2 },
   { type: 'wait', label: 'Attendre', icon: LucideHourglass },
   { type: 'stop', label: 'Arrêter', icon: LucideOctagonX },
+  { type: 'item', label: 'Objet', icon: LucideBackpack },
+  { type: 'money', label: 'Argent', icon: LucideCoins },
+  { type: 'party', label: 'Équipe', icon: LucideUsers },
+  { type: 'fight', label: 'Combat', icon: LucideSwords, branches: true },
 ];
 
 const COUNTER_TESTS: { op: VariableTest['op'], label: string }[] = [
@@ -56,6 +63,9 @@ function branchList(action: EventAction, b: BranchKey): EventAction[] | null {
   if (action.type === 'if') {
     return b === 'then' ? action.then : b === 'else' ? action.else : null;
   }
+  if (action.type === 'fight') {
+    return b === 'win' ? action.win : b === 'lose' ? action.lose : b === 'flee' ? action.flee : null;
+  }
   return null;
 }
 
@@ -74,7 +84,8 @@ function listAt(event: ObjectEvent, path: ListPath): EventAction[] {
 /** Actions of a list, those of its branches counted. */
 function countActions(list: EventAction[]): number {
   return list.reduce((n, a) => n + 1 + (a.type === 'choice' ? a.options.reduce((m, o) => m + countActions(o.actions), 0)
-    : a.type === 'if' ? countActions(a.then) + countActions(a.else) : 0), 0);
+    : a.type === 'if' ? countActions(a.then) + countActions(a.else)
+      : a.type === 'fight' ? countActions(a.win) + countActions(a.lose) + countActions(a.flee) : 0), 0);
 }
 
 function plural(n: number, word: string): string {
@@ -91,7 +102,7 @@ function plural(n: number, word: string): string {
   selector: 'game-event-editor',
   imports: [NgTemplateOutlet, LucideDynamicIcon, LucideChevronDown, LucideChevronRight, LucideClock, LucideCloudSun, LucideCopy,
     LucideEllipsisVertical, LucideImagePlus, LucidePlay, LucidePlus, LucideTrash, LucideVariable, LucideX, LucideArrowUp,
-    LucideArrowDown, WeatherPickerComponent],
+    LucideArrowDown, LucideBackpack, LucideCoins, LucideUsers, WeatherPickerComponent],
   templateUrl: './event-editor.component.html',
   styleUrl: './event-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -117,6 +128,11 @@ export class EventEditorComponent {
   protected readonly hourList = Array.from({ length: 24 }, (_, h) => h);
   protected readonly maxOptions = MAX_CHOICE_OPTIONS;
   protected readonly root: ListPath = [];
+  /** The database: items, characters (of the team), groups of enemies. */
+  protected readonly db = loadDatabase();
+  protected readonly teamCharacters = this.db.characters.filter(c => c.team);
+  protected readonly countMax = ITEM_COUNT_MAX;
+  protected readonly moneyMax = MONEY_MAX;
 
   /** The trigger and conditions unfolded (folded into one line once the event has actions: room for the tree). */
   protected readonly headOpen = linkedSignal(() => {
@@ -136,7 +152,8 @@ export class EventEditorComponent {
     if (e.face && e.trigger === 'action') {
       parts.push('se tourne vers le joueur');
     }
-    const n = e.conditions.variables.length + (e.conditions.hours ? 1 : 0) + (e.conditions.weathers ? 1 : 0);
+    const c = e.conditions;
+    const n = c.variables.length + (c.hours ? 1 : 0) + (c.weathers ? 1 : 0) + (c.items?.length ?? 0) + (c.money ? 1 : 0) + (c.members?.length ?? 0);
     parts.push(n ? plural(n, 'condition') : 'sans condition');
     return parts.join(' · ');
   });
@@ -249,7 +266,55 @@ export class EventEditorComponent {
       case 'sound': return { type, sound: 'bip' };
       case 'wait': return { type, seconds: 1 };
       case 'stop': return { type };
+      case 'item': return this.db.items[0] ? { type, item: this.db.items[0].id, amount: 1 } : null;
+      case 'money': return { type, amount: 100 };
+      case 'party': return this.teamCharacters[0] ? { type, character: this.teamCharacters[0].id, join: true } : null;
+      case 'fight': return this.db.groups[0] ? { type, group: this.db.groups[0].id, win: [], lose: [], flee: [] } : null;
     }
+  }
+
+  /** Can this action be added (the database has what it needs)? */
+  protected canAdd(type: EventActionType): boolean {
+    switch (type) {
+      case 'variable': return this.variables.length > 0;
+      case 'item': return this.db.items.length > 0;
+      case 'party': return this.teamCharacters.length > 0;
+      case 'fight': return this.db.groups.length > 0;
+      default: return true;
+    }
+  }
+
+  protected itemName(id: string): string | undefined {
+    return this.db.items.find(i => i.id === id)?.name;
+  }
+
+  protected characterName(id: string): string | undefined {
+    return this.db.characters.find(c => c.id === id)?.name;
+  }
+
+  protected group(id: string) {
+    return this.db.groups.find(g => g.id === id);
+  }
+
+  /** « Gluant ×2 · Chauve-souris » */
+  protected groupMembers(id: string): string {
+    const group = this.group(id);
+    if (!group) {
+      return '';
+    }
+    const counts = new Map<string, number>();
+    group.members.forEach(m => counts.set(m.enemy, (counts.get(m.enemy) ?? 0) + 1));
+    return [...counts].map(([e, n]) => `${this.db.enemies.find(en => en.id === e)?.name ?? '?'}${n > 1 ? ` ×${n}` : ''}`).join(' · ');
+  }
+
+  /** The same amount, given (+) or taken (−). */
+  protected signed(amount: number, take: boolean): number {
+    return (take ? -1 : 1) * Math.abs(amount);
+  }
+
+  protected wholeNumber(raw: string, min: number, max: number): number {
+    const n = Math.round(Number(raw));
+    return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : min;
   }
 
   protected setAction(path: ListPath, i: number, patch: Partial<EventAction>): void {
@@ -288,6 +353,9 @@ export class EventEditorComponent {
     }
     if (action.type === 'if') {
       return `Alors : ${plural(countActions(action.then), 'action')} · Sinon : ${plural(countActions(action.else), 'action')}`;
+    }
+    if (action.type === 'fight') {
+      return `Victoire : ${countActions(action.win)} · Défaite : ${countActions(action.lose)} · Fuite : ${countActions(action.flee)}`;
     }
     return '';
   }
@@ -381,6 +449,58 @@ export class EventEditorComponent {
         c.hours = hours;
       } else {
         delete c.hours;
+      }
+    });
+  }
+
+  // The team: items carried, money, members
+
+  protected addItemTest(target: CondTarget): void {
+    const first = this.db.items[0];
+    if (first) {
+      this.changeConds(target, c => c.items = [...(c.items ?? []), { id: first.id, count: 1 }]);
+    }
+  }
+
+  protected setItemTest(target: CondTarget, index: number, change: Partial<{ id: string, count: number }>): void {
+    this.changeConds(target, c => c.items![index] = { ...c.items![index], ...change });
+  }
+
+  protected removeItemTest(target: CondTarget, index: number): void {
+    this.changeConds(target, c => {
+      c.items!.splice(index, 1);
+      if (!c.items!.length) {
+        delete c.items;
+      }
+    });
+  }
+
+  protected setMoneyTest(target: CondTarget, money: number | undefined): void {
+    this.changeConds(target, c => {
+      if (money) {
+        c.money = money;
+      } else {
+        delete c.money;
+      }
+    });
+  }
+
+  protected addMemberTest(target: CondTarget): void {
+    const first = this.teamCharacters[0];
+    if (first) {
+      this.changeConds(target, c => c.members = [...(c.members ?? []), first.id]);
+    }
+  }
+
+  protected setMemberTest(target: CondTarget, index: number, id: string): void {
+    this.changeConds(target, c => c.members![index] = id);
+  }
+
+  protected removeMemberTest(target: CondTarget, index: number): void {
+    this.changeConds(target, c => {
+      c.members!.splice(index, 1);
+      if (!c.members!.length) {
+        delete c.members;
       }
     });
   }

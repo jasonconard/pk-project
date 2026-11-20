@@ -676,11 +676,14 @@ export class DatabaseEditorComponent {
 
   // --- Characters ---
 
-  protected setCharacter(ch: DbCharacter, change: Partial<Pick<DbCharacter, 'team' | 'xpCurve' | 'model'>>): void {
+  protected setCharacter(ch: DbCharacter, change: Partial<Pick<DbCharacter, 'team' | 'xpCurve' | 'model' | 'startsInTeam'>>): void {
     this.edit(ch.id, c => {
       const next = { ...c, ...change } as DbCharacter;
       if (!next.model) {
         delete next.model;
+      }
+      if (!next.startsInTeam) {
+        delete next.startsInTeam;
       }
       return next;
     });

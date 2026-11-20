@@ -211,6 +211,8 @@ export interface DbCharacter {
   name: string;
   note?: string;
   team: boolean;
+  /** In the team when a new game starts (else an event makes them join). */
+  startsInTeam?: boolean;
   /** Pixel art: the menus' and action gauge's small face (also the list's icon), the dialogues' portrait, the combat sprite. */
   icon?: string;
   portrait?: string;

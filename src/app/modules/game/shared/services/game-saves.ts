@@ -1,10 +1,12 @@
 import { WeatherType } from '../weather/Weather';
 import { Vec3 } from '../model/SceneUtils';
 import { VariableValues } from '../../../variables-editor/shared/variable-values';
+import { PartyState } from '../../../database-editor/shared/party';
 
 /**
  * The saved games: a few slots, in the browser of this device (they are the player's progress, not creations: not
- * in the game project file). A slot keeps where the player is, the time and the weather, and the variables' values.
+ * in the game project file). A slot keeps where the player is, the time and the weather, the variables' values and
+ * the team (members, items, money).
  */
 const STORAGE_KEY = 'pk-saves';
 export const SAVE_SLOTS = 3;
@@ -22,6 +24,8 @@ export interface GameSave {
   hour: number;
   weather: WeatherType;
   variables: VariableValues;
+  /** Missing in the saves made before the database. */
+  party?: PartyState;
 }
 
 /** The slots (null: empty), always SAVE_SLOTS of them. */

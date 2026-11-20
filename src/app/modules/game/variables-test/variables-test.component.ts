@@ -6,6 +6,7 @@ import { clampCounter } from '../../variables-editor/shared/variables';
 import {
   currentVariableValues, resetVariableValues, setVariableValue, VariableValue,
 } from '../../variables-editor/shared/variable-values';
+import { resetParty } from '../../database-editor/shared/party';
 
 /**
  * Variables test (menu → Test des variables): every variable with its value in the game being played, to change by
@@ -52,6 +53,8 @@ export class VariablesTestComponent {
     }
     this.resetArmed.set(false);
     resetVariableValues();
+    // (like a new game: the team too)
+    resetParty();
     this.values.set(currentVariableValues());
   }
 }
