@@ -14,6 +14,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 8. [Éditeur de variables](08-variables.md) : les drapeaux et compteurs de l'histoire, leur valeur au début, export.
 9. [Événements](09-evenements.md) : faire parler un objet, zones invisibles, déclencheurs, conditions (variables, heure, météo) et actions.
 10. [Base de données](10-base-de-donnees.md) : personnages (apparence, niveaux, stats, éléments et armes à la Grandia), ennemis (faiblesses, butin, comportement, météo) et groupes (placés sur le terrain), compétences (coût, incantation, effets, niveaux pour les apprendre), objets (consommables, équipement, objets clés, cadeaux), états, éléments (simples ou composés, liés aux météos), types d'armes, icônes en pixel art, export.
+11. [Planches de combat](11-planches.md) : les animations d'un personnage ou d'un ennemi en combat (attente, marche, attaques, incantation, magie, coup reçu, mort), le découpage de l'image, l'aperçu.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 

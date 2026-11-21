@@ -22,7 +22,7 @@ Renommer ne casse rien : ce qui utilise une ligne la retrouve par un identifiant
 
 ## L'icône (éditeur pixel)
 
-Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tête). Toucher l'icône de la fiche ouvre l'éditeur pixel ; il sert aussi aux portraits (48 × 48) et aux sprites de combat (32 × 48) des personnages :
+Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tête). Toucher l'icône de la fiche ouvre l'éditeur pixel ; il sert aussi aux portraits (48 × 48) et aux images fixes (48 × 48) des personnages et des ennemis :
 
 - **Crayon**, **Gomme**, **Remplir** (pot de peinture), **Pipette** (reprend une couleur du dessin), **Miroir** (retourne gauche / droite).
 - **La palette** : 20 couleurs, puis les autres couleurs déjà dans le dessin ; **+** choisit n'importe quelle couleur.
@@ -36,7 +36,7 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
 
 - **Équipe** ou **Habitant** : un habitant ne se bat pas, il n'a que son apparence (son emploi du temps et ses liens viendront plus tard).
 - **Dans l'équipe au début de la partie** : sinon, un [événement](09-evenements.md) le fait entrer (action Équipe).
-- **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (48 × 48), le **sprite de combat** (32 × 48, une image plate face à la caméra, à la Grandia) et le **modèle 3D** sur la carte.
+- **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (48 × 48), l'**image fixe** (48 × 48, dans les menus), la **planche de combat** (ses animations en combat, à la Grandia, voir [Planches de combat](11-planches.md)) et le **modèle 3D** sur la carte.
 - Un membre de l'équipe a deux onglets :
   - **Général** :
     - **Niveaux et expérience** : niveau de départ, niveau max, et si les niveaux montent vite, normalement ou lentement ;
@@ -49,7 +49,7 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
 
 ## Ennemis
 
-- **Apparence** : sa petite image dans la jauge d'action (l'icône à côté du nom), son **sprite de combat** (48 × 48) et son **modèle 3D** (vu sur la carte du donjon).
+- **Apparence** : sa petite image dans la jauge d'action (l'icône à côté du nom), son **image fixe** (48 × 48, dans les menus et les groupes), sa **planche de combat** (ses animations, voir [Planches de combat](11-planches.md)) et son **modèle 3D** (vu sur la carte du donjon).
 - **Stats** : le niveau, puis PV, PM, Force, Magie, Endurance, Agilité, Chance.
 - **Face aux éléments** : pour chaque élément, Faible (dégâts ×2), Normal, Résiste (×½), Annule (aucun dégât) ou Absorbe (le soigne).
 - **Butin** : l'expérience, l'argent, et des objets avec leur chance (%).
@@ -146,7 +146,8 @@ Les [événements](09-evenements.md) donnent et retirent des objets et de l'arge
 | `src/app/modules/database-editor/effects-editor/` | Les effets d'une compétence ou d'un objet |
 | `src/app/modules/database-editor/learn-select/` | Le choix d'un élément simple ou d'un type d'arme |
 | `src/app/modules/database-editor/_sheets.scss` | Le style des champs des fiches (commun) |
-| `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel (icônes 16 × 16, portraits, sprites) |
+| `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel (icônes 16 × 16, portraits, images fixes) |
+| `src/app/modules/database-editor/sheet-editor/`, `shared/sprite-sheet.ts` | Les planches de combat (voir [11-planches](11-planches.md)) |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
 | `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbEnemy`, `DbGroup`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |

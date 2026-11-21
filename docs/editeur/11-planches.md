@@ -1,0 +1,79 @@
+# Planches de combat
+
+En combat (à la Grandia), chaque personnage et chaque ennemi est une image plate animée, posée sur le terrain en 3D. Ses animations viennent d'une **planche** : une seule image découpée en cases de même taille, avec une petite description. On l'ajoute dans la [base de données](10-base-de-donnees.md), fiche du personnage ou de l'ennemi, **Apparence → Planche de combat**.
+
+Exemple : la planche du gluant, [images/planche-gluant.png](images/planche-gluant.png) (384 × 768, cases de 48 × 48).
+
+![La planche du gluant](images/planche-gluant.png)
+
+## Le découpage
+
+- **Les cases** font toutes la même taille : **48 × 48** par défaut (monstres et personnages), plus grand pour un boss (multiple de 8 conseillé).
+- **Une ligne par animation et par direction**, dans cet ordre :
+  1. Attente
+  2. Marche
+  3. Attaque
+  4. Attaque forte
+  5. Incantation
+  6. Magie
+  7. Coup reçu
+  8. Mort
+- Pour chaque animation : la ligne **sud-est** (de face, tourné vers la droite) puis la ligne **nord-est** (de dos, vers la droite).
+- **Ouest en miroir** : sud-ouest et nord-ouest sont l'est retourné. Un personnage pas symétrique (une arme dans une main, une cicatrice) décoche le miroir et dessine 4 lignes par animation : sud-est, nord-est, sud-ouest, nord-ouest.
+- **Les colonnes** : les images de l'animation, de gauche à droite. Les cases en trop au bout d'une ligne restent vides (transparentes).
+- **Les pieds** : un point dans la case (par défaut au milieu, 3 pixels au-dessus du bas), posé sur le sol du combat. **L'ombre ronde est dessinée par le jeu**, pas dans la planche.
+- **Sur place** : la marche et les attaques bougent peu dans la case ; c'est le jeu qui déplace le combattant jusqu'à sa cible.
+
+## Les animations
+
+| Animation | Lecture | Images du gluant | Remarque |
+|---|---|---|---|
+| Attente | en boucle | 6 × 160 ms | entre deux actions |
+| Marche | en boucle | 8 × 100 ms | sur place, le jeu le déplace |
+| Attaque | une fois | 6 × 90 ms, coup sur l'image 4 | |
+| Attaque forte | une fois | 8 × 100 ms, coup sur l'image 7 | |
+| Incantation | en boucle | 6 × 140 ms | tant qu'il concentre sa magie (le temps de préparation dans la jauge d'action) ; le frapper à ce moment peut l'interrompre |
+| Magie | une fois | 6 × 100 ms, sort lancé sur l'image 4 | l'effet du sort (sa couleur selon l'élément) est dessiné par le jeu |
+| Coup reçu | une fois | 4 × 90 ms | |
+| Mort | une fois | 7 × 130 ms | la dernière image reste, puis il disparaît et laisse son objet ou son argent (dessinés par le jeu) |
+
+**L'image du coup** : le moment où le coup touche (dégâts, chiffre, interruption de l'action de la cible) ou où le sort part.
+
+Plus tard, les **boss** auront leurs animations à eux, en lignes après la mort, chacune avec un nom ; une compétence choisira l'animation qu'elle joue.
+
+## La fenêtre de la planche
+
+- **Importer un PNG** : les images de chaque animation sont **comptées toutes seules** (jusqu'à la dernière case où quelque chose est dessiné). **Changer l'image** garde les réglages et recompte.
+- **L'aperçu** joue l'animation choisie (les boutons sous l'aperçu) dans la direction choisie (nord-est, nord-ouest, sud-est, sud-ouest) ; pause, image précédente / suivante. L'étiquette indique l'image et « coup » sur l'image du coup.
+- **Animations** : pour chacune, le nombre d'**images**, la durée **par image** (ms), l'image du **coup** et **en boucle**.
+- **Découpage** : la largeur et la hauteur d'une case, les pieds (x, y), le miroir. Changer la taille des cases ou le miroir recompte les images.
+- Les problèmes s'affichent en orange : une image qui ne se découpe pas en cases, des lignes qui manquent, une animation sans image.
+- **La planche** en bas : l'image entière, avec la case jouée entourée en orange.
+- **OK** garde la planche ; **Fermer** (ou Échap, ou toucher à côté) l'oublie ; **Retirer la planche** l'enlève.
+
+**L'image fixe** (48 × 48, à côté de la planche) montre le combattant dans les menus et les groupes. Sans image fixe, la première image de l'attente (sud-est) en devient une quand on garde la planche.
+
+## Pour le code
+
+| Fichier | Rôle |
+|---|---|
+| `src/app/modules/database-editor/shared/sprite-sheet.ts` | Le format (`SpriteSheet`, `SheetAnim`, `SHEET_ANIMS`), la ligne d'une animation dans une direction (`sheetRow`), l'image à un moment (`frameAt`), le comptage des images (`detectFrames`), les problèmes, l'image fixe |
+| `src/app/modules/database-editor/sheet-editor/` | La fenêtre de la planche, et sa tuile dans les fiches (`sheet-tile`) |
+| `src/app/modules/database-editor/_popup.scss` | Le style des fenêtres par-dessus la base (éditeur pixel, planche) |
+
+La description enregistrée avec l'image :
+
+```json
+{
+  "image": "data:image/png;base64,…",
+  "frame": { "w": 48, "h": 48 },
+  "anchor": { "x": 24, "y": 45 },
+  "mirror": true,
+  "anims": [
+    { "id": "idle", "frames": 6, "ms": 160, "loop": true },
+    { "id": "attack", "frames": 6, "ms": 90, "loop": false, "hit": 3 }
+  ]
+}
+```
+
+(`hit` compte à partir de 0 : `3` est la 4ᵉ image.)

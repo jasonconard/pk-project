@@ -63,7 +63,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `sheets/<table>-sheet/` one component per table, extending `shared/db-sheet.ts` (`DbSheet`: the store, constants,
   lookups); `shared/database-store.ts` (`DatabaseStore`, provided by the editor: the database, its saving, the table
   shown, the pixel editor / weathers windows); `effects-editor/` (skills' and items' effects), `learn-select/`,
-  `pixel-editor/`, `stepper/`; `_sheets.scss` the sheets' shared fields (global, inside `app-database-editor`, in
+  `pixel-editor/`, `sheet-editor/` (combat sprite sheets; format in `shared/sprite-sheet.ts`, docs/editeur/11-planches.md),
+  `stepper/`; `_popup.scss` the windows over it; `_sheets.scss` the sheets' shared fields (global, inside `app-database-editor`, in
   `styles.scss`). `shared/database.ts` (types, rules), `database-storage` (`pk-database`, else
   `assets/database/database.ts`), `party` (the team in the game being played: members, items, money).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be replaced by the Grandia-style combat.
