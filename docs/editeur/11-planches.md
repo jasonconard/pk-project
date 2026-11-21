@@ -43,13 +43,28 @@ Plus tard, les **boss** auront leurs animations à eux, en lignes après la mort
 
 ## La fenêtre de la planche
 
-- **Importer un PNG** : les images de chaque animation sont **comptées toutes seules** (jusqu'à la dernière case où quelque chose est dessiné). **Changer l'image** garde les réglages et recompte.
-- **L'aperçu** joue l'animation choisie (les boutons sous l'aperçu) dans la direction choisie (nord-est, nord-ouest, sud-est, sud-ouest) ; pause, image précédente / suivante. L'étiquette indique l'image et « coup » sur l'image du coup.
-- **Animations** : pour chacune, le nombre d'**images**, la durée **par image** (ms), l'image du **coup** et **en boucle**.
-- **Découpage** : la largeur et la hauteur d'une case, les pieds (x, y), le miroir. Changer la taille des cases ou le miroir recompte les images.
-- Les problèmes s'affichent en orange : une image qui ne se découpe pas en cases, des lignes qui manquent, une animation sans image.
-- **La planche** en bas : l'image entière, avec la case jouée entourée en orange.
-- **OK** garde la planche ; **Fermer** (ou Échap, ou toucher à côté) l'oublie ; **Retirer la planche** l'enlève.
+Sans planche, la fenêtre explique le format et propose **Importer un PNG** : les images de chaque animation sont **comptées toutes seules** (jusqu'à la dernière case où quelque chose est dessiné).
+
+**Toujours visibles en haut** (ils restent à l'écran quand on fait défiler le reste) :
+
+- **L'aperçu** joue l'animation choisie. Ses 4 coins choisissent la direction : NO, NE, SO, SE (l'icône miroir marque les directions retournées). En bas, image précédente, pause / lecture, image suivante. L'étiquette en haut indique l'image et « ⚡ coup » sur l'image du coup.
+- **Les 8 boutons des animations** (en deux lignes) ; une animation sans image est grisée.
+
+Puis deux onglets :
+
+- **Animations** : la fiche de l'animation choisie.
+  - Son nom, sa lecture (en boucle / une fois) et sa durée totale.
+  - **Ses images**, découpées dans la planche : en toucher une l'affiche à l'arrêt. **Image du coup** marque l'image affichée (badge ⚡ orange) ; la retoucher enlève la marque.
+  - Le nombre d'**images**, la durée **par image** (ms), **en boucle**.
+- **Découpage** :
+  - en haut, un résumé en vert (« 16 lignes · 8 animations trouvées ») ou les problèmes en orange (l'onglet porte alors un point orange) : une image qui ne se découpe pas en cases, des lignes qui manquent, une animation sans image ;
+  - la largeur et la hauteur d'une case, les **pieds** (x, y : une croix orange les montre dans l'aperçu, avec le bord de la case), le miroir ; changer la taille des cases ou le miroir recompte les images ;
+  - **la planche** entière, la case jouée entourée en orange ;
+  - **Changer l'image** (garde les réglages et recompte) et **Retirer la planche**.
+
+Sur un écran large, la fenêtre a deux colonnes : l'aperçu et les boutons à gauche, les onglets à droite, avec en plus **les 8 animations d'un coup d'œil** (images × durée, image du coup, boucle ; un clic choisit l'animation).
+
+**OK** garde la planche ; **Fermer** (ou Échap, ou toucher à côté) l'oublie.
 
 **L'image fixe** (48 × 48, à côté de la planche) montre le combattant dans les menus et les groupes. Sans image fixe, la première image de l'attente (sud-est) en devient une quand on garde la planche.
 
