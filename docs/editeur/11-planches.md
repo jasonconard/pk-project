@@ -2,7 +2,11 @@
 
 En combat (à la Grandia), chaque personnage et chaque ennemi est une image plate animée, posée sur le terrain en 3D. Ses animations viennent d'une **planche** : une seule image découpée en cases de même taille, avec une petite description. On l'ajoute dans la [base de données](10-base-de-donnees.md), fiche du personnage ou de l'ennemi, **Apparence → Planche de combat**.
 
-Exemple : la planche du gluant, [images/planche-gluant.png](images/planche-gluant.png) (384 × 768, cases de 48 × 48).
+Exemples (384 × 768, cases de 48 × 48), déjà dans la base du jeu :
+
+- le gluant, [images/planche-gluant.png](images/planche-gluant.png) : un corps de gelée qui s'étale en avançant ;
+- le gluant des neiges, [images/planche-gluant-des-neiges.png](images/planche-gluant-des-neiges.png) : la même gelée sous un bonnet de neige, qui fond en flaque ;
+- la chauve-souris, [images/planche-chauve-souris.png](images/planche-chauve-souris.png) : elle **vole** au-dessus de ses pieds (le point des pieds reste au sol, sous elle, pour que l'ombre y soit), plonge pour mordre, crie sa magie, tombe au sol en mourant.
 
 ![La planche du gluant](images/planche-gluant.png)
 
