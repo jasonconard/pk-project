@@ -11,6 +11,7 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
+import { loadImage } from "../shared/load-image";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import {
   LucideEraser,
@@ -398,15 +399,6 @@ export class PixelEditorComponent implements OnInit {
     const y = Math.floor(((ev.clientY - rect.top) / rect.height) * h);
     return x < 0 || y < 0 || x >= w || y >= h ? -1 : y * w + x;
   }
-}
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
 }
 
 /**

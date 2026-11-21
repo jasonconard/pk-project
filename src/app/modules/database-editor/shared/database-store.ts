@@ -9,13 +9,13 @@ import {
   DbState,
   DbTable,
   DbWeapon,
-  ENEMY_SPRITE_SIZE,
   GameDatabase,
   PICTURE_SIZES,
   learnChoices,
   partsLabel,
 } from "./database";
 import { loadDatabase, saveDatabase } from "./database-storage";
+import { SpriteSheet } from "./sprite-sheet";
 import { WeatherType } from "../../game/shared/weather/Weather";
 
 export type Row =
@@ -39,6 +39,13 @@ export interface IconEdit {
   h: number;
 }
 
+/** The combat sprite sheet being edited: whose, the window's title, the sheet. */
+export interface SheetEdit {
+  id: string;
+  title: string;
+  value?: SpriteSheet;
+}
+
 export interface WeatherPick {
   id: string;
   strong?: boolean;
@@ -58,6 +65,8 @@ export class DatabaseStore {
   readonly message = signal("");
   /** The picture being drawn: whose, which one (icon, or a portrait / sprite), its title and size. */
   readonly iconEdit = signal<IconEdit | null>(null);
+  /** The combat sprite sheet being edited (a character's, an enemy's). */
+  readonly sheetEdit = signal<SheetEdit | null>(null);
   /** The weathers window: for an element (stronger / weaker), an enemy, or an enemy's skill condition. */
   readonly weatherPick = signal<WeatherPick | null>(null);
   /** What a skill can be learned with: the simple elements, the weapon types. */
@@ -84,18 +93,42 @@ export class DatabaseStore {
     const titles = {
       icon: `Icône de ${name}`,
       portrait: `Portrait de ${name}`,
-      sprite: `${name} en combat`,
+      sprite: `Image fixe de ${name}`,
     };
-    const size =
-      this.table() === "enemies" && field === "sprite"
-        ? ENEMY_SPRITE_SIZE
-        : PICTURE_SIZES[field];
+    const size = PICTURE_SIZES[field];
     this.iconEdit.set({
       id: row.id,
       field,
       title: title ?? titles[field],
       value: (row as DbCharacter)[field],
       ...size,
+    });
+  }
+
+  editSheet(row: DbCharacter | DbEnemy): void {
+    this.sheetEdit.set({
+      id: row.id,
+      title: `Planche de ${row.name.trim() || "sans nom"}`,
+      value: row.sheet,
+    });
+  }
+
+  /** The sheet window's OK: the sheet (none: removed); its still picture becomes the still one if there is none. */
+  sheetDone(sheet: SpriteSheet | undefined, still: string | undefined): void {
+    const target = this.sheetEdit();
+    this.sheetEdit.set(null);
+    if (!target) {
+      return;
+    }
+    this.edit(target.id, (r) => {
+      const next = { ...r, sheet } as DbCharacter;
+      if (!sheet) {
+        delete next.sheet;
+      }
+      if (still && !next.sprite) {
+        next.sprite = still;
+      }
+      return next;
     });
   }
 

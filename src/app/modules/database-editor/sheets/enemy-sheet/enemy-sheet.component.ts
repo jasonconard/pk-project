@@ -22,9 +22,11 @@ import { omit } from "../../../../core/shared/omit";
 import { StepperComponent } from "../../stepper/stepper.component";
 
 /** The sheet of a row of the « enemy » table. */
+import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
 @Component({
   selector: "db-enemy-sheet",
   imports: [
+    SheetTileComponent,
     StepperComponent,
     LucideBox,
     LucideCoins,

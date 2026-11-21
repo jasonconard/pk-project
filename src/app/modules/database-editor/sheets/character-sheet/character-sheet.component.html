@@ -78,7 +78,7 @@
       <button
         type="button"
         class="tile"
-        title="Dessiner le sprite de combat"
+        title="Dessiner l'image fixe (menus)"
         (click)="editPicture(ch, 'sprite')"
       >
         <span class="tile-box">
@@ -89,8 +89,9 @@
           }
           <span class="pen" aria-hidden="true"><svg lucidePencil></svg></span>
         </span>
-        <small>Combat · {{ sizes.sprite.w }}×{{ sizes.sprite.h }}</small>
+        <small>Image fixe · {{ sizes.sprite.w }}×{{ sizes.sprite.h }}</small>
       </button>
+      <db-sheet-tile [sheet]="ch.sheet" (opened)="editSheet(ch)" />
       <label class="tile">
         <span class="tile-box">
           <svg lucideBox class="model-icon"></svg>

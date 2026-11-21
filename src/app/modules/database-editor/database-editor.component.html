@@ -262,6 +262,15 @@
   />
 }
 
+@if (sheetEdit(); as target) {
+  <db-sheet-editor
+    [title]="target.title"
+    [value]="target.value"
+    (done)="store.sheetDone($event.sheet, $event.still)"
+    (dismissed)="sheetEdit.set(null)"
+  />
+}
+
 @if (iconEdit(); as target) {
   <db-pixel-editor
     [title]="target.title"

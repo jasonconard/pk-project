@@ -213,6 +213,10 @@ export abstract class DbSheet {
     this.store.editPicture(row, field, title);
   }
 
+  protected editSheet(row: DbCharacter | DbEnemy): void {
+    this.store.editSheet(row);
+  }
+
   protected partsLabel(element: DbElement): string {
     return this.store.partsLabel(element);
   }

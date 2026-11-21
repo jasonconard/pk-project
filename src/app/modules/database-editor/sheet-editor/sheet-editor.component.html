@@ -1,0 +1,273 @@
+<div class="dim" (click)="dismissed.emit()"></div>
+<section
+  class="sheet"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="title()"
+>
+  <span class="handle" aria-hidden="true"></span>
+  <header>
+    <div class="titles">
+      <strong>{{ title() }}</strong>
+      @if (sheet(); as s) {
+        <small>
+          Cases de {{ s.frame.w }} × {{ s.frame.h }} ·
+          {{ s.mirror ? "ouest en miroir" : "4 directions dessinées" }}
+        </small>
+      } @else {
+        <small>Les animations du combat</small>
+      }
+    </div>
+    <button type="button" class="cancel" (click)="dismissed.emit()">
+      Fermer
+    </button>
+    <button type="button" class="ok" (click)="ok()">OK</button>
+  </header>
+
+  @if (sheet(); as s) {
+    <div class="preview">
+      <div class="stage-box">
+        <canvas #stage class="stage" width="240" height="200"></canvas>
+        <span class="frame-tag">
+          @if (current(); as a) {
+            @if (a.frames) {
+              Image {{ frame() + 1 }} / {{ a.frames }}
+              @if (a.hit === frame()) {
+                · <b>coup</b>
+              }
+            } @else {
+              Pas d'image
+            }
+          }
+        </span>
+      </div>
+      <div class="preview-side">
+        <div class="dirs" role="group" aria-label="Direction">
+          @for (d of directions; track d.id) {
+            <button
+              type="button"
+              [class.on]="dir() === d.id"
+              [attr.aria-pressed]="dir() === d.id"
+              (click)="setDir(d.id)"
+            >
+              {{ d.label }}
+              @if (s.mirror && (d.id === "sw" || d.id === "nw")) {
+                <small>miroir</small>
+              }
+            </button>
+          }
+        </div>
+        <div class="play">
+          <button
+            type="button"
+            class="square"
+            aria-label="Image précédente"
+            (click)="step(-1)"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            class="square"
+            [attr.aria-label]="playing() ? 'Pause' : 'Lecture'"
+            (click)="togglePlay()"
+          >
+            @if (playing()) {
+              <svg lucidePause></svg>
+            } @else {
+              <svg lucidePlay></svg>
+            }
+          </button>
+          <button
+            type="button"
+            class="square"
+            aria-label="Image suivante"
+            (click)="step(1)"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chips" role="group" aria-label="Animation">
+      @for (a of s.anims; track a.id; let i = $index) {
+        <button
+          type="button"
+          class="chip plain"
+          [class.on]="anim() === i"
+          [class.empty]="!a.frames"
+          (click)="show(i)"
+        >
+          {{ label(a.id) }}
+        </button>
+      }
+    </div>
+
+    @for (p of problems(); track p) {
+      <p class="warning">{{ p }}</p>
+    }
+
+    <div class="block">
+      <h3>Animations</h3>
+      @for (a of s.anims; track a.id; let i = $index) {
+        <div class="anim" [class.on]="anim() === i">
+          <button type="button" class="anim-name" (click)="show(i)">
+            <strong>{{ label(a.id) }}</strong>
+            <small>{{ notes[a.id] ?? "animation du monstre" }}</small>
+          </button>
+          <div class="anim-fields">
+            <label class="field">
+              <span>Images</span>
+              <db-stepper
+                [value]="a.frames"
+                [min]="0"
+                [max]="columns()"
+                [label]="'Images de ' + label(a.id)"
+                (changed)="setAnim(i, { frames: $event })"
+              />
+            </label>
+            <label class="field">
+              <span>Par image</span>
+              <db-stepper
+                [value]="a.ms"
+                [min]="30"
+                [max]="1000"
+                [step]="10"
+                suffix="ms"
+                [label]="'Durée d\'une image de ' + label(a.id)"
+                (changed)="setAnim(i, { ms: $event })"
+              />
+            </label>
+            <label class="field">
+              <span>Coup</span>
+              <select
+                [attr.aria-label]="'Image du coup de ' + label(a.id)"
+                (change)="setHit(i, $any($event.target).value)"
+              >
+                <option value="" [selected]="a.hit === undefined">Aucun</option>
+                @for (f of frameNumbers(a); track f) {
+                  <option [value]="f" [selected]="a.hit === f">
+                    Image {{ f + 1 }}
+                  </option>
+                }
+              </select>
+            </label>
+            <label class="loop">
+              <input
+                type="checkbox"
+                [checked]="a.loop"
+                (change)="setAnim(i, { loop: $any($event.target).checked })"
+              />
+              En boucle
+            </label>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="block">
+      <h3>Découpage</h3>
+      <div class="layout">
+        <label class="field">
+          <span>Largeur d'une case</span>
+          <db-stepper
+            [value]="s.frame.w"
+            [min]="8"
+            [max]="256"
+            [step]="8"
+            suffix="px"
+            [label]="'Largeur d\'une case'"
+            (changed)="setLayout({ frame: { w: $event, h: s.frame.h } })"
+          />
+        </label>
+        <label class="field">
+          <span>Hauteur d'une case</span>
+          <db-stepper
+            [value]="s.frame.h"
+            [min]="8"
+            [max]="256"
+            [step]="8"
+            suffix="px"
+            [label]="'Hauteur d\'une case'"
+            (changed)="setLayout({ frame: { w: s.frame.w, h: $event } })"
+          />
+        </label>
+        <label class="field">
+          <span>Pieds · x</span>
+          <db-stepper
+            [value]="s.anchor.x"
+            [min]="0"
+            [max]="s.frame.w"
+            [label]="'Pieds, de gauche à droite'"
+            (changed)="setAnchor('x', $event)"
+          />
+        </label>
+        <label class="field">
+          <span>Pieds · y</span>
+          <db-stepper
+            [value]="s.anchor.y"
+            [min]="0"
+            [max]="s.frame.h"
+            [label]="'Pieds, de haut en bas'"
+            (changed)="setAnchor('y', $event)"
+          />
+        </label>
+      </div>
+      <label class="switch">
+        <input
+          type="checkbox"
+          [checked]="s.mirror"
+          (change)="setLayout({ mirror: $any($event.target).checked })"
+        />
+        Ouest en miroir (sud-ouest et nord-ouest : l'est retourné)
+      </label>
+      <p class="note">
+        Une ligne par animation et par direction, dans l'ordre de la liste :
+        sud-est (de face) puis nord-est (de dos)
+        @if (!s.mirror) {
+          , puis sud-ouest et nord-ouest
+        }
+        . Les pieds sont posés sur le sol du combat ; l'ombre est dessinée par
+        le jeu.
+      </p>
+    </div>
+
+    <div class="block">
+      <h3>La planche</h3>
+      <div class="sheet-view">
+        <canvas #sheetView></canvas>
+      </div>
+    </div>
+  } @else {
+    <div class="empty">
+      <p>
+        Une planche est une image découpée en cases de même taille : une ligne
+        par animation (attente, marche, attaque, attaque forte, incantation,
+        magie, coup reçu, mort) et par direction (sud-est, nord-est ; l'ouest en
+        miroir).
+      </p>
+      <p class="note">
+        Cases de 48 × 48 par défaut. Les images de chaque animation sont
+        comptées toutes seules à l'import.
+      </p>
+    </div>
+  }
+
+  @if (message()) {
+    <p class="warning" role="status">{{ message() }}</p>
+  }
+
+  <div class="actions">
+    <label class="action">
+      <svg lucideImageUp></svg>
+      {{ sheet() ? "Changer l'image" : "Importer un PNG" }}
+      <input type="file" accept="image/png" (change)="importPng($event)" />
+    </label>
+    @if (sheet()) {
+      <button type="button" class="action" (click)="remove()">
+        <svg lucideTrash></svg> Retirer la planche
+      </button>
+    }
+  </div>
+</section>

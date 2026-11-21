@@ -34,9 +34,11 @@ import { DbSheet } from "../../shared/db-sheet";
 import { StepperComponent } from "../../stepper/stepper.component";
 
 /** The sheet of a row of the « character » table. */
+import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
 @Component({
   selector: "db-character-sheet",
   imports: [
+    SheetTileComponent,
     StepperComponent,
     LucideBan,
     LucideBox,

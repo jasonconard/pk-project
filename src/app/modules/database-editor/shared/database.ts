@@ -1,5 +1,6 @@
 import { WeatherType } from "../../game/shared/weather/Weather";
 import { omit } from "../../../core/shared/omit";
+import { SpriteSheet } from "./sprite-sheet";
 
 /**
  * The game's database (docs/idees.md, point 5): what the combat, the events and the menus read. Built table by
@@ -214,10 +215,12 @@ export interface DbCharacter {
   team: boolean;
   /** In the team when a new game starts (else an event makes them join). */
   startsInTeam?: boolean;
-  /** Pixel art: the menus' and action gauge's small face (also the list's icon), the dialogues' portrait, the combat sprite. */
+  /** Pixel art: the menus' and action gauge's small face (also the list's icon), the dialogues' portrait, the still picture. */
   icon?: string;
   portrait?: string;
   sprite?: string;
+  /** The combat animations (see sprite-sheet.ts). */
+  sheet?: SpriteSheet;
   /** The 3D model on the map. */
   model?: string;
   levelStart: number;
@@ -236,10 +239,8 @@ export interface DbCharacter {
 export const PICTURE_SIZES = {
   icon: { w: 16, h: 16 },
   portrait: { w: 48, h: 48 },
-  sprite: { w: 32, h: 48 },
+  sprite: { w: 48, h: 48 },
 };
-/** An enemy's combat sprite (wider: a bat, a slime). */
-export const ENEMY_SPRITE_SIZE = { w: 48, h: 48 };
 
 /** The moments of the day (the calendar, point 7, will use them too). */
 export type DayTime = "morning" | "afternoon" | "evening" | "night";
@@ -274,9 +275,11 @@ export interface DbEnemy {
   id: string;
   name: string;
   note?: string;
-  /** The action gauge's small picture (16×16) and the combat sprite (48×48). */
+  /** The action gauge's small picture (16×16) and the still picture (48×48: menus, groups). */
   icon?: string;
   sprite?: string;
+  /** The combat animations (see sprite-sheet.ts). */
+  sheet?: SpriteSheet;
   /** Seen on the dungeon map before the fight. */
   model?: string;
   level: number;

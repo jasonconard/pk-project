@@ -5,7 +5,7 @@
     <button
       type="button"
       class="tile"
-      title="Dessiner le sprite de combat"
+      title="Dessiner l'image fixe (menus, groupes)"
       (click)="editPicture(en, 'sprite')"
     >
       <span class="tile-box">
@@ -16,8 +16,9 @@
         }
         <span class="pen" aria-hidden="true"><svg lucidePencil></svg></span>
       </span>
-      <small>Combat · 48×48</small>
+      <small>Image fixe · 48×48</small>
     </button>
+    <db-sheet-tile [sheet]="en.sheet" (opened)="editSheet(en)" />
     <label class="tile">
       <span class="tile-box">
         <svg lucideBox class="model-icon"></svg>
@@ -37,8 +38,9 @@
     </label>
   </div>
   <p class="note">
-    L'icône à côté du nom est sa petite image dans la jauge d'action. Le modèle
-    3D se voit sur la carte du donjon.
+    L'icône à côté du nom est sa petite image dans la jauge d'action. La planche
+    donne ses animations en combat, l'image fixe le montre dans les menus. Le
+    modèle 3D se voit sur la carte du donjon.
   </p>
 </div>
 

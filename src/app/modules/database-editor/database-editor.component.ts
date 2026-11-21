@@ -63,6 +63,7 @@ import { DatabaseStore, Row } from "./shared/database-store";
 import { DbSheet } from "./shared/db-sheet";
 import { downloadFile } from "../game/shared/util/ts-source";
 import { PixelEditorComponent } from "./pixel-editor/pixel-editor.component";
+import { SheetEditorComponent } from "./sheet-editor/sheet-editor.component";
 import { WeatherPickerComponent } from "../game/weather-picker/weather-picker.component";
 import { ElementSheetComponent } from "./sheets/element-sheet/element-sheet.component";
 import { WeaponSheetComponent } from "./sheets/weapon-sheet/weapon-sheet.component";
@@ -120,6 +121,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     LucideTrash,
     NgTemplateOutlet,
     PixelEditorComponent,
+    SheetEditorComponent,
     WeatherPickerComponent,
     ElementSheetComponent,
     WeaponSheetComponent,
@@ -139,6 +141,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
 export class DatabaseEditorComponent extends DbSheet {
   protected readonly saveFailed = this.store.saveFailed;
   protected readonly iconEdit = this.store.iconEdit;
+  protected readonly sheetEdit = this.store.sheetEdit;
 
   /** Opened over the game (Jeu closes the panel instead of going to the game's page). */
   readonly embedded = input(false);
@@ -266,10 +269,12 @@ export class DatabaseEditorComponent extends DbSheet {
     }
   }
 
-  /** The back button, Escape: the icon being drawn, then the sheet (phone), then the editor closes. */
+  /** The back button, Escape: the picture or sprite sheet being edited, then the sheet (phone), then the editor closes. */
   requestClose(): void {
     if (this.iconEdit()) {
       this.iconEdit.set(null);
+    } else if (this.sheetEdit()) {
+      this.sheetEdit.set(null);
     } else if (this.weatherPick()) {
       this.weatherPick.set(null);
     } else if (!this.sideBySide() && this.current()) {
