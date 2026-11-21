@@ -10,6 +10,10 @@ import {
 } from "@angular/core";
 import {
   LucideArrowLeft,
+  LucideCoins,
+  LucideSkull,
+  LucideStar,
+  LucideTrophy,
   LucideBackpack,
   LucideFootprints,
   LucideMoonStar,
@@ -53,6 +57,10 @@ interface CommandItem {
   selector: "battle-hud",
   imports: [
     LucideArrowLeft,
+    LucideCoins,
+    LucideSkull,
+    LucideStar,
+    LucideTrophy,
     LucideBackpack,
     LucideFootprints,
     LucideMoonStar,
@@ -191,6 +199,17 @@ export class BattleHudComponent {
     this.selected.set(0);
   }
 
+  /** The end window's member cards: always 4 places. */
+  protected readonly outcomeMembers = computed(() => {
+    const members = this.view()?.outcome?.members ?? [];
+    return Array.from({ length: TEAM_PLACES }, (_, i) => members[i] ?? null);
+  });
+
+  /** The end window read: the fight closes. */
+  protected closeOutcome(): void {
+    this.battle.closeOutcome();
+  }
+
   /** A state's look (its name, color) for the small dots. */
   protected stateLook(id: string): { name: string; color: string } {
     return this.view()?.stateLooks[id] ?? { name: id, color: "#999" };
@@ -211,6 +230,13 @@ export class BattleHudComponent {
 
   private key(ev: KeyboardEvent): void {
     const phase = this.view()?.phase;
+    if (phase === "result") {
+      if (ev.key === "Enter" || ev.key === " " || ev.key === "Escape") {
+        ev.preventDefault();
+        this.closeOutcome();
+      }
+      return;
+    }
     if (phase !== "command" && phase !== "target") {
       return;
     }

@@ -54,6 +54,8 @@ export interface Fighter {
   resists: Record<string, ResistLevel>;
   /** The element of its plain attacks (the weapon's, else physical). */
   attackElement: string;
+  /** The team: its weapon's type (its attacks make that level grow). */
+  weaponType?: string;
   states: ActiveState[];
   boosts: Boost[];
   /** The team: the skills it knows; an enemy: what it may do. */
@@ -122,7 +124,7 @@ export interface BattleView {
   groupName: string;
   canFlee: boolean;
   fighters: Fighter[];
-  phase: "run" | "command" | "target" | "act" | "over";
+  phase: "run" | "command" | "target" | "act" | "over" | "result";
   /** Who chooses (command, target) or acts. */
   actor: string | null;
   /** Where the one choosing stands on the screen (CSS px): the commands go beside it. */
@@ -139,6 +141,8 @@ export interface BattleView {
   popups: Popup[];
   /** Fighters just interrupted or pushed back on the gauge (their token flashes). */
   knocked: string[];
+  /** The end of the fight (victory, defeat): what the team won (phase « result »). */
+  outcome: BattleOutcome | null;
   /** State id → its name and color (the cards' small dots). */
   stateLooks: Record<string, { name: string; color: string }>;
 }
@@ -146,3 +150,33 @@ export interface BattleView {
 /** Where the action gauge's zones start: waiting, then the command (the turn comes), then the action. */
 export const GAUGE_COMMAND = 0.7;
 export const GAUGE_ACTION = 0.86;
+
+/** What a team member got from a victory. */
+export interface MemberOutcome {
+  id: string;
+  name: string;
+  portrait?: string;
+  levelFrom: number;
+  levelTo: number;
+  /** Fallen during the fight (no experience; back on its feet with 1 PV). */
+  fallen: boolean;
+  /** Elements and weapon types used: their name and icon, the points gained, a level reached. */
+  gains: {
+    id: string;
+    name: string;
+    icon?: string;
+    points: number;
+    level: number | null;
+  }[];
+  /** Skills learned with the new levels. */
+  skills: string[];
+}
+
+/** The end window: victory (experience, money, items, each member's progress) or defeat. */
+export interface BattleOutcome {
+  result: "win" | "lose";
+  xp: number;
+  money: number;
+  items: { name: string; icon?: string; count: number }[];
+  members: MemberOutcome[];
+}

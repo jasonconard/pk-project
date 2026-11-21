@@ -24,7 +24,6 @@ import {
   giveMoney,
   setInTeam,
 } from "../../../database-editor/shared/party";
-import { loadDatabase } from "../../../database-editor/shared/database-storage";
 import { BattleService } from "../../../battle/shared/battle.service";
 import { BattleResult } from "../../../battle/shared/battle-types";
 
@@ -52,10 +51,8 @@ export class SequenceService {
   /** What the branches of the event being played check (hour, weather, variables now), given by the game. */
   private context: (() => EventContext) | null = null;
 
-  /**
-   * The fight being played (BattleService); a victory gives the loot (shown in a message, then the 'win' branch).
-   */
-  private fight: { group: string; result?: string } | null = null;
+  /** A fight is being played (BattleService: it shows and gives the victory's loot itself). */
+  private fight = false;
 
   /** `true` while an event sequence is being played (player inputs are frozen). */
   get isRunning(): boolean {
@@ -74,7 +71,7 @@ export class SequenceService {
   /** Stops the event being played (opening the map editor): its message closes, the rest is not played. */
   stop(): void {
     this.sequence = null;
-    this.fight = null;
+    this.fight = false;
     this.battleService.cancel();
     this.messageState.set(null);
   }
@@ -82,16 +79,6 @@ export class SequenceService {
   /** Closes the current message and resumes the sequence with the (optional) chosen answer. */
   closeMessage(choiceKey?: string): void {
     this.messageState.set(null);
-    const fight = this.fight;
-    if (fight) {
-      // The loot message closed: the 'win' branch
-      if (fight.result) {
-        this.fight = null;
-        this.nextSequence(fight.result);
-        return;
-      }
-      this.fight = null;
-    }
     this.nextSequence(choiceKey);
   }
 
@@ -174,54 +161,18 @@ export class SequenceService {
     }
   }
 
-  /** The fight against a group; then the event's branch for how it ended (a victory: its loot first). */
+  /** The fight against a group; then the event's branch for how it ended (Victoire, Défaite, Fuite). */
   private startFight(groupId: string): void {
-    this.fight = { group: groupId };
+    this.fight = true;
     this.battleService.start(groupId, (result) => this.fightEnded(result));
   }
 
   private fightEnded(result: BattleResult): void {
-    const fight = this.fight;
-    const loot = fight && result === "win" ? this.giveLoot(fight.group) : null;
-    if (fight && loot) {
-      fight.result = "win";
-      this.messageState.set({ text: loot });
+    if (!this.fight) {
       return;
     }
-    this.fight = null;
+    this.fight = false;
     this.nextSequence(result);
-  }
-
-  /** A victory's loot: the enemies' money, and their items by chance. « Victoire ! 16 pièces, Potion. » (null: nothing). */
-  private giveLoot(groupId: string): string | null {
-    const db = loadDatabase();
-    const group = db.groups.find((g) => g.id === groupId);
-    if (!group) {
-      return null;
-    }
-    let money = 0;
-    const items = new Map<string, number>();
-    for (const member of group.members) {
-      const enemy = db.enemies.find((e) => e.id === member.enemy);
-      money += enemy?.money ?? 0;
-      enemy?.drops.forEach((drop) => {
-        if (Math.random() * 100 < drop.chance) {
-          items.set(drop.item, (items.get(drop.item) ?? 0) + 1);
-        }
-      });
-    }
-    if (money) {
-      giveMoney(money);
-    }
-    items.forEach((n, id) => giveItem(id, n));
-    const parts = [
-      ...(money ? [`${money} pièce${money > 1 ? "s" : ""}`] : []),
-      ...[...items].map(
-        ([id, n]) =>
-          `${db.items.find((i) => i.id === id)?.name ?? "?"}${n > 1 ? ` ×${n}` : ""}`
-      ),
-    ];
-    return parts.length > 0 ? `Victoire ! ${parts.join(", ")}.` : null;
   }
 
   private setLogs(log: InstructionLog | undefined): void {

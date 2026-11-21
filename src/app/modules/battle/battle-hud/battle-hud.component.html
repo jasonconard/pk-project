@@ -231,4 +231,98 @@
       }
     }
   </div>
+
+  <!-- The end: victory (what the team won, each member's progress) or defeat -->
+  @if (v.outcome; as o) {
+    <div class="outcome-veil" (click)="closeOutcome()"></div>
+    <section
+      class="outcome"
+      role="dialog"
+      [attr.aria-label]="o.result === 'win' ? 'Victoire' : 'Défaite'"
+      (click)="closeOutcome()"
+    >
+      <span class="outcome-title">
+        @if (o.result === "win") {
+          <svg lucideTrophy></svg> Victoire !
+        } @else {
+          <svg lucideSkull></svg> Défaite…
+        }
+      </span>
+      <div class="outcome-box">
+        @if (o.result === "win") {
+          <div class="loot">
+            <span class="loot-chip">
+              <svg lucideStar></svg><span class="loot-label">Expérience</span>
+              <b>+{{ o.xp }}</b>
+            </span>
+            <span class="loot-chip">
+              <svg lucideCoins></svg><span class="loot-label">Pièces</span>
+              <b>+{{ o.money }}</b>
+            </span>
+            @for (i of o.items; track i.name) {
+              <span class="loot-chip">
+                @if (i.icon) {
+                  <img [src]="i.icon" alt="" />
+                }
+                <b>{{ i.name }}{{ i.count > 1 ? " ×" + i.count : "" }}</b>
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="lost">L'équipe est tombée. Chacun se relève avec 1 PV.</p>
+        }
+        <div class="members">
+          @for (m of outcomeMembers(); track $index) {
+            @if (m) {
+              <div class="member">
+                <div class="member-top">
+                  @if (m.portrait) {
+                    <img [src]="m.portrait" alt="" />
+                  }
+                  <div class="member-names">
+                    <strong>{{ m.name }}</strong>
+                    <small>
+                      @if (m.levelTo > m.levelFrom) {
+                        Niv. {{ m.levelFrom }} → {{ m.levelTo }}
+                      } @else {
+                        Niv. {{ m.levelTo }}
+                      }
+                    </small>
+                  </div>
+                  @if (m.levelTo > m.levelFrom) {
+                    <span class="level-up"
+                      >Niv. +{{ m.levelTo - m.levelFrom }}</span
+                    >
+                  } @else if (m.fallen) {
+                    <span class="fallen">Tombé</span>
+                  }
+                </div>
+                @if (m.gains.length) {
+                  <div class="gains">
+                    @for (g of m.gains; track g.id) {
+                      <span class="gain" [class.up]="g.level !== null">
+                        @if (g.icon) {
+                          <img [src]="g.icon" alt="" />
+                        }
+                        {{ g.name }} +{{ g.points }}
+                        @if (g.level !== null) {
+                          <b>niv. {{ g.level }}</b>
+                        }
+                      </span>
+                    }
+                  </div>
+                }
+                @for (s of m.skills; track s) {
+                  <span class="learned">Apprend {{ s }}</span>
+                }
+              </div>
+            } @else {
+              <div class="member free">Place libre</div>
+            }
+          }
+        </div>
+        <small class="continue">Toucher pour continuer</small>
+      </div>
+    </section>
+  }
 }

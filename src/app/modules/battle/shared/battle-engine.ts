@@ -17,6 +17,7 @@ import {
   HEAVY_FACTOR,
   isMelee,
 } from "./battle-rules";
+import { trainedBy } from "./progress";
 import {
   BattleResult,
   BattleView,
@@ -100,6 +101,8 @@ export class BattleEngine {
   /** Hurt fighters going back to idle, defeated enemies fading out (time since). */
   private readonly hurt = new Set<Fighter>();
   private readonly fading = new Map<Fighter, number>();
+  /** What each team member used (element / weapon type id → uses): their levels grow after a victory. */
+  readonly uses = new Map<string, Record<string, number>>();
   /** Fighters just interrupted or pushed back (their token flashes), with the time since. */
   readonly knocked = new Map<string, number>();
   private readonly fastest: number;
@@ -420,6 +423,9 @@ export class BattleEngine {
       this.done(f);
       return;
     }
+    if (f.side === "team") {
+      this.recordUse(f, command, skill);
+    }
     if (skill) {
       f.mp -= skill.mp;
       this.popup(f, skill.name, "info", 1.6);
@@ -442,6 +448,21 @@ export class BattleEngine {
       const anim = item ? "attack" : "magic";
       this.field.play(f.id, anim, facing(f.pos, focus.pos), true);
     }
+  }
+
+  /** A team member's action trains its levels: a skill's, or its weapon type for the attacks. */
+  private recordUse(f: Fighter, command: Command, skill?: DbSkill): void {
+    let trained: string[] = [];
+    if (skill) {
+      trained = trainedBy(skill, this.db, f.weaponType);
+    } else if (command.kind === "attack" || command.kind === "heavy") {
+      trained = f.weaponType ? [f.weaponType] : [];
+    }
+    const used = this.uses.get(f.id) ?? {};
+    for (const id of trained) {
+      used[id] = (used[id] ?? 0) + 1;
+    }
+    this.uses.set(f.id, used);
   }
 
   /** What a command aims at (a skill's or an item's target setting; the attacks: one enemy). */

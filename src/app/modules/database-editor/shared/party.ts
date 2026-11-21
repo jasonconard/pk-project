@@ -1,4 +1,5 @@
 import { loadDatabase } from "./database-storage";
+import { DbCharacter, statAt } from "./database";
 import {
   cachedFromStorage,
   readJson,
@@ -15,9 +16,25 @@ const STORAGE_KEY = "pk-party";
 export const MONEY_MAX = 9_999_999;
 export const ITEM_COUNT_MAX = 99;
 
+/**
+ * A team member's progress in the game being played (from the fights): its level and experience, its PV / PM and the
+ * states it keeps between fights, its level and points in each element and weapon type. Missing: as in the database
+ * (its starting level, full PV / PM).
+ */
+export interface MemberProgress {
+  level: number;
+  xp: number;
+  hp: number;
+  mp: number;
+  states: string[];
+  growth: Record<string, { level: number; points: number }>;
+}
+
 export interface PartyState {
   /** Character ids, in order. */
   team: string[];
+  /** Character id → its progress (once it has fought). */
+  members?: Record<string, MemberProgress>;
   /** Item id → how many. */
   items: Record<string, number>;
   money: number;
@@ -83,6 +100,34 @@ export function setInTeam(id: string, inTeam: boolean): void {
   if (inTeam) {
     party.team.push(id);
   }
+  writeParty(party);
+}
+
+/** A member's progress (its starting one when it has not fought yet). */
+export function memberProgress(c: DbCharacter): MemberProgress {
+  const saved = currentParty().members?.[c.id];
+  if (saved) {
+    return structuredClone(saved);
+  }
+  return {
+    level: c.levelStart,
+    xp: 0,
+    hp: statAt(c, "hp", c.levelStart),
+    mp: statAt(c, "mp", c.levelStart),
+    states: [],
+    growth: Object.fromEntries(
+      Object.entries(c.growth).map(([id, g]) => [
+        id,
+        { level: g.level, points: 0 },
+      ])
+    ),
+  };
+}
+
+/** Members' progress after a fight. */
+export function saveProgress(progress: Record<string, MemberProgress>): void {
+  const party = structuredClone(currentParty());
+  party.members = { ...party.members, ...progress };
   writeParty(party);
 }
 
