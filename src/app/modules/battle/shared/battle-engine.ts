@@ -6,6 +6,7 @@ import {
   SkillTarget,
   STATS,
 } from "../../database-editor/shared/database";
+import * as THREE from "three";
 import { SheetDirection } from "../../database-editor/shared/sprite-sheet";
 import { currentParty, giveItem } from "../../database-editor/shared/party";
 import { BattleField, facing } from "./battle-field";
@@ -60,12 +61,22 @@ const END_DELAY = 1.8;
 /** An enemy's plain attack is a heavy one this often. */
 const ENEMY_HEAVY_CHANCE = 0.2;
 
+/**
+ * After acting, a fighter moves to a free spot near where it stands (Grandia style: the field keeps moving): this
+ * far from it (world units), at least SPOT_ROOM from the others, within FIELD_RADIUS of the field's middle.
+ */
+const SPOT_NEAR = { min: 10, max: 26 };
+const SPOT_ROOM = 16;
+const FIELD_RADIUS = 75;
+
 interface Action {
   actor: Fighter;
   /** Who it walks to (melee), or faces. */
   focus: Fighter;
   melee: boolean;
-  step: "go" | "strike" | "back";
+  step: "go" | "strike" | "move";
+  /** Where it goes after acting (its new place). */
+  dest?: THREE.Vector3;
 }
 
 /** The most hurt first. */
@@ -81,9 +92,10 @@ function pickOne(list: Fighter[]): Fighter | undefined {
  * The fight's rules and timing, Grandia style. Each fighter's gauge fills with its agility; at the command mark its
  * states act (poison, sleep…), then a team member chooses what to do (time stops) or an enemy decides from its
  * behaviour; the command fills up to the action mark (a heavy attack, a long spell more slowly: the caster gathers
- * it) and the fighter acts, alone while the others' gauges stop: a melee blow walks to the target and back, a spell
- * or an item is used from where it stands; the effects land on the animation's hit frame. The fight ends when one
- * side has fallen.
+ * it) and the fighter acts while the others' gauges go on (several actions can play at once): a melee blow walks
+ * to the target, a spell or an item is used from where it stands; the effects land on the animation's hit frame;
+ * then the fighter moves to a free spot nearby. A fighter hit on its way stops for its « hit taken » animation. The
+ * fight ends when one side has fallen.
  */
 export class BattleEngine {
   phase: BattleView["phase"] = "run";
@@ -93,7 +105,8 @@ export class BattleEngine {
   targetSide: Fighter["side"] = "foe";
   aim: string | null = null;
   popups: (Popup & { age: number })[] = [];
-  private action: Action | null = null;
+  /** The actions being played (several at once: the gauges don't wait for them). */
+  private actions: Action[] = [];
   private result: BattleResult | null = null;
   private endTimer = 0;
   private endWait = 0;
@@ -106,6 +119,8 @@ export class BattleEngine {
   /** Fighters just interrupted or pushed back (their token flashes), with the time since. */
   readonly knocked = new Map<string, number>();
   private readonly fastest: number;
+  /** The middle of the field (the fighters stay around it). */
+  private readonly middle: THREE.Vector3;
 
   constructor(
     readonly fighters: Fighter[],
@@ -116,6 +131,9 @@ export class BattleEngine {
     private readonly ended: (result: BattleResult) => void
   ) {
     this.fastest = Math.max(1, ...fighters.map((f) => f.stats.agi));
+    this.middle = fighters
+      .reduce((sum, f) => sum.add(f.home), new THREE.Vector3())
+      .divideScalar(Math.max(1, fighters.length));
   }
 
   alive(side: Fighter["side"]): Fighter[] {
@@ -144,20 +162,22 @@ export class BattleEngine {
       }));
   }
 
+  /** Is the fighter playing an action now? */
+  acting(f: Fighter): boolean {
+    return this.actions.some((a) => a.actor === f);
+  }
+
   update(dt: number): void {
     this.updateLooks(dt);
     switch (this.phase) {
       case "run": {
         this.runGauges(dt);
-
-        break;
-      }
-      case "act": {
-        this.stepAction(dt);
-
+        this.stepActions(dt);
         break;
       }
       case "over": {
+        // (the ones still acting finish, moving to their new place)
+        this.stepActions(dt);
         this.endTimer += dt;
         if (this.endTimer >= this.endWait && this.result) {
           const result = this.result;
@@ -284,7 +304,7 @@ export class BattleEngine {
 
   private runGauges(dt: number): void {
     for (const f of this.fighters) {
-      if (f.hp <= 0) {
+      if (f.hp <= 0 || this.acting(f)) {
         continue;
       }
       if (f.gauge < GAUGE_COMMAND) {
@@ -299,7 +319,6 @@ export class BattleEngine {
         f.gauge = Math.min(1, f.gauge + dt * this.commandSpeed(f.command));
         if (f.gauge >= 1) {
           this.act(f);
-          return;
         }
       }
     }
@@ -439,9 +458,10 @@ export class BattleEngine {
       command.kind === "heavy" ||
       (!!skill && isMelee(skill));
     const focus = targets[0];
-    this.phase = "act";
-    this.actor = f;
-    this.action = { actor: f, focus, melee, step: melee ? "go" : "strike" };
+    this.actions = [
+      ...this.actions,
+      { actor: f, focus, melee, step: melee ? "go" : "strike" },
+    ];
     if (melee) {
       this.field.play(f.id, "walk", facing(f.pos, focus.pos));
     } else {
@@ -499,40 +519,100 @@ export class BattleEngine {
     return other1 ? [other1] : [];
   }
 
-  private stepAction(dt: number): void {
-    const a = this.action;
-    if (!a) {
-      this.phase = "run";
+  private stepActions(dt: number): void {
+    for (const a of this.actions) {
+      this.stepAction(a, dt);
+    }
+  }
+
+  /**
+   * One action going on: walking to the target (melee), the blow or the spell (its effects on the hit frame),
+   * moving to a free spot nearby. A fighter hit while walking stops for its « hit taken » animation.
+   */
+  private stepAction(a: Action, dt: number): void {
+    const { actor } = a;
+    if (this.hurt.has(actor) && a.step !== "strike") {
       return;
     }
-    const { actor, focus } = a;
     if (a.step === "go") {
+      // Its target fell on the way: another one of that side, or back home
+      if (a.focus.hp <= 0) {
+        const next = pickOne(this.alive(a.focus.side));
+        if (!next) {
+          this.walkBack(a);
+          return;
+        }
+        a.focus = next;
+        if (actor.command) {
+          actor.command = { ...actor.command, target: next.id };
+        }
+        this.field.play(actor.id, "walk", facing(actor.pos, next.pos));
+      }
       // Up to the target, keeping a little distance (on its side facing the actor)
-      const dest = focus.pos
+      const dest = a.focus.pos
         .clone()
-        .add(actor.home.clone().sub(focus.pos).setY(0).setLength(REACH));
+        .add(actor.home.clone().sub(a.focus.pos).setY(0).setLength(REACH));
       if (this.walk(actor, dest, dt)) {
         a.step = "strike";
         const anim = actor.command?.kind === "attack" ? "attack" : "heavy";
-        this.field.play(actor.id, anim, facing(actor.pos, focus.pos), true);
+        this.field.play(actor.id, anim, facing(actor.pos, a.focus.pos), true);
       }
     } else if (a.step === "strike") {
       if (this.field.consumeHit(actor.id)) {
         this.land(actor);
       }
       if (this.field.finished(actor.id)) {
-        if (a.melee) {
-          a.step = "back";
-          this.field.play(actor.id, "walk", facing(actor.pos, actor.home));
-        } else {
-          this.action = null;
-          this.done(actor);
-        }
+        this.walkBack(a);
       }
-    } else if (this.walk(actor, actor.home, dt)) {
-      this.action = null;
+    } else if (this.walk(actor, a.dest ?? actor.home, dt)) {
+      // Its new place, from where it will start next time
+      actor.home = actor.pos.clone();
       this.done(actor);
     }
+  }
+
+  /** The action played: off to a free spot nearby. */
+  private walkBack(a: Action): void {
+    a.step = "move";
+    a.dest = this.freeSpot(a.actor);
+    this.field.play(a.actor.id, "walk", facing(a.actor.pos, a.dest));
+  }
+
+  /** A random spot near the fighter, away from the others, inside the field (the best of a few tries). */
+  private freeSpot(f: Fighter): THREE.Vector3 {
+    const others = this.fighters.filter((x) => x !== f && x.hp > 0);
+    let best = f.pos.clone();
+    let bestRoom = -1;
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist =
+        SPOT_NEAR.min + Math.random() * (SPOT_NEAR.max - SPOT_NEAR.min);
+      const spot = f.pos
+        .clone()
+        .add(
+          new THREE.Vector3(Math.cos(angle) * dist, 0, Math.sin(angle) * dist)
+        );
+      // Kept inside the field
+      const off = spot.clone().sub(this.middle).setY(0);
+      if (off.length() > FIELD_RADIUS) {
+        spot.sub(off.setLength(off.length() - FIELD_RADIUS));
+      }
+      const room = Math.min(
+        ...others.map((x) => {
+          const there = this.actions.find((a) => a.actor === x)?.dest ?? x.pos;
+          return Math.hypot(there.x - spot.x, there.z - spot.z);
+        }),
+        Infinity
+      );
+      if (room > bestRoom) {
+        best = spot;
+        bestRoom = room;
+      }
+      if (room >= SPOT_ROOM) {
+        break;
+      }
+    }
+    return best;
   }
 
   /** One step towards a point; true once there. */
@@ -704,9 +784,15 @@ export class BattleEngine {
       (s) => !this.db.states.find((x) => x.id === s.id)?.endsOnHit
     );
     if (target.hp > 0) {
-      this.field.play(target.id, "hurt", facing(target.pos, actor.pos), true);
-      this.hurt.add(target);
-      if (interrupts && !target.defending) {
+      // (a fighter in the middle of its own blow finishes it)
+      const striking = this.actions.some(
+        (a) => a.actor === target && a.step === "strike"
+      );
+      if (!striking) {
+        this.field.play(target.id, "hurt", facing(target.pos, actor.pos), true);
+        this.hurt.add(target);
+      }
+      if (interrupts && !target.defending && !this.acting(target)) {
         this.interrupt(target, line + 1);
       }
     }
@@ -760,6 +846,8 @@ export class BattleEngine {
     if (f.hp <= 0) {
       f.states = [];
       f.command = null;
+      // Fallen while acting: its action stops there
+      this.actions = this.actions.filter((a) => a.actor !== f);
       this.field.play(f.id, "death", undefined, true);
       this.hurt.delete(f);
       if (f.side === "foe") {
@@ -770,14 +858,15 @@ export class BattleEngine {
 
   /** The fighter's turn is over: its gauge starts again, back to its usual stance; one side down: the end. */
   private done(f: Fighter): void {
+    this.actions = this.actions.filter((a) => a.actor !== f);
     f.gauge = 0;
     f.command = null;
     if (f.hp > 0) {
       this.field.play(f.id, "idle", this.restDir(f));
     }
-    this.phase = "run";
-    this.actor = null;
-    this.checkEnd();
+    if (this.phase === "run") {
+      this.checkEnd();
+    }
   }
 
   private checkEnd(): void {
@@ -797,8 +886,30 @@ export class BattleEngine {
     this.endWait = wait;
   }
 
+  /** The hit taken: back to walking (on its way), to its spell, or to idle. */
+  private afterHurt(f: Fighter): void {
+    const a = this.actions.find((x) => x.actor === f);
+    if (a && a.step === "go") {
+      this.field.play(f.id, "walk", facing(f.pos, a.focus.pos));
+    } else if (a && a.step === "move") {
+      this.field.play(f.id, "walk", facing(f.pos, a.dest ?? f.home));
+    } else if (f.command?.kind === "skill" && f.gauge > GAUGE_COMMAND) {
+      this.field.play(f.id, "cast", this.restDir(f));
+    } else {
+      this.field.play(f.id, "idle", this.restDir(f));
+    }
+  }
+
+  /** At rest: facing the other side (the middle of its standing fighters). */
   private restDir(f: Fighter): SheetDirection {
-    return f.side === "team" ? "ne" : "sw";
+    const other = this.alive(f.side === "team" ? "foe" : "team");
+    if (other.length === 0) {
+      return f.side === "team" ? "ne" : "sw";
+    }
+    const center = other
+      .reduce((sum, x) => sum.add(x.pos), new THREE.Vector3())
+      .divideScalar(other.length);
+    return facing(f.pos, center);
   }
 
   /** Hurt fighters back to idle (or to their spell) once the hit is taken; the defeated fading out; the numbers. */
@@ -806,8 +917,7 @@ export class BattleEngine {
     for (const f of this.hurt) {
       if (this.field.finished(f.id)) {
         this.hurt.delete(f);
-        const casting = f.command?.kind === "skill" && f.gauge > GAUGE_COMMAND;
-        this.field.play(f.id, casting ? "cast" : "idle", this.restDir(f));
+        this.afterHurt(f);
       }
     }
     for (const [f, t] of this.fading) {

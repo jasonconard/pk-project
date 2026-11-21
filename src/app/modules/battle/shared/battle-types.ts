@@ -117,14 +117,15 @@ export interface Cast {
 }
 
 /**
- * What the fight's interface shows (updated by the battle service). `phase`: the gauges run, a team member chooses
- * its command or its target (time stops), someone acts (time stops), the fight is over.
+ * What the fight's interface shows (updated by the battle service). `phase`: the fight runs (the gauges fill and the
+ * actions play, several at once), a team member chooses its command or its target (everything waits), the fight is
+ * over, its end window.
  */
 export interface BattleView {
   groupName: string;
   canFlee: boolean;
   fighters: Fighter[];
-  phase: "run" | "command" | "target" | "act" | "over" | "result";
+  phase: "run" | "command" | "target" | "over" | "result";
   /** Who chooses (command, target) or acts. */
   actor: string | null;
   /** Where the one choosing stands on the screen (CSS px): the commands go beside it. */

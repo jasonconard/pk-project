@@ -271,7 +271,10 @@ export class BattleService {
       return;
     }
     this.engine.update(dt);
-    this.field?.update(dt);
+    // A team member choosing: the whole fight waits (the gauges, and the actions going on with their animations)
+    const choosing =
+      this.engine.phase === "command" || this.engine.phase === "target";
+    this.field?.update(choosing ? 0 : dt);
     this.refresh();
   }
 
