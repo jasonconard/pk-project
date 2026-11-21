@@ -502,6 +502,28 @@ export function statAt(
   return Math.round(start + (max - start) * f);
 }
 
+/** The items a character wears (its equipment). */
+export function wornItems(c: DbCharacter, db: GameDatabase): DbItem[] {
+  return Object.values(c.equipment)
+    .map((id) => db.items.find((i) => i.id === id))
+    .filter((i) => !!i);
+}
+
+/** A character's stats at a level, with its equipment's bonuses. */
+export function characterStats(
+  c: DbCharacter,
+  level: number,
+  db: GameDatabase
+): Record<StatId, number> {
+  const stats = Object.fromEntries(
+    STATS.map((s) => [s.id, statAt(c, s.id, level)])
+  ) as Record<StatId, number>;
+  for (const item of wornItems(c, db)) {
+    item.bonuses?.forEach((b) => (stats[b.stat] += b.amount));
+  }
+  return stats;
+}
+
 /** The character's level and affinity in an element or a weapon type. */
 export function growthOf(
   character: DbCharacter,

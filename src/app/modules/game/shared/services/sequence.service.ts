@@ -22,6 +22,7 @@ import { KeyService } from "../../../../core/shared/service/key.service";
 import {
   giveItem,
   giveMoney,
+  healTeam,
   setInTeam,
 } from "../../../database-editor/shared/party";
 import { BattleService } from "../../../battle/shared/battle.service";
@@ -151,6 +152,10 @@ export class SequenceService {
         if (instruction.party) {
           setInTeam(instruction.party.id, instruction.party.join);
         }
+        this.nextSequence();
+        break;
+      case InstructionType.HEAL:
+        healTeam();
         this.nextSequence();
         break;
       case InstructionType.FIGHT:

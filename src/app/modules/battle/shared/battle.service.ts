@@ -5,12 +5,10 @@ import { loadDatabase } from "../../database-editor/shared/database-storage";
 import {
   DbCharacter,
   DbEnemy,
-  DbItem,
   GameDatabase,
+  characterStats,
   ResistLevel,
-  STATS,
-  StatId,
-  statAt,
+  wornItems,
 } from "../../database-editor/shared/database";
 import {
   currentParty,
@@ -51,37 +49,15 @@ function physicalId(db: GameDatabase): string {
   return db.elements.find((e) => e.physical)?.id ?? "";
 }
 
-/** The items a character wears. */
-function wornBy(c: DbCharacter, db: GameDatabase): DbItem[] {
-  return Object.values(c.equipment)
-    .map((id) => db.items.find((i) => i.id === id))
-    .filter((i) => !!i);
-}
-
-/** A character's stats at a level, with its equipment's bonuses. */
-function statsAt(
-  c: DbCharacter,
-  level: number,
-  db: GameDatabase
-): Record<StatId, number> {
-  const stats = Object.fromEntries(
-    STATS.map((s) => [s.id, statAt(c, s.id, level)])
-  ) as Record<StatId, number>;
-  for (const item of wornBy(c, db)) {
-    item.bonuses?.forEach((b) => (stats[b.stat] += b.amount));
-  }
-  return stats;
-}
-
 /** A team member as it stands in the game: its level, PV / PM and states kept, its equipment, the skills it knows. */
 function teamFighter(
   c: DbCharacter,
   p: MemberProgress,
   db: GameDatabase
 ): Fighter {
-  const stats = statsAt(c, p.level, db);
+  const stats = characterStats(c, p.level, db);
   const resists: Record<string, ResistLevel> = {};
-  const worn = wornBy(c, db);
+  const worn = wornItems(c, db);
   for (const item of worn) {
     item.resists?.forEach((r) => (resists[r.element] = r.level));
   }
@@ -374,14 +350,14 @@ export class BattleService {
       .map((s) => s.id);
     const gains: MemberOutcome["gains"] = [];
     if (xp > 0 && !fallen) {
-      const maxBefore = statsAt(c, p.level, db);
+      const maxBefore = characterStats(c, p.level, db);
       gainXp(c, p, xp);
-      const maxAfter = statsAt(c, p.level, db);
+      const maxAfter = characterStats(c, p.level, db);
       // A level up adds its new PV / PM
       p.hp = Math.min(maxAfter.hp, p.hp + maxAfter.hp - maxBefore.hp);
       p.mp = Math.min(maxAfter.mp, p.mp + maxAfter.mp - maxBefore.mp);
       const bonus = (id: string) =>
-        wornBy(c, db).reduce(
+        wornItems(c, db).reduce(
           (n, i) => n + (i.growth?.find((g) => g.id === id)?.percent ?? 0),
           0
         );

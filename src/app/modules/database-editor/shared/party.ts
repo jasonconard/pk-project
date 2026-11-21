@@ -1,5 +1,5 @@
 import { loadDatabase } from "./database-storage";
-import { DbCharacter, statAt } from "./database";
+import { characterStats, DbCharacter, statAt } from "./database";
 import {
   cachedFromStorage,
   readJson,
@@ -129,6 +129,22 @@ export function saveProgress(progress: Record<string, MemberProgress>): void {
   const party = structuredClone(currentParty());
   party.members = { ...party.members, ...progress };
   writeParty(party);
+}
+
+/** The team healed (an inn, a fountain…): every member's PV and PM full, its states gone. */
+export function healTeam(): void {
+  const db = loadDatabase();
+  const healed: Record<string, MemberProgress> = {};
+  for (const id of currentParty().team) {
+    const c = db.characters.find((x) => x.id === id);
+    if (!c) {
+      continue;
+    }
+    const p = memberProgress(c);
+    const stats = characterStats(c, p.level, db);
+    healed[id] = { ...p, hp: stats.hp, mp: stats.mp, states: [] };
+  }
+  saveProgress(healed);
 }
 
 /** A saved game's team replaces the current one. */

@@ -31,6 +31,7 @@ import {
   LucideSwords,
   LucideTrash,
   LucideUsers,
+  LucideHeartPulse,
   LucideVariable,
   LucideVolume2,
   LucideX,
@@ -92,6 +93,7 @@ const ACTIONS: {
   { type: "item", label: "Objet", icon: LucideBackpack },
   { type: "money", label: "Argent", icon: LucideCoins },
   { type: "party", label: "Équipe", icon: LucideUsers },
+  { type: "heal", label: "Soigner l'équipe", icon: LucideHeartPulse },
   { type: "fight", label: "Combat", icon: LucideSwords, branches: true },
 ];
 
@@ -388,6 +390,7 @@ export class EventEditorComponent {
       case "wait":
         return { type, seconds: 1 };
       case "stop":
+      case "heal":
         return { type };
       case "item":
         return this.data.db.items[0]

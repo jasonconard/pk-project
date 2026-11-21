@@ -63,6 +63,8 @@ export type EventAction =
   | { type: "item"; item: string; amount: number }
   | { type: "money"; amount: number }
   | { type: "party"; character: string; join: boolean }
+  /** The team healed: PV and PM full, states gone. */
+  | { type: "heal" }
   /** A fight against a group of the database, then the branch of how it ended. */
   | {
       type: "fight";
@@ -306,6 +308,8 @@ function toInstruction(
         type: InstructionType.PARTY,
         party: { id: action.character, join: action.join },
       };
+    case "heal":
+      return { type: InstructionType.HEAL };
   }
 }
 
@@ -429,6 +433,8 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
       return { type: "wait", seconds: (instruction.wait?.time ?? 0) / 1000 };
     case InstructionType.STOP:
       return { type: "stop" };
+    case InstructionType.HEAL:
+      return { type: "heal" };
     case InstructionType.ITEM:
       return instruction.item
         ? {

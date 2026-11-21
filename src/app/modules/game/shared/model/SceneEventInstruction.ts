@@ -16,6 +16,7 @@ export enum InstructionType {
   MONEY,
   PARTY,
   FIGHT,
+  HEAL,
 }
 
 export interface SceneEventInstruction {
