@@ -229,6 +229,7 @@ interface PaletteEntry {
   templateUrl: "./editor-bar.component.html",
   styleUrls: [
     "./editor-bar.component.scss",
+    "./editor-bar.selection.scss",
     "./editor-bar.passage.scss",
     "./editor-bar.wide.scss",
   ],

@@ -6,69 +6,28 @@ import {
   ZONE_DEFAULT_SIZE,
   ZONE_ID,
 } from "./Zone";
-import { SceneChunk, SceneMap, StairsSide, stairsSide } from "./SceneMap";
+import { SceneChunk, SceneMap, StairsSide } from "./SceneMap";
 import { ScenePlayer } from "./ScenePlayer";
 import {
   CAMERA_LOOK,
   Game,
   SHADE_OFFSET,
   SHADOW_AREA,
-  TOO_CLOSE_LIMIT,
   TOO_FAR_LIMIT,
 } from "./Game";
 import { BasicMeshService } from "../services/basic-mesh.service";
 import { convertVec2, convertVec3 } from "./SceneUtils";
 import { MODELS } from "../../../../../assets/models/models";
 import { SceneBuilding } from "./SceneBuilding";
-import { MathService } from "../services/math.service";
-import {
-  autotile,
-  NEIGHBORS,
-  terrainById,
-  TILE_SIZE,
-  TILESET_ANIM_LINK,
-  TILESET_LINK,
-  tilesetPos,
-  waterFramePos,
-} from "./Terrain";
-import { applyWeatherShader } from "../weather/weather-shader";
-import {
-  buildGroundGeometry,
-  LEVEL_HEIGHT,
-  MAX_LEVEL,
-  STAIRS_TILE,
-} from "./GroundMesh";
+import { NEIGHBORS, TILE_SIZE } from "./Terrain";
+import { LEVEL_HEIGHT, MAX_LEVEL } from "./GroundMesh";
+import { ChunkGround } from "./ChunkGround";
+import { applyMeshOpacity, meshOpacity } from "./mesh-fading";
 import { canInstance, forgetTemplate, ModelInstances } from "./ModelInstances";
-import { isGameAsleep } from "../../../../core/shared/app-visibility";
-
-/** A chunk ground drawn on a canvas: its texture, then the painted tiles over it. */
-interface PaintedGround {
-  ctx: CanvasRenderingContext2D;
-  texture: THREE.CanvasTexture;
-  base: HTMLImageElement | null;
-}
 
 /** Chunks built ahead of the view (chunk sizes around what can be seen), and kept until this far. */
 const BUILD_AHEAD = 0.6;
 const KEEP_RANGE = 1.6;
-
-/** Water animation step (ms per frame). */
-const WATER_STEP = 220;
-
-/** Pictures loaded once (ground textures, tiles). */
-const IMAGES = new Map<string, Promise<HTMLImageElement>>();
-function loadImage(link: string): Promise<HTMLImageElement> {
-  let image = IMAGES.get(link);
-  if (!image) {
-    image = new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.src = link;
-    });
-    IMAGES.set(link, image);
-  }
-  return image;
-}
 
 export interface MapHelperInit {
   originGame: Game;
@@ -305,25 +264,18 @@ export class MapHelper {
       ground.mesh = groundMesh;
       group.add(groundMesh);
       if (
-        chunk.tiles &&
-        Object.keys(chunk.tiles).length > 0 &&
+        (Object.keys(chunk.tiles ?? {}).length > 0 ||
+          Object.keys(chunk.stairs ?? {}).length > 0) &&
         ground === chunk.grounds[0]
       ) {
-        this.paintedGround(chunk);
-      }
-      if (
-        chunk.stairs &&
-        Object.keys(chunk.stairs).length > 0 &&
-        ground === chunk.grounds[0]
-      ) {
-        this.paintedGround(chunk);
+        this.ground.paintedGround(chunk);
       }
       if (
         ((chunk.heights && Object.keys(chunk.heights).length > 0) ||
           (chunk.stairs && Object.keys(chunk.stairs).length > 0)) &&
         ground === chunk.grounds[0]
       ) {
-        this.rebuildGround(chunk);
+        this.ground.rebuildGround(chunk);
       }
       // ground.mesh.rotation.x = Math.PI / -2;
     });
@@ -350,15 +302,7 @@ export class MapHelper {
     chunk.visible = false;
     this.instances.get(chunk.id)?.forEach((set) => set.dispose());
     this.instances.delete(chunk.id);
-    const painted = this.paintedGrounds.get(chunk.id);
-    if (painted) {
-      const material = chunk.grounds[0]?.mesh?.material;
-      (Array.isArray(material) ? material[0] : material)?.dispose();
-      painted.texture.dispose();
-      this.paintedGrounds.delete(chunk.id);
-    }
-    this.flatGrounds.get(chunk.id)?.geometry.dispose();
-    this.flatGrounds.delete(chunk.id);
+    this.ground.forget(chunk);
     // (materials are shared between chunks: only the geometries are the chunk's own)
     chunk.group?.traverse((object) => {
       if (
@@ -376,10 +320,11 @@ export class MapHelper {
       .forEach((key) => delete this.meshes[key]);
   }
 
-  private readonly paintedGrounds = new Map<string, PaintedGround>();
-  /** Water animation: current frame of the animated water tiles. */
-  private waterFrame = 0;
-  private waterTimer?: ReturnType<typeof setInterval>;
+  /** The chunks' ground: painted tiles, reliefs, stairs. */
+  private readonly ground = new ChunkGround(
+    () => this.sceneMap.chunks,
+    (x, z) => this.cellAt(x, z)
+  );
 
   /** The ground cell (column, row from the chunk corner) under a world point, if any. */
   public cellAt(
@@ -402,91 +347,37 @@ export class MapHelper {
     row: number,
     tileId: string | null
   ) {
-    const key = col + "," + row;
-    chunk.tiles ??= {};
-    if (tileId) {
-      chunk.tiles[key] = tileId;
-    } else {
-      delete chunk.tiles[key];
-    }
-    const painted = this.paintedGround(chunk);
-    if (painted) {
-      this.drawCell(chunk, painted, col, row);
-    }
-    // The painted neighbors change their borders (autotiling), in this chunk or the next one
-    for (const [dc, dr] of NEIGHBORS) {
-      const n = this.neighborCell(chunk, col + dc, row + dr);
-      const nPainted =
-        n && n.chunk.tiles?.[n.col + "," + n.row]
-          ? this.paintedGround(n.chunk)
-          : null;
-      if (n && nPainted) {
-        this.drawCell(n.chunk, nPainted, n.col, n.row);
-      }
-    }
+    this.ground.paintCell(chunk, col, row, tileId);
   }
 
   /** Ground level of a cell (possibly in the next chunk; 0 outside the map). */
   public levelAt(chunk: SceneChunk, col: number, row: number): number {
-    const cell = this.neighborCell(chunk, col, row);
-    return cell?.chunk.heights?.[cell.col + "," + cell.row] ?? 0;
+    return this.ground.levelAt(chunk, col, row);
   }
 
   /** Ground level under a world point (0 outside the map or on flat ground). */
   public levelAtWorld(x: number, z: number): number {
-    const cell = this.cellAt(x, z);
-    return cell ? (cell.chunk.heights?.[cell.col + "," + cell.row] ?? 0) : 0;
+    return this.ground.levelAtWorld(x, z);
   }
 
   /** Side the stairs cell under a world point rises towards (null = no stairs there). */
   public stairsAt(x: number, z: number): StairsSide | null {
-    const cell = this.cellAt(x, z);
-    return cell
-      ? stairsSide(cell.chunk.stairs?.[cell.col + "," + cell.row])
-      : null;
+    return this.ground.stairsAt(x, z);
   }
 
   /** Is there a stairs cell under a world point? */
   public isStairsAt(x: number, z: number): boolean {
-    const cell = this.cellAt(x, z);
-    return !!cell?.chunk.stairs?.[cell.col + "," + cell.row];
+    return this.ground.isStairsAt(x, z);
   }
 
-  /**
-   * Puts / removes stairs on a cell: a ramp up one level towards `side` (null = no stairs), the stairs tile painted
-   * on it. 'auto' rises towards the neighbor exactly one level higher (north first), north if none.
-   */
+  /** Puts / removes stairs on a cell (see ChunkGround.setStairs). */
   public setStairs(
     chunk: SceneChunk,
     col: number,
     row: number,
     side: StairsSide | "auto" | null
   ) {
-    const key = col + "," + row;
-    chunk.stairs ??= {};
-    if (side === "auto") {
-      const level = this.levelAt(chunk, col, row);
-      const sides: [StairsSide, number, number][] = [
-        ["n", 0, -1],
-        ["e", 1, 0],
-        ["w", -1, 0],
-        ["s", 0, 1],
-      ];
-      side =
-        sides.find(
-          ([, dc, dr]) => this.levelAt(chunk, col + dc, row + dr) === level + 1
-        )?.[0] ?? "n";
-    }
-    if (side) {
-      chunk.stairs[key] = side;
-    } else {
-      delete chunk.stairs[key];
-    }
-    this.rebuildGround(chunk);
-    const painted = this.paintedGround(chunk);
-    if (painted) {
-      this.drawCell(chunk, painted, col, row);
-    }
+    this.ground.setStairs(chunk, col, row, side);
   }
 
   /** Sets the ground level of a cell and rebuilds the ground (and the next chunk's on a border: its walls). */
@@ -499,7 +390,7 @@ export class MapHelper {
     } else {
       delete chunk.heights[key];
     }
-    this.rebuildGround(chunk);
+    this.ground.rebuildGround(chunk);
     // The objects standing on the cell go up / down with it
     chunk.buildings.forEach((building) => {
       const bc = Math.floor((building.pos.x + chunk.size.x / 2) / TILE_SIZE);
@@ -520,284 +411,11 @@ export class MapHelper {
     const rows = chunk.size.y / TILE_SIZE;
     if (col === 0 || row === 0 || col === cols - 1 || row === rows - 1) {
       for (const [dc, dr] of NEIGHBORS) {
-        const n = this.neighborCell(chunk, col + dc, row + dr);
+        const n = this.ground.neighborCell(chunk, col + dc, row + dr);
         if (n && n.chunk !== chunk) {
-          this.rebuildGround(n.chunk);
+          this.ground.rebuildGround(n.chunk);
         }
       }
-    }
-  }
-
-  private wallMaterial?: THREE.MeshLambertMaterial;
-  /** Original flat ground of the chunks given reliefs (put back once every cell is flat again). */
-  private readonly flatGrounds = new Map<
-    string,
-    { geometry: THREE.BufferGeometry; castShadow: boolean }
-  >();
-
-  /**
-   * The chunk ground becomes a grid of cells at their level, with rock walls (see buildGroundGeometry); without any
-   * height nor stairs left, the original flat ground (2 triangles, one material, no shadow cast) comes back.
-   */
-  private rebuildGround(chunk: SceneChunk) {
-    const mesh = chunk.grounds[0]?.mesh;
-    if (!mesh) {
-      return;
-    }
-    const flat = this.flatGrounds.get(chunk.id);
-    const hasRelief =
-      Object.keys(chunk.heights ?? {}).length > 0 ||
-      Object.keys(chunk.stairs ?? {}).length > 0;
-    if (!hasRelief) {
-      if (flat) {
-        mesh.geometry.dispose();
-        mesh.geometry = flat.geometry;
-        mesh.castShadow = flat.castShadow;
-        if (Array.isArray(mesh.material)) {
-          mesh.material = mesh.material[0];
-        }
-        this.flatGrounds.delete(chunk.id);
-      }
-      return;
-    }
-    if (!flat) {
-      this.flatGrounds.set(chunk.id, {
-        geometry: mesh.geometry,
-        castShadow: mesh.castShadow,
-      });
-    }
-    const old = flat ? mesh.geometry : null;
-    mesh.geometry = buildGroundGeometry(
-      chunk,
-      (col, row) => this.levelAt(chunk, col, row),
-      (col, row) => stairsSide(chunk.stairs?.[col + "," + row])
-    );
-    old?.dispose(); // (the flat ground is kept)
-    if (!this.wallMaterial) {
-      const texture = new THREE.TextureLoader().load(TILESET_LINK);
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      this.wallMaterial = applyWeatherShader(
-        new THREE.MeshLambertMaterial({ map: texture })
-      );
-    }
-    if (!Array.isArray(mesh.material)) {
-      mesh.material = [mesh.material, this.wallMaterial];
-    }
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-  }
-
-  /** A cell given from a chunk, possibly out of it (then in the chunk next to it). */
-  private neighborCell(
-    chunk: SceneChunk,
-    col: number,
-    row: number
-  ): { chunk: SceneChunk; col: number; row: number } | null {
-    const cols = chunk.size.x / TILE_SIZE;
-    const rows = chunk.size.y / TILE_SIZE;
-    if (col >= 0 && row >= 0 && col < cols && row < rows) {
-      return { chunk, col, row };
-    }
-    const x = chunk.pos.x - chunk.size.x / 2 + (col + 0.5) * TILE_SIZE;
-    const z = chunk.pos.z - chunk.size.y / 2 + (row + 0.5) * TILE_SIZE;
-    return this.cellAt(x, z);
-  }
-
-  /** Does a neighbor terrain get a border? The water has none towards a beach (the sand tile draws the shore). */
-  private differs(terrainId: string, neighborId: string | undefined): boolean {
-    if (neighborId === terrainId) {
-      return false;
-    }
-    return !(terrainById(terrainId)?.blocking && neighborId === "sand");
-  }
-
-  private terrainIdAt(
-    chunk: SceneChunk,
-    col: number,
-    row: number
-  ): string | undefined {
-    const cell = this.neighborCell(chunk, col, row);
-    return cell?.chunk.tiles?.[cell.col + "," + cell.row];
-  }
-
-  /**
-   * The chunk ground switches to its own canvas texture (the original texture, the tiles over it), with its own
-   * material (the textures are shared between chunks). The canvas has 1 px per world unit like the ground textures.
-   */
-  private paintedGround(chunk: SceneChunk): PaintedGround | null {
-    const existing = this.paintedGrounds.get(chunk.id);
-    const ground = chunk.grounds[0];
-    if (existing || !ground?.mesh) {
-      return existing ?? null;
-    }
-    const canvas = document.createElement("canvas");
-    canvas.width = chunk.size.x;
-    canvas.height = chunk.size.y;
-    const ctx = canvas.getContext("2d")!;
-    ctx.imageSmoothingEnabled = false;
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.magFilter = THREE.NearestFilter;
-    const current = ground.mesh.material;
-    const old = (
-      Array.isArray(current) ? current[0] : current
-    ) as THREE.MeshLambertMaterial;
-    const material = applyWeatherShader(
-      new THREE.MeshLambertMaterial({ map: texture, side: old.side })
-    );
-    // (with reliefs, the mesh has a second material: the walls)
-    ground.mesh.material = Array.isArray(current)
-      ? [material, ...current.slice(1)]
-      : material;
-    const painted: PaintedGround = { ctx, texture, base: null };
-    this.paintedGrounds.set(chunk.id, painted);
-    // Once the original texture is there: drawn whole, then every painted cell
-    this.waterTimer ??= setInterval(() => this.animateWater(), WATER_STEP);
-    loadImage(ground.link).then((base) => {
-      painted.base = base;
-      ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
-      Object.keys(chunk.tiles ?? {}).forEach((key) => {
-        const [col, row] = key.split(",").map(Number);
-        this.drawCell(chunk, painted, col, row);
-      });
-      texture.needsUpdate = true;
-    });
-    return painted;
-  }
-
-  /** Redraws the open water cells (no border) of the visible painted chunks with the next animation frame. */
-  private animateWater() {
-    if (isGameAsleep()) {
-      return;
-    }
-    this.waterFrame++;
-    loadImage(TILESET_ANIM_LINK).then((img) =>
-      this.paintedGrounds.forEach((painted, chunkId) => {
-        const chunk = this.sceneMap.chunks.find((c) => c.id === chunkId);
-        if (!chunk?.visible || !chunk.tiles) {
-          return;
-        }
-        let changed = false;
-        Object.entries(chunk.tiles).forEach(([key, id]) => {
-          const terrain = terrainById(id);
-          if (!terrain?.blocking) {
-            return;
-          }
-          const [col, row] = key.split(",").map(Number);
-          const differs = NEIGHBORS.map(([dc, dr]) =>
-            this.differs(id, this.terrainIdAt(chunk, col + dc, row + dr))
-          );
-          const [c, r] = autotile(terrain, differs);
-          if (c !== terrain.center[0] || r !== terrain.center[1]) {
-            return; // shores stay still
-          }
-          const src = waterFramePos(id, this.waterFrame);
-          if (!src) {
-            return;
-          }
-          painted.ctx.drawImage(
-            img,
-            src.x,
-            src.y,
-            TILE_SIZE,
-            TILE_SIZE,
-            col * TILE_SIZE,
-            row * TILE_SIZE,
-            TILE_SIZE,
-            TILE_SIZE
-          );
-          changed = true;
-        });
-        if (changed) {
-          painted.texture.needsUpdate = true;
-        }
-      })
-    );
-  }
-
-  private drawCell(
-    chunk: SceneChunk,
-    painted: PaintedGround,
-    col: number,
-    row: number
-  ) {
-    const x = col * TILE_SIZE;
-    const y = row * TILE_SIZE;
-    const tileId = chunk.tiles?.[col + "," + row];
-    const terrain = terrainById(tileId);
-    const stairs = stairsSide(chunk.stairs?.[col + "," + row]);
-    if (stairs) {
-      loadImage(TILESET_LINK).then((img) => {
-        if (stairsSide(chunk.stairs?.[col + "," + row]) === stairs) {
-          // The steps are drawn for a ramp rising north: turned for the other sides
-          const src = tilesetPos(...STAIRS_TILE);
-          const ctx = painted.ctx;
-          ctx.save();
-          ctx.translate(x + TILE_SIZE / 2, y + TILE_SIZE / 2);
-          ctx.rotate(
-            { n: 0, e: Math.PI / 2, s: Math.PI, w: -Math.PI / 2 }[stairs]
-          );
-          ctx.drawImage(
-            img,
-            src.x,
-            src.y,
-            TILE_SIZE,
-            TILE_SIZE,
-            -TILE_SIZE / 2,
-            -TILE_SIZE / 2,
-            TILE_SIZE,
-            TILE_SIZE
-          );
-          ctx.restore();
-          painted.texture.needsUpdate = true;
-        }
-      });
-    } else if (terrain) {
-      loadImage(TILESET_LINK).then((img) => {
-        // (still the same terrain once loaded: the cell may have been repainted meanwhile)
-        if (chunk.tiles?.[col + "," + row] === tileId) {
-          // The tile whose borders match the neighbors (autotiling)
-          const ids = NEIGHBORS.map(([dc, dr]) =>
-            this.terrainIdAt(chunk, col + dc, row + dr)
-          );
-          const differs = ids.map((id) => this.differs(tileId!, id));
-          // Beach: every different neighbor is water
-          const others = ids.filter((id) => id !== tileId);
-          const shore =
-            others.length > 0 &&
-            others.every((id) => terrainById(id)?.blocking);
-          const src = tilesetPos(...autotile(terrain, differs, shore));
-          painted.ctx.drawImage(
-            img,
-            src.x,
-            src.y,
-            TILE_SIZE,
-            TILE_SIZE,
-            x,
-            y,
-            TILE_SIZE,
-            TILE_SIZE
-          );
-          painted.texture.needsUpdate = true;
-        }
-      });
-    } else if (painted.base) {
-      const sx = painted.base.width / chunk.size.x;
-      const sy = painted.base.height / chunk.size.y;
-      painted.ctx.drawImage(
-        painted.base,
-        x * sx,
-        y * sy,
-        TILE_SIZE * sx,
-        TILE_SIZE * sy,
-        x,
-        y,
-        TILE_SIZE,
-        TILE_SIZE
-      );
-      painted.texture.needsUpdate = true;
     }
   }
 
@@ -1207,7 +825,13 @@ export class MapHelper {
     }
 
     const bounds = new THREE.Box3().setFromObject(mesh);
-    const opacity = this.getOpacity(mesh, bounds, playerPos, canHide);
+    const opacity = meshOpacity(
+      this.originGame,
+      mesh,
+      bounds,
+      playerPos,
+      canHide
+    );
     // A hidden mesh is only kept for its shadow while it is inside the area where shadows are computed
     // (around the camera target): farther, it can't shade anything visible and is dropped completely.
     const target = this.originGame.getCameraTarget();
@@ -1218,97 +842,7 @@ export class MapHelper {
       bounds.min.z < target.z + SHADOW_AREA;
 
     mesh.children.forEach((child) =>
-      MapHelper.updateMeshOpacity(child, opacity, castsShadow)
+      applyMeshOpacity(child, opacity, castsShadow)
     );
-  }
-
-  private getOpacity(
-    mesh: THREE.Object3D,
-    bounds: THREE.Box3,
-    playerPos: THREE.Vector3,
-    canHide: boolean
-  ): number {
-    let opacity = 1;
-
-    const camera = this.originGame.camera;
-
-    // HIDE IF TOO CLOSE TO CAMERA (out of view at the bottom of the screen). The camera looks down at an angle:
-    // a point h high is seen along the same line of sight as the ground h × CAMERA_LOOK.z / CAMERA_LOOK.y further
-    // ahead, so a tall building (the lab, a tower) is still on screen when its base already left it.
-    const cameraZ = camera.position.z - TOO_CLOSE_LIMIT;
-    const visibleZ =
-      bounds.max.z -
-      ((bounds.max.y - bounds.min.y) * CAMERA_LOOK.z) / CAMERA_LOOK.y;
-    if (cameraZ < visibleZ) {
-      opacity = Math.max(0, 1 - (visibleZ - cameraZ) / SHADE_OFFSET);
-      return opacity;
-    }
-
-    // HIDE IF TOO FAR FOR CAMERA
-    // (farther when the editor zooms out)
-    const farLimit = TOO_FAR_LIMIT * Math.max(1, this.originGame.cameraZoom);
-    const dist = MathService.getDist(mesh.position, camera.position);
-    if (dist > farLimit) {
-      opacity = Math.max(0, 1 - (dist - farLimit) / SHADE_OFFSET);
-      return opacity;
-    }
-
-    if (
-      bounds.min.x < playerPos.x &&
-      bounds.max.x > playerPos.x &&
-      playerPos.z < bounds.min.z
-    ) {
-      const borderDist = Math.min(
-        Math.abs(playerPos.x - bounds.min.x),
-        Math.abs(playerPos.x - bounds.max.x)
-      );
-      const behindDist = Math.abs(playerPos.z - bounds.min.z);
-      const height = bounds.max.y - bounds.min.y + SHADE_OFFSET;
-      if (behindDist < height) {
-        const opacityOffsetX =
-          borderDist > SHADE_OFFSET ? 0 : 1 - borderDist / SHADE_OFFSET;
-        const opacityOffsetZ = behindDist > height ? 0 : behindDist / height;
-        const opacityOffset = Math.max(opacityOffsetX, opacityOffsetZ);
-        opacity = 0.7 + 0.3 * opacityOffset;
-      }
-    }
-
-    if (canHide) {
-      return opacity;
-    } else {
-      return opacity > 0 ? 1 : 0;
-    }
-  }
-
-  /**
-   * A hidden mesh (too close to the camera / too far) is not drawn but, while `castsShadow`, stays in the scene:
-   * it still casts its shadow, which would otherwise vanish at once from the visible ground (e.g. the lab's long
-   * shadow when walking past it). Hidden = no color and no depth written. Once its shadow can't reach the view
-   * anymore, it is removed (`visible = false`: no more drawing, shadow or weather effects on it).
-   */
-  private static updateMeshOpacity(
-    mesh: THREE.Object3D,
-    opacity: number,
-    castsShadow: boolean
-  ) {
-    if (!(mesh instanceof THREE.Mesh)) {
-      return;
-    }
-    const material = mesh.material as THREE.Material;
-    // Transparent only while fading: a transparent double sided material is drawn in two passes (back faces,
-    // then front faces), twice the draw calls; the cut-out texels are handled by the alphaTest anyway.
-    // One pass even while fading (the few overlapping faces of a fading building don't need the second one).
-    // Parts drawn without the depth test (a sign's text over its posts) stay in the transparent list: drawn from
-    // the farthest to the nearest, their order is right (the opaque list draws the nearest first).
-    material.transparent = (opacity > 0 && opacity < 1) || !material.depthTest;
-    material.forceSinglePass = true;
-    mesh.visible = opacity > 0 || castsShadow;
-    if (material.userData["depthWrite"] === undefined) {
-      material.userData["depthWrite"] = material.depthWrite;
-    }
-    const hidden = opacity <= 0;
-    material.colorWrite = !hidden;
-    material.depthWrite = hidden ? false : material.userData["depthWrite"];
-    material.opacity = Math.min(opacity, 1);
   }
 }
