@@ -10,10 +10,6 @@ import {
 } from "@angular/core";
 import {
   LucideArrowLeft,
-  LucideCoins,
-  LucideSkull,
-  LucideStar,
-  LucideTrophy,
   LucideBackpack,
   LucideFootprints,
   LucideMoonStar,
@@ -24,6 +20,7 @@ import {
   LucideSwords,
 } from "@lucide/angular";
 import { BattleService } from "../shared/battle.service";
+import { BattleOutcomeComponent } from "../battle-outcome/battle-outcome.component";
 import {
   CommandKind,
   GAUGE_ACTION,
@@ -56,11 +53,8 @@ interface CommandItem {
 @Component({
   selector: "battle-hud",
   imports: [
+    BattleOutcomeComponent,
     LucideArrowLeft,
-    LucideCoins,
-    LucideSkull,
-    LucideStar,
-    LucideTrophy,
     LucideBackpack,
     LucideFootprints,
     LucideMoonStar,
@@ -198,12 +192,6 @@ export class BattleHudComponent {
     this.menu.set("main");
     this.selected.set(0);
   }
-
-  /** The end window's member cards: always 4 places. */
-  protected readonly outcomeMembers = computed(() => {
-    const members = this.view()?.outcome?.members ?? [];
-    return Array.from({ length: TEAM_PLACES }, (_, i) => members[i] ?? null);
-  });
 
   /** The end window read: the fight closes. */
   protected closeOutcome(): void {
