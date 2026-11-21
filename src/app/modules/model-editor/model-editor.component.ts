@@ -15,14 +15,8 @@ import {
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-  LucideArrowDown,
-  LucideArrowDownLeft,
-  LucideArrowLeft,
   LucideArrowLeftRight,
-  LucideArrowRight,
-  LucideArrowUp,
   LucideArrowUpDown,
-  LucideArrowUpRight,
   LucideBox,
   LucideBrush,
   LucideChevronDown,
@@ -32,7 +26,6 @@ import {
   LucideCopy,
   LucideDownload,
   LucideDynamicIcon,
-  LucideEraser,
   LucideHand,
   LucideHouse,
   LucideLink,
@@ -41,12 +34,8 @@ import {
   LucideMinus,
   LucideMoon,
   LucideMousePointerClick,
-  LucideMountain,
   LucidePackage,
-  LucidePaintBucket,
   LucidePalette,
-  LucidePencil,
-  LucidePipette,
   LucidePlus,
   LucideRectangleHorizontal,
   LucideRedo2,
@@ -54,8 +43,6 @@ import {
   LucideRotateCw,
   LucideSettings2,
   LucideShapes,
-  LucideSlash,
-  LucideSparkles,
   LucideSquare,
   LucideSquareDashed,
   LucideSun,
@@ -63,7 +50,6 @@ import {
   LucideUndo2,
   LucideUpload,
   LucideX,
-  LucideIcon,
 } from "@lucide/angular";
 import { ActivatedRoute } from "@angular/router";
 import { EscapeService } from "../../core/shared/service/escape.service";
@@ -101,6 +87,7 @@ import {
   unlinkFace,
 } from "./shared/model-ops";
 import { ModelHistory } from "./shared/model-history";
+import { ModelSaver } from "./shared/model-saver";
 import {
   forgetStoredModel,
   loadImportedPalette,
@@ -108,7 +95,6 @@ import {
   loadStoredModel,
   saveImportedPalette,
   saveRecentColors,
-  saveStoredModel,
   StoredPalette,
   storedModelIds,
 } from "./shared/model-storage";
@@ -127,178 +113,32 @@ import {
 } from "./shared/pixel-tools";
 import { PixelCanvasComponent } from "./pixel-canvas/pixel-canvas.component";
 import { haptic } from "../../core/shared/haptics";
-import { readJson, writeJson } from "../../core/shared/local-store";
-
-const FACE_LABELS: Record<BoxFace, string> = {
-  front: "Avant",
-  back: "Arrière",
-  left: "Gauche",
-  right: "Droite",
-  top: "Dessus",
-  bottom: "Dessous",
-};
-
-/** Selected part, and one of its faces (null: the whole part). */
-interface Selection {
-  partIndex: number;
-  face: BoxFace | null;
-}
-
-type Axis = "x" | "y" | "z";
-
-/** Pointer moves below this (px) between press and release: a click (select), not a camera drag. */
-const CLICK_TOLERANCE = 4;
-const NEW_MODEL_ID = "nouveau-modele";
-
-/** Selection: click a face, move the part with the arrows. Painting: the tool draws on the faces in 3D too. */
-type Mode = "select" | "paint";
-
-const TOOLS: {
-  id: Tool;
-  icon: LucideIcon;
-  label: string;
-  short: string;
-  key: string;
-}[] = [
-  {
-    id: "pencil",
-    icon: LucidePencil,
-    label: "Crayon",
-    short: "Crayon",
-    key: "p",
-  },
-  {
-    id: "eraser",
-    icon: LucideEraser,
-    label: "Gomme (transparent)",
-    short: "Gomme",
-    key: "e",
-  },
-  {
-    id: "picker",
-    icon: LucidePipette,
-    label: "Pipette",
-    short: "Pipette",
-    key: "i",
-  },
-  {
-    id: "fill",
-    icon: LucidePaintBucket,
-    label: "Pot de peinture",
-    short: "Pot",
-    key: "f",
-  },
-  { id: "line", icon: LucideSlash, label: "Ligne", short: "Ligne", key: "l" },
-  {
-    id: "rect",
-    icon: LucideSquare,
-    label: "Rectangle",
-    short: "Rectangle",
-    key: "r",
-  },
-];
-
-const LAYERS: {
-  id: LayerName;
-  label: string;
-  icon: LucideIcon;
-  short: string;
-  hint: string;
-}[] = [
-  {
-    id: "color",
-    label: "Couleur",
-    icon: LucidePalette,
-    short: "Pixels",
-    hint: "Les couleurs des pixels.",
-  },
-  {
-    id: "specular",
-    label: "Brillance",
-    icon: LucideSparkles,
-    short: "Reflets",
-    hint: "Blanc : reflets du soleil · Noir : mat",
-  },
-  {
-    id: "night",
-    label: "Nuit",
-    icon: LucideMoon,
-    short: "Lumières",
-    hint: "Ce qui s'allume la nuit (lumière chaude) · Noir : éteint",
-  },
-  {
-    id: "bump",
-    label: "Relief",
-    icon: LucideMountain,
-    short: "Bosses",
-    hint: "Blanc : en relief · Noir : en creux (seules les différences comptent)",
-  },
-];
-
-/** Bottom sheets of the phone layout (one open at a time). */
-type Sheet = "model" | "shapes" | "add" | "layer" | "face" | "palette";
-
-/** Rows of numbers of the selected part, changed with − / + (step) or typed. */
-type VecKind = "size" | "pos" | "rot";
-const VECS: { kind: VecKind; label: string; step: number }[] = [
-  { kind: "size", label: "Taille", step: 1 },
-  { kind: "pos", label: "Position", step: 1 },
-  { kind: "rot", label: "Rotation °", step: 15 },
-];
-
-/** Arrows moving the selected part on a phone (no keyboard). */
-const NUDGES: {
-  axis: "x" | "y" | "z";
-  delta: number;
-  icon: LucideIcon;
-  label: string;
-}[] = [
-  { axis: "x", delta: -1, icon: LucideArrowLeft, label: "x −" },
-  { axis: "x", delta: 1, icon: LucideArrowRight, label: "x +" },
-  { axis: "y", delta: 1, icon: LucideArrowUp, label: "y +" },
-  { axis: "y", delta: -1, icon: LucideArrowDown, label: "y −" },
-  { axis: "z", delta: -1, icon: LucideArrowUpRight, label: "z −" },
-  { axis: "z", delta: 1, icon: LucideArrowDownLeft, label: "z +" },
-];
-
-/** Width below which the editor uses the phone layout (bottom bars and sheets instead of the side panel). */
-const PHONE_QUERY = "(max-width: 700px)";
-/** Recent colors shown in the phone's tool bar. */
-const TRAY_COLORS = 7;
-
-/** Shades of the grayscale layers' palette. */
-const GRAYS = [0, 32, 64, 96, 128, 160, 192, 224, 255];
-
-/** Sections of the panel that can be folded. */
-type PanelSection =
-  "model" | "parts" | "part" | "layer" | "drawing" | "color" | "face";
-const SECTIONS_KEY = "pk-model-editor-sections";
-const BIG_VIEW_KEY = "pk-model-editor-big-view";
-
-/** A saved view setting, completed with the defaults (what it misses, or all when unreadable). */
-function loadJson<T>(key: string, fallback: T): T {
-  return { ...fallback, ...readJson<Partial<T>>(key) };
-}
-
-/** Delay before the model is saved in the browser after a change (ms). */
-const SAVE_DELAY = 400;
-const RECENT_COLORS = 12;
-/** Time to confirm going back to the game's version (ms). */
-const CONFIRM_TIME = 3000;
-
-/** Waiting for a click on the target face: link it to the selected face, or copy the selected face's pixels on it. */
-interface PendingFaceAction {
-  kind: "link" | "copy";
-  texId: string;
-}
-
-/** A stroke in progress, on one face texture. */
-interface ActiveStroke {
-  texId: string;
-  stroke: PaintStroke;
-  /** Started on the 3D view (the pointer is followed there). */
-  in3d: boolean;
-}
+import { writeJson } from "../../core/shared/local-store";
+import {
+  FACE_LABELS,
+  Selection,
+  Axis,
+  CLICK_TOLERANCE,
+  NEW_MODEL_ID,
+  Mode,
+  TOOLS,
+  LAYERS,
+  Sheet,
+  VecKind,
+  VECS,
+  NUDGES,
+  PHONE_QUERY,
+  TRAY_COLORS,
+  GRAYS,
+  PanelSection,
+  SECTIONS_KEY,
+  BIG_VIEW_KEY,
+  loadJson,
+  RECENT_COLORS,
+  CONFIRM_TIME,
+  PendingFaceAction,
+  ActiveStroke,
+} from "./model-editor.options";
 
 /**
  * 3D model editor (/modeles): opens a model of the game or a new one, adds / removes / duplicates / moves its
@@ -375,12 +215,19 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   /** A second finger touched the 3D view: the press is a pinch (zoom / pan), not a tap nor a stroke. */
   private multiTouch = false;
   private readonly history = new ModelHistory();
-  private saveTimer: ReturnType<typeof setTimeout> | null = null;
-  /** Saves one after the other (IndexedDB is asynchronous). */
-  private saving: Promise<void> = Promise.resolve();
   private confirmTimer: ReturnType<typeof setTimeout> | null = null;
-  /** Id the model is saved under in the browser (changes with a rename). */
-  private storedAs: string | null = null;
+  /** Saves the model in the browser a little after each change. */
+  private readonly saver = new ModelSaver(
+    () => this.model(),
+    async (ok) => {
+      if (!ok) {
+        this.status.set(
+          "Enregistrement impossible dans le navigateur : pense à exporter."
+        );
+      }
+      await this.refreshStoredIds();
+    }
+  );
 
   protected readonly modelIds = CODE_MODELS.map((m) => m.id);
   /** Models saved in the browser (edited models of the game, and new ones). */
@@ -598,7 +445,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.phoneQuery.removeEventListener("change", this.onPhoneChange);
-    this.flushSave();
+    this.saver.flush();
     if (this.confirmTimer) {
       clearTimeout(this.confirmTimer);
     }
@@ -609,7 +456,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   /** Opens the browser's version of a model if there is one, else the game's. */
   protected async open(id: string, fromGame = false) {
-    await this.flushSave();
+    await this.saver.flush();
     const stored = fromGame ? null : await loadStoredModel(id);
     if (stored) {
       this.show(stored, id);
@@ -639,7 +486,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   protected create() {
     this.show(newModel(this.freeId(NEW_MODEL_ID)), null);
-    this.save();
+    this.saver.save();
     this.select({ partIndex: 0, face: null });
   }
 
@@ -669,7 +516,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.confirmRevert.set(false);
-    await this.flushSave();
+    await this.saver.flush();
     await forgetStoredModel(id);
     await this.refreshStoredIds();
     this.open(id, true);
@@ -951,7 +798,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
         this.useColor(this.color());
       }
       this.paletteVersion.update((v) => v + 1);
-      this.scheduleSave();
+      this.saver.schedule();
     }
     this.active = null;
     if (this.scene) {
@@ -1348,8 +1195,8 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   // --- Helpers ---
 
   private show(model: EditableModel, storedAs: string | null) {
-    this.flushSave();
-    this.storedAs = storedAs;
+    this.saver.flush();
+    this.saver.storedAs = storedAs;
     this.history.clear();
     this.updateHistory();
     this.pending.set(null);
@@ -1369,7 +1216,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.select(sel && model.parts[sel.partIndex] ? sel : null);
     this.paintVersion.update((v) => v + 1);
     this.paletteVersion.update((v) => v + 1);
-    this.scheduleSave();
+    this.saver.schedule();
   }
 
   private record(model: EditableModel) {
@@ -1380,42 +1227,6 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   private updateHistory() {
     this.canUndo.set(this.history.canUndo);
     this.canRedo.set(this.history.canRedo);
-  }
-
-  private scheduleSave() {
-    if (this.saveTimer) {
-      clearTimeout(this.saveTimer);
-    }
-    this.saveTimer = setTimeout(() => this.save(), SAVE_DELAY);
-  }
-
-  /** Saves now a change waiting to be saved; resolves when everything is written. */
-  private flushSave(): Promise<void> {
-    if (this.saveTimer) {
-      this.save();
-    }
-    return this.saving;
-  }
-
-  private save() {
-    if (this.saveTimer) {
-      clearTimeout(this.saveTimer);
-      this.saveTimer = null;
-    }
-    const model = this.model();
-    if (!model) {
-      return;
-    }
-    const previousId = this.storedAs ?? undefined;
-    this.storedAs = model.id;
-    this.saving = this.saving.then(async () => {
-      if (!(await saveStoredModel(model, previousId))) {
-        this.status.set(
-          "Enregistrement impossible dans le navigateur : pense à exporter."
-        );
-      }
-      await this.refreshStoredIds();
-    });
   }
 
   private async refreshStoredIds() {
@@ -1432,7 +1243,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       await this.requestClose();
       return;
     }
-    await this.flushSave();
+    await this.saver.flush();
     const url = new URL(location.href);
     url.hash = "#/";
     location.assign(url);
@@ -1441,7 +1252,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
 
   /** Over the game (Jeu, the back button): the model is saved, then the panel closes (the game reads it). */
   async requestClose(): Promise<void> {
-    await this.flushSave();
+    await this.saver.flush();
     this.closed.emit();
   }
 
@@ -1464,7 +1275,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.record(model);
     change(model);
     this.model.set({ ...model });
-    this.scheduleSave();
+    this.saver.schedule();
     if (rebuild) {
       this.scene?.refresh(this.model()!);
       const sel = this.selection();
