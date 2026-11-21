@@ -24,6 +24,8 @@ import { TouchPadComponent } from "../../core/touch-pad/touch-pad.component";
 import { MessageComponent } from "../../core/message/message.component";
 import { TeleportComponent } from "./teleport/teleport.component";
 import { FightUiComponent } from "../fight/fight-ui/fight-ui.component";
+import { BattleHudComponent } from "../battle/battle-hud/battle-hud.component";
+import { BattleService } from "../battle/shared/battle.service";
 import {
   EditorBarComponent,
   EditorPanel,
@@ -66,6 +68,7 @@ import { isTyping } from "../../core/shared/typing";
     MessageComponent,
     TeleportComponent,
     FightUiComponent,
+    BattleHudComponent,
     WeatherPanelComponent,
     EditorBarComponent,
     ReleaseNotesComponent,
@@ -111,12 +114,19 @@ export class GameComponent {
   protected readonly soundMuted = this.gameService.soundMuted;
   protected readonly musicVolume = this.gameService.musicVolume;
   protected readonly GameMode = GameMode;
+  private readonly battle = inject(BattleService);
   /** Goes up when the models change (back from the model editor). */
   protected readonly modelsVersion = this.gameService.modelsVersion;
   /** Playing on the map (not editing, not fighting, loaded): the game mode's own interface (clock, Créer, Menu). */
   protected readonly playing = computed(() => {
     const hud = this.hud();
-    return !!hud && hud.mode === GameMode.MAP && !hud.editMode && !hud.loading;
+    return (
+      !!hud &&
+      hud.mode === GameMode.MAP &&
+      !hud.editMode &&
+      !hud.loading &&
+      !this.battle.view()
+    );
   });
   /** An editor opened over the game (a full screen panel), null: none. */
   protected readonly editorPanel = signal<EditorPanel | null>(null);

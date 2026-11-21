@@ -25,11 +25,14 @@ import {
   setInTeam,
 } from "../../../database-editor/shared/party";
 import { loadDatabase } from "../../../database-editor/shared/database-storage";
+import { BattleService } from "../../../battle/shared/battle.service";
+import { BattleResult } from "../../../battle/shared/battle-types";
 
 @Service()
 export class SequenceService {
   private readonly coreService = inject(CoreService);
   private readonly keyService = inject(KeyService);
+  private readonly battleService = inject(BattleService);
 
   private sequence: SceneEventSequence | null = null;
 
@@ -50,8 +53,7 @@ export class SequenceService {
   private context: (() => EventContext) | null = null;
 
   /**
-   * The fight being played. The combat doesn't exist yet (docs/idees.md, point 9): the player chooses how it ends,
-   * to try the event's branches; a victory gives the loot (shown in a message, then the 'win' branch).
+   * The fight being played (BattleService); a victory gives the loot (shown in a message, then the 'win' branch).
    */
   private fight: { group: string; result?: string } | null = null;
 
@@ -73,6 +75,7 @@ export class SequenceService {
   stop(): void {
     this.sequence = null;
     this.fight = null;
+    this.battleService.cancel();
     this.messageState.set(null);
   }
 
@@ -86,14 +89,6 @@ export class SequenceService {
         this.fight = null;
         this.nextSequence(fight.result);
         return;
-      }
-      if (choiceKey === "win") {
-        const loot = this.giveLoot(fight.group);
-        if (loot) {
-          fight.result = "win";
-          this.messageState.set({ text: loot });
-          return;
-        }
       }
       this.fight = null;
     }
@@ -179,19 +174,22 @@ export class SequenceService {
     }
   }
 
-  /** For now: asks how the fight ends (Victoire, Défaite, and Fuite when the group allows it). */
+  /** The fight against a group; then the event's branch for how it ended (a victory: its loot first). */
   private startFight(groupId: string): void {
-    const group = loadDatabase().groups.find((g) => g.id === groupId);
     this.fight = { group: groupId };
-    this.messageState.set({
-      name: "Combat",
-      text: `${group?.name ?? "Des ennemis"} ! (Le combat arrive bientôt : choisis comment il se termine.)`,
-      choices: [
-        { key: "win", text: "Victoire" },
-        { key: "lose", text: "Défaite" },
-        ...((group?.canFlee ?? true) ? [{ key: "flee", text: "Fuite" }] : []),
-      ],
-    });
+    this.battleService.start(groupId, (result) => this.fightEnded(result));
+  }
+
+  private fightEnded(result: BattleResult): void {
+    const fight = this.fight;
+    const loot = fight && result === "win" ? this.giveLoot(fight.group) : null;
+    if (fight && loot) {
+      fight.result = "win";
+      this.messageState.set({ text: loot });
+      return;
+    }
+    this.fight = null;
+    this.nextSequence(result);
   }
 
   /** A victory's loot: the enemies' money, and their items by chance. « Victoire ! 16 pièces, Potion. » (null: nothing). */

@@ -1,0 +1,357 @@
+/* The fight's interface (design/combat.pen): small and light, in the dialogue window's style (white boxes, thin
+   grey border, soft shadow, Roboto). Only the controls catch clicks. */
+
+:host {
+  --box: #fff;
+  --box-border: #eee;
+  --ink: #1b1b1f;
+  --ink-soft: #6b6e7a;
+  --pick: #1e90ff;
+  --foe: #e0554a;
+  --hp: #4cc06a;
+  --mp: #3f8ef0;
+  --veil: #0a0c1866;
+  --shadow: 1px 2px 3px #00000026;
+
+  position: absolute;
+  inset: 0;
+  z-index: 700;
+  pointer-events: none;
+  font-family: Roboto, sans-serif;
+  color: var(--ink);
+}
+
+/* ---------- The action gauge: a thin line, small tokens ---------- */
+
+.gauge {
+  position: absolute;
+  top: calc(12px + var(--safe-top));
+  left: 50%;
+  translate: -50% 0;
+  width: min(520px, calc(100% - 24px));
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 20px;
+  border-radius: 12px;
+  background: var(--veil);
+}
+
+.track {
+  position: relative;
+  top: 17px;
+  height: 4px;
+
+  .zone {
+    position: absolute;
+    top: 0;
+    height: 4px;
+
+    &.wait {
+      left: 0;
+      border-radius: 2px 0 0 2px;
+      background: #ffffff59;
+    }
+
+    &.command {
+      background: var(--pick);
+    }
+
+    &.action {
+      border-radius: 0 2px 2px 0;
+      background: var(--foe);
+    }
+  }
+
+  .label {
+    position: absolute;
+    top: 7px;
+    font-size: 9px;
+    font-weight: 700;
+
+    &.command {
+      color: #9fc8ff;
+    }
+
+    &.action {
+      color: #ffaaa3;
+    }
+  }
+}
+
+.token {
+  position: absolute;
+  top: 2px;
+  width: 22px;
+  height: 22px;
+  translate: -50% -50%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--pick);
+  background: var(--box);
+  box-shadow: var(--shadow);
+  transition: left 120ms linear;
+
+  &.foe {
+    border-color: var(--foe);
+  }
+
+  img {
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+  }
+}
+
+/* ---------- The weather ---------- */
+
+.weather {
+  position: absolute;
+  top: calc(18px + var(--safe-top));
+  right: calc(16px + var(--safe-right));
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: var(--veil);
+  color: #ffffffdd;
+  font-size: 11px;
+
+  svg {
+    font-size: 12px;
+    color: #f2d067;
+  }
+}
+
+/* ---------- How the fight ends (for now) ---------- */
+
+.end {
+  position: absolute;
+  right: calc(16px + var(--safe-right));
+  bottom: calc(90px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  pointer-events: auto;
+
+  .end-title {
+    margin-bottom: 3px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--veil);
+    color: #ffffffdd;
+    font-size: 11px;
+  }
+
+  button {
+    width: 134px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 10px;
+    border-radius: 7px;
+    border: 1.5px solid #fafafa;
+    background: var(--box);
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    font: 500 12.5px Roboto, sans-serif;
+    cursor: pointer;
+
+    svg {
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    &:hover, &:focus-visible {
+      border-color: var(--pick);
+      color: var(--pick);
+      outline: none;
+
+      svg {
+        color: var(--pick);
+      }
+    }
+  }
+}
+
+/* ---------- The team: 4 places ---------- */
+
+.team {
+  position: absolute;
+  left: calc(16px + var(--safe-left));
+  bottom: calc(16px + var(--safe-bottom));
+  display: flex;
+  gap: 6px;
+}
+
+.card {
+  width: 180px;
+  height: 54px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  border: 2px solid var(--box-border);
+  background: var(--box);
+  box-shadow: var(--shadow);
+
+  &.free {
+    justify-content: center;
+    border: 1.5px solid #ffffff40;
+    background: none;
+    box-shadow: none;
+    color: #ffffff70;
+    font-size: 11px;
+  }
+
+  .portrait {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    image-rendering: pixelated;
+  }
+
+  .info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    strong {
+      font-size: 12px;
+    }
+
+    small {
+      font-size: 10px;
+      color: var(--ink-soft);
+    }
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  b {
+    font-size: 9px;
+  }
+
+  .track {
+    top: 0;
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: #e8ebf1;
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      border-radius: 2px;
+    }
+  }
+
+  .value {
+    font-size: 10px;
+  }
+
+  &.hp {
+    b { color: var(--hp); }
+    .track span { background: var(--hp); }
+  }
+
+  &.mp {
+    b { color: var(--mp); }
+    .track span { background: var(--mp); }
+  }
+}
+
+/* Phones: the 4 cards share the width, smaller */
+@media (max-width: 760px) {
+  .team {
+    right: calc(12px + var(--safe-right));
+    left: calc(12px + var(--safe-left));
+    bottom: calc(12px + var(--safe-bottom));
+    gap: 5px;
+  }
+
+  .card {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    height: 62px;
+    flex-wrap: wrap;
+    align-content: center;
+    gap: 3px 5px;
+    padding: 5px 6px;
+    border-radius: 8px;
+
+    .portrait {
+      width: 24px;
+      height: 24px;
+    }
+
+    .info {
+      display: contents;
+    }
+
+    .name-row {
+      flex: 1;
+      flex-direction: column;
+      align-items: flex-start;
+
+      strong {
+        font-size: 11px;
+      }
+
+      small {
+        font-size: 8.5px;
+      }
+    }
+
+    .bar {
+      flex-basis: 100%;
+
+      b {
+        display: none;
+      }
+
+      .value {
+        font-size: 8.5px;
+        font-weight: 600;
+      }
+    }
+
+    &.hp .value { color: var(--hp); }
+  }
+
+  .end {
+    bottom: calc(86px + var(--safe-bottom));
+    right: calc(12px + var(--safe-right));
+  }
+
+  /* Under the gauge (which takes the width) */
+  .weather {
+    top: calc(56px + var(--safe-top));
+    right: auto;
+    left: calc(12px + var(--safe-left));
+    height: 22px;
+    font-size: 10px;
+  }
+}

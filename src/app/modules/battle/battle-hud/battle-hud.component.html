@@ -1,0 +1,90 @@
+@if (view(); as v) {
+  <div class="gauge" aria-label="Jauge d'action">
+    <div class="track">
+      <span class="zone wait" [style.width.%]="commandAt"></span>
+      <span
+        class="zone command"
+        [style.left.%]="commandAt"
+        [style.width.%]="actionAt - commandAt"
+      ></span>
+      <span
+        class="zone action"
+        [style.left.%]="actionAt"
+        [style.width.%]="100 - actionAt"
+      ></span>
+      <small class="label command" [style.left.%]="commandAt + 6">COM</small>
+      <small class="label action" [style.left.%]="actionAt + 1">ACT</small>
+      @for (f of v.fighters; track f.id) {
+        <span
+          class="token"
+          [class.foe]="f.side === 'foe'"
+          [style.left.%]="f.gauge * 100"
+          [attr.title]="f.name"
+        >
+          @if (f.icon) {
+            <img [src]="f.icon" alt="" />
+          }
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="weather">
+    @if (night()) {
+      <svg lucideMoonStar></svg>
+    } @else {
+      <svg lucideSun></svg>
+    }
+    {{ night() ? "Nuit" : "Jour" }} · {{ weatherLabel() }}
+  </div>
+
+  <!-- For now: the player chooses how the fight ends (the commands come at the next step) -->
+  <div class="end" role="group" aria-label="Fin du combat">
+    <span class="end-title">{{ v.groupName }} · fin du combat</span>
+    <button type="button" (click)="end('win')">
+      <svg lucideTrophy></svg> Victoire
+    </button>
+    <button type="button" (click)="end('lose')">
+      <svg lucideSkull></svg> Défaite
+    </button>
+    @if (v.canFlee) {
+      <button type="button" (click)="end('flee')">
+        <svg lucideFootprints></svg> Fuite
+      </button>
+    }
+  </div>
+
+  <div class="team">
+    @for (f of team(); track $index) {
+      @if (f) {
+        <div class="card">
+          @if (f.portrait) {
+            <img class="portrait" [src]="f.portrait" alt="" />
+          }
+          <div class="info">
+            <div class="name-row">
+              <strong>{{ f.name }}</strong>
+              <small>Niv. {{ f.level }}</small>
+            </div>
+            <div class="bar hp">
+              <b>PV</b>
+              <span class="track"
+                ><span [style.width.%]="percent(f.hp, f.hpMax)"></span
+              ></span>
+              <span class="value">{{ f.hp }}</span>
+            </div>
+            <div class="bar mp">
+              <b>PM</b>
+              <span class="track"
+                ><span [style.width.%]="percent(f.mp, f.mpMax)"></span
+              ></span>
+              <span class="value">{{ f.mp }}</span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="card free">Place libre</div>
+      }
+    }
+  </div>
+}

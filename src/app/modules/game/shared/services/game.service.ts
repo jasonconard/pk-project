@@ -4,6 +4,7 @@ import { reloadBrowserModels } from "../model/browser-models";
 import { GameAction } from "../model/GameAction";
 import { MapHelper } from "../model/MapHelper";
 import * as THREE from "three";
+import { BattleService } from "../../../battle/shared/battle.service";
 import { GameMode, Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
 import { QUALITY_CHOICES, QualityMode } from "../model/Quality";
@@ -195,6 +196,7 @@ export class GameService {
   private readonly fightService = inject(FightService);
   private readonly gameMapService = inject(GameMapService);
   private readonly mapEditorService = inject(MapEditorService);
+  private readonly battleService = inject(BattleService);
   private readonly sequenceService = inject(SequenceService);
 
   private game: Game | null = null;
@@ -420,6 +422,7 @@ export class GameService {
       }
     }, TIME_STEP);
 
+    this.battleService.attach(game);
     this.animate(game);
 
     return game;
@@ -473,6 +476,7 @@ export class GameService {
       const diag = game.diagnostics;
       diag.frameStart(game.renderer);
       diag.measure("weather", () => game.updateLights(dt));
+      this.battleService.update(dt);
       diag.measure("render", () => game.renderFrame());
       diag.frameEnd(game.renderer);
     }
