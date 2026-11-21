@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.38',
+    date: '2026-11-21',
+    notes: [
+      'Base de données : chaque personnage et chaque ennemi a maintenant une planche de combat, avec ses animations : attente, marche, attaque, attaque forte, incantation, magie, coup reçu et mort.',
+      'La planche s\'importe en PNG : ses images sont comptées toutes seules, et un aperçu les joue dans les 4 directions.',
+      'Pour chaque animation, on règle sa vitesse, si elle tourne en boucle, et l\'image où le coup touche.',
+      'Le gluant a sa planche : un corps de gelée qui tremble, s\'étale en avançant et fond quand il est vaincu.',
+    ],
+  },
+  {
     version: '0.0.37',
     date: '2026-11-20',
     notes: [
