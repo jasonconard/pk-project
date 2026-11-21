@@ -141,135 +141,111 @@
         },
         {
           "type": "frame",
-          "id": "VSZFj",
-          "x": 300,
-          "y": 18,
+          "id": "auUbu",
+          "x": 380,
+          "y": 14,
           "name": "Action gauge",
-          "width": 680,
-          "height": 92,
-          "fill": "$box",
-          "cornerRadius": 16,
-          "stroke": "$box-border",
-          "strokeWidth": 4,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
+          "width": 520,
+          "height": 40,
+          "fill": "#0a0c1866",
+          "cornerRadius": 12,
           "layout": "none",
           "children": [
             {
               "type": "rectangle",
               "cornerRadius": [
-                6,
+                2,
                 0,
                 0,
-                6
+                2
               ],
-              "id": "P3PwqQ",
-              "x": 30,
-              "y": 50,
+              "id": "X0nmN8",
+              "x": 20,
+              "y": 20,
               "name": "Zone attente",
-              "fill": "#e8ebf1",
-              "width": 434,
-              "height": 12
+              "fill": "#ffffff59",
+              "width": 336,
+              "height": 4
             },
             {
               "type": "rectangle",
-              "id": "jLkPA",
-              "x": 464,
-              "y": 50,
+              "id": "M1w9T7",
+              "x": 356,
+              "y": 20,
               "name": "Zone commande",
-              "fill": "#d3e6ff",
-              "width": 99.20000000000002,
-              "height": 12
+              "fill": "$pick",
+              "width": 76.80000000000001,
+              "height": 4
             },
             {
               "type": "rectangle",
               "cornerRadius": [
                 0,
-                6,
-                6,
+                2,
+                2,
                 0
               ],
-              "id": "haQVc",
-              "x": 563.2,
-              "y": 50,
+              "id": "tFixc",
+              "x": 432.8,
+              "y": 20,
               "name": "Zone action",
-              "fill": "#ffdcd8",
-              "width": 86.80000000000001,
-              "height": 12
-            },
-            {
-              "type": "text",
-              "id": "J6njJ",
-              "x": 30,
-              "y": 67,
-              "name": "Label Attente",
-              "fill": "$ink-soft",
-              "content": "Attente",
-              "fontFamily": "Roboto",
-              "fontSize": 12,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "vjgzd",
-              "x": 468,
-              "y": 67,
-              "name": "Label Commande",
-              "fill": "$pick",
-              "content": "Commande",
-              "fontFamily": "Roboto",
-              "fontSize": 12,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "MdCjg",
-              "x": 567.2,
-              "y": 67,
-              "name": "Label Action",
               "fill": "$foe",
-              "content": "Action",
+              "width": 67.2,
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "L1Sm5",
+              "x": 384.8,
+              "y": 28,
+              "name": "Label COM",
+              "fill": "#9fc8ff",
+              "content": "COM",
               "fontFamily": "Roboto",
-              "fontSize": 12,
-              "fontWeight": "600"
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "EN5Cd",
+              "x": 437.6,
+              "y": 28,
+              "name": "Label ACT",
+              "fill": "#ffaaa3",
+              "content": "ACT",
+              "fontFamily": "Roboto",
+              "fontSize": 9,
+              "fontWeight": "700"
             },
             {
               "type": "frame",
-              "id": "hT9kZ",
-              "x": 185.60000000000002,
-              "y": 20,
+              "id": "uXs9e",
+              "x": 143.4,
+              "y": 11,
               "name": "Token Slime A",
-              "width": 36,
-              "height": 36,
+              "width": 22,
+              "height": 22,
               "fill": "$box",
-              "cornerRadius": 18,
+              "cornerRadius": 11,
               "stroke": "$foe",
-              "strokeWidth": 3,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "UsoXl",
-                  "x": 5,
-                  "y": 5,
+                  "id": "b77gC2",
+                  "x": 3,
+                  "y": 3,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -277,40 +253,40 @@
                     "url": "images/combat/icon-slime.png",
                     "mode": "stretch"
                   },
-                  "width": 26,
-                  "height": 26
+                  "width": 16,
+                  "height": 16
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "G2W001",
-              "x": 303.4,
-              "y": 20,
+              "id": "xvx1D",
+              "x": 234.6,
+              "y": 11,
               "name": "Token Slime B",
-              "width": 36,
-              "height": 36,
+              "width": 22,
+              "height": 22,
               "fill": "$box",
-              "cornerRadius": 18,
+              "cornerRadius": 11,
               "stroke": "$foe",
-              "strokeWidth": 3,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "qNyjG",
-                  "x": 5,
-                  "y": 5,
+                  "id": "Aa9s4",
+                  "x": 3,
+                  "y": 3,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -318,40 +294,40 @@
                     "url": "images/combat/icon-slime.png",
                     "mode": "stretch"
                   },
-                  "width": 26,
-                  "height": 26
+                  "width": 16,
+                  "height": 16
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "Fanpp",
-              "x": 588.6,
-              "y": 20,
+              "id": "aimSl",
+              "x": 455.40000000000003,
+              "y": 11,
               "name": "Token Bat",
-              "width": 36,
-              "height": 36,
+              "width": 22,
+              "height": 22,
               "fill": "$box",
-              "cornerRadius": 18,
+              "cornerRadius": 11,
               "stroke": "$cast",
-              "strokeWidth": 3,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "V5oZQn",
-                  "x": 5,
-                  "y": 5,
+                  "id": "qWj7f",
+                  "x": 3,
+                  "y": 3,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -359,36 +335,36 @@
                     "url": "images/combat/icon-bat.png",
                     "mode": "stretch"
                   },
-                  "width": 26,
-                  "height": 26
+                  "width": 16,
+                  "height": 16
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "L6fYY",
-              "x": 442,
-              "y": 12,
+              "id": "L7O03Q",
+              "x": 343,
+              "y": 9,
               "name": "Token Hugo",
-              "width": 44,
-              "height": 44,
+              "width": 26,
+              "height": 26,
               "fill": "$box",
-              "cornerRadius": 22,
+              "cornerRadius": 13,
               "stroke": "$pick",
-              "strokeWidth": 4,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#1e90ff80",
-                "blur": 10
+                "color": "#1e90ffaa",
+                "blur": 6
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "VxWq8",
-                  "x": 9,
-                  "y": 9,
+                  "id": "FnFSa",
+                  "x": 5,
+                  "y": 5,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -396,8 +372,8 @@
                     "url": "images/combat/icon-hugo.png",
                     "mode": "stretch"
                   },
-                  "width": 26,
-                  "height": 26
+                  "width": 16,
+                  "height": 16
                 }
               ]
             }
@@ -405,45 +381,43 @@
         },
         {
           "type": "frame",
-          "id": "vGBe9",
-          "x": 24,
-          "y": 628,
+          "id": "cMFzm",
+          "x": 16,
+          "y": 730,
           "name": "Party",
-          "width": 440,
-          "height": 152,
-          "layout": "none",
+          "gap": 6,
           "children": [
             {
               "type": "frame",
-              "id": "gyjey",
-              "x": 0,
-              "y": 22,
+              "id": "PLS8Y",
               "name": "Card Hugo",
-              "clip": true,
-              "width": 420,
-              "height": 126,
+              "width": 180,
+              "height": 54,
               "fill": "$box",
-              "cornerRadius": 16,
+              "cornerRadius": 10,
               "stroke": "$pick",
-              "strokeWidth": 4,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
-              "layout": "none",
+              "gap": 8,
+              "padding": [
+                7,
+                9
+              ],
+              "alignItems": "center",
               "children": [
                 {
                   "type": "rectangle",
-                  "cornerRadius": 10,
-                  "id": "wu9ng",
-                  "x": 18,
-                  "y": 15,
+                  "cornerRadius": 6,
+                  "id": "d8jfl",
                   "name": "Portrait",
                   "fill": {
                     "type": "image",
@@ -451,183 +425,150 @@
                     "url": "images/combat/portrait-hugo.png",
                     "mode": "stretch"
                   },
-                  "width": 96,
-                  "height": 96
+                  "width": 38,
+                  "height": 38
                 },
                 {
                   "type": "frame",
-                  "id": "rdXj8",
-                  "x": 132,
-                  "y": 20,
-                  "name": "Stats",
-                  "width": 262,
+                  "id": "gvj68",
+                  "name": "Info",
+                  "width": "fill_container",
                   "layout": "vertical",
-                  "gap": 9,
+                  "gap": 3,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "PhCAZ",
-                      "name": "Level row",
+                      "id": "oAoZj",
+                      "name": "Name row",
                       "width": "fill_container",
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "text",
-                          "id": "QpAei",
+                          "id": "DfOFu",
+                          "name": "Hugo",
+                          "fill": "$ink",
+                          "content": "Hugo",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "k9ugIQ",
                           "name": "Niv. 1",
                           "fill": "$ink-soft",
                           "content": "Niv. 1",
                           "fontFamily": "Roboto",
-                          "fontSize": 14,
+                          "fontSize": 10,
                           "fontWeight": "500"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "KTxrI",
-                          "name": "Turn badge",
-                          "fill": "#1e90ff1f",
-                          "cornerRadius": 8,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "mVzGg",
-                              "name": "À lui de jouer",
-                              "fill": "$pick",
-                              "content": "À lui de jouer",
-                              "fontFamily": "Roboto",
-                              "fontSize": 12,
-                              "fontWeight": "700"
-                            }
-                          ]
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "AjJG0",
+                      "id": "W2KMr",
                       "name": "Bar PV",
                       "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 3,
+                      "gap": 4,
+                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "HwTJw",
-                          "name": "Bar head",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "Y9Yhw",
-                              "name": "PV",
-                              "fill": "$hp",
-                              "content": "PV",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "U7qjfA",
-                              "name": "42 / 42",
-                              "fill": "$ink",
-                              "content": "42 / 42",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "500"
-                            }
-                          ]
+                          "type": "text",
+                          "id": "xOnV5",
+                          "name": "PV",
+                          "fill": "$hp",
+                          "content": "PV",
+                          "fontFamily": "Roboto",
+                          "fontSize": 9,
+                          "fontWeight": "700"
                         },
                         {
                           "type": "frame",
-                          "id": "UE6Xw",
+                          "id": "STxkr",
                           "name": "Track",
                           "width": "fill_container",
-                          "height": 8,
+                          "height": 4,
                           "fill": "#e8ebf1",
-                          "cornerRadius": 4,
+                          "cornerRadius": 2,
                           "layout": "none",
                           "children": [
                             {
                               "type": "rectangle",
-                              "cornerRadius": 4,
-                              "id": "pYyd6",
+                              "cornerRadius": 2,
+                              "id": "X88Zr",
                               "x": 0,
                               "y": 0,
                               "name": "Fill",
                               "fill": "$hp",
-                              "width": 262,
-                              "height": 8
+                              "width": 70,
+                              "height": 4
                             }
                           ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "mmajW",
+                          "name": "42",
+                          "fill": "$ink",
+                          "content": "42",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "bYAjC",
+                      "id": "XpUQA",
                       "name": "Bar PM",
                       "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 3,
+                      "gap": 4,
+                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "PPSLN",
-                          "name": "Bar head",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "vDYOQ",
-                              "name": "PM",
-                              "fill": "$mp",
-                              "content": "PM",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "c50Ra",
-                              "name": "18 / 18",
-                              "fill": "$ink",
-                              "content": "18 / 18",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "500"
-                            }
-                          ]
+                          "type": "text",
+                          "id": "VA9Ib",
+                          "name": "PM",
+                          "fill": "$mp",
+                          "content": "PM",
+                          "fontFamily": "Roboto",
+                          "fontSize": 9,
+                          "fontWeight": "700"
                         },
                         {
                           "type": "frame",
-                          "id": "viOXi",
+                          "id": "M1y0Cr",
                           "name": "Track",
                           "width": "fill_container",
-                          "height": 8,
+                          "height": 4,
                           "fill": "#e8ebf1",
-                          "cornerRadius": 4,
+                          "cornerRadius": 2,
                           "layout": "none",
                           "children": [
                             {
                               "type": "rectangle",
-                              "cornerRadius": 4,
-                              "id": "QINAn",
+                              "cornerRadius": 2,
+                              "id": "P1cgS9",
                               "x": 0,
                               "y": 0,
                               "name": "Fill",
                               "fill": "$mp",
-                              "width": 262,
-                              "height": 8
+                              "width": 70,
+                              "height": 4
                             }
                           ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "JPTIr",
+                          "name": "18",
+                          "fill": "$ink",
+                          "content": "18",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
                         }
                       ]
                     }
@@ -637,39 +578,72 @@
             },
             {
               "type": "frame",
-              "id": "GY2TG",
-              "x": 40,
-              "y": 0,
-              "name": "Name pill",
-              "height": 44,
-              "fill": "$box",
+              "id": "A7gBmx",
+              "name": "Free slot 2",
+              "width": 180,
+              "height": 54,
               "cornerRadius": 10,
-              "stroke": "#fafafa",
-              "strokeWidth": 2,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000001f",
-                "offset": {
-                  "x": 2,
-                  "y": 4
-                },
-                "blur": 4
-              },
-              "padding": [
-                0,
-                20
-              ],
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
               "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "HURTF",
-                  "name": "Hugo",
-                  "fill": "$ink",
-                  "content": "Hugo",
+                  "id": "D9iWY",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
                   "fontFamily": "Roboto",
-                  "fontSize": 18,
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "JXIg4",
+              "name": "Free slot 3",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "t2Jhf",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "eawvW",
+              "name": "Free slot 4",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "B5wu9t",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
                   "fontWeight": "500"
                 }
               ]
@@ -678,23 +652,23 @@
         },
         {
           "type": "frame",
-          "id": "DiBxG",
-          "x": 160,
-          "y": 330,
+          "id": "WgrBw",
+          "x": 200,
+          "y": 430,
           "name": "Commands",
-          "width": 250,
+          "width": 160,
           "layout": "vertical",
-          "gap": 4,
+          "gap": 3,
           "alignItems": "end",
           "children": [
             {
               "type": "frame",
-              "id": "E2jsM",
+              "id": "k8TGE",
               "name": "Row Attaque",
               "width": "fill_container",
               "padding": [
                 0,
-                34,
+                14,
                 0,
                 0
               ],
@@ -702,49 +676,49 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "hMCsy",
+                  "id": "c0AOCR",
                   "name": "Choice Attaque",
-                  "width": 200,
-                  "height": 44,
+                  "width": 134,
+                  "height": 28,
                   "fill": "$box",
-                  "cornerRadius": 10,
+                  "cornerRadius": 7,
                   "stroke": "$pick",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 10,
+                  "gap": 7,
                   "padding": [
                     0,
-                    16
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "XQQh7",
+                      "id": "X9ZsS",
                       "name": "sword",
-                      "width": 18,
-                      "height": 18,
+                      "width": 13,
+                      "height": 13,
                       "icon": "sword",
                       "library": "lucide",
                       "fill": "$pick"
                     },
                     {
                       "type": "text",
-                      "id": "qaBrG",
+                      "id": "VOksN",
                       "name": "Attaque",
                       "fill": "$pick",
                       "content": "Attaque",
                       "fontFamily": "Roboto",
-                      "fontSize": 17,
+                      "fontSize": 12.5,
                       "fontWeight": "700"
                     }
                   ]
@@ -753,56 +727,56 @@
             },
             {
               "type": "frame",
-              "id": "Oqfol",
+              "id": "X6QCCQ",
               "name": "Row Attaque forte",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "o9DIMZ",
+                  "id": "cS2hX",
                   "name": "Choice Attaque forte",
-                  "width": 200,
-                  "height": 44,
+                  "width": 134,
+                  "height": 28,
                   "fill": "$box",
-                  "cornerRadius": 10,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 10,
+                  "gap": 7,
                   "padding": [
                     0,
-                    16
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "yT2RQ",
+                      "id": "Qmw6u",
                       "name": "swords",
-                      "width": 18,
-                      "height": 18,
+                      "width": 13,
+                      "height": 13,
                       "icon": "swords",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "gKjy6",
+                      "id": "x7fPib",
                       "name": "Attaque forte",
                       "fill": "$ink",
                       "content": "Attaque forte",
                       "fontFamily": "Roboto",
-                      "fontSize": 17,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -811,56 +785,56 @@
             },
             {
               "type": "frame",
-              "id": "yz1BB",
+              "id": "BLGIx",
               "name": "Row Magie",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "qd4Gi",
+                  "id": "xdAFX",
                   "name": "Choice Magie",
-                  "width": 200,
-                  "height": 44,
+                  "width": 134,
+                  "height": 28,
                   "fill": "$box",
-                  "cornerRadius": 10,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 10,
+                  "gap": 7,
                   "padding": [
                     0,
-                    16
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "oyV8x",
+                      "id": "WwGpU",
                       "name": "sparkles",
-                      "width": 18,
-                      "height": 18,
+                      "width": 13,
+                      "height": 13,
                       "icon": "sparkles",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "H0igkI",
+                      "id": "G7qw8",
                       "name": "Magie",
                       "fill": "$ink",
                       "content": "Magie",
                       "fontFamily": "Roboto",
-                      "fontSize": 17,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -869,56 +843,56 @@
             },
             {
               "type": "frame",
-              "id": "dQZwH",
+              "id": "cgXhb",
               "name": "Row Objets",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "sT359",
+                  "id": "NbK1M",
                   "name": "Choice Objets",
-                  "width": 200,
-                  "height": 44,
+                  "width": 134,
+                  "height": 28,
                   "fill": "$box",
-                  "cornerRadius": 10,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 10,
+                  "gap": 7,
                   "padding": [
                     0,
-                    16
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "RbUZT",
+                      "id": "H9YMw",
                       "name": "backpack",
-                      "width": 18,
-                      "height": 18,
+                      "width": 13,
+                      "height": 13,
                       "icon": "backpack",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "Z4c4TC",
+                      "id": "yuq2q",
                       "name": "Objets",
                       "fill": "$ink",
                       "content": "Objets",
                       "fontFamily": "Roboto",
-                      "fontSize": 17,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -927,56 +901,56 @@
             },
             {
               "type": "frame",
-              "id": "m1mrn",
+              "id": "qDVRJ",
               "name": "Row Défendre",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "BCSF2",
+                  "id": "Yo6OL",
                   "name": "Choice Défendre",
-                  "width": 200,
-                  "height": 44,
+                  "width": 134,
+                  "height": 28,
                   "fill": "$box",
-                  "cornerRadius": 10,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 10,
+                  "gap": 7,
                   "padding": [
                     0,
-                    16
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "NI7lj",
+                      "id": "YKMYs",
                       "name": "shield",
-                      "width": 18,
-                      "height": 18,
+                      "width": 13,
+                      "height": 13,
                       "icon": "shield",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "v77RQ",
+                      "id": "dMjk8",
                       "name": "Défendre",
                       "fill": "$ink",
                       "content": "Défendre",
                       "fontFamily": "Roboto",
-                      "fontSize": 17,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -985,56 +959,56 @@
             },
             {
               "type": "frame",
-              "id": "okxKb",
+              "id": "JvyEy",
               "name": "Row Fuir",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "MWcNQ",
+                  "id": "Fvyo1",
                   "name": "Choice Fuir",
-                  "width": 200,
-                  "height": 44,
+                  "width": 134,
+                  "height": 28,
                   "fill": "$box",
-                  "cornerRadius": 10,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 10,
+                  "gap": 7,
                   "padding": [
                     0,
-                    16
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "vGJlE",
+                      "id": "PTPPG",
                       "name": "footprints",
-                      "width": 18,
-                      "height": 18,
+                      "width": 13,
+                      "height": 13,
                       "icon": "footprints",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "e9G9qj",
+                      "id": "pMLT6",
                       "name": "Fuir",
                       "fill": "$ink",
                       "content": "Fuir",
                       "fontFamily": "Roboto",
-                      "fontSize": 17,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -1045,72 +1019,72 @@
         },
         {
           "type": "frame",
-          "id": "sVegk",
-          "x": 722,
-          "y": 218,
+          "id": "qzJJA",
+          "x": 735,
+          "y": 236,
           "name": "Cast label Bat",
-          "height": 34,
+          "height": 22,
           "fill": "$box",
-          "cornerRadius": 10,
+          "cornerRadius": 6,
           "stroke": "$cast",
-          "strokeWidth": 2,
+          "strokeWidth": 1.5,
           "effect": {
             "type": "shadow",
             "shadowType": "outer",
-            "color": "#0000001f",
+            "color": "#00000026",
             "offset": {
-              "x": 2,
-              "y": 4
+              "x": 1,
+              "y": 2
             },
-            "blur": 4
+            "blur": 3
           },
-          "gap": 8,
+          "gap": 5,
           "padding": [
             0,
-            12
+            8
           ],
           "alignItems": "center",
           "children": [
             {
               "type": "icon",
-              "id": "sJDmg",
+              "id": "Jr9Al",
               "name": "sparkles",
-              "width": 15,
-              "height": 15,
+              "width": 11,
+              "height": 11,
               "icon": "sparkles",
               "library": "lucide",
               "fill": "$cast"
             },
             {
               "type": "text",
-              "id": "SHHm2",
+              "id": "dZyu9",
               "name": "Venin",
               "fill": "$cast",
               "content": "Venin",
               "fontFamily": "Roboto",
-              "fontSize": 14,
+              "fontSize": 11,
               "fontWeight": "700"
             },
             {
               "type": "frame",
-              "id": "ebQ7Z",
+              "id": "BAo7l",
               "name": "Cast track",
-              "width": 46,
-              "height": 6,
+              "width": 28,
+              "height": 4,
               "fill": "#efe4fa",
-              "cornerRadius": 3,
+              "cornerRadius": 2,
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "cornerRadius": 3,
-                  "id": "w06cf",
+                  "cornerRadius": 2,
+                  "id": "g40KOz",
                   "x": 0,
                   "y": 0,
                   "name": "Cast fill",
                   "fill": "$cast",
-                  "width": 30,
-                  "height": 6
+                  "width": 18,
+                  "height": 4
                 }
               ]
             }
@@ -1118,50 +1092,38 @@
         },
         {
           "type": "frame",
-          "id": "eefyj",
-          "x": 1040,
-          "y": 30,
+          "id": "uwvlG",
+          "x": 1150,
+          "y": 20,
           "name": "Weather chip",
-          "height": 40,
-          "fill": "$box",
-          "cornerRadius": 10,
-          "stroke": "$box-border",
-          "strokeWidth": 2,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
-          "gap": 8,
+          "height": 26,
+          "fill": "#0a0c1866",
+          "cornerRadius": 7,
+          "gap": 5,
           "padding": [
             0,
-            14
+            9
           ],
           "alignItems": "center",
           "children": [
             {
               "type": "icon",
-              "id": "nd6w4",
+              "id": "kq2ih",
               "name": "moon",
-              "width": 17,
-              "height": 17,
+              "width": 12,
+              "height": 12,
               "icon": "moon-star",
               "library": "lucide",
-              "fill": "#c9a227"
+              "fill": "#f2d067"
             },
             {
               "type": "text",
-              "id": "HXKuD",
+              "id": "F9EfM",
               "name": "Nuit · Lucioles",
-              "fill": "$ink",
+              "fill": "#ffffffdd",
               "content": "Nuit · Lucioles",
               "fontFamily": "Roboto",
-              "fontSize": 14,
+              "fontSize": 11,
               "fontWeight": "500"
             }
           ]
@@ -1307,633 +1269,26 @@
           "height": 144
         },
         {
-          "type": "frame",
-          "id": "nGGFU",
-          "x": 300,
-          "y": 18,
-          "name": "Action gauge",
-          "width": 680,
-          "height": 92,
-          "fill": "$box",
-          "cornerRadius": 16,
-          "stroke": "$box-border",
-          "strokeWidth": 4,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
-          "layout": "none",
-          "children": [
-            {
-              "type": "rectangle",
-              "cornerRadius": [
-                6,
-                0,
-                0,
-                6
-              ],
-              "id": "fmJQG",
-              "x": 30,
-              "y": 50,
-              "name": "Zone attente",
-              "fill": "#e8ebf1",
-              "width": 434,
-              "height": 12
-            },
-            {
-              "type": "rectangle",
-              "id": "jV3fX",
-              "x": 464,
-              "y": 50,
-              "name": "Zone commande",
-              "fill": "#d3e6ff",
-              "width": 99.20000000000002,
-              "height": 12
-            },
-            {
-              "type": "rectangle",
-              "cornerRadius": [
-                0,
-                6,
-                6,
-                0
-              ],
-              "id": "sjJut",
-              "x": 563.2,
-              "y": 50,
-              "name": "Zone action",
-              "fill": "#ffdcd8",
-              "width": 86.80000000000001,
-              "height": 12
-            },
-            {
-              "type": "text",
-              "id": "kYWeb",
-              "x": 30,
-              "y": 67,
-              "name": "Label Attente",
-              "fill": "$ink-soft",
-              "content": "Attente",
-              "fontFamily": "Roboto",
-              "fontSize": 12,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "w2YRha",
-              "x": 468,
-              "y": 67,
-              "name": "Label Commande",
-              "fill": "$pick",
-              "content": "Commande",
-              "fontFamily": "Roboto",
-              "fontSize": 12,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "o5gy6",
-              "x": 567.2,
-              "y": 67,
-              "name": "Label Action",
-              "fill": "$foe",
-              "content": "Action",
-              "fontFamily": "Roboto",
-              "fontSize": 12,
-              "fontWeight": "600"
-            },
-            {
-              "type": "frame",
-              "id": "c1u2b",
-              "x": 185.60000000000002,
-              "y": 20,
-              "name": "Token Slime A",
-              "width": 36,
-              "height": 36,
-              "fill": "$box",
-              "cornerRadius": 18,
-              "stroke": "$foe",
-              "strokeWidth": 3,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000001f",
-                "offset": {
-                  "x": 2,
-                  "y": 4
-                },
-                "blur": 4
-              },
-              "layout": "none",
-              "children": [
-                {
-                  "type": "rectangle",
-                  "id": "Q1UtRa",
-                  "x": 5,
-                  "y": 5,
-                  "name": "Icon",
-                  "fill": {
-                    "type": "image",
-                    "enabled": true,
-                    "url": "images/combat/icon-slime.png",
-                    "mode": "stretch"
-                  },
-                  "width": 26,
-                  "height": 26
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "uXrOc",
-              "x": 421.20000000000005,
-              "y": 20,
-              "name": "Token Slime B",
-              "width": 36,
-              "height": 36,
-              "fill": "$box",
-              "cornerRadius": 18,
-              "stroke": "$foe",
-              "strokeWidth": 3,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000001f",
-                "offset": {
-                  "x": 2,
-                  "y": 4
-                },
-                "blur": 4
-              },
-              "layout": "none",
-              "children": [
-                {
-                  "type": "rectangle",
-                  "id": "L5X2GI",
-                  "x": 5,
-                  "y": 5,
-                  "name": "Icon",
-                  "fill": {
-                    "type": "image",
-                    "enabled": true,
-                    "url": "images/combat/icon-slime.png",
-                    "mode": "stretch"
-                  },
-                  "width": 26,
-                  "height": 26
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "DzHku",
-              "x": 322,
-              "y": 20,
-              "name": "Token Bat",
-              "width": 36,
-              "height": 36,
-              "fill": "$box",
-              "cornerRadius": 18,
-              "stroke": "$foe",
-              "strokeWidth": 3,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000001f",
-                "offset": {
-                  "x": 2,
-                  "y": 4
-                },
-                "blur": 4
-              },
-              "layout": "none",
-              "children": [
-                {
-                  "type": "rectangle",
-                  "id": "eTsKt",
-                  "x": 5,
-                  "y": 5,
-                  "name": "Icon",
-                  "fill": {
-                    "type": "image",
-                    "enabled": true,
-                    "url": "images/combat/icon-bat.png",
-                    "mode": "stretch"
-                  },
-                  "width": 26,
-                  "height": 26
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "rrwwr",
-              "x": 597,
-              "y": 12,
-              "name": "Token Hugo",
-              "width": 44,
-              "height": 44,
-              "fill": "$box",
-              "cornerRadius": 22,
-              "stroke": "$pick",
-              "strokeWidth": 4,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#1e90ff80",
-                "blur": 10
-              },
-              "layout": "none",
-              "children": [
-                {
-                  "type": "rectangle",
-                  "id": "Tuq1r",
-                  "x": 9,
-                  "y": 9,
-                  "name": "Icon",
-                  "fill": {
-                    "type": "image",
-                    "enabled": true,
-                    "url": "images/combat/icon-hugo.png",
-                    "mode": "stretch"
-                  },
-                  "width": 26,
-                  "height": 26
-                }
-              ]
-            },
-            {
-              "type": "path",
-              "id": "v7UmPB",
-              "x": 358.6,
-              "y": 20,
-              "name": "Knockback arrow",
-              "geometry": "M100 7l-94 0m8-6l-8 6 8 6",
-              "viewBox": [
-                0,
-                0,
-                100,
-                14
-              ],
-              "width": 235.6,
-              "height": 14,
-              "stroke": "$foe",
-              "strokeWidth": 2.5,
-              "strokeLinejoin": "round",
-              "strokeLinecap": "round"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "Vg0Cd",
-          "x": 24,
-          "y": 628,
-          "name": "Party",
-          "width": 440,
-          "height": 152,
-          "layout": "none",
-          "children": [
-            {
-              "type": "frame",
-              "id": "DFNWm",
-              "x": 0,
-              "y": 22,
-              "name": "Card Hugo",
-              "clip": true,
-              "width": 420,
-              "height": 126,
-              "fill": "$box",
-              "cornerRadius": 16,
-              "stroke": "$box-border",
-              "strokeWidth": 4,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000001f",
-                "offset": {
-                  "x": 2,
-                  "y": 4
-                },
-                "blur": 4
-              },
-              "layout": "none",
-              "children": [
-                {
-                  "type": "rectangle",
-                  "cornerRadius": 10,
-                  "id": "VrLsM",
-                  "x": 18,
-                  "y": 15,
-                  "name": "Portrait",
-                  "fill": {
-                    "type": "image",
-                    "enabled": true,
-                    "url": "images/combat/portrait-hugo.png",
-                    "mode": "stretch"
-                  },
-                  "width": 96,
-                  "height": 96
-                },
-                {
-                  "type": "frame",
-                  "id": "QRITl",
-                  "x": 132,
-                  "y": 20,
-                  "name": "Stats",
-                  "width": 262,
-                  "layout": "vertical",
-                  "gap": 9,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "JArzE",
-                      "name": "Level row",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "EaLPD",
-                          "name": "Niv. 1",
-                          "fill": "$ink-soft",
-                          "content": "Niv. 1",
-                          "fontFamily": "Roboto",
-                          "fontSize": 14,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "I5N1n",
-                          "name": "Turn badge",
-                          "fill": "#e0554a1f",
-                          "cornerRadius": 8,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "FOj03",
-                              "name": "À lui de jouer",
-                              "fill": "$foe",
-                              "content": "Attaque",
-                              "fontFamily": "Roboto",
-                              "fontSize": 12,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "Uwo5R",
-                      "name": "Bar PV",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 3,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "KPzoj",
-                          "name": "Bar head",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "uZQwm",
-                              "name": "PV",
-                              "fill": "$hp",
-                              "content": "PV",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "LZs0n",
-                              "name": "42 / 42",
-                              "fill": "$ink",
-                              "content": "42 / 42",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "500"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "e5xuLV",
-                          "name": "Track",
-                          "width": "fill_container",
-                          "height": 8,
-                          "fill": "#e8ebf1",
-                          "cornerRadius": 4,
-                          "layout": "none",
-                          "children": [
-                            {
-                              "type": "rectangle",
-                              "cornerRadius": 4,
-                              "id": "OMwWi",
-                              "x": 0,
-                              "y": 0,
-                              "name": "Fill",
-                              "fill": "$hp",
-                              "width": 262,
-                              "height": 8
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "Ji8hs",
-                      "name": "Bar PM",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 3,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "DhEwJ",
-                          "name": "Bar head",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "xuNNl",
-                              "name": "PM",
-                              "fill": "$mp",
-                              "content": "PM",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "qj3yN",
-                              "name": "18 / 18",
-                              "fill": "$ink",
-                              "content": "18 / 18",
-                              "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "500"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Ngr7F",
-                          "name": "Track",
-                          "width": "fill_container",
-                          "height": 8,
-                          "fill": "#e8ebf1",
-                          "cornerRadius": 4,
-                          "layout": "none",
-                          "children": [
-                            {
-                              "type": "rectangle",
-                              "cornerRadius": 4,
-                              "id": "qTLrj",
-                              "x": 0,
-                              "y": 0,
-                              "name": "Fill",
-                              "fill": "$mp",
-                              "width": 262,
-                              "height": 8
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "HStoJ",
-              "x": 40,
-              "y": 0,
-              "name": "Name pill",
-              "height": 44,
-              "fill": "$box",
-              "cornerRadius": 10,
-              "stroke": "#fafafa",
-              "strokeWidth": 2,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000001f",
-                "offset": {
-                  "x": 2,
-                  "y": 4
-                },
-                "blur": 4
-              },
-              "padding": [
-                0,
-                20
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "p2Egy",
-                  "name": "Hugo",
-                  "fill": "$ink",
-                  "content": "Hugo",
-                  "fontFamily": "Roboto",
-                  "fontSize": 18,
-                  "fontWeight": "500"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "i2sVL",
-          "x": 1040,
-          "y": 30,
-          "name": "Weather chip",
-          "height": 40,
-          "fill": "$box",
-          "cornerRadius": 10,
-          "stroke": "$box-border",
-          "strokeWidth": 2,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
-          "gap": 8,
-          "padding": [
-            0,
-            14
-          ],
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "icon",
-              "id": "ZhSXb",
-              "name": "moon",
-              "width": 17,
-              "height": 17,
-              "icon": "moon-star",
-              "library": "lucide",
-              "fill": "#c9a227"
-            },
-            {
-              "type": "text",
-              "id": "NgeKl",
-              "name": "Nuit · Lucioles",
-              "fill": "$ink",
-              "content": "Nuit · Lucioles",
-              "fontFamily": "Roboto",
-              "fontSize": 14,
-              "fontWeight": "500"
-            }
-          ]
-        },
-        {
           "type": "text",
           "id": "PCJmR",
-          "x": 860,
-          "y": 200,
+          "x": 858,
+          "y": 208,
           "name": "Damage",
           "fill": "#ffffff",
           "content": "14",
           "fontFamily": "Roboto",
-          "fontSize": 44,
+          "fontSize": 30,
           "fontWeight": "900"
         },
         {
           "type": "frame",
           "id": "M6H71",
-          "x": 735,
-          "y": 146,
+          "x": 746,
+          "y": 160,
           "name": "Interrupted",
-          "height": 40,
+          "height": 26,
           "fill": "$foe",
-          "cornerRadius": 10,
+          "cornerRadius": 7,
           "effect": {
             "type": "shadow",
             "shadowType": "outer",
@@ -1944,10 +1299,10 @@
             },
             "blur": 4
           },
-          "gap": 8,
+          "gap": 5,
           "padding": [
             0,
-            14
+            9
           ],
           "alignItems": "center",
           "children": [
@@ -1955,8 +1310,8 @@
               "type": "icon",
               "id": "R5Vz8Y",
               "name": "ban",
-              "width": 18,
-              "height": 18,
+              "width": 13,
+              "height": 13,
               "icon": "circle-slash",
               "library": "lucide",
               "fill": "#ffffff"
@@ -1968,7 +1323,7 @@
               "fill": "#ffffff",
               "content": "Venin interrompu !",
               "fontFamily": "Roboto",
-              "fontSize": 16,
+              "fontSize": 12,
               "fontWeight": "700"
             }
           ]
@@ -1994,43 +1349,193 @@
         },
         {
           "type": "frame",
-          "id": "bDHST",
-          "x": 24,
-          "y": 130,
-          "name": "Enemy info",
-          "width": 300,
-          "fill": "$box",
-          "cornerRadius": 16,
-          "stroke": "$box-border",
-          "strokeWidth": 4,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
-          "layout": "vertical",
-          "gap": 10,
-          "padding": [
-            14,
-            16
-          ],
+          "id": "LP9q5",
+          "x": 380,
+          "y": 14,
+          "name": "Action gauge",
+          "width": 520,
+          "height": 40,
+          "fill": "#0a0c1866",
+          "cornerRadius": 12,
+          "layout": "none",
           "children": [
             {
+              "type": "rectangle",
+              "cornerRadius": [
+                2,
+                0,
+                0,
+                2
+              ],
+              "id": "JVLEQ",
+              "x": 20,
+              "y": 20,
+              "name": "Zone attente",
+              "fill": "#ffffff59",
+              "width": 336,
+              "height": 4
+            },
+            {
+              "type": "rectangle",
+              "id": "AtZrq",
+              "x": 356,
+              "y": 20,
+              "name": "Zone commande",
+              "fill": "$pick",
+              "width": 76.80000000000001,
+              "height": 4
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": [
+                0,
+                2,
+                2,
+                0
+              ],
+              "id": "LFhlW",
+              "x": 432.8,
+              "y": 20,
+              "name": "Zone action",
+              "fill": "$foe",
+              "width": 67.2,
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "ojeYN",
+              "x": 384.8,
+              "y": 28,
+              "name": "Label COM",
+              "fill": "#9fc8ff",
+              "content": "COM",
+              "fontFamily": "Roboto",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "YNG9m",
+              "x": 437.6,
+              "y": 28,
+              "name": "Label ACT",
+              "fill": "#ffaaa3",
+              "content": "ACT",
+              "fontFamily": "Roboto",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
               "type": "frame",
-              "id": "G81po2",
-              "name": "Info head",
-              "width": "fill_container",
-              "gap": 10,
-              "alignItems": "center",
+              "id": "Um0PL",
+              "x": 143.4,
+              "y": 11,
+              "name": "Token Slime A",
+              "width": 22,
+              "height": 22,
+              "fill": "$box",
+              "cornerRadius": 11,
+              "stroke": "$foe",
+              "strokeWidth": 2,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000026",
+                "offset": {
+                  "x": 1,
+                  "y": 2
+                },
+                "blur": 3
+              },
+              "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "hS222",
+                  "id": "Uj40g",
+                  "x": 3,
+                  "y": 3,
+                  "name": "Icon",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/combat/icon-slime.png",
+                    "mode": "stretch"
+                  },
+                  "width": 16,
+                  "height": 16
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VpwPQ",
+              "x": 306.6,
+              "y": 11,
+              "name": "Token Slime B",
+              "width": 22,
+              "height": 22,
+              "fill": "$box",
+              "cornerRadius": 11,
+              "stroke": "$foe",
+              "strokeWidth": 2,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000026",
+                "offset": {
+                  "x": 1,
+                  "y": 2
+                },
+                "blur": 3
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "LKt6a",
+                  "x": 3,
+                  "y": 3,
+                  "name": "Icon",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/combat/icon-slime.png",
+                    "mode": "stretch"
+                  },
+                  "width": 16,
+                  "height": 16
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "qG9ts",
+              "x": 249,
+              "y": 11,
+              "name": "Token Bat",
+              "width": 22,
+              "height": 22,
+              "fill": "$box",
+              "cornerRadius": 11,
+              "stroke": "$foe",
+              "strokeWidth": 2,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000026",
+                "offset": {
+                  "x": 1,
+                  "y": 2
+                },
+                "blur": 3
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "r8ppjk",
+                  "x": 3,
+                  "y": 3,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -2038,35 +1543,262 @@
                     "url": "images/combat/icon-bat.png",
                     "mode": "stretch"
                   },
-                  "width": 32,
-                  "height": 32
+                  "width": 16,
+                  "height": 16
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HFh74",
+              "x": 463,
+              "y": 9,
+              "name": "Token Hugo",
+              "width": 26,
+              "height": 26,
+              "fill": "$box",
+              "cornerRadius": 13,
+              "stroke": "$pick",
+              "strokeWidth": 2,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1e90ffaa",
+                "blur": 6
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "VVO0l",
+                  "x": 5,
+                  "y": 5,
+                  "name": "Icon",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/combat/icon-hugo.png",
+                    "mode": "stretch"
+                  },
+                  "width": 16,
+                  "height": 16
+                }
+              ]
+            },
+            {
+              "type": "path",
+              "id": "Rqxlf",
+              "x": 274.4,
+              "y": 4,
+              "name": "Knockback arrow",
+              "geometry": "M100 4l-96 0m6-3.5l-6 3.5 6 3.5",
+              "viewBox": [
+                0,
+                0,
+                100,
+                8
+              ],
+              "width": 182.4,
+              "height": 8,
+              "stroke": "$foe",
+              "strokeWidth": 1.8,
+              "strokeLinejoin": "round",
+              "strokeLinecap": "round"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "vEivd",
+          "x": 16,
+          "y": 730,
+          "name": "Party",
+          "gap": 6,
+          "children": [
+            {
+              "type": "frame",
+              "id": "EIfcm",
+              "name": "Card Hugo",
+              "width": 180,
+              "height": 54,
+              "fill": "$box",
+              "cornerRadius": 10,
+              "stroke": "$box-border",
+              "strokeWidth": 2,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000026",
+                "offset": {
+                  "x": 1,
+                  "y": 2
+                },
+                "blur": 3
+              },
+              "gap": 8,
+              "padding": [
+                7,
+                9
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 6,
+                  "id": "bKaGL",
+                  "name": "Portrait",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/combat/portrait-hugo.png",
+                    "mode": "stretch"
+                  },
+                  "width": 38,
+                  "height": 38
                 },
                 {
                   "type": "frame",
-                  "id": "seDJW",
-                  "name": "Names",
+                  "id": "Nj9X5",
+                  "name": "Info",
                   "width": "fill_container",
                   "layout": "vertical",
+                  "gap": 3,
                   "children": [
                     {
-                      "type": "text",
-                      "id": "ziQuI",
-                      "name": "Chauve-souris",
-                      "fill": "$ink",
-                      "content": "Chauve-souris",
-                      "fontFamily": "Roboto",
-                      "fontSize": 17,
-                      "fontWeight": "700"
+                      "type": "frame",
+                      "id": "wVani",
+                      "name": "Name row",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "A14wdc",
+                          "name": "Hugo",
+                          "fill": "$ink",
+                          "content": "Hugo",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "V8rn1",
+                          "name": "Niv. 1",
+                          "fill": "$ink-soft",
+                          "content": "Niv. 1",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        }
+                      ]
                     },
                     {
-                      "type": "text",
-                      "id": "zikvh",
-                      "name": "Niv. 5",
-                      "fill": "$ink-soft",
-                      "content": "Niv. 5",
-                      "fontFamily": "Roboto",
-                      "fontSize": 13,
-                      "fontWeight": "500"
+                      "type": "frame",
+                      "id": "NcZHA",
+                      "name": "Bar PV",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "LypiF",
+                          "name": "PV",
+                          "fill": "$hp",
+                          "content": "PV",
+                          "fontFamily": "Roboto",
+                          "fontSize": 9,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "i2Xz6s",
+                          "name": "Track",
+                          "width": "fill_container",
+                          "height": 4,
+                          "fill": "#e8ebf1",
+                          "cornerRadius": 2,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2,
+                              "id": "z1qQv",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Fill",
+                              "fill": "$hp",
+                              "width": 70,
+                              "height": 4
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "QwJNh",
+                          "name": "42",
+                          "fill": "$ink",
+                          "content": "42",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ti8mt",
+                      "name": "Bar PM",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "eQI26",
+                          "name": "PM",
+                          "fill": "$mp",
+                          "content": "PM",
+                          "fontFamily": "Roboto",
+                          "fontSize": 9,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ikVvc",
+                          "name": "Track",
+                          "width": "fill_container",
+                          "height": 4,
+                          "fill": "#e8ebf1",
+                          "cornerRadius": 2,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2,
+                              "id": "MWPSe",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Fill",
+                              "fill": "$mp",
+                              "width": 70,
+                              "height": 4
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "xCVOv",
+                          "name": "18",
+                          "fill": "$ink",
+                          "content": "18",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -2074,112 +1806,284 @@
             },
             {
               "type": "frame",
-              "id": "OceE2",
-              "name": "Bar PV",
-              "width": "fill_container",
-              "layout": "vertical",
-              "gap": 3,
+              "id": "Y9zBd",
+              "name": "Free slot 2",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
               "children": [
                 {
-                  "type": "frame",
-                  "id": "S5rsoG",
-                  "name": "Bar head",
-                  "width": "fill_container",
-                  "justifyContent": "space_between",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "ZMHkI",
-                      "name": "PV",
-                      "fill": "$hp",
-                      "content": "PV",
-                      "fontFamily": "Roboto",
-                      "fontSize": 13,
-                      "fontWeight": "700"
-                    },
-                    {
-                      "type": "text",
-                      "id": "XJSQU",
-                      "name": "31 / 45",
-                      "fill": "$ink",
-                      "content": "31 / 45",
-                      "fontFamily": "Roboto",
-                      "fontSize": 13,
-                      "fontWeight": "500"
-                    }
-                  ]
+                  "type": "text",
+                  "id": "ZMxrE",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hYg7W",
+              "name": "Free slot 3",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "E24tM",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "mwmAM",
+              "name": "Free slot 4",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "vnnUm",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "T6Ixnx",
+          "x": 1150,
+          "y": 20,
+          "name": "Weather chip",
+          "height": 26,
+          "fill": "#0a0c1866",
+          "cornerRadius": 7,
+          "gap": 5,
+          "padding": [
+            0,
+            9
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "NxLJ7",
+              "name": "moon",
+              "width": 12,
+              "height": 12,
+              "icon": "moon-star",
+              "library": "lucide",
+              "fill": "#f2d067"
+            },
+            {
+              "type": "text",
+              "id": "ULOmT",
+              "name": "Nuit · Lucioles",
+              "fill": "#ffffffdd",
+              "content": "Nuit · Lucioles",
+              "fontFamily": "Roboto",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ZC4lg",
+          "x": 16,
+          "y": 70,
+          "name": "Enemy info",
+          "width": 210,
+          "fill": "$box",
+          "cornerRadius": 10,
+          "stroke": "$box-border",
+          "strokeWidth": 2,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000026",
+            "offset": {
+              "x": 1,
+              "y": 2
+            },
+            "blur": 3
+          },
+          "layout": "vertical",
+          "gap": 6,
+          "padding": [
+            9,
+            11
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "ow1tF",
+              "name": "Info head",
+              "width": "fill_container",
+              "gap": 7,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "ytC4W",
+                  "name": "Icon",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/combat/icon-bat.png",
+                    "mode": "stretch"
+                  },
+                  "width": 20,
+                  "height": 20
+                },
+                {
+                  "type": "text",
+                  "id": "gxwUp",
+                  "name": "Chauve-souris",
+                  "fill": "$ink",
+                  "content": "Chauve-souris",
+                  "fontFamily": "Roboto",
+                  "fontSize": 13,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "frame",
-                  "id": "Tckus",
+                  "id": "XeyXu",
+                  "name": "Spacer",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "Z7SCN",
+                  "name": "Niv. 5",
+                  "fill": "$ink-soft",
+                  "content": "Niv. 5",
+                  "fontFamily": "Roboto",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "CT1LC",
+              "name": "Bar PV",
+              "width": "fill_container",
+              "gap": 5,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "keg5a",
+                  "name": "PV",
+                  "fill": "$hp",
+                  "content": "PV",
+                  "fontFamily": "Roboto",
+                  "fontSize": 9,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "S0lwD",
                   "name": "Track",
                   "width": "fill_container",
-                  "height": 8,
+                  "height": 4,
                   "fill": "#e8ebf1",
-                  "cornerRadius": 4,
+                  "cornerRadius": 2,
                   "layout": "none",
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": 4,
-                      "id": "aUmf3",
+                      "cornerRadius": 2,
+                      "id": "kPOtb",
                       "x": 0,
                       "y": 0,
                       "name": "Fill",
                       "fill": "$hp",
-                      "width": 183,
-                      "height": 8
+                      "width": 96,
+                      "height": 4
                     },
                     {
                       "type": "rectangle",
-                      "id": "p0uKC",
-                      "x": 183,
+                      "id": "j3eAs",
+                      "x": 96,
                       "y": 0,
                       "name": "Lost",
                       "fill": "#ffb3ab",
-                      "width": 83,
-                      "height": 8
+                      "width": 43,
+                      "height": 4
                     }
                   ]
+                },
+                {
+                  "type": "text",
+                  "id": "UWmdb",
+                  "name": "31 / 45",
+                  "fill": "$ink",
+                  "content": "31 / 45",
+                  "fontFamily": "Roboto",
+                  "fontSize": 10,
+                  "fontWeight": "500"
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "oqZTB",
+              "id": "CiEef",
               "name": "Resists",
               "width": "fill_container",
-              "layout": "vertical",
-              "gap": 6,
+              "gap": 10,
               "children": [
                 {
                   "type": "frame",
-                  "id": "glwMC",
+                  "id": "oxrwk",
                   "name": "Resist Faible",
-                  "width": "fill_container",
-                  "gap": 8,
+                  "gap": 3,
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "kJW5J",
+                      "id": "q0ovp",
                       "name": "Faible",
                       "fill": "$foe",
                       "content": "Faible",
                       "fontFamily": "Roboto",
-                      "fontSize": 13,
+                      "fontSize": 10,
                       "fontWeight": "700"
                     },
                     {
-                      "type": "frame",
-                      "id": "QXeGE",
-                      "name": "Spacer",
-                      "width": "fill_container",
-                      "height": 1
-                    },
-                    {
                       "type": "rectangle",
-                      "id": "UX22l",
+                      "id": "gfBb2",
                       "name": "El icon",
                       "fill": {
                         "type": "image",
@@ -2187,49 +2091,31 @@
                         "url": "images/db/light.png",
                         "mode": "stretch"
                       },
-                      "width": 18,
-                      "height": 18
-                    },
-                    {
-                      "type": "text",
-                      "id": "KrliF",
-                      "name": "Lumière",
-                      "fill": "$ink",
-                      "content": "Lumière",
-                      "fontFamily": "Roboto",
-                      "fontSize": 13,
-                      "fontWeight": "500"
+                      "width": 13,
+                      "height": 13
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "A7X2Q",
+                  "id": "RgAeg",
                   "name": "Resist Résiste",
-                  "width": "fill_container",
-                  "gap": 8,
+                  "gap": 3,
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "PA3PC",
+                      "id": "SBTwn",
                       "name": "Résiste",
                       "fill": "$ink-soft",
                       "content": "Résiste",
                       "fontFamily": "Roboto",
-                      "fontSize": 13,
+                      "fontSize": 10,
                       "fontWeight": "700"
                     },
                     {
-                      "type": "frame",
-                      "id": "eGU3m",
-                      "name": "Spacer",
-                      "width": "fill_container",
-                      "height": 1
-                    },
-                    {
                       "type": "rectangle",
-                      "id": "U1HMJX",
+                      "id": "VCpOE",
                       "name": "El icon",
                       "fill": {
                         "type": "image",
@@ -2237,49 +2123,31 @@
                         "url": "images/db/wind.png",
                         "mode": "stretch"
                       },
-                      "width": 18,
-                      "height": 18
-                    },
-                    {
-                      "type": "text",
-                      "id": "x4YkDl",
-                      "name": "Vent",
-                      "fill": "$ink",
-                      "content": "Vent",
-                      "fontFamily": "Roboto",
-                      "fontSize": 13,
-                      "fontWeight": "500"
+                      "width": 13,
+                      "height": 13
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "MKf57",
+                  "id": "FFMjR",
                   "name": "Resist Absorbe",
-                  "width": "fill_container",
-                  "gap": 8,
+                  "gap": 3,
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "AWluo",
+                      "id": "jY3mi",
                       "name": "Absorbe",
                       "fill": "$hp",
                       "content": "Absorbe",
                       "fontFamily": "Roboto",
-                      "fontSize": 13,
+                      "fontSize": 10,
                       "fontWeight": "700"
                     },
                     {
-                      "type": "frame",
-                      "id": "C1hHmn",
-                      "name": "Spacer",
-                      "width": "fill_container",
-                      "height": 1
-                    },
-                    {
                       "type": "rectangle",
-                      "id": "rsgsF",
+                      "id": "c92r2",
                       "name": "El icon",
                       "fill": {
                         "type": "image",
@@ -2287,18 +2155,8 @@
                         "url": "images/db/dark.png",
                         "mode": "stretch"
                       },
-                      "width": 18,
-                      "height": 18
-                    },
-                    {
-                      "type": "text",
-                      "id": "MoPjG",
-                      "name": "Ténèbres",
-                      "fill": "$ink",
-                      "content": "Ténèbres",
-                      "fontFamily": "Roboto",
-                      "fontSize": 13,
-                      "fontWeight": "500"
+                      "width": 13,
+                      "height": 13
                     }
                   ]
                 }
@@ -2448,135 +2306,111 @@
         },
         {
           "type": "frame",
-          "id": "J4jS5F",
+          "id": "IQp0T",
           "x": 12,
-          "y": 55,
+          "y": 52,
           "name": "Action gauge",
           "width": 366,
-          "height": 78,
-          "fill": "$box",
-          "cornerRadius": 12,
-          "stroke": "$box-border",
-          "strokeWidth": 3,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
+          "height": 38,
+          "fill": "#0a0c1866",
+          "cornerRadius": 11,
           "layout": "none",
           "children": [
             {
               "type": "rectangle",
               "cornerRadius": [
-                5,
+                2,
                 0,
                 0,
-                5
+                2
               ],
-              "id": "c6Q25",
-              "x": 20,
-              "y": 42,
+              "id": "ZAdpI",
+              "x": 18,
+              "y": 18,
               "name": "Zone attente",
-              "fill": "#e8ebf1",
-              "width": 215.16,
-              "height": 10
+              "fill": "#ffffff59",
+              "width": 230.99999999999997,
+              "height": 4
             },
             {
               "type": "rectangle",
-              "id": "h4S5ig",
-              "x": 235.16,
-              "y": 42,
+              "id": "lGF6i",
+              "x": 248.99999999999997,
+              "y": 18,
               "name": "Zone commande",
-              "fill": "#d3e6ff",
-              "width": 65.2,
-              "height": 10
+              "fill": "$pick",
+              "width": 52.80000000000001,
+              "height": 4
             },
             {
               "type": "rectangle",
               "cornerRadius": [
                 0,
-                5,
-                5,
+                2,
+                2,
                 0
               ],
-              "id": "UHqx3",
-              "x": 300.36,
-              "y": 42,
+              "id": "p5lSrZ",
+              "x": 301.8,
+              "y": 18,
               "name": "Zone action",
-              "fill": "#ffdcd8",
-              "width": 45.64000000000001,
-              "height": 10
-            },
-            {
-              "type": "text",
-              "id": "pKijG",
-              "x": 20,
-              "y": 56,
-              "name": "Label Attente",
-              "fill": "$ink-soft",
-              "content": "Attente",
-              "fontFamily": "Roboto",
-              "fontSize": 10.5,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "N6k818",
-              "x": 238.16,
-              "y": 56,
-              "name": "Label Commande",
-              "fill": "$pick",
-              "content": "Commande",
-              "fontFamily": "Roboto",
-              "fontSize": 10.5,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "xXoy5",
-              "x": 303.36,
-              "y": 56,
-              "name": "Label Action",
               "fill": "$foe",
-              "content": "Action",
+              "width": 46.2,
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "dR9yr",
+              "x": 270.45000000000005,
+              "y": 26,
+              "name": "Label COM",
+              "fill": "#9fc8ff",
+              "content": "COM",
               "fontFamily": "Roboto",
-              "fontSize": 10.5,
-              "fontWeight": "600"
+              "fontSize": 8.5,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "VahmU",
+              "x": 303.45,
+              "y": 26,
+              "name": "Label ACT",
+              "fill": "#ffaaa3",
+              "content": "ACT",
+              "fontFamily": "Roboto",
+              "fontSize": 8.5,
+              "fontWeight": "700"
             },
             {
               "type": "frame",
-              "id": "rFXFT",
-              "x": 83.24,
-              "y": 17,
+              "id": "r1mJkX",
+              "x": 100.4,
+              "y": 10,
               "name": "Token Slime A",
-              "width": 30,
-              "height": 30,
+              "width": 20,
+              "height": 20,
               "fill": "$box",
-              "cornerRadius": 15,
+              "cornerRadius": 10,
               "stroke": "$foe",
-              "strokeWidth": 2.5,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "AsRL2",
-                  "x": 4,
-                  "y": 4,
+                  "id": "f8oeyE",
+                  "x": 3,
+                  "y": 3,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -2584,40 +2418,40 @@
                     "url": "images/combat/icon-slime.png",
                     "mode": "stretch"
                   },
-                  "width": 22,
-                  "height": 22
+                  "width": 14,
+                  "height": 14
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "R9S7Z1",
-              "x": 151.70000000000002,
-              "y": 17,
+              "id": "ww4hH",
+              "x": 163.1,
+              "y": 10,
               "name": "Token Slime B",
-              "width": 30,
-              "height": 30,
+              "width": 20,
+              "height": 20,
               "fill": "$box",
-              "cornerRadius": 15,
+              "cornerRadius": 10,
               "stroke": "$foe",
-              "strokeWidth": 2.5,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "qc33p",
-                  "x": 4,
-                  "y": 4,
+                  "id": "sfVyF",
+                  "x": 3,
+                  "y": 3,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -2625,40 +2459,40 @@
                     "url": "images/combat/icon-slime.png",
                     "mode": "stretch"
                   },
-                  "width": 22,
-                  "height": 22
+                  "width": 14,
+                  "height": 14
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "Zs5BA",
-              "x": 308.18,
-              "y": 17,
+              "id": "aHkAb",
+              "x": 318.2,
+              "y": 10,
               "name": "Token Bat",
-              "width": 30,
-              "height": 30,
+              "width": 20,
+              "height": 20,
               "fill": "$box",
-              "cornerRadius": 15,
+              "cornerRadius": 10,
               "stroke": "$cast",
-              "strokeWidth": 2.5,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "x8Xd3",
-                  "x": 4,
-                  "y": 4,
+                  "id": "JozJu",
+                  "x": 3,
+                  "y": 3,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -2666,36 +2500,36 @@
                     "url": "images/combat/icon-bat.png",
                     "mode": "stretch"
                   },
-                  "width": 22,
-                  "height": 22
+                  "width": 14,
+                  "height": 14
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "t8vY57",
-              "x": 217.16,
-              "y": 11,
+              "id": "fRh3d",
+              "x": 236.99999999999997,
+              "y": 8,
               "name": "Token Hugo",
-              "width": 36,
-              "height": 36,
+              "width": 24,
+              "height": 24,
               "fill": "$box",
-              "cornerRadius": 18,
+              "cornerRadius": 12,
               "stroke": "$pick",
-              "strokeWidth": 3,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#1e90ff80",
-                "blur": 8
+                "color": "#1e90ffaa",
+                "blur": 6
               },
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "id": "GtAut",
-                  "x": 7,
-                  "y": 7,
+                  "id": "XSePG",
+                  "x": 5,
+                  "y": 5,
                   "name": "Icon",
                   "fill": {
                     "type": "image",
@@ -2703,8 +2537,8 @@
                     "url": "images/combat/icon-hugo.png",
                     "mode": "stretch"
                   },
-                  "width": 22,
-                  "height": 22
+                  "width": 14,
+                  "height": 14
                 }
               ]
             }
@@ -2712,72 +2546,110 @@
         },
         {
           "type": "frame",
-          "id": "I4gmWV",
-          "x": 222,
-          "y": 150,
-          "name": "Cast label Bat",
-          "height": 30,
-          "fill": "$box",
-          "cornerRadius": 8,
-          "stroke": "$cast",
-          "strokeWidth": 2,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
-          "gap": 6,
+          "id": "dLvv5",
+          "x": 12,
+          "y": 96,
+          "name": "Weather chip",
+          "height": 22,
+          "fill": "#0a0c1866",
+          "cornerRadius": 6,
+          "gap": 4,
           "padding": [
             0,
-            10
+            8
           ],
           "alignItems": "center",
           "children": [
             {
               "type": "icon",
-              "id": "r7Eau",
+              "id": "xricT",
+              "name": "moon",
+              "width": 11,
+              "height": 11,
+              "icon": "moon-star",
+              "library": "lucide",
+              "fill": "#f2d067"
+            },
+            {
+              "type": "text",
+              "id": "nvpXN",
+              "name": "Nuit · Lucioles",
+              "fill": "#ffffffdd",
+              "content": "Nuit · Lucioles",
+              "fontFamily": "Roboto",
+              "fontSize": 10,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "n66EB",
+          "x": 222,
+          "y": 170,
+          "name": "Cast label Bat",
+          "height": 20,
+          "fill": "$box",
+          "cornerRadius": 6,
+          "stroke": "$cast",
+          "strokeWidth": 1.5,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000026",
+            "offset": {
+              "x": 1,
+              "y": 2
+            },
+            "blur": 3
+          },
+          "gap": 4,
+          "padding": [
+            0,
+            7
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "pL0up",
               "name": "sparkles",
-              "width": 13,
-              "height": 13,
+              "width": 10,
+              "height": 10,
               "icon": "sparkles",
               "library": "lucide",
               "fill": "$cast"
             },
             {
               "type": "text",
-              "id": "DuQAv",
+              "id": "TEn1Z",
               "name": "Venin",
               "fill": "$cast",
               "content": "Venin",
               "fontFamily": "Roboto",
-              "fontSize": 13,
+              "fontSize": 10,
               "fontWeight": "700"
             },
             {
               "type": "frame",
-              "id": "jfM1P",
+              "id": "f5CJL",
               "name": "Cast track",
-              "width": 34,
-              "height": 5,
+              "width": 22,
+              "height": 3,
               "fill": "#efe4fa",
-              "cornerRadius": 3,
+              "cornerRadius": 2,
               "layout": "none",
               "children": [
                 {
                   "type": "rectangle",
-                  "cornerRadius": 3,
-                  "id": "kuNmb",
+                  "cornerRadius": 2,
+                  "id": "AwR3W",
                   "x": 0,
                   "y": 0,
                   "name": "Cast fill",
                   "fill": "$cast",
-                  "width": 22,
-                  "height": 5
+                  "width": 14,
+                  "height": 3
                 }
               ]
             }
@@ -2785,67 +2657,73 @@
         },
         {
           "type": "frame",
-          "id": "PBb5k",
-          "x": 186,
-          "y": 446,
+          "id": "UGfIM",
+          "x": 218,
+          "y": 470,
           "name": "Commands",
-          "width": 192,
+          "width": 160,
           "layout": "vertical",
-          "gap": 4,
+          "gap": 3,
           "alignItems": "end",
           "children": [
             {
               "type": "frame",
-              "id": "TLo7k",
+              "id": "gH8BT",
               "name": "Row Attaque",
               "width": "fill_container",
+              "padding": [
+                0,
+                12,
+                0,
+                0
+              ],
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "UHbci",
+                  "id": "kuFEy",
                   "name": "Choice Attaque",
-                  "width": 172,
-                  "height": 38,
+                  "width": 128,
+                  "height": 30,
                   "fill": "$box",
-                  "cornerRadius": 8,
+                  "cornerRadius": 7,
                   "stroke": "$pick",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 8,
+                  "gap": 7,
                   "padding": [
                     0,
-                    12
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "q7XpFW",
+                      "id": "F0UHJ",
                       "name": "sword",
-                      "width": 15,
-                      "height": 15,
+                      "width": 13,
+                      "height": 13,
                       "icon": "sword",
                       "library": "lucide",
                       "fill": "$pick"
                     },
                     {
                       "type": "text",
-                      "id": "WNhQs",
+                      "id": "dWitm",
                       "name": "Attaque",
                       "fill": "$pick",
                       "content": "Attaque",
                       "fontFamily": "Roboto",
-                      "fontSize": 15,
+                      "fontSize": 12.5,
                       "fontWeight": "700"
                     }
                   ]
@@ -2854,56 +2732,56 @@
             },
             {
               "type": "frame",
-              "id": "aa3U7",
+              "id": "r3FjBJ",
               "name": "Row Attaque forte",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "nnkJb",
+                  "id": "D2Sqcc",
                   "name": "Choice Attaque forte",
-                  "width": 152,
-                  "height": 38,
+                  "width": 128,
+                  "height": 30,
                   "fill": "$box",
-                  "cornerRadius": 8,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 8,
+                  "gap": 7,
                   "padding": [
                     0,
-                    12
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "PWmXs",
+                      "id": "hkTqt",
                       "name": "swords",
-                      "width": 15,
-                      "height": 15,
+                      "width": 13,
+                      "height": 13,
                       "icon": "swords",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "Nyx9C",
+                      "id": "y0OQh",
                       "name": "Attaque forte",
                       "fill": "$ink",
                       "content": "Attaque forte",
                       "fontFamily": "Roboto",
-                      "fontSize": 15,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -2912,56 +2790,56 @@
             },
             {
               "type": "frame",
-              "id": "gBXc1",
+              "id": "ukZsv",
               "name": "Row Magie",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "YjpXv",
+                  "id": "AJBg9",
                   "name": "Choice Magie",
-                  "width": 152,
-                  "height": 38,
+                  "width": 128,
+                  "height": 30,
                   "fill": "$box",
-                  "cornerRadius": 8,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 8,
+                  "gap": 7,
                   "padding": [
                     0,
-                    12
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "QxpPM",
+                      "id": "xf236",
                       "name": "sparkles",
-                      "width": 15,
-                      "height": 15,
+                      "width": 13,
+                      "height": 13,
                       "icon": "sparkles",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "H2C8k",
+                      "id": "vpoHN",
                       "name": "Magie",
                       "fill": "$ink",
                       "content": "Magie",
                       "fontFamily": "Roboto",
-                      "fontSize": 15,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -2970,56 +2848,56 @@
             },
             {
               "type": "frame",
-              "id": "fTmF5",
+              "id": "QC7nr",
               "name": "Row Objets",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "e4ddEO",
+                  "id": "zjdD8",
                   "name": "Choice Objets",
-                  "width": 152,
-                  "height": 38,
+                  "width": 128,
+                  "height": 30,
                   "fill": "$box",
-                  "cornerRadius": 8,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 8,
+                  "gap": 7,
                   "padding": [
                     0,
-                    12
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "laWyM",
+                      "id": "mQSlq",
                       "name": "backpack",
-                      "width": 15,
-                      "height": 15,
+                      "width": 13,
+                      "height": 13,
                       "icon": "backpack",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "Sitl0",
+                      "id": "BZ1ZR",
                       "name": "Objets",
                       "fill": "$ink",
                       "content": "Objets",
                       "fontFamily": "Roboto",
-                      "fontSize": 15,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -3028,56 +2906,56 @@
             },
             {
               "type": "frame",
-              "id": "Vmws6",
+              "id": "PIyI6",
               "name": "Row Défendre",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "PiAHe",
+                  "id": "a89D3e",
                   "name": "Choice Défendre",
-                  "width": 152,
-                  "height": 38,
+                  "width": 128,
+                  "height": 30,
                   "fill": "$box",
-                  "cornerRadius": 8,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 8,
+                  "gap": 7,
                   "padding": [
                     0,
-                    12
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "VZqs4",
+                      "id": "K8YmEn",
                       "name": "shield",
-                      "width": 15,
-                      "height": 15,
+                      "width": 13,
+                      "height": 13,
                       "icon": "shield",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "U5BeHF",
+                      "id": "o9X86",
                       "name": "Défendre",
                       "fill": "$ink",
                       "content": "Défendre",
                       "fontFamily": "Roboto",
-                      "fontSize": 15,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -3086,56 +2964,56 @@
             },
             {
               "type": "frame",
-              "id": "t0TIW",
+              "id": "opyGx",
               "name": "Row Fuir",
               "width": "fill_container",
               "justifyContent": "end",
               "children": [
                 {
                   "type": "frame",
-                  "id": "ik8UP",
+                  "id": "T38ew",
                   "name": "Choice Fuir",
-                  "width": 152,
-                  "height": 38,
+                  "width": 128,
+                  "height": 30,
                   "fill": "$box",
-                  "cornerRadius": 8,
+                  "cornerRadius": 7,
                   "stroke": "#fafafa",
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001f",
+                    "color": "#00000026",
                     "offset": {
-                      "x": 2,
-                      "y": 4
+                      "x": 1,
+                      "y": 2
                     },
-                    "blur": 4
+                    "blur": 3
                   },
-                  "gap": 8,
+                  "gap": 7,
                   "padding": [
                     0,
-                    12
+                    10
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "mODty",
+                      "id": "pCxbd",
                       "name": "footprints",
-                      "width": 15,
-                      "height": 15,
+                      "width": 13,
+                      "height": 13,
                       "icon": "footprints",
                       "library": "lucide",
                       "fill": "$ink-soft"
                     },
                     {
                       "type": "text",
-                      "id": "XGbhd",
+                      "id": "MgrIH",
                       "name": "Fuir",
                       "fill": "$ink",
                       "content": "Fuir",
                       "fontFamily": "Roboto",
-                      "fontSize": 15,
+                      "fontSize": 12.5,
                       "fontWeight": "500"
                     }
                   ]
@@ -3146,231 +3024,172 @@
         },
         {
           "type": "frame",
-          "id": "A9EKz",
+          "id": "sk7rZ",
           "x": 12,
-          "y": 712,
+          "y": 770,
           "name": "Party",
           "width": 366,
-          "height": 120,
-          "layout": "none",
+          "gap": 5,
           "children": [
             {
               "type": "frame",
-              "id": "TakUh",
-              "x": 0,
-              "y": 18,
+              "id": "fReAJ",
               "name": "Card Hugo",
-              "clip": true,
-              "width": 366,
-              "height": 102,
+              "width": "fill_container",
+              "height": 62,
               "fill": "$box",
-              "cornerRadius": 12,
+              "cornerRadius": 8,
               "stroke": "$pick",
-              "strokeWidth": 3,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
-              "layout": "none",
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 6,
               "children": [
                 {
-                  "type": "rectangle",
-                  "cornerRadius": 8,
-                  "id": "dGxIh",
-                  "x": 12,
-                  "y": 12,
-                  "name": "Portrait",
-                  "fill": {
-                    "type": "image",
-                    "enabled": true,
-                    "url": "images/combat/portrait-hugo.png",
-                    "mode": "stretch"
-                  },
-                  "width": 76,
-                  "height": 76
-                },
-                {
                   "type": "frame",
-                  "id": "T57zB",
-                  "x": 102,
-                  "y": 14,
-                  "name": "Stats",
-                  "width": 248,
-                  "layout": "vertical",
-                  "gap": 7,
+                  "id": "QXAPt",
+                  "name": "Top",
+                  "width": "fill_container",
+                  "gap": 5,
+                  "alignItems": "center",
                   "children": [
                     {
+                      "type": "rectangle",
+                      "cornerRadius": 5,
+                      "id": "PSFBE",
+                      "name": "Portrait",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "images/combat/portrait-hugo.png",
+                        "mode": "stretch"
+                      },
+                      "width": 24,
+                      "height": 24
+                    },
+                    {
                       "type": "frame",
-                      "id": "m1AjAG",
-                      "name": "Level row",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
+                      "id": "SM3XT",
+                      "name": "Names",
+                      "layout": "vertical",
                       "children": [
                         {
                           "type": "text",
-                          "id": "oinpl",
+                          "id": "n427K",
+                          "name": "Hugo",
+                          "fill": "$ink",
+                          "content": "Hugo",
+                          "fontFamily": "Roboto",
+                          "fontSize": 11,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "rLk09",
                           "name": "Niv. 1",
                           "fill": "$ink-soft",
                           "content": "Niv. 1",
                           "fontFamily": "Roboto",
-                          "fontSize": 13,
+                          "fontSize": 8.5,
                           "fontWeight": "500"
-                        },
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mZ1wG",
+                  "name": "Bar PV",
+                  "width": "fill_container",
+                  "gap": 3,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "J5yAg",
+                      "name": "Track",
+                      "width": "fill_container",
+                      "height": 4,
+                      "fill": "#e8ebf1",
+                      "cornerRadius": 2,
+                      "layout": "none",
+                      "children": [
                         {
-                          "type": "frame",
-                          "id": "Qon01",
-                          "name": "Turn badge",
-                          "fill": "#1e90ff1f",
-                          "cornerRadius": 7,
-                          "padding": [
-                            2,
-                            7
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "TOz7d",
-                              "name": "À lui de jouer",
-                              "fill": "$pick",
-                              "content": "À lui de jouer",
-                              "fontFamily": "Roboto",
-                              "fontSize": 11,
-                              "fontWeight": "700"
-                            }
-                          ]
+                          "type": "rectangle",
+                          "cornerRadius": 2,
+                          "id": "JhVxV",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Fill",
+                          "fill": "$hp",
+                          "width": 52,
+                          "height": 4
                         }
                       ]
                     },
                     {
+                      "type": "text",
+                      "id": "xvt5b",
+                      "name": "42",
+                      "fill": "$hp",
+                      "content": "42",
+                      "fontFamily": "Roboto",
+                      "fontSize": 8.5,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "j5T52",
+                  "name": "Bar PM",
+                  "width": "fill_container",
+                  "gap": 3,
+                  "alignItems": "center",
+                  "children": [
+                    {
                       "type": "frame",
-                      "id": "vuE6W",
-                      "name": "Bar PV",
+                      "id": "GfmQg",
+                      "name": "Track",
                       "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 2,
+                      "height": 4,
+                      "fill": "#e8ebf1",
+                      "cornerRadius": 2,
+                      "layout": "none",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "AOgCK",
-                          "name": "Bar head",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "Q3An0",
-                              "name": "PV",
-                              "fill": "$hp",
-                              "content": "PV",
-                              "fontFamily": "Roboto",
-                              "fontSize": 12,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "Y7FFy",
-                              "name": "42 / 42",
-                              "fill": "$ink",
-                              "content": "42 / 42",
-                              "fontFamily": "Roboto",
-                              "fontSize": 12,
-                              "fontWeight": "500"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "TCQFF",
-                          "name": "Track",
-                          "width": "fill_container",
-                          "height": 7,
-                          "fill": "#e8ebf1",
-                          "cornerRadius": 4,
-                          "layout": "none",
-                          "children": [
-                            {
-                              "type": "rectangle",
-                              "cornerRadius": 4,
-                              "id": "dBDXG",
-                              "x": 0,
-                              "y": 0,
-                              "name": "Fill",
-                              "fill": "$hp",
-                              "width": 248,
-                              "height": 7
-                            }
-                          ]
+                          "type": "rectangle",
+                          "cornerRadius": 2,
+                          "id": "PXG76",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Fill",
+                          "fill": "$mp",
+                          "width": 52,
+                          "height": 4
                         }
                       ]
                     },
                     {
-                      "type": "frame",
-                      "id": "Iwn1q",
-                      "name": "Bar PM",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 2,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "njN3v",
-                          "name": "Bar head",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "KnfPD",
-                              "name": "PM",
-                              "fill": "$mp",
-                              "content": "PM",
-                              "fontFamily": "Roboto",
-                              "fontSize": 12,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "uOocw",
-                              "name": "18 / 18",
-                              "fill": "$ink",
-                              "content": "18 / 18",
-                              "fontFamily": "Roboto",
-                              "fontSize": 12,
-                              "fontWeight": "500"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "B8I8jS",
-                          "name": "Track",
-                          "width": "fill_container",
-                          "height": 7,
-                          "fill": "#e8ebf1",
-                          "cornerRadius": 4,
-                          "layout": "none",
-                          "children": [
-                            {
-                              "type": "rectangle",
-                              "cornerRadius": 4,
-                              "id": "avD9Y",
-                              "x": 0,
-                              "y": 0,
-                              "name": "Fill",
-                              "fill": "$mp",
-                              "width": 248,
-                              "height": 7
-                            }
-                          ]
-                        }
-                      ]
+                      "type": "text",
+                      "id": "G7F0y",
+                      "name": "18",
+                      "fill": "$mp",
+                      "content": "18",
+                      "fontFamily": "Roboto",
+                      "fontSize": 8.5,
+                      "fontWeight": "600"
                     }
                   ]
                 }
@@ -3378,92 +3197,75 @@
             },
             {
               "type": "frame",
-              "id": "Mid1N",
-              "x": 24,
-              "y": 0,
-              "name": "Name pill",
-              "height": 34,
-              "fill": "$box",
+              "id": "F44AsW",
+              "name": "Free slot 2",
+              "width": "fill_container",
+              "height": 62,
               "cornerRadius": 8,
-              "stroke": "#fafafa",
-              "strokeWidth": 2,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000001f",
-                "offset": {
-                  "x": 2,
-                  "y": 4
-                },
-                "blur": 4
-              },
-              "padding": [
-                0,
-                14
-              ],
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
               "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "OiZmy",
-                  "name": "Hugo",
-                  "fill": "$ink",
-                  "content": "Hugo",
+                  "id": "pnFkI",
+                  "name": "Libre",
+                  "fill": "#ffffff70",
+                  "content": "Libre",
                   "fontFamily": "Roboto",
-                  "fontSize": 16,
+                  "fontSize": 10,
                   "fontWeight": "500"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "wCL5f",
-          "x": 12,
-          "y": 144,
-          "name": "Weather chip",
-          "height": 30,
-          "fill": "$box",
-          "cornerRadius": 8,
-          "stroke": "$box-border",
-          "strokeWidth": 2,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
-          "gap": 6,
-          "padding": [
-            0,
-            10
-          ],
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "icon",
-              "id": "X7yd0",
-              "name": "moon",
-              "width": 14,
-              "height": 14,
-              "icon": "moon-star",
-              "library": "lucide",
-              "fill": "#c9a227"
             },
             {
-              "type": "text",
-              "id": "k7cStt",
-              "name": "Nuit · Lucioles",
-              "fill": "$ink",
-              "content": "Nuit · Lucioles",
-              "fontFamily": "Roboto",
-              "fontSize": 12.5,
-              "fontWeight": "500"
+              "type": "frame",
+              "id": "FLGU9",
+              "name": "Free slot 3",
+              "width": "fill_container",
+              "height": 62,
+              "cornerRadius": 8,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "YksP9",
+                  "name": "Libre",
+                  "fill": "#ffffff70",
+                  "content": "Libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PO5xN",
+              "name": "Free slot 4",
+              "width": "fill_container",
+              "height": 62,
+              "cornerRadius": 8,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "e9pTst",
+                  "name": "Libre",
+                  "fill": "#ffffff70",
+                  "content": "Libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
             }
           ]
         }
@@ -3531,236 +3333,494 @@
         },
         {
           "type": "frame",
-          "id": "Xh2PA",
-          "x": 1040,
-          "y": 30,
+          "id": "SexZU",
+          "x": 1150,
+          "y": 20,
           "name": "Weather chip",
-          "height": 40,
-          "fill": "$box",
-          "cornerRadius": 10,
-          "stroke": "$box-border",
-          "strokeWidth": 2,
-          "effect": {
-            "type": "shadow",
-            "shadowType": "outer",
-            "color": "#0000001f",
-            "offset": {
-              "x": 2,
-              "y": 4
-            },
-            "blur": 4
-          },
-          "gap": 8,
+          "height": 26,
+          "fill": "#0a0c1866",
+          "cornerRadius": 7,
+          "gap": 5,
           "padding": [
             0,
-            14
+            9
           ],
           "alignItems": "center",
           "children": [
             {
               "type": "icon",
-              "id": "hBpNY",
+              "id": "Bzq23",
               "name": "moon",
-              "width": 17,
-              "height": 17,
+              "width": 12,
+              "height": 12,
               "icon": "moon-star",
               "library": "lucide",
-              "fill": "#c9a227"
+              "fill": "#f2d067"
             },
             {
               "type": "text",
-              "id": "qUlch",
+              "id": "y8W4lU",
               "name": "Nuit · Lucioles",
-              "fill": "$ink",
+              "fill": "#ffffffdd",
               "content": "Nuit · Lucioles",
               "fontFamily": "Roboto",
-              "fontSize": 14,
+              "fontSize": 11,
               "fontWeight": "500"
             }
           ]
         },
         {
           "type": "frame",
-          "id": "UB5m7",
-          "x": 340,
-          "y": 150,
+          "id": "MArIC",
+          "x": 16,
+          "y": 730,
+          "name": "Party",
+          "gap": 6,
+          "children": [
+            {
+              "type": "frame",
+              "id": "p510A",
+              "name": "Card Hugo",
+              "width": 180,
+              "height": 54,
+              "fill": "$box",
+              "cornerRadius": 10,
+              "stroke": "$pick",
+              "strokeWidth": 2,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000026",
+                "offset": {
+                  "x": 1,
+                  "y": 2
+                },
+                "blur": 3
+              },
+              "gap": 8,
+              "padding": [
+                7,
+                9
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 6,
+                  "id": "zdooT",
+                  "name": "Portrait",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/combat/portrait-hugo.png",
+                    "mode": "stretch"
+                  },
+                  "width": 38,
+                  "height": 38
+                },
+                {
+                  "type": "frame",
+                  "id": "vfuE7",
+                  "name": "Info",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 3,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "chxdR",
+                      "name": "Name row",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "CUkhm",
+                          "name": "Hugo",
+                          "fill": "$ink",
+                          "content": "Hugo",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "jBT8g",
+                          "name": "Niv. 1",
+                          "fill": "$ink-soft",
+                          "content": "Niv. 1",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p1ICa",
+                      "name": "Bar PV",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "b81Q5",
+                          "name": "PV",
+                          "fill": "$hp",
+                          "content": "PV",
+                          "fontFamily": "Roboto",
+                          "fontSize": 9,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hG2Gr",
+                          "name": "Track",
+                          "width": "fill_container",
+                          "height": 4,
+                          "fill": "#e8ebf1",
+                          "cornerRadius": 2,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2,
+                              "id": "pjMCQ",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Fill",
+                              "fill": "$hp",
+                              "width": 70,
+                              "height": 4
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "pJLIh",
+                          "name": "42",
+                          "fill": "$ink",
+                          "content": "42",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qqyep",
+                      "name": "Bar PM",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "FucM7",
+                          "name": "PM",
+                          "fill": "$mp",
+                          "content": "PM",
+                          "fontFamily": "Roboto",
+                          "fontSize": 9,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "xeaL6",
+                          "name": "Track",
+                          "width": "fill_container",
+                          "height": 4,
+                          "fill": "#e8ebf1",
+                          "cornerRadius": 2,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2,
+                              "id": "RDEmH",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Fill",
+                              "fill": "$mp",
+                              "width": 70,
+                              "height": 4
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "R3OZV0",
+                          "name": "18",
+                          "fill": "$ink",
+                          "content": "18",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HmUvZ",
+              "name": "Free slot 2",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "lNFcq",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "sKQJ9",
+              "name": "Free slot 3",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "l12Iuf",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Sm1S1",
+              "name": "Free slot 4",
+              "width": 180,
+              "height": 54,
+              "cornerRadius": 10,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "j6nVUU",
+                  "name": "Place libre",
+                  "fill": "#ffffff70",
+                  "content": "Place libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jXbFt",
+          "x": 430,
+          "y": 230,
           "name": "Victory",
-          "width": 600,
-          "height": 520,
+          "width": 420,
+          "height": 330,
           "layout": "none",
           "children": [
             {
               "type": "frame",
-              "id": "wmRry",
+              "id": "CUAOS",
               "x": 0,
-              "y": 24,
+              "y": 16,
               "name": "Box",
-              "clip": true,
-              "width": 600,
+              "width": 420,
               "fill": "$box",
-              "cornerRadius": 16,
+              "cornerRadius": 12,
               "stroke": "$box-border",
-              "strokeWidth": 4,
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
               "layout": "vertical",
-              "gap": 18,
+              "gap": 12,
               "padding": [
-                34,
-                36,
-                28,
-                36
+                22,
+                18,
+                14,
+                18
               ],
               "children": [
                 {
                   "type": "frame",
-                  "id": "bevJz",
+                  "id": "n3Cnl",
                   "name": "Loot",
                   "width": "fill_container",
-                  "gap": 12,
+                  "gap": 8,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "HWsLN",
+                      "id": "J32qN",
                       "name": "Loot Expérience",
                       "width": "fill_container",
                       "fill": "#f5f6f9",
-                      "cornerRadius": 10,
+                      "cornerRadius": 8,
                       "layout": "vertical",
-                      "gap": 4,
+                      "gap": 2,
                       "padding": [
-                        12,
-                        14
+                        7,
+                        9
                       ],
                       "children": [
                         {
                           "type": "frame",
-                          "id": "geqsB",
+                          "id": "u3uME",
                           "name": "Head",
-                          "gap": 6,
+                          "gap": 4,
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "icon",
-                              "id": "XTfLG",
+                              "id": "ZViki",
                               "name": "star",
-                              "width": 16,
-                              "height": 16,
+                              "width": 11,
+                              "height": 11,
                               "icon": "star",
                               "library": "lucide",
                               "fill": "$ink-soft"
                             },
                             {
                               "type": "text",
-                              "id": "aFhEC",
+                              "id": "qHUP2",
                               "name": "Expérience",
                               "fill": "$ink-soft",
                               "content": "Expérience",
                               "fontFamily": "Roboto",
-                              "fontSize": 13,
+                              "fontSize": 10,
                               "fontWeight": "500"
                             }
                           ]
                         },
                         {
                           "type": "text",
-                          "id": "K3jH0A",
+                          "id": "c6BcOU",
                           "name": "+42",
                           "fill": "$ink",
                           "content": "+42",
                           "fontFamily": "Roboto",
-                          "fontSize": 22,
+                          "fontSize": 15,
                           "fontWeight": "700"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "Z55Gwc",
+                      "id": "X9lAX",
                       "name": "Loot Pièces",
                       "width": "fill_container",
                       "fill": "#f5f6f9",
-                      "cornerRadius": 10,
+                      "cornerRadius": 8,
                       "layout": "vertical",
-                      "gap": 4,
+                      "gap": 2,
                       "padding": [
-                        12,
-                        14
+                        7,
+                        9
                       ],
                       "children": [
                         {
                           "type": "frame",
-                          "id": "wLNxF",
+                          "id": "jtLDB",
                           "name": "Head",
-                          "gap": 6,
+                          "gap": 4,
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "icon",
-                              "id": "gz79P",
+                              "id": "RonOJ",
                               "name": "coins",
-                              "width": 16,
-                              "height": 16,
+                              "width": 11,
+                              "height": 11,
                               "icon": "coins",
                               "library": "lucide",
                               "fill": "$ink-soft"
                             },
                             {
                               "type": "text",
-                              "id": "QRNxH",
+                              "id": "k3wPk9",
                               "name": "Pièces",
                               "fill": "$ink-soft",
                               "content": "Pièces",
                               "fontFamily": "Roboto",
-                              "fontSize": 13,
+                              "fontSize": 10,
                               "fontWeight": "500"
                             }
                           ]
                         },
                         {
                           "type": "text",
-                          "id": "Xptfa",
+                          "id": "vF1ES",
                           "name": "+22",
                           "fill": "$ink",
                           "content": "+22",
                           "fontFamily": "Roboto",
-                          "fontSize": 22,
+                          "fontSize": 15,
                           "fontWeight": "700"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "lntSE",
+                      "id": "WsrIi",
                       "name": "Loot Objet trouvé",
                       "width": "fill_container",
                       "fill": "#f5f6f9",
-                      "cornerRadius": 10,
+                      "cornerRadius": 8,
                       "layout": "vertical",
-                      "gap": 4,
+                      "gap": 2,
                       "padding": [
-                        12,
-                        14
+                        7,
+                        9
                       ],
                       "children": [
                         {
                           "type": "frame",
-                          "id": "lpthW",
+                          "id": "EZ3Wb",
                           "name": "Head",
-                          "gap": 6,
+                          "gap": 4,
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "rectangle",
-                              "id": "S1Y9wz",
+                              "id": "GzrD4",
                               "name": "Img",
                               "fill": {
                                 "type": "image",
@@ -3768,29 +3828,29 @@
                                 "url": "images/db/potion.png",
                                 "mode": "stretch"
                               },
-                              "width": 18,
-                              "height": 18
+                              "width": 13,
+                              "height": 13
                             },
                             {
                               "type": "text",
-                              "id": "u1qdfu",
+                              "id": "p7dgK",
                               "name": "Objet trouvé",
                               "fill": "$ink-soft",
                               "content": "Objet trouvé",
                               "fontFamily": "Roboto",
-                              "fontSize": 13,
+                              "fontSize": 10,
                               "fontWeight": "500"
                             }
                           ]
                         },
                         {
                           "type": "text",
-                          "id": "ZatSX",
+                          "id": "I1X2dI",
                           "name": "Potion ×1",
                           "fill": "$ink",
                           "content": "Potion ×1",
                           "fontFamily": "Roboto",
-                          "fontSize": 22,
+                          "fontSize": 15,
                           "fontWeight": "700"
                         }
                       ]
@@ -3799,15 +3859,15 @@
                 },
                 {
                   "type": "frame",
-                  "id": "it9RD",
+                  "id": "SuVM5",
                   "name": "Hugo progress",
                   "width": "fill_container",
-                  "gap": 16,
+                  "gap": 10,
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": 10,
-                      "id": "wwSUT",
+                      "cornerRadius": 7,
+                      "id": "jSCY6",
                       "name": "Portrait",
                       "fill": {
                         "type": "image",
@@ -3815,64 +3875,64 @@
                         "url": "images/combat/portrait-hugo.png",
                         "mode": "stretch"
                       },
-                      "width": 84,
-                      "height": 84
+                      "width": 48,
+                      "height": 48
                     },
                     {
                       "type": "frame",
-                      "id": "g4EKUW",
+                      "id": "kp3Ub",
                       "name": "Progress",
                       "width": "fill_container",
                       "layout": "vertical",
-                      "gap": 10,
+                      "gap": 6,
                       "children": [
                         {
                           "type": "frame",
-                          "id": "b4ERST",
+                          "id": "jzO32",
                           "name": "Level row",
                           "width": "fill_container",
-                          "gap": 10,
+                          "gap": 7,
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "text",
-                              "id": "N4q3Ru",
+                              "id": "X0bWt7",
                               "name": "Hugo",
                               "fill": "$ink",
                               "content": "Hugo",
                               "fontFamily": "Roboto",
-                              "fontSize": 18,
+                              "fontSize": 13,
                               "fontWeight": "700"
                             },
                             {
                               "type": "text",
-                              "id": "LaXKd",
+                              "id": "RtBBA",
                               "name": "Niv. 1 → 2",
                               "fill": "$ink-soft",
                               "content": "Niv. 1 → 2",
                               "fontFamily": "Roboto",
-                              "fontSize": 15,
+                              "fontSize": 11,
                               "fontWeight": "500"
                             },
                             {
                               "type": "frame",
-                              "id": "NskG3",
+                              "id": "tmcWu",
                               "name": "Level up",
                               "fill": "#4cc06a26",
-                              "cornerRadius": 8,
+                              "cornerRadius": 6,
                               "padding": [
-                                3,
-                                9
+                                2,
+                                6
                               ],
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "l9ir5",
+                                  "id": "nhdxG",
                                   "name": "Niveau supérieur !",
                                   "fill": "#2f9a4c",
                                   "content": "Niveau supérieur !",
                                   "fontFamily": "Roboto",
-                                  "fontSize": 12,
+                                  "fontSize": 10,
                                   "fontWeight": "700"
                                 }
                               ]
@@ -3881,79 +3941,79 @@
                         },
                         {
                           "type": "frame",
-                          "id": "OXU2I",
+                          "id": "bUkOr",
                           "name": "Bar Expérience",
                           "width": "fill_container",
                           "layout": "vertical",
-                          "gap": 3,
+                          "gap": 2,
                           "children": [
                             {
                               "type": "frame",
-                              "id": "CFyIf",
+                              "id": "MuaQV",
                               "name": "Bar head",
                               "width": "fill_container",
-                              "gap": 6,
+                              "gap": 4,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "Rm7xe",
+                                  "id": "dBWXY",
                                   "name": "Expérience",
                                   "fill": "#3f8ef0",
                                   "content": "Expérience",
                                   "fontFamily": "Roboto",
-                                  "fontSize": 13,
+                                  "fontSize": 10.5,
                                   "fontWeight": "700"
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "ECxJ0",
+                                  "id": "u05CRO",
                                   "name": "Spacer",
                                   "width": "fill_container",
                                   "height": 1
                                 },
                                 {
                                   "type": "text",
-                                  "id": "hlAaa",
+                                  "id": "Ne2aC",
                                   "name": "8 / 60 vers le niv. 3",
                                   "fill": "$ink-soft",
                                   "content": "8 / 60 vers le niv. 3",
                                   "fontFamily": "Roboto",
-                                  "fontSize": 12.5,
+                                  "fontSize": 10,
                                   "fontWeight": "500"
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "Fq71K",
+                              "id": "jyXp6",
                               "name": "Track",
                               "width": "fill_container",
-                              "height": 8,
+                              "height": 4,
                               "fill": "#e8ebf1",
-                              "cornerRadius": 4,
+                              "cornerRadius": 2,
                               "layout": "none",
                               "children": [
                                 {
                                   "type": "rectangle",
-                                  "cornerRadius": 4,
-                                  "id": "y1OaLG",
+                                  "cornerRadius": 2,
+                                  "id": "Qfz4Y",
                                   "x": 0,
                                   "y": 0,
                                   "name": "Before",
                                   "fill": "#3f8ef0",
                                   "width": 0,
-                                  "height": 8
+                                  "height": 4
                                 },
                                 {
                                   "type": "rectangle",
-                                  "id": "Zd9AY",
+                                  "id": "Y1rLbK",
                                   "x": 0,
                                   "y": 0,
                                   "name": "Gained",
                                   "fill": "#3f8ef080",
-                                  "width": 51.74,
-                                  "height": 8
+                                  "width": 42.38,
+                                  "height": 4
                                 }
                               ]
                             }
@@ -3961,23 +4021,23 @@
                         },
                         {
                           "type": "frame",
-                          "id": "IejJ0",
+                          "id": "aCGpF",
                           "name": "Bar Épée 3",
                           "width": "fill_container",
                           "layout": "vertical",
-                          "gap": 3,
+                          "gap": 2,
                           "children": [
                             {
                               "type": "frame",
-                              "id": "w0UQRa",
+                              "id": "ZS0uB",
                               "name": "Bar head",
                               "width": "fill_container",
-                              "gap": 6,
+                              "gap": 4,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "rectangle",
-                                  "id": "so3DV",
+                                  "id": "wV37T",
                                   "name": "Img",
                                   "fill": {
                                     "type": "image",
@@ -3985,68 +4045,68 @@
                                     "url": "images/db/sword.png",
                                     "mode": "stretch"
                                   },
-                                  "width": 16,
-                                  "height": 16
+                                  "width": 12,
+                                  "height": 12
                                 },
                                 {
                                   "type": "text",
-                                  "id": "dKQTO",
+                                  "id": "CYNUt",
                                   "name": "Épée 3",
                                   "fill": "#6b6e7a",
                                   "content": "Épée 3",
                                   "fontFamily": "Roboto",
-                                  "fontSize": 13,
+                                  "fontSize": 10.5,
                                   "fontWeight": "700"
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "LcKbM",
+                                  "id": "PYjo3",
                                   "name": "Spacer",
                                   "width": "fill_container",
                                   "height": 1
                                 },
                                 {
                                   "type": "text",
-                                  "id": "Ph7MC",
+                                  "id": "sg4lY",
                                   "name": "+6 · 34 / 50",
                                   "fill": "$ink-soft",
                                   "content": "+6 · 34 / 50",
                                   "fontFamily": "Roboto",
-                                  "fontSize": 12.5,
+                                  "fontSize": 10,
                                   "fontWeight": "500"
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "T7cgbw",
+                              "id": "yE1lF",
                               "name": "Track",
                               "width": "fill_container",
-                              "height": 8,
+                              "height": 4,
                               "fill": "#e8ebf1",
-                              "cornerRadius": 4,
+                              "cornerRadius": 2,
                               "layout": "none",
                               "children": [
                                 {
                                   "type": "rectangle",
-                                  "cornerRadius": 4,
-                                  "id": "drrN9",
+                                  "cornerRadius": 2,
+                                  "id": "V5gSP",
                                   "x": 0,
                                   "y": 0,
                                   "name": "Before",
                                   "fill": "#6b6e7a",
-                                  "width": 222.88000000000002,
-                                  "height": 8
+                                  "width": 182.56000000000003,
+                                  "height": 4
                                 },
                                 {
                                   "type": "rectangle",
-                                  "id": "UpYKP",
-                                  "x": 222.88000000000002,
+                                  "id": "qjCjo",
+                                  "x": 182.56000000000003,
                                   "y": 0,
                                   "name": "Gained",
                                   "fill": "#6b6e7a80",
-                                  "width": 47.76,
-                                  "height": 8
+                                  "width": 39.12,
+                                  "height": 4
                                 }
                               ]
                             }
@@ -4054,23 +4114,23 @@
                         },
                         {
                           "type": "frame",
-                          "id": "XgsxV",
+                          "id": "l6mQw",
                           "name": "Bar Feu 2",
                           "width": "fill_container",
                           "layout": "vertical",
-                          "gap": 3,
+                          "gap": 2,
                           "children": [
                             {
                               "type": "frame",
-                              "id": "G93qnx",
+                              "id": "ri1KN",
                               "name": "Bar head",
                               "width": "fill_container",
-                              "gap": 6,
+                              "gap": 4,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "rectangle",
-                                  "id": "kySlM",
+                                  "id": "zAs0j",
                                   "name": "Img",
                                   "fill": {
                                     "type": "image",
@@ -4078,68 +4138,68 @@
                                     "url": "images/db/fire.png",
                                     "mode": "stretch"
                                   },
-                                  "width": 16,
-                                  "height": 16
+                                  "width": 12,
+                                  "height": 12
                                 },
                                 {
                                   "type": "text",
-                                  "id": "LI14Y",
+                                  "id": "cqFVg",
                                   "name": "Feu 2",
                                   "fill": "#f08c32",
                                   "content": "Feu 2",
                                   "fontFamily": "Roboto",
-                                  "fontSize": 13,
+                                  "fontSize": 10.5,
                                   "fontWeight": "700"
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "iTccb",
+                                  "id": "sfVVw",
                                   "name": "Spacer",
                                   "width": "fill_container",
                                   "height": 1
                                 },
                                 {
                                   "type": "text",
-                                  "id": "I1Wue",
+                                  "id": "hj2ED",
                                   "name": "+3 · 12 / 30",
                                   "fill": "$ink-soft",
                                   "content": "+3 · 12 / 30",
                                   "fontFamily": "Roboto",
-                                  "fontSize": 12.5,
+                                  "fontSize": 10,
                                   "fontWeight": "500"
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "YlxZY",
+                              "id": "aSXqv",
                               "name": "Track",
                               "width": "fill_container",
-                              "height": 8,
+                              "height": 4,
                               "fill": "#e8ebf1",
-                              "cornerRadius": 4,
+                              "cornerRadius": 2,
                               "layout": "none",
                               "children": [
                                 {
                                   "type": "rectangle",
-                                  "cornerRadius": 4,
-                                  "id": "fwzcZ",
+                                  "cornerRadius": 2,
+                                  "id": "fC6Tu",
                                   "x": 0,
                                   "y": 0,
                                   "name": "Before",
                                   "fill": "#f08c32",
-                                  "width": 119.39999999999999,
-                                  "height": 8
+                                  "width": 97.8,
+                                  "height": 4
                                 },
                                 {
                                   "type": "rectangle",
-                                  "id": "hubWf",
-                                  "x": 119.39999999999999,
+                                  "id": "lxAfx",
+                                  "x": 97.8,
                                   "y": 0,
                                   "name": "Gained",
                                   "fill": "#f08c3280",
-                                  "width": 39.80000000000001,
-                                  "height": 8
+                                  "width": 32.60000000000001,
+                                  "height": 4
                                 }
                               ]
                             }
@@ -4151,57 +4211,57 @@
                 },
                 {
                   "type": "frame",
-                  "id": "P7AaPZ",
+                  "id": "ksCSZ",
                   "name": "New skill",
                   "width": "fill_container",
                   "fill": "#1e90ff0f",
-                  "cornerRadius": 10,
+                  "cornerRadius": 7,
                   "stroke": "$pick",
-                  "strokeWidth": 2,
-                  "gap": 10,
+                  "strokeWidth": 1.5,
+                  "gap": 6,
                   "padding": [
-                    10,
-                    14
+                    6,
+                    9
                   ],
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "icon",
-                      "id": "rV6Fy",
+                      "id": "yr5Ri",
                       "name": "sparkles",
-                      "width": 18,
-                      "height": 18,
+                      "width": 13,
+                      "height": 13,
                       "icon": "sparkles",
                       "library": "lucide",
                       "fill": "$pick"
                     },
                     {
                       "type": "text",
-                      "id": "LgBUZ",
+                      "id": "q2X1Pn",
                       "name": "Nouvelle compétence : Co",
                       "fill": "$pick",
                       "content": "Nouvelle compétence : Coup double",
                       "fontFamily": "Roboto",
-                      "fontSize": 15,
+                      "fontSize": 12,
                       "fontWeight": "700"
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "KH0t2",
+                  "id": "SYSf0",
                   "name": "Footer",
                   "width": "fill_container",
                   "justifyContent": "end",
                   "children": [
                     {
                       "type": "text",
-                      "id": "L0lV1",
+                      "id": "CYdJ9",
                       "name": "Toucher pour continuer",
                       "fill": "$ink-soft",
                       "content": "Toucher pour continuer",
                       "fontFamily": "Roboto",
-                      "fontSize": 13,
+                      "fontSize": 10,
                       "fontWeight": "500"
                     }
                   ]
@@ -4210,50 +4270,50 @@
             },
             {
               "type": "frame",
-              "id": "mgy8Q",
-              "x": 40,
+              "id": "zn5wp",
+              "x": 24,
               "y": 0,
               "name": "Title pill",
-              "height": 48,
+              "height": 32,
               "fill": "$box",
-              "cornerRadius": 10,
+              "cornerRadius": 8,
               "stroke": "#fafafa",
-              "strokeWidth": 2,
+              "strokeWidth": 1.5,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "#0000001f",
+                "color": "#00000026",
                 "offset": {
-                  "x": 2,
-                  "y": 4
+                  "x": 1,
+                  "y": 2
                 },
-                "blur": 4
+                "blur": 3
               },
-              "gap": 8,
+              "gap": 6,
               "padding": [
                 0,
-                20
+                12
               ],
               "alignItems": "center",
               "children": [
                 {
                   "type": "icon",
-                  "id": "N3zymW",
+                  "id": "ZBRLk",
                   "name": "trophy",
-                  "width": 20,
-                  "height": 20,
+                  "width": 14,
+                  "height": 14,
                   "icon": "trophy",
                   "library": "lucide",
                   "fill": "#c9a227"
                 },
                 {
                   "type": "text",
-                  "id": "VNa1X",
+                  "id": "A3ssqD",
                   "name": "Victoire !",
                   "fill": "$ink",
                   "content": "Victoire !",
                   "fontFamily": "Roboto",
-                  "fontSize": 20,
+                  "fontSize": 14,
                   "fontWeight": "500"
                 }
               ]
