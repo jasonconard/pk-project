@@ -38,8 +38,10 @@ interface CommandItem {
   kind: CommandKind | "magic" | "items";
   label: string;
   icon: string;
-  /** Not there yet (magic, items: the next steps). */
+  /** Greyed out (nothing to use, can't flee). */
   soon?: boolean;
+  /** A word under the label (« interrompt »). */
+  hint?: string;
 }
 
 /**
@@ -76,7 +78,12 @@ export class BattleHudComponent {
   protected readonly menu = signal<"main" | "skills" | "items">("main");
   protected readonly commands = computed<CommandItem[]>(() => [
     { kind: "attack", label: "Attaque", icon: "sword" },
-    { kind: "heavy", label: "Attaque forte", icon: "swords" },
+    {
+      kind: "heavy",
+      label: "Attaque forte",
+      icon: "swords",
+      hint: "interrompt",
+    },
     {
       kind: "magic",
       label: "Magie",

@@ -105,6 +105,14 @@
     box-shadow: 0 0 6px #1e90ffaa;
   }
 
+  /* Interrupted / pushed back: a red shake (its slide back is the left transition) */
+  &.knocked {
+    z-index: 3;
+    border-color: var(--foe);
+    box-shadow: 0 0 8px #e0554acc;
+    animation: knocked 0.3s ease-in-out 2;
+  }
+
   img {
     width: 16px;
     height: 16px;
@@ -294,6 +302,33 @@
 .menu .detail {
   font-size: 10.5px;
   color: var(--ink-soft);
+
+  &.hint {
+    margin-left: auto;
+    font-size: 9.5px;
+    font-weight: 500;
+    color: #a463e0;
+  }
+}
+
+/* An enemy between its command and its action (interruptible) */
+.menu .busy {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #a463e0;
+  box-shadow: 0 0 0 2px #efe4fa;
+}
+
+@keyframes knocked {
+  25% {
+    translate: calc(-50% - 3px) -50%;
+  }
+
+  75% {
+    translate: calc(-50% + 3px) -50%;
+  }
 }
 
 .menu.choices button {
@@ -343,6 +378,18 @@
     font-size: 14px;
     font-weight: 700;
   }
+
+  /* « Interruption : Venin »: a red label */
+  &.cancel {
+    padding: 4px 9px;
+    border-radius: 7px;
+    background: var(--foe);
+    box-shadow: var(--shadow);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: none;
+  }
 }
 
 @keyframes popup-rise {
@@ -367,7 +414,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .menu, .aim {
+  .menu, .aim, .token.knocked {
     animation: none;
   }
 }

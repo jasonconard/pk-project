@@ -284,6 +284,7 @@ export class BattleService {
               icon: f.icon,
               hp: f.hp,
               hpMax: f.hpMax,
+              busy: !!f.command && f.gauge > GAUGE_COMMAND,
             }))
           : [],
       aim: engine.aim,
@@ -293,6 +294,7 @@ export class BattleService {
         return { ...c, ...field.screenPos(f?.pos ?? new THREE.Vector3(), 40) };
       }),
       popups: engine.popups,
+      knocked: [...engine.knocked.keys()],
       stateLooks: Object.fromEntries(
         db.states.map((s) => [s.id, { name: s.name, color: s.color }])
       ),

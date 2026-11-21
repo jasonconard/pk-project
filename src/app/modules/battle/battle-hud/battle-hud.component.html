@@ -20,6 +20,7 @@
             class="token"
             [class.foe]="f.side === 'foe'"
             [class.turn]="f.id === v.actor"
+            [class.knocked]="v.knocked.includes(f.id)"
             [style.left.%]="f.gauge * 100"
             [attr.title]="f.name"
           >
@@ -115,6 +116,9 @@
               }
             }
             {{ c.label }}
+            @if (c.hint) {
+              <small class="detail hint">{{ c.hint }}</small>
+            }
           </button>
         }
       </div>
@@ -139,6 +143,12 @@
               <img [src]="f.icon" alt="" />
             }
             <span class="target-name">{{ f.name }}</span>
+            @if (f.busy) {
+              <span
+                class="busy"
+                title="En action : une attaque forte l'interrompt"
+              ></span>
+            }
             <span class="mini-hp"
               ><span [style.width.%]="percent(f.hp, f.hpMax)"></span
             ></span>

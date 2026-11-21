@@ -46,6 +46,14 @@ const WALK_SPEED = 70;
 const REACH = 15;
 /** A number shown over a fighter (s), a defeated enemy fading out (s), the pause before the fight ends (s). */
 const POPUP_TIME = 1;
+/**
+ * Interrupting (Grandia's critical hits): a heavy attack landing between the command and the action marks cancels
+ * the target's action and throws it back this far on the gauge; landing earlier, it only pushes it back a little.
+ * A defending fighter is not interrupted. The token flashes for KNOCK_TIME (s).
+ */
+const CANCEL_BACK = 0.45;
+const DELAY_BACK = 0.12;
+const KNOCK_TIME = 0.6;
 const FADE_TIME = 0.6;
 const END_DELAY = 1.8;
 /** An enemy's plain attack is a heavy one this often. */
@@ -92,6 +100,8 @@ export class BattleEngine {
   /** Hurt fighters going back to idle, defeated enemies fading out (time since). */
   private readonly hurt = new Set<Fighter>();
   private readonly fading = new Map<Fighter, number>();
+  /** Fighters just interrupted or pushed back (their token flashes), with the time since. */
+  readonly knocked = new Map<string, number>();
   private readonly fastest: number;
 
   constructor(
@@ -537,7 +547,14 @@ export class BattleEngine {
         const amount =
           baseAmount(actor, target, "str", ATTACK_POWER, true, this.db) *
           (command.kind === "heavy" ? HEAVY_FACTOR : 1);
-        this.hit(actor, target, amount, actor.attackElement, 0);
+        this.hit(
+          actor,
+          target,
+          amount,
+          actor.attackElement,
+          0,
+          command.kind === "heavy"
+        );
         continue;
       }
       const skill = this.skill(command.id);
@@ -642,7 +659,8 @@ export class BattleEngine {
     target: Fighter,
     amount: number,
     element: string,
-    line: number
+    line: number,
+    interrupts = false
   ): void {
     const damage = finalDamage(
       amount,
@@ -653,7 +671,7 @@ export class BattleEngine {
       this.db
     );
     if (damage === 0) {
-      this.popup(target, "Annulé", "info", line);
+      this.popup(target, "Sans effet", "info", line);
       return;
     }
     this.changeHp(target, -damage, line);
@@ -667,7 +685,37 @@ export class BattleEngine {
     if (target.hp > 0) {
       this.field.play(target.id, "hurt", facing(target.pos, actor.pos), true);
       this.hurt.add(target);
+      if (interrupts && !target.defending) {
+        this.interrupt(target, line + 1);
+      }
     }
+  }
+
+  /** A heavy blow: the target's action cancelled (between command and action), else its turn pushed back. */
+  private interrupt(target: Fighter, line: number): void {
+    const command = target.command;
+    if (command && target.gauge > GAUGE_COMMAND) {
+      const name =
+        command.kind === "skill"
+          ? (this.skill(command.id)?.name ?? "Action")
+          : this.commandName(command);
+      target.command = null;
+      target.gauge = Math.max(0, target.gauge - CANCEL_BACK);
+      this.popup(target, `Interruption : ${name}`, "cancel", line);
+    } else if (target.gauge < GAUGE_COMMAND) {
+      target.gauge = Math.max(0, target.gauge - DELAY_BACK);
+      this.popup(target, "Retardé", "info", line);
+    } else {
+      return;
+    }
+    this.knocked.set(target.id, 0);
+  }
+
+  private commandName(command: Command): string {
+    if (command.kind === "item") {
+      return this.item(command.id)?.name ?? "Objet";
+    }
+    return command.kind === "heavy" ? "Attaque forte" : "Attaque";
   }
 
   /** PV gained (+) or lost (−), shown; at 0 the fighter falls. */
@@ -751,6 +799,13 @@ export class BattleEngine {
     }
     for (const p of this.popups) {
       p.age += dt;
+    }
+    for (const [id, age] of this.knocked) {
+      if (age + dt >= KNOCK_TIME) {
+        this.knocked.delete(id);
+      } else {
+        this.knocked.set(id, age + dt);
+      }
     }
     this.popups = this.popups.filter((p) => p.age < POPUP_TIME);
     // A fighter fallen to a state (poison) between two actions: the end may come

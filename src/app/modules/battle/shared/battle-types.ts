@@ -78,7 +78,7 @@ export interface Fighter {
 export interface Popup {
   id: number;
   text: string;
-  kind: "damage" | "heal" | "info" | "state";
+  kind: "damage" | "heal" | "info" | "state" | "cancel";
   color?: string;
   x: number;
   y: number;
@@ -101,6 +101,8 @@ export interface TargetChoice {
   icon?: string;
   hp: number;
   hpMax: number;
+  /** Between its command and its action: a heavy attack would interrupt it. */
+  busy: boolean;
 }
 
 /** A spell being gathered (between the command and the action marks), shown over its caster. */
@@ -135,6 +137,8 @@ export interface BattleView {
   aimScreen: { x: number; y: number } | null;
   casts: Cast[];
   popups: Popup[];
+  /** Fighters just interrupted or pushed back on the gauge (their token flashes). */
+  knocked: string[];
   /** State id → its name and color (the cards' small dots). */
   stateLooks: Record<string, { name: string; color: string }>;
 }
