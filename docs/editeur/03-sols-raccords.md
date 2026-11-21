@@ -12,7 +12,7 @@ Une case fait **16 unités** ; elle est rangée dans `chunk.tiles` : `'colonne,l
 
 ## Le sol peint : un canvas
 
-Le sol d'un morceau de carte est un seul maillage avec une texture. Dès qu'il est peint, sa texture devient un **canvas** de 512 × 512 pixels (1 pixel par unité, comme les textures de sol) : on y dessine la texture d'origine, puis chaque case peinte par-dessus (`MapHelper.paintedGround`, `drawCell`). Le sol garde ainsi tous les effets météo (pluie, flaques, neige…) et un seul maillage.
+Le sol d'un morceau de carte est un seul maillage avec une texture. Dès qu'il est peint, sa texture devient un **canvas** de 512 × 512 pixels (1 pixel par unité, comme les textures de sol) : on y dessine la texture d'origine, puis chaque case peinte par-dessus (`ChunkGround.paintedGround`, `drawCell`). Le sol garde ainsi tous les effets météo (pluie, flaques, neige…) et un seul maillage.
 
 ## Les terrains et la planche
 

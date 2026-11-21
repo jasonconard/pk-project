@@ -70,7 +70,7 @@ Chaque terrain se présente sous forme de blocs 3×3 (centre, 4 bords, 4 coins e
 
 ### 2. Raccords automatiques (autotiling)
 - **Données inchangées** : `chunk.tiles` contient toujours `'col,ligne' → terrain`. Une case vide garde le sol d'origine (herbe).
-- **Affichage** : dans `MapHelper.drawCell` (`shared/model/MapHelper.ts`), on calcule un masque à partir des 8 voisins. On pioche ensuite le bord ou le coin du terrain de plus haute priorité qui touche la case, et on le dessine par-dessus.
+- **Affichage** : dans `ChunkGround.drawCell` (`shared/model/ChunkGround.ts`), on calcule un masque à partir des 8 voisins. On pioche ensuite le bord ou le coin du terrain de plus haute priorité qui touche la case, et on le dessine par-dessus.
 - **Voisins à redessiner** : peindre une case redessine la case et ses 8 voisines (`paintCell`), y compris dans le morceau de carte voisin. Il faudra donc un `cellAt` global, qui existe déjà, plus un repli de bord en bord.
 - **Pinceau** : on garde `MapEditorService.paintAt` et l'historique (un trait = une action). On ajoute une **taille de pinceau** (1, 2 ou 3 cases) et un **remplissage** (pot de peinture).
 
@@ -105,7 +105,7 @@ Chaque terrain se présente sous forme de blocs 3×3 (centre, 4 bords, 4 coins e
 
 ## Fichiers principaux
 
-- `src/app/modules/game/shared/model/MapHelper.ts` : rendu du sol (canvas, grille, parois), `cellAt`, `paintCell`.
+- `src/app/modules/game/shared/model/ChunkGround.ts` : rendu du sol (canvas, parois, escaliers), `paintCell` ; `MapHelper.ts` garde `cellAt` et passe le reste au sol.
 - `src/app/modules/game/shared/services/map-editor/ground-painter.ts` : outils pinceau, remplissage, hauteur, escalier.
 - `src/app/modules/game/shared/services/map-storage.ts` : sauvegarde, export, migration.
 - `src/app/modules/game/shared/services/scene.service.ts` et `game-map.service.ts` : collisions, hauteurs, saut.

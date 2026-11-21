@@ -30,7 +30,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   input listeners must respect it). `stick`, `touch-pad`, `message`, `update-prompt` (GitHub release check, live update).
 - `modules/game/`: `game.component` (main view, game mode / edit mode, editor panels opened over the game via
   `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
-  landscape/desktop), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
+  landscape/desktop, `editor-bar.selection.scss` the selected object's sheet), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
   `release-notes`, `game-saves` (saved games dialog), `variables-test` (change the variables' values while playing),
   `teleport`, `event-editor` (an object's event window: trigger, conditions, the tree of actions and branches;
   `event-conditions/` and `event-action/` (one action's fields) components, `event-editor-data.ts` (`EventEditorData`,
@@ -42,7 +42,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
     `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
     `event` (`actionAt`, `armed`: enter / automatic events), `sequence` (plays the actions), `sfx` (synthesized sound
     effects), `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
-  - `shared/model/`: `MapHelper` (chunks, bounds, `refreshModels`), `Terrain`, `GroundMesh`, `SceneMap`,
+  - `shared/model/`: `MapHelper` (chunks, bounds, `refreshModels`; `ChunkGround` the painted ground, water, reliefs and stairs;
+    `mesh-fading` objects fading near the camera / see-through), `Terrain`, `GroundMesh`, `SceneMap`,
     `SceneBuilding`, `SceneModel`, `ModelChoice` (`MODEL_CHOICES`, palette thumbnails), `ModelInstances`,
     `browser-models`, `Passage` (links between maps), `ObjectEvent` (editor events ↔ `SceneEvent`, `conditionsFit`),
     `Zone` (invisible zones, camera layer 1 shown only in the editor; `findModel`), `Quality`.
@@ -71,7 +72,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 
 **Big files — never read whole, grep the symbol then read a range:** `day-presets.ts` (~900 lines), `night-presets.ts` (~750), `WeatherAudio.ts`
 (~1350), `WeatherHelper.ts` (~1700), `map-editor.service.ts` (~1350), `model-editor.component.ts` (~1300),
-`GlowParticles.ts`, `MapHelper.ts`, `assets/map/world/world.ts`, `music-editor.component.ts`, `game.service.ts`.
+`GlowParticles.ts`, `assets/map/world/world.ts`, `music-editor.component.ts`, `game.service.ts`.
 
 ## Conventions
 
