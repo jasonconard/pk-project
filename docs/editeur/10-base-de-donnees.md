@@ -67,6 +67,7 @@ Ce que le combat lit dans la base :
 - **L'incantation** : le temps d'incantation d'une compétence est le temps passé entre la commande et l'action sur la jauge ; le lanceur concentre son sort (son nom au-dessus de lui).
 - **Les PM** : payés au moment d'agir ; une compétence trop chère est grisée.
 - **Les états** : au début de chaque tour, leurs PV / PM gagnés ou perdus, leur chance de faire perdre le tour (sommeil, paralysie) ; ils durent leur nombre de tours. Ceux qui finissent quand on est touché (sommeil) s'arrêtent au premier coup.
+- **Interrompre** (comme dans Grandia) : une **attaque forte** qui touche un combattant entre sa commande et son action (un sort en incantation, une attaque qui arrive) l'**annule** et le renvoie loin sur la jauge (« Interruption : Venin ») ; avant sa commande, elle le **retarde** un peu. Celui qui se défend n'est pas interrompu. Les ennemis peuvent le faire aussi. Dans la liste des cibles, un point violet marque ceux qu'on peut interrompre.
 - **Les ennemis** : à leur tour, une de leurs compétences selon leur poids (rarement, parfois, souvent) et leur condition (PV sous…, pendant une météo), ou une attaque simple.
 
 ## Groupes
