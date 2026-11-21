@@ -59,7 +59,7 @@ Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'a
 | **Objet** | Donne ou retire un nombre d'un objet de la [base de données](10-base-de-donnees.md) (jamais en dessous de 0). |
 | **Argent** | Donne ou retire des pièces. |
 | **Équipe** | Un personnage entre dans l'équipe ou en sort. |
-| **Combat** | Un combat contre un groupe d'ennemis de la base de données, puis la branche de la fin : **Victoire**, **Défaite** ou **Fuite** (seulement si on peut fuir ce groupe). Le combat se joue sur la carte, là où se trouve le joueur : l'équipe et les ennemis du groupe, animés par leurs [planches](11-planches.md), la jauge d'action, les cartes de l'équipe. En attendant les commandes, on choisit comment il se termine (Victoire, Défaite, Fuite) ; une victoire donne le butin (l'argent des ennemis, leurs objets selon leur chance). |
+| **Combat** | Un combat contre un groupe d'ennemis de la base de données, puis la branche de la fin : **Victoire**, **Défaite** ou **Fuite** (seulement si on peut fuir ce groupe). Le combat se joue sur la carte, là où se trouve le joueur : l'équipe et les ennemis du groupe, animés par leurs [planches](11-planches.md), la jauge d'action, les cartes de l'équipe. Quand vient son tour, un membre de l'équipe choisit Attaque, Attaque forte, Défendre ou Fuir (si on peut fuir ce groupe), puis sa cible ; les ennemis choisissent seuls. Le combat finit quand un camp est tombé ; une victoire donne le butin (l'argent des ennemis, leurs objets selon leur chance). |
 
 ## L'arbre d'actions
 
