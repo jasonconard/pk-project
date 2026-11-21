@@ -51,7 +51,9 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
     (wiring; `weather-blend` the day / night blending and sun, `weather-motion` the player thrown, floating, shaken), `GlowParticles.ts`, `weather-shader.ts`, `WeatherAudio.ts` (+ `audio/`: kit, mix levels, one-shot sounds), one `XxxHelper.ts` per effect, post passes
     (`BloomPass`, `GodRaysPass`, `HeatHazePass`), `weather-catalog.ts` (catalog texts). Details in `shared/weather/CLAUDE.md`.
 - `modules/model-editor/`: 3D model editor (one pixel grid per face, grayscale layers specular / night / bump).
-  `shared/`: `EditableModel`, `model-ops`, `model-history`, `model-storage` (IndexedDB), `model-export` (→ `md-xxx.ts` + png).
+  `model-editor.options.ts` (tools, layers, rows of numbers, saved view settings). `shared/`: `EditableModel`,
+  `model-ops`, `model-history`, `model-saver` (saves a little after each change), `model-storage` (IndexedDB),
+  `model-export` (→ `md-xxx.ts` + png).
 - `modules/music-editor/`: lo-fi music editor. `shared/`: `song`, `instruments` (data sheets), `synth`, `music-engine`, `song-storage`.
 - `modules/variables-editor/`: story flags and counters (`GameVariable`). `shared/`: `variables`, `variable-storage`
   (browser `pk-variables`, else `assets/variables/variables.ts`), `variable-values` (values in the game being played).
@@ -68,7 +70,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
 **Big files — never read whole, grep the symbol then read a range:** `day-presets.ts` (~900 lines), `night-presets.ts` (~750), `WeatherAudio.ts`
-(~1350), `WeatherHelper.ts` (~1700), `map-editor.service.ts` (~1350), `model-editor.component.ts` (~1100),
+(~1350), `WeatherHelper.ts` (~1700), `map-editor.service.ts` (~1350), `model-editor.component.ts` (~1300),
 `GlowParticles.ts`, `MapHelper.ts`, `assets/map/world/world.ts`, `music-editor.component.ts`, `game.service.ts`.
 
 ## Conventions

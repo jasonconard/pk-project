@@ -115,14 +115,15 @@ Le fichier du code générait parfois des formes en boucle (l'arbre) : l'export 
 
 | Fichier | Rôle |
 |---|---|
-| `model-editor/model-editor.component.*` | La page : panneau, outils, raccourcis, sauvegarde |
+| `model-editor/model-editor.component.*` | La page : panneau, outils, raccourcis |
+| `model-editor/model-editor.options.ts` | Les listes de la page : outils, calques, lignes de nombres, flèches du téléphone |
 | `model-editor/pixel-canvas/` | Vue 2D d'une face (zoom, grille) |
 | `model-editor/shared/EditableModel.ts` | Le modèle en cours d'édition : formes, une texture par face, calques |
 | `model-editor/shared/model-editor-scene.ts` | La vue 3D : caméra, flèches, choix de la face, aperçu |
 | `model-editor/shared/pixel-tools.ts` | Les outils de dessin |
 | `model-editor/shared/model-ops.ts` | Formes et faces : ajouter, redimensionner, lier, copier… |
 | `model-editor/shared/model-import.ts`, `model-export.ts` | Modèle du jeu ↔ modèle éditable (découpe et rangement de l'atlas) |
-| `model-editor/shared/model-history.ts`, `model-storage.ts` | Annuler / refaire, enregistrement IndexedDB |
+| `model-editor/shared/model-history.ts`, `model-saver.ts`, `model-storage.ts` | Annuler / refaire, enregistrement un peu après chaque changement, stockage IndexedDB |
 | `game/shared/model/browser-models.ts` | Le jeu prend les modèles du navigateur (appelé par la route du jeu) |
 | `model-editor/shared/palette.ts`, `palette-import.ts` | Couleurs du modèle, palettes importées |
 | `game/shared/model/model-uv.ts` | UV des faces (partagé avec le jeu) |
