@@ -71,8 +71,9 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `shared/battle.service` (start / end, the fighters, `view` for the interface), `battle-engine` (the timing:
   gauges, turns, commands, the action played, the end), `battle-rules` (stats, damage / heal, elements, weather,
   the enemies' choices), `battle-field` (the fighters placed on the map, moved,
-  the camera, put back after), `sheet-sprite` (a fighter drawn from its sprite sheet), `battle-types`;
-  `battle-hud/` the interface (design/combat.pen). Steps in docs/idees.md (point 9).
+  the camera, put back after), `sheet-sprite` (a fighter drawn from its sprite sheet), `progress` (experience, levels, element / weapon
+  growth, skills known), `battle-types`; `battle-hud/` the interface, `battle-outcome/` the end window
+  (design/combat.pen). The team's progress is kept in `party.ts` (`members`, `memberProgress`, `saveProgress`). Steps in docs/idees.md (point 9).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
