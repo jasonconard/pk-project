@@ -13,10 +13,21 @@ import {
   viewChild,
 } from "@angular/core";
 import {
+  LucideArrowDownLeft,
+  LucideArrowDownRight,
+  LucideArrowUpLeft,
+  LucideArrowUpRight,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideCircleCheck,
+  LucideFlipHorizontal2,
   LucideImageUp,
   LucidePause,
   LucidePlay,
+  LucideRepeat,
   LucideTrash,
+  LucideTriangleAlert,
+  LucideZap,
 } from "@lucide/angular";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import { StepperComponent } from "../stepper/stepper.component";
@@ -24,12 +35,11 @@ import { loadImage } from "../shared/load-image";
 import {
   defaultAnchor,
   detectFrames,
-  DIRECTION_LABELS,
   frameAt,
   isFlipped,
   newSheet,
+  rowsPerAnim,
   SHEET_ANIMS,
-  SHEET_DIRECTIONS,
   SheetAnim,
   SheetDirection,
   sheetLabel,
@@ -45,21 +55,38 @@ export interface SheetResult {
   still?: string;
 }
 
+type Tab = "anims" | "cut";
+
 /** Preview stage, in canvas pixels. */
-const STAGE_W = 240;
-const STAGE_H = 200;
+const STAGE_W = 352;
+const STAGE_H = 260;
+/** Size of a frame in the animation's row of frames (css px). */
+const THUMB = 50;
 
 /**
- * A fighter's combat sprite sheet: import the PNG, its frame size, mirror and feet; each animation's frames, speed,
- * loop and hit frame; an animated preview in the 4 directions. Format: docs/editeur/11-planches.md.
+ * A fighter's combat sprite sheet. Always shown: the animated preview (the 4 directions in its corners) and the
+ * animations' buttons; then the « Animations » tab (the chosen animation: its frames from the sheet, the hit
+ * frame, speed, loop) or the « Découpage » tab (frame size, feet, mirror, the sheet, import / remove).
+ * Format: docs/editeur/11-planches.md.
  */
 @Component({
   selector: "db-sheet-editor",
   imports: [
+    LucideArrowDownLeft,
+    LucideArrowDownRight,
+    LucideArrowUpLeft,
+    LucideArrowUpRight,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideCircleCheck,
+    LucideFlipHorizontal2,
     LucideImageUp,
     LucidePause,
     LucidePlay,
+    LucideRepeat,
     LucideTrash,
+    LucideTriangleAlert,
+    LucideZap,
     StepperComponent,
   ],
   templateUrl: "./sheet-editor.component.html",
@@ -75,6 +102,7 @@ export class SheetEditorComponent implements OnInit {
   protected readonly sheet = signal<SpriteSheet | undefined>(undefined);
   protected readonly image = signal<HTMLImageElement | null>(null);
   protected readonly message = signal("");
+  protected readonly tab = signal<Tab>("anims");
   /** The animation and direction previewed. */
   protected readonly anim = signal(0);
   protected readonly dir = signal<SheetDirection>("se");
@@ -82,10 +110,17 @@ export class SheetEditorComponent implements OnInit {
   /** The frame shown in the preview (follows the time while playing). */
   protected readonly frame = signal(0);
 
-  protected readonly directions = [
-    ...SHEET_DIRECTIONS.filter((d) => d.startsWith("n")),
-    ...SHEET_DIRECTIONS.filter((d) => d.startsWith("s")),
-  ].map((id) => ({ id, label: DIRECTION_LABELS[id] }));
+  /** The 4 directions, in the preview's corners. */
+  protected readonly directions: {
+    id: SheetDirection;
+    label: string;
+    corner: string;
+  }[] = [
+    { id: "nw", label: "NO", corner: "top-left" },
+    { id: "ne", label: "NE", corner: "top-right" },
+    { id: "sw", label: "SO", corner: "bottom-left" },
+    { id: "se", label: "SE", corner: "bottom-right" },
+  ];
   protected readonly label = sheetLabel;
   protected readonly notes = Object.fromEntries(
     SHEET_ANIMS.map((a) => [a.id, a.note])
@@ -96,6 +131,16 @@ export class SheetEditorComponent implements OnInit {
     return sheet && img
       ? sheetProblems(sheet, { w: img.width, h: img.height })
       : [];
+  });
+  /** « 16 lignes · 8 animations trouvées · 384 × 768 » */
+  protected readonly summary = computed(() => {
+    const sheet = this.sheet();
+    const img = this.image();
+    if (!sheet || !img) {
+      return "";
+    }
+    const found = sheet.anims.filter((a) => a.frames > 0).length;
+    return `${sheet.anims.length * rowsPerAnim(sheet)} lignes · ${found} animations trouvées · ${img.width} × ${img.height}`;
   });
   /** Frames in a row of the picture (the most an animation can have). */
   protected readonly columns = computed(() => {
@@ -111,6 +156,26 @@ export class SheetEditorComponent implements OnInit {
   protected readonly flipped = computed(() => {
     const sheet = this.sheet();
     return !!sheet && isFlipped(sheet, this.dir());
+  });
+  /** The chosen animation's frames, cut from the sheet (seen from the chosen direction). */
+  protected readonly thumbs = computed(() => {
+    const sheet = this.sheet();
+    const img = this.image();
+    const anim = this.current();
+    if (!sheet || !img || !anim) {
+      return [];
+    }
+    const { w, h } = sheet.frame;
+    const k = THUMB / Math.max(w, h);
+    const row = sheetRow(sheet, this.anim(), this.dir());
+    return Array.from({ length: anim.frames }, (_, i) => ({
+      index: i,
+      width: w * k,
+      height: h * k,
+      image: `url(${sheet.image})`,
+      size: `${img.width * k}px ${img.height * k}px`,
+      position: `${-i * w * k}px ${-row * h * k}px`,
+    }));
   });
 
   private readonly stage = viewChild<ElementRef<HTMLCanvasElement>>("stage");
@@ -162,6 +227,7 @@ export class SheetEditorComponent implements OnInit {
   protected remove(): void {
     this.sheet.set(undefined);
     this.image.set(null);
+    this.tab.set("anims");
   }
 
   /** A new frame size or mirror: the frames are counted again. */
@@ -206,23 +272,33 @@ export class SheetEditorComponent implements OnInit {
           }),
         }
     );
+    const frames = this.current()?.frames ?? 0;
+    if (this.frame() >= frames) {
+      this.frame.set(Math.max(0, frames - 1));
+    }
   }
 
-  protected setHit(index: number, value: string): void {
-    this.setAnim(index, { hit: value === "" ? undefined : Number(value) });
+  /** The frame shown becomes the hit frame (or stops being it). */
+  protected toggleHit(): void {
+    const anim = this.current();
+    if (anim) {
+      this.setAnim(this.anim(), {
+        hit: anim.hit === this.frame() ? undefined : this.frame(),
+      });
+    }
   }
 
-  protected frameNumbers(anim: SheetAnim): number[] {
-    return Array.from({ length: anim.frames }, (_, i) => i);
+  /** A frame of the row: shown, paused. */
+  protected pickFrame(index: number): void {
+    const anim = this.current();
+    this.playing.set(false);
+    this.frame.set(index);
+    this.time = index * (anim?.ms ?? 0);
   }
 
   protected show(index: number): void {
     this.anim.set(index);
     this.restart();
-  }
-
-  protected setDir(dir: SheetDirection): void {
-    this.dir.set(dir);
   }
 
   protected togglePlay(): void {
@@ -235,9 +311,7 @@ export class SheetEditorComponent implements OnInit {
     if (!anim || anim.frames === 0) {
       return;
     }
-    this.playing.set(false);
-    this.frame.set((this.frame() + delta + anim.frames) % anim.frames);
-    this.time = this.frame() * anim.ms;
+    this.pickFrame((this.frame() + delta + anim.frames) % anim.frames);
   }
 
   protected ok(): void {
@@ -285,11 +359,13 @@ export class SheetEditorComponent implements OnInit {
     const { w, h } = sheet.frame;
     const scale = Math.max(
       1,
-      Math.floor(Math.min((STAGE_W - 20) / w, (STAGE_H - 20) / h))
+      Math.floor(Math.min((STAGE_W - 40) / w, (STAGE_H - 70) / h))
     );
-    const groundX = STAGE_W / 2;
-    const groundY = STAGE_H - 24;
-    // The round shadow (the game draws it) and the feet
+    const groundX = Math.round(STAGE_W / 2);
+    const groundY = STAGE_H - 52;
+    const left = groundX - sheet.anchor.x * scale;
+    const top = groundY - sheet.anchor.y * scale;
+    // The round shadow (the game draws it)
     ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
     ctx.beginPath();
     ctx.ellipse(
@@ -321,6 +397,15 @@ export class SheetEditorComponent implements OnInit {
         h * scale
       );
       ctx.restore();
+    }
+    // Cutting: the frame's edges and the feet
+    if (this.tab() === "cut") {
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(left + 0.5, top + 0.5, w * scale - 1, h * scale - 1);
+      ctx.fillStyle = "#ffb84d";
+      ctx.fillRect(groundX - 12, groundY - 1, 24, 2);
+      ctx.fillRect(groundX - 1, groundY - 12, 2, 24);
     }
   }
 

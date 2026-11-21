@@ -3,6 +3,7 @@
   class="sheet"
   role="dialog"
   aria-modal="true"
+  [class.has-sheet]="!!sheet()"
   [attr.aria-label]="title()"
 >
   <span class="handle" aria-hidden="true"></span>
@@ -11,7 +12,7 @@
       <strong>{{ title() }}</strong>
       @if (sheet(); as s) {
         <small>
-          Cases de {{ s.frame.w }} × {{ s.frame.h }} ·
+          {{ s.frame.w }} × {{ s.frame.h }} ·
           {{ s.mirror ? "ouest en miroir" : "4 directions dessinées" }}
         </small>
       } @else {
@@ -25,218 +26,350 @@
   </header>
 
   @if (sheet(); as s) {
-    <div class="preview">
-      <div class="stage-box">
-        <canvas #stage class="stage" width="240" height="200"></canvas>
-        <span class="frame-tag">
-          @if (current(); as a) {
-            @if (a.frames) {
-              Image {{ frame() + 1 }} / {{ a.frames }}
-              @if (a.hit === frame()) {
-                · <b>coup</b>
+    <div class="columns">
+      <!-- Always shown: the preview and the animations -->
+      <div class="left">
+        <div class="stage-box">
+          <canvas #stage class="stage" width="352" height="260"></canvas>
+          <span class="frame-tag">
+            @if (current(); as a) {
+              @if (a.frames) {
+                Image {{ frame() + 1 }} / {{ a.frames }}
+                @if (a.hit === frame()) {
+                  ·
+                  <svg lucideZap></svg>
+                  <b>coup</b>
+                }
+              } @else {
+                Pas d'image
               }
-            } @else {
-              Pas d'image
             }
-          }
-        </span>
-      </div>
-      <div class="preview-side">
-        <div class="dirs" role="group" aria-label="Direction">
+          </span>
           @for (d of directions; track d.id) {
             <button
               type="button"
+              [class]="'dir ' + d.corner"
               [class.on]="dir() === d.id"
               [attr.aria-pressed]="dir() === d.id"
-              (click)="setDir(d.id)"
+              [attr.aria-label]="
+                'Direction ' +
+                d.label +
+                (s.mirror && d.id.endsWith('w') ? ' (miroir)' : '')
+              "
+              (click)="dir.set(d.id)"
             >
+              @switch (d.id) {
+                @case ("nw") {
+                  <svg lucideArrowUpLeft></svg>
+                }
+                @case ("ne") {
+                  <svg lucideArrowUpRight></svg>
+                }
+                @case ("sw") {
+                  <svg lucideArrowDownLeft></svg>
+                }
+                @default {
+                  <svg lucideArrowDownRight></svg>
+                }
+              }
               {{ d.label }}
-              @if (s.mirror && (d.id === "sw" || d.id === "nw")) {
-                <small>miroir</small>
+              @if (s.mirror && d.id.endsWith("w")) {
+                <svg lucideFlipHorizontal2 class="mirror"></svg>
               }
             </button>
           }
-        </div>
-        <div class="play">
-          <button
-            type="button"
-            class="square"
-            aria-label="Image précédente"
-            (click)="step(-1)"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            class="square"
-            [attr.aria-label]="playing() ? 'Pause' : 'Lecture'"
-            (click)="togglePlay()"
-          >
-            @if (playing()) {
-              <svg lucidePause></svg>
-            } @else {
-              <svg lucidePlay></svg>
-            }
-          </button>
-          <button
-            type="button"
-            class="square"
-            aria-label="Image suivante"
-            (click)="step(1)"
-          >
-            ›
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="chips" role="group" aria-label="Animation">
-      @for (a of s.anims; track a.id; let i = $index) {
-        <button
-          type="button"
-          class="chip plain"
-          [class.on]="anim() === i"
-          [class.empty]="!a.frames"
-          (click)="show(i)"
-        >
-          {{ label(a.id) }}
-        </button>
-      }
-    </div>
-
-    @for (p of problems(); track p) {
-      <p class="warning">{{ p }}</p>
-    }
-
-    <div class="block">
-      <h3>Animations</h3>
-      @for (a of s.anims; track a.id; let i = $index) {
-        <div class="anim" [class.on]="anim() === i">
-          <button type="button" class="anim-name" (click)="show(i)">
-            <strong>{{ label(a.id) }}</strong>
-            <small>{{ notes[a.id] ?? "animation du monstre" }}</small>
-          </button>
-          <div class="anim-fields">
-            <label class="field">
-              <span>Images</span>
-              <db-stepper
-                [value]="a.frames"
-                [min]="0"
-                [max]="columns()"
-                [label]="'Images de ' + label(a.id)"
-                (changed)="setAnim(i, { frames: $event })"
-              />
-            </label>
-            <label class="field">
-              <span>Par image</span>
-              <db-stepper
-                [value]="a.ms"
-                [min]="30"
-                [max]="1000"
-                [step]="10"
-                suffix="ms"
-                [label]="'Durée d\'une image de ' + label(a.id)"
-                (changed)="setAnim(i, { ms: $event })"
-              />
-            </label>
-            <label class="field">
-              <span>Coup</span>
-              <select
-                [attr.aria-label]="'Image du coup de ' + label(a.id)"
-                (change)="setHit(i, $any($event.target).value)"
-              >
-                <option value="" [selected]="a.hit === undefined">Aucun</option>
-                @for (f of frameNumbers(a); track f) {
-                  <option [value]="f" [selected]="a.hit === f">
-                    Image {{ f + 1 }}
-                  </option>
-                }
-              </select>
-            </label>
-            <label class="loop">
-              <input
-                type="checkbox"
-                [checked]="a.loop"
-                (change)="setAnim(i, { loop: $any($event.target).checked })"
-              />
-              En boucle
-            </label>
+          <div class="play">
+            <button
+              type="button"
+              aria-label="Image précédente"
+              (click)="step(-1)"
+            >
+              <svg lucideChevronLeft></svg>
+            </button>
+            <button
+              type="button"
+              [attr.aria-label]="playing() ? 'Pause' : 'Lecture'"
+              (click)="togglePlay()"
+            >
+              @if (playing()) {
+                <svg lucidePause></svg>
+              } @else {
+                <svg lucidePlay></svg>
+              }
+            </button>
+            <button type="button" aria-label="Image suivante" (click)="step(1)">
+              <svg lucideChevronRight></svg>
+            </button>
           </div>
         </div>
-      }
-    </div>
 
-    <div class="block">
-      <h3>Découpage</h3>
-      <div class="layout">
-        <label class="field">
-          <span>Largeur d'une case</span>
-          <db-stepper
-            [value]="s.frame.w"
-            [min]="8"
-            [max]="256"
-            [step]="8"
-            suffix="px"
-            [label]="'Largeur d\'une case'"
-            (changed)="setLayout({ frame: { w: $event, h: s.frame.h } })"
-          />
-        </label>
-        <label class="field">
-          <span>Hauteur d'une case</span>
-          <db-stepper
-            [value]="s.frame.h"
-            [min]="8"
-            [max]="256"
-            [step]="8"
-            suffix="px"
-            [label]="'Hauteur d\'une case'"
-            (changed)="setLayout({ frame: { w: s.frame.w, h: $event } })"
-          />
-        </label>
-        <label class="field">
-          <span>Pieds · x</span>
-          <db-stepper
-            [value]="s.anchor.x"
-            [min]="0"
-            [max]="s.frame.w"
-            [label]="'Pieds, de gauche à droite'"
-            (changed)="setAnchor('x', $event)"
-          />
-        </label>
-        <label class="field">
-          <span>Pieds · y</span>
-          <db-stepper
-            [value]="s.anchor.y"
-            [min]="0"
-            [max]="s.frame.h"
-            [label]="'Pieds, de haut en bas'"
-            (changed)="setAnchor('y', $event)"
-          />
-        </label>
+        <div class="anim-chips" role="group" aria-label="Animation">
+          @for (a of s.anims; track a.id; let i = $index) {
+            <button
+              type="button"
+              [class.on]="anim() === i"
+              [class.empty]="!a.frames"
+              [attr.aria-pressed]="anim() === i"
+              (click)="show(i)"
+            >
+              {{ label(a.id) }}
+            </button>
+          }
+        </div>
       </div>
-      <label class="switch">
-        <input
-          type="checkbox"
-          [checked]="s.mirror"
-          (change)="setLayout({ mirror: $any($event.target).checked })"
-        />
-        Ouest en miroir (sud-ouest et nord-ouest : l'est retourné)
-      </label>
-      <p class="note">
-        Une ligne par animation et par direction, dans l'ordre de la liste :
-        sud-est (de face) puis nord-est (de dos)
-        @if (!s.mirror) {
-          , puis sud-ouest et nord-ouest
-        }
-        . Les pieds sont posés sur le sol du combat ; l'ombre est dessinée par
-        le jeu.
-      </p>
-    </div>
 
-    <div class="block">
-      <h3>La planche</h3>
-      <div class="sheet-view">
-        <canvas #sheetView></canvas>
+      <div class="right">
+        <div class="tabs segmented wide">
+          <button
+            type="button"
+            [class.on]="tab() === 'anims'"
+            (click)="tab.set('anims')"
+          >
+            Animations
+          </button>
+          <button
+            type="button"
+            [class.on]="tab() === 'cut'"
+            (click)="tab.set('cut')"
+          >
+            Découpage
+            @if (problems().length) {
+              <span class="problem-dot" aria-label="(à vérifier)"></span>
+            }
+          </button>
+        </div>
+
+        @if (tab() === "anims") {
+          @if (current(); as a) {
+            <div class="anim-tile">
+              <div class="tile-head">
+                <div class="tile-titles">
+                  <strong>{{ label(a.id) }}</strong>
+                  <small>
+                    {{ a.loop ? "En boucle" : "Une fois" }} ·
+                    {{ notes[a.id] ?? "animation du monstre" }}
+                  </small>
+                </div>
+                <small class="total">{{ a.frames * a.ms }} ms</small>
+              </div>
+
+              @if (a.frames) {
+                <div class="strip">
+                  @for (t of thumbs(); track t.index) {
+                    <button
+                      type="button"
+                      class="thumb"
+                      [class.on]="frame() === t.index"
+                      [attr.aria-label]="'Image ' + (t.index + 1)"
+                      (click)="pickFrame(t.index)"
+                    >
+                      <span class="thumb-box">
+                        <span
+                          class="thumb-frame"
+                          [class.flipped]="flipped()"
+                          [style.width.px]="t.width"
+                          [style.height.px]="t.height"
+                          [style.background-image]="t.image"
+                          [style.background-size]="t.size"
+                          [style.background-position]="t.position"
+                        ></span>
+                        @if (a.hit === t.index) {
+                          <span class="hit-badge" aria-label="image du coup">
+                            <svg lucideZap></svg>
+                          </span>
+                        }
+                      </span>
+                      <small>{{ t.index + 1 }}</small>
+                    </button>
+                  }
+                </div>
+
+                <div class="selected-row">
+                  <strong>Image {{ frame() + 1 }}</strong>
+                  <button
+                    type="button"
+                    class="hit-toggle"
+                    [class.on]="a.hit === frame()"
+                    [attr.aria-pressed]="a.hit === frame()"
+                    (click)="toggleHit()"
+                  >
+                    <svg lucideZap></svg> Image du coup
+                  </button>
+                </div>
+              } @else {
+                <p class="warning">
+                  Pas d'image pour cette animation dans la planche.
+                </p>
+              }
+
+              <div class="fields">
+                <label class="field">
+                  <span>Images</span>
+                  <db-stepper
+                    [value]="a.frames"
+                    [min]="0"
+                    [max]="columns()"
+                    [label]="'Images de ' + label(a.id)"
+                    (changed)="setAnim(anim(), { frames: $event })"
+                  />
+                </label>
+                <label class="field">
+                  <span>Par image</span>
+                  <db-stepper
+                    [value]="a.ms"
+                    [min]="30"
+                    [max]="1000"
+                    [step]="10"
+                    suffix="ms"
+                    [label]="'Durée d\'une image de ' + label(a.id)"
+                    (changed)="setAnim(anim(), { ms: $event })"
+                  />
+                </label>
+                <label class="loop">
+                  <input
+                    type="checkbox"
+                    [checked]="a.loop"
+                    (change)="
+                      setAnim(anim(), { loop: $any($event.target).checked })
+                    "
+                  />
+                  En boucle
+                </label>
+              </div>
+            </div>
+            <p class="note hint">
+              Touchez une image pour la voir à l'arrêt ; « Image du coup » la
+              marque (les dégâts, le chiffre, l'interruption, le sort qui part).
+            </p>
+          }
+
+          <!-- Computer: every animation at a glance -->
+          <div class="all-anims">
+            <h3>Les {{ s.anims.length }} animations</h3>
+            @for (a of s.anims; track a.id; let i = $index) {
+              <button
+                type="button"
+                class="all-row"
+                [class.on]="anim() === i"
+                (click)="show(i)"
+              >
+                <span class="all-name">{{ label(a.id) }}</span>
+                <span class="all-time">{{ a.frames }} × {{ a.ms }} ms</span>
+                <span class="all-hit">
+                  @if (a.hit !== undefined && a.frames) {
+                    <svg lucideZap></svg> image {{ a.hit + 1 }}
+                  }
+                </span>
+                <span class="all-loop">
+                  @if (a.loop) {
+                    <svg lucideRepeat aria-label="en boucle"></svg>
+                  }
+                </span>
+              </button>
+            }
+          </div>
+        } @else {
+          @if (problems().length) {
+            <div class="status bad">
+              <svg lucideTriangleAlert></svg>
+              <div>
+                @for (p of problems(); track p) {
+                  <p>{{ p }}</p>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="status good">
+              <svg lucideCircleCheck></svg>
+              <p>{{ summary() }}</p>
+            </div>
+          }
+
+          <div class="block">
+            <h3>Cases et pieds</h3>
+            <div class="grid">
+              <label class="field">
+                <span>Largeur d'une case</span>
+                <db-stepper
+                  [value]="s.frame.w"
+                  [min]="8"
+                  [max]="256"
+                  [step]="8"
+                  suffix="px"
+                  [label]="'Largeur d\'une case'"
+                  (changed)="setLayout({ frame: { w: $event, h: s.frame.h } })"
+                />
+              </label>
+              <label class="field">
+                <span>Hauteur d'une case</span>
+                <db-stepper
+                  [value]="s.frame.h"
+                  [min]="8"
+                  [max]="256"
+                  [step]="8"
+                  suffix="px"
+                  [label]="'Hauteur d\'une case'"
+                  (changed)="setLayout({ frame: { w: s.frame.w, h: $event } })"
+                />
+              </label>
+              <label class="field">
+                <span>Pieds · x</span>
+                <db-stepper
+                  [value]="s.anchor.x"
+                  [min]="0"
+                  [max]="s.frame.w"
+                  [label]="'Pieds, de gauche à droite'"
+                  (changed)="setAnchor('x', $event)"
+                />
+              </label>
+              <label class="field">
+                <span>Pieds · y</span>
+                <db-stepper
+                  [value]="s.anchor.y"
+                  [min]="0"
+                  [max]="s.frame.h"
+                  [label]="'Pieds, de haut en bas'"
+                  (changed)="setAnchor('y', $event)"
+                />
+              </label>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="s.mirror"
+                (change)="setLayout({ mirror: $any($event.target).checked })"
+              />
+              Ouest en miroir : sud-ouest et nord-ouest sont l'est retourné
+            </label>
+            <p class="note">
+              Une ligne par animation et par direction, dans l'ordre des boutons
+              : sud-est (de face) puis nord-est (de dos){{
+                s.mirror ? "" : ", puis sud-ouest et nord-ouest"
+              }}. L'ombre est dessinée par le jeu.
+            </p>
+          </div>
+
+          <div class="block">
+            <h3>La planche</h3>
+            <div class="sheet-view">
+              <canvas #sheetView></canvas>
+            </div>
+          </div>
+
+          <div class="actions">
+            <label class="action">
+              <svg lucideImageUp></svg> Changer l'image
+              <input
+                type="file"
+                accept="image/png"
+                (change)="importPng($event)"
+              />
+            </label>
+            <button type="button" class="action danger" (click)="remove()">
+              <svg lucideTrash></svg> Retirer la planche
+            </button>
+          </div>
+        }
       </div>
     </div>
   } @else {
@@ -252,22 +385,17 @@
         comptées toutes seules à l'import.
       </p>
     </div>
+    <div class="actions">
+      <label class="action">
+        <svg lucideImageUp></svg> Importer un PNG
+        <input type="file" accept="image/png" (change)="importPng($event)" />
+      </label>
+    </div>
   }
 
   @if (message()) {
-    <p class="warning" role="status">{{ message() }}</p>
+    <p class="warning" role="status">
+      {{ message() }}
+    </p>
   }
-
-  <div class="actions">
-    <label class="action">
-      <svg lucideImageUp></svg>
-      {{ sheet() ? "Changer l'image" : "Importer un PNG" }}
-      <input type="file" accept="image/png" (change)="importPng($event)" />
-    </label>
-    @if (sheet()) {
-      <button type="button" class="action" (click)="remove()">
-        <svg lucideTrash></svg> Retirer la planche
-      </button>
-    }
-  </div>
 </section>
