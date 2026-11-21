@@ -6,6 +6,7 @@ Exemples (384 × 768, cases de 48 × 48), déjà dans la base du jeu :
 
 - le gluant, [images/planche-gluant.png](images/planche-gluant.png) : un corps de gelée qui s'étale en avançant ;
 - le gluant des neiges, [images/planche-gluant-des-neiges.png](images/planche-gluant-des-neiges.png) : la même gelée sous un bonnet de neige, qui fond en flaque ;
+- Hugo, [images/planche-hugo.png](images/planche-hugo.png) : un personnage avec son arme (l'épée courte) et son bouclier de bois ; avec le miroir, il change de main vers l'ouest, comme dans Grandia ;
 - la chauve-souris, [images/planche-chauve-souris.png](images/planche-chauve-souris.png) : elle **vole** au-dessus de ses pieds (le point des pieds reste au sol, sous elle, pour que l'ombre y soit), plonge pour mordre, crie sa magie, tombe au sol en mourant.
 
 ![La planche du gluant](images/planche-gluant.png)
