@@ -68,8 +68,9 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `styles.scss`). `shared/database.ts` (types, rules), `database-storage` (`pk-database`, else
   `assets/database/database.ts`), `party` (the team in the game being played: members, items, money).
 - `modules/battle/`: the Grandia-style combat, played on the map (the Combat action → `SequenceService.startFight`).
-  `shared/battle.service` (start / end, the fighters, `view` for the interface), `battle-engine` (the rules and timing:
-  gauges, turns, commands, the action played, damage, the end), `battle-field` (the fighters placed on the map, moved,
+  `shared/battle.service` (start / end, the fighters, `view` for the interface), `battle-engine` (the timing:
+  gauges, turns, commands, the action played, the end), `battle-rules` (stats, damage / heal, elements, weather,
+  the enemies' choices), `battle-field` (the fighters placed on the map, moved,
   the camera, put back after), `sheet-sprite` (a fighter drawn from its sprite sheet), `battle-types`;
   `battle-hud/` the interface (design/combat.pen). Steps in docs/idees.md (point 9).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.

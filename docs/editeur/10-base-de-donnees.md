@@ -56,6 +56,19 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
 - **Comportement** : ses compétences, chacune utilisée rarement, parfois ou souvent, toujours ou seulement **si ses PV sont sous** un pourcentage ou **pendant une météo**. Sans compétence, il attaque simplement.
 - **Météo et heure** : des météos où il **apparaît** (seulement pendant celles-là) ou est **plus fort**, et les moments de la journée où il apparaît (aucun : toute la journée).
 
+## Le combat
+
+Ce que le combat lit dans la base :
+
+- **Les dégâts** : puissance ÷ 10 × la stat de celui qui frappe (Force ou Magie), moins l'Endurance de la cible, ±10 %. Une compétence avec une **formule** l'utilise à la place (« a.mag * 2 - b.end »). L'**attaque** simple a une puissance de 20 (Force), avec l'élément de l'arme (sinon physique) ; l'**attaque forte** frappe 1,6 fois plus fort mais arrive plus lentement.
+- **Les soins** : puissance ÷ 10 × la Magie de celui qui soigne (une potion aussi).
+- **Les éléments** : Faible ×2, Résiste ×½, Annule 0, Absorbe soigne. Pour l'équipe, les résistances viennent de l'équipement porté (le bouclier de bois d'Hugo le rend faible au feu). Un élément composé sans résistance à lui prend celle de ses parties.
+- **La météo** : chaque élément est plus fort ou plus faible selon la météo du combat (les pourcentages de sa fiche) ; un ennemi « plus fort » dans une météo frappe 25 % plus fort.
+- **L'incantation** : le temps d'incantation d'une compétence est le temps passé entre la commande et l'action sur la jauge ; le lanceur concentre son sort (son nom au-dessus de lui).
+- **Les PM** : payés au moment d'agir ; une compétence trop chère est grisée.
+- **Les états** : au début de chaque tour, leurs PV / PM gagnés ou perdus, leur chance de faire perdre le tour (sommeil, paralysie) ; ils durent leur nombre de tours. Ceux qui finissent quand on est touché (sommeil) s'arrêtent au premier coup.
+- **Les ennemis** : à leur tour, une de leurs compétences selon leur poids (rarement, parfois, souvent) et leur condition (PV sous…, pendant une météo), ou une attaque simple.
+
 ## Groupes
 
 Un groupe, ce sont les ennemis qu'on rencontre ensemble (un événement « lancer un combat » choisira un groupe).
