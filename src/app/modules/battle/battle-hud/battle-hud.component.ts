@@ -3,8 +3,10 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   signal,
+  untracked,
 } from "@angular/core";
 import {
   LucideArrowLeft,
@@ -70,11 +72,23 @@ export class BattleHudComponent {
   protected readonly actionAt = GAUGE_ACTION * 100;
   /** The command under the cursor (keyboard, mouse). */
   protected readonly selected = signal(0);
+  /** The list shown on a turn: the commands, the skills (Magie), the items (Objets). */
+  protected readonly menu = signal<"main" | "skills" | "items">("main");
   protected readonly commands = computed<CommandItem[]>(() => [
     { kind: "attack", label: "Attaque", icon: "sword" },
     { kind: "heavy", label: "Attaque forte", icon: "swords" },
-    { kind: "magic", label: "Magie", icon: "sparkles", soon: true },
-    { kind: "items", label: "Objets", icon: "backpack", soon: true },
+    {
+      kind: "magic",
+      label: "Magie",
+      icon: "sparkles",
+      soon: !this.view()?.skills.length,
+    },
+    {
+      kind: "items",
+      label: "Objets",
+      icon: "backpack",
+      soon: !this.view()?.items.length,
+    },
     { kind: "defend", label: "Défendre", icon: "shield" },
     {
       kind: "flee",
@@ -88,10 +102,16 @@ export class BattleHudComponent {
       this.view()?.fighters.filter((f) => f.side === "team") ?? [];
     return Array.from({ length: TEAM_PLACES }, (_, i) => fighters[i] ?? null);
   });
-  protected readonly foes = computed(
-    () =>
-      this.view()?.fighters.filter((f) => f.side === "foe" && f.hp > 0) ?? []
-  );
+  /** The skills or the items listed (menu « skills » / « items »). */
+  protected readonly choices = computed(() => {
+    const v = this.view();
+    if (!v) {
+      return [];
+    }
+    return this.menu() === "skills" ? v.skills : v.items;
+  });
+  /** The spells being gathered whose caster is not the one choosing (its label would sit under the menu). */
+  protected readonly casts = computed(() => this.view()?.casts ?? []);
   /** The commands' place: beside the fighter (on its left, on its right when there is no room), on the screen. */
   protected readonly menuPos = computed(() => {
     const at = this.view()?.actorScreen;
@@ -114,6 +134,12 @@ export class BattleHudComponent {
   );
 
   constructor() {
+    // A new turn (or none): back to the commands
+    effect(() => {
+      if (this.view()?.phase !== "command") {
+        untracked(() => this.menu.set("main"));
+      }
+    });
     const onKey = (ev: KeyboardEvent) => this.key(ev);
     window.addEventListener("keydown", onKey);
     inject(DestroyRef).onDestroy(() =>
@@ -126,10 +152,41 @@ export class BattleHudComponent {
   }
 
   protected pick(item: CommandItem): void {
-    if (item.soon || item.kind === "magic" || item.kind === "items") {
+    if (item.soon) {
+      return;
+    }
+    if (item.kind === "magic" || item.kind === "items") {
+      this.menu.set(item.kind === "magic" ? "skills" : "items");
+      this.selected.set(0);
+      return;
+    }
+    if (item.kind === "skill" || item.kind === "item") {
       return;
     }
     this.battle.choose(item.kind);
+  }
+
+  /** A skill or an item from its list. */
+  protected use(id: string, usable: boolean): void {
+    if (!usable) {
+      return;
+    }
+    if (this.menu() === "skills") {
+      this.battle.chooseSkill(id);
+    } else {
+      this.battle.chooseItem(id);
+    }
+    this.selected.set(0);
+  }
+
+  protected leaveList(): void {
+    this.menu.set("main");
+    this.selected.set(0);
+  }
+
+  /** A state's look (its name, color) for the small dots. */
+  protected stateLook(id: string): { name: string; color: string } {
+    return this.view()?.stateLooks[id] ?? { name: id, color: "#999" };
   }
 
   protected aim(id: string): void {
@@ -152,7 +209,21 @@ export class BattleHudComponent {
     }
     const step =
       { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[ev.key] ?? 0;
-    if (phase === "command") {
+    if (phase === "command" && this.menu() !== "main") {
+      const list = this.choices();
+      if (step && list.length > 0) {
+        this.selected.update((i) => (i + step + list.length) % list.length);
+      } else if (ev.key === "Enter" || ev.key === " ") {
+        const c = list[this.selected()];
+        if (c) {
+          this.use(c.id, c.usable);
+        }
+      } else if (ev.key === "Escape" || ev.key === "Backspace") {
+        this.leaveList();
+      } else {
+        return;
+      }
+    } else if (phase === "command") {
       const list = this.commands();
       if (step) {
         this.selected.update((i) => (i + step + list.length) % list.length);

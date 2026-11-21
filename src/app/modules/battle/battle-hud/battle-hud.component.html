@@ -43,7 +43,39 @@
 
   <!-- A team member's turn: its commands beside it, then the target -->
   @if (menuPos(); as at) {
-    @if (v.phase === "command") {
+    @if (v.phase === "command" && menu() !== "main") {
+      <div
+        class="menu choices"
+        role="menu"
+        [attr.aria-label]="menu() === 'skills' ? 'Magie' : 'Objets'"
+        [style.left.px]="at.left"
+        [style.top.px]="at.top"
+      >
+        <span class="menu-title">{{
+          menu() === "skills" ? "Magie" : "Objets"
+        }}</span>
+        @for (c of choices(); track c.id; let i = $index) {
+          <button
+            type="button"
+            role="menuitem"
+            [class.on]="i === selected()"
+            [class.soon]="!c.usable"
+            [attr.aria-disabled]="c.usable ? null : 'true'"
+            (pointerenter)="selected.set(i)"
+            (click)="use(c.id, c.usable)"
+          >
+            @if (c.icon) {
+              <img [src]="c.icon" alt="" />
+            }
+            <span class="target-name">{{ c.name }}</span>
+            <small class="detail">{{ c.detail }}</small>
+          </button>
+        }
+        <button type="button" class="back" (click)="leaveList()">
+          <svg lucideArrowLeft></svg> Retour
+        </button>
+      </div>
+    } @else if (v.phase === "command") {
       <div
         class="menu"
         role="menu"
@@ -94,10 +126,8 @@
         [style.left.px]="at.left"
         [style.top.px]="at.top"
       >
-        <span class="menu-title">{{
-          v.pending === "heavy" ? "Attaque forte" : "Attaque"
-        }}</span>
-        @for (f of foes(); track f.id) {
+        <span class="menu-title">{{ v.pendingLabel }}</span>
+        @for (f of v.targets; track f.id) {
           <button
             type="button"
             role="menuitem"
@@ -126,12 +156,23 @@
     <span class="aim" [style.left.px]="at.x" [style.top.px]="at.y"></span>
   }
 
+  <!-- The spells being gathered: their name and how far along, over the caster -->
+  @for (c of casts(); track c.id) {
+    <span class="cast" [style.left.px]="c.x" [style.top.px]="c.y">
+      <svg lucideSparkles></svg> {{ c.name }}
+      <span class="cast-track"
+        ><span [style.width.%]="c.progress * 100"></span
+      ></span>
+    </span>
+  }
+
   @for (p of v.popups; track p.id) {
     <span
       class="popup"
       [class]="'popup ' + p.kind"
       [style.left.px]="p.x"
       [style.top.px]="p.y"
+      [style.color]="p.color ?? null"
       >{{ p.text }}</span
     >
   }
@@ -150,6 +191,13 @@
           <div class="info">
             <div class="name-row">
               <strong>{{ f.name }}</strong>
+              @for (s of f.states; track s.id) {
+                <span
+                  class="state-dot"
+                  [style.background]="stateLook(s.id).color"
+                  [attr.title]="stateLook(s.id).name"
+                ></span>
+              }
               <small>Niv. {{ f.level }}</small>
             </div>
             <div class="bar hp">
