@@ -67,7 +67,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `stepper/`; `_popup.scss` the windows over it; `_sheets.scss` the sheets' shared fields (global, inside `app-database-editor`, in
   `styles.scss`). `shared/database.ts` (types, rules), `database-storage` (`pk-database`, else
   `assets/database/database.ts`), `party` (the team in the game being played: members, items, money).
-- `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be replaced by the Grandia-style combat.
+- `modules/battle/`: the Grandia-style combat, played on the map (the Combat action → `SequenceService.startFight`).
+  `shared/battle.service` (start / end, the fighters, `view` for the interface), `battle-field` (the fighters placed on
+  the map, the camera, put back after), `sheet-sprite` (a fighter drawn from its sprite sheet), `battle-types`;
+  `battle-hud/` the interface (design/combat.pen). Steps in docs/idees.md (point 9).
+- `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
