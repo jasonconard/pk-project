@@ -5,23 +5,27 @@ import { loadDatabase } from "../../database-editor/shared/database-storage";
 import { statAt } from "../../database-editor/shared/database";
 import { currentParty } from "../../database-editor/shared/party";
 import { BattleField } from "./battle-field";
+import { BattleEngine } from "./battle-engine";
 import {
   BattleResult,
   BattleView,
+  CommandKind,
   Fighter,
   GAUGE_COMMAND,
 } from "./battle-types";
 
 /**
- * The Grandia-like fight (docs/idees.md, point 9), played on the map where it starts. For now (step 1): the field
- * with the team and the group's enemies animated from their sprite sheets, their place on the action gauge, and
- * the fight's end chosen by the player (the commands come next).
+ * The Grandia-like fight (docs/idees.md, point 9), played on the map where it starts: the field (BattleField), the
+ * rules and timing (BattleEngine), and what the interface shows (`view`, refreshed every frame of the fight).
  */
 @Service()
 export class BattleService {
   private game: Game | null = null;
   private field: BattleField | null = null;
+  private engine: BattleEngine | null = null;
   private onEnd: ((result: BattleResult) => void) | null = null;
+  private groupName = "";
+  private canFlee = true;
   private readonly viewState = signal<BattleView | null>(null);
   /** The fight shown (null: no fight). */
   readonly view = this.viewState.asReadonly();
@@ -44,6 +48,13 @@ export class BattleService {
       onEnd("win");
       return;
     }
+    const fresh = () => ({
+      gauge: 0,
+      command: null,
+      defending: false,
+      home: new THREE.Vector3(),
+      pos: new THREE.Vector3(),
+    });
     const team: Fighter[] = currentParty()
       .team.map((id) => db.characters.find((c) => c.id === id))
       .filter((c) => !!c)
@@ -53,6 +64,7 @@ export class BattleService {
         const hp = statAt(c, "hp", level);
         const mp = statAt(c, "mp", level);
         return {
+          ...fresh(),
           id: c.id,
           side: "team",
           name: c.name,
@@ -64,10 +76,10 @@ export class BattleService {
           hpMax: hp,
           mp,
           mpMax: mp,
+          strength: statAt(c, "str", level),
+          endurance: statAt(c, "end", level),
           agility: statAt(c, "agi", level),
-          gauge: 0,
           spot: { x: 0.5, y: 1 },
-          pos: new THREE.Vector3(),
         };
       });
     const foes: Fighter[] = group.members.flatMap((m, i) => {
@@ -75,6 +87,7 @@ export class BattleService {
       return e
         ? [
             {
+              ...fresh(),
               id: `${e.id}#${i}`,
               side: "foe" as const,
               name: e.name,
@@ -85,10 +98,10 @@ export class BattleService {
               hpMax: e.stats.hp,
               mp: e.stats.mp,
               mpMax: e.stats.mp,
+              strength: e.stats.str,
+              endurance: e.stats.end,
               agility: e.stats.agi,
-              gauge: 0,
               spot: { x: m.x, y: m.y },
-              pos: new THREE.Vector3(),
             },
           ]
         : [];
@@ -105,12 +118,39 @@ export class BattleService {
       );
     }
     this.onEnd = onEnd;
+    this.groupName = group.name;
+    this.canFlee = group.canFlee;
     this.field = new BattleField(game, fighters);
-    this.viewState.set({
-      groupName: group.name,
-      canFlee: group.canFlee,
-      fighters,
-    });
+    this.engine = new BattleEngine(fighters, this.field, group.canFlee, (r) =>
+      this.end(r)
+    );
+    this.refresh();
+  }
+
+  /** The team member whose turn it is: its command; an attack then asks for its target. */
+  choose(kind: CommandKind): void {
+    this.engine?.choose(kind);
+    this.refresh();
+  }
+
+  aimAt(id: string): void {
+    this.engine?.aimAt(id);
+    this.refresh();
+  }
+
+  moveAim(step: number): void {
+    this.engine?.moveAim(step);
+    this.refresh();
+  }
+
+  confirmTarget(id?: string): void {
+    this.engine?.confirmTarget(id);
+    this.refresh();
+  }
+
+  back(): void {
+    this.engine?.back();
+    this.refresh();
   }
 
   /** The fight ends: the field is taken down, the map comes back, the event goes on with the result. */
@@ -118,6 +158,7 @@ export class BattleService {
     const onEnd = this.onEnd;
     this.field?.dispose();
     this.field = null;
+    this.engine = null;
     this.onEnd = null;
     this.viewState.set(null);
     onEnd?.(result);
@@ -129,8 +170,35 @@ export class BattleService {
     this.end("lose");
   }
 
-  /** Every frame (the game's render loop): the sprites' animations. */
+  /** Every frame (the game's render loop): the fight goes on, the sprites animate. */
   update(dt: number): void {
+    if (!this.engine || !this.field) {
+      return;
+    }
+    this.engine.update(dt);
     this.field?.update(dt);
+    this.refresh();
+  }
+
+  private refresh(): void {
+    const engine = this.engine;
+    const field = this.field;
+    if (!engine || !field) {
+      return;
+    }
+    const actor = engine.actor;
+    const aimed = engine.fighters.find((f) => f.id === engine.aim);
+    this.viewState.set({
+      groupName: this.groupName,
+      canFlee: this.canFlee,
+      fighters: engine.fighters,
+      phase: engine.phase,
+      actor: actor?.id ?? null,
+      actorScreen: actor ? field.screenPos(actor.pos, 14) : null,
+      pending: engine.pending,
+      aim: engine.aim,
+      aimScreen: aimed ? field.screenPos(aimed.pos, 34) : null,
+      popups: engine.popups,
+    });
   }
 }

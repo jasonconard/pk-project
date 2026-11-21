@@ -15,16 +15,19 @@
       <small class="label command" [style.left.%]="commandAt + 6">COM</small>
       <small class="label action" [style.left.%]="actionAt + 1">ACT</small>
       @for (f of v.fighters; track f.id) {
-        <span
-          class="token"
-          [class.foe]="f.side === 'foe'"
-          [style.left.%]="f.gauge * 100"
-          [attr.title]="f.name"
-        >
-          @if (f.icon) {
-            <img [src]="f.icon" alt="" />
-          }
-        </span>
+        @if (f.hp > 0) {
+          <span
+            class="token"
+            [class.foe]="f.side === 'foe'"
+            [class.turn]="f.id === v.actor"
+            [style.left.%]="f.gauge * 100"
+            [attr.title]="f.name"
+          >
+            @if (f.icon) {
+              <img [src]="f.icon" alt="" />
+            }
+          </span>
+        }
       }
     </div>
   </div>
@@ -38,26 +41,109 @@
     {{ night() ? "Nuit" : "Jour" }} · {{ weatherLabel() }}
   </div>
 
-  <!-- For now: the player chooses how the fight ends (the commands come at the next step) -->
-  <div class="end" role="group" aria-label="Fin du combat">
-    <span class="end-title">{{ v.groupName }} · fin du combat</span>
-    <button type="button" (click)="end('win')">
-      <svg lucideTrophy></svg> Victoire
-    </button>
-    <button type="button" (click)="end('lose')">
-      <svg lucideSkull></svg> Défaite
-    </button>
-    @if (v.canFlee) {
-      <button type="button" (click)="end('flee')">
-        <svg lucideFootprints></svg> Fuite
-      </button>
+  <!-- A team member's turn: its commands beside it, then the target -->
+  @if (menuPos(); as at) {
+    @if (v.phase === "command") {
+      <div
+        class="menu"
+        role="menu"
+        aria-label="Commandes"
+        [style.left.px]="at.left"
+        [style.top.px]="at.top"
+      >
+        @for (c of commands(); track c.kind; let i = $index) {
+          <button
+            type="button"
+            role="menuitem"
+            [class.on]="i === selected()"
+            [class.soon]="c.soon"
+            [attr.aria-disabled]="c.soon ? 'true' : null"
+            [attr.title]="c.soon ? 'Bientôt' : null"
+            (pointerenter)="selected.set(i)"
+            (click)="pick(c)"
+          >
+            @switch (c.icon) {
+              @case ("sword") {
+                <svg lucideSword></svg>
+              }
+              @case ("swords") {
+                <svg lucideSwords></svg>
+              }
+              @case ("sparkles") {
+                <svg lucideSparkles></svg>
+              }
+              @case ("backpack") {
+                <svg lucideBackpack></svg>
+              }
+              @case ("shield") {
+                <svg lucideShield></svg>
+              }
+              @default {
+                <svg lucideFootprints></svg>
+              }
+            }
+            {{ c.label }}
+          </button>
+        }
+      </div>
+    } @else if (v.phase === "target") {
+      <div
+        class="menu targets"
+        role="menu"
+        aria-label="Cible"
+        [style.left.px]="at.left"
+        [style.top.px]="at.top"
+      >
+        <span class="menu-title">{{
+          v.pending === "heavy" ? "Attaque forte" : "Attaque"
+        }}</span>
+        @for (f of foes(); track f.id) {
+          <button
+            type="button"
+            role="menuitem"
+            [class.on]="f.id === v.aim"
+            (pointerenter)="aim(f.id)"
+            (click)="confirm(f.id)"
+          >
+            @if (f.icon) {
+              <img [src]="f.icon" alt="" />
+            }
+            <span class="target-name">{{ f.name }}</span>
+            <span class="mini-hp"
+              ><span [style.width.%]="percent(f.hp, f.hpMax)"></span
+            ></span>
+          </button>
+        }
+        <button type="button" class="back" (click)="back()">
+          <svg lucideArrowLeft></svg> Retour
+        </button>
+      </div>
     }
-  </div>
+  }
+
+  <!-- The aimed enemy: a marker over it -->
+  @if (v.phase === "target" && v.aimScreen; as at) {
+    <span class="aim" [style.left.px]="at.x" [style.top.px]="at.y"></span>
+  }
+
+  @for (p of v.popups; track p.id) {
+    <span
+      class="popup"
+      [class]="'popup ' + p.kind"
+      [style.left.px]="p.x"
+      [style.top.px]="p.y"
+      >{{ p.text }}</span
+    >
+  }
 
   <div class="team">
     @for (f of team(); track $index) {
       @if (f) {
-        <div class="card">
+        <div
+          class="card"
+          [class.turn]="f.id === v.actor"
+          [class.down]="f.hp <= 0"
+        >
           @if (f.portrait) {
             <img class="portrait" [src]="f.portrait" alt="" />
           }

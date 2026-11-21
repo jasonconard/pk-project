@@ -31,6 +31,7 @@ export class SheetSprite {
   private animIndex = 0;
   private dir: SheetDirection = "se";
   private time = 0;
+  private hitFired = false;
 
   constructor(private readonly sheet: SpriteSheet) {
     const { w, h } = sheet.frame;
@@ -82,11 +83,12 @@ export class SheetSprite {
   }
 
   /** Plays an animation (by id: idle, walk…) from its start; the direction stays unless given. */
-  play(id: string, dir?: SheetDirection): void {
+  play(id: string, dir?: SheetDirection, restart = false): void {
     const index = this.sheet.anims.findIndex((a) => a.id === id);
-    if (index >= 0 && (index !== this.animIndex || dir !== this.dir)) {
+    if (index >= 0 && (index !== this.animIndex || restart)) {
       this.animIndex = index;
       this.time = 0;
+      this.hitFired = false;
     }
     if (dir) {
       this.dir = dir;
@@ -98,6 +100,26 @@ export class SheetSprite {
   get finished(): boolean {
     const anim = this.anim;
     return !!anim && !anim.loop && this.time >= anim.frames * anim.ms;
+  }
+
+  /** True once, when the animation reaches its hit frame (the blow lands, the spell leaves); no hit frame: at its end. */
+  consumeHit(): boolean {
+    const anim = this.anim;
+    if (!anim || this.hitFired) {
+      return false;
+    }
+    const at = anim.hit ?? Math.max(0, anim.frames - 1);
+    if (this.time >= at * anim.ms) {
+      this.hitFired = true;
+      return true;
+    }
+    return false;
+  }
+
+  /** Fading out (a defeated enemy): 1 shown … 0 gone. */
+  setOpacity(opacity: number): void {
+    this.material.opacity = opacity;
+    (this.shadow.material as THREE.MeshBasicMaterial).opacity = 0.28 * opacity;
   }
 
   update(dt: number): void {

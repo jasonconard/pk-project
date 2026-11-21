@@ -11,6 +11,16 @@ const TEAM_BACK = 14;
 /** The camera closer than on the map during a fight. */
 const FIGHT_ZOOM = 0.85;
 
+/** The diagonal a fighter faces to look from `from` towards `to` (on the ground: x right, z towards the camera). */
+export function facing(from: THREE.Vector3, to: THREE.Vector3): SheetDirection {
+  const east = to.x >= from.x;
+  const south = to.z > from.z;
+  if (south) {
+    return east ? "se" : "sw";
+  }
+  return east ? "ne" : "nw";
+}
+
 /**
  * The fight drawn on the map, where the player stands: the team in a line, the enemies ahead of it where the group
  * places them, each a sprite animated from its sheet; the camera closer and centred on the field; the player's own
@@ -35,20 +45,21 @@ export class BattleField {
 
     const team = fighters.filter((f) => f.side === "team");
     team.forEach((f, i) => {
-      f.pos = new THREE.Vector3(
+      f.home = new THREE.Vector3(
         center.x + (i - (team.length - 1) / 2) * TEAM_SPACING,
         center.y,
         center.z + TEAM_BACK + (i % 2) * 6
       );
     });
     for (const f of fighters.filter((x) => x.side === "foe")) {
-      f.pos = new THREE.Vector3(
+      f.home = new THREE.Vector3(
         center.x + (f.spot.x - 0.5) * FOE_AREA.width,
         center.y,
         center.z - FOE_AREA.ahead + (f.spot.y - 0.5) * FOE_AREA.depth
       );
     }
     for (const f of fighters) {
+      f.pos = f.home.clone();
       if (!f.sheet) {
         continue;
       }
@@ -70,9 +81,41 @@ export class BattleField {
     game.mapHelper?.updateCameraAim();
   }
 
-  /** A fighter plays an animation (facing its usual way unless told). */
-  play(id: string, anim: string, dir?: SheetDirection): void {
-    this.sprites.get(id)?.play(anim, dir);
+  /** A fighter plays an animation (restart: from its start even if already playing). */
+  play(id: string, anim: string, dir?: SheetDirection, restart = false): void {
+    this.sprites.get(id)?.play(anim, dir, restart);
+  }
+
+  /** Puts a fighter's sprite where it stands now. */
+  place(fighter: Fighter): void {
+    this.sprites.get(fighter.id)?.group.position.copy(fighter.pos);
+  }
+
+  /** Has the fighter's animation (played once) ended? A fighter without a sprite: at once. */
+  finished(id: string): boolean {
+    return this.sprites.get(id)?.finished ?? true;
+  }
+
+  /** True once when the fighter's animation reaches its hit frame (no sprite: at once). */
+  consumeHit(id: string): boolean {
+    return this.sprites.get(id)?.consumeHit() ?? true;
+  }
+
+  fade(id: string, opacity: number): void {
+    this.sprites.get(id)?.setOpacity(opacity);
+  }
+
+  /** Where a point of the field (lifted by `up` world units) is on the screen, in CSS pixels. */
+  screenPos(pos: THREE.Vector3, up = 0): { x: number; y: number } {
+    const v = pos
+      .clone()
+      .setY(pos.y + up)
+      .project(this.game.camera);
+    const rect = this.game.renderer.domElement.getBoundingClientRect();
+    return {
+      x: rect.left + ((v.x + 1) / 2) * rect.width,
+      y: rect.top + ((1 - v.y) / 2) * rect.height,
+    };
   }
 
   update(dt: number): void {

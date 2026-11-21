@@ -98,6 +98,13 @@
     border-color: var(--foe);
   }
 
+  &.turn {
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    box-shadow: 0 0 6px #1e90ffaa;
+  }
+
   img {
     width: 16px;
     height: 16px;
@@ -127,20 +134,20 @@
   }
 }
 
-/* ---------- How the fight ends (for now) ---------- */
+/* ---------- A team member's turn: the commands, the target ---------- */
 
-.end {
+.menu {
   position: absolute;
-  right: calc(16px + var(--safe-right));
-  bottom: calc(90px + var(--safe-bottom));
+  width: 160px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 3px;
   pointer-events: auto;
+  animation: menu-in 160ms ease-out;
 
-  .end-title {
-    margin-bottom: 3px;
+  .menu-title {
+    margin-bottom: 2px;
     padding: 3px 8px;
     border-radius: 6px;
     background: var(--veil);
@@ -162,21 +169,147 @@
     color: var(--ink);
     font: 500 12.5px Roboto, sans-serif;
     cursor: pointer;
+    transition: margin-right 120ms ease-out;
 
     svg {
+      flex-shrink: 0;
       font-size: 13px;
       color: var(--ink-soft);
     }
 
-    &:hover, &:focus-visible {
+    img {
+      width: 16px;
+      height: 16px;
+      image-rendering: pixelated;
+    }
+
+    /* The chosen one: blue, shifted (like the dialogue's choices) */
+    &.on {
+      margin-right: 14px;
       border-color: var(--pick);
       color: var(--pick);
-      outline: none;
+      font-weight: 700;
 
       svg {
         color: var(--pick);
       }
     }
+
+    &.soon {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pick);
+      outline-offset: 1px;
+    }
+  }
+
+  &.targets button {
+    width: 150px;
+  }
+
+  .target-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  .mini-hp {
+    width: 28px;
+    height: 4px;
+    border-radius: 2px;
+    background: #e8ebf1;
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      background: var(--hp);
+    }
+  }
+
+  .back {
+    width: 96px;
+    color: var(--ink-soft);
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    translate: 8px 0;
+  }
+}
+
+/* Over the aimed enemy: a small arrow pointing down */
+.aim {
+  position: absolute;
+  width: 0;
+  height: 0;
+  translate: -50% -100%;
+  border: 8px solid transparent;
+  border-top: 11px solid var(--pick);
+  border-bottom: 0;
+  filter: drop-shadow(0 1px 1px #0006);
+  animation: aim-bob 600ms ease-in-out infinite alternate;
+}
+
+@keyframes aim-bob {
+  to {
+    translate: -50% calc(-100% - 5px);
+  }
+}
+
+/* The numbers rising over a fighter */
+.popup {
+  position: absolute;
+  translate: -50% -50%;
+  color: #fff;
+  font: 900 24px Roboto, sans-serif;
+  text-shadow: 0 0 3px #000, 0 2px 0 #000, 2px 0 0 #000, -2px 0 0 #000, 0 -2px 0 #000;
+  white-space: nowrap;
+  animation: popup-rise 1s ease-out forwards;
+
+  &.info {
+    font-size: 13px;
+    font-weight: 700;
+    color: #cfe5ff;
+  }
+
+  &.heal {
+    color: #a9f5b9;
+  }
+}
+
+@keyframes popup-rise {
+  0% {
+    opacity: 0;
+    translate: -50% -20%;
+  }
+
+  15% {
+    opacity: 1;
+    translate: -50% -90%;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: -50% -140%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu, .aim {
+    animation: none;
   }
 }
 
@@ -202,6 +335,15 @@
   border: 2px solid var(--box-border);
   background: var(--box);
   box-shadow: var(--shadow);
+
+  &.turn {
+    border-color: var(--pick);
+  }
+
+  &.down {
+    filter: grayscale(1);
+    opacity: 0.6;
+  }
 
   &.free {
     justify-content: center;
@@ -341,10 +483,6 @@
     &.hp .value { color: var(--hp); }
   }
 
-  .end {
-    bottom: calc(86px + var(--safe-bottom));
-    right: calc(12px + var(--safe-right));
-  }
 
   /* Under the gauge (which takes the width) */
   .weather {
