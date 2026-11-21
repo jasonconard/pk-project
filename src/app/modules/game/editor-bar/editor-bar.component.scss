@@ -160,6 +160,10 @@ kbd {
   right: -6px;
   z-index: 1;
   width: 230px;
+  // No taller than the screen under the bar: it scrolls (a phone)
+  max-height: calc(100dvh - 96px - var(--safe-top) - var(--safe-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   padding: 6px;
