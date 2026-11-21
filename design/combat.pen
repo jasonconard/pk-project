@@ -3642,21 +3642,26 @@
         },
         {
           "type": "frame",
-          "id": "jXbFt",
-          "x": 430,
-          "y": 230,
+          "id": "aHIHq",
+          "x": 400,
+          "y": 200,
           "name": "Victory",
-          "width": 420,
-          "height": 330,
-          "layout": "none",
+          "width": 480,
+          "layout": "vertical",
           "children": [
             {
               "type": "frame",
-              "id": "CUAOS",
-              "x": 0,
-              "y": 16,
+              "id": "DsVyL",
+              "name": "Pill row",
+              "width": "fill_container",
+              "height": 16,
+              "layout": "none"
+            },
+            {
+              "type": "frame",
+              "id": "n1AVS",
               "name": "Box",
-              "width": 420,
+              "width": "fill_container",
               "fill": "$box",
               "cornerRadius": 12,
               "stroke": "$box-border",
@@ -3672,171 +3677,447 @@
                 "blur": 3
               },
               "layout": "vertical",
-              "gap": 12,
+              "gap": 10,
               "padding": [
                 22,
-                18,
-                14,
-                18
+                16,
+                12,
+                16
               ],
               "children": [
                 {
                   "type": "frame",
-                  "id": "n3Cnl",
+                  "id": "hkFFA",
                   "name": "Loot",
                   "width": "fill_container",
-                  "gap": 8,
+                  "gap": 6,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "J32qN",
+                      "id": "YQel1",
                       "name": "Loot Expérience",
                       "width": "fill_container",
                       "fill": "#f5f6f9",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 2,
+                      "cornerRadius": 7,
+                      "gap": 5,
                       "padding": [
-                        7,
-                        9
+                        6,
+                        8
                       ],
+                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "u3uME",
-                          "name": "Head",
-                          "gap": 4,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "ZViki",
-                              "name": "star",
-                              "width": 11,
-                              "height": 11,
-                              "icon": "star",
-                              "library": "lucide",
-                              "fill": "$ink-soft"
-                            },
-                            {
-                              "type": "text",
-                              "id": "qHUP2",
-                              "name": "Expérience",
-                              "fill": "$ink-soft",
-                              "content": "Expérience",
-                              "fontFamily": "Roboto",
-                              "fontSize": 10,
-                              "fontWeight": "500"
-                            }
-                          ]
+                          "type": "icon",
+                          "id": "Y6mBw",
+                          "name": "star",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "star",
+                          "library": "lucide",
+                          "fill": "$ink-soft"
                         },
                         {
                           "type": "text",
-                          "id": "c6BcOU",
+                          "id": "WjFDY",
+                          "name": "Expérience",
+                          "fill": "$ink-soft",
+                          "content": "Expérience",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "C4CL3",
+                          "name": "Spacer",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "tRdCl",
                           "name": "+42",
                           "fill": "$ink",
                           "content": "+42",
                           "fontFamily": "Roboto",
-                          "fontSize": 15,
+                          "fontSize": 13,
                           "fontWeight": "700"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "X9lAX",
+                      "id": "igVcn",
                       "name": "Loot Pièces",
                       "width": "fill_container",
                       "fill": "#f5f6f9",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 2,
+                      "cornerRadius": 7,
+                      "gap": 5,
                       "padding": [
-                        7,
-                        9
+                        6,
+                        8
                       ],
+                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "jtLDB",
-                          "name": "Head",
-                          "gap": 4,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "RonOJ",
-                              "name": "coins",
-                              "width": 11,
-                              "height": 11,
-                              "icon": "coins",
-                              "library": "lucide",
-                              "fill": "$ink-soft"
-                            },
-                            {
-                              "type": "text",
-                              "id": "k3wPk9",
-                              "name": "Pièces",
-                              "fill": "$ink-soft",
-                              "content": "Pièces",
-                              "fontFamily": "Roboto",
-                              "fontSize": 10,
-                              "fontWeight": "500"
-                            }
-                          ]
+                          "type": "icon",
+                          "id": "yIudp",
+                          "name": "coins",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "coins",
+                          "library": "lucide",
+                          "fill": "$ink-soft"
                         },
                         {
                           "type": "text",
-                          "id": "vF1ES",
+                          "id": "tJ5LZ",
+                          "name": "Pièces",
+                          "fill": "$ink-soft",
+                          "content": "Pièces",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ANLcF",
+                          "name": "Spacer",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "PHACA",
                           "name": "+22",
                           "fill": "$ink",
                           "content": "+22",
                           "fontFamily": "Roboto",
-                          "fontSize": 15,
+                          "fontSize": 13,
                           "fontWeight": "700"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "WsrIi",
-                      "name": "Loot Objet trouvé",
+                      "id": "Oncbd",
+                      "name": "Loot Objet",
                       "width": "fill_container",
                       "fill": "#f5f6f9",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 2,
+                      "cornerRadius": 7,
+                      "gap": 5,
                       "padding": [
-                        7,
-                        9
+                        6,
+                        8
                       ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "VZW6W",
+                          "name": "Img",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/db/potion.png",
+                            "mode": "stretch"
+                          },
+                          "width": 13,
+                          "height": 13
+                        },
+                        {
+                          "type": "text",
+                          "id": "bqoZM",
+                          "name": "Objet",
+                          "fill": "$ink-soft",
+                          "content": "Objet",
+                          "fontFamily": "Roboto",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "t5dZo",
+                          "name": "Spacer",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "K4IWtK",
+                          "name": "Potion ×1",
+                          "fill": "$ink",
+                          "content": "Potion ×1",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M6N5Ao",
+                  "name": "Team",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "JcyLu",
+                      "name": "Team row 1",
+                      "width": "fill_container",
+                      "gap": 6,
                       "children": [
                         {
                           "type": "frame",
-                          "id": "EZ3Wb",
-                          "name": "Head",
-                          "gap": 4,
+                          "id": "l83DX",
+                          "name": "Member Hugo",
+                          "width": "fill_container",
+                          "height": 92,
+                          "fill": "#f5f6f9",
+                          "cornerRadius": 8,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            7,
+                            9
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "zjYEP",
+                              "name": "Top",
+                              "width": "fill_container",
+                              "gap": 7,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "cornerRadius": 5,
+                                  "id": "t9A24",
+                                  "name": "Portrait",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "images/combat/portrait-hugo.png",
+                                    "mode": "stretch"
+                                  },
+                                  "width": 30,
+                                  "height": 30
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "n3skT",
+                                  "name": "Names",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "fYlyO",
+                                      "name": "Hugo",
+                                      "fill": "$ink",
+                                      "content": "Hugo",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 12,
+                                      "fontWeight": "700"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "V8WZHv",
+                                      "name": "Niv. 1 → 2",
+                                      "fill": "$ink-soft",
+                                      "content": "Niv. 1 → 2",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 9.5,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "lVueU",
+                                  "name": "Level up",
+                                  "fill": "#4cc06a26",
+                                  "cornerRadius": 5,
+                                  "padding": [
+                                    2,
+                                    5
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "SFEVR",
+                                      "name": "Niv. +1",
+                                      "fill": "#2f9a4c",
+                                      "content": "Niv. +1",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 9.5,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "sxH5F",
+                              "name": "Gains",
+                              "width": "fill_container",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "nKSbU",
+                                  "name": "Gain Épée +6",
+                                  "gap": 3,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "rectangle",
+                                      "id": "Gczax",
+                                      "name": "Img",
+                                      "fill": {
+                                        "type": "image",
+                                        "enabled": true,
+                                        "url": "images/db/sword.png",
+                                        "mode": "stretch"
+                                      },
+                                      "width": 11,
+                                      "height": 11
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "BiWaF",
+                                      "name": "Épée +6",
+                                      "fill": "$ink-soft",
+                                      "content": "Épée +6",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "H8T2L",
+                                  "name": "Gain Feu +3",
+                                  "gap": 3,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "rectangle",
+                                      "id": "UMVmy",
+                                      "name": "Img",
+                                      "fill": {
+                                        "type": "image",
+                                        "enabled": true,
+                                        "url": "images/db/fire.png",
+                                        "mode": "stretch"
+                                      },
+                                      "width": 11,
+                                      "height": 11
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "ZsDb9",
+                                      "name": "Feu +3",
+                                      "fill": "#d9771f",
+                                      "content": "Feu +3",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ttU4l",
+                              "name": "New skill",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "CuyLg",
+                                  "name": "sparkles",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "sparkles",
+                                  "library": "lucide",
+                                  "fill": "$pick"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "SIoOd",
+                                  "name": "Apprend Coup double",
+                                  "fill": "$pick",
+                                  "content": "Apprend Coup double",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "YOLPW",
+                          "name": "Free slot 2",
+                          "width": "fill_container",
+                          "height": 92,
+                          "cornerRadius": 8,
+                          "stroke": "#e3e5eb",
+                          "strokeWidth": 1.5,
+                          "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
                             {
-                              "type": "rectangle",
-                              "id": "GzrD4",
-                              "name": "Img",
-                              "fill": {
-                                "type": "image",
-                                "enabled": true,
-                                "url": "images/db/potion.png",
-                                "mode": "stretch"
-                              },
-                              "width": 13,
-                              "height": 13
-                            },
+                              "type": "text",
+                              "id": "o7ea6",
+                              "name": "Place libre",
+                              "fill": "#b4b7c2",
+                              "content": "Place libre",
+                              "fontFamily": "Roboto",
+                              "fontSize": 10,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VYf19",
+                      "name": "Team row 2",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "h6ifb",
+                          "name": "Free slot 3",
+                          "width": "fill_container",
+                          "height": 92,
+                          "cornerRadius": 8,
+                          "stroke": "#e3e5eb",
+                          "strokeWidth": 1.5,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
                             {
                               "type": "text",
-                              "id": "p7dgK",
-                              "name": "Objet trouvé",
-                              "fill": "$ink-soft",
-                              "content": "Objet trouvé",
+                              "id": "pc8mk",
+                              "name": "Place libre",
+                              "fill": "#b4b7c2",
+                              "content": "Place libre",
                               "fontFamily": "Roboto",
                               "fontSize": 10,
                               "fontWeight": "500"
@@ -3844,364 +4125,26 @@
                           ]
                         },
                         {
-                          "type": "text",
-                          "id": "I1X2dI",
-                          "name": "Potion ×1",
-                          "fill": "$ink",
-                          "content": "Potion ×1",
-                          "fontFamily": "Roboto",
-                          "fontSize": 15,
-                          "fontWeight": "700"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "SuVM5",
-                  "name": "Hugo progress",
-                  "width": "fill_container",
-                  "gap": 10,
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "cornerRadius": 7,
-                      "id": "jSCY6",
-                      "name": "Portrait",
-                      "fill": {
-                        "type": "image",
-                        "enabled": true,
-                        "url": "images/combat/portrait-hugo.png",
-                        "mode": "stretch"
-                      },
-                      "width": 48,
-                      "height": 48
-                    },
-                    {
-                      "type": "frame",
-                      "id": "kp3Ub",
-                      "name": "Progress",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 6,
-                      "children": [
-                        {
                           "type": "frame",
-                          "id": "jzO32",
-                          "name": "Level row",
+                          "id": "Es1qZ",
+                          "name": "Free slot 4",
                           "width": "fill_container",
-                          "gap": 7,
+                          "height": 92,
+                          "cornerRadius": 8,
+                          "stroke": "#e3e5eb",
+                          "strokeWidth": 1.5,
+                          "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "text",
-                              "id": "X0bWt7",
-                              "name": "Hugo",
-                              "fill": "$ink",
-                              "content": "Hugo",
+                              "id": "BAUjr",
+                              "name": "Place libre",
+                              "fill": "#b4b7c2",
+                              "content": "Place libre",
                               "fontFamily": "Roboto",
-                              "fontSize": 13,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "RtBBA",
-                              "name": "Niv. 1 → 2",
-                              "fill": "$ink-soft",
-                              "content": "Niv. 1 → 2",
-                              "fontFamily": "Roboto",
-                              "fontSize": 11,
+                              "fontSize": 10,
                               "fontWeight": "500"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "tmcWu",
-                              "name": "Level up",
-                              "fill": "#4cc06a26",
-                              "cornerRadius": 6,
-                              "padding": [
-                                2,
-                                6
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "nhdxG",
-                                  "name": "Niveau supérieur !",
-                                  "fill": "#2f9a4c",
-                                  "content": "Niveau supérieur !",
-                                  "fontFamily": "Roboto",
-                                  "fontSize": 10,
-                                  "fontWeight": "700"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "bUkOr",
-                          "name": "Bar Expérience",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 2,
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "MuaQV",
-                              "name": "Bar head",
-                              "width": "fill_container",
-                              "gap": 4,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "dBWXY",
-                                  "name": "Expérience",
-                                  "fill": "#3f8ef0",
-                                  "content": "Expérience",
-                                  "fontFamily": "Roboto",
-                                  "fontSize": 10.5,
-                                  "fontWeight": "700"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "u05CRO",
-                                  "name": "Spacer",
-                                  "width": "fill_container",
-                                  "height": 1
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "Ne2aC",
-                                  "name": "8 / 60 vers le niv. 3",
-                                  "fill": "$ink-soft",
-                                  "content": "8 / 60 vers le niv. 3",
-                                  "fontFamily": "Roboto",
-                                  "fontSize": 10,
-                                  "fontWeight": "500"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "jyXp6",
-                              "name": "Track",
-                              "width": "fill_container",
-                              "height": 4,
-                              "fill": "#e8ebf1",
-                              "cornerRadius": 2,
-                              "layout": "none",
-                              "children": [
-                                {
-                                  "type": "rectangle",
-                                  "cornerRadius": 2,
-                                  "id": "Qfz4Y",
-                                  "x": 0,
-                                  "y": 0,
-                                  "name": "Before",
-                                  "fill": "#3f8ef0",
-                                  "width": 0,
-                                  "height": 4
-                                },
-                                {
-                                  "type": "rectangle",
-                                  "id": "Y1rLbK",
-                                  "x": 0,
-                                  "y": 0,
-                                  "name": "Gained",
-                                  "fill": "#3f8ef080",
-                                  "width": 42.38,
-                                  "height": 4
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "aCGpF",
-                          "name": "Bar Épée 3",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 2,
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "ZS0uB",
-                              "name": "Bar head",
-                              "width": "fill_container",
-                              "gap": 4,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "rectangle",
-                                  "id": "wV37T",
-                                  "name": "Img",
-                                  "fill": {
-                                    "type": "image",
-                                    "enabled": true,
-                                    "url": "images/db/sword.png",
-                                    "mode": "stretch"
-                                  },
-                                  "width": 12,
-                                  "height": 12
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "CYNUt",
-                                  "name": "Épée 3",
-                                  "fill": "#6b6e7a",
-                                  "content": "Épée 3",
-                                  "fontFamily": "Roboto",
-                                  "fontSize": 10.5,
-                                  "fontWeight": "700"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "PYjo3",
-                                  "name": "Spacer",
-                                  "width": "fill_container",
-                                  "height": 1
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "sg4lY",
-                                  "name": "+6 · 34 / 50",
-                                  "fill": "$ink-soft",
-                                  "content": "+6 · 34 / 50",
-                                  "fontFamily": "Roboto",
-                                  "fontSize": 10,
-                                  "fontWeight": "500"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "yE1lF",
-                              "name": "Track",
-                              "width": "fill_container",
-                              "height": 4,
-                              "fill": "#e8ebf1",
-                              "cornerRadius": 2,
-                              "layout": "none",
-                              "children": [
-                                {
-                                  "type": "rectangle",
-                                  "cornerRadius": 2,
-                                  "id": "V5gSP",
-                                  "x": 0,
-                                  "y": 0,
-                                  "name": "Before",
-                                  "fill": "#6b6e7a",
-                                  "width": 182.56000000000003,
-                                  "height": 4
-                                },
-                                {
-                                  "type": "rectangle",
-                                  "id": "qjCjo",
-                                  "x": 182.56000000000003,
-                                  "y": 0,
-                                  "name": "Gained",
-                                  "fill": "#6b6e7a80",
-                                  "width": 39.12,
-                                  "height": 4
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "l6mQw",
-                          "name": "Bar Feu 2",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 2,
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "ri1KN",
-                              "name": "Bar head",
-                              "width": "fill_container",
-                              "gap": 4,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "rectangle",
-                                  "id": "zAs0j",
-                                  "name": "Img",
-                                  "fill": {
-                                    "type": "image",
-                                    "enabled": true,
-                                    "url": "images/db/fire.png",
-                                    "mode": "stretch"
-                                  },
-                                  "width": 12,
-                                  "height": 12
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "cqFVg",
-                                  "name": "Feu 2",
-                                  "fill": "#f08c32",
-                                  "content": "Feu 2",
-                                  "fontFamily": "Roboto",
-                                  "fontSize": 10.5,
-                                  "fontWeight": "700"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "sfVVw",
-                                  "name": "Spacer",
-                                  "width": "fill_container",
-                                  "height": 1
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "hj2ED",
-                                  "name": "+3 · 12 / 30",
-                                  "fill": "$ink-soft",
-                                  "content": "+3 · 12 / 30",
-                                  "fontFamily": "Roboto",
-                                  "fontSize": 10,
-                                  "fontWeight": "500"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "aSXqv",
-                              "name": "Track",
-                              "width": "fill_container",
-                              "height": 4,
-                              "fill": "#e8ebf1",
-                              "cornerRadius": 2,
-                              "layout": "none",
-                              "children": [
-                                {
-                                  "type": "rectangle",
-                                  "cornerRadius": 2,
-                                  "id": "fC6Tu",
-                                  "x": 0,
-                                  "y": 0,
-                                  "name": "Before",
-                                  "fill": "#f08c32",
-                                  "width": 97.8,
-                                  "height": 4
-                                },
-                                {
-                                  "type": "rectangle",
-                                  "id": "lxAfx",
-                                  "x": 97.8,
-                                  "y": 0,
-                                  "name": "Gained",
-                                  "fill": "#f08c3280",
-                                  "width": 32.60000000000001,
-                                  "height": 4
-                                }
-                              ]
                             }
                           ]
                         }
@@ -4211,52 +4154,14 @@
                 },
                 {
                   "type": "frame",
-                  "id": "ksCSZ",
-                  "name": "New skill",
-                  "width": "fill_container",
-                  "fill": "#1e90ff0f",
-                  "cornerRadius": 7,
-                  "stroke": "$pick",
-                  "strokeWidth": 1.5,
-                  "gap": 6,
-                  "padding": [
-                    6,
-                    9
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "yr5Ri",
-                      "name": "sparkles",
-                      "width": 13,
-                      "height": 13,
-                      "icon": "sparkles",
-                      "library": "lucide",
-                      "fill": "$pick"
-                    },
-                    {
-                      "type": "text",
-                      "id": "q2X1Pn",
-                      "name": "Nouvelle compétence : Co",
-                      "fill": "$pick",
-                      "content": "Nouvelle compétence : Coup double",
-                      "fontFamily": "Roboto",
-                      "fontSize": 12,
-                      "fontWeight": "700"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "SYSf0",
+                  "id": "fp9EY",
                   "name": "Footer",
                   "width": "fill_container",
                   "justifyContent": "end",
                   "children": [
                     {
                       "type": "text",
-                      "id": "CYdJ9",
+                      "id": "OFgYU",
                       "name": "Toucher pour continuer",
                       "fill": "$ink-soft",
                       "content": "Toucher pour continuer",
@@ -4267,18 +4172,178 @@
                   ]
                 }
               ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "TOOHS",
+          "x": 420,
+          "y": 200,
+          "name": "Title pill",
+          "height": 32,
+          "fill": "$box",
+          "cornerRadius": 8,
+          "stroke": "#fafafa",
+          "strokeWidth": 1.5,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000026",
+            "offset": {
+              "x": 1,
+              "y": 2
+            },
+            "blur": 3
+          },
+          "gap": 6,
+          "padding": [
+            0,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "yWfk0",
+              "name": "trophy",
+              "width": 14,
+              "height": 14,
+              "icon": "trophy",
+              "library": "lucide",
+              "fill": "#c9a227"
             },
             {
+              "type": "text",
+              "id": "gk1Fv",
+              "name": "Victoire !",
+              "fill": "$ink",
+              "content": "Victoire !",
+              "fontFamily": "Roboto",
+              "fontSize": 14,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "z4Vyii",
+      "x": 3190,
+      "y": 0,
+      "name": "5 · Portrait · Victoire",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "images/screens/combat-portrait.png",
+        "mode": "stretch",
+        "transform": [
+          1.35,
+          0,
+          0,
+          1.35,
+          -0.2,
+          -0.17
+        ]
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "DJyTX",
+          "x": 0,
+          "y": 0,
+          "name": "Night dim",
+          "fill": "#0a0c1880",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "ellipse",
+          "id": "P972nc",
+          "x": 82.5,
+          "y": 532.5,
+          "name": "Hugo shadow",
+          "fill": "#00000055",
+          "width": 55,
+          "height": 15
+        },
+        {
+          "type": "rectangle",
+          "id": "nE3Ys",
+          "x": 50,
+          "y": 427.5,
+          "name": "Hugo",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/combat/hugo-idle-1-ne.png",
+            "mode": "stretch"
+          },
+          "width": 120,
+          "height": 120
+        },
+        {
+          "type": "frame",
+          "id": "P5dKo",
+          "x": 12,
+          "y": 96,
+          "name": "Weather chip",
+          "height": 22,
+          "fill": "#0a0c1866",
+          "cornerRadius": 6,
+          "gap": 4,
+          "padding": [
+            0,
+            8
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "OQDpS",
+              "name": "moon",
+              "width": 11,
+              "height": 11,
+              "icon": "moon-star",
+              "library": "lucide",
+              "fill": "#f2d067"
+            },
+            {
+              "type": "text",
+              "id": "RmGLT",
+              "name": "Nuit · Lucioles",
+              "fill": "#ffffffdd",
+              "content": "Nuit · Lucioles",
+              "fontFamily": "Roboto",
+              "fontSize": 10,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Q57e9j",
+          "x": 12,
+          "y": 770,
+          "name": "Party",
+          "width": 366,
+          "gap": 5,
+          "children": [
+            {
               "type": "frame",
-              "id": "zn5wp",
-              "x": 24,
-              "y": 0,
-              "name": "Title pill",
-              "height": 32,
+              "id": "ooQK7",
+              "name": "Card Hugo",
+              "width": "fill_container",
+              "height": 62,
               "fill": "$box",
               "cornerRadius": 8,
-              "stroke": "#fafafa",
-              "strokeWidth": 1.5,
+              "stroke": "$pick",
+              "strokeWidth": 2,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
@@ -4289,34 +4354,794 @@
                 },
                 "blur": 3
               },
-              "gap": 6,
-              "padding": [
-                0,
-                12
-              ],
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UxFYE",
+                  "name": "Top",
+                  "width": "fill_container",
+                  "gap": 5,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 5,
+                      "id": "hmQAU",
+                      "name": "Portrait",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "images/combat/portrait-hugo.png",
+                        "mode": "stretch"
+                      },
+                      "width": 24,
+                      "height": 24
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WwgD4",
+                      "name": "Names",
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "qAJ2n",
+                          "name": "Hugo",
+                          "fill": "$ink",
+                          "content": "Hugo",
+                          "fontFamily": "Roboto",
+                          "fontSize": 11,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Wtqv5",
+                          "name": "Niv. 1",
+                          "fill": "$ink-soft",
+                          "content": "Niv. 1",
+                          "fontFamily": "Roboto",
+                          "fontSize": 8.5,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "N5C7J7",
+                  "name": "Bar PV",
+                  "width": "fill_container",
+                  "gap": 3,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "zwNfj",
+                      "name": "Track",
+                      "width": "fill_container",
+                      "height": 4,
+                      "fill": "#e8ebf1",
+                      "cornerRadius": 2,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 2,
+                          "id": "hQkdR",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Fill",
+                          "fill": "$hp",
+                          "width": 52,
+                          "height": 4
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "q9qAI",
+                      "name": "42",
+                      "fill": "$hp",
+                      "content": "42",
+                      "fontFamily": "Roboto",
+                      "fontSize": 8.5,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "IHV1b",
+                  "name": "Bar PM",
+                  "width": "fill_container",
+                  "gap": 3,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Qb6xk",
+                      "name": "Track",
+                      "width": "fill_container",
+                      "height": 4,
+                      "fill": "#e8ebf1",
+                      "cornerRadius": 2,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 2,
+                          "id": "U1i64l",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Fill",
+                          "fill": "$mp",
+                          "width": 52,
+                          "height": 4
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "RT3Zn",
+                      "name": "18",
+                      "fill": "$mp",
+                      "content": "18",
+                      "fontFamily": "Roboto",
+                      "fontSize": 8.5,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ebEjp",
+              "name": "Free slot 2",
+              "width": "fill_container",
+              "height": 62,
+              "cornerRadius": 8,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "icon",
-                  "id": "ZBRLk",
-                  "name": "trophy",
-                  "width": 14,
-                  "height": 14,
-                  "icon": "trophy",
-                  "library": "lucide",
-                  "fill": "#c9a227"
-                },
-                {
                   "type": "text",
-                  "id": "A3ssqD",
-                  "name": "Victoire !",
-                  "fill": "$ink",
-                  "content": "Victoire !",
+                  "id": "cRaUq",
+                  "name": "Libre",
+                  "fill": "#ffffff70",
+                  "content": "Libre",
                   "fontFamily": "Roboto",
-                  "fontSize": 14,
+                  "fontSize": 10,
                   "fontWeight": "500"
                 }
               ]
+            },
+            {
+              "type": "frame",
+              "id": "v8mzNd",
+              "name": "Free slot 3",
+              "width": "fill_container",
+              "height": 62,
+              "cornerRadius": 8,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qtCRo",
+                  "name": "Libre",
+                  "fill": "#ffffff70",
+                  "content": "Libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fqnEU",
+              "name": "Free slot 4",
+              "width": "fill_container",
+              "height": 62,
+              "cornerRadius": 8,
+              "stroke": "#ffffff40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "LVfnm",
+                  "name": "Libre",
+                  "fill": "#ffffff70",
+                  "content": "Libre",
+                  "fontFamily": "Roboto",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "S3Hh0O",
+          "x": 16,
+          "y": 150,
+          "name": "Victory",
+          "width": 358,
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "R3kaF",
+              "name": "Pill row",
+              "width": "fill_container",
+              "height": 16,
+              "layout": "none"
+            },
+            {
+              "type": "frame",
+              "id": "fQ3ui",
+              "name": "Box",
+              "width": "fill_container",
+              "fill": "$box",
+              "cornerRadius": 12,
+              "stroke": "$box-border",
+              "strokeWidth": 2,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000026",
+                "offset": {
+                  "x": 1,
+                  "y": 2
+                },
+                "blur": 3
+              },
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                22,
+                12,
+                12,
+                12
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "rcgwk",
+                  "name": "Loot",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "V3imVw",
+                      "name": "Loot Expérience",
+                      "width": "fill_container",
+                      "fill": "#f5f6f9",
+                      "cornerRadius": 7,
+                      "gap": 5,
+                      "padding": [
+                        6,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "W6zOmI",
+                          "name": "star",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "star",
+                          "library": "lucide",
+                          "fill": "$ink-soft"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "tV0f1",
+                          "name": "Spacer",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "rCN2R",
+                          "name": "+42",
+                          "fill": "$ink",
+                          "content": "+42",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kWnrF",
+                      "name": "Loot Pièces",
+                      "width": "fill_container",
+                      "fill": "#f5f6f9",
+                      "cornerRadius": 7,
+                      "gap": 5,
+                      "padding": [
+                        6,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "fZFrP",
+                          "name": "coins",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "coins",
+                          "library": "lucide",
+                          "fill": "$ink-soft"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "gwDn9",
+                          "name": "Spacer",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "pmfGC",
+                          "name": "+22",
+                          "fill": "$ink",
+                          "content": "+22",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Eca1L",
+                      "name": "Loot Objet",
+                      "width": "fill_container",
+                      "fill": "#f5f6f9",
+                      "cornerRadius": 7,
+                      "gap": 5,
+                      "padding": [
+                        6,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "z06pah",
+                          "name": "Img",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/db/potion.png",
+                            "mode": "stretch"
+                          },
+                          "width": 13,
+                          "height": 13
+                        },
+                        {
+                          "type": "frame",
+                          "id": "PlH6Q",
+                          "name": "Spacer",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "Ns0rG",
+                          "name": "Potion ×1",
+                          "fill": "$ink",
+                          "content": "Potion ×1",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "T4l23",
+                  "name": "Team",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "PWvYV",
+                      "name": "Team row 1",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "tyNhd",
+                          "name": "Member Hugo",
+                          "width": "fill_container",
+                          "height": 58,
+                          "fill": "#f5f6f9",
+                          "cornerRadius": 8,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            7,
+                            9
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "u9K0Nu",
+                              "name": "Top",
+                              "width": "fill_container",
+                              "gap": 7,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "cornerRadius": 5,
+                                  "id": "uG1jz",
+                                  "name": "Portrait",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "images/combat/portrait-hugo.png",
+                                    "mode": "stretch"
+                                  },
+                                  "width": 22,
+                                  "height": 22
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "IAWLt",
+                                  "name": "Names",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "HtKRM",
+                                      "name": "Hugo",
+                                      "fill": "$ink",
+                                      "content": "Hugo",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 12,
+                                      "fontWeight": "700"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "Gs5yo",
+                                      "name": "Niv. 1 → 2",
+                                      "fill": "$ink-soft",
+                                      "content": "Niv. 1 → 2",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 9.5,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "dgOhK",
+                                  "name": "Level up",
+                                  "fill": "#4cc06a26",
+                                  "cornerRadius": 5,
+                                  "padding": [
+                                    2,
+                                    5
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "vVL32",
+                                      "name": "Niv. +1",
+                                      "fill": "#2f9a4c",
+                                      "content": "Niv. +1",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 9.5,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Plm2z",
+                              "name": "Gains",
+                              "width": "fill_container",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "Ohe5k",
+                                  "name": "Gain Épée +6",
+                                  "gap": 3,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "rectangle",
+                                      "id": "D2bcIc",
+                                      "name": "Img",
+                                      "fill": {
+                                        "type": "image",
+                                        "enabled": true,
+                                        "url": "images/db/sword.png",
+                                        "mode": "stretch"
+                                      },
+                                      "width": 11,
+                                      "height": 11
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "MJT8D",
+                                      "name": "Épée +6",
+                                      "fill": "$ink-soft",
+                                      "content": "Épée +6",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "OnhQZ",
+                                  "name": "Gain Feu +3",
+                                  "gap": 3,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "rectangle",
+                                      "id": "XbicT",
+                                      "name": "Img",
+                                      "fill": {
+                                        "type": "image",
+                                        "enabled": true,
+                                        "url": "images/db/fire.png",
+                                        "mode": "stretch"
+                                      },
+                                      "width": 11,
+                                      "height": 11
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "FVzUr",
+                                      "name": "Feu +3",
+                                      "fill": "#d9771f",
+                                      "content": "Feu +3",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "qMOmm",
+                                  "name": "New skill",
+                                  "gap": 3,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "C7PRkv",
+                                      "name": "sparkles",
+                                      "width": 10,
+                                      "height": 10,
+                                      "icon": "sparkles",
+                                      "library": "lucide",
+                                      "fill": "$pick"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "ahAHn",
+                                      "name": "Coup double",
+                                      "fill": "$pick",
+                                      "content": "Coup double",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vLer0",
+                      "name": "Team row 2",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "gwu1e",
+                          "name": "Free slot 2",
+                          "width": "fill_container",
+                          "height": 58,
+                          "cornerRadius": 8,
+                          "stroke": "#e3e5eb",
+                          "strokeWidth": 1.5,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "un7Ky",
+                              "name": "Place libre",
+                              "fill": "#b4b7c2",
+                              "content": "Place libre",
+                              "fontFamily": "Roboto",
+                              "fontSize": 10,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "y1a8c",
+                      "name": "Team row 3",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "I2BKg",
+                          "name": "Free slot 3",
+                          "width": "fill_container",
+                          "height": 58,
+                          "cornerRadius": 8,
+                          "stroke": "#e3e5eb",
+                          "strokeWidth": 1.5,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "D26T7",
+                              "name": "Place libre",
+                              "fill": "#b4b7c2",
+                              "content": "Place libre",
+                              "fontFamily": "Roboto",
+                              "fontSize": 10,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lSa0k",
+                      "name": "Team row 4",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "h3YHtj",
+                          "name": "Free slot 4",
+                          "width": "fill_container",
+                          "height": 58,
+                          "cornerRadius": 8,
+                          "stroke": "#e3e5eb",
+                          "strokeWidth": 1.5,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "M2eqv",
+                              "name": "Place libre",
+                              "fill": "#b4b7c2",
+                              "content": "Place libre",
+                              "fontFamily": "Roboto",
+                              "fontSize": 10,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kMkZB",
+                  "name": "Footer",
+                  "width": "fill_container",
+                  "justifyContent": "end",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pu5TJ",
+                      "name": "Toucher pour continuer",
+                      "fill": "$ink-soft",
+                      "content": "Toucher pour continuer",
+                      "fontFamily": "Roboto",
+                      "fontSize": 10,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "N7ncRu",
+          "x": 36,
+          "y": 150,
+          "name": "Title pill",
+          "height": 32,
+          "fill": "$box",
+          "cornerRadius": 8,
+          "stroke": "#fafafa",
+          "strokeWidth": 1.5,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000026",
+            "offset": {
+              "x": 1,
+              "y": 2
+            },
+            "blur": 3
+          },
+          "gap": 6,
+          "padding": [
+            0,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "w0lfMd",
+              "name": "trophy",
+              "width": 14,
+              "height": 14,
+              "icon": "trophy",
+              "library": "lucide",
+              "fill": "#c9a227"
+            },
+            {
+              "type": "text",
+              "id": "G2nOx0",
+              "name": "Victoire !",
+              "fill": "$ink",
+              "content": "Victoire !",
+              "fontFamily": "Roboto",
+              "fontSize": 14,
+              "fontWeight": "500"
             }
           ]
         }
