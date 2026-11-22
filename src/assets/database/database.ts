@@ -240,6 +240,8 @@ export const CODE_DATABASE: GameDatabase = {
       "mp": 4,
       "cast": 0.5,
       "target": "enemy",
+      "range": "long",
+      "zone": 30,
       "use": "fight",
       "effects": [
         {
@@ -268,6 +270,7 @@ export const CODE_DATABASE: GameDatabase = {
       "mp": 6,
       "cast": 1.5,
       "target": "enemy",
+      "range": "long",
       "use": "fight",
       "effects": [
         {
@@ -291,6 +294,7 @@ export const CODE_DATABASE: GameDatabase = {
       "mp": 12,
       "cast": 3,
       "target": "enemies",
+      "range": "any",
       "use": "fight",
       "effects": [
         {
@@ -323,6 +327,7 @@ export const CODE_DATABASE: GameDatabase = {
       "mp": 3,
       "cast": 0.5,
       "target": "ally",
+      "range": "medium",
       "use": "both",
       "effects": [
         {
@@ -346,6 +351,7 @@ export const CODE_DATABASE: GameDatabase = {
       "mp": 5,
       "cast": 1,
       "target": "enemy",
+      "range": "medium",
       "use": "fight",
       "effects": [
         {
@@ -374,6 +380,7 @@ export const CODE_DATABASE: GameDatabase = {
       "mp": 0,
       "cast": 0.5,
       "target": "enemy",
+      "range": "contact",
       "use": "fight",
       "effects": [
         {
@@ -401,7 +408,9 @@ export const CODE_DATABASE: GameDatabase = {
       "element": "el-wind",
       "mp": 7,
       "cast": 3,
-      "target": "enemies",
+      "target": "enemy",
+      "range": "medium",
+      "zone": 32,
       "use": "fight",
       "effects": [
         {
