@@ -16,6 +16,7 @@ export type SoundId =
   | "magic"
   | "jump"
   | "hit"
+  | "explosion"
   | "step";
 
 export const SOUND_CHOICES: { id: SoundId; label: string }[] = [
@@ -30,6 +31,7 @@ export const SOUND_CHOICES: { id: SoundId; label: string }[] = [
   { id: "magic", label: "Magie" },
   { id: "jump", label: "Saut" },
   { id: "hit", label: "Coup" },
+  { id: "explosion", label: "Explosion" },
   { id: "step", label: "Pas" },
 ];
 
@@ -86,8 +88,19 @@ const SOUNDS: Record<SoundId, Note[]> = {
     { at: 0, len: 0.12, freq: 1000, wave: "noise", gain: 0.8 },
     { at: 0, len: 0.12, freq: 160, to: 60, wave: "square", gain: 0.4 },
   ],
+  // A deep thump, a roar of noise falling away, a crackle on top
+  explosion: [
+    { at: 0, len: 0.45, freq: 120, to: 32, wave: "square", gain: 0.7 },
+    { at: 0, len: 0.7, freq: 300, wave: "noise", gain: 1 },
+    { at: 0, len: 0.5, freq: 700, wave: "noise", gain: 0.7 },
+    { at: 0.03, len: 0.35, freq: 1800, wave: "noise", gain: 0.4 },
+    { at: 0.1, len: 0.6, freq: 160, wave: "noise", gain: 0.8 },
+  ],
   step: [{ at: 0, len: 0.06, freq: 400, wave: "noise", gain: 0.5 }],
 };
+
+/** Sounds louder than the others (a factor on their volume): an explosion has to boom. */
+const LOUDER: Partial<Record<SoundId, number>> = { explosion: 2.5 };
 
 let context: AudioContext | null = null;
 let volume = 0.6;
@@ -118,7 +131,7 @@ export function playSound(id: string, preview = false): void {
   }
   const ctx = context;
   const master = ctx.createGain();
-  master.gain.value = 0.25 * volume;
+  master.gain.value = 0.25 * volume * (LOUDER[id] ?? 1);
   // A soft low-pass: the lo-fi colour of the music
   const filter = ctx.createBiquadFilter();
   filter.type = "lowpass";

@@ -422,7 +422,7 @@ export class BattleService {
         : []
     );
     const shown = engine.shown();
-    field.setShowcase(shown?.look ?? null);
+    field.setShowcase(shown?.look ?? null, shown?.wide);
     const choosing = engine.phase === "command" || engine.phase === "target";
     const pending = engine.pending;
     const pendingLabel = (() => {

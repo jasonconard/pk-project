@@ -32,9 +32,12 @@ import {
   Popup,
 } from "./battle-types";
 
-/** Gauge speed while waiting (per second): the slowest fighter, plus up to this for the quickest. */
-const WAIT_SPEED = 0.1;
-const WAIT_SPEED_SPREAD = 0.12;
+/**
+ * Gauge speed while waiting (per second): the slowest fighter, plus up to this for the quickest. From 0 to the
+ * command mark (4/5): about 5.5 s for the quickest, 12 s for the slowest.
+ */
+const WAIT_SPEED = 0.065;
+const WAIT_SPEED_SPREAD = 0.08;
 /** A skill charges from the command mark to the end in its cast time (s, at least this). */
 const MIN_CAST = 0.25;
 /** Walking speed (world units per second) and the distance kept from the target when striking. */
@@ -211,7 +214,12 @@ export class BattleEngine {
    * The skill being shown off: its name, its caster (the only one moving), where the camera looks (the caster, then
    * the middle of the targets once the effects land). Null: no showcase.
    */
-  shown(): { name: string; actor: string; look: THREE.Vector3 } | null {
+  shown(): {
+    name: string;
+    actor: string;
+    look: THREE.Vector3;
+    wide: boolean;
+  } | null {
     const s = this.showcase;
     if (!s) {
       return null;
@@ -222,7 +230,13 @@ export class BattleEngine {
           .reduce((sum, f) => sum.add(f.pos), new THREE.Vector3())
           .divideScalar(targets.length)
       : s.actor.pos.clone();
-    return { name: s.name, actor: s.actor.id, look };
+    // (on several targets the camera stands back to show them all)
+    return {
+      name: s.name,
+      actor: s.actor.id,
+      look,
+      wide: s.landed && targets.length > 1,
+    };
   }
 
   update(dt: number): void {
@@ -601,6 +615,17 @@ export class BattleEngine {
     }
     action.step = "strike";
     this.field.play(f.id, anim, facing(f.pos, action.focus.pos), true);
+    // A skill whose animation plays on its targets: the camera turns to them as the caster starts (it is there when
+    // the effect plays); a projectile's follows it when it leaves
+    const skill =
+      command?.kind === "skill" ? this.skill(command.id) : undefined;
+    if (
+      this.showcase?.actor === f &&
+      skill?.anim &&
+      skill.anim.mode !== "projectile"
+    ) {
+      this.showcase.landed = true;
+    }
   }
 
   /** A team member's action trains its levels: a skill's, or its weapon type for the attacks. */

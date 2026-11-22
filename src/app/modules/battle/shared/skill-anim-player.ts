@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { CAMERA_LOOK } from "../../game/shared/model/Game";
 import { animFrame, SkillAnim } from "../../database-editor/shared/skill-anim";
+import { playSound } from "../../game/shared/services/sfx";
 import { SHEET_SCALE } from "./sheet-sprite";
 
 /** A projectile's speed (world units per second) and the height it flies at (a fighter's chest). */
@@ -94,11 +95,14 @@ export class SkillAnimPlayer {
     return id;
   }
 
-  /** True once, when its effects land (the effect's hit frame). */
+  /**
+   * True once, when its effects land (the effect's hit frame). Unknown (over, its hit already taken: it is only
+   * removed after that): false, so the effects never land twice.
+   */
   takeHit(id: number): boolean {
     const show = this.shows.get(id);
     if (!show || !show.hitFired || show.hitTaken) {
-      return !show;
+      return false;
     }
     show.hitTaken = true;
     return true;
@@ -179,6 +183,10 @@ export class SkillAnimPlayer {
   }
 
   private startEffect(show: Show): void {
+    // (once, however many targets)
+    if (show.anim.sound) {
+      playSound(show.anim.sound);
+    }
     show.pieces = show.spots.map((spot) => {
       const piece = this.piece(show.anim, 0, spot.scale);
       piece.group.position.copy(spot.pos).add(towardCamera());

@@ -2,6 +2,7 @@
 // skill's showcase. Row 1: the effect (an impact, a cloud, a flash); row 2, for a projectile: the projectile flying.
 // Format: docs/editeur/10-base-de-donnees.md (Compétences, Animation).
 
+import { SoundId } from "../../game/shared/services/sfx";
 import { frameUsed } from "./sprite-sheet";
 
 /**
@@ -28,6 +29,8 @@ export interface SkillAnim {
   hit: number;
   /** A projectile: its frames (row 2, played in a loop while it flies). */
   flyFrames?: number;
+  /** The sound played when the effect starts (an explosion as the fireball lands). */
+  sound?: SoundId;
 }
 
 /** Frame size, frames and time limits in the editor. */

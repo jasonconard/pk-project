@@ -262,6 +262,20 @@
             }
           </select>
         </label>
+        <label class="field grow"
+          ><small>Son au début de l'effet</small>
+          <select
+            aria-label="Son au début de l'effet"
+            (change)="setAnimSound(sk, $any($event.target).value)"
+          >
+            <option value="" [selected]="!an.sound">Aucun</option>
+            @for (so of sounds; track so.id) {
+              <option [value]="so.id" [selected]="so.id === an.sound">
+                {{ so.label }}
+              </option>
+            }
+          </select>
+        </label>
         <label class="field"
           ><small>Case (largeur)</small>
           <db-stepper

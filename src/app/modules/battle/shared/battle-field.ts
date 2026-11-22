@@ -16,6 +16,8 @@ const FOCUS_SHIFT = 0.7;
 const CAMERA_EASE = 6;
 /** A skill shown off: the camera right on the caster (then the targets), closer still. */
 const SHOW_ZOOM = 0.5;
+/** …standing back to show several targets. */
+const SHOW_WIDE_ZOOM = 0.8;
 
 /** An arrow in flight: a thin shaft (world units), flying at about a fighter's chest height. */
 const ARROW_GEOMETRY = new THREE.BoxGeometry(0.6, 0.6, 9);
@@ -55,6 +57,7 @@ export class BattleField {
   private focus: THREE.Vector3 | null = null;
   /** A skill shown off: where the camera looks (over the aim). */
   private showLook: THREE.Vector3 | null = null;
+  private showWide = false;
   /** Arrows flying (ranged attacks), with their way and time. */
   private arrows: {
     mesh: THREE.Mesh;
@@ -178,8 +181,9 @@ export class BattleField {
   }
 
   /** A skill shown off: the camera on this point (the caster, then its targets); null: back to the field. */
-  setShowcase(look: THREE.Vector3 | null): void {
+  setShowcase(look: THREE.Vector3 | null, wide = false): void {
     this.showLook = look;
+    this.showWide = wide;
   }
 
   /** The real clock (also while the fight waits): the camera easing to its place, the glows and blinks. */
@@ -193,7 +197,11 @@ export class BattleField {
         .sub(CAMERA_LOOK.clone().multiplyScalar(FIGHT_ZOOM));
       dest = middle
         .add(this.showLook.clone().sub(middle).setY(0))
-        .add(CAMERA_LOOK.clone().multiplyScalar(SHOW_ZOOM));
+        .add(
+          CAMERA_LOOK.clone().multiplyScalar(
+            this.showWide ? SHOW_WIDE_ZOOM : SHOW_ZOOM
+          )
+        );
     } else if (this.focus) {
       // Closer, between the field's middle and the aimed one
       const look = this.cameraHome

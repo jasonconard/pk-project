@@ -51,6 +51,11 @@ import {
   withFrames,
 } from "../../shared/skill-anim";
 import { SkillAnimPreviewComponent } from "./skill-anim-preview.component";
+import {
+  playSound,
+  SOUND_CHOICES,
+  SoundId,
+} from "../../../game/shared/services/sfx";
 
 /** The sheet of a row of the « skill » table. */
 @Component({
@@ -78,10 +83,11 @@ export class SkillSheetComponent extends DbSheet {
     formulaProblem(this.skill()?.formula ?? "")
   );
 
-  /** The formula block is unfolded (always when there is one). */
+  /** The formula block is unfolded (always when there is one); folded again for another skill only. */
   protected readonly formulaOpen = linkedSignal<string, boolean>({
     source: () => this.skill().id,
-    computation: () => false,
+    computation: (id, previous) =>
+      previous && previous.source === id ? previous.value : false,
   });
 
   /** Another element: the levels it is learned with follow, when none were chosen yet. */
@@ -148,6 +154,23 @@ export class SkillSheetComponent extends DbSheet {
   }
 
   protected readonly animModes = SKILL_ANIM_MODES;
+
+  protected readonly sounds = SOUND_CHOICES;
+
+  /** The sound when its effect starts (none: silent); heard at once in the editor. */
+  protected setAnimSound(skill: DbSkill, sound: string): void {
+    const anim = skill.anim;
+    if (!anim) {
+      return;
+    }
+    const next: SkillAnim = { ...anim, sound: sound as SoundId };
+    if (sound) {
+      playSound(sound, true);
+    } else {
+      delete next.sound;
+    }
+    this.setAnim(skill, next);
+  }
 
   protected readonly animFrameMax = ANIM_FRAME_MAX;
 
