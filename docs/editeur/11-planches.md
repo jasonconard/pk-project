@@ -2,11 +2,11 @@
 
 En combat (à la Grandia), chaque personnage et chaque ennemi est une image plate animée, posée sur le terrain en 3D. Ses animations viennent d'une **planche** : une seule image découpée en cases de même taille, avec une petite description. On l'ajoute dans la [base de données](10-base-de-donnees.md), fiche du personnage ou de l'ennemi, **Apparence → Planche de combat**.
 
-Exemples (384 × 768, cases de 48 × 48), déjà dans la base du jeu :
+Exemples déjà dans la base du jeu (384 × 768, cases de 48 × 48, sauf Hugo) :
 
 - le gluant, [images/planche-gluant.png](images/planche-gluant.png) : un corps de gelée qui s'étale en avançant ;
 - le gluant des neiges, [images/planche-gluant-des-neiges.png](images/planche-gluant-des-neiges.png) : la même gelée sous un bonnet de neige, qui fond en flaque ;
-- Hugo, [images/planche-hugo.png](images/planche-hugo.png) : un personnage avec son arme (l'épée courte) et son bouclier de bois ; avec le miroir, il change de main vers l'ouest, comme dans Grandia ;
+- Hugo, [images/planche-hugo.png](images/planche-hugo.png) (768 × 1024, cases de 64 × 64, dessiné avec PixelLab) : un épéiste avec son épée courte et son bouclier de bois ; ses coups d'épée laissent une trace blanche, son attaque forte est un saut (12 images, plus lente), il incante bouclier levé dans un cercle azur ; avec le miroir, il change de main vers l'ouest, comme dans Grandia ;
 - Jason, [images/planche-jason.png](images/planche-jason.png) : un archer de glace ; il tire à l'arc (la flèche part sur l'image du coup), une flèche de glace chargée pour l'attaque forte, des éclats de glace pour sa magie ;
 - la chauve-souris, [images/planche-chauve-souris.png](images/planche-chauve-souris.png) : elle **vole** au-dessus de ses pieds (le point des pieds reste au sol, sous elle, pour que l'ombre y soit), plonge pour mordre, crie sa magie, tombe au sol en mourant.
 
@@ -14,7 +14,7 @@ Exemples (384 × 768, cases de 48 × 48), déjà dans la base du jeu :
 
 ## Le découpage
 
-- **Les cases** font toutes la même taille : **48 × 48** par défaut (monstres et personnages), plus grand pour un boss (multiple de 8 conseillé).
+- **Les cases** font toutes la même taille : **48 × 48** par défaut (monstres et personnages), **64 × 64** pour un personnage qui saute ou dont l'arme dépasse (Hugo), plus grand pour un boss (multiple de 8 conseillé).
 - **Une ligne par animation et par direction**, dans cet ordre :
   1. Attente
   2. Marche
