@@ -20,6 +20,7 @@
             [class.spell]="f.side === 'foe' && f.command?.kind === 'skill'"
             [class.turn]="f.id === v.actor"
             [class.knocked]="v.knocked.includes(f.id)"
+            [class.aimed]="v.phase === 'target' && f.id === v.aim"
             [style.left.%]="f.gauge * 100"
             [attr.title]="f.name"
           >
@@ -121,42 +122,6 @@
           </button>
         }
       </div>
-    } @else if (v.phase === "target") {
-      <div
-        class="menu targets"
-        role="menu"
-        aria-label="Cible"
-        [style.left.px]="at.left"
-        [style.top.px]="at.top"
-      >
-        <span class="menu-title">{{ v.pendingLabel }}</span>
-        @for (f of v.targets; track f.id) {
-          <button
-            type="button"
-            role="menuitem"
-            [class.on]="f.id === v.aim"
-            (pointerenter)="aim(f.id)"
-            (click)="confirm(f.id)"
-          >
-            @if (f.icon) {
-              <img [src]="f.icon" alt="" />
-            }
-            <span class="target-name">{{ f.name }}</span>
-            @if (f.busy) {
-              <span
-                class="busy"
-                title="En action : une attaque forte l'interrompt"
-              ></span>
-            }
-            <span class="mini-hp"
-              ><span [style.width.%]="percent(f.hp, f.hpMax)"></span
-            ></span>
-          </button>
-        }
-        <button type="button" class="back" (click)="back()">
-          <svg lucideArrowLeft></svg> Retour
-        </button>
-      </div>
     }
   }
 
@@ -165,7 +130,17 @@
     <span class="aim" [style.left.px]="at.x" [style.top.px]="at.y"></span>
   }
   @if (v.phase === "target" && aimed(); as t) {
-    <battle-target-info [target]="t" [looks]="v.stateLooks" />
+    <!-- A touch on the field aims at the nearest one (again on it: confirms) -->
+    <div class="pick-layer" (pointerdown)="pickOnField($event)"></div>
+    <battle-target-info
+      [target]="t"
+      [looks]="v.stateLooks"
+      [label]="v.pendingLabel"
+      [many]="v.targets.length > 1"
+      (step)="moveAim($event)"
+      (confirmed)="confirm(t.id)"
+      (back)="back()"
+    />
   }
 
   <!-- The spells being gathered: their name and how far along, over the caster -->

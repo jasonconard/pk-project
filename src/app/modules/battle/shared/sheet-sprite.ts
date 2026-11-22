@@ -34,7 +34,9 @@ export class SheetSprite {
   private hitFired = false;
   /** Glowing (an enemy preparing a spell): its colour pulses brighter. */
   private glow = false;
-  private glowTime = 0;
+  /** Blinking (aimed at): flashes bright, over the glow. */
+  private blink = false;
+  private effectTime = 0;
 
   constructor(private readonly sheet: SpriteSheet) {
     const { w, h } = sheet.frame;
@@ -125,24 +127,36 @@ export class SheetSprite {
     (this.shadow.material as THREE.MeshBasicMaterial).opacity = 0.28 * opacity;
   }
 
+  /** The animation goes on (stopped while a team member chooses: dt 0). */
   update(dt: number): void {
     this.time += dt * 1000;
     this.applyFrame();
-    if (this.glow) {
-      this.glowTime += dt;
-      const k = 0.5 + 0.5 * Math.sin(this.glowTime * 6);
-      // (the weather multiplies this base colour by its tint each frame)
-      this.baseColor().setRGB(1 + 0.45 * k, 1 + 0.3 * k, 1 + 0.75 * k);
+  }
+
+  /** The glow and the blink, on the real clock (they go on while the fight waits). */
+  effects(dt: number): void {
+    this.effectTime += dt;
+    // (the weather multiplies this base colour by its tint each frame)
+    const color = this.baseColor();
+    if (this.blink) {
+      const on = Math.sin(this.effectTime * 16) > 0;
+      color.setRGB(on ? 2.2 : 1, on ? 2.2 : 1, on ? 2.2 : 1);
+    } else if (this.glow) {
+      const k = 0.5 + 0.5 * Math.sin(this.effectTime * 6);
+      color.setRGB(1 + 0.45 * k, 1 + 0.3 * k, 1 + 0.75 * k);
+    } else {
+      color.setRGB(1, 1, 1);
     }
   }
 
   /** Glowing on / off (an enemy preparing a spell). */
   setGlow(on: boolean): void {
     this.glow = on;
-    this.glowTime = 0;
-    if (!on) {
-      this.baseColor().setRGB(1, 1, 1);
-    }
+  }
+
+  /** Blinking on / off (aimed at). */
+  setBlink(on: boolean): void {
+    this.blink = on;
   }
 
   private baseColor(): THREE.Color {

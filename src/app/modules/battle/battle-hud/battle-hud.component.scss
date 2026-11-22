@@ -128,6 +128,13 @@
   }
 
   /* Interrupted / pushed back: a red shake (its slide back is the left transition) */
+  /* The aimed one: blinking */
+  &.aimed {
+    z-index: 4;
+    border-color: #fff;
+    animation: aimed 0.4s steps(2, jump-none) infinite;
+  }
+
   &.knocked {
     z-index: 3;
     border-color: var(--foe);
@@ -236,10 +243,6 @@
     }
   }
 
-  &.targets button {
-    width: 150px;
-  }
-
   .target-name {
     flex: 1;
     min-width: 0;
@@ -247,20 +250,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: left;
-  }
-
-  .mini-hp {
-    width: 28px;
-    height: 4px;
-    border-radius: 2px;
-    background: #e8ebf1;
-    overflow: hidden;
-
-    span {
-      display: block;
-      height: 100%;
-      background: var(--hp);
-    }
   }
 
   .back {
@@ -333,14 +322,18 @@
   }
 }
 
-/* An enemy between its command and its action (interruptible) */
-.menu .busy {
-  width: 8px;
-  height: 8px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: #a463e0;
-  box-shadow: 0 0 0 2px #efe4fa;
+@keyframes aimed {
+  50% {
+    background: var(--pick);
+    box-shadow: 0 0 10px #1e90ffdd;
+  }
+}
+
+/* While aiming: touches on the field go to the target picking */
+.pick-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
 }
 
 @keyframes knocked {

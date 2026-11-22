@@ -107,6 +107,8 @@ export interface TargetChoice {
   hp: number;
   hpMax: number;
   level: number;
+  /** Where it is on the screen (CSS px): a touch near it aims at it. */
+  screen: { x: number; y: number };
   /** Its states (ids). */
   states: string[];
   /** Its next action when decided (an enemy past 2/5, a team member who chose): « Venin », « Attaque ». */

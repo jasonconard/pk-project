@@ -35,6 +35,8 @@ const TEAM_PLACES = 4;
 /** The commands' column: its width, and the gap from the fighter (css px). */
 const MENU_WIDTH = 160;
 const MENU_GAP = 34;
+/** A touch this close to a fighter on the screen (css px) aims at it. */
+const PICK_RADIUS = 70;
 
 interface CommandItem {
   kind: CommandKind | "magic" | "items";
@@ -212,6 +214,35 @@ export class BattleHudComponent {
 
   protected aim(id: string): void {
     this.battle.aimAt(id);
+  }
+
+  protected moveAim(step: number): void {
+    this.battle.moveAim(step);
+  }
+
+  /** A touch on the field: the target nearest to it is aimed at (it was already: the action goes). */
+  protected pickOnField(ev: PointerEvent): void {
+    const v = this.view();
+    if (!v) {
+      return;
+    }
+    let best: string | null = null;
+    let bestDist = PICK_RADIUS;
+    for (const t of v.targets) {
+      const d = Math.hypot(t.screen.x - ev.clientX, t.screen.y - ev.clientY);
+      if (d < bestDist) {
+        best = t.id;
+        bestDist = d;
+      }
+    }
+    if (!best) {
+      return;
+    }
+    if (best === v.aim) {
+      this.confirm(best);
+    } else {
+      this.aim(best);
+    }
   }
 
   protected confirm(id: string): void {

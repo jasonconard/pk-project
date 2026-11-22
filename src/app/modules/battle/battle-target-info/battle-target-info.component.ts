@@ -3,8 +3,15 @@ import {
   Component,
   computed,
   input,
+  output,
 } from "@angular/core";
-import { LucideSparkles } from "@lucide/angular";
+import {
+  LucideArrowLeft,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideCrosshair,
+  LucideSparkles,
+} from "@lucide/angular";
 import { TargetChoice } from "../shared/battle-types";
 
 const RESIST_LABELS = {
@@ -15,15 +22,32 @@ const RESIST_LABELS = {
 };
 
 /**
- * The aimed fighter's details (design/combat.pen, « Le coup qui interrompt »): its PV left, its states, its next
- * action when decided (charging: a heavy attack would cancel it), an enemy's weaknesses and resistances.
+ * Choosing a target (design/combat.pen, « Le coup qui interrompt »): the aimed fighter's details (its PV left, its
+ * states, its next action when decided (charging: a heavy attack would cancel it), an enemy's weaknesses and
+ * resistances), ◀ ▶ to aim at another one, Viser, Retour. Keyboard: ← → / ↑ ↓, Entrée, Échap (battle-hud).
  */
 @Component({
   selector: "battle-target-info",
-  imports: [LucideSparkles],
+  imports: [
+    LucideArrowLeft,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideCrosshair,
+    LucideSparkles,
+  ],
   template: `
     @let t = target();
+    <span class="action">{{ label() }}</span>
     <div class="head">
+      @if (many()) {
+        <button
+          type="button"
+          class="nav"
+          aria-label="Cible précédente"
+          (click)="step.emit(-1)">
+          <svg lucideChevronLeft></svg>
+        </button>
+      }
       @if (t.icon) {
         <img
           [src]="t.icon"
@@ -31,6 +55,15 @@ const RESIST_LABELS = {
       }
       <strong>{{ t.name }}</strong>
       <small>Niv. {{ t.level }}</small>
+      @if (many()) {
+        <button
+          type="button"
+          class="nav"
+          aria-label="Cible suivante"
+          (click)="step.emit(1)">
+          <svg lucideChevronRight></svg>
+        </button>
+      }
     </div>
     <div class="hp">
       <b>PV</b>
@@ -76,9 +109,24 @@ const RESIST_LABELS = {
         }
       </div>
     }
+    <div class="buttons">
+      <button
+        type="button"
+        class="back"
+        (click)="back.emit()">
+        <svg lucideArrowLeft></svg> Retour
+      </button>
+      <button
+        type="button"
+        class="go"
+        (click)="confirmed.emit()">
+        <svg lucideCrosshair></svg> Viser
+      </button>
+    </div>
   `,
   styles: `
     :host {
+      pointer-events: auto;
       position: absolute;
       top: calc(60px + var(--safe-top));
       left: calc(16px + var(--safe-left));
@@ -87,7 +135,7 @@ const RESIST_LABELS = {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      padding: 9px 11px;
+      padding: 13px 11px 9px;
       border-radius: 10px;
       border: 2px solid var(--box-border);
       background: var(--box);
@@ -98,6 +146,60 @@ const RESIST_LABELS = {
       width: 16px;
       height: 16px;
       image-rendering: pixelated;
+    }
+    button {
+      font: inherit;
+      color: inherit;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    .action {
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--pick);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+    .nav {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      background: #f0f2f6;
+      font-size: 14px;
+    }
+    .buttons {
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+      button {
+        flex: 1;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .back {
+        background: #f0f2f6;
+        color: var(--ink-soft);
+      }
+      .go {
+        background: var(--pick);
+        color: #fff;
+      }
     }
     .head {
       display: flex;
@@ -214,6 +316,13 @@ export class BattleTargetInfoComponent {
   readonly target = input.required<TargetChoice>();
   /** State id → its name and color. */
   readonly looks = input<Record<string, { name: string; color: string }>>({});
+  /** What is being aimed (« Attaque », « Boule de feu »). */
+  readonly label = input("");
+  /** More than one possible target: the ◀ ▶ buttons. */
+  readonly many = input(false);
+  readonly step = output<number>();
+  readonly confirmed = output<void>();
+  readonly back = output<void>();
   protected readonly labels = RESIST_LABELS;
   protected readonly percent = computed(() => {
     const t = this.target();

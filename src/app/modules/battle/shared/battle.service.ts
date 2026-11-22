@@ -275,6 +275,7 @@ export class BattleService {
     const choosing =
       this.engine.phase === "command" || this.engine.phase === "target";
     this.field?.update(choosing ? 0 : dt);
+    this.field?.tick(dt);
     this.refresh();
   }
 
@@ -403,6 +404,7 @@ export class BattleService {
     }
     const actor = engine.actor;
     const aimed = engine.fighters.find((f) => f.id === engine.aim);
+    field.setAim(engine.phase === "target" ? (aimed ?? null) : null);
     const choosing = engine.phase === "command" || engine.phase === "target";
     const pending = engine.pending;
     const pendingLabel = (() => {
@@ -433,6 +435,7 @@ export class BattleService {
               hp: f.hp,
               hpMax: f.hpMax,
               level: f.level,
+              screen: field.screenPos(f.pos, 14),
               states: f.states.map((s) => s.id),
               plan: this.planOf(f, engine),
               busy:
