@@ -19,6 +19,15 @@ refaire les erreurs du premier essai (Hugo, novembre 2026 : 49 générations et 
   2.5 heads tall, rich shading, vivid colors ».
 - Ennemis et autres personnages : même réglage pour garder la cohérence. Pour un corps qui n'est pas humain, voir
   `search_help(tool="create_character")` (template quadrupède, ou image puis `mode="pro"`).
+- **Monstres** (pas humanoïdes) : `create_character_pro_flash(template_id="custom", width=48, height=48)` avec
+  `style_image` = la rotation sud de Hugo (`usage_description` : « copy only the pixel art style… not the
+  character », `style_options.color_palette=false`), 6 générations. Animés en v3 comme Hugo. Leur cadre est 48 × 48
+  ou plus grand (52, 56), **agrandi de façon égale autour du dessin** : position dans la case =
+  `(8 - (w-48)/2, refy - (h-48)/2)`, sans alignement. `refy` : le bas du dessin au point des pieds (gluants 12) ;
+  un volant flotte à ~12 px du sol (chauve-souris 4). Sa mort : garder une image couchée à la fin (`pick`) et la
+  faire tomber au sol avec `dy` (ex. `[0,0,3,6,9,12,12,12]`).
+- Ids PixelLab : gluant `64287e91-5bc0-4a60-9c02-5e56537e1e60`, gluant des neiges
+  `710a8252-f52e-40f9-95b4-b3181df0871c`, chauve-souris `6149d5c0-64ee-41f6-a05e-32418f822320`.
 - Hugo existe déjà dans PixelLab : `character_id = 03c414b4-e61c-4173-9d9f-6413df65b3bb` (réutilisable pour
   ajouter des animations).
 
