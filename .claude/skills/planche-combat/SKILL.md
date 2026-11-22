@@ -109,3 +109,18 @@ refaire les erreurs du premier essai (Hugo, novembre 2026 : 49 générations et 
    republier sur la même URL. La page lit la taille des cases dans `desc.frame`.
 8. Dire les générations dépensées (`get_balance`) et ce qui reste imparfait. Ne pas commiter sans demande ; la doc
    (`docs/editeur/11-planches.md`, `docs/editeur/images/planche-<nom>.png`) après validation.
+
+## Animations d'effet des compétences
+
+Format : `src/app/modules/database-editor/shared/skill-anim.ts` (ligne 1 l'effet, ligne 2 le projectile ; modes
+sur la cible, projectile puis impact, sur la zone). On les fait avec `vfx_workbench` (gratuit) : `start --fps 12`,
+`add_part` d'une pièce prête (`fire_blast`, `fire_bolt`, `ice_lance`, `ice_shatter` + `ice_spikes`, `bolt_strike`,
+`heal_plus`, `cross_slash`, `blood_splat` recoloré + `smoke_puff`…) ou un `render` avec sa propre recette (la
+Berceuse : notes dessinées en `pixels`), regarder chaque rendu, `render {"fit_canvas": true}` si c'est coupé, puis
+`export --name`. Télécharger `<nom>.png` et `.json` (une grille + la durée des images) et assembler avec
+`scripts/assemble_skill_anims.py` : renseigner pour chaque compétence l'impact, **son point au sol** (centre de
+l'effet + 24 px pour un effet à hauteur de poitrine, le pied pour un éclair), le projectile et **sa tête** (l'origine
+que donne l'export), le mode et l'image du coup ; il retire les images vides de la fin et sort `anims.json` à mettre
+dans `"anim"` des compétences. Le cadre doit contenir le point au sol (le script ajoute ce qu'il faut en bas).
+Un son au début de l'effet : `"sound"` (un son de `src/app/modules/game/shared/services/sfx.ts`, ex. `explosion`). Effets créés (« My effects » de PixelLab) : Boule de feu - vol (luciole : une boule ronde sans traînée, recette maison) / impact, Lance de glace - vol / impact, Orage, Soin,
+Venin, Coup double, Berceuse.
