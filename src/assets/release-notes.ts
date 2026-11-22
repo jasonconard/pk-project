@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.40',
+    date: '2026-11-22',
+    notes: [
+      'Combat : la jauge d\'action fonctionne comme dans Grandia. Les ennemis décident de leur action plus tôt, et brillent quand ils préparent un sort.',
+      'Une attaque forte annule l\'action d\'un ennemi qui se prépare ou qui s\'avance, et le renvoie en arrière sur la jauge.',
+      'Pour choisir une cible, la caméra s\'approche d\'elle et elle clignote. Sa fenêtre montre ses PV, ses états, sa prochaine action et ses faiblesses.',
+      'On peut aussi toucher un ennemi pour le viser.',
+    ],
+  },
+  {
     version: '0.0.39',
     date: '2026-11-22',
     notes: [
