@@ -149,16 +149,6 @@
     />
   }
 
-  <!-- The spells being gathered: their name and how far along, over the caster -->
-  @for (c of casts(); track c.id) {
-    <span class="cast" [style.left.px]="c.x" [style.top.px]="c.y">
-      <svg lucideSparkles></svg> {{ c.name }}
-      <span class="cast-track"
-        ><span [style.width.%]="c.progress * 100"></span
-      ></span>
-    </span>
-  }
-
   @for (p of v.popups; track p.id) {
     <span
       class="popup"

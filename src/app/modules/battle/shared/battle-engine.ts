@@ -22,7 +22,6 @@ import { trainedBy } from "./progress";
 import {
   BattleResult,
   BattleView,
-  Cast,
   Command,
   Fighter,
   GAUGE_COMMAND,
@@ -183,23 +182,6 @@ export class BattleEngine {
 
   item(id: string | undefined): DbItem | undefined {
     return this.db.items.find((i) => i.id === id);
-  }
-
-  /** The spells being gathered, with how far along (not once cast: its name shows big then). */
-  casts(): Omit<Cast, "x" | "y">[] {
-    return this.fighters
-      .filter(
-        (f) =>
-          f.hp > 0 &&
-          f.command?.kind === "skill" &&
-          f.gauge > GAUGE_COMMAND &&
-          !this.acting(f)
-      )
-      .map((f) => ({
-        id: f.id,
-        name: this.skill(f.command?.id)?.name ?? "",
-        progress: (f.gauge - GAUGE_COMMAND) / (1 - GAUGE_COMMAND),
-      }));
   }
 
   /** Is the fighter walking to its target (a heavy attack would stop it)? */
@@ -364,13 +346,13 @@ export class BattleEngine {
     return command?.kind === "skill" ? (this.skill(command.id)?.cast ?? 0) : 0;
   }
 
-  /** From the command mark: a skill with a cast time charges (its caster gathers it); anything else acts at once. */
+  /**
+   * From the command mark: a skill with a cast time charges, its caster in its « casting » animation while its token
+   * moves on to the action mark; anything else acts at once.
+   */
   private startCharge(f: Fighter): void {
-    const skill = f.command?.kind === "skill" ? this.skill(f.command.id) : null;
     if (this.chargeTime(f.command) > 0) {
-      if (skill && !isMelee(skill)) {
-        this.field.play(f.id, "cast", this.restDir(f));
-      }
+      this.field.play(f.id, "cast", this.restDir(f));
       return;
     }
     f.gauge = 1;

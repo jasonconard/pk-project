@@ -123,15 +123,6 @@ export interface TargetChoice {
   resists: { name: string; icon?: string; level: ResistLevel }[];
 }
 
-/** A spell being gathered (between the command and the action marks), shown over its caster. */
-export interface Cast {
-  id: string;
-  name: string;
-  progress: number;
-  x: number;
-  y: number;
-}
-
 /**
  * What the fight's interface shows (updated by the battle service). `phase`: the fight runs (the gauges fill and the
  * actions play, several at once), a team member chooses its command or its target (everything waits), the fight is
@@ -154,7 +145,6 @@ export interface BattleView {
   targets: TargetChoice[];
   aim: string | null;
   aimScreen: { x: number; y: number } | null;
-  casts: Cast[];
   popups: Popup[];
   /** A skill being shown off (the fight stops): its name, big under the gauge. */
   showcase: string | null;

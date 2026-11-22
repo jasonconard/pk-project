@@ -129,7 +129,6 @@ export class BattleHudComponent {
     return this.menu() === "skills" ? v.skills : v.items;
   });
   /** The spells being gathered whose caster is not the one choosing (its label would sit under the menu). */
-  protected readonly casts = computed(() => this.view()?.casts ?? []);
   /** The commands' place: beside the fighter (on its left, on its right when there is no room), on the screen. */
   protected readonly menuPos = computed(() => {
     const at = this.view()?.actorScreen;

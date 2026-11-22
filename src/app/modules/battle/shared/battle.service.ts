@@ -457,10 +457,6 @@ export class BattleService {
           : [],
       aim: engine.aim,
       aimScreen: aimed ? field.screenPos(aimed.pos, 34) : null,
-      casts: engine.casts().map((c) => {
-        const f = engine.fighters.find((x) => x.id === c.id);
-        return { ...c, ...field.screenPos(f?.pos ?? new THREE.Vector3(), 40) };
-      }),
       // (over their fighter, wherever the camera goes)
       popups: engine.popups.map(({ id, text, kind, color, fighter, line }) => {
         const at = field.screenPos(fighter.pos, 26);
