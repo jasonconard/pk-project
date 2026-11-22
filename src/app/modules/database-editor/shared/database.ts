@@ -235,6 +235,8 @@ export interface DbCharacter {
   equipment: Partial<Record<EquipSlot, string>>;
   /** Skills this character never learns, even with the levels (other characters' own skills). */
   excludedSkills?: string[];
+  /** Stunned after a hit (ms, 0 or missing: no): its gauge waits that long, at least its « hit taken » animation. */
+  stunMs?: number;
 }
 
 /** Pixel sizes of a character's pictures. */
@@ -288,6 +290,8 @@ export interface DbEnemy {
   stats: Record<StatId, number>;
   /** Element id → how it takes it (missing: normal). */
   resists: Record<string, ResistLevel>;
+  /** Stunned after a hit (ms, 0 or missing: no): its gauge waits that long, at least its « hit taken » animation. */
+  stunMs?: number;
   xp: number;
   money: number;
   drops: { item: string; chance: number }[];

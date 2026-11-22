@@ -36,6 +36,8 @@ export class SheetSprite {
   private glow = false;
   /** Blinking (aimed at): flashes bright, over the glow. */
   private blink = false;
+  /** Flashing red (a hit taken, while its gauge waits): over the blink and the glow. */
+  private hurtFlash = false;
   private effectTime = 0;
 
   constructor(private readonly sheet: SpriteSheet) {
@@ -138,7 +140,10 @@ export class SheetSprite {
     this.effectTime += dt;
     // (the weather multiplies this base colour by its tint each frame)
     const color = this.baseColor();
-    if (this.blink) {
+    if (this.hurtFlash) {
+      const on = Math.sin(this.effectTime * 30) > 0;
+      color.setRGB(on ? 2.6 : 1, on ? 0.45 : 1, on ? 0.45 : 1);
+    } else if (this.blink) {
       const on = Math.sin(this.effectTime * 16) > 0;
       color.setRGB(on ? 2.2 : 1, on ? 2.2 : 1, on ? 2.2 : 1);
     } else if (this.glow) {
@@ -157,6 +162,11 @@ export class SheetSprite {
   /** Blinking on / off (aimed at). */
   setBlink(on: boolean): void {
     this.blink = on;
+  }
+
+  /** Flashing red on / off (a hit taken). */
+  setHurtFlash(on: boolean): void {
+    this.hurtFlash = on;
   }
 
   private baseColor(): THREE.Color {

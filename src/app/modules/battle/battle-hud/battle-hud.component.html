@@ -33,6 +33,12 @@
     </div>
   </div>
 
+  @if (v.showcase; as name) {
+    <div class="showcase" role="status">
+      {{ name }}
+    </div>
+  }
+
   <div class="weather">
     @if (night()) {
       <svg lucideMoonStar></svg>

@@ -95,7 +95,10 @@ export class CharacterSheetComponent extends DbSheet {
   protected setCharacter(
     ch: DbCharacter,
     change: Partial<
-      Pick<DbCharacter, "team" | "xpCurve" | "model" | "startsInTeam">
+      Pick<
+        DbCharacter,
+        "team" | "xpCurve" | "model" | "startsInTeam" | "stunMs"
+      >
     >
   ): void {
     this.edit(ch.id, (c) => {
@@ -105,6 +108,9 @@ export class CharacterSheetComponent extends DbSheet {
       }
       if (!next.startsInTeam) {
         delete next.startsInTeam;
+      }
+      if (!next.stunMs) {
+        delete next.stunMs;
       }
       return next;
     });

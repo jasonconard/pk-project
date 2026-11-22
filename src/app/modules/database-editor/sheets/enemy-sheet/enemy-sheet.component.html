@@ -91,6 +91,25 @@
 </div>
 
 <div class="block">
+  <h3>Au combat</h3>
+  <label class="field"
+    ><small>Étourdi après un coup (ms)</small>
+    <db-stepper
+      [value]="en.stunMs ?? 0"
+      [min]="0"
+      [max]="2000"
+      [step]="100"
+      [label]="'Étourdi après un coup'"
+      (changed)="setEnemy(en, { stunMs: $event })"
+    />
+  </label>
+  <p class="note">
+    Touché, sa jauge reste arrêtée au moins ce temps (0 : seulement le temps de
+    l'animation « coup reçu »). Pas de nouvel étourdissement juste après.
+  </p>
+</div>
+
+<div class="block">
   <h3>Face aux éléments</h3>
   <div class="stats">
     @for (e of db().elements; track e.id) {

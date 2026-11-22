@@ -13,6 +13,8 @@ const FIGHT_ZOOM = 0.85;
 const FOCUS_ZOOM = 0.62;
 const FOCUS_SHIFT = 0.7;
 const CAMERA_EASE = 6;
+/** A skill shown off: the camera right on the caster (then the targets), closer still. */
+const SHOW_ZOOM = 0.5;
 
 /** An arrow in flight: a thin shaft (world units), flying at about a fighter's chest height. */
 const ARROW_GEOMETRY = new THREE.BoxGeometry(0.6, 0.6, 9);
@@ -42,6 +44,8 @@ export class BattleField {
   /** The camera's usual place in the fight, the fighter it looks at (aimed at), the one blinking. */
   private readonly cameraHome: THREE.Vector3;
   private focus: THREE.Vector3 | null = null;
+  /** A skill shown off: where the camera looks (over the aim). */
+  private showLook: THREE.Vector3 | null = null;
   /** Arrows flying (ranged attacks), with their way and time. */
   private arrows: {
     mesh: THREE.Mesh;
@@ -119,12 +123,24 @@ export class BattleField {
     this.focus = fighter ? fighter.pos.clone() : null;
   }
 
+  /** A skill shown off: the camera on this point (the caster, then its targets); null: back to the field. */
+  setShowcase(look: THREE.Vector3 | null): void {
+    this.showLook = look;
+  }
+
   /** The real clock (also while the fight waits): the camera easing to its place, the glows and blinks. */
   tick(dt: number): void {
     this.sprites.forEach((s) => s.effects(dt));
     const camera = this.game.camera;
     let dest = this.cameraHome;
-    if (this.focus) {
+    if (this.showLook) {
+      const middle = this.cameraHome
+        .clone()
+        .sub(CAMERA_LOOK.clone().multiplyScalar(FIGHT_ZOOM));
+      dest = middle
+        .add(this.showLook.clone().sub(middle).setY(0))
+        .add(CAMERA_LOOK.clone().multiplyScalar(SHOW_ZOOM));
+    } else if (this.focus) {
       // Closer, between the field's middle and the aimed one
       const look = this.cameraHome
         .clone()
@@ -163,6 +179,11 @@ export class BattleField {
     this.sprites.get(id)?.setGlow(on);
   }
 
+  /** A fighter flashing red (a hit taken) or not. */
+  hurtFlash(id: string, on: boolean): void {
+    this.sprites.get(id)?.setHurtFlash(on);
+  }
+
   fade(id: string, opacity: number): void {
     this.sprites.get(id)?.setOpacity(opacity);
   }
@@ -191,10 +212,12 @@ export class BattleField {
     this.arrows.push({ mesh, from: a, to: b, time: 0, duration });
   }
 
-  update(dt: number): void {
-    this.sprites.forEach((s) => s.update(dt));
+  /** The animations go on; `only`: just this fighter's (a skill shown off, the others stand still). */
+  update(dt: number, only?: string): void {
+    this.sprites.forEach((s, id) => s.update(only && id !== only ? 0 : dt));
     for (const arrow of this.arrows) {
-      arrow.time += dt;
+      // (stopped too while a skill is shown off)
+      arrow.time += only ? 0 : dt;
       const k = Math.min(1, arrow.time / arrow.duration);
       arrow.mesh.position.lerpVectors(arrow.from, arrow.to, k);
       // A slight arc

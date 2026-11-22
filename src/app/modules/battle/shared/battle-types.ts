@@ -58,6 +58,8 @@ export interface Fighter {
   weaponType?: string;
   /** Its weapon hits from afar (a bow): its attacks are shot from where it stands. */
   ranged?: boolean;
+  /** Stunned after a hit (s, 0: no): its gauge waits at least that long (its sheet's « Étourdi après un coup »). */
+  stun: number;
   states: ActiveState[];
   boosts: Boost[];
   /** The team: the skills it knows; an enemy: what it may do. */
@@ -154,6 +156,8 @@ export interface BattleView {
   aimScreen: { x: number; y: number } | null;
   casts: Cast[];
   popups: Popup[];
+  /** A skill being shown off (the fight stops): its name, big under the gauge. */
+  showcase: string | null;
   /** Fighters just interrupted or pushed back on the gauge (their token flashes). */
   knocked: string[];
   /** The end of the fight (victory, defeat): what the team won (phase « result »). */

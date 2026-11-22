@@ -45,12 +45,17 @@ export class EnemySheetComponent extends DbSheet {
 
   protected setEnemy(
     enemy: DbEnemy,
-    change: Partial<Pick<DbEnemy, "level" | "xp" | "money" | "model">>
+    change: Partial<
+      Pick<DbEnemy, "level" | "xp" | "money" | "model" | "stunMs">
+    >
   ): void {
     this.edit(enemy.id, (e) => {
       const next = { ...e, ...change } as DbEnemy;
       if (!next.model) {
         delete next.model;
+      }
+      if (!next.stunMs) {
+        delete next.stunMs;
       }
       return next;
     });

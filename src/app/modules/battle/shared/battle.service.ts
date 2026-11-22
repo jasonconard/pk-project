@@ -80,6 +80,7 @@ function teamFighter(
     attackElement: weapon?.attackElement ?? physicalId(db),
     weaponType: weapon?.weapon,
     ranged: !!db.weapons.find((w) => w.id === weapon?.weapon)?.ranged,
+    stun: (c.stunMs ?? 0) / 1000,
     states: p.states
       .map((id) => db.states.find((s) => s.id === id))
       .filter((s) => !!s)
@@ -115,6 +116,7 @@ function foeFighter(
     stats: { ...e.stats },
     resists: { ...e.resists },
     attackElement: physicalId(db),
+    stun: (e.stunMs ?? 0) / 1000,
     skills: [],
     actions: e.actions,
     stronger: e.weathers.some(
@@ -275,7 +277,8 @@ export class BattleService {
     // A team member choosing: the whole fight waits (the gauges, and the actions going on with their animations)
     const choosing =
       this.engine.phase === "command" || this.engine.phase === "target";
-    this.field?.update(choosing ? 0 : dt);
+    // A skill shown off: only its caster moves
+    this.field?.update(choosing ? 0 : dt, this.engine.shown()?.actor);
     this.field?.tick(dt);
     this.refresh();
   }
@@ -406,6 +409,8 @@ export class BattleService {
     const actor = engine.actor;
     const aimed = engine.fighters.find((f) => f.id === engine.aim);
     field.setAim(engine.phase === "target" ? (aimed ?? null) : null);
+    const shown = engine.shown();
+    field.setShowcase(shown?.look ?? null);
     const choosing = engine.phase === "command" || engine.phase === "target";
     const pending = engine.pending;
     const pendingLabel = (() => {
@@ -456,7 +461,12 @@ export class BattleService {
         const f = engine.fighters.find((x) => x.id === c.id);
         return { ...c, ...field.screenPos(f?.pos ?? new THREE.Vector3(), 40) };
       }),
-      popups: engine.popups,
+      // (over their fighter, wherever the camera goes)
+      popups: engine.popups.map(({ id, text, kind, color, fighter, line }) => {
+        const at = field.screenPos(fighter.pos, 26);
+        return { id, text, kind, color, x: at.x, y: at.y - line * 18 };
+      }),
+      showcase: shown?.name ?? null,
       knocked: [...engine.knocked.keys()],
       outcome: this.outcome,
       stateLooks: Object.fromEntries(

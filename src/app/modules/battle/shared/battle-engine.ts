@@ -52,6 +52,15 @@ const FADE_TIME = 0.6;
 const END_DELAY = 1.8;
 /** An arrow's speed (world units per second; a ranged attack lands when it arrives). */
 const ARROW_SPEED = 180;
+/**
+ * A skill's showcase (Grandia): the whole fight stops while the caster plays it. Its name shows and the camera closes
+ * on the caster for SHOWCASE_INTRO (s), then the skill plays; once its effects land the camera turns to the targets,
+ * and stays SHOWCASE_HOLD (s) after the blow before the fight goes on (the targets then take their hits).
+ */
+const SHOWCASE_INTRO = 0.9;
+const SHOWCASE_HOLD = 0.9;
+/** After a stun, this long (s) when a new hit is only its « hit taken » animation (no stun locks a fighter for good). */
+const STUN_GUARD = 1.5;
 /** An enemy's plain attack is a heavy one this often. */
 const ENEMY_HEAVY_CHANCE = 0.2;
 
@@ -68,7 +77,8 @@ interface Action {
   /** Who it walks to (melee), or faces. */
   focus: Fighter;
   melee: boolean;
-  step: "go" | "strike" | "move";
+  /** wait: a skill's showcase opening (it starts after). */
+  step: "wait" | "go" | "strike" | "move";
   /** Where it goes after acting (its new place). */
   dest?: THREE.Vector3;
   /** A ranged attack's arrow in flight: the time left before it lands. */
@@ -78,6 +88,19 @@ interface Action {
 /** The most hurt first. */
 function byHurt(list: Fighter[]): Fighter[] {
   return [...list].sort((a, b) => a.hp / a.hpMax - b.hp / b.hpMax);
+}
+
+/** A skill being shown off: the fight stops while its caster plays it. */
+interface Showcase {
+  actor: Fighter;
+  name: string;
+  stage: "intro" | "act" | "hold";
+  time: number;
+  /** Its effects landed: the camera on the targets. */
+  landed: boolean;
+  targets: Fighter[];
+  /** The hits taken, played once the fight goes on (target, from whom). */
+  hurts: { target: Fighter; from: Fighter }[];
 }
 
 function pickOne(list: Fighter[]): Fighter | undefined {
@@ -91,8 +114,10 @@ function pickOne(list: Fighter[]): Fighter | undefined {
  * it), anything else goes straight to the end. At the end the fighter acts while the others' gauges go on (several
  * actions can play at once): a melee blow walks to the target, a spell or an item is used from where it stands; the
  * effects land on the animation's hit frame; then the fighter moves to a free spot nearby. A heavy attack on a
- * fighter charging or walking to its target cancels its action (back to 2/5). The fight ends when one side has
- * fallen.
+ * fighter charging or walking to its target cancels its action (back to 2/5). A fighter taking a hit plays its « hit
+ * taken » animation, flashing red, and its gauge waits until the end of it. A skill
+ * is shown off: everything else stops while it plays (its name big, the camera on the caster then on the targets),
+ * its targets take their hits after. The fight ends when one side has fallen.
  */
 export class BattleEngine {
   phase: BattleView["phase"] = "run";
@@ -101,15 +126,26 @@ export class BattleEngine {
   pending: Command | null = null;
   targetSide: Fighter["side"] = "foe";
   aim: string | null = null;
-  popups: (Popup & { age: number })[] = [];
+  /** The numbers and words over the fighters (placed on the screen by the service, following their fighter). */
+  popups: (Omit<Popup, "x" | "y"> & {
+    age: number;
+    fighter: Fighter;
+    line: number;
+  })[] = [];
   /** The actions being played (several at once: the gauges don't wait for them). */
   private actions: Action[] = [];
+  /** A skill being shown off (the rest of the fight stops), or null. */
+  private showcase: Showcase | null = null;
   private result: BattleResult | null = null;
   private endTimer = 0;
   private endWait = 0;
   private popupId = 0;
-  /** Hurt fighters going back to idle, defeated enemies fading out (time since). */
-  private readonly hurt = new Set<Fighter>();
+  /**
+   * Fighters taking a hit (gauge waiting, flashing red) with the time since and how long it lasts at least (their
+   * stun); the stunned ones' guard (time left); defeated enemies fading out (time since).
+   */
+  private readonly hurt = new Map<Fighter, { time: number; stun: number }>();
+  private readonly stunGuard = new Map<Fighter, number>();
   private readonly fading = new Map<Fighter, number>();
   /** What each team member used (element / weapon type id → uses): their levels grow after a victory. */
   readonly uses = new Map<string, Record<string, number>>();
@@ -149,12 +185,15 @@ export class BattleEngine {
     return this.db.items.find((i) => i.id === id);
   }
 
-  /** The spells being gathered, with how far along. */
+  /** The spells being gathered, with how far along (not once cast: its name shows big then). */
   casts(): Omit<Cast, "x" | "y">[] {
     return this.fighters
       .filter(
         (f) =>
-          f.hp > 0 && f.command?.kind === "skill" && f.gauge > GAUGE_COMMAND
+          f.hp > 0 &&
+          f.command?.kind === "skill" &&
+          f.gauge > GAUGE_COMMAND &&
+          !this.acting(f)
       )
       .map((f) => ({
         id: f.id,
@@ -173,12 +212,34 @@ export class BattleEngine {
     return this.actions.some((a) => a.actor === f);
   }
 
+  /**
+   * The skill being shown off: its name, its caster (the only one moving), where the camera looks (the caster, then
+   * the middle of the targets once the effects land). Null: no showcase.
+   */
+  shown(): { name: string; actor: string; look: THREE.Vector3 } | null {
+    const s = this.showcase;
+    if (!s) {
+      return null;
+    }
+    const targets = s.targets.length > 0 ? s.targets : [s.actor];
+    const look = s.landed
+      ? targets
+          .reduce((sum, f) => sum.add(f.pos), new THREE.Vector3())
+          .divideScalar(targets.length)
+      : s.actor.pos.clone();
+    return { name: s.name, actor: s.actor.id, look };
+  }
+
   update(dt: number): void {
     this.updateLooks(dt);
     switch (this.phase) {
       case "run": {
-        this.runGauges(dt);
-        this.stepActions(dt);
+        if (this.showcase) {
+          this.stepShowcase(dt);
+        } else {
+          this.runGauges(dt);
+          this.stepActions(dt);
+        }
         break;
       }
       case "over": {
@@ -327,7 +388,8 @@ export class BattleEngine {
 
   private runGauges(dt: number): void {
     for (const f of this.fighters) {
-      if (f.hp <= 0 || this.acting(f)) {
+      // (a fighter taking a hit: its gauge waits for the end of the blow)
+      if (f.hp <= 0 || this.acting(f) || this.hurt.has(f)) {
         continue;
       }
       if (f.gauge < GAUGE_COMMAND) {
@@ -353,6 +415,9 @@ export class BattleEngine {
         f.gauge = Math.min(1, f.gauge + (dt * (1 - GAUGE_COMMAND)) / cast);
         if (f.gauge >= 1) {
           this.act(f);
+          if (this.showcase) {
+            return;
+          }
         }
       }
     }
@@ -476,8 +541,8 @@ export class BattleEngine {
       this.recordUse(f, command, skill);
     }
     if (skill) {
+      // (its name shows big, in the showcase)
       f.mp -= skill.mp;
-      this.popup(f, skill.name, "info", 1.6);
     }
     if (item) {
       giveItem(item.id, -1);
@@ -486,16 +551,39 @@ export class BattleEngine {
     const attack = command.kind === "attack" || command.kind === "heavy";
     const melee = (attack && !f.ranged) || (!!skill && isMelee(skill));
     const focus = targets[0];
-    this.actions = [
-      ...this.actions,
-      { actor: f, focus, melee, step: melee ? "go" : "strike" },
-    ];
+    const action: Action = { actor: f, focus, melee, step: "wait" };
+    this.actions = [...this.actions, action];
+    if (skill) {
+      // A skill: the whole fight stops while it plays
+      this.showcase = {
+        actor: f,
+        name: skill.name,
+        stage: "intro",
+        time: 0,
+        landed: false,
+        targets,
+        hurts: [],
+      };
+      // (a spell: still gathering it; a blow: ready)
+      this.field.play(f.id, melee ? "idle" : "cast", facing(f.pos, focus.pos));
+      return;
+    }
+    this.startAction(action);
+  }
+
+  /** The action starts: walking to the target (melee), else its animation where it stands. */
+  private startAction(action: Action): void {
+    const f = action.actor;
+    const focus = action.focus;
+    const command = f.command;
+    const melee = action.melee;
+    action.step = melee ? "go" : "strike";
     if (melee) {
       this.field.play(f.id, "walk", facing(f.pos, focus.pos));
     } else {
       // A shot from afar (a bow): its attack animation where it stands; an item, a spell: theirs
-      let anim = item ? "attack" : "magic";
-      if (attack) {
+      let anim = command?.kind === "item" ? "attack" : "magic";
+      if (command?.kind === "attack" || command?.kind === "heavy") {
         anim = command.kind;
       }
       this.field.play(f.id, anim, facing(f.pos, focus.pos), true);
@@ -563,7 +651,7 @@ export class BattleEngine {
    */
   private stepAction(a: Action, dt: number): void {
     const { actor } = a;
-    if (this.hurt.has(actor) && a.step !== "strike") {
+    if (a.step === "wait" || (this.hurt.has(actor) && a.step !== "strike")) {
       return;
     }
     if (a.step === "go") {
@@ -690,6 +778,9 @@ export class BattleEngine {
     const command = actor.command;
     if (!command) {
       return;
+    }
+    if (this.showcase?.actor === actor) {
+      this.showcase.landed = true;
     }
     for (const target of this.targetsOf(actor, command)) {
       if (command.kind === "attack" || command.kind === "heavy") {
@@ -833,12 +924,11 @@ export class BattleEngine {
     );
     if (target.hp > 0) {
       // (a fighter in the middle of its own blow finishes it)
-      const striking = this.actions.some(
-        (a) => a.actor === target && a.step === "strike"
-      );
-      if (!striking) {
-        this.field.play(target.id, "hurt", facing(target.pos, actor.pos), true);
-        this.hurt.add(target);
+      if (this.showcase?.actor === actor) {
+        // (shown off: the hit is taken once the fight goes on)
+        this.showcase.hurts.push({ target, from: actor });
+      } else if (!this.striking(target)) {
+        this.takeHit(target, actor);
       }
       if (interrupts && !target.defending) {
         this.interrupt(target, line + 1);
@@ -908,7 +998,7 @@ export class BattleEngine {
       this.actions = this.actions.filter((a) => a.actor !== f);
       this.field.glow(f.id, false);
       this.field.play(f.id, "death", undefined, true);
-      this.hurt.delete(f);
+      this.setHurt(f, false);
       if (f.side === "foe") {
         this.fading.set(f, 0);
       }
@@ -938,11 +1028,93 @@ export class BattleEngine {
 
   /** The fight ends, `wait` seconds later (the event goes on with the result). */
   private over(result: BattleResult, wait: number): void {
+    this.endShowcase();
     this.phase = "over";
     this.actor = null;
     this.result = result;
     this.endTimer = 0;
     this.endWait = wait;
+  }
+
+  /** The skill's showcase going on: the opening (name, camera on the caster), the skill played, a pause after. */
+  private stepShowcase(dt: number): void {
+    const s = this.showcase;
+    if (!s) {
+      return;
+    }
+    s.time += dt;
+    const a = this.actions.find((x) => x.actor === s.actor);
+    if (s.stage === "intro") {
+      if (!a) {
+        this.endShowcase();
+      } else if (s.time >= SHOWCASE_INTRO) {
+        s.stage = "act";
+        this.startAction(a);
+      }
+      return;
+    }
+    if (s.stage === "act") {
+      if (a) {
+        this.stepAction(a, dt);
+      }
+      // The blow played (it walks off to its new place), or it fell: a pause on the targets
+      if (!a || a.step === "move") {
+        s.stage = "hold";
+        s.time = 0;
+        s.landed = true;
+      }
+      return;
+    }
+    if (s.time >= SHOWCASE_HOLD) {
+      this.endShowcase();
+    }
+  }
+
+  /** The showcase is over: the fight goes on, the targets take their hits. */
+  private endShowcase(): void {
+    const s = this.showcase;
+    if (!s) {
+      return;
+    }
+    this.showcase = null;
+    // The caster back at the start of the gauge (it fills again once it reaches its new place)
+    s.actor.gauge = 0;
+    for (const { target, from } of s.hurts) {
+      if (target.hp > 0) {
+        this.takeHit(target, from);
+      }
+    }
+  }
+
+  /** A hit taken: its « hit taken » animation, flashing red, its gauge waiting (longer when it is stunned). */
+  private takeHit(target: Fighter, from: Fighter): void {
+    this.field.play(target.id, "hurt", facing(target.pos, from.pos), true);
+    const stun = this.stunGuard.has(target) ? 0 : target.stun;
+    if (stun > 0 && !this.hurt.has(target)) {
+      this.popup(target, "Étourdi", "state", 2);
+    }
+    this.setHurt(target, true, stun);
+  }
+
+  /** Taking a hit (its gauge waits at least `stun` s, it flashes red) or done with it. */
+  private setHurt(f: Fighter, on: boolean, stun = 0): void {
+    if (on) {
+      // (hit again while stunned: the longer stays)
+      const before = this.hurt.get(f)?.stun ?? 0;
+      this.hurt.set(f, { time: 0, stun: Math.max(stun, before) });
+    } else {
+      const was = this.hurt.get(f);
+      this.hurt.delete(f);
+      if (was && was.stun > 0 && f.hp > 0) {
+        this.stunGuard.set(f, STUN_GUARD);
+      }
+    }
+    this.field.hurtFlash(f.id, on);
+  }
+
+  /** Is the fighter in the middle of its own blow (its animation, its arrow flying)? */
+  private striking(by: Fighter): boolean {
+    return this.actions.some((a) => a.actor === by && a.step === "strike");
   }
 
   /** The hit taken: back to walking (on its way), to its spell, or to idle. */
@@ -973,10 +1145,21 @@ export class BattleEngine {
 
   /** Hurt fighters back to idle (or to their spell) once the hit is taken; the defeated fading out; the numbers. */
   private updateLooks(dt: number): void {
-    for (const f of this.hurt) {
-      if (this.field.finished(f.id)) {
-        this.hurt.delete(f);
-        this.afterHurt(f);
+    // (frozen while a skill is shown off)
+    if (!this.showcase) {
+      for (const [f, h] of this.hurt) {
+        h.time += dt;
+        if (this.field.finished(f.id) && h.time >= h.stun) {
+          this.setHurt(f, false);
+          this.afterHurt(f);
+        }
+      }
+      for (const [f, left] of this.stunGuard) {
+        if (left <= dt) {
+          this.stunGuard.delete(f);
+        } else {
+          this.stunGuard.set(f, left - dt);
+        }
       }
     }
     for (const [f, t] of this.fading) {
@@ -1011,7 +1194,6 @@ export class BattleEngine {
     line = 0,
     color?: string
   ): void {
-    const at = this.field.screenPos(f.pos, 26);
     this.popups = [
       ...this.popups,
       {
@@ -1019,8 +1201,8 @@ export class BattleEngine {
         text,
         kind,
         color,
-        x: at.x,
-        y: at.y - line * 18,
+        fighter: f,
+        line,
         age: 0,
       },
     ];
