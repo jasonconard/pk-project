@@ -101,6 +101,11 @@ export class BattleField {
     return this.sprites.get(id)?.consumeHit() ?? true;
   }
 
+  /** A fighter glowing (an enemy preparing a spell) or not. */
+  glow(id: string, on: boolean): void {
+    this.sprites.get(id)?.setGlow(on);
+  }
+
   fade(id: string, opacity: number): void {
     this.sprites.get(id)?.setOpacity(opacity);
   }

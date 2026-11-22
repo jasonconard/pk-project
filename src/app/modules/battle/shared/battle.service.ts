@@ -432,7 +432,18 @@ export class BattleService {
               icon: f.icon,
               hp: f.hp,
               hpMax: f.hpMax,
-              busy: !!f.command && f.gauge > GAUGE_COMMAND,
+              level: f.level,
+              states: f.states.map((s) => s.id),
+              plan: this.planOf(f, engine),
+              busy:
+                !!f.command && (f.gauge > GAUGE_COMMAND || engine.walkingTo(f)),
+              resists:
+                f.side === "foe"
+                  ? Object.entries(f.resists).map(([id, level]) => {
+                      const el = db.elements.find((e) => e.id === id);
+                      return { name: el?.name ?? id, icon: el?.icon, level };
+                    })
+                  : [],
             }))
           : [],
       aim: engine.aim,
@@ -448,6 +459,26 @@ export class BattleService {
         db.states.map((s) => [s.id, { name: s.name, color: s.color }])
       ),
     });
+  }
+
+  /** A fighter's next action, when decided: « Venin », « Attaque forte »… */
+  private planOf(f: Fighter, engine: BattleEngine): string | null {
+    const c = f.command;
+    if (!c) {
+      return null;
+    }
+    switch (c.kind) {
+      case "skill":
+        return engine.skill(c.id)?.name ?? null;
+      case "item":
+        return engine.item(c.id)?.name ?? null;
+      case "heavy":
+        return "Attaque forte";
+      case "defend":
+        return "Défense";
+      default:
+        return "Attaque";
+    }
   }
 
   private skillChoices(actor: Fighter, db: GameDatabase): ActionChoice[] {

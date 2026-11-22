@@ -52,17 +52,33 @@
       background: #ffffff59;
     }
 
-    &.command {
-      background: var(--pick);
+    &.charge {
+      border-radius: 0 2px 2px 0;
+      background: linear-gradient(90deg, var(--pick), var(--foe));
+    }
+  }
+
+  /* The fixed points: 2/5 (the enemies decide), 4/5 (COM) */
+  .mark {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 10px;
+    translate: -50% 0;
+    border-radius: 1px;
+
+    &.decide {
+      background: #ffffff8c;
     }
 
-    &.action {
-      border-radius: 0 2px 2px 0;
-      background: var(--foe);
+    &.command {
+      width: 3px;
+      background: #9fc8ff;
     }
   }
 
   .label {
+    translate: -50% 0;
     position: absolute;
     top: 7px;
     font-size: 9px;
@@ -96,6 +112,12 @@
 
   &.foe {
     border-color: var(--foe);
+  }
+
+  /* An enemy that decided a skill (2/5) */
+  &.spell {
+    border-color: #a463e0;
+    box-shadow: 0 0 6px #a463e0aa;
   }
 
   &.turn {

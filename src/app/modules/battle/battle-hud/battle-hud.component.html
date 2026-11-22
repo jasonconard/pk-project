@@ -3,22 +3,21 @@
     <div class="track">
       <span class="zone wait" [style.width.%]="commandAt"></span>
       <span
-        class="zone command"
+        class="zone charge"
         [style.left.%]="commandAt"
-        [style.width.%]="actionAt - commandAt"
+        [style.width.%]="100 - commandAt"
       ></span>
-      <span
-        class="zone action"
-        [style.left.%]="actionAt"
-        [style.width.%]="100 - actionAt"
-      ></span>
-      <small class="label command" [style.left.%]="commandAt + 6">COM</small>
-      <small class="label action" [style.left.%]="actionAt + 1">ACT</small>
+      <!-- 2/5: the enemies decide; 4/5: COM (the team chooses); the end: ACT -->
+      <span class="mark decide" [style.left.%]="decideAt"></span>
+      <span class="mark command" [style.left.%]="commandAt"></span>
+      <small class="label command" [style.left.%]="commandAt">COM</small>
+      <small class="label action" [style.left.%]="100">ACT</small>
       @for (f of v.fighters; track f.id) {
         @if (f.hp > 0) {
           <span
             class="token"
             [class.foe]="f.side === 'foe'"
+            [class.spell]="f.side === 'foe' && f.command?.kind === 'skill'"
             [class.turn]="f.id === v.actor"
             [class.knocked]="v.knocked.includes(f.id)"
             [style.left.%]="f.gauge * 100"
@@ -161,9 +160,12 @@
     }
   }
 
-  <!-- The aimed enemy: a marker over it -->
+  <!-- The aimed one: a marker over it, its details in a window -->
   @if (v.phase === "target" && v.aimScreen; as at) {
     <span class="aim" [style.left.px]="at.x" [style.top.px]="at.y"></span>
+  }
+  @if (v.phase === "target" && aimed(); as t) {
+    <battle-target-info [target]="t" [looks]="v.stateLooks" />
   }
 
   <!-- The spells being gathered: their name and how far along, over the caster -->

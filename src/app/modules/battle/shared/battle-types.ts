@@ -63,9 +63,12 @@ export interface Fighter {
   actions: EnemyAction[];
   /** An enemy stronger in the weather of the fight. */
   stronger: boolean;
-  /** Place on the action gauge: 0 (just acted) … GAUGE_COMMAND (its turn) … 1 (it acts). */
+  /**
+   * Place on the action gauge: 0 (just acted) … GAUGE_DECIDE (an enemy decides) … GAUGE_COMMAND (the team chooses;
+   * then a skill charges) … 1 (it acts).
+   */
   gauge: number;
-  /** Chosen at GAUGE_COMMAND, done at 1. */
+  /** Decided (an enemy, at GAUGE_DECIDE) or chosen (the team, at GAUGE_COMMAND), done at 1. */
   command: Command | null;
   /** Takes half the damage until its next turn. */
   defending: boolean;
@@ -103,8 +106,15 @@ export interface TargetChoice {
   icon?: string;
   hp: number;
   hpMax: number;
-  /** Between its command and its action: a heavy attack would interrupt it. */
+  level: number;
+  /** Its states (ids). */
+  states: string[];
+  /** Its next action when decided (an enemy past 2/5, a team member who chose): « Venin », « Attaque ». */
+  plan: string | null;
+  /** Charging its skill or walking to its target: a heavy attack would interrupt it. */
   busy: boolean;
+  /** An enemy: how it takes the elements it doesn't take normally. */
+  resists: { name: string; icon?: string; level: ResistLevel }[];
 }
 
 /** A spell being gathered (between the command and the action marks), shown over its caster. */
@@ -148,9 +158,13 @@ export interface BattleView {
   stateLooks: Record<string, { name: string; color: string }>;
 }
 
-/** Where the action gauge's zones start: waiting, then the command (the turn comes), then the action. */
-export const GAUGE_COMMAND = 0.7;
-export const GAUGE_ACTION = 0.86;
+/**
+ * The action gauge, Grandia style: at 2/5 an enemy decides its next action (a spell: it glows); at 4/5 (COM) a team
+ * member chooses its command; from there to the end a skill charges (the others go straight to the end); at the end
+ * the fighter acts.
+ */
+export const GAUGE_DECIDE = 0.4;
+export const GAUGE_COMMAND = 0.8;
 
 /** What a team member got from a victory. */
 export interface MemberOutcome {

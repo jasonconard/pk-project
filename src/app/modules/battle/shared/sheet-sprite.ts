@@ -32,6 +32,9 @@ export class SheetSprite {
   private dir: SheetDirection = "se";
   private time = 0;
   private hitFired = false;
+  /** Glowing (an enemy preparing a spell): its colour pulses brighter. */
+  private glow = false;
+  private glowTime = 0;
 
   constructor(private readonly sheet: SpriteSheet) {
     const { w, h } = sheet.frame;
@@ -125,6 +128,25 @@ export class SheetSprite {
   update(dt: number): void {
     this.time += dt * 1000;
     this.applyFrame();
+    if (this.glow) {
+      this.glowTime += dt;
+      const k = 0.5 + 0.5 * Math.sin(this.glowTime * 6);
+      // (the weather multiplies this base colour by its tint each frame)
+      this.baseColor().setRGB(1 + 0.45 * k, 1 + 0.3 * k, 1 + 0.75 * k);
+    }
+  }
+
+  /** Glowing on / off (an enemy preparing a spell). */
+  setGlow(on: boolean): void {
+    this.glow = on;
+    this.glowTime = 0;
+    if (!on) {
+      this.baseColor().setRGB(1, 1, 1);
+    }
+  }
+
+  private baseColor(): THREE.Color {
+    return this.material.userData["unlitBaseColor"] as THREE.Color;
   }
 
   dispose(): void {

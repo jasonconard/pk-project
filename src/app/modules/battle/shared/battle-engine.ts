@@ -24,24 +24,16 @@ import {
   BattleView,
   Cast,
   Command,
-  CommandKind,
   Fighter,
   GAUGE_COMMAND,
+  GAUGE_DECIDE,
   Popup,
 } from "./battle-types";
 
 /** Gauge speed while waiting (per second): the slowest fighter, plus up to this for the quickest. */
 const WAIT_SPEED = 0.1;
 const WAIT_SPEED_SPREAD = 0.12;
-/** Gauge speed from the command to the action (per second); a skill: its cast time (s) over that stretch. */
-const COMMAND_SPEED: Record<CommandKind, number> = {
-  attack: 0.6,
-  heavy: 0.22,
-  skill: 1,
-  item: 1,
-  defend: 3,
-  flee: 1,
-};
+/** A skill charges from the command mark to the end in its cast time (s, at least this). */
 const MIN_CAST = 0.25;
 /** Walking speed (world units per second) and the distance kept from the target when striking. */
 const WALK_SPEED = 70;
@@ -49,11 +41,11 @@ const REACH = 15;
 /** A number shown over a fighter (s), a defeated enemy fading out (s), the pause before the fight ends (s). */
 const POPUP_TIME = 1;
 /**
- * Interrupting (Grandia's critical hits): a heavy attack landing between the command and the action marks cancels
- * the target's action and throws it back this far on the gauge; landing earlier, it only pushes it back a little.
- * A defending fighter is not interrupted. The token flashes for KNOCK_TIME (s).
+ * Interrupting (Grandia's critical hits): a heavy attack landing on a fighter charging its skill (between the command
+ * mark and the end) or walking to its target cancels its action and sends it back to the decision mark (2/5);
+ * landing earlier on the gauge, it pushes it back a little. A defending fighter is not interrupted. The token
+ * flashes for KNOCK_TIME (s).
  */
-const CANCEL_BACK = 0.45;
 const DELAY_BACK = 0.12;
 const KNOCK_TIME = 0.6;
 const FADE_TIME = 0.6;
@@ -89,13 +81,14 @@ function pickOne(list: Fighter[]): Fighter | undefined {
 }
 
 /**
- * The fight's rules and timing, Grandia style. Each fighter's gauge fills with its agility; at the command mark its
- * states act (poison, sleep…), then a team member chooses what to do (time stops) or an enemy decides from its
- * behaviour; the command fills up to the action mark (a heavy attack, a long spell more slowly: the caster gathers
- * it) and the fighter acts while the others' gauges go on (several actions can play at once): a melee blow walks
- * to the target, a spell or an item is used from where it stands; the effects land on the animation's hit frame;
- * then the fighter moves to a free spot nearby. A fighter hit on its way stops for its « hit taken » animation. The
- * fight ends when one side has fallen.
+ * The fight's rules and timing, Grandia style. Each fighter's gauge fills with its agility. At 2/5 an enemy decides
+ * its next action from its behaviour (a spell: it glows). At 4/5 (COM) its states act (poison, sleep…), then a team
+ * member chooses what to do (time stops); a skill then charges up to the end in its cast time (the caster gathers
+ * it), anything else goes straight to the end. At the end the fighter acts while the others' gauges go on (several
+ * actions can play at once): a melee blow walks to the target, a spell or an item is used from where it stands; the
+ * effects land on the animation's hit frame; then the fighter moves to a free spot nearby. A heavy attack on a
+ * fighter charging or walking to its target cancels its action (back to 2/5). The fight ends when one side has
+ * fallen.
  */
 export class BattleEngine {
   phase: BattleView["phase"] = "run";
@@ -134,6 +127,10 @@ export class BattleEngine {
     this.middle = fighters
       .reduce((sum, f) => sum.add(f.home), new THREE.Vector3())
       .divideScalar(Math.max(1, fighters.length));
+    // The enemies already past the decision mark decide now
+    fighters
+      .filter((f) => f.side === "foe" && f.gauge >= GAUGE_DECIDE)
+      .forEach((f) => this.decide(f));
   }
 
   alive(side: Fighter["side"]): Fighter[] {
@@ -160,6 +157,11 @@ export class BattleEngine {
         name: this.skill(f.command?.id)?.name ?? "",
         progress: (f.gauge - GAUGE_COMMAND) / (1 - GAUGE_COMMAND),
       }));
+  }
+
+  /** Is the fighter walking to its target (a heavy attack would stop it)? */
+  walkingTo(f: Fighter): boolean {
+    return this.actions.some((a) => a.actor === f && a.step === "go");
   }
 
   /** Is the fighter playing an action now? */
@@ -285,19 +287,36 @@ export class BattleEngine {
       return;
     }
     actor.command = command;
-    this.gather(actor);
     this.phase = "run";
     this.actor = null;
     this.pending = null;
     this.aim = null;
+    this.startCharge(actor);
   }
 
-  /** A spell with a cast time: the caster gathers it (incantation) until it acts. */
-  private gather(f: Fighter): void {
+  /** The skill of a command (none: an attack, an item, defending). */
+  private chargeTime(command: Command | null): number {
+    return command?.kind === "skill" ? (this.skill(command.id)?.cast ?? 0) : 0;
+  }
+
+  /** From the command mark: a skill with a cast time charges (its caster gathers it); anything else acts at once. */
+  private startCharge(f: Fighter): void {
     const skill = f.command?.kind === "skill" ? this.skill(f.command.id) : null;
-    if (skill && skill.cast > 0 && !isMelee(skill)) {
-      this.field.play(f.id, "cast", this.restDir(f));
+    if (this.chargeTime(f.command) > 0) {
+      if (skill && !isMelee(skill)) {
+        this.field.play(f.id, "cast", this.restDir(f));
+      }
+      return;
     }
+    f.gauge = 1;
+    this.act(f);
+  }
+
+  /** An enemy at the decision mark chooses its next action; a spell makes it glow. */
+  private decide(f: Fighter): void {
+    f.command = this.enemyCommand(f);
+    const skill = f.command.kind === "skill" ? this.skill(f.command.id) : null;
+    this.field.glow(f.id, !!skill && !isMelee(skill));
   }
 
   // ---------- Time ----------
@@ -310,26 +329,29 @@ export class BattleEngine {
       if (f.gauge < GAUGE_COMMAND) {
         const agility = Math.max(1, f.stats.agi);
         const speed = WAIT_SPEED + (WAIT_SPEED_SPREAD * agility) / this.fastest;
+        const before = f.gauge;
         f.gauge = Math.min(GAUGE_COMMAND, f.gauge + dt * speed);
+        if (
+          f.side === "foe" &&
+          before < GAUGE_DECIDE &&
+          f.gauge >= GAUGE_DECIDE
+        ) {
+          this.decide(f);
+        }
         if (f.gauge >= GAUGE_COMMAND) {
           this.turn(f);
-          return;
+          if (this.phase !== "run") {
+            return;
+          }
         }
       } else if (f.command) {
-        f.gauge = Math.min(1, f.gauge + dt * this.commandSpeed(f.command));
+        const cast = Math.max(MIN_CAST, this.chargeTime(f.command));
+        f.gauge = Math.min(1, f.gauge + (dt * (1 - GAUGE_COMMAND)) / cast);
         if (f.gauge >= 1) {
           this.act(f);
         }
       }
     }
-  }
-
-  private commandSpeed(command: Command): number {
-    if (command.kind === "skill") {
-      const cast = this.skill(command.id)?.cast ?? 0;
-      return (1 - GAUGE_COMMAND) / Math.max(MIN_CAST, cast);
-    }
-    return COMMAND_SPEED[command.kind];
   }
 
   /** A fighter reaches the command mark: its states act, then the team chooses, an enemy decides. */
@@ -343,8 +365,10 @@ export class BattleEngine {
       this.actor = f;
       return;
     }
-    f.command = this.enemyCommand(f);
-    this.gather(f);
+    if (!f.command) {
+      this.decide(f);
+    }
+    this.startCharge(f);
   }
 
   /** States and boosts at the start of a turn (true: it may act; false: it lost its turn or fell). */
@@ -392,6 +416,7 @@ export class BattleEngine {
     if (skip) {
       f.gauge = 0;
       f.command = null;
+      this.field.glow(f.id, false);
       return false;
     }
     return true;
@@ -416,6 +441,7 @@ export class BattleEngine {
 
   /** A fighter reaches the action mark: it acts (the others wait). */
   private act(f: Fighter): void {
+    this.field.glow(f.id, false);
     const command = f.command;
     if (!command || command.kind === "defend" || command.kind === "flee") {
       f.defending = command?.kind === "defend";
@@ -792,7 +818,7 @@ export class BattleEngine {
         this.field.play(target.id, "hurt", facing(target.pos, actor.pos), true);
         this.hurt.add(target);
       }
-      if (interrupts && !target.defending && !this.acting(target)) {
+      if (interrupts && !target.defending) {
         this.interrupt(target, line + 1);
       }
     }
@@ -801,15 +827,25 @@ export class BattleEngine {
   /** A heavy blow: the target's action cancelled (between command and action), else its turn pushed back. */
   private interrupt(target: Fighter, line: number): void {
     const command = target.command;
-    if (command && target.gauge > GAUGE_COMMAND) {
+    const action = this.actions.find((a) => a.actor === target);
+    const charging = !!command && !action && target.gauge > GAUGE_COMMAND;
+    const walking = action?.step === "go";
+    if (command && (charging || walking)) {
       const name =
         command.kind === "skill"
           ? (this.skill(command.id)?.name ?? "Action")
           : this.commandName(command);
+      // Its action stops; it stays where it is, back at the decision mark
+      this.actions = this.actions.filter((a) => a.actor !== target);
+      target.home = target.pos.clone();
       target.command = null;
-      target.gauge = Math.max(0, target.gauge - CANCEL_BACK);
+      target.gauge = GAUGE_DECIDE;
+      this.field.glow(target.id, false);
       this.popup(target, `Interruption : ${name}`, "cancel", line);
-    } else if (target.gauge < GAUGE_COMMAND) {
+      if (target.side === "foe") {
+        this.decide(target);
+      }
+    } else if (!action && target.gauge < GAUGE_COMMAND) {
       target.gauge = Math.max(0, target.gauge - DELAY_BACK);
       this.popup(target, "Retardé", "info", line);
     } else {
@@ -848,6 +884,7 @@ export class BattleEngine {
       f.command = null;
       // Fallen while acting: its action stops there
       this.actions = this.actions.filter((a) => a.actor !== f);
+      this.field.glow(f.id, false);
       this.field.play(f.id, "death", undefined, true);
       this.hurt.delete(f);
       if (f.side === "foe") {

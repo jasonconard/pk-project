@@ -20,11 +20,12 @@ import {
   LucideSwords,
 } from "@lucide/angular";
 import { BattleService } from "../shared/battle.service";
+import { BattleTargetInfoComponent } from "../battle-target-info/battle-target-info.component";
 import { BattleOutcomeComponent } from "../battle-outcome/battle-outcome.component";
 import {
   CommandKind,
-  GAUGE_ACTION,
   GAUGE_COMMAND,
+  GAUGE_DECIDE,
 } from "../shared/battle-types";
 import { GameService } from "../../game/shared/services/game.service";
 import { WEATHER_CHOICES } from "../../game/shared/weather/Weather";
@@ -53,6 +54,7 @@ interface CommandItem {
 @Component({
   selector: "battle-hud",
   imports: [
+    BattleTargetInfoComponent,
     BattleOutcomeComponent,
     LucideArrowLeft,
     LucideBackpack,
@@ -72,8 +74,13 @@ export class BattleHudComponent {
   private readonly battle = inject(BattleService);
   private readonly gameService = inject(GameService);
   protected readonly view = this.battle.view;
+  protected readonly decideAt = GAUGE_DECIDE * 100;
   protected readonly commandAt = GAUGE_COMMAND * 100;
-  protected readonly actionAt = GAUGE_ACTION * 100;
+  /** The aimed one's details (target phase). */
+  protected readonly aimed = computed(() => {
+    const v = this.view();
+    return v?.targets.find((x) => x.id === v.aim) ?? null;
+  });
   /** The command under the cursor (keyboard, mouse). */
   protected readonly selected = signal(0);
   /** The list shown on a turn: the commands, the skills (Magie), the items (Objets). */
