@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.39',
+    date: '2026-11-22',
+    notes: [
+      'Les combats arrivent, à la Grandia : ils se jouent sur la carte, avec la jauge d\'action, les attaques, la magie, les objets et les états.',
+      'Une attaque forte au bon moment interrompt l\'action d\'un ennemi.',
+      'Après une victoire, l\'équipe gagne de l\'expérience, des niveaux, et progresse dans les éléments et les armes qu\'elle utilise.',
+      'Hugo, la chauve-souris et le gluant des neiges ont leurs animations de combat. Événements : nouvelle action pour soigner l\'équipe.',
+      'Sur mobile : le menu du jeu et le menu « ⋮ » de l\'éditeur défilent quand l\'écran est petit.',
+    ],
+  },
+  {
     version: '0.0.38',
     date: '2026-11-21',
     notes: [
