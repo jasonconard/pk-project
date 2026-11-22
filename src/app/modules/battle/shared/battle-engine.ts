@@ -50,6 +50,8 @@ const DELAY_BACK = 0.12;
 const KNOCK_TIME = 0.6;
 const FADE_TIME = 0.6;
 const END_DELAY = 1.8;
+/** An arrow's speed (world units per second; a ranged attack lands when it arrives). */
+const ARROW_SPEED = 180;
 /** An enemy's plain attack is a heavy one this often. */
 const ENEMY_HEAVY_CHANCE = 0.2;
 
@@ -69,6 +71,8 @@ interface Action {
   step: "go" | "strike" | "move";
   /** Where it goes after acting (its new place). */
   dest?: THREE.Vector3;
+  /** A ranged attack's arrow in flight: the time left before it lands. */
+  flight?: number;
 }
 
 /** The most hurt first. */
@@ -479,10 +483,8 @@ export class BattleEngine {
       giveItem(item.id, -1);
       this.popup(f, item.name, "info", 1.6);
     }
-    const melee =
-      command.kind === "attack" ||
-      command.kind === "heavy" ||
-      (!!skill && isMelee(skill));
+    const attack = command.kind === "attack" || command.kind === "heavy";
+    const melee = (attack && !f.ranged) || (!!skill && isMelee(skill));
     const focus = targets[0];
     this.actions = [
       ...this.actions,
@@ -491,7 +493,11 @@ export class BattleEngine {
     if (melee) {
       this.field.play(f.id, "walk", facing(f.pos, focus.pos));
     } else {
-      const anim = item ? "attack" : "magic";
+      // A shot from afar (a bow): its attack animation where it stands; an item, a spell: theirs
+      let anim = item ? "attack" : "magic";
+      if (attack) {
+        anim = command.kind;
+      }
       this.field.play(f.id, anim, facing(f.pos, focus.pos), true);
     }
   }
@@ -585,9 +591,25 @@ export class BattleEngine {
       }
     } else if (a.step === "strike") {
       if (this.field.consumeHit(actor.id)) {
-        this.land(actor);
+        const shot =
+          actor.ranged &&
+          (actor.command?.kind === "attack" || actor.command?.kind === "heavy");
+        if (shot) {
+          // A ranged attack: an arrow flies, the blow lands when it arrives
+          a.flight = actor.pos.distanceTo(a.focus.pos) / ARROW_SPEED;
+          this.field.shoot(actor.pos, a.focus.pos, a.flight);
+        } else {
+          this.land(actor);
+        }
       }
-      if (this.field.finished(actor.id)) {
+      if (a.flight !== undefined) {
+        a.flight -= dt;
+        if (a.flight <= 0) {
+          a.flight = undefined;
+          this.land(actor);
+        }
+      }
+      if (this.field.finished(actor.id) && a.flight === undefined) {
         this.walkBack(a);
       }
     } else if (this.walk(actor, a.dest ?? actor.home, dt)) {

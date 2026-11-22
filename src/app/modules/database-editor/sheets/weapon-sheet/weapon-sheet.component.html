@@ -10,7 +10,19 @@
     (input)="setNote(wp, $any($event.target).value)"
   />
 </div>
+<label class="switch">
+  <input
+    type="checkbox"
+    [checked]="!!wp.ranged"
+    (change)="setRanged(wp, $any($event.target).checked)"
+  />
+  Attaque à distance
+</label>
+<p class="note">
+  Avec une arme à distance (un arc…), le personnage tire de là où il est en
+  combat, sans aller jusqu'à sa cible.
+</p>
 <p class="hint">
   <svg lucideInfo></svg> Frapper avec ce type d'arme fait monter son niveau, qui
-  débloque des coups spéciaux (les compétences arrivent bientôt).
+  apprend des compétences.
 </p>

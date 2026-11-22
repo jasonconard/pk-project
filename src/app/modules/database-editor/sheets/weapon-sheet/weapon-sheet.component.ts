@@ -13,4 +13,14 @@ import { DbSheet } from "../../shared/db-sheet";
 })
 export class WeaponSheetComponent extends DbSheet {
   readonly weapon = input.required<DbWeapon>();
+
+  protected setRanged(wp: DbWeapon, ranged: boolean): void {
+    this.edit(wp.id, (r) => {
+      const next = { ...r, ranged } as DbWeapon;
+      if (!ranged) {
+        delete next.ranged;
+      }
+      return next;
+    });
+  }
 }

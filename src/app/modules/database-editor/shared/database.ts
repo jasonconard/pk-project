@@ -49,6 +49,8 @@ export interface DbWeapon {
   name: string;
   icon?: string;
   note?: string;
+  /** Hits from afar (a bow): its attacks are shot from where the fighter stands, no walking to the target. */
+  ranged?: boolean;
 }
 
 /** What a state does each turn or while it lasts. */

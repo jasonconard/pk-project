@@ -14,6 +14,11 @@ const FOCUS_ZOOM = 0.62;
 const FOCUS_SHIFT = 0.7;
 const CAMERA_EASE = 6;
 
+/** An arrow in flight: a thin shaft (world units), flying at about a fighter's chest height. */
+const ARROW_GEOMETRY = new THREE.BoxGeometry(0.6, 0.6, 9);
+const ARROW_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xf0_e6_d0 });
+const ARROW_HEIGHT = 12;
+
 /** The diagonal a fighter faces to look from `from` towards `to` (on the ground: x right, z towards the camera). */
 export function facing(from: THREE.Vector3, to: THREE.Vector3): SheetDirection {
   const east = to.x >= from.x;
@@ -37,6 +42,14 @@ export class BattleField {
   /** The camera's usual place in the fight, the fighter it looks at (aimed at), the one blinking. */
   private readonly cameraHome: THREE.Vector3;
   private focus: THREE.Vector3 | null = null;
+  /** Arrows flying (ranged attacks), with their way and time. */
+  private arrows: {
+    mesh: THREE.Mesh;
+    from: THREE.Vector3;
+    to: THREE.Vector3;
+    time: number;
+    duration: number;
+  }[] = [];
   private aimed: string | null = null;
 
   constructor(
@@ -167,11 +180,38 @@ export class BattleField {
     };
   }
 
+  /** An arrow shot from one fighter to another, flying `duration` seconds (a ranged attack). */
+  shoot(from: THREE.Vector3, to: THREE.Vector3, duration: number): void {
+    const mesh = new THREE.Mesh(ARROW_GEOMETRY, ARROW_MATERIAL);
+    const a = from.clone().setY(from.y + ARROW_HEIGHT);
+    const b = to.clone().setY(to.y + ARROW_HEIGHT);
+    mesh.position.copy(a);
+    mesh.lookAt(b);
+    this.game.scene.add(mesh);
+    this.arrows.push({ mesh, from: a, to: b, time: 0, duration });
+  }
+
   update(dt: number): void {
     this.sprites.forEach((s) => s.update(dt));
+    for (const arrow of this.arrows) {
+      arrow.time += dt;
+      const k = Math.min(1, arrow.time / arrow.duration);
+      arrow.mesh.position.lerpVectors(arrow.from, arrow.to, k);
+      // A slight arc
+      arrow.mesh.position.y += Math.sin(k * Math.PI) * 6;
+    }
+    this.arrows = this.arrows.filter((a) => {
+      const done = a.time >= a.duration;
+      if (done) {
+        a.mesh.removeFromParent();
+      }
+      return !done;
+    });
   }
 
   dispose(): void {
+    this.arrows.forEach((a) => a.mesh.removeFromParent());
+    this.arrows = [];
     this.sprites.forEach((s) => s.dispose());
     this.sprites.clear();
     const game = this.game;

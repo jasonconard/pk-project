@@ -56,6 +56,8 @@ export interface Fighter {
   attackElement: string;
   /** The team: its weapon's type (its attacks make that level grow). */
   weaponType?: string;
+  /** Its weapon hits from afar (a bow): its attacks are shot from where it stands. */
+  ranged?: boolean;
   states: ActiveState[];
   boosts: Boost[];
   /** The team: the skills it knows; an enemy: what it may do. */

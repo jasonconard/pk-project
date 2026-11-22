@@ -79,6 +79,7 @@ function teamFighter(
     resists,
     attackElement: weapon?.attackElement ?? physicalId(db),
     weaponType: weapon?.weapon,
+    ranged: !!db.weapons.find((w) => w.id === weapon?.weapon)?.ranged,
     states: p.states
       .map((id) => db.states.find((s) => s.id === id))
       .filter((s) => !!s)
