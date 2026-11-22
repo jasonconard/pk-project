@@ -171,7 +171,7 @@ export function defaultAnchor(w: number, h: number): { x: number; y: number } {
 }
 
 /** Is any pixel of the frame (col, row) visible? */
-function frameUsed(
+export function frameUsed(
   data: ImageData,
   x0: number,
   y0: number,

@@ -114,17 +114,89 @@
   <div class="block grow">
     <h3>Cible</h3>
     <select
-      aria-label="Cible"
-      (change)="setTarget(sk, $any($event.target).value)"
+      aria-label="Camp visé"
+      (change)="setCamp(sk, $any($event.target).value)"
     >
-      @for (t of targets; track t.id) {
-        <option [value]="t.id" [selected]="t.id === sk.target">
-          {{ t.label }}
+      <option value="enemy" [selected]="campOf(sk) === 'enemy'">
+        Les ennemis
+      </option>
+      <option value="ally" [selected]="campOf(sk) === 'ally'">L'équipe</option>
+      <option value="self" [selected]="campOf(sk) === 'self'">Soi-même</option>
+    </select>
+  </div>
+</div>
+
+<div class="two">
+  <div class="block grow">
+    <h3>Zone d'effet</h3>
+    <select
+      aria-label="Zone d'effet"
+      [disabled]="campOf(sk) === 'self'"
+      (change)="setArea(sk, $any($event.target).value)"
+    >
+      <option value="single" [selected]="areaOf(sk) === 'single'">
+        Cible unique
+      </option>
+      <option value="around" [selected]="areaOf(sk) === 'around'">
+        Autour de la cible
+      </option>
+      <option value="all" [selected]="areaOf(sk) === 'all'">
+        Tout le terrain
+      </option>
+    </select>
+    @if (areaOf(sk) === "around") {
+      <div class="zone-size">
+        <small>Rayon {{ zoneOf(sk) }}</small>
+        <input
+          type="range"
+          [min]="zoneMin"
+          [max]="zoneMax"
+          step="2"
+          list="zone-marks"
+          aria-label="Taille de la zone"
+          [value]="zoneOf(sk)"
+          (input)="setZone(sk, +$any($event.target).value)"
+        />
+        <datalist id="zone-marks">
+          @for (m of zoneMarks; track m.radius) {
+            <option [value]="m.radius"></option>
+          }
+        </datalist>
+        <div class="zone-marks">
+          @for (m of zoneMarks; track m.radius) {
+            <button
+              type="button"
+              [style.left.%]="zoneAt(m.radius)"
+              [class.on]="zoneOf(sk) === m.radius"
+              (click)="setZone(sk, m.radius)"
+            >
+              {{ m.label }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+  <div class="block grow">
+    <h3>Portée</h3>
+    <select
+      aria-label="Portée"
+      [disabled]="campOf(sk) === 'self'"
+      (change)="setRange(sk, $any($event.target).value)"
+    >
+      @for (r of ranges; track r.id) {
+        <option [value]="r.id" [selected]="r.id === rangeOf(sk)">
+          {{ r.label }}
         </option>
       }
     </select>
   </div>
 </div>
+<p class="note">
+  Autour de la cible : les autres du même camp dans la zone sont touchés aussi.
+  Portée : si la cible est plus loin, le lanceur s'approche avant d'agir (au
+  contact : il va jusqu'à elle).
+</p>
 
 <div class="block">
   <div class="block-head">
@@ -169,6 +241,105 @@
     Plus c'est lent, plus un ennemi a le temps de l'interrompre en frappant
     pendant l'incantation.
   </p>
+</div>
+
+<div class="block">
+  <h3>Animation</h3>
+  @if (sk.anim; as an) {
+    <div class="anim">
+      <db-skill-anim-preview [anim]="an" />
+      <div class="anim-fields">
+        <label class="field grow"
+          ><small>Jouée</small>
+          <select
+            aria-label="Comment l'animation est jouée"
+            (change)="setAnimMode(sk, $any($event.target).value)"
+          >
+            @for (m of animModes; track m.id) {
+              <option [value]="m.id" [selected]="m.id === an.mode">
+                {{ m.label }}
+              </option>
+            }
+          </select>
+        </label>
+        <label class="field"
+          ><small>Case (largeur)</small>
+          <db-stepper
+            [value]="an.frame.w"
+            [min]="8"
+            [max]="animFrameMax"
+            [step]="8"
+            [label]="'Largeur d\'une case'"
+            (changed)="setAnimFrame(sk, { w: $event })"
+          />
+        </label>
+        <label class="field"
+          ><small>Case (hauteur)</small>
+          <db-stepper
+            [value]="an.frame.h"
+            [min]="8"
+            [max]="animFrameMax"
+            [step]="8"
+            [label]="'Hauteur d\'une case'"
+            (changed)="setAnimFrame(sk, { h: $event })"
+          />
+        </label>
+        <label class="field"
+          ><small>Durée par image (ms)</small>
+          <db-stepper
+            [value]="an.ms"
+            [min]="animMsMin"
+            [max]="animMsMax"
+            [step]="10"
+            [label]="'Durée par image'"
+            (changed)="setAnimTiming(sk, { ms: $event })"
+          />
+        </label>
+        <label class="field"
+          ><small>Image du coup (sur {{ an.frames }})</small>
+          <db-stepper
+            [value]="an.hit + 1"
+            [min]="1"
+            [max]="an.frames"
+            [label]="'Image du coup'"
+            (changed)="setAnimTiming(sk, { hit: $event - 1 })"
+          />
+        </label>
+      </div>
+    </div>
+    <p class="note">
+      {{ an.frames }} images d'effet
+      @if (an.mode === "projectile") {
+        · {{ an.flyFrames ?? 0 }} images de projectile (2e ligne)
+      }
+      · {{ an.frames * an.ms }} ms. Les dégâts et les soins tombent sur l'image
+      du coup.
+    </p>
+    <div class="anim-actions">
+      <label class="add-select"
+        ><svg lucideImageUp></svg> Changer l'image
+        <input
+          type="file"
+          accept="image/png"
+          (change)="importAnim(sk, $event)"
+        />
+      </label>
+      <button type="button" class="add-select" (click)="removeAnim(sk)">
+        <svg lucideTrash></svg> Retirer
+      </button>
+    </div>
+  } @else {
+    <p class="note">
+      Une image découpée en cases de même taille : la 1re ligne est l'effet
+      (l'impact), la 2e le projectile en vol (pour « Projectile puis impact »).
+      Jouée pendant la mise en scène : sur chaque cible, en projectile puis
+      impact, ou sur la zone (étirée à sa taille).
+    </p>
+    <label class="add-select"
+      ><svg lucideImageUp></svg> Importer un PNG
+      <input type="file" accept="image/png" (change)="importAnim(sk, $event)" />
+    </label>
+  }
 </div>
 
 <div class="block">

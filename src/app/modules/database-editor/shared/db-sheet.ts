@@ -23,8 +23,12 @@ import {
   POWER_MAX,
   PRICE_MAX,
   RESIST_LEVELS,
+  SKILL_RANGES,
   SKILL_TARGETS,
   SKILL_USES,
+  ZONE_MARKS,
+  ZONE_MAX,
+  ZONE_MIN,
   STATS,
   SkillEffectKind,
   StateEffectKind,
@@ -105,6 +109,14 @@ export abstract class DbSheet {
   protected readonly learnMax = LEARN_MAX;
 
   protected readonly targets = SKILL_TARGETS;
+
+  protected readonly ranges = SKILL_RANGES;
+
+  protected readonly zoneMarks = ZONE_MARKS;
+
+  protected readonly zoneMin = ZONE_MIN;
+
+  protected readonly zoneMax = ZONE_MAX;
 
   protected readonly uses = SKILL_USES;
 

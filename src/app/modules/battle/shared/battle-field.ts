@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { CAMERA_LOOK, Game } from "../../game/shared/model/Game";
 import { SheetDirection } from "../../database-editor/shared/sprite-sheet";
 import { SheetSprite } from "./sheet-sprite";
+import { SkillAnimPlayer } from "./skill-anim-player";
 import { Fighter } from "./battle-types";
 
 /** The enemies' area (its centre ahead of the team) and the team's line, in world units. */
@@ -20,6 +21,14 @@ const SHOW_ZOOM = 0.5;
 const ARROW_GEOMETRY = new THREE.BoxGeometry(0.6, 0.6, 9);
 const ARROW_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xf0_e6_d0 });
 const ARROW_HEIGHT = 12;
+/** A skill's zone while aiming: a thin orange circle on the ground. */
+const ZONE_MATERIAL = new THREE.MeshBasicMaterial({
+  color: 0xff_b0_4a,
+  transparent: true,
+  opacity: 0.75,
+  depthWrite: false,
+  side: THREE.DoubleSide,
+});
 
 /** The diagonal a fighter faces to look from `from` towards `to` (on the ground: x right, z towards the camera). */
 export function facing(from: THREE.Vector3, to: THREE.Vector3): SheetDirection {
@@ -55,6 +64,11 @@ export class BattleField {
     duration: number;
   }[] = [];
   private aimed: string | null = null;
+  /** The skills' effect animations playing. */
+  readonly skillAnims: SkillAnimPlayer;
+  /** Aiming a skill with a zone: its circle on the ground, and the others caught in it (they blink too). */
+  private zoneRing: THREE.Mesh | null = null;
+  private zoned: string[] = [];
 
   constructor(
     private readonly game: Game,
@@ -62,6 +76,7 @@ export class BattleField {
   ) {
     const player = game.mapHelper?.meshes["player"];
     const center = player?.position.clone() ?? game.getCameraTarget();
+    this.skillAnims = new SkillAnimPlayer(game.scene);
     this.savedCamera = game.camera.position.clone();
     this.savedZoom = game.cameraZoom;
     this.savedPlayerScale = player?.scale.clone() ?? null;
@@ -121,6 +136,45 @@ export class BattleField {
       }
     }
     this.focus = fighter ? fighter.pos.clone() : null;
+  }
+
+  /**
+   * Aiming a skill with a zone: a circle of this radius on the ground around its center, the fighters in it
+   * blinking with the aimed one; null: none.
+   */
+  setZone(
+    center: THREE.Vector3 | null,
+    radius: number,
+    inside: string[]
+  ): void {
+    const keep = new Set(inside);
+    for (const id of this.zoned) {
+      if (!keep.has(id) && id !== this.aimed) {
+        this.sprites.get(id)?.setBlink(false);
+      }
+    }
+    for (const id of inside) {
+      this.sprites.get(id)?.setBlink(true);
+    }
+    this.zoned = inside;
+    if (!center || radius <= 0) {
+      this.zoneRing?.removeFromParent();
+      return;
+    }
+    if (!this.zoneRing || this.zoneRing.userData["radius"] !== radius) {
+      this.zoneRing?.removeFromParent();
+      this.zoneRing?.geometry.dispose();
+      this.zoneRing = new THREE.Mesh(
+        new THREE.RingGeometry(radius - 1.5, radius, 48),
+        ZONE_MATERIAL
+      );
+      this.zoneRing.rotation.x = -Math.PI / 2;
+      this.zoneRing.userData["radius"] = radius;
+    }
+    this.zoneRing.position.set(center.x, center.y + 0.4, center.z);
+    if (!this.zoneRing.parent) {
+      this.game.scene.add(this.zoneRing);
+    }
   }
 
   /** A skill shown off: the camera on this point (the caster, then its targets); null: back to the field. */
@@ -215,6 +269,7 @@ export class BattleField {
   /** The animations go on; `only`: just this fighter's (a skill shown off, the others stand still). */
   update(dt: number, only?: string): void {
     this.sprites.forEach((s, id) => s.update(only && id !== only ? 0 : dt));
+    this.skillAnims.update(dt);
     for (const arrow of this.arrows) {
       // (stopped too while a skill is shown off)
       arrow.time += only ? 0 : dt;
@@ -233,6 +288,9 @@ export class BattleField {
   }
 
   dispose(): void {
+    this.skillAnims.dispose();
+    this.zoneRing?.removeFromParent();
+    this.zoneRing?.geometry.dispose();
     this.arrows.forEach((a) => a.mesh.removeFromParent());
     this.arrows = [];
     this.sprites.forEach((s) => s.dispose());

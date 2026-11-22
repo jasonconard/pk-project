@@ -3,6 +3,7 @@ import {
   GameDatabase,
   ResistLevel,
   StatId,
+  skillRange,
 } from "../../database-editor/shared/database";
 import { Fighter } from "./battle-types";
 
@@ -170,10 +171,9 @@ export function enemySkill(
   return null;
 }
 
-/** Does a skill hit in melee (its damage only from Strength: the user walks to its target)? */
+/** Does a skill hit in melee (its range is « contact »: the user walks up to its target)? */
 export function isMelee(skill: DbSkill): boolean {
-  const damages = skill.effects.filter((e) => e.kind === "damage");
-  return damages.length > 0 && damages.every((e) => e.stat === "str");
+  return skillRange(skill) === "contact";
 }
 
 /**

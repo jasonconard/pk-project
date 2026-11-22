@@ -1,5 +1,6 @@
 import { WeatherType } from "../../game/shared/weather/Weather";
 import { omit } from "../../../core/shared/omit";
+import { SkillAnim } from "./skill-anim";
 import { SpriteSheet } from "./sprite-sheet";
 
 /**
@@ -91,6 +92,60 @@ export const SKILL_TARGETS: { id: SkillTarget; label: string }[] = [
   { id: "allies", label: "Toute l'équipe" },
   { id: "self", label: "Soi-même" },
 ];
+
+/**
+ * How far a skill reaches from its user (world units on the battle field): a target farther away, the user walks
+ * closer first; « contact » is a blow (it walks up to its target). Missing: contact for a skill hitting only with
+ * Strength, else any distance.
+ */
+export type SkillRange = "contact" | "short" | "medium" | "long" | "any";
+export const SKILL_RANGES: { id: SkillRange; label: string }[] = [
+  { id: "contact", label: "Au contact" },
+  { id: "short", label: "Courte" },
+  { id: "medium", label: "Moyenne" },
+  { id: "long", label: "Longue" },
+  { id: "any", label: "Illimitée" },
+];
+export const RANGE_DISTANCE: Record<SkillRange, number> = {
+  contact: 15,
+  short: 35,
+  medium: 60,
+  long: 95,
+  any: Number.POSITIVE_INFINITY,
+};
+
+/** A skill's range, or the old rule when none is set (hitting only with Strength: a blow at contact). */
+export function skillRange(skill: DbSkill): SkillRange {
+  if (skill.range) {
+    return skill.range;
+  }
+  const damages = skill.effects.filter((e) => e.kind === "damage");
+  return damages.length > 0 && damages.every((e) => e.stat === "str")
+    ? "contact"
+    : "any";
+}
+
+/**
+ * A skill's zone around its one target: its radius (world units, fighters stand about 26 apart), from ZONE_MIN to
+ * ZONE_MAX; missing: the target alone. The editor's slider marks a few usual sizes.
+ */
+export const ZONE_MIN = 10;
+export const ZONE_MAX = 70;
+export const ZONE_MARKS: { label: string; radius: number }[] = [
+  { label: "Petite", radius: 20 },
+  { label: "Moyenne", radius: 32 },
+  { label: "Grande", radius: 48 },
+];
+
+/** A skill's zone radius (0: the target alone); an older « small / medium / large » becomes its mark's radius. */
+export function skillZone(skill: DbSkill): number {
+  const zone = skill.zone as unknown;
+  if (typeof zone === "number") {
+    return zone;
+  }
+  const old = { small: 20, medium: 32, large: 48 }[String(zone)];
+  return old ?? 0;
+}
 
 /** Where a skill can be used. */
 export type SkillUse = "fight" | "field" | "both";
@@ -341,6 +396,12 @@ export interface DbSkill {
   /** Seconds of casting on the action gauge (0 = right away): the slower, the easier to cancel. */
   cast: number;
   target: SkillTarget;
+  /** How far it reaches (see SkillRange). */
+  range?: SkillRange;
+  /** One target (enemy, ally): the radius of the zone around it also hit (see ZONE_MIN). */
+  zone?: number;
+  /** Its effect animation, played during its showcase (see skill-anim.ts). */
+  anim?: SkillAnim;
   use: SkillUse;
   effects: SkillEffect[];
   /** Replaces the power of its damage and heals (« a.mag * 2 - b.end »: a = who uses it, b = the target). */

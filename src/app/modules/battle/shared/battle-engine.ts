@@ -2,9 +2,12 @@ import {
   DbItem,
   DbSkill,
   GameDatabase,
+  RANGE_DISTANCE,
   SkillEffect,
   SkillTarget,
   STATS,
+  skillRange,
+  skillZone,
 } from "../../database-editor/shared/database";
 import * as THREE from "three";
 import { SheetDirection } from "../../database-editor/shared/sprite-sheet";
@@ -75,13 +78,18 @@ interface Action {
   actor: Fighter;
   /** Who it walks to (melee), or faces. */
   focus: Fighter;
+  /** A blow at contact (it walks right up to its target, its heavy animation for a skill). */
   melee: boolean;
+  /** How close it must be to its target to act (world units): farther, it walks closer first. */
+  reach: number;
   /** wait: a skill's showcase opening (it starts after). */
   step: "wait" | "go" | "strike" | "move";
   /** Where it goes after acting (its new place). */
   dest?: THREE.Vector3;
   /** A ranged attack's arrow in flight: the time left before it lands. */
   flight?: number;
+  /** A skill's effect animation playing (its id on the field): its effects land on its hit frame. */
+  anim?: number;
 }
 
 /** The most hurt first. */
@@ -100,6 +108,11 @@ interface Showcase {
   targets: Fighter[];
   /** The hits taken, played once the fight goes on (target, from whom). */
   hurts: { target: Fighter; from: Fighter }[];
+}
+
+/** The distance between two points of the field, on the ground. */
+function groundDistance(a: THREE.Vector3, b: THREE.Vector3): number {
+  return Math.hypot(a.x - b.x, a.z - b.z);
 }
 
 function pickOne(list: Fighter[]): Fighter | undefined {
@@ -532,8 +545,15 @@ export class BattleEngine {
     }
     const attack = command.kind === "attack" || command.kind === "heavy";
     const melee = (attack && !f.ranged) || (!!skill && isMelee(skill));
+    // How close it must be: a blow at contact, a skill its range, a shot or an item from anywhere
+    let reach = Number.POSITIVE_INFINITY;
+    if (melee) {
+      reach = REACH;
+    } else if (skill && skill.target !== "self") {
+      reach = RANGE_DISTANCE[skillRange(skill)];
+    }
     const focus = targets[0];
-    const action: Action = { actor: f, focus, melee, step: "wait" };
+    const action: Action = { actor: f, focus, melee, reach, step: "wait" };
     this.actions = [...this.actions, action];
     if (skill) {
       // A skill: the whole fight stops while it plays
@@ -553,23 +573,34 @@ export class BattleEngine {
     this.startAction(action);
   }
 
-  /** The action starts: walking to the target (melee), else its animation where it stands. */
+  /** The action starts: walking closer when its target is out of reach (a blow: up to it), else it strikes. */
   private startAction(action: Action): void {
     const f = action.actor;
     const focus = action.focus;
-    const command = f.command;
-    const melee = action.melee;
-    action.step = melee ? "go" : "strike";
-    if (melee) {
+    const far = groundDistance(f.pos, focus.pos) > action.reach;
+    action.step = action.melee || far ? "go" : "strike";
+    if (action.step === "go") {
       this.field.play(f.id, "walk", facing(f.pos, focus.pos));
     } else {
-      // A shot from afar (a bow): its attack animation where it stands; an item, a spell: theirs
-      let anim = command?.kind === "item" ? "attack" : "magic";
-      if (command?.kind === "attack" || command?.kind === "heavy") {
-        anim = command.kind;
-      }
-      this.field.play(f.id, anim, facing(f.pos, focus.pos), true);
+      this.strike(action);
     }
+  }
+
+  /**
+   * Its blow, spell or item now: an attack (shot from afar or not) its attack animation, a skill at contact its heavy
+   * one, a spell its magic, an item its attack.
+   */
+  private strike(action: Action): void {
+    const f = action.actor;
+    const command = f.command;
+    let anim = command?.kind === "item" ? "attack" : "magic";
+    if (command?.kind === "attack" || command?.kind === "heavy") {
+      anim = command.kind;
+    } else if (command?.kind === "skill" && action.melee) {
+      anim = "heavy";
+    }
+    action.step = "strike";
+    this.field.play(f.id, anim, facing(f.pos, action.focus.pos), true);
   }
 
   /** A team member's action trains its levels: a skill's, or its weapon type for the attacks. */
@@ -599,6 +630,16 @@ export class BattleEngine {
   }
 
   /** Who a command lands on now (a single target fallen meanwhile: another one of its side). */
+  /** A skill's zone around its one target (world units, 0: the target alone). */
+  zoneRadius(command: Command | null): number {
+    if (command?.kind !== "skill") {
+      return 0;
+    }
+    const skill = this.skill(command.id);
+    const one = skill?.target === "enemy" || skill?.target === "ally";
+    return one && skill ? skillZone(skill) : 0;
+  }
+
   private targetsOf(f: Fighter, command: Command): Fighter[] {
     const target = this.targetKind(command);
     const own = f.side;
@@ -613,12 +654,26 @@ export class BattleEngine {
       return this.alive(own);
     }
     const side = target === "ally" ? own : other;
-    const chosen = this.fighters.find((x) => x.id === command.target);
-    if (chosen && chosen.hp > 0 && chosen.side === side) {
-      return [chosen];
+    const found = this.fighters.find((x) => x.id === command.target);
+    const chosen =
+      found && found.hp > 0 && found.side === side
+        ? found
+        : pickOne(this.alive(side));
+    if (!chosen) {
+      return [];
     }
-    const other1 = pickOne(this.alive(side));
-    return other1 ? [other1] : [];
+    return [chosen, ...this.caughtWith(command, chosen)];
+  }
+
+  /** The others of its side in the zone around a skill's target (none without a zone). */
+  caughtWith(command: Command | null, chosen: Fighter): Fighter[] {
+    const radius = this.zoneRadius(command);
+    if (radius <= 0) {
+      return [];
+    }
+    return this.alive(chosen.side).filter(
+      (x) => x !== chosen && groundDistance(x.pos, chosen.pos) <= radius
+    );
   }
 
   private stepActions(dt: number): void {
@@ -650,26 +705,51 @@ export class BattleEngine {
         }
         this.field.play(actor.id, "walk", facing(actor.pos, next.pos));
       }
-      // Up to the target, keeping a little distance (on its side facing the actor)
-      const dest = a.focus.pos
-        .clone()
-        .add(actor.home.clone().sub(a.focus.pos).setY(0).setLength(REACH));
-      if (this.walk(actor, dest, dt)) {
-        a.step = "strike";
-        const anim = actor.command?.kind === "attack" ? "attack" : "heavy";
-        this.field.play(actor.id, anim, facing(actor.pos, a.focus.pos), true);
+      // Up to the target (a blow), or just within its reach (a spell), on its side facing the actor
+      const away = actor.pos.clone().sub(a.focus.pos).setY(0);
+      const stop = a.melee ? REACH : Math.max(REACH, a.reach - 2);
+      const dest = a.focus.pos.clone().add(away.setLength(stop));
+      if (
+        this.walk(actor, dest, dt) ||
+        (!a.melee && groundDistance(actor.pos, a.focus.pos) <= a.reach)
+      ) {
+        this.strike(a);
       }
     } else if (a.step === "strike") {
       if (this.field.consumeHit(actor.id)) {
         const shot =
           actor.ranged &&
           (actor.command?.kind === "attack" || actor.command?.kind === "heavy");
+        const skill =
+          actor.command?.kind === "skill"
+            ? this.skill(actor.command.id)
+            : undefined;
         if (shot) {
           // A ranged attack: an arrow flies, the blow lands when it arrives
           a.flight = actor.pos.distanceTo(a.focus.pos) / ARROW_SPEED;
           this.field.shoot(actor.pos, a.focus.pos, a.flight);
+        } else if (skill?.anim && actor.command) {
+          // A skill with its animation: its effects land on the animation's hit frame
+          const all = skill.target === "enemies" || skill.target === "allies";
+          a.anim = this.field.skillAnims.play(
+            skill.anim,
+            actor.pos,
+            this.targetsOf(actor, actor.command).map((t) => t.pos),
+            all ? null : this.zoneRadius(actor.command)
+          );
+          if (this.showcase?.actor === actor) {
+            this.showcase.landed = true;
+          }
         } else {
           this.land(actor);
+        }
+      }
+      if (a.anim !== undefined) {
+        if (this.field.skillAnims.takeHit(a.anim)) {
+          this.land(actor);
+        }
+        if (this.field.skillAnims.done(a.anim)) {
+          a.anim = undefined;
         }
       }
       if (a.flight !== undefined) {
@@ -679,7 +759,11 @@ export class BattleEngine {
           this.land(actor);
         }
       }
-      if (this.field.finished(actor.id) && a.flight === undefined) {
+      if (
+        this.field.finished(actor.id) &&
+        a.flight === undefined &&
+        a.anim === undefined
+      ) {
         this.walkBack(a);
       }
     } else if (this.walk(actor, a.dest ?? actor.home, dt)) {

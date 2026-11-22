@@ -409,6 +409,18 @@ export class BattleService {
     const actor = engine.actor;
     const aimed = engine.fighters.find((f) => f.id === engine.aim);
     field.setAim(engine.phase === "target" ? (aimed ?? null) : null);
+    // Aiming a skill with a zone: its circle around the aimed one, the others caught in it
+    const radius =
+      engine.phase === "target" && aimed
+        ? engine.zoneRadius(engine.pending)
+        : 0;
+    field.setZone(
+      radius > 0 ? (aimed?.pos ?? null) : null,
+      radius,
+      radius > 0 && aimed
+        ? engine.caughtWith(engine.pending, aimed).map((f) => f.id)
+        : []
+    );
     const shown = engine.shown();
     field.setShowcase(shown?.look ?? null);
     const choosing = engine.phase === "command" || engine.phase === "target";

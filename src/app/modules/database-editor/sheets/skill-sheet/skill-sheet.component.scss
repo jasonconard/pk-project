@@ -111,3 +111,106 @@
 .mono {
   font-family: ui-monospace, Menlo, Consolas, monospace !important;
 }
+
+/* The zone's radius: a slider with its usual sizes marked under it (a mark sets it) */
+.zone-size {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+
+  small {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  input {
+    accent-color: #ffd34d;
+  }
+}
+
+.zone-marks {
+  position: relative;
+  height: 18px;
+  margin: 0 8px;
+
+  button {
+    position: absolute;
+    translate: -50% 0;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+
+    &.on {
+      color: #ffd34d;
+      font-weight: 600;
+    }
+  }
+}
+
+/* The effect animation: its preview beside its fields */
+.anim {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+
+  db-skill-anim-preview {
+    flex: 0 1 240px;
+  }
+
+  .anim-fields {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    &.grow {
+      flex: 1 1 100%;
+    }
+
+    small {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    select {
+      height: 36px;
+    }
+  }
+}
+
+.anim-actions {
+  display: flex;
+  gap: 8px;
+
+  .add-select {
+    padding: 0 12px;
+    background: none;
+    cursor: pointer;
+
+    input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+  }
+}
+
+.add-select input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
