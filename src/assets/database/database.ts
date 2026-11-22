@@ -128,6 +128,7 @@ export const CODE_DATABASE: GameDatabase = {
     {
       "id": "wp-bow",
       "name": "Arc",
+      "ranged": true,
       "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAr0lEQVR42mNgoBAw4pMUEZL5D2O/efcEq1oWfBqbghQYGBgYGOrWPcBpCQs2zega79w7wyAgIEHYAHTNSM7+j8sFTNgE0TQTB0SEZP5PS7H5jxxwMPDhwwucLmDEpgEd3Ll3hkFFyQRD/M27J4yMIkIy/1dt3EaSax2F6xgYGBgYRG3OUO4CisOAqIDEZwDWaGwKUmAgxmsYBrx594QRlvpghhAyiJHYvIArYVGcGwHM/l5U1/kuZgAAAABJRU5ErkJggg=="
     },
     {
@@ -503,6 +504,28 @@ export const CODE_DATABASE: GameDatabase = {
       "growth": []
     },
     {
+      "id": "it-short-bow",
+      "name": "Arc court",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA6UlEQVR4nGNgoCYQEZL5T0gehmFijMiSd+6dYVBRMmF48+4JijiMHWLABjdszYVfYHUsyJpv7JrAADUErqkpQAKuqW7DC4ZLF7Yx6Bl4oVjCADPkw4cX/0+sqgA7cVqSCRgjO/vZo0sozscAIlCFyJph4rg0M6ELwJxs5OECNxSns7G5YBqSs0HeIehsGAApOtITgOFsWJgw4ABM2ASRne2TsYRhy4wYgmmEAdkF6M6GeQenISJCMv8znJTwRhVeQ0SgBhAKMGyGoIQBMVH1TS6OYdW2XZhhQlRUISW2fSeuERe9+AwCyQEAkNG0LXMGG+sAAAAASUVORK5CYII=",
+      "note": "Un arc léger : on tire de loin.",
+      "kind": "equipment",
+      "price": 140,
+      "slot": "weapon",
+      "weapon": "wp-bow",
+      "bonuses": [
+        {
+          "stat": "str",
+          "amount": 4
+        },
+        {
+          "stat": "agi",
+          "amount": 1
+        }
+      ],
+      "resists": [],
+      "growth": []
+    },
+    {
       "id": "it-wood-shield",
       "name": "Bouclier de bois",
       "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAmUlEQVR42mNgoBAwwhgiQjL/SdH45t0TRgYGBgYWZEERuz5URYeKGBgYGBhsWq6giB+p0YGzmQjZ9PqICV55JpqGAcx2UZszxIUBLueiiyMbiGJA4IEFGIH1+ogJg2ZVFJqRZ6gXBkzIfkKOHpzxf6gI7n/quoAYV6DbjtUFuAzBphkvEBGS+S8iJPP//7WA/6TmEwxDGGgJANNlQzOwlpsWAAAAAElFTkSuQmCC",
@@ -846,6 +869,7 @@ export const CODE_DATABASE: GameDatabase = {
         }
       },
       "equipment": {
+        "weapon": "it-short-bow",
         "accessory": "it-ice-amulet"
       }
     }
