@@ -133,7 +133,7 @@
   border: 2px solid var(--pick);
   background: var(--box);
   box-shadow: var(--shadow);
-  transition: left 120ms linear;
+  /* (no transition: its place is set every frame, a transition restarting each frame made it stutter) */
 
   &.foe {
     border-color: var(--foe);

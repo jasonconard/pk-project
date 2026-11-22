@@ -55,10 +55,14 @@ import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
 export class CharacterSheetComponent extends DbSheet {
   readonly character = input.required<DbCharacter>();
 
-  /** The character sheet's tab. */
+  /**
+   * The character sheet's tab: back to « Général » for another character only (each change makes a new row, which
+   * runs this again: the same character keeps its tab).
+   */
   protected readonly charTab = linkedSignal<string, "general" | "growth">({
     source: () => this.character().id,
-    computation: () => "general",
+    computation: (id, previous) =>
+      previous && previous.source === id ? previous.value : "general",
   });
 
   /** The character sheet's element and weapon rows: simple elements, composed ones (they follow their parts), weapon types. */

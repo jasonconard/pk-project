@@ -50,9 +50,11 @@ export class GroupSheetComponent extends DbSheet {
     y: number;
   } | null>(null);
 
+  /** (forgotten for another group only: each change makes a new row, which runs this again) */
   protected readonly memberChosen = linkedSignal<string, number | null>({
     source: () => this.group().id,
-    computation: () => null,
+    computation: (id, previous) =>
+      previous && previous.source === id ? previous.value : null,
   });
 
   /** The open group's enemies, with how many of each. */
