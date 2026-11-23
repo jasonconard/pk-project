@@ -68,6 +68,13 @@
         font-size: 13px;
       }
     }
+
+    /* Taking the game's version back (a second touch confirms) */
+    &.restore.armed {
+      padding: 0 10px;
+      background: #3f8ef0;
+      font-size: 13px;
+    }
   }
 
   .no-icon {

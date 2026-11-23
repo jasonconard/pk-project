@@ -10,6 +10,7 @@ import {
   LucideIcon,
   LucidePencil,
   LucidePlus,
+  LucideRotateCcw,
   LucideSearch,
   LucideSkull,
   LucideSparkles,
@@ -60,6 +61,7 @@ import {
   withoutRow,
 } from "./shared/database";
 import { DatabaseStore, Row } from "./shared/database-store";
+import { CODE_DATABASE } from "../../../assets/database/database";
 import { DbSheet } from "./shared/db-sheet";
 import { downloadFile } from "../game/shared/util/ts-source";
 import { PixelEditorComponent } from "./pixel-editor/pixel-editor.component";
@@ -117,6 +119,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     LucideDynamicIcon,
     LucidePencil,
     LucidePlus,
+    LucideRotateCcw,
     LucideSearch,
     LucideTrash,
     NgTemplateOutlet,
@@ -161,6 +164,24 @@ export class DatabaseEditorComponent extends DbSheet {
 
   /** The row whose Supprimer was pressed once (pressed again within 3 s: deleted). */
   protected readonly deleting = signal<string | null>(null);
+  /** The row asked to take the game's version back (a second touch does it). */
+  protected readonly restoring = signal<string | null>(null);
+  private restoreTimer?: ReturnType<typeof setTimeout>;
+
+  /**
+   * The open row as the game has it (the database in the code), when it is not the same any more: what « Reprendre
+   * la version du jeu » puts back. A row the game does not have (made in the editor): none.
+   */
+  protected readonly gameVersion = computed(() => {
+    const row = this.current();
+    if (!row) {
+      return null;
+    }
+    const code = (CODE_DATABASE[this.table()] as Row[]).find(
+      (r) => r.id === row.id
+    );
+    return code && JSON.stringify(code) !== JSON.stringify(row) ? code : null;
+  });
 
   /** The weathers the element already has (not offered again). */
   protected readonly pickExclude = computed(() => {
@@ -309,6 +330,7 @@ export class DatabaseEditorComponent extends DbSheet {
   protected select(id: string): void {
     this.selectedId.set(id);
     this.deleting.set(null);
+    this.restoring.set(null);
     this.host.nativeElement.querySelector(".sheet-pane")?.scrollTo({ top: 0 });
   }
 
@@ -383,6 +405,22 @@ export class DatabaseEditorComponent extends DbSheet {
     this.store.commit(withoutRow(this.db(), this.table(), row.id));
     const next = this.rows()[Math.min(index, this.rows().length - 1)];
     this.selectedId.set(this.sideBySide() ? (next?.id ?? null) : null);
+  }
+
+  /** The open row back to the game's version (its changes in the editor forgotten); a second touch confirms. */
+  protected restore(row: Row): void {
+    clearTimeout(this.restoreTimer);
+    const code = this.gameVersion();
+    if (!code) {
+      return;
+    }
+    if (this.restoring() !== row.id) {
+      this.restoring.set(row.id);
+      this.restoreTimer = setTimeout(() => this.restoring.set(null), 3000);
+      return;
+    }
+    this.restoring.set(null);
+    this.edit(row.id, () => structuredClone(code));
   }
 
   protected rename(row: Row, name: string): void {

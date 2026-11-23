@@ -109,6 +109,26 @@
   <section class="sheet-pane" aria-label="Fiche">
     @if (current(); as row) {
       <ng-template #actions>
+        @if (gameVersion()) {
+          <button
+            type="button"
+            class="square-btn restore"
+            [class.armed]="restoring() === row.id"
+            [title]="
+              restoring() === row.id
+                ? 'Appuyer encore pour reprendre la version du jeu'
+                : 'Reprendre la version du jeu'
+            "
+            aria-label="Reprendre la version du jeu"
+            (click)="restore(row)"
+          >
+            @if (restoring() === row.id) {
+              <span>Reprendre ?</span>
+            } @else {
+              <svg lucideRotateCcw></svg>
+            }
+          </button>
+        }
         <button
           type="button"
           class="square-btn"
