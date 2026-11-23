@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { CAMERA_LOOK, Game } from "../../game/shared/model/Game";
 import { SheetDirection } from "../../database-editor/shared/sprite-sheet";
+import { EFFECT_ORDER } from "./skill-anim-player";
 import { SheetSprite } from "./sheet-sprite";
 import { SkillAnimPlayer } from "./skill-anim-player";
 import { Fighter } from "./battle-types";
@@ -21,7 +22,10 @@ const SHOW_WIDE_ZOOM = 0.8;
 
 /** An arrow in flight: a thin shaft (world units), flying at about a fighter's chest height. */
 const ARROW_GEOMETRY = new THREE.BoxGeometry(0.6, 0.6, 9);
-const ARROW_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xf0_e6_d0 });
+const ARROW_MATERIAL = new THREE.MeshBasicMaterial({
+  color: 0xf0_e6_d0,
+  depthTest: false,
+});
 const ARROW_HEIGHT = 12;
 /** A skill's zone while aiming: a thin orange circle on the ground. */
 const ZONE_MATERIAL = new THREE.MeshBasicMaterial({
@@ -79,7 +83,7 @@ export class BattleField {
   ) {
     const player = game.mapHelper?.meshes["player"];
     const center = player?.position.clone() ?? game.getCameraTarget();
-    this.skillAnims = new SkillAnimPlayer(game.scene);
+    this.skillAnims = new SkillAnimPlayer(game.scene, game.camera);
     this.savedCamera = game.camera.position.clone();
     this.savedZoom = game.cameraZoom;
     this.savedPlayerScale = player?.scale.clone() ?? null;
@@ -214,6 +218,7 @@ export class BattleField {
       camera.position.lerp(dest, 1 - Math.exp(-dt * CAMERA_EASE));
       this.game.mapHelper?.updateCameraAim();
     }
+    this.faceCamera();
   }
 
   /** A fighter plays an animation (restart: from its start even if already playing). */
@@ -229,6 +234,11 @@ export class BattleField {
   /** Has the fighter's animation (played once) ended? A fighter without a sprite: at once. */
   finished(id: string): boolean {
     return this.sprites.get(id)?.finished ?? true;
+  }
+
+  /** Is the fighter back in a looping animation (idle, walk, cast: its blow's animation was cut, e.g. by a hit)? */
+  looping(id: string): boolean {
+    return !!this.sprites.get(id)?.anim?.loop;
   }
 
   /** True once when the fighter's animation reaches its hit frame (no sprite: at once). */
@@ -266,6 +276,7 @@ export class BattleField {
   /** An arrow shot from one fighter to another, flying `duration` seconds (a ranged attack). */
   shoot(from: THREE.Vector3, to: THREE.Vector3, duration: number): void {
     const mesh = new THREE.Mesh(ARROW_GEOMETRY, ARROW_MATERIAL);
+    mesh.renderOrder = EFFECT_ORDER;
     const a = from.clone().setY(from.y + ARROW_HEIGHT);
     const b = to.clone().setY(to.y + ARROW_HEIGHT);
     mesh.position.copy(a);
@@ -293,6 +304,19 @@ export class BattleField {
       }
       return !done;
     });
+  }
+
+  /**
+   * The fighters turned to face the camera (seen face on whatever it does), the closest to it drawn last (over the
+   * ones behind).
+   */
+  private faceCamera(): void {
+    const camera = this.game.camera;
+    const away = (s: SheetSprite) =>
+      s.group.position.distanceToSquared(camera.position);
+    [...this.sprites.values()]
+      .sort((a, b) => away(b) - away(a))
+      .forEach((s, i) => s.faceCamera(camera, i));
   }
 
   dispose(): void {

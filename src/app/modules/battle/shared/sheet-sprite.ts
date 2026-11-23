@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { CAMERA_LOOK } from "../../game/shared/model/Game";
 import {
   registerUnlitMaterial,
   UNLIT_MATERIALS,
@@ -16,15 +15,21 @@ import {
 /** World units per pixel of a sheet (a 48 px frame: a fighter a little smaller than the player on the map). */
 export const SHEET_SCALE = 0.5;
 
+/** Fighters are drawn after the map, over it (the closest to the camera last). */
+export const SPRITE_ORDER = 1000;
+
 /**
- * A fighter drawn from its sprite sheet: a flat picture standing on the ground and facing the camera (like the
- * player on the map), its round shadow on the ground, playing one animation in one of the 4 directions.
+ * A fighter drawn from its sprite sheet: a flat picture standing on its feet and turned to face the camera every frame
+ * (whatever the fight camera does, it is seen face on), drawn over the map (nothing hides it, no part sinks into the
+ * ground), its round shadow on the ground, playing one animation in one of the 4 directions.
  */
 export class SheetSprite {
   readonly group = new THREE.Group();
   private readonly texture: THREE.Texture;
   private readonly material: THREE.MeshBasicMaterial;
   private readonly plane: THREE.Mesh;
+  /** Turns the picture to the camera around its feet. */
+  private readonly pivot = new THREE.Group();
   private readonly shadow: THREE.Mesh;
   private columns = 1;
   private rows = 1;
@@ -58,17 +63,19 @@ export class SheetSprite {
         transparent: true,
         alphaTest: 0.1,
         side: THREE.DoubleSide,
+        // (over the map: no tree, wall or slope of the ground cuts it)
+        depthTest: false,
+        depthWrite: false,
       })
     );
-    // Upright, stretched so it looks its height from the camera pitch (see MapHelper.buildPlayer)
-    const stretch = 1 / Math.cos(Math.atan2(CAMERA_LOOK.y, CAMERA_LOOK.z));
     this.plane = new THREE.Mesh(
       new THREE.PlaneGeometry(w * SHEET_SCALE, h * SHEET_SCALE),
       this.material
     );
-    this.plane.scale.y = stretch;
+    this.plane.renderOrder = SPRITE_ORDER;
     // The plane's centre above the feet: half the frame, minus what lies under the feet
-    this.plane.position.y = (sheet.anchor.y - h / 2) * SHEET_SCALE * stretch;
+    this.plane.position.y = (sheet.anchor.y - h / 2) * SHEET_SCALE;
+    this.pivot.add(this.plane);
     this.shadow = new THREE.Mesh(
       new THREE.CircleGeometry(1, 20),
       new THREE.MeshBasicMaterial({
@@ -81,7 +88,7 @@ export class SheetSprite {
     this.shadow.rotation.x = -Math.PI / 2;
     this.shadow.scale.set(w * SHEET_SCALE * 0.24, w * SHEET_SCALE * 0.1, 1);
     this.shadow.position.y = 0.3;
-    this.group.add(this.shadow, this.plane);
+    this.group.add(this.shadow, this.pivot);
     this.applyFrame();
   }
 
@@ -127,6 +134,12 @@ export class SheetSprite {
   setOpacity(opacity: number): void {
     this.material.opacity = opacity;
     (this.shadow.material as THREE.MeshBasicMaterial).opacity = 0.28 * opacity;
+  }
+
+  /** Turned to face the camera (every frame: the fight camera moves); `order`: drawn after the ones farther away. */
+  faceCamera(camera: THREE.Camera, order: number): void {
+    this.pivot.quaternion.copy(camera.quaternion);
+    this.plane.renderOrder = SPRITE_ORDER + order;
   }
 
   /** The animation goes on (stopped while a team member chooses: dt 0). */

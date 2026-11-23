@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { CAMERA_LOOK } from "../../game/shared/model/Game";
 import { animFrame, SkillAnim } from "../../database-editor/shared/skill-anim";
 import { playSound } from "../../game/shared/services/sfx";
-import { SHEET_SCALE } from "./sheet-sprite";
+import { SHEET_SCALE, SPRITE_ORDER } from "./sheet-sprite";
 
 /** A projectile's speed (world units per second) and the height it flies at (a fighter's chest). */
 const FLY_SPEED = 160;
@@ -11,6 +11,8 @@ const FLY_HEIGHT = 12;
 const IN_FRONT = 3;
 /** « All of a side »: the zone around its fighters, this much wider than the farthest one. */
 const ZONE_MARGIN = 16;
+/** Effects drawn over the map and over the fighters. */
+export const EFFECT_ORDER = SPRITE_ORDER + 100;
 /** An animation over that its fight never took the hit of (its caster fell): removed this long after (ms). */
 const FORGOTTEN = 3000;
 
@@ -51,7 +53,10 @@ export class SkillAnimPlayer {
   private readonly shows = new Map<number, Show>();
   private nextId = 0;
 
-  constructor(private readonly scene: THREE.Scene) {}
+  constructor(
+    private readonly scene: THREE.Scene,
+    private readonly camera: THREE.Camera
+  ) {}
 
   /**
    * Plays an animation from the caster `from` on `targets`; `zone`: the zone around the main target (its radius, 0:
@@ -215,25 +220,28 @@ export class SkillAnimPlayer {
       map: piece.texture,
       transparent: true,
       depthWrite: false,
+      // (over the map and the fighters)
+      depthTest: false,
       side: THREE.DoubleSide,
     });
-    // Upright and stretched like the fighters (see SheetSprite), its foot on the ground point
-    const stretch = 1 / Math.cos(Math.atan2(CAMERA_LOOK.y, CAMERA_LOOK.z));
+    // Facing the camera like the fighters (see SheetSprite), turned around its foot on the ground point
     piece.plane = new THREE.Mesh(
       new THREE.PlaneGeometry(w * SHEET_SCALE, h * SHEET_SCALE),
       piece.material
     );
     piece.plane.visible = false;
-    piece.plane.renderOrder = 10;
-    piece.plane.scale.y = stretch;
+    piece.plane.renderOrder = EFFECT_ORDER;
     piece.plane.position.set(
       (w / 2 - anim.anchor.x) * SHEET_SCALE,
-      (anim.anchor.y - h / 2) * SHEET_SCALE * stretch,
+      (anim.anchor.y - h / 2) * SHEET_SCALE,
       0
     );
+    const pivot = new THREE.Group();
+    pivot.quaternion.copy(this.camera.quaternion);
+    pivot.add(piece.plane);
     piece.group = new THREE.Group();
     piece.group.scale.set(scale, scale, scale);
-    piece.group.add(piece.plane);
+    piece.group.add(pivot);
     this.scene.add(piece.group);
     this.frame(piece, 0);
     return piece;

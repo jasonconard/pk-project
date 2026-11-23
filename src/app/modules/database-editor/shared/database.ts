@@ -52,6 +52,11 @@ export interface DbWeapon {
   note?: string;
   /** Hits from afar (a bow): its attacks are shot from where the fighter stands, no walking to the target. */
   ranged?: boolean;
+  /**
+   * Played by its attacks (attack and heavy attack), apart from the fighter's sheet: an arrow flying then its impact,
+   * a slash on the target (see skill-anim.ts; never on a zone). The blow lands on its hit frame.
+   */
+  anim?: SkillAnim;
 }
 
 /** What a state does each turn or while it lasts. */
@@ -297,7 +302,7 @@ export interface DbCharacter {
 /** Pixel sizes of a character's pictures. */
 export const PICTURE_SIZES = {
   icon: { w: 16, h: 16 },
-  portrait: { w: 48, h: 48 },
+  portrait: { w: 96, h: 96 },
   sprite: { w: 48, h: 48 },
 };
 

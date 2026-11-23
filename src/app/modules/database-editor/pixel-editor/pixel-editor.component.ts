@@ -60,7 +60,7 @@ type Pixels = string[];
 /**
  * Draws a pixel art image (16×16 icons, character portraits and combat sprites…), or imports a PNG (shrunk to fit).
  * Gives back a PNG data URL, or undefined when everything was erased. Zoom: − / +, two fingers (pinch, and move),
- * Ctrl + wheel. The grid is a canvas (a 48×48 portrait has 2304 pixels).
+ * Ctrl + wheel. The grid is a canvas (a 96×96 portrait has 9216 pixels).
  */
 @Component({
   selector: "db-pixel-editor",

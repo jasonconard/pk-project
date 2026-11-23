@@ -467,7 +467,7 @@
     width: 38px;
     height: 38px;
     border-radius: 6px;
-    image-rendering: pixelated;
+    // (a 96 px portrait shrunk: smooth, not pixelated)
   }
 
   .info {

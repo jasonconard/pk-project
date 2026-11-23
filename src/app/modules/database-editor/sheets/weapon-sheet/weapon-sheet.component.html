@@ -22,6 +22,22 @@
   Avec une arme à distance (un arc…), le personnage tire de là où il est en
   combat, sans aller jusqu'à sa cible.
 </p>
+<div class="block">
+  <h3>Animation des attaques</h3>
+  <db-anim-field
+    [anim]="wp.anim"
+    [modes]="animModes"
+    lands="Le coup tombe"
+    (changed)="setAnim(wp, $event)"
+  >
+    <p class="note">
+      Jouée par l'attaque et l'attaque forte, à part de la planche du combattant
+      : une flèche qui vole puis son impact (1re ligne l'impact, 2e la flèche en
+      vol), ou un effet sur la cible (une entaille). Le coup tombe sur l'image
+      du coup.
+    </p>
+  </db-anim-field>
+</div>
 <p class="hint">
   <svg lucideInfo></svg> Frapper avec ce type d'arme fait monter son niveau, qui
   apprend des compétences.

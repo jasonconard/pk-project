@@ -1,0 +1,69 @@
+// An effect animation's fields (skills, weapon types). The shared fields: ../_sheets.scss.
+
+:host {
+  display: contents;
+}
+
+/* The effect animation: its preview beside its fields */
+.anim {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+
+  db-skill-anim-preview {
+    flex: 0 1 240px;
+  }
+
+  .anim-fields {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    &.grow {
+      flex: 1 1 100%;
+    }
+
+    small {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    select {
+      height: 36px;
+    }
+  }
+}
+
+.anim-actions {
+  display: flex;
+  gap: 8px;
+
+  .add-select {
+    padding: 0 12px;
+    background: none;
+    cursor: pointer;
+
+    input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+  }
+}
+
+.add-select input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}

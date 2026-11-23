@@ -146,7 +146,7 @@
     width: 30px;
     height: 30px;
     border-radius: 5px;
-    image-rendering: pixelated;
+    // (a 96 px portrait shrunk: smooth, not pixelated)
   }
 
   .member-names {

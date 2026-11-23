@@ -8,7 +8,7 @@ import {
   input,
   viewChild,
 } from "@angular/core";
-import { animFrame, SkillAnim } from "../../shared/skill-anim";
+import { animFrame, SkillAnim } from "../shared/skill-anim";
 
 /** The preview's size (CSS px), how long a projectile flies across it (ms), the pause before playing again (ms). */
 const WIDTH = 240;

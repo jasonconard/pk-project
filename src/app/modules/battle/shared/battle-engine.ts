@@ -11,6 +11,7 @@ import {
 } from "../../database-editor/shared/database";
 import * as THREE from "three";
 import { SheetDirection } from "../../database-editor/shared/sprite-sheet";
+import { SkillAnim } from "../../database-editor/shared/skill-anim";
 import { currentParty, giveItem } from "../../database-editor/shared/party";
 import { BattleField, facing } from "./battle-field";
 import {
@@ -93,6 +94,11 @@ interface Action {
   flight?: number;
   /** A skill's effect animation playing (its id on the field): its effects land on its hit frame. */
   anim?: number;
+  /**
+   * Its blow left (the sprite's hit frame was taken): only once per action, even when a hit taken plays the sprite's
+   * animations again (each would reach a hit frame again: endless arrows).
+   */
+  struck?: boolean;
 }
 
 /** The most hurt first. */
@@ -614,6 +620,7 @@ export class BattleEngine {
       anim = "heavy";
     }
     action.step = "strike";
+    action.struck = false;
     this.field.play(f.id, anim, facing(f.pos, action.focus.pos), true);
     // A skill whose animation plays on its targets: the camera turns to them as the caster starts (it is there when
     // the effect plays); a projectile's follows it when it leaves
@@ -626,6 +633,13 @@ export class BattleEngine {
     ) {
       this.showcase.landed = true;
     }
+  }
+
+  /** The animation its weapon type plays for its attacks (none: the sheet's alone, a plain arrow from afar). */
+  private weaponAnim(f: Fighter): SkillAnim | undefined {
+    return f.weaponType
+      ? this.db.weapons.find((w) => w.id === f.weaponType)?.anim
+      : undefined;
   }
 
   /** A team member's action trains its levels: a skill's, or its weapon type for the attacks. */
@@ -741,15 +755,25 @@ export class BattleEngine {
         this.strike(a);
       }
     } else if (a.step === "strike") {
-      if (this.field.consumeHit(actor.id)) {
-        const shot =
-          actor.ranged &&
-          (actor.command?.kind === "attack" || actor.command?.kind === "heavy");
+      if (!a.struck && this.field.consumeHit(actor.id)) {
+        a.struck = true;
+        const attack =
+          actor.command?.kind === "attack" || actor.command?.kind === "heavy";
+        const shot = actor.ranged && attack;
+        const weaponAnim = attack ? this.weaponAnim(actor) : undefined;
         const skill =
           actor.command?.kind === "skill"
             ? this.skill(actor.command.id)
             : undefined;
-        if (shot) {
+        if (weaponAnim) {
+          // Its weapon type's animation (an arrow flying, a slash): the blow lands on its hit frame
+          a.anim = this.field.skillAnims.play(
+            weaponAnim,
+            actor.pos,
+            [a.focus.pos],
+            0
+          );
+        } else if (shot) {
           // A ranged attack: an arrow flies, the blow lands when it arrives
           a.flight = actor.pos.distanceTo(a.focus.pos) / ARROW_SPEED;
           this.field.shoot(actor.pos, a.focus.pos, a.flight);
@@ -784,11 +808,11 @@ export class BattleEngine {
           this.land(actor);
         }
       }
-      if (
-        this.field.finished(actor.id) &&
-        a.flight === undefined &&
-        a.anim === undefined
-      ) {
+      // Done: its blow's animation played to the end, or cut by a hit taken (back to a loop) once the blow left
+      const ended =
+        this.field.finished(actor.id) ||
+        (!!a.struck && this.field.looping(actor.id));
+      if (ended && a.flight === undefined && a.anim === undefined) {
         this.walkBack(a);
       }
     } else if (this.walk(actor, a.dest ?? actor.home, dt)) {

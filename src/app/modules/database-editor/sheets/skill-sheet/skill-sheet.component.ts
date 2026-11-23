@@ -1,9 +1,7 @@
 import {
   LucideChevronDown,
-  LucideImageUp,
   LucidePlus,
   LucideSigma,
-  LucideTrash,
   LucideX,
 } from "@lucide/angular";
 import {
@@ -40,22 +38,8 @@ const AIMS: Record<SkillCamp, [SkillTarget, SkillTarget]> = {
 import { DbSheet } from "../../shared/db-sheet";
 import { StepperComponent } from "../../stepper/stepper.component";
 import { EffectsEditorComponent } from "../../effects-editor/effects-editor.component";
-import {
-  ANIM_FRAME_MAX,
-  ANIM_MS_MAX,
-  ANIM_MS_MIN,
-  newSkillAnim,
-  SKILL_ANIM_MODES,
-  SkillAnim,
-  SkillAnimMode,
-  withFrames,
-} from "../../shared/skill-anim";
-import { SkillAnimPreviewComponent } from "./skill-anim-preview.component";
-import {
-  playSound,
-  SOUND_CHOICES,
-  SoundId,
-} from "../../../game/shared/services/sfx";
+import { SkillAnim } from "../../shared/skill-anim";
+import { AnimFieldComponent } from "../../anim-field/anim-field.component";
 
 /** The sheet of a row of the « skill » table. */
 @Component({
@@ -63,10 +47,8 @@ import {
   imports: [
     StepperComponent,
     EffectsEditorComponent,
-    SkillAnimPreviewComponent,
+    AnimFieldComponent,
     LucideChevronDown,
-    LucideImageUp,
-    LucideTrash,
     LucidePlus,
     LucideSigma,
     LucideX,
@@ -153,105 +135,15 @@ export class SkillSheetComponent extends DbSheet {
     return ((radius - ZONE_MIN) / (ZONE_MAX - ZONE_MIN)) * 100;
   }
 
-  protected readonly animModes = SKILL_ANIM_MODES;
-
-  protected readonly sounds = SOUND_CHOICES;
-
-  /** The sound when its effect starts (none: silent); heard at once in the editor. */
-  protected setAnimSound(skill: DbSkill, sound: string): void {
-    const anim = skill.anim;
-    if (!anim) {
-      return;
-    }
-    const next: SkillAnim = { ...anim, sound: sound as SoundId };
-    if (sound) {
-      playSound(sound, true);
-    } else {
-      delete next.sound;
-    }
-    this.setAnim(skill, next);
-  }
-
-  protected readonly animFrameMax = ANIM_FRAME_MAX;
-
-  protected readonly animMsMin = ANIM_MS_MIN;
-
-  protected readonly animMsMax = ANIM_MS_MAX;
-
-  /** A PNG for its effect animation: frames cut and counted (a first one: played on the target). */
-  protected async importAnim(skill: DbSkill, event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = "";
-    if (!file) {
-      return;
-    }
-    const image = await readDataUrl(file);
-    const img = await loadImage(image);
-    const mode = skill.anim?.mode ?? "target";
-    const anim = skill.anim
-      ? withFrames(
-          img,
-          { ...skill.anim, image },
-          skill.anim.frame.w,
-          skill.anim.frame.h
-        )
-      : newSkillAnim(img, image, mode);
-    this.setAnim(skill, anim);
-  }
-
-  protected removeAnim(skill: DbSkill): void {
+  /** Its effect animation changed (undefined: removed). */
+  protected setAnim(skill: DbSkill, anim: SkillAnim | undefined): void {
     this.edit(skill.id, (s) => {
-      const next = { ...s } as DbSkill;
-      delete next.anim;
+      const next = { ...s, anim } as DbSkill;
+      if (!anim) {
+        delete next.anim;
+      }
       return next;
     });
-  }
-
-  /** Another way to play it: a projectile reads its second row (the frames are counted again). */
-  protected async setAnimMode(skill: DbSkill, mode: string): Promise<void> {
-    const anim = skill.anim;
-    if (!anim) {
-      return;
-    }
-    const img = await loadImage(anim.image);
-    const next = { ...anim, mode: mode as SkillAnimMode };
-    const fresh = anim.mode !== "projectile" && mode === "projectile";
-    this.setAnim(
-      skill,
-      fresh
-        ? newSkillAnim(img, anim.image, "projectile")
-        : withFrames(img, next, anim.frame.w, anim.frame.h)
-    );
-  }
-
-  /** Another frame size: the frames are counted again. */
-  protected async setAnimFrame(
-    skill: DbSkill,
-    change: Partial<SkillAnim["frame"]>
-  ): Promise<void> {
-    const anim = skill.anim;
-    if (!anim) {
-      return;
-    }
-    const img = await loadImage(anim.image);
-    const w = clampSize(change.w ?? anim.frame.w);
-    const h = clampSize(change.h ?? anim.frame.h);
-    this.setAnim(skill, withFrames(img, anim, w, h));
-  }
-
-  protected setAnimTiming(
-    skill: DbSkill,
-    change: Partial<Pick<SkillAnim, "ms" | "hit">>
-  ): void {
-    const anim = skill.anim;
-    if (anim) {
-      this.setAnim(skill, { ...anim, ...change });
-    }
-  }
-
-  private setAnim(skill: DbSkill, anim: SkillAnim): void {
-    this.edit(skill.id, (s) => ({ ...s, anim }));
   }
 
   /** Its range (or the one it has by default). */
@@ -336,26 +228,4 @@ export class SkillSheetComponent extends DbSheet {
       learn: (s as DbSkill).learn.filter((_, i) => i !== index),
     }));
   }
-}
-
-function clampSize(n: number): number {
-  return Math.min(ANIM_FRAME_MAX, Math.max(8, Math.round(n)));
-}
-
-function readDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
 }

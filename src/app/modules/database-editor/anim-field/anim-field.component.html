@@ -1,0 +1,101 @@
+@if (anim(); as an) {
+  <div class="anim">
+    <db-skill-anim-preview [anim]="an" />
+    <div class="anim-fields">
+      @if (animModes().length > 1) {
+        <label class="field grow"
+          ><small>Jouée</small>
+          <select
+            aria-label="Comment l'animation est jouée"
+            (change)="setMode($any($event.target).value)"
+          >
+            @for (m of animModes(); track m.id) {
+              <option [value]="m.id" [selected]="m.id === an.mode">
+                {{ m.label }}
+              </option>
+            }
+          </select>
+        </label>
+      }
+      <label class="field grow"
+        ><small>Son au début de l'effet</small>
+        <select
+          aria-label="Son au début de l'effet"
+          (change)="setSound($any($event.target).value)"
+        >
+          <option value="" [selected]="!an.sound">Aucun</option>
+          @for (so of sounds; track so.id) {
+            <option [value]="so.id" [selected]="so.id === an.sound">
+              {{ so.label }}
+            </option>
+          }
+        </select>
+      </label>
+      <label class="field"
+        ><small>Case (largeur)</small>
+        <db-stepper
+          [value]="an.frame.w"
+          [min]="8"
+          [max]="animFrameMax"
+          [step]="8"
+          [label]="'Largeur d\'une case'"
+          (changed)="setFrame({ w: $event })"
+        />
+      </label>
+      <label class="field"
+        ><small>Case (hauteur)</small>
+        <db-stepper
+          [value]="an.frame.h"
+          [min]="8"
+          [max]="animFrameMax"
+          [step]="8"
+          [label]="'Hauteur d\'une case'"
+          (changed)="setFrame({ h: $event })"
+        />
+      </label>
+      <label class="field"
+        ><small>Durée par image (ms)</small>
+        <db-stepper
+          [value]="an.ms"
+          [min]="animMsMin"
+          [max]="animMsMax"
+          [step]="10"
+          [label]="'Durée par image'"
+          (changed)="setTiming({ ms: $event })"
+        />
+      </label>
+      <label class="field"
+        ><small>Image du coup (sur {{ an.frames }})</small>
+        <db-stepper
+          [value]="an.hit + 1"
+          [min]="1"
+          [max]="an.frames"
+          [label]="'Image du coup'"
+          (changed)="setTiming({ hit: $event - 1 })"
+        />
+      </label>
+    </div>
+  </div>
+  <p class="note">
+    {{ an.frames }} images d'effet
+    @if (an.mode === "projectile") {
+      · {{ an.flyFrames ?? 0 }} images de projectile (2e ligne)
+    }
+    · {{ an.frames * an.ms }} ms. {{ lands() }} sur l'image du coup.
+  </p>
+  <div class="anim-actions">
+    <label class="add-select"
+      ><svg lucideImageUp></svg> Changer l'image
+      <input type="file" accept="image/png" (change)="import($event)" />
+    </label>
+    <button type="button" class="add-select" (click)="remove()">
+      <svg lucideTrash></svg> Retirer
+    </button>
+  </div>
+} @else {
+  <ng-content />
+  <label class="add-select"
+    ><svg lucideImageUp></svg> Importer un PNG
+    <input type="file" accept="image/png" (change)="import($event)" />
+  </label>
+}
