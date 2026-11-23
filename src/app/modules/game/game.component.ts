@@ -53,6 +53,7 @@ import {
 import { GameMenuComponent } from "./game-menu/game-menu.component";
 import { GameSavesComponent } from "./game-saves/game-saves.component";
 import { VariablesTestComponent } from "./variables-test/variables-test.component";
+import { BattleSimComponent } from "../battle/battle-sim/battle-sim.component";
 import { MapControlsComponent } from "./map-controls/map-controls.component";
 import { EscapeService } from "../../core/shared/service/escape.service";
 import { CoreService } from "../../core/shared/service/core.service";
@@ -75,6 +76,7 @@ import { isTyping } from "../../core/shared/typing";
     GameMenuComponent,
     GameSavesComponent,
     VariablesTestComponent,
+    BattleSimComponent,
     MapControlsComponent,
     MusicEditorComponent,
     ModelEditorComponent,
@@ -140,6 +142,7 @@ export class GameComponent {
   protected readonly savesOpen = signal(false);
   /** The variables test panel (menu → Test des variables). */
   protected readonly variablesTestOpen = signal(false);
+  protected readonly battleSimOpen = signal(false);
   /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
   protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
   /** Weather and hour, for the editor's Ambiance button (computer). */
@@ -197,6 +200,7 @@ export class GameComponent {
         !this.releaseNotes() &&
         !this.savesOpen() &&
         !this.variablesTestOpen() &&
+        !this.battleSimOpen() &&
         !this.sequenceService.message() &&
         !isTyping(ev)
       ) {
@@ -284,6 +288,11 @@ export class GameComponent {
   protected openVariablesTest(): void {
     this.menuOpen.set(false);
     this.variablesTestOpen.set(true);
+  }
+
+  protected openBattleSim(): void {
+    this.menuOpen.set(false);
+    this.battleSimOpen.set(true);
   }
 
   protected openSaves(): void {

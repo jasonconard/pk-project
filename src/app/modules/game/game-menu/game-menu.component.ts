@@ -28,6 +28,7 @@ import {
   LucideSave,
   LucideShare2,
   LucideSparkles,
+  LucideSwords,
   LucideUpload,
   LucideUsers,
   LucideVariable,
@@ -114,6 +115,7 @@ const ENTRIES: MenuEntry[] = [
     LucideDownload,
     LucideShare2,
     LucideUpload,
+    LucideSwords,
     LucideVariable,
   ],
   templateUrl: "./game-menu.component.html",
@@ -134,6 +136,7 @@ export class GameMenuComponent {
   readonly saves = output<void>();
   /** The variables test panel: the menu closes, the panel opens. */
   readonly variablesTest = output<void>();
+  readonly battleSim = output<void>();
 
   protected readonly entries = ENTRIES;
   protected readonly hud = this.gameService.hud;

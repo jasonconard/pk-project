@@ -224,6 +224,14 @@
         }
       </div>
     }
+    <button type="button" class="row" (click)="battleSim.emit()">
+      <svg lucideSwords class="row-icon"></svg>
+      <span class="row-text"
+        ><b>Simuler un combat</b
+        ><small>Un groupe d'ennemis, une carte, une équipe choisie</small></span
+      >
+      <svg lucideChevronRight class="chevron"></svg>
+    </button>
     <button type="button" class="row" (click)="variablesTest.emit()">
       <svg lucideVariable class="row-icon"></svg>
       <span class="row-text"

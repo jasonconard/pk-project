@@ -16,6 +16,8 @@ import {
   giveMoney,
   MemberProgress,
   memberProgress,
+  PartyState,
+  restoreParty,
   saveProgress,
 } from "../../database-editor/shared/party";
 import { BattleField } from "./battle-field";
@@ -30,6 +32,34 @@ import {
   MemberOutcome,
 } from "./battle-types";
 import { gainGrowth, gainXp, knownSkills } from "./progress";
+
+/**
+ * A member of a simulated fight's team (menu → Simuler un combat): its level and its levels in the elements (the
+ * others as the character starts).
+ */
+export interface SimMember {
+  id: string;
+  level: number;
+  growth: Record<string, number>;
+}
+
+/** A simulated member's progress: at the level chosen, PV / PM full, no state. */
+function simProgress(
+  c: DbCharacter,
+  m: SimMember,
+  db: GameDatabase
+): MemberProgress {
+  const level = Math.min(c.levelMax, Math.max(1, Math.round(m.level)));
+  const stats = characterStats(c, level, db);
+  const growth: MemberProgress["growth"] = {};
+  for (const [id, g] of Object.entries(c.growth)) {
+    growth[id] = { level: g.level, points: 0 };
+  }
+  for (const [id, level] of Object.entries(m.growth)) {
+    growth[id] = { level: Math.max(0, Math.round(level)), points: 0 };
+  }
+  return { level, xp: 0, hp: stats.hp, mp: stats.mp, states: [], growth };
+}
 
 /** A fighter's parts every fighter starts the same. */
 function fresh() {
@@ -144,6 +174,10 @@ export class BattleService {
   private characters = new Map<string, DbCharacter>();
   private progress = new Map<string, MemberProgress>();
   private outcome: BattleOutcome | null = null;
+  /** The next fight is a simulation with this team. */
+  private simTeam: SimMember[] | null = null;
+  /** A simulation is played: the team as it was before, put back at the end. */
+  private savedParty: PartyState | null = null;
   private readonly viewState = signal<BattleView | null>(null);
   /** The fight shown (null: no fight). */
   readonly view = this.viewState.asReadonly();
@@ -157,22 +191,38 @@ export class BattleService {
     return this.field !== null;
   }
 
+  /**
+   * The next fight is a simulation (menu → Simuler un combat) played by this team: nothing it changes is kept (the
+   * team's progress, its items and money are put back as they were when it ends).
+   */
+  simulateNext(team: SimMember[]): void {
+    this.simTeam = team;
+  }
+
   /** Starts a fight against a group; `onEnd` is called with how it ended. */
   start(groupId: string, onEnd: (result: BattleResult) => void): void {
     const game = this.game;
     const db = loadDatabase();
     const group = db.groups.find((g) => g.id === groupId);
+    const sim = this.simTeam;
+    this.simTeam = null;
     if (!game || !group || this.field) {
       onEnd("win");
       return;
     }
     const weather = game.weather.type;
-    const members = currentParty()
-      .team.map((id) => db.characters.find((c) => c.id === id))
+    const members = (sim ? sim.map((m) => m.id) : currentParty().team)
+      .map((id) => db.characters.find((c) => c.id === id))
       .filter((c) => !!c)
       .slice(0, 4);
+    this.savedParty = sim ? structuredClone(currentParty()) : null;
     this.characters = new Map(members.map((c) => [c.id, c]));
-    this.progress = new Map(members.map((c) => [c.id, memberProgress(c)]));
+    this.progress = new Map(
+      members.map((c) => {
+        const m = sim?.find((x) => x.id === c.id);
+        return [c.id, m ? simProgress(c, m, db) : memberProgress(c)];
+      })
+    );
     const team = members.map((c) =>
       teamFighter(c, this.progress.get(c.id)!, db)
     );
@@ -259,6 +309,10 @@ export class BattleService {
     this.outcome = null;
     this.onEnd = null;
     this.viewState.set(null);
+    if (this.savedParty) {
+      restoreParty(this.savedParty);
+      this.savedParty = null;
+    }
     onEnd?.(result);
   }
 

@@ -1,0 +1,154 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="battle-sim-title"
+>
+  <header>
+    <h2 id="battle-sim-title">Simuler un combat</h2>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer"
+      title="Fermer (Échap)"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
+  </header>
+  <div class="body">
+    <label class="field">
+      <span>Ennemis</span>
+      <select [value]="group()" (change)="group.set($any($event.target).value)">
+        @for (g of groups; track g.id) {
+          <option [value]="g.id" [selected]="g.id === group()">
+            {{ g.name }}
+          </option>
+        }
+      </select>
+      @if (groupMembers()) {
+        <small>{{ groupMembers() }}</small>
+      } @else if (!groups.length) {
+        <small
+          >Aucun groupe : créez-en dans Éditeurs → Base de données →
+          Groupes.</small
+        >
+      }
+    </label>
+    <label class="field">
+      <span>Lieu</span>
+      <select [value]="place()" (change)="place.set($any($event.target).value)">
+        <option value="" [selected]="place() === ''">
+          Ici, où est le joueur
+        </option>
+        @for (m of maps; track m.id) {
+          <option [value]="m.id" [selected]="m.id === place()">
+            {{ m.name }}
+          </option>
+        }
+      </select>
+      @if (place()) {
+        <small>Au point d'arrivée de la carte, puis retour ici</small>
+      }
+    </label>
+    <div class="field">
+      <span>Équipe ({{ team().length }} / {{ teamMax }})</span>
+      @for (c of characters; track c.id) {
+        @let m = member(c.id);
+        <article [class.on]="m">
+          <div class="head">
+            <button
+              type="button"
+              class="pick"
+              [attr.aria-pressed]="!!m"
+              [disabled]="!m && team().length >= teamMax"
+              (click)="toggle(c)"
+            >
+              <span class="check" aria-hidden="true"></span>
+              @if (c.icon) {
+                <img [src]="c.icon" alt="" />
+              }
+              <b>{{ c.name }}</b>
+            </button>
+            @if (m) {
+              <div class="stepper">
+                <button
+                  type="button"
+                  aria-label="Niveau moins"
+                  (click)="setLevel(c, m.level - 1)"
+                >
+                  <svg lucideMinus></svg>
+                </button>
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  [attr.aria-label]="'Niveau de ' + c.name"
+                  [value]="m.level"
+                  (change)="
+                    setLevel(c, +$any($event.target).value);
+                    $any($event.target).value = member(c.id)?.level
+                  "
+                />
+                <button
+                  type="button"
+                  aria-label="Niveau plus"
+                  (click)="setLevel(c, m.level + 1)"
+                >
+                  <svg lucidePlus></svg>
+                </button>
+              </div>
+            }
+          </div>
+          @if (m) {
+            <div class="elements">
+              @for (e of elementsOf(c); track e.id) {
+                <label
+                  class="element"
+                  [style.--color]="e.color"
+                  [title]="e.name"
+                >
+                  @if (e.icon) {
+                    <img [src]="e.icon" alt="" />
+                  } @else {
+                    <span class="dot" aria-hidden="true"></span>
+                  }
+                  <span class="name">{{ e.name }}</span>
+                  <input
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    [max]="levelMax"
+                    [attr.aria-label]="e.name + ' de ' + c.name"
+                    [value]="m.growth[e.id] ?? 0"
+                    (change)="
+                      setGrowth(c.id, e.id, +$any($event.target).value);
+                      $any($event.target).value = member(c.id)?.growth?.[e.id]
+                    "
+                  />
+                </label>
+              }
+            </div>
+          }
+        </article>
+      } @empty {
+        <small>Aucun personnage d'équipe dans la base de données.</small>
+      }
+    </div>
+  </div>
+  <footer>
+    <small
+      >Rien n'est gardé : l'équipe, ses objets et l'argent reviennent comme
+      avant.</small
+    >
+    <button
+      type="button"
+      class="launch"
+      [disabled]="!canLaunch()"
+      (click)="launch()"
+    >
+      <svg lucideSwords></svg>
+      Lancer
+    </button>
+  </footer>
+</section>

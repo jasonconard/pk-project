@@ -187,6 +187,7 @@
     (releaseNotes)="openReleaseNotes()"
     (saves)="openSaves()"
     (variablesTest)="openVariablesTest()"
+    (battleSim)="openBattleSim()"
   />
 }
 
@@ -196,6 +197,10 @@
     (closed)="savesOpen.set(false)"
     (loaded)="savesOpen.set(false)"
   />
+}
+
+@if (battleSimOpen() && hud()?.mapHelper; as mapHelper) {
+  <battle-sim [mapHelper]="mapHelper" (closed)="battleSimOpen.set(false)" />
 }
 
 @if (variablesTestOpen()) {
