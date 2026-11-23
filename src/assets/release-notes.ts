@@ -14,6 +14,18 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.42',
+    date: '2026-11-23',
+    notes: [
+      'Combat : Jason a un nouveau sprite, dans le même style que Hugo. Il bande son arc et tire.',
+      'Combat : les flèches volent jusqu\'à leur cible. Chaque type d\'arme peut avoir sa propre animation d\'attaque.',
+      'Combat : les combattants sont toujours vus de face et ne sont plus cachés par le décor.',
+      'Hugo et Jason ont de nouveaux portraits dans les dialogues.',
+      'Menu : Simuler un combat permet d\'essayer un combat contre un groupe d\'ennemis, sur la carte et avec l\'équipe de son choix. Rien n\'est gardé après.',
+      'Éditeur : une fiche de la base de données peut reprendre la version du jeu.',
+    ],
+  },
+  {
     version: '0.0.41',
     date: '2026-11-23',
     notes: [
