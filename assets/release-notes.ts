@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.41',
+    date: '2026-11-23',
+    notes: [
+      'Combat : Hugo et les monstres ont de nouveaux sprites, plus détaillés.',
+      'Combat : un combattant touché clignote en rouge et perd un peu de temps ; certains restent étourdis.',
+      'Combat : les compétences et la magie sont mises en scène. Le combat s\'arrête, leur nom s\'affiche en gros et une animation se joue : une boule de feu qui explose, un orage, une berceuse…',
+      'Combat : une compétence a une portée et peut toucher une zone autour de sa cible. Un arc tire de loin.',
+      'La jauge d\'action avance plus doucement et sans à-coups.',
+    ],
+  },
+  {
     version: '0.0.40',
     date: '2026-11-22',
     notes: [
