@@ -2,12 +2,12 @@
 
 En combat (à la Grandia), chaque personnage et chaque ennemi est une image plate animée, posée sur le terrain en 3D. Ses animations viennent d'une **planche** : une seule image découpée en cases de même taille, avec une petite description. On l'ajoute dans la [base de données](10-base-de-donnees.md), fiche du personnage ou de l'ennemi, **Apparence → Planche de combat**.
 
-Exemples déjà dans la base du jeu (cases de 64 × 64, dessinés avec PixelLab, sauf Jason : 384 × 768, cases de 48 × 48) :
+Exemples déjà dans la base du jeu (cases de 64 × 64, dessinés avec PixelLab) :
 
 - le gluant, [images/planche-gluant.png](images/planche-gluant.png) (512 × 1024) : une gelée verte qui avance par petits sauts, donne un coup de tête, s'écrase en crêpe pour l'attaque forte et fond en flaque ;
 - le gluant des neiges, [images/planche-gluant-des-neiges.png](images/planche-gluant-des-neiges.png) (512 × 1024) : la même gelée en bleu glacé sous un bonnet de neige, qui fond en flaque d'eau ;
 - Hugo, [images/planche-hugo.png](images/planche-hugo.png) (768 × 1024) : un épéiste avec son épée courte et son bouclier de bois ; ses coups d'épée laissent une trace blanche, son attaque forte est un saut (12 images, plus lente), il incante bouclier levé dans un cercle azur ; avec le miroir, il change de main vers l'ouest, comme dans Grandia ;
-- Jason, [images/planche-jason.png](images/planche-jason.png) : un archer de glace ; il tire à l'arc (la flèche part sur l'image du coup), une flèche de glace chargée pour l'attaque forte, des éclats de glace pour sa magie ;
+- Jason, [images/planche-jason.png](images/planche-jason.png) (768 × 1024) : un archer chauve en tunique rouge et or, dans le style de Hugo ; il bande son arc et tire (la flèche part sur l'image du coup), l'attaque forte est un long tir chargé (12 images, coup sur la 10e), il incante la main levée dans le cercle azur. **La flèche n'est pas dans la planche** : c'est l'animation du type d'arme Arc (voir [Types d'armes](10-base-de-donnees.md#types-darmes)), jouée par-dessus ;
 - la chauve-souris, [images/planche-chauve-souris.png](images/planche-chauve-souris.png) (512 × 1024) : elle **vole** au-dessus de ses pieds (le point des pieds reste au sol, sous elle, pour que l'ombre y soit), plonge pour mordre, crie sa magie, tombe au sol en mourant.
 
 ![La planche du gluant](images/planche-gluant.png)
