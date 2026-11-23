@@ -30,6 +30,22 @@ refaire les erreurs du premier essai (Hugo, novembre 2026 : 49 générations et 
   `710a8252-f52e-40f9-95b4-b3181df0871c`, chauve-souris `6149d5c0-64ee-41f6-a05e-32418f822320`.
 - Hugo existe déjà dans PixelLab : `character_id = 03c414b4-e61c-4173-9d9f-6413df65b3bb` (réutilisable pour
   ajouter des animations).
+- Jason (archer, arc dans la main gauche) : `character_id = 43eb8c0f-ecf2-4236-bacd-00e84e6c6d4b`. Pour un archer, une
+  fin `end_frame_url` = la rotation garde l'arc dans la main (sans elle, le v3 lui fait lâcher ou perdre l'arc à la
+  fin d'un tir) ; son attaque sud-est reprend des images de l'attaque forte (`pick`), le tir rapide du v3 étant trop mou.
+
+## Portraits de dialogue
+
+- **96 × 96** (`PICTURE_SIZES.portrait`), buste de face un peu de trois quarts, fond transparent.
+- `create_image_pro(width=96, height=96)` (10 générations, 4 propositions) avec `style_image_url` = la rotation sud
+  de Hugo (`style_copy` : outline, shading, + color_palette pour Hugo lui-même) ; pour Hugo, la même image en
+  `reference_images` (« identity: hair, eyes, outfit colors »). Description : apparence, expression, tenue, puis
+  « Detailed JRPG pixel art portrait in the style of Final Fantasy Brave Exvius, rich shading, vivid colors,
+  selective dark outline, transparent background ».
+- Les résultats ont souvent une **ligne grise** sous le buste (lignes 90-91) ou sur un bord : effacer les pixels gris
+  clairs alignés avant de les mettre dans le jeu.
+- Où les mettre : `portrait` de la fiche dans `src/assets/database/database.ts` (data URL) et
+  `src/assets/img/faces/face-<nom>.png` (portraits des messages, liste `PORTRAITS` dans `ObjectEvent.ts`).
 
 ## Format de sortie
 
@@ -124,3 +140,8 @@ que donne l'export), le mode et l'image du coup ; il retire les images vides de 
 dans `"anim"` des compétences. Le cadre doit contenir le point au sol (le script ajoute ce qu'il faut en bas).
 Un son au début de l'effet : `"sound"` (un son de `src/app/modules/game/shared/services/sfx.ts`, ex. `explosion`). Effets créés (« My effects » de PixelLab) : Boule de feu - vol (luciole : une boule ronde sans traînée, recette maison) / impact, Lance de glace - vol / impact, Orage, Soin,
 Venin, Coup double, Berceuse.
+
+**Animations des types d'armes** (`anim` d'un type d'arme, même format ; jouées par l'attaque et l'attaque forte, à part
+de la planche) : l'Arc (`wp-bow`) a « Flèche - vol » (`throw` de l'image `arrow` sur place + `speed_lines` taille 0.35,
+4 images en boucle, pointe en (39, 10)) et « Flèche - impact » (`hit_star` taille 0.5, point au sol (12, 36), coup 1).
+Assembler avec `assemble_skill_anims.py` en mettant l'id du type d'arme dans `SPEC`, puis `"anim"` dans le type d'arme.

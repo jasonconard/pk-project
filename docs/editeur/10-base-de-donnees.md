@@ -9,7 +9,7 @@ En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en 
 - **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
-- Sur les écrans larges, **Dupliquer** et **Supprimer** sont à droite du nom.
+- Sur les écrans larges, **Reprendre la version du jeu**, **Dupliquer** et **Supprimer** sont à droite du nom.
 - **Échap** ou le bouton retour ferme ce qui est ouvert, le dernier d'abord : la liste des météos ou l'éditeur pixel, puis la fiche (téléphone), puis l'éditeur.
 
 ## La liste
@@ -17,12 +17,13 @@ En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en 
 - **Chercher** filtre par nom (les accents et les majuscules ne comptent pas).
 - **+ Personnage** (ou + Ennemi, + Groupe, + Compétence, + Objet, + État, + Élément, + Type d'arme), en bas, ajoute une ligne et ouvre sa fiche, le nom prêt à être tapé.
 - Dans la fiche : **Dupliquer** (copie juste en dessous) et **Supprimer** (la corbeille : appuyer deux fois, « Supprimer ? » pendant 3 secondes).
+- **Reprendre la version du jeu** (la flèche qui tourne, seulement sur une fiche modifiée) : la fiche redevient celle du jeu, ses changements dans l'éditeur oubliés (appuyer deux fois, « Reprendre ? »). Le reste de la base ne bouge pas : pratique pour récupérer une compétence ou un ennemi mis à jour dans le jeu sans perdre ses autres réglages.
 
 Renommer ne casse rien : ce qui utilise une ligne la retrouve par un identifiant qui ne change jamais.
 
 ## L'icône (éditeur pixel)
 
-Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tête). Toucher l'icône de la fiche ouvre l'éditeur pixel ; il sert aussi aux portraits (48 × 48) et aux images fixes (48 × 48) des personnages et des ennemis :
+Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tête). Toucher l'icône de la fiche ouvre l'éditeur pixel ; il sert aussi aux portraits (96 × 96) et aux images fixes (48 × 48) des personnages et des ennemis :
 
 - **Crayon**, **Gomme**, **Remplir** (pot de peinture), **Pipette** (reprend une couleur du dessin), **Miroir** (retourne gauche / droite).
 - **La palette** : 20 couleurs, puis les autres couleurs déjà dans le dessin ; **+** choisit n'importe quelle couleur.
@@ -36,7 +37,7 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
 
 - **Équipe** ou **Habitant** : un habitant ne se bat pas, il n'a que son apparence (son emploi du temps et ses liens viendront plus tard).
 - **Dans l'équipe au début de la partie** : sinon, un [événement](09-evenements.md) le fait entrer (action Équipe).
-- **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (48 × 48), l'**image fixe** (48 × 48, dans les menus), la **planche de combat** (ses animations en combat, à la Grandia, voir [Planches de combat](11-planches.md)) et le **modèle 3D** sur la carte.
+- **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (96 × 96, dans le style des planches de combat ; aussi sur les cartes de l'équipe en combat), l'**image fixe** (48 × 48, dans les menus), la **planche de combat** (ses animations en combat, à la Grandia, voir [Planches de combat](11-planches.md)) et le **modèle 3D** sur la carte.
 - Un membre de l'équipe a deux onglets :
   - **Général** :
     - **Niveaux et expérience** : niveau de départ, niveau max, et si les niveaux montent vite, normalement ou lentement ;
@@ -135,6 +136,9 @@ Supprimer un élément fait passer ses compétences en Physique ; supprimer un �
 
 Épée, arc, poings, bâton… Pour les coups physiques, ils jouent le rôle des éléments pour la magie : frapper avec un type d'arme fait monter son niveau, qui débloque des coups spéciaux (avec les compétences, bientôt). La fiche : le nom, l'icône, une description facultative.
 
+- **Attaque à distance** : le personnage tire de là où il est, sans aller jusqu'à sa cible (un arc).
+- **Animation des attaques** : jouée par l'attaque et l'attaque forte de ceux qui portent ce type d'arme, **à part de leur planche de combat** (la planche montre le geste, l'animation la flèche). Même format que l'animation d'une compétence : la 1re ligne l'impact, la 2e la flèche en vol. **Jouée** : **projectile puis impact** (la flèche part du tireur et vole jusqu'à sa cible) ou **sur la cible** (une entaille). Le coup tombe sur l'image du coup. L'**Arc** a la sienne : une flèche avec une petite traînée, puis une étincelle sur la cible. Sans animation, une arme à distance tire une simple flèche.
+
 ## États
 
 - **Durée** : en tours ; 0 = tout le combat.
@@ -152,6 +156,17 @@ Sans rien changer, la base contient 7 compétences (Boule de feu, Lance de glace
 ## Pendant la partie
 
 Les [événements](09-evenements.md) donnent et retirent des objets et de l'argent, font entrer ou sortir des personnages de l'équipe et lancent des combats contre les groupes ; leurs conditions vérifient ce que l'équipe a. L'équipe (membres, objets, argent) est gardée dans le navigateur, et dans les [sauvegardes de partie](05-sauvegarde-export.md#sauvegarde-de-partie). **Tout remettre au début** (Menu → Test des variables) la remet comme au début d'une partie.
+
+## Simuler un combat
+
+Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat**, pendant la partie.
+
+- **Ennemis** : le groupe à combattre (ses ennemis sont écrits dessous).
+- **Lieu** : **Ici, où est le joueur**, ou une carte : le combat a lieu à son point d'arrivée, puis le joueur revient où il était.
+- **Équipe** : cocher jusqu'à 4 personnages ; pour chacun, son **niveau** (− / +) et son niveau dans chaque élément (les éléments « jamais » ne sont pas proposés). Au départ : les personnages du début de partie, à leurs niveaux de départ.
+- **Lancer** : le combat commence, avec la météo du moment. Les objets du sac sont utilisables.
+- **Rien n'est gardé** : à la fin (victoire, défaite ou fuite), l'équipe, ses niveaux, ses objets et l'argent redeviennent comme avant.
+- Les choix sont retenus pour la simulation suivante.
 
 ## Sauvegarde et export
 
@@ -172,6 +187,7 @@ Les [événements](09-evenements.md) donnent et retirent des objets et de l'arge
 | `src/app/modules/database-editor/_sheets.scss` | Le style des champs des fiches (commun) |
 | `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel (icônes 16 × 16, portraits, images fixes) |
 | `src/app/modules/database-editor/sheet-editor/`, `shared/sprite-sheet.ts` | Les planches de combat (voir [11-planches](11-planches.md)) |
+| `src/app/modules/battle/battle-sim/` | Simuler un combat (Menu) : l'équipe choisie passe par `BattleService.simulateNext` |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
 | `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbEnemy`, `DbGroup`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |

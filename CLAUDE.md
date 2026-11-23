@@ -62,7 +62,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   weapon types), opened over the game. The editor is a shell (tables, list, sheet head, windows over it);
   `sheets/<table>-sheet/` one component per table, extending `shared/db-sheet.ts` (`DbSheet`: the store, constants,
   lookups); `shared/database-store.ts` (`DatabaseStore`, provided by the editor: the database, its saving, the table
-  shown, the pixel editor / weathers windows); `effects-editor/` (skills' and items' effects), `learn-select/`,
+  shown, the pixel editor / weathers windows); `effects-editor/` (skills' and items' effects), `anim-field/` (an effect animation's fields and preview: skills, weapon types), `learn-select/`,
   `pixel-editor/`, `sheet-editor/` (combat sprite sheets; format in `shared/sprite-sheet.ts`, docs/editeur/11-planches.md;
   drawn with PixelLab through the `planche-combat` skill),
   `stepper/`; `_popup.scss` the windows over it; `_sheets.scss` the sheets' shared fields (global, inside `app-database-editor`, in
@@ -73,7 +73,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   gauges, turns, commands, the action played, the end), `battle-rules` (stats, damage / heal, elements, weather,
   the enemies' choices), `battle-field` (the fighters placed on the map, moved,
   the camera, put back after), `sheet-sprite` (a fighter drawn from its sprite sheet), `progress` (experience, levels, element / weapon
-  growth, skills known), `battle-types`; `battle-hud/` the interface, `battle-outcome/` the end window
+  growth, skills known), `battle-types`; `battle-hud/` the interface, `battle-outcome/` the end window, `battle-sim/` the fight simulation (menu → Simuler un combat; `BattleService.simulateNext`, the party put back after)
   (design/combat.pen). The team's progress is kept in `party.ts` (`members`, `memberProgress`, `saveProgress`). Steps in docs/idees.md (point 9).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
