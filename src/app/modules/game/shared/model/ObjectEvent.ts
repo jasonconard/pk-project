@@ -8,6 +8,11 @@ import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { isPassageEvent } from "./Passage";
 import { Vec3 } from "./SceneUtils";
 import { currentParty } from "../../../database-editor/shared/party";
+import {
+  DATABASE_KEY,
+  loadDatabase,
+} from "../../../database-editor/shared/database-storage";
+import { cachedFromStorage } from "../../../../core/shared/local-store";
 
 /**
  * An event set on an object in the map editor's event window: what starts it (talking to the object, stepping on it,
@@ -44,7 +49,7 @@ export type EventAction =
       type: "message";
       name?: string;
       text: string;
-      /** Portrait (image path), shown next to the text. */ pic?: string;
+      /** Portrait shown next to the text: a character's (`character:<id>`) or an image path. */ pic?: string;
     }
   | { type: "choice"; options: ChoiceOption[] }
   | {
@@ -80,11 +85,44 @@ export interface ChoiceOption {
   actions: EventAction[];
 }
 
-/** Portraits to show next to a message (the game's faces; later the ones drawn in the portraits editor). */
-export const PORTRAITS: { pic: string; label: string }[] = [
-  { pic: "assets/img/faces/face-hugo.png", label: "Hugo" },
-  { pic: "assets/img/faces/face-jason.png", label: "Jason" },
-];
+/** A message's portrait taken from a character of the database: `character:<id>` (drawn in its sheet). */
+const CHARACTER_PORTRAIT = "character:";
+
+/** The first dialogues' pictures, now the portraits of the database's characters. */
+const OLD_FACES: Record<string, string> = {
+  "assets/img/faces/face-hugo.png": "ch-hugo",
+  "assets/img/faces/face-jason.png": "ch-jason",
+};
+
+/** A message's portrait choosing a character's portrait. */
+export function characterPortrait(characterId: string): string {
+  return CHARACTER_PORTRAIT + characterId;
+}
+
+/** The character whose portrait a message shows (also for the first dialogues' pictures), else undefined. */
+export function portraitCharacter(pic: string | undefined): string | undefined {
+  if (!pic) {
+    return undefined;
+  }
+  return pic.startsWith(CHARACTER_PORTRAIT)
+    ? pic.slice(CHARACTER_PORTRAIT.length)
+    : OLD_FACES[pic];
+}
+
+const portraitsById = cachedFromStorage(
+  [DATABASE_KEY],
+  () => new Map(loadDatabase().characters.map((c) => [c.id, c.portrait]))
+);
+
+/** The picture to show for a message's portrait (a character's one read from the database, else the path). */
+export function portraitSrc(pic: string | undefined): string | undefined {
+  const character = portraitCharacter(pic);
+  if (!character) {
+    return pic;
+  }
+  const portrait = portraitsById().get(character);
+  return portrait ?? (pic?.startsWith(CHARACTER_PORTRAIT) ? undefined : pic);
+}
 
 /** How deep choices and conditions may go in each other (a choice in a choice in a choice). */
 export const MAX_BRANCH_DEPTH = 3;

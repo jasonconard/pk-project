@@ -6,7 +6,11 @@ import {
   clampCounter,
   GameVariable,
 } from "../../variables-editor/shared/variables";
-import { EventConditions } from "../shared/model/ObjectEvent";
+import {
+  characterPortrait,
+  EventConditions,
+  portraitCharacter,
+} from "../shared/model/ObjectEvent";
 import { VariableTest } from "../shared/model/SceneEvent";
 import { WEATHER_CHOICES } from "../shared/weather/Weather";
 
@@ -20,6 +24,30 @@ export class EventEditorData {
   /** The database: items, characters (of the team), groups of enemies. */
   readonly db = loadDatabase();
   readonly teamCharacters = this.db.characters.filter((c) => c.team);
+  /** The portraits a message may show: the characters' drawn in their sheet. */
+  readonly portraits = this.db.characters
+    .filter((c) => c.portrait)
+    .map((c) => ({
+      pic: characterPortrait(c.id),
+      character: c.id,
+      label: c.name,
+      src: c.portrait as string,
+    }));
+
+  /** Has this character a portrait to show (drawn in its sheet)? */
+  hasPortrait(character: string | undefined): boolean {
+    return this.portraits.some((p) => p.character === character);
+  }
+
+  /** The picture of a message's portrait (a character's, else the image path). */
+  portraitSrc(pic: string | undefined): string | undefined {
+    const character = portraitCharacter(pic);
+    return (
+      (character &&
+        this.portraits.find((p) => p.character === character)?.src) ||
+      pic
+    );
+  }
 
   variable(id: string): GameVariable | undefined {
     return this.variables.find((v) => v.id === id);

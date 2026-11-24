@@ -17,7 +17,7 @@ import {
 } from "../../../variables-editor/shared/variable-values";
 import { clampCounter } from "../../../variables-editor/shared/variables";
 import { playSound } from "./sfx";
-import { conditionsFit, EventContext } from "../model/ObjectEvent";
+import { conditionsFit, EventContext, portraitSrc } from "../model/ObjectEvent";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import {
   giveItem,
@@ -208,7 +208,9 @@ export class SequenceService {
     if (!msg) {
       return this.nextSequence();
     }
-    this.messageState.set(msg);
+    this.messageState.set(
+      msg.pic ? { ...msg, pic: portraitSrc(msg.pic) } : msg
+    );
   }
 
   private setWait(wait: InstructionWait | undefined): void {

@@ -20,7 +20,7 @@ import {
 import {
   EventAction,
   MAX_CHOICE_OPTIONS,
-  PORTRAITS,
+  portraitCharacter,
 } from "../../shared/model/ObjectEvent";
 import { playSound, SOUND_CHOICES } from "../../shared/services/sfx";
 import {
@@ -61,7 +61,7 @@ export class EventActionComponent {
 
   protected readonly data = inject(EventEditorData);
   protected readonly sounds = SOUND_CHOICES;
-  protected readonly portraits = PORTRAITS;
+  protected readonly portraitCharacter = portraitCharacter;
   protected readonly maxOptions = MAX_CHOICE_OPTIONS;
   protected readonly countMax = ITEM_COUNT_MAX;
   protected readonly moneyMax = MONEY_MAX;
@@ -71,6 +71,17 @@ export class EventActionComponent {
 
   protected set(patch: Partial<EventAction>): void {
     this.changed.emit(patch);
+  }
+
+  /** Another portrait; a character's also fills « Qui parle » when it is empty. */
+  protected setPortrait(pic: string): void {
+    const action = this.action();
+    const portrait = this.data.portraits.find((p) => p.pic === pic);
+    const name =
+      portrait && action.type === "message" && !action.name?.trim()
+        ? { name: portrait.label }
+        : {};
+    this.set({ pic: pic || undefined, ...name });
   }
 
   /** Another variable: its kind decides the change (a flag becomes true, a counter is set to 1). */

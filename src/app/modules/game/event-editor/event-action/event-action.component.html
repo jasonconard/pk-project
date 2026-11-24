@@ -2,24 +2,26 @@
 @switch (action.type) {
   @case ("message") {
     <div class="row">
+      @let portrait = data.portraitSrc(action.pic);
+      @let speaker = portraitCharacter(action.pic);
       <label
         class="portrait"
         [title]="action.pic ? 'Changer le portrait' : 'Ajouter un portrait'"
       >
-        @if (action.pic) {
-          <img [src]="action.pic" alt="" />
+        @if (portrait) {
+          <img [src]="portrait" alt="" />
         } @else {
           <svg lucideImagePlus></svg>
         }
-        <select
-          aria-label="Portrait"
-          (change)="set({ pic: value($event) || undefined })"
-        >
+        <select aria-label="Portrait" (change)="setPortrait(value($event))">
           <option value="" [selected]="!action.pic">Sans portrait</option>
-          @for (p of portraits; track p.pic) {
-            <option [value]="p.pic" [selected]="p.pic === action.pic">
+          @for (p of data.portraits; track p.pic) {
+            <option [value]="p.pic" [selected]="p.character === speaker">
               {{ p.label }}
             </option>
+          }
+          @if (action.pic && !data.hasPortrait(speaker)) {
+            <option [value]="action.pic" selected>Autre image</option>
           }
         </select>
       </label>
