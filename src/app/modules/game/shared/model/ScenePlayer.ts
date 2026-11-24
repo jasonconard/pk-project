@@ -26,7 +26,10 @@ export interface ScenePlayer {
 
 export interface PlayerTex {
   link: string;
+  /** One picture's size (pixels = map units). */
   size: Vec2;
+  /** A walking sheet of the database (see WALK_CELL), else the first sprite's layout. */
+  walk?: boolean;
 }
 
 export interface PlayerMove {

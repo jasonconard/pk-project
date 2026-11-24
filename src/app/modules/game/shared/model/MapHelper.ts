@@ -7,7 +7,8 @@ import {
   ZONE_ID,
 } from "./Zone";
 import { SceneChunk, SceneMap, StairsSide } from "./SceneMap";
-import { ScenePlayer } from "./ScenePlayer";
+import { PlayerTex, ScenePlayer } from "./ScenePlayer";
+import { playerLook } from "./player-look";
 import {
   CAMERA_LOOK,
   Game,
@@ -75,10 +76,45 @@ export class MapHelper {
 
   public buildPlayer() {
     const p = this.scenePlayer;
+    p.tex = playerLook();
     const spriteGroup = new THREE.Group();
+    spriteGroup.add(this.makePlayerSprite(p.tex));
+
+    const camera = this.originGame.camera;
+    const scene = this.originGame.scene;
+
+    this.addMesh(p.id, spriteGroup);
+    camera.position.x = 0;
+    scene.add(spriteGroup);
+
+    this.scenePlayer.mesh = spriteGroup;
+
+    this.updateVisibleChunks();
+  }
+
+  /**
+   * The player drawn again when the team leader or its walking sheet changed (the database editor, an event making
+   * someone join or leave the team). Cheap when nothing changed.
+   */
+  public refreshPlayerLook() {
+    const look = playerLook();
+    const group = this.scenePlayer.mesh;
+    if (look === this.scenePlayer.tex || !group) {
+      return;
+    }
+    this.scenePlayer.tex = look;
+    const old = group.children[0] as THREE.Mesh;
+    group.remove(old);
+    old.geometry.dispose();
+    (old.material as THREE.Material).dispose();
+    group.add(this.makePlayerSprite(look));
+  }
+
+  /** The player's sprite: one picture of its texture (see PlayerService), with its shadow caster. */
+  private makePlayerSprite(tex: PlayerTex): THREE.Mesh {
     const spritePlane = BasicMeshService.makePlane(
-      p.tex.link,
-      convertVec2(p.tex.size),
+      tex.link,
+      convertVec2(tex.size),
       true
     );
     const mat = spritePlane.material as THREE.Material;
@@ -98,21 +134,8 @@ export class MapHelper {
     this.playerShadow = new THREE.Mesh(spritePlane.geometry, shadowMaterial);
     this.playerShadow.castShadow = true;
     spritePlane.add(this.playerShadow);
-    spritePlane.position.x = 0;
-    spritePlane.position.y = (p.tex.size.y / 2) * stretch;
-    spritePlane.position.z = 0;
-    spriteGroup.add(spritePlane);
-
-    const camera = this.originGame.camera;
-    const scene = this.originGame.scene;
-
-    this.addMesh(p.id, spriteGroup);
-    camera.position.x = spritePlane.position.x;
-    scene.add(spriteGroup);
-
-    this.scenePlayer.mesh = spriteGroup;
-
-    this.updateVisibleChunks();
+    spritePlane.position.set(0, (tex.size.y / 2) * stretch, 0);
+    return spritePlane;
   }
 
   /**

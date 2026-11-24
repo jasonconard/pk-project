@@ -12,11 +12,14 @@ import {
   DbWeapon,
   GameDatabase,
   PICTURE_SIZES,
+  WALK_CELL,
+  WALK_DIRS,
   learnChoices,
   partsLabel,
 } from "./database";
 import { loadDatabase, saveDatabase } from "./database-storage";
 import { SpriteSheet } from "./sprite-sheet";
+import { WalkCell, walkFrame } from "./walk-sheet";
 import { WeatherType } from "../../game/shared/weather/Weather";
 
 export type Row =
@@ -39,6 +42,8 @@ export interface IconEdit {
   value?: string;
   w: number;
   h: number;
+  /** One picture of the walking sheet (the rest of the sheet is kept). */
+  cell?: WalkCell;
 }
 
 /** The combat sprite sheet being edited: whose, the window's title, the sheet. */
@@ -96,6 +101,7 @@ export class DatabaseStore {
       icon: `Icône de ${name}`,
       portrait: `Portrait de ${name}`,
       sprite: `Image fixe de ${name}`,
+      walk: `Planche de marche de ${name}`,
     };
     const size = PICTURE_SIZES[field];
     this.iconEdit.set({
@@ -104,6 +110,21 @@ export class DatabaseStore {
       title: title ?? titles[field],
       value: (row as DbCharacter)[field],
       ...size,
+    });
+  }
+
+  /** Draws one picture of a character's or an NPC's walking sheet. */
+  async editWalkFrame(row: DbCharacter | DbNpc, cell: WalkCell): Promise<void> {
+    const name = row.name.trim() || "sans nom";
+    const dir = WALK_DIRS[cell.row].label.toLowerCase();
+    this.iconEdit.set({
+      id: row.id,
+      field: "walk",
+      title: `${name} · ${dir} · image ${cell.col + 1}`,
+      value: await walkFrame(row.walk, cell),
+      w: WALK_CELL.w,
+      h: WALK_CELL.h,
+      cell,
     });
   }
 

@@ -66,6 +66,7 @@ import {
 import { DatabaseStore, Row } from "./shared/database-store";
 import { CODE_DATABASE } from "../../../assets/database/database";
 import { DbSheet } from "./shared/db-sheet";
+import { withWalkFrame } from "./shared/walk-sheet";
 import { downloadFile } from "../game/shared/util/ts-source";
 import { PixelEditorComponent } from "./pixel-editor/pixel-editor.component";
 import { SheetEditorComponent } from "./sheet-editor/sheet-editor.component";
@@ -455,18 +456,26 @@ export class DatabaseEditorComponent extends DbSheet {
     this.editPicture(row, "icon", title);
   }
 
-  protected iconDone(picture: string | undefined): void {
+  /** The picture drawn: put in its row (one picture of a walking sheet: put in the sheet). */
+  protected async iconDone(drawn: string | undefined): Promise<void> {
     const target = this.iconEdit();
     this.iconEdit.set(null);
-    if (target) {
-      this.edit(target.id, (r) => {
-        const next = { ...r, [target.field]: picture } as Row;
-        if (!picture) {
-          delete (next as DbCharacter)[target.field];
-        }
-        return next;
-      });
+    if (!target) {
+      return;
     }
+    let picture = drawn;
+    if (target.cell) {
+      const row = this.rows().find((r) => r.id === target.id) as
+        DbCharacter | DbNpc | undefined;
+      picture = await withWalkFrame(row?.walk, target.cell, drawn);
+    }
+    this.edit(target.id, (r) => {
+      const next = { ...r, [target.field]: picture } as Row;
+      if (!picture) {
+        delete (next as DbCharacter)[target.field];
+      }
+      return next;
+    });
   }
 
   /** The dot shown without an icon: the row's color, or its element's. */

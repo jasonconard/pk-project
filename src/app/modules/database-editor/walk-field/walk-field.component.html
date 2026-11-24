@@ -1,0 +1,45 @@
+@let owner = this.owner();
+@let sheet = owner.walk ? "url(" + owner.walk + ")" : "none";
+<div class="block">
+  <div class="block-head">
+    <h3>Planche de marche</h3>
+    <small>{{ cell.w }}×{{ cell.h }} · 4 directions × 3 images</small>
+  </div>
+  <div class="walk">
+    <div class="grid">
+      @for (dir of dirs; track dir.id; let row = $index) {
+        <span class="dir">{{ dir.label }}</span>
+        @for (col of frames; track col) {
+          <button
+            type="button"
+            class="frame"
+            [class.stand]="col === stand"
+            [title]="dir.label + ' · image ' + (col + 1) + ' : dessiner'"
+            [style.background-image]="sheet"
+            [style.background-position]="position(col, row)"
+            (click)="drawFrame(col, row)"
+          ></button>
+        }
+      }
+    </div>
+    <div class="preview" aria-hidden="true">
+      @if (owner.walk) {
+        <span
+          class="frame big"
+          [style.background-image]="sheet"
+          [style.background-position]="position(previewCol(), previewRow())"
+        ></span>
+      } @else {
+        <span class="no-icon big"></span>
+      }
+      <small>Aperçu</small>
+    </div>
+  </div>
+  <button type="button" class="whole" (click)="editPicture(owner, 'walk')">
+    <svg lucidePencil></svg> Planche entière (dessiner ou importer un PNG)
+  </button>
+  <p class="note">
+    <svg lucideInfo></svg> Touche une image pour la dessiner. Le personnage
+    marche avec les 3 images ; celle du milieu (encadrée) est celle à l'arrêt.
+  </p>
+</div>

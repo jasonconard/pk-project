@@ -282,6 +282,8 @@ export interface DbCharacter {
   sprite?: string;
   /** The combat animations (see sprite-sheet.ts). */
   sheet?: SpriteSheet;
+  /** The walking sheet on the map (see WALK_CELL): the team's leader is drawn with it. */
+  walk?: string;
   /** The 3D model on the map. */
   model?: string;
   levelStart: number;
@@ -306,13 +308,31 @@ export interface DbNpc {
   /** Pixel art: the list's small face, the dialogues' portrait. */
   icon?: string;
   portrait?: string;
+  /** The walking sheet on the map (see WALK_CELL). */
+  walk?: string;
 }
+
+/**
+ * The walking sheet on the map: one picture of WALK_FRAMES columns (left foot, standing, right foot) and one row per
+ * direction (WALK_DIRS, in that order). A sprite pixel is a map pixel (the old player sprite was 14×22).
+ */
+export const WALK_CELL = { w: 16, h: 24 };
+export const WALK_FRAMES = 3;
+export const WALK_DIRS = [
+  { id: "down", label: "Bas" },
+  { id: "left", label: "Gauche" },
+  { id: "right", label: "Droite" },
+  { id: "up", label: "Haut" },
+] as const;
+/** The column of the standing picture. */
+export const WALK_STAND = 1;
 
 /** Pixel sizes of a character's pictures. */
 export const PICTURE_SIZES = {
   icon: { w: 16, h: 16 },
   portrait: { w: 96, h: 96 },
   sprite: { w: 48, h: 48 },
+  walk: { w: WALK_CELL.w * WALK_FRAMES, h: WALK_CELL.h * WALK_DIRS.length },
 };
 
 /** The moments of the day (the calendar, point 7, will use them too). */

@@ -12,7 +12,7 @@ import {
  * (give an item, money, a character joins…) and read by their conditions. A new game starts with the characters
  * marked « Dans l'équipe au début », no item and no money.
  */
-const STORAGE_KEY = "pk-party";
+export const PARTY_KEY = "pk-party";
 export const MONEY_MAX = 9_999_999;
 export const ITEM_COUNT_MAX = 99;
 
@@ -52,7 +52,7 @@ export function startParty(): PartyState {
 }
 
 function readParty(): PartyState | null {
-  const party = readJson<PartyState>(STORAGE_KEY);
+  const party = readJson<PartyState>(PARTY_KEY);
   return party &&
     Array.isArray(party.team) &&
     party.items &&
@@ -63,12 +63,12 @@ function readParty(): PartyState | null {
 
 function writeParty(party: PartyState): void {
   // (no room: the team lives until the page closes)
-  writeJson(STORAGE_KEY, party);
+  writeJson(PARTY_KEY, party);
 }
 
 /** The team now. Don't change the object returned. */
 export const currentParty = cachedFromStorage(
-  [STORAGE_KEY],
+  [PARTY_KEY],
   (): PartyState => readParty() ?? startParty()
 );
 

@@ -34,6 +34,8 @@ const HOP_BODY = 7;
 const VISIBILITY_EVERY = 4;
 /** The action in front of the player is looked for every this many input frames (120 Hz). */
 const ACTION_EVERY = 4;
+/** Frames between two looks at how the player is drawn (the team leader's walking sheet). */
+const LOOK_EVERY = 60;
 
 @Service()
 export class GameMapService {
@@ -388,6 +390,10 @@ export class GameMapService {
       camera.position.z -= this.moveRatio.z;
     }
 
+    // The team leader or its walking sheet may have changed (an event, the database editor): about once a second
+    if (game.frame % LOOK_EVERY === 0) {
+      mapHelper.refreshPlayerLook();
+    }
     PlayerService.updatePlayerSprite({
       mapHelper: mapHelper,
       player: mapHelper.scenePlayer,

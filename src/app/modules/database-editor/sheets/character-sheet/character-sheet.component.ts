@@ -34,10 +34,12 @@ import { StepperComponent } from "../../stepper/stepper.component";
 
 /** The sheet of a row of the « character » table. */
 import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
+import { WalkFieldComponent } from "../../walk-field/walk-field.component";
 @Component({
   selector: "db-character-sheet",
   imports: [
     SheetTileComponent,
+    WalkFieldComponent,
     StepperComponent,
     LucideBan,
     LucideBox,
