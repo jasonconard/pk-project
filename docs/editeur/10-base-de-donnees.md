@@ -38,7 +38,7 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
 Les membres de l'équipe (ceux qui se battent). Les habitants sont des [PNJ](#pnj).
 
 - **Dans l'équipe au début de la partie** : sinon, un [événement](09-evenements.md) le fait entrer (action Équipe).
-- **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (96 × 96, dans le style des planches de combat ; aussi sur les cartes de l'équipe en combat), l'**image fixe** (48 × 48, dans les menus), la **planche de combat** (ses animations en combat, à la Grandia, voir [Planches de combat](11-planches.md)) et le **modèle 3D** sur la carte.
+- **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (96 × 96, dans le style des planches de combat ; aussi sur les cartes de l'équipe en combat), l'**image fixe** (48 × 48, dans les menus), la **planche de combat** (ses animations en combat, à la Grandia, voir [Planches de combat](11-planches.md)), le **modèle 3D** sur la carte et la **planche de marche** (voir [plus bas](#planche-de-marche)) : le joueur est dessiné avec celle du chef d'équipe (le premier de l'équipe) ; sans elle, avec l'ancien sprite.
 - Deux onglets :
   - **Général** :
     - **Niveaux et expérience** : niveau de départ, niveau max, et si les niveaux montent vite, normalement ou lentement ;
@@ -57,9 +57,18 @@ Les personnages non joueurs (le boulanger, le maire…) : ils ne se battent pas,
 - **La petite tête** (l'icône à côté du nom, dans la liste ; sans elle, la liste montre le portrait).
 - **Le portrait** des dialogues (96 × 96) : il se choisit dans l'action Message des [événements](09-evenements.md), sous « PNJ ».
 - **Description** (facultative).
-- À venir : la planche de marche (4 directions × 3 images) et leur place sur les cartes, avec leurs événements.
+- **La planche de marche** (voir [plus bas](#planche-de-marche)).
+- À venir : leur place sur les cartes, avec leurs événements.
 
 Les habitants des premières versions (des personnages « Habitant ») sont passés tout seuls dans cette table, avec leur nom, leur description et leurs images.
+
+### Planche de marche
+
+Comment un personnage ou un PNJ marche sur la carte : une image de 48 × 96, faite de 12 images de 16 × 24 (un pixel de l'image = un pixel du décor). Une ligne par direction (Bas, Gauche, Droite, Haut) et 3 images par ligne : pied gauche, à l'arrêt (celle du milieu, encadrée), pied droit. En marchant, le personnage passe par 1, 2, 3, 2.
+
+- **Toucher une image** l'ouvre dans l'éditeur pixel (16 × 24) ; le reste de la planche est gardé.
+- **Planche entière** ouvre toute la planche (48 × 96) : pour la dessiner d'un coup ou **importer un PNG** (par exemple une planche faite avec PixelLab, à la même taille).
+- L'**aperçu** le fait marcher dans les 4 directions.
 
 ## Ennemis
 
@@ -197,6 +206,8 @@ Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat
 | `src/app/modules/database-editor/effects-editor/` | Les effets d'une compétence ou d'un objet |
 | `src/app/modules/database-editor/learn-select/` | Le choix d'un élément simple ou d'un type d'arme |
 | `src/app/modules/database-editor/_sheets.scss` | Le style des champs des fiches (commun) |
+| `src/app/modules/database-editor/walk-field/`, `shared/walk-sheet.ts` | La planche de marche dans les fiches (grille, aperçu), une image découpée ou remise dans la planche |
+| `src/app/modules/game/shared/model/player-look.ts` | Le joueur dessiné avec la planche du chef d'équipe (`PlayerService` choisit l'image) |
 | `src/app/modules/database-editor/pixel-editor/` | L'éditeur pixel (icônes 16 × 16, portraits, images fixes) |
 | `src/app/modules/database-editor/sheet-editor/`, `shared/sprite-sheet.ts` | Les planches de combat (voir [11-planches](11-planches.md)) |
 | `src/app/modules/battle/battle-sim/` | Simuler un combat (Menu) : l'équipe choisie passe par `BattleService.simulateNext` |
