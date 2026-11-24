@@ -12495,6 +12495,1718 @@
       "width": 840,
       "height": 300,
       "content": "Arbre d'actions (point 4, Dialogues)\n\n• Les actions Choix et Condition contiennent des branches : un trait de couleur à gauche (orange : réponses d'un choix, bleu : Alors / Sinon) et un décalage. Chaque branche finit par « + Action ».\n• Choix : 2 à 4 réponses (pastilles, « + Réponse »). Condition : mêmes réglages que les conditions de l'événement (variable, heure, météo), « et… » pour en ajouter.\n• Le chevron plie une action à branches (résumé « Oui · 2 actions ») ou une seule branche. Profondeur maximale : 3 niveaux.\n• ⋮ sur chaque action : Monter, Descendre, Dupliquer, Retirer (remplace les trois boutons, trop larges dans une branche).\n• « + Action » ouvre une feuille avec les 9 sortes d'action ; nouveaux : Choix, Condition, Arrêter l'événement.\n• Message : un portrait (images du jeu, plus tard ceux du point 6) à gauche de qui parle.\n• Téléphone : le déclencheur et les conditions se replient en une ligne de résumé quand on travaille sur les actions."
+    },
+    {
+      "type": "frame",
+      "id": "D9Ev6",
+      "x": 3604,
+      "y": 320,
+      "name": "Édition · Portrait · Poser un PNJ",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "UanOS",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 28,
+          "id": "AsUUM",
+          "x": 0,
+          "y": 0,
+          "name": "Liseré mode édition",
+          "fill": "#00000000",
+          "width": 390,
+          "height": 844,
+          "stroke": "$edit",
+          "strokeWidth": 3
+        },
+        {
+          "type": "frame",
+          "id": "UTTQ2",
+          "x": 92,
+          "y": 300,
+          "name": "PNJ posé (aperçu)",
+          "width": 64,
+          "height": 94,
+          "fill": "#FFB04A22",
+          "cornerRadius": 6,
+          "stroke": "$edit",
+          "strokeWidth": 2,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "h8K8LI",
+              "x": 4,
+              "y": 3,
+              "name": "Sprite",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/npc/walk-0-1.png",
+                "mode": "contain"
+              },
+              "width": 56,
+              "height": 88
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "eBNaq",
+          "x": 10,
+          "y": 50,
+          "name": "Barre d'édition",
+          "width": 370,
+          "fill": "$panel",
+          "cornerRadius": 18,
+          "gap": 6,
+          "padding": 6,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "W0NJZ",
+              "name": "Bouton Jouer",
+              "height": 40,
+              "fill": "$edit",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "jIf3v",
+                  "name": "play",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "play",
+                  "library": "lucide",
+                  "fill": "#2A1A00"
+                },
+                {
+                  "type": "text",
+                  "id": "Z6bTdl",
+                  "name": "Jouer",
+                  "fill": "#2A1A00",
+                  "content": "Jouer",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "j67cpK",
+              "name": "Carte ouverte",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "DIa8K",
+                  "name": "map",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "map",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                },
+                {
+                  "type": "text",
+                  "id": "r5xQ4e",
+                  "name": "Ville",
+                  "fill": "$text",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Ville",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "O3XgV",
+                  "name": "chevron-down",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-down",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "uVHpv",
+              "name": "undo-2",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "mLOae",
+                  "name": "undo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "undo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "T0s8a",
+              "name": "redo-2",
+              "opacity": 0.4,
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "VKQjA",
+                  "name": "redo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "redo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "J5G5d",
+              "name": "Plus",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "IgrXA",
+                  "name": "ellipsis-vertical",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "ellipsis-vertical",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "tVump",
+          "x": 10,
+          "y": 104,
+          "name": "Aide contextuelle",
+          "fill": "#22232AB3",
+          "cornerRadius": 12,
+          "gap": 8,
+          "padding": [
+            6,
+            8,
+            6,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "x2pyMi",
+              "name": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fill": "$text-dim",
+              "content": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fontFamily": "$font",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "icon",
+              "id": "k5XhrN",
+              "name": "x",
+              "width": 14,
+              "height": 14,
+              "icon": "x",
+              "library": "lucide",
+              "fill": "$text-dim"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "M2G29",
+          "x": 0,
+          "y": 604,
+          "name": "Dock d'outils",
+          "width": 390,
+          "height": 240,
+          "fill": "$panel-solid",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            12,
+            0,
+            34,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "xhErJ",
+              "name": "Onglets",
+              "width": "fill_container",
+              "gap": 6,
+              "padding": [
+                0,
+                12
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ZAN0G",
+                  "name": "Onglet Objets",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "F8cz6h",
+                      "name": "box",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "box",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wJdut",
+                  "name": "Onglet PNJ",
+                  "height": 34,
+                  "fill": "#FFB04A33",
+                  "cornerRadius": 17,
+                  "stroke": "#FFB04A80",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ZgDso",
+                      "name": "user-round",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "user-round",
+                      "library": "lucide",
+                      "fill": "$edit"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dvwv6",
+                      "name": "PNJ",
+                      "fill": "$edit",
+                      "content": "PNJ",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PvQNu",
+                  "name": "Onglet Sols",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Fmpl4",
+                      "name": "paintbrush",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "paintbrush",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "OxDJd",
+                  "name": "Onglet Reliefs",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "IdBC6",
+                      "name": "mountain",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "mountain",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "TGMSy",
+                  "name": "Onglet Morceaux",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "QKwZG",
+                      "name": "layout-grid",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "layout-grid",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RMIMD",
+                  "name": "Onglet Événements",
+                  "opacity": 0.45,
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "vawPX",
+                      "name": "zap",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "zap",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "O7n2r",
+              "name": "Palette",
+              "width": "fill_container",
+              "gap": 8,
+              "padding": [
+                0,
+                12
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "YQayO",
+                  "name": "Entrée Aucun",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "FM7g2",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#FFFFFF14",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "sOfEQ",
+                          "name": "mouse-pointer-2",
+                          "width": 26,
+                          "height": 26,
+                          "icon": "mouse-pointer-2",
+                          "library": "lucide",
+                          "fill": "#FFFFFFE6"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "rz1wr",
+                      "name": "Aucun",
+                      "fill": "$text-dim",
+                      "content": "Aucun",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "u0Qnhh",
+                  "name": "Entrée Boulanger",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "IgI77",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#3A3B44",
+                      "cornerRadius": 14,
+                      "stroke": "$edit",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "XXZ2W",
+                          "name": "Sprite boulanger",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/npc/walk-0-1.png",
+                            "mode": "contain"
+                          },
+                          "width": 30,
+                          "height": 47
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "rdjJP",
+                      "name": "Boulanger",
+                      "fill": "$edit",
+                      "content": "Boulanger",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "l9bHF",
+                  "name": "Entrée Maire",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Gviyf",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#3A3B44",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "kr0uj",
+                          "name": "user-round",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "user-round",
+                          "library": "lucide",
+                          "fill": "$text-dim"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "s1Utx",
+                      "name": "Le maire",
+                      "fill": "$text-dim",
+                      "content": "Le maire",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "MUqcX",
+                  "name": "Entrée Nouveau",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "aqN4W",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#FFFFFF14",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "P0kwd6",
+                          "name": "plus",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#FFFFFFE6"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "T0PJua",
+                      "name": "Nouveau",
+                      "fill": "$text-dim",
+                      "content": "Nouveau",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dUwwM",
+              "name": "Pied du dock",
+              "width": "fill_container",
+              "padding": [
+                0,
+                16
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ujQw4",
+                  "name": "Sapin : toucher le sol pour poser",
+                  "fill": "$text-dim",
+                  "content": "Boulanger : toucher le sol pour le poser",
+                  "fontFamily": "$font",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "H6NJ4",
+                  "name": "Recherche",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HNSue",
+                      "name": "search",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lMmy6",
+                      "name": "Chercher",
+                      "fill": "$text-dim",
+                      "content": "Chercher",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bT97O",
+      "x": 4054,
+      "y": 320,
+      "name": "Édition · Portrait · PNJ sélectionné",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "Blj3E",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 28,
+          "id": "daOzv",
+          "x": 0,
+          "y": 0,
+          "name": "Liseré mode édition",
+          "fill": "#00000000",
+          "width": 390,
+          "height": 844,
+          "stroke": "$edit",
+          "strokeWidth": 3
+        },
+        {
+          "type": "rectangle",
+          "id": "Y39lUM",
+          "x": 96,
+          "y": 232,
+          "name": "PNJ boulanger",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/npc/walk-0-1.png",
+            "mode": "contain"
+          },
+          "width": 56,
+          "height": 88
+        },
+        {
+          "type": "frame",
+          "id": "yPk5c",
+          "x": 10,
+          "y": 50,
+          "name": "Barre d'édition",
+          "width": 370,
+          "fill": "$panel",
+          "cornerRadius": 18,
+          "gap": 6,
+          "padding": 6,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "SUFuJ",
+              "name": "Bouton Jouer",
+              "height": 40,
+              "fill": "$edit",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Xi6QP",
+                  "name": "play",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "play",
+                  "library": "lucide",
+                  "fill": "#2A1A00"
+                },
+                {
+                  "type": "text",
+                  "id": "rGBlX",
+                  "name": "Jouer",
+                  "fill": "#2A1A00",
+                  "content": "Jouer",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dZ27a",
+              "name": "Carte ouverte",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "NZJtj",
+                  "name": "map",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "map",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                },
+                {
+                  "type": "text",
+                  "id": "Ve6gR",
+                  "name": "Ville",
+                  "fill": "$text",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Ville",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "jB2lY",
+                  "name": "chevron-down",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-down",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "YRdNF",
+              "name": "undo-2",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "dUyWU",
+                  "name": "undo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "undo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NLeSZ",
+              "name": "redo-2",
+              "opacity": 0.4,
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "X5qvM",
+                  "name": "redo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "redo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "uQU3z",
+              "name": "Plus",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "OU70N",
+                  "name": "ellipsis-vertical",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "ellipsis-vertical",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zdNZm",
+          "x": 10,
+          "y": 104,
+          "name": "Aide contextuelle",
+          "enabled": false,
+          "fill": "#22232AB3",
+          "cornerRadius": 12,
+          "gap": 8,
+          "padding": [
+            6,
+            8,
+            6,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "v4Ixkx",
+              "name": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fill": "$text-dim",
+              "content": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fontFamily": "$font",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "icon",
+              "id": "WxFpR",
+              "name": "x",
+              "width": 14,
+              "height": 14,
+              "icon": "x",
+              "library": "lucide",
+              "fill": "$text-dim"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 14,
+          "id": "uvcqQ",
+          "x": 86,
+          "y": 224,
+          "name": "Contour sélection",
+          "fill": "#FFB04A1A",
+          "width": 76,
+          "height": 104,
+          "stroke": "$edit",
+          "strokeWidth": 2.5
+        },
+        {
+          "type": "frame",
+          "id": "HPnwb",
+          "x": 0,
+          "y": 336,
+          "name": "Fiche objet",
+          "width": 390,
+          "height": 508,
+          "fill": "$panel-solid",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            10,
+            16,
+            30,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "g9GGi",
+              "name": "Poignée",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "ilpr2",
+                  "name": "Grip",
+                  "fill": "#FFFFFF4D",
+                  "width": 40,
+                  "height": 4
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "pTyzY",
+              "name": "En-tête",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ZN5Kp",
+                  "name": "Vignette",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "#3A3B44",
+                  "cornerRadius": 12,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "jIEEI",
+                      "name": "Vignette PNJ",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "images/npc/walk-0-1.png",
+                        "mode": "contain"
+                      },
+                      "width": 24,
+                      "height": 38
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LX8fe",
+                  "name": "Titre",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "W5rsT",
+                      "name": "Maison rouge",
+                      "fill": "$text",
+                      "content": "Le boulanger",
+                      "fontFamily": "$font",
+                      "fontSize": 17,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zH39a",
+                      "name": "Glisser l'objet pour le déplacer",
+                      "fill": "$text-dim",
+                      "content": "PNJ · glisser pour le déplacer",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gHBTs",
+                  "name": "Fermer",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "$chip",
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ZzPWl",
+                      "name": "x",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "K4GRz",
+              "name": "Actions rapides",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "s0CVWZ",
+                  "name": "Action Tourner",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "$chip",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ovcS9",
+                      "name": "rotate-cw",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "rotate-cw",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Ijywd",
+                      "name": "Tourner",
+                      "fill": "$text-dim",
+                      "content": "Tourner",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "b7CtMk",
+                  "name": "Action Dupliquer",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "$chip",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "r9kdRO",
+                      "name": "copy",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "copy",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "q4kmDH",
+                      "name": "Dupliquer",
+                      "fill": "$text-dim",
+                      "content": "Dupliquer",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "F71Wk",
+                  "name": "Action Modèle",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "$chip",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "neqtv",
+                      "name": "box",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "square-user",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "mzzFO",
+                      "name": "Modèle",
+                      "fill": "$text-dim",
+                      "content": "Fiche",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DQzEb",
+                  "name": "Action Supprimer",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "#FF6B6B1F",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "GbBoT",
+                      "name": "trash",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "trash",
+                      "library": "lucide",
+                      "fill": "$danger"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yhQmP",
+                      "name": "Supprimer",
+                      "fill": "$danger",
+                      "content": "Supprimer",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ef7b0",
+              "name": "Options",
+              "width": "fill_container",
+              "fill": "$chip",
+              "cornerRadius": 14,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hDybf",
+                  "name": "Option Déplacement",
+                  "width": "fill_container",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "bottom": 1
+                  },
+                  "gap": 14,
+                  "padding": [
+                    8,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XSzl8",
+                      "name": "Déplacement",
+                      "fill": "$text",
+                      "content": "Déplacement",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "P9HSCW",
+                      "name": "Choix",
+                      "height": 32,
+                      "fill": "#FFFFFF14",
+                      "cornerRadius": 10,
+                      "gap": 2,
+                      "padding": 3,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "JWAJb",
+                          "name": "Immobile",
+                          "height": "fill_container",
+                          "fill": "#FFB04A33",
+                          "cornerRadius": 8,
+                          "padding": [
+                            0,
+                            9
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "WOXRO",
+                              "name": "Immobile",
+                              "fill": "$edit",
+                              "content": "Immobile",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "gH6EC",
+                          "name": "Regarde autour",
+                          "height": "fill_container",
+                          "fill": "#00000000",
+                          "cornerRadius": 8,
+                          "padding": [
+                            0,
+                            9
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "UQY51",
+                              "name": "Regarde autour",
+                              "fill": "$text-dim",
+                              "content": "Regarde autour",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ebhvX",
+                          "name": "Se promène",
+                          "height": "fill_container",
+                          "fill": "#00000000",
+                          "cornerRadius": 8,
+                          "padding": [
+                            0,
+                            9
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "B8ihxn",
+                              "name": "Se promène",
+                              "fill": "$text-dim",
+                              "content": "Se promène",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PNHqz",
+                  "name": "Option Se tourne vers le joueur qui lui parle",
+                  "width": "fill_container",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "bottom": 1
+                  },
+                  "gap": 10,
+                  "padding": [
+                    8,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "gxicV",
+                      "name": "Se tourne vers le joueur qui lui parle",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Se tourne vers le joueur qui lui parle",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Py2p1",
+                      "name": "Interrupteur",
+                      "width": 40,
+                      "height": 24,
+                      "fill": "$edit",
+                      "cornerRadius": 12,
+                      "padding": 3,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "W9NNUD",
+                          "name": "Bouton",
+                          "fill": "#FFFFFF",
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fxfRd",
+              "name": "Événements",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "crwoH",
+                  "name": "Titre événements",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "i66UO",
+                      "name": "zap",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "zap",
+                      "library": "lucide",
+                      "fill": "$edit"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Q0LUm9",
+                      "name": "Événements",
+                      "fill": "$text",
+                      "content": "Événements",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VZd0i",
+                  "name": "Événement Parler",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 12,
+                  "gap": 10,
+                  "padding": [
+                    9,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "z7w0Hq",
+                      "name": "message-circle",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "message-circle",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZcFlF",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "RZl2t",
+                          "name": "Parler",
+                          "fill": "$text",
+                          "content": "Parler",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "O6wOi",
+                          "name": "« Du pain tout chaud ! » · choix Acheter / Non merci",
+                          "fill": "$text-dim",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "« Du pain tout chaud ! » · choix Acheter / Non merci",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "JEVzl",
+                      "name": "chevron-right",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "chevron-right",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GktrL",
+                  "name": "Événement Parler · après 18 h",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 12,
+                  "gap": 10,
+                  "padding": [
+                    9,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "zJTCa",
+                      "name": "message-circle",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "message-circle",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JNrK6",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "qDzKu",
+                          "name": "Parler · après 18 h",
+                          "fill": "$text",
+                          "content": "Parler · après 18 h",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Fl0zm",
+                          "name": "« Désolé, c'est fermé pour aujourd'hui. »",
+                          "fill": "$text-dim",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "« Désolé, c'est fermé pour aujourd'hui. »",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "G1n9Hj",
+                      "name": "chevron-right",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "chevron-right",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LxnE3",
+                  "name": "Ajouter un événement",
+                  "width": "fill_container",
+                  "cornerRadius": 12,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    9,
+                    12
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ok5Us",
+                      "name": "plus",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "DPlrX",
+                      "name": "Ajouter un événement",
+                      "fill": "$text",
+                      "content": "Ajouter un événement",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "note",
+      "id": "ZXbXN",
+      "x": 3604,
+      "y": 0,
+      "name": "Note PNJ",
+      "width": 840,
+      "height": 260,
+      "content": "PNJ SUR LA CARTE — un onglet PNJ dans le dock (à côté d'Objets) : la palette des PNJ de la base (sprite de marche en vignette, « Nouveau » ouvre la table PNJ). Toucher le sol pose le PNJ, il regarde vers le bas. Sélectionné : Tourner (sa direction), Dupliquer, Fiche (ouvre sa fiche dans la base), Supprimer ; Déplacement (immobile, regarde autour, se promène autour de sa place) ; se tourne vers le joueur qui lui parle ; ses événements comme ceux d'un objet. Le PNJ bloque toujours le passage. Planche d'exemple : l'ancien sprite du joueur, en attendant les vraies planches (étape 6)."
     }
   ],
   "variables": {
