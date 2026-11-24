@@ -49,7 +49,7 @@ export type EventAction =
       type: "message";
       name?: string;
       text: string;
-      /** Portrait shown next to the text: a character's (`character:<id>`) or an image path. */ pic?: string;
+      /** Portrait shown next to the text: a character's or an NPC's (see `portraitRef`), or an image path. */ pic?: string;
     }
   | { type: "choice"; options: ChoiceOption[] }
   | {
@@ -85,43 +85,50 @@ export interface ChoiceOption {
   actions: EventAction[];
 }
 
-/** A message's portrait taken from a character of the database: `character:<id>` (drawn in its sheet). */
-const CHARACTER_PORTRAIT = "character:";
+/**
+ * A message's portrait taken from the database (drawn in a sheet): `character:<id>` (a team character) or
+ * `npc:<id>` (an NPC); else an image path.
+ */
+export type PortraitOwner = "character" | "npc";
 
 /** The first dialogues' pictures, now the portraits of the database's characters. */
 const OLD_FACES: Record<string, string> = {
-  "assets/img/faces/face-hugo.png": "ch-hugo",
-  "assets/img/faces/face-jason.png": "ch-jason",
+  "assets/img/faces/face-hugo.png": "character:ch-hugo",
+  "assets/img/faces/face-jason.png": "character:ch-jason",
 };
 
-/** A message's portrait choosing a character's portrait. */
-export function characterPortrait(characterId: string): string {
-  return CHARACTER_PORTRAIT + characterId;
+/** A message's portrait choosing a character's or an NPC's portrait. */
+export function portraitOf(owner: PortraitOwner, id: string): string {
+  return `${owner}:${id}`;
 }
 
-/** The character whose portrait a message shows (also for the first dialogues' pictures), else undefined. */
-export function portraitCharacter(pic: string | undefined): string | undefined {
+/** Whose portrait a message shows (`character:<id>`, `npc:<id>`; the first dialogues' pictures too), else undefined. */
+export function portraitRef(pic: string | undefined): string | undefined {
   if (!pic) {
     return undefined;
   }
-  return pic.startsWith(CHARACTER_PORTRAIT)
-    ? pic.slice(CHARACTER_PORTRAIT.length)
-    : OLD_FACES[pic];
+  return /^(character|npc):/.test(pic) ? pic : OLD_FACES[pic];
 }
 
-const portraitsById = cachedFromStorage(
-  [DATABASE_KEY],
-  () => new Map(loadDatabase().characters.map((c) => [c.id, c.portrait]))
-);
+const portraitsByRef = cachedFromStorage([DATABASE_KEY], () => {
+  const db = loadDatabase();
+  const byRef = new Map<string, string | undefined>();
+  for (const c of db.characters) {
+    byRef.set(portraitOf("character", c.id), c.portrait);
+  }
+  for (const n of db.npcs) {
+    byRef.set(portraitOf("npc", n.id), n.portrait);
+  }
+  return byRef;
+});
 
-/** The picture to show for a message's portrait (a character's one read from the database, else the path). */
+/** The picture to show for a message's portrait (a character's or an NPC's read from the database, else the path). */
 export function portraitSrc(pic: string | undefined): string | undefined {
-  const character = portraitCharacter(pic);
-  if (!character) {
+  const ref = portraitRef(pic);
+  if (!ref) {
     return pic;
   }
-  const portrait = portraitsById().get(character);
-  return portrait ?? (pic?.startsWith(CHARACTER_PORTRAIT) ? undefined : pic);
+  return portraitsByRef().get(ref) ?? (ref === pic ? undefined : pic);
 }
 
 /** How deep choices and conditions may go in each other (a choice in a choice in a choice). */

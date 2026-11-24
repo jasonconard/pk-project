@@ -44,7 +44,7 @@ export interface PartyState {
 export function startParty(): PartyState {
   return {
     team: loadDatabase()
-      .characters.filter((c) => c.team && c.startsInTeam)
+      .characters.filter((c) => c.startsInTeam)
       .map((c) => c.id),
     items: {},
     money: 0,

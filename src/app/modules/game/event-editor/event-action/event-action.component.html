@@ -3,7 +3,7 @@
   @case ("message") {
     <div class="row">
       @let portrait = data.portraitSrc(action.pic);
-      @let speaker = portraitCharacter(action.pic);
+      @let speaker = portraitRef(action.pic);
       <label
         class="portrait"
         [title]="action.pic ? 'Changer le portrait' : 'Ajouter un portrait'"
@@ -15,10 +15,14 @@
         }
         <select aria-label="Portrait" (change)="setPortrait(value($event))">
           <option value="" [selected]="!action.pic">Sans portrait</option>
-          @for (p of data.portraits; track p.pic) {
-            <option [value]="p.pic" [selected]="p.character === speaker">
-              {{ p.label }}
-            </option>
+          @for (group of data.portraitGroups; track group.label) {
+            <optgroup [label]="group.label">
+              @for (p of group.portraits; track p.pic) {
+                <option [value]="p.pic" [selected]="p.pic === speaker">
+                  {{ p.label }}
+                </option>
+              }
+            </optgroup>
           }
           @if (action.pic && !data.hasPortrait(speaker)) {
             <option [value]="action.pic" selected>Autre image</option>

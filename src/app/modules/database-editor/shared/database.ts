@@ -269,12 +269,11 @@ export interface CharacterStat {
   curve: StatCurve;
 }
 
-/** A character: a team member (levels, stats, element and weapon levels, equipment) or a villager (looks only). */
+/** A character of the team: levels, stats, element and weapon levels, equipment (the villagers are NPCs). */
 export interface DbCharacter {
   id: string;
   name: string;
   note?: string;
-  team: boolean;
   /** In the team when a new game starts (else an event makes them join). */
   startsInTeam?: boolean;
   /** Pixel art: the menus' and action gauge's small face (also the list's icon), the dialogues' portrait, the still picture. */
@@ -297,6 +296,16 @@ export interface DbCharacter {
   excludedSkills?: string[];
   /** Stunned after a hit (ms, 0 or missing: no): its gauge waits that long, at least its « hit taken » animation. */
   stunMs?: number;
+}
+
+/** A non-player character (the baker, the mayor…): looks only, no fight. Placed on the maps with its events. */
+export interface DbNpc {
+  id: string;
+  name: string;
+  note?: string;
+  /** Pixel art: the list's small face, the dialogues' portrait. */
+  icon?: string;
+  portrait?: string;
 }
 
 /** Pixel sizes of a character's pictures. */
@@ -422,6 +431,7 @@ export interface GameDatabase {
   skills: DbSkill[];
   items: DbItem[];
   characters: DbCharacter[];
+  npcs: DbNpc[];
   enemies: DbEnemy[];
   groups: DbGroup[];
 }
@@ -536,7 +546,6 @@ export function newCharacter(name: string): DbCharacter {
   return {
     id: newId("ch"),
     name,
-    team: true,
     levelStart: 1,
     levelMax: 99,
     xpCurve: "normal",
@@ -622,6 +631,10 @@ export function learnState(
   return skill.learn.every((l) => growthOf(character, l.id).level >= l.level)
     ? "start"
     : "later";
+}
+
+export function newNpc(name: string): DbNpc {
+  return { id: newId("npc"), name };
 }
 
 export function newEnemy(name: string): DbEnemy {

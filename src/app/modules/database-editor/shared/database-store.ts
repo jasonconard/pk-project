@@ -1,6 +1,7 @@
 import { computed, Injectable, signal } from "@angular/core";
 import {
   DbCharacter,
+  DbNpc,
   DbElement,
   DbEnemy,
   DbGroup,
@@ -25,6 +26,7 @@ export type Row =
   | DbSkill
   | DbItem
   | DbCharacter
+  | DbNpc
   | DbEnemy
   | DbGroup;
 /** A picture drawn in the pixel editor (icon: the small face of a character or an enemy). */

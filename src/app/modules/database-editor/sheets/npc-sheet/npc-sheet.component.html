@@ -1,0 +1,43 @@
+@let npc = this.npc();
+<div class="block">
+  <h3>Apparence</h3>
+  <div class="tiles">
+    <button
+      type="button"
+      class="tile"
+      title="Dessiner le portrait (dialogues)"
+      (click)="editPicture(npc, 'portrait')"
+    >
+      <span class="tile-box">
+        @if (npc.portrait) {
+          <img class="pixel portrait" [src]="npc.portrait" alt="" />
+        } @else {
+          <span class="no-icon big"></span>
+        }
+        <span class="pen" aria-hidden="true"><svg lucidePencil></svg></span>
+      </span>
+      <small>Portrait · {{ sizes.portrait.w }}×{{ sizes.portrait.h }}</small>
+    </button>
+  </div>
+  <p class="note">
+    L'icône à côté du nom est sa petite tête (la liste). Le portrait se choisit
+    dans l'action Message des événements.
+  </p>
+</div>
+
+<div class="block">
+  <h3>Description</h3>
+  <input
+    type="text"
+    maxlength="120"
+    placeholder="Facultatif"
+    aria-label="Description"
+    [value]="npc.note ?? ''"
+    (input)="setNote(npc, $any($event.target).value)"
+  />
+</div>
+
+<p class="hint">
+  <svg lucideInfo></svg> Un PNJ ne se bat pas. Sa planche de marche et sa place
+  sur les cartes viendront ensuite.
+</p>

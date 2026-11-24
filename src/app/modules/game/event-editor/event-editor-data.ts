@@ -7,9 +7,9 @@ import {
   GameVariable,
 } from "../../variables-editor/shared/variables";
 import {
-  characterPortrait,
   EventConditions,
-  portraitCharacter,
+  portraitOf,
+  portraitRef,
 } from "../shared/model/ObjectEvent";
 import { VariableTest } from "../shared/model/SceneEvent";
 import { WEATHER_CHOICES } from "../shared/weather/Weather";
@@ -23,30 +23,35 @@ export class EventEditorData {
   readonly variables: GameVariable[] = loadVariables();
   /** The database: items, characters (of the team), groups of enemies. */
   readonly db = loadDatabase();
-  readonly teamCharacters = this.db.characters.filter((c) => c.team);
-  /** The portraits a message may show: the characters' drawn in their sheet. */
-  readonly portraits = this.db.characters
-    .filter((c) => c.portrait)
-    .map((c) => ({
-      pic: characterPortrait(c.id),
-      character: c.id,
-      label: c.name,
-      src: c.portrait as string,
+  readonly teamCharacters = this.db.characters;
+  /** The portraits a message may show: the characters' and the NPCs' drawn in their sheet. */
+  readonly portraits = [
+    ...this.db.characters.map((c) => ({ row: c, owner: "character" as const })),
+    ...this.db.npcs.map((n) => ({ row: n, owner: "npc" as const })),
+  ]
+    .filter(({ row }) => row.portrait)
+    .map(({ row, owner }) => ({
+      pic: portraitOf(owner, row.id),
+      label: row.name,
+      src: row.portrait as string,
+      npc: owner === "npc",
     }));
 
-  /** Has this character a portrait to show (drawn in its sheet)? */
-  hasPortrait(character: string | undefined): boolean {
-    return this.portraits.some((p) => p.character === character);
+  /** The portraits by table (the team's, the NPCs'), the empty ones left out. */
+  readonly portraitGroups = [
+    { label: "Équipe", portraits: this.portraits.filter((p) => !p.npc) },
+    { label: "PNJ", portraits: this.portraits.filter((p) => p.npc) },
+  ].filter((g) => g.portraits.length > 0);
+
+  /** Is there a portrait drawn for this reference (`character:<id>`, `npc:<id>`)? */
+  hasPortrait(ref: string | undefined): boolean {
+    return this.portraits.some((p) => p.pic === ref);
   }
 
-  /** The picture of a message's portrait (a character's, else the image path). */
+  /** The picture of a message's portrait (a character's or an NPC's, else the image path). */
   portraitSrc(pic: string | undefined): string | undefined {
-    const character = portraitCharacter(pic);
-    return (
-      (character &&
-        this.portraits.find((p) => p.character === character)?.src) ||
-      pic
-    );
+    const ref = portraitRef(pic);
+    return this.portraits.find((p) => p.pic === ref)?.src ?? pic;
   }
 
   variable(id: string): GameVariable | undefined {

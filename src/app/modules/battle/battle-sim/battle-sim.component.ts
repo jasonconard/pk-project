@@ -65,7 +65,7 @@ export class BattleSimComponent {
   private readonly db = loadDatabase();
   protected readonly groups = this.db.groups;
   protected readonly maps = listMaps();
-  protected readonly characters = this.db.characters.filter((c) => c.team);
+  protected readonly characters = this.db.characters;
   /** The elements a character grows in (simple, not the physical one). */
   private readonly elements = this.db.elements.filter(
     (e) => !e.physical && !e.parts

@@ -20,7 +20,7 @@ import {
 import {
   EventAction,
   MAX_CHOICE_OPTIONS,
-  portraitCharacter,
+  portraitRef,
 } from "../../shared/model/ObjectEvent";
 import { playSound, SOUND_CHOICES } from "../../shared/services/sfx";
 import {
@@ -61,7 +61,7 @@ export class EventActionComponent {
 
   protected readonly data = inject(EventEditorData);
   protected readonly sounds = SOUND_CHOICES;
-  protected readonly portraitCharacter = portraitCharacter;
+  protected readonly portraitRef = portraitRef;
   protected readonly maxOptions = MAX_CHOICE_OPTIONS;
   protected readonly countMax = ITEM_COUNT_MAX;
   protected readonly moneyMax = MONEY_MAX;

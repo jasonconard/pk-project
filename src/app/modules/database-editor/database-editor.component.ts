@@ -17,6 +17,7 @@ import {
   LucideSword,
   LucideSwords,
   LucideTrash,
+  LucideUserRound,
   LucideUsers,
 } from "@lucide/angular";
 import { NgTemplateOutlet } from "@angular/common";
@@ -37,6 +38,7 @@ import {
   DbEnemy,
   DbGroup,
   DbItem,
+  DbNpc,
   DbSkill,
   DbState,
   DbTable,
@@ -53,6 +55,7 @@ import {
   newGroup,
   newId,
   newItem,
+  newNpc,
   newSkill,
   newState,
   newWeapon,
@@ -73,6 +76,7 @@ import { StateSheetComponent } from "./sheets/state-sheet/state-sheet.component"
 import { SkillSheetComponent } from "./sheets/skill-sheet/skill-sheet.component";
 import { ItemSheetComponent } from "./sheets/item-sheet/item-sheet.component";
 import { CharacterSheetComponent } from "./sheets/character-sheet/character-sheet.component";
+import { NpcSheetComponent } from "./sheets/npc-sheet/npc-sheet.component";
 import { EnemySheetComponent } from "./sheets/enemy-sheet/enemy-sheet.component";
 import { GroupSheetComponent } from "./sheets/group-sheet/group-sheet.component";
 import { searchKey } from "../../core/shared/text";
@@ -86,6 +90,7 @@ const TABLES: { id: DbTable; label: string; one: string; icon: LucideIcon }[] =
       one: "Personnage",
       icon: LucideUsers,
     },
+    { id: "npcs", label: "PNJ", one: "PNJ", icon: LucideUserRound },
     { id: "enemies", label: "Ennemis", one: "Ennemi", icon: LucideSkull },
     { id: "groups", label: "Groupes", one: "Groupe", icon: LucideSwords },
     {
@@ -106,7 +111,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
 /**
  * Database editor (docs/idees.md, point 5): one tab per table, the list then the row's sheet (side by side on wide
  * screens). Saved in the browser at every change; Exporter writes the game's file (src/assets/database/database.ts).
- * Tables: characters (looks, levels, stats, element and weapon levels, equipment), skills (cost, cast time, effects, the levels they are learned with), items (consumables, equipment,
+ * Tables: characters (looks, levels, stats, element and weapon levels, equipment), NPCs (looks), skills (cost, cast time, effects, the levels they are learned with), items (consumables, equipment,
  * key items, gifts), states, elements (with their weathers, simple or composed), weapon types.
  */
 @Component({
@@ -132,6 +137,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     SkillSheetComponent,
     ItemSheetComponent,
     CharacterSheetComponent,
+    NpcSheetComponent,
     EnemySheetComponent,
     GroupSheetComponent,
   ],
@@ -271,6 +277,10 @@ export class DatabaseEditorComponent extends DbSheet {
       : null
   );
 
+  protected readonly npc = computed(() =>
+    this.table() === "npcs" ? (this.current() as DbNpc | null) : null
+  );
+
   constructor() {
     super();
     const onMedia = () => this.sideBySide.set(this.media.matches);
@@ -343,6 +353,7 @@ export class DatabaseEditorComponent extends DbSheet {
       skills: "Nouvelle compétence",
       items: "Nouvel objet",
       characters: "Nouveau personnage",
+      npcs: "Nouveau PNJ",
       enemies: "Nouvel ennemi",
       groups: "Nouveau groupe",
     }[table];
@@ -359,6 +370,7 @@ export class DatabaseEditorComponent extends DbSheet {
       items: () =>
         withItemKind(newItem(name), this.itemFilter() ?? "consumable"),
       characters: () => newCharacter(name),
+      npcs: () => newNpc(name),
       enemies: () => newEnemy(name),
       groups: () => newGroup(name, this.db()),
     };
@@ -433,13 +445,14 @@ export class DatabaseEditorComponent extends DbSheet {
 
   protected editIcon(row: Row): void {
     const name = row.name.trim() || "sans nom";
-    this.editPicture(
-      row,
-      "icon",
-      this.table() === "characters" || this.table() === "enemies"
-        ? `Petite image de ${name} (jauge)`
-        : `Icône de ${name}`
-    );
+    const table = this.table();
+    let title = `Icône de ${name}`;
+    if (table === "npcs") {
+      title = `Petite tête de ${name} (liste)`;
+    } else if (table === "characters" || table === "enemies") {
+      title = `Petite image de ${name} (jauge)`;
+    }
+    this.editPicture(row, "icon", title);
   }
 
   protected iconDone(picture: string | undefined): void {
@@ -473,13 +486,16 @@ export class DatabaseEditorComponent extends DbSheet {
     return item.price ? `${item.price} pièces` : "ne se vend pas";
   }
 
-  /** The list's picture: the icon, else the sprite, else (a group) its first enemy's. */
+  /** The list's picture: the icon, else the sprite (an NPC: its portrait), else (a group) its first enemy's. */
   protected rowIcon(row: Row): string | undefined {
     if (row.icon) {
       return row.icon;
     }
     if ("sprite" in row && row.sprite) {
       return row.sprite;
+    }
+    if (this.table() === "npcs" && "portrait" in row && row.portrait) {
+      return row.portrait;
     }
     if ("members" in row) {
       const first = this.enemyOf(row.members[0]?.enemy ?? "");
@@ -520,10 +536,10 @@ export class DatabaseEditorComponent extends DbSheet {
         return groupLabel(row as DbGroup, this.db().enemies) || "Vide";
       case "characters": {
         const ch = row as DbCharacter;
-        return ch.team
-          ? `Équipe · niv. ${ch.levelStart} · PV ${statAt(ch, "hp", ch.levelStart)}`
-          : "Habitant";
+        return `Niv. ${ch.levelStart} · PV ${statAt(ch, "hp", ch.levelStart)}`;
       }
+      case "npcs":
+        return (row as DbNpc).note || "PNJ";
       case "items": {
         const it = row as DbItem;
         const kind =
@@ -577,7 +593,7 @@ export class DatabaseEditorComponent extends DbSheet {
     const source = `import { GameDatabase } from '../../app/modules/database-editor/shared/database';
 
 /**
- * The game's database (elements, weapon types, states, skills, items, characters, enemies, groups). Written by the database editor's export (editor →
+ * The game's database (elements, weapon types, states, skills, items, characters, NPCs, enemies, groups). Written by the database editor's export (editor →
  * Éditeurs → Base de données → Exporter); the database saved in the browser replaces this one.
  */
 export const CODE_DATABASE: GameDatabase = ${JSON.stringify(this.db(), null, 2)};

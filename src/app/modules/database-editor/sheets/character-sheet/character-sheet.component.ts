@@ -2,7 +2,6 @@ import {
   LucideBan,
   LucideBox,
   LucideCheck,
-  LucideInfo,
   LucideLock,
   LucidePencil,
   LucideRotateCcw,
@@ -43,7 +42,6 @@ import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
     LucideBan,
     LucideBox,
     LucideCheck,
-    LucideInfo,
     LucideLock,
     LucidePencil,
     LucideRotateCcw,
@@ -99,10 +97,7 @@ export class CharacterSheetComponent extends DbSheet {
   protected setCharacter(
     ch: DbCharacter,
     change: Partial<
-      Pick<
-        DbCharacter,
-        "team" | "xpCurve" | "model" | "startsInTeam" | "stunMs"
-      >
+      Pick<DbCharacter, "xpCurve" | "model" | "startsInTeam" | "stunMs">
     >
   ): void {
     this.edit(ch.id, (c) => {

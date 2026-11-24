@@ -38,9 +38,7 @@ import { LearnSelectComponent } from "../../learn-select/learn-select.component"
 export class ItemSheetComponent extends DbSheet {
   readonly item = input.required<DbItem>();
 
-  protected readonly teamCharacters = computed(() =>
-    this.db().characters.filter((c) => c.team)
-  );
+  protected readonly teamCharacters = computed(() => this.db().characters);
 
   protected setItemKind(item: DbItem, kind: ItemKind): void {
     this.edit(item.id, (i) => withItemKind(i as DbItem, kind));

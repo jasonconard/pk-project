@@ -254,6 +254,9 @@
         @if (character(); as ch) {
           <db-character-sheet [character]="ch" />
         }
+        @if (npc(); as np) {
+          <db-npc-sheet [npc]="np" />
+        }
         @if (skill(); as sk) {
           <db-skill-sheet [skill]="sk" />
         }

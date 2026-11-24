@@ -1,5 +1,5 @@
 import { CODE_DATABASE } from "../../../../assets/database/database";
-import { DbTable, GameDatabase } from "./database";
+import { DbCharacter, DbNpc, DbTable, GameDatabase } from "./database";
 import {
   readJson,
   removeKey,
@@ -17,9 +17,42 @@ export interface StoredDatabase {
 function complete(database: Partial<GameDatabase>): GameDatabase {
   const code = structuredClone(CODE_DATABASE);
   const tables = Object.keys(code) as DbTable[];
-  return Object.fromEntries(
-    tables.map((t) => [t, Array.isArray(database[t]) ? database[t] : code[t]])
-  ) as unknown as GameDatabase;
+  return withVillagersAsNpcs(
+    Object.fromEntries(
+      tables.map((t) => [t, Array.isArray(database[t]) ? database[t] : code[t]])
+    ) as unknown as GameDatabase
+  );
+}
+
+/** A character of the first versions: `team` false was a villager. */
+type OldCharacter = DbCharacter & { team?: boolean };
+
+/** The villagers of the first versions (characters out of the team) become NPCs, with their name and pictures. */
+function withVillagersAsNpcs(db: GameDatabase): GameDatabase {
+  const characters = db.characters as OldCharacter[];
+  if (!characters.some((c) => "team" in c)) {
+    return db;
+  }
+  const villagers: DbNpc[] = characters
+    .filter((c) => c.team === false)
+    .map(({ id, name, note, icon, portrait }) => ({
+      id,
+      name,
+      ...(note ? { note } : {}),
+      ...(icon ? { icon } : {}),
+      ...(portrait ? { portrait } : {}),
+    }));
+  return {
+    ...db,
+    characters: characters
+      .filter((c) => c.team !== false)
+      .map((c) => {
+        const character: OldCharacter = { ...c };
+        delete character.team;
+        return character;
+      }),
+    npcs: [...db.npcs, ...villagers],
+  };
 }
 
 function readStored(): StoredDatabase | null {
