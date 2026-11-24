@@ -6,7 +6,7 @@ La base de données rassemble ce que le combat, les événements et les menus vo
 
 En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en paysage) ou **⋮ → Base de données** (téléphone en portrait). L'éditeur s'ouvre par-dessus le jeu ; **Jeu** le ferme.
 
-- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
+- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, PNJ, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
 - Sur les écrans larges, **Reprendre la version du jeu**, **Dupliquer** et **Supprimer** sont à droite du nom.
@@ -35,10 +35,11 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
 
 ## Personnages
 
-- **Équipe** ou **Habitant** : un habitant ne se bat pas, il n'a que son apparence (son emploi du temps et ses liens viendront plus tard).
+Les membres de l'équipe (ceux qui se battent). Les habitants sont des [PNJ](#pnj).
+
 - **Dans l'équipe au début de la partie** : sinon, un [événement](09-evenements.md) le fait entrer (action Équipe).
 - **Apparence** : la petite tête (l'icône à côté du nom, pour les menus et la jauge d'action), le **portrait** des dialogues (96 × 96, dans le style des planches de combat ; aussi sur les cartes de l'équipe en combat), l'**image fixe** (48 × 48, dans les menus), la **planche de combat** (ses animations en combat, à la Grandia, voir [Planches de combat](11-planches.md)) et le **modèle 3D** sur la carte.
-- Un membre de l'équipe a deux onglets :
+- Deux onglets :
   - **Général** :
     - **Niveaux et expérience** : niveau de départ, niveau max, et si les niveaux montent vite, normalement ou lentement ;
     - **Stats** : la valeur au niveau 1 et au niveau max ; toucher la **courbe** la change (régulière, monte tôt, monte tard) ;
@@ -48,6 +49,17 @@ Chaque ligne a une icône de 16 × 16 pixels (pour un personnage : sa petite tê
     - pour chaque élément simple et chaque type d'arme : son **niveau au départ** et sa **progression** (rapide, normal, lent, jamais) ; un élément composé suit ses deux éléments ;
     - **Ce qu'il apprendra** : les compétences qu'il connaît dès le départ, celles qu'il apprendra (ce qui manque : « Feu 2/5 · Vent 1/3 ») et celles qu'il n'apprendra jamais.
     - le bouton **Exclure** (⊘) d'une compétence la réserve aux autres personnages : celui-ci ne l'apprendra jamais, même avec les niveaux. Elle passe en bas, marquée « exclue » ; la flèche la rend de nouveau possible.
+
+## PNJ
+
+Les personnages non joueurs (le boulanger, le maire…) : ils ne se battent pas, ils n'ont que leur apparence. Maquette : `design/database.pen`, écran 12.
+
+- **La petite tête** (l'icône à côté du nom, dans la liste ; sans elle, la liste montre le portrait).
+- **Le portrait** des dialogues (96 × 96) : il se choisit dans l'action Message des [événements](09-evenements.md), sous « PNJ ».
+- **Description** (facultative).
+- À venir : la planche de marche (4 directions × 3 images) et leur place sur les cartes, avec leurs événements.
+
+Les habitants des premières versions (des personnages « Habitant ») sont passés tout seuls dans cette table, avec leur nom, leur description et leurs images.
 
 ## Ennemis
 
@@ -179,7 +191,7 @@ Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat
 | Fichier | Rôle |
 |---|---|
 | `src/app/modules/database-editor/database-editor.component.*` | L'éditeur : les onglets, la liste, le haut de la fiche (icône, nom, couleur), les fenêtres par-dessus |
-| `src/app/modules/database-editor/sheets/<table>-sheet/` | Une fiche par table (personnage, ennemi, groupe, compétence, objet, état, élément, type d'arme) |
+| `src/app/modules/database-editor/sheets/<table>-sheet/` | Une fiche par table (personnage, PNJ, ennemi, groupe, compétence, objet, état, élément, type d'arme) |
 | `src/app/modules/database-editor/shared/db-sheet.ts` | Ce que les fiches partagent (`DbSheet`) : les constantes, les noms des éléments, compétences, météos… |
 | `src/app/modules/database-editor/shared/database-store.ts` | La base en cours de modification et son enregistrement (`DatabaseStore`) |
 | `src/app/modules/database-editor/effects-editor/` | Les effets d'une compétence ou d'un objet |
@@ -189,7 +201,7 @@ Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat
 | `src/app/modules/database-editor/sheet-editor/`, `shared/sprite-sheet.ts` | Les planches de combat (voir [11-planches](11-planches.md)) |
 | `src/app/modules/battle/battle-sim/` | Simuler un combat (Menu) : l'équipe choisie passe par `BattleService.simulateNext` |
 | `src/app/modules/database-editor/stepper/` | Le champ − nombre + |
-| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbEnemy`, `DbGroup`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
+| `src/app/modules/database-editor/shared/database.ts` | Les types (`DbCharacter`, `DbNpc`, `DbEnemy`, `DbGroup`, `DbSkill`, `DbItem`, `DbElement`, `DbWeapon`, `DbState`, `STATS`), les règles (éléments composés, niveaux proposés, formule, suppression) |
 | `src/app/modules/database-editor/shared/database-storage.ts` | Le navigateur (`pk-database`), sinon le code |
 | `src/app/modules/database-editor/shared/party.ts` | L'équipe dans la partie (`pk-party`) : membres, objets, argent |
 | `src/assets/database/database.ts` | La base du jeu (`CODE_DATABASE`), écrite par l'export |

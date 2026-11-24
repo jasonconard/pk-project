@@ -58,7 +58,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - `modules/music-editor/`: lo-fi music editor. `shared/`: `song`, `instruments` (data sheets), `synth`, `music-engine`, `song-storage`.
 - `modules/variables-editor/`: story flags and counters (`GameVariable`). `shared/`: `variables`, `variable-storage`
   (browser `pk-variables`, else `assets/variables/variables.ts`), `variable-values` (values in the game being played).
-- `modules/database-editor/`: the game's database (characters, enemies, groups, skills, items, states, elements,
+- `modules/database-editor/`: the game's database (characters, NPCs, enemies, groups, skills, items, states, elements,
   weapon types), opened over the game. The editor is a shell (tables, list, sheet head, windows over it);
   `sheets/<table>-sheet/` one component per table, extending `shared/db-sheet.ts` (`DbSheet`: the store, constants,
   lookups); `shared/database-store.ts` (`DatabaseStore`, provided by the editor: the database, its saving, the table

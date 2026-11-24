@@ -47,7 +47,7 @@ Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'a
 
 | Action | Ce qu'elle fait |
 |---|---|
-| **Message** | Une réplique, avec qui parle (facultatif) et un portrait (touche le carré à gauche du nom) : celui d'un personnage de la base de données, dessiné dans sa fiche ; choisir un portrait remplit « Qui parle » s'il est vide. Si on redessine le portrait dans la base, les dialogues montrent le nouveau. Le joueur la ferme pour passer à la suite. |
+| **Message** | Une réplique, avec qui parle (facultatif) et un portrait (touche le carré à gauche du nom) : celui d'un personnage ou d'un PNJ de la base de données, dessiné dans sa fiche ; choisir un portrait remplit « Qui parle » s'il est vide. Si on redessine le portrait dans la base, les dialogues montrent le nouveau. Le joueur la ferme pour passer à la suite. |
 | **Choix** | Des réponses (2 à 4) affichées avec le message juste avant. Chaque réponse a sa branche d'actions, jouée si le joueur la choisit. |
 | **Condition** | Teste des variables, l'heure ou la météo (comme les conditions de l'événement) : joue la branche **Alors** si tout est vrai, sinon la branche **Sinon**. |
 | **Variable** | Un drapeau devient vrai / faux ; un compteur devient un nombre ou augmente de (négatif : diminue). |
