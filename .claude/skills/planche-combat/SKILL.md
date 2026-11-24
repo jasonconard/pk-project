@@ -47,6 +47,26 @@ refaire les erreurs du premier essai (Hugo, novembre 2026 : 49 générations et 
 - Où les mettre : `portrait` de la fiche dans `src/assets/database/database.ts` (data URL) et
   `src/assets/img/faces/face-<nom>.png` (portraits des messages, liste `PORTRAITS` dans `ObjectEvent.ts`).
 
+## Planches de marche (carte)
+
+Format : `docs/editeur/10-base-de-donnees.md#planche-de-marche` (48 × 96, 3 images de 16 × 24 par direction : bas,
+gauche, droite, haut ; pas, arrêt, pas). Méthode validée (Bernard, Hugo, Jason, novembre 2026) :
+- **Proportions de référence : Bernard** (`npc-bernard`, PixelLab `7261f90a-f74e-4c5f-8267-ffaf466ff6a1`) : tête ronde
+  d'environ 11 lignes, buste 8, jambes 4 ; 22-24 px de haut dans les 4 directions.
+- Personnage : `create_character(mode="v3", size=24, view="low top-down", outline="selective outline",
+  detail="low detail")`, description « 2-heads-tall chibi villager, natural rounded head » + la tenue vue sur son
+  sprite de combat. Refaire si un accessoire (grand bouclier, carquois) le rend plus large que 16 px.
+  Hugo `8c8d89ee-cb44-41d1-85ef-d0c3bf38756d`, Jason `2a55638a-917f-4e4e-b1fd-a4532458a557`.
+- Marche : le v3 libre et le template simple sont instables à 24 px (tête qui tourne, détails qui changent). Ce qui
+  marche : l'animation **skeleton-v3** ; le template `walking-4-frames` balance trop peu les bras (max 1.5), écrire
+  son propre clip de 4 images (main avant devant le corps, l'autre en arrière et écartée, hanches et buste en sens
+  opposé, foulée 0.10, pied arrière levé).
+- Arrêt : la rotation pour bas / haut, l'image de passage de la marche pour les côtés (la rotation de côté est de
+  trois quarts). Après : pieds sur la ligne 23, palette de la rotation, pixels isolés enlevés, 1 px de rebond
+  (retirer une ligne de jambe et une de buste dans les images de pas). Ne jamais redessiner le corps à la main : les
+  planches faites à la main ont été refusées (tête carrée, cheveux plats, côtés plus petits).
+- Les mettre dans le jeu : le `walk` du personnage (data URL) dans `src/assets/database/database.ts`.
+
 ## Format de sortie
 
 - **Cases de 64 × 64**, pieds `anchor {x: 32, y: 52}`, `mirror: true`, lignes sud-est puis nord-est. Le 64 laisse
