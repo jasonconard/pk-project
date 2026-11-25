@@ -40,6 +40,10 @@ Toutes doivent être vraies. Sans condition, l'événement se joue toujours.
 - **Objet** : l'équipe a au moins tant de cet objet (les objets de la [base de données](10-base-de-donnees.md)).
 - **Argent** : l'équipe a au moins tant de pièces.
 - **Équipe** : tel personnage est dans l'équipe.
+- **Jour** : certains jours de la semaine du [calendrier](10-base-de-donnees.md#calendrier) (à cocher).
+- **Date** : entre deux dates, chaque année (du 13 au 13 printemps : ce jour-là ; d'hiver à printemps : passe le nouvel an).
+- **Moment** : le matin, l'après-midi, le soir ou la nuit (aux heures du calendrier).
+- **Jour spécial** : l'un des jours spéciaux du calendrier (la fête, le marché…), à ses moments.
 
 ## Actions
 
@@ -59,6 +63,8 @@ Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'a
 | **Objet** | Donne ou retire un nombre d'un objet de la [base de données](10-base-de-donnees.md) (jamais en dessous de 0). |
 | **Argent** | Donne ou retire des pièces. |
 | **Équipe** | Un personnage entre dans l'équipe ou en sort. |
+| **Faire passer le temps** | Un fondu au noir, et l'horloge avance : de quelques heures, jusqu'au prochain moment choisi (le soir, la nuit…), ou jusqu'au lendemain matin. Le jour change si on passe minuit. |
+| **Arrêter / reprendre le temps** | L'heure ne bouge plus jusqu'à « Reprendre » ou au changement de carte. |
 | **Soigner l'équipe** | Toute l'équipe retrouve ses PV et ses PM, et ses états (poison…) disparaissent : une auberge, une source, un lit. |
 | **Combat** | Un combat contre un groupe d'ennemis de la base de données, puis la branche de la fin : **Victoire**, **Défaite** ou **Fuite** (seulement si on peut fuir ce groupe). Le combat se joue sur la carte, là où se trouve le joueur : l'équipe et les ennemis du groupe, animés par leurs [planches](11-planches.md), la jauge d'action, les cartes de l'équipe. Quand vient son tour, un membre de l'équipe choisit Attaque, Attaque forte, Magie (ses compétences), Objets (ceux de l'équipe), Défendre ou Fuir (si on peut fuir ce groupe), puis sa cible ; les ennemis suivent leur comportement de la base de données. Les règles sont celles de la [base de données](10-base-de-donnees.md#le-combat). Le combat finit quand un camp est tombé ; une victoire donne le butin (l'argent des ennemis, leurs objets selon leur chance). |
 

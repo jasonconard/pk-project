@@ -47,6 +47,7 @@ Chaque changement enregistre une action `{ undo, redo }` (`MapEditorService.reco
 L'onglet **PNJ** de la palette (à côté d'Objets) montre les PNJ de la [base de données](10-base-de-donnees.md#pnj), avec leur image à l'arrêt ; **Nouveau** ouvre la table des PNJ pour en créer un. Choisir un PNJ puis toucher le sol le pose (il regarde vers le bas). Maquette : `design/main-view.pen` (Poser un PNJ, PNJ sélectionné).
 
 - Sur la carte, il est dessiné avec l'image à l'arrêt de sa **planche de marche**, dans sa direction (sans planche : l'ancien sprite du joueur).
+- **Nom de la place** (dans sa fiche) : « derrière le comptoir » ; son [emploi du temps](10-base-de-donnees.md#pnj) choisit entre ses places.
 - Sélectionné : **Tourner** change la direction où il regarde (bas, gauche, haut, droite), **Fiche** ouvre sa fiche dans la base, **Dupliquer** et **Supprimer** comme un objet. Il bloque le passage (réglable) et n'a pas de passage vers une carte.
 - Ses **événements** se règlent comme ceux d'un objet : pour lui parler, le déclencheur **Parler** avec « Se tourner vers le joueur » ; dans l'action Message, choisir son portrait (le nom se remplit tout seul).
 - Changer sa planche ou son nom dans la base met à jour la carte en fermant la base.

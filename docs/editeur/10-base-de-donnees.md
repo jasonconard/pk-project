@@ -58,7 +58,7 @@ Les personnages non joueurs (le boulanger, le maire…) : ils ne se battent pas,
 - **Le portrait** des dialogues (96 × 96) : il se choisit dans l'action Message des [événements](09-evenements.md), sous « PNJ ».
 - **Description** (facultative).
 - **La planche de marche** (voir [plus bas](#planche-de-marche)).
-- À venir : leur place sur les cartes, avec leurs événements.
+- **Emploi du temps** (case « Suit un emploi du temps ») : une grille jours de la semaine × moments ; chaque case dit à quelle place il est, ou absent. Ses places sont ses poses sur les cartes (éditeur de carte, onglet PNJ ; chacune avec ses événements et son nom, « Nom de la place » dans sa fiche). Toucher le nom d'un jour met toute la journée comme le matin. **Exceptions des jours spéciaux** : un jour spécial du calendrier, ses moments (aucun : toute la journée) et la place ce jour-là. Dans le jeu, il n'est visible qu'à la place où il est (l'éditeur montre toutes ses places). Sans emploi du temps, il est toujours à toutes ses places.
 
 Les habitants des premières versions (des personnages « Habitant ») sont passés tout seuls dans cette table, avec leur nom, leur description et leurs images.
 
@@ -200,7 +200,13 @@ Le calendrier du jeu : une seule fiche (l'onglet l'ouvre directement). Maquette 
 - **Les moments de la journée** : l'heure où commencent le matin, l'après-midi, le soir et la nuit (6 h, 12 h, 18 h, 22 h par défaut), avec la barre des 24 heures.
 - **Jours spéciaux** : un nom, une couleur, quand il revient (chaque année à une date, chaque mois un jour, chaque semaine un jour de la semaine) et ses moments (aucun : toute la journée).
 
-Le jeu ne s'en sert pas encore : la date dans l'horloge et la durée des journées viennent à l'étape suivante (point 7 de la feuille de route), puis l'Agenda, les conditions des événements et les emplois du temps.
+Dans le jeu :
+
+- **L'horloge** (en haut à gauche) affiche la date (« Ven. 5 printemps ») et, dessous, le moment, l'heure et la température. Un bandeau annonce chaque nouveau moment (« Le soir tombe »).
+- **Les jours** avancent quand l'heure passe minuit ; une journée dure le temps réglé ici. Le temps s'arrête pendant les dialogues et les combats, sur une carte réglée ainsi ([Cartes](05-sauvegarde-export.md)), et après l'action « Arrêter le temps ».
+- **Menu → Agenda** : le mois (le jour d'aujourd'hui, les jours spéciaux en couleur), la journée en moments (celui en cours, les jours spéciaux de chaque moment) et les prochains jours spéciaux.
+- **Les événements** : conditions jour, date, moment, jour spécial ; actions « Faire passer le temps » et « Arrêter / reprendre le temps » ([Événements](09-evenements.md)).
+- **Les sauvegardes de partie** gardent la date.
 
 ## Sauvegarde et export
 

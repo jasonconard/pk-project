@@ -6,6 +6,7 @@ Le bouton au nom de la carte ouverte (en haut, avec l'icône de carte) ouvre le 
 
 - **Toucher une carte** l'ouvre dans l'éditeur : elle remplace la carte affichée, le joueur et la caméra vont à son point d'arrivée. Le jeu se rouvre sur la dernière carte ouverte.
 - Chaque carte indique son type (Monde, Ville, Intérieur, Donjon), sa taille en zones, et si elle est **Ouverte**, **Modifiée** (carte du code changée dans le navigateur) ou **Navigateur** (créée ici, pas encore dans le code).
+- **…** déplie aussi **Le temps** sur cette carte : **Passe** (comme dehors), **S'arrête** (l'horloge reste à l'heure d'entrée : un donjon) ou **Figé** à une heure choisie (toujours la même heure, quelle que soit l'heure dehors ; en revenant dehors, l'heure reprend où elle en était).
 - **…** déplie ses actions : **Renommer**, **Dupliquer** (« (copie) »), **Exporter**, et **Réinit.** pour une carte du code (oublie ses modifications) ou **Supprimer** pour une carte du navigateur. Ces deux dernières demandent un second appui (« Confirmer ? », 3 secondes) ; supprimer la carte ouverte ramène sur la carte du monde.
 - **Nouvelle carte** : un nom, un type, une taille choisie en glissant sur une grille de 6 × 4 zones (une zone : 512 unités, 32 × 32 cases), en herbe. Son identifiant vient du nom (`grotte-de-cristal`), son point d'arrivée est au milieu. Elle s'ouvre aussitôt.
 
