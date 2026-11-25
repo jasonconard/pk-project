@@ -1,6 +1,6 @@
 import { GameAction } from "./GameAction";
 import * as THREE from "three";
-import { retroScale } from "./pixel-scale";
+import { CameraFollow, retroScale } from "./pixel-scale";
 import { MaterialService } from "../services/material.service";
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
@@ -162,6 +162,8 @@ export class Game {
   pixelRatio = 1;
   /** Retro rendering (see pixel-scale.ts): a small picture, one pixel per map unit, enlarged with crisp pixels. */
   retro = false;
+  /** The camera follows the player with a lag it catches up (see pixel-scale.ts), else stays locked on it. */
+  smoothCamera = true;
   shadowMapSize = 2048;
   /** Auto quality: seconds in a row below / above the fps thresholds. */
   private slowSeconds = 0;
@@ -295,10 +297,15 @@ export class Game {
 
   /** Draws the scene on screen (through the weather post effects when needed: sun rays, window bloom). */
   public renderFrame() {
+    this.follow.apply(this);
     if (!this.weather.renderPostEffects()) {
       this.renderer.render(this.scene, this.camera);
     }
+    this.follow.restore(this);
   }
+
+  /** The camera following the player smoothly, the player on the pixel grid (only while drawing). */
+  private readonly follow = new CameraFollow();
 
   /**
    * Prepares the whole map for the GPU at once, while loading: the shaders of every object are compiled and the

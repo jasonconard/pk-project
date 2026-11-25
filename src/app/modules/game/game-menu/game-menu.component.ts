@@ -151,6 +151,7 @@ export class GameMenuComponent {
   );
   protected readonly quality = this.gameService.quality;
   protected readonly retro = this.gameService.retro;
+  protected readonly smoothCamera = this.gameService.smoothCamera;
   protected readonly qualityChoices = QUALITY_CHOICES;
   protected readonly qualityLabel = computed(
     () => QUALITY_CHOICES.find((q) => q.mode === this.quality())?.label ?? ""
@@ -207,6 +208,13 @@ export class GameMenuComponent {
   /** Retro rendering: big pixels like a handheld console. */
   protected setRetro(event: Event): void {
     this.gameService.setRetro((event.target as HTMLInputElement).checked);
+  }
+
+  /** The camera follows the player with a lag, or stays locked on it. */
+  protected setSmoothCamera(event: Event): void {
+    this.gameService.setSmoothCamera(
+      (event.target as HTMLInputElement).checked
+    );
   }
 
   protected setHaptics(event: Event): void {

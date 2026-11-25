@@ -122,6 +122,8 @@ interface SavedSettings {
   quality: QualityMode;
   /** Retro rendering: big pixels like a handheld console (see pixel-scale.ts). */
   retro: boolean;
+  /** The camera follows the player with a lag (else locked on it). */
+  smoothCamera: boolean;
 }
 
 const SETTINGS_KEY = "pk-weather-settings";
@@ -164,6 +166,7 @@ function loadSettings(): Partial<SavedSettings> {
   out.gusts = bool(raw["gusts"]);
   out.soundMuted = bool(raw["soundMuted"]);
   out.retro = bool(raw["retro"]);
+  out.smoothCamera = bool(raw["smoothCamera"]);
   return out;
 }
 
@@ -262,6 +265,8 @@ export class GameService {
   readonly quality = this.qualityState.asReadonly();
   private readonly retroState = signal(this.saved.retro ?? false);
   readonly retro = this.retroState.asReadonly();
+  private readonly smoothCameraState = signal(this.saved.smoothCamera ?? true);
+  readonly smoothCamera = this.smoothCameraState.asReadonly();
 
   constructor() {
     this.initCheckResize();
@@ -312,6 +317,7 @@ export class GameService {
         leafMode: this.leafModeState(),
         quality: this.qualityState(),
         retro: this.retroState(),
+        smoothCamera: this.smoothCameraState(),
       })
     );
   }
@@ -361,6 +367,7 @@ export class GameService {
 
     game.setQuality(this.qualityState());
     game.setRetro(this.retroState());
+    game.smoothCamera = this.smoothCameraState();
     // In the background (home screen, other app, screen locked): the game stops (see isGameAsleep in the loops);
     // keys held when leaving would stay pressed (their keyup is lost), and the time spent away is not caught up
     onGameAsleep((hidden) => {
@@ -716,6 +723,13 @@ export class GameService {
     this.qualityState.set(mode);
     this.game?.setQuality(mode);
     this.syncHud();
+  }
+
+  setSmoothCamera(smooth: boolean) {
+    this.smoothCameraState.set(smooth);
+    if (this.game) {
+      this.game.smoothCamera = smooth;
+    }
   }
 
   setRetro(retro: boolean) {

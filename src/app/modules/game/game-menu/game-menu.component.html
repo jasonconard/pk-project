@@ -127,6 +127,15 @@
             />
             Rendu rétro : de gros pixels, comme sur une console portable
           </label>
+          <label class="check">
+            <input
+              type="checkbox"
+              [checked]="smoothCamera()"
+              (change)="setSmoothCamera($event)"
+            />
+            Caméra glissante : elle suit le joueur avec un léger retard
+            (décochée : collée au joueur)
+          </label>
           @if (hapticsSupported) {
             <label class="check">
               <input
