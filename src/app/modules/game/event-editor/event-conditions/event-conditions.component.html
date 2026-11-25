@@ -315,6 +315,40 @@
     </button>
   </div>
 }
+@for (l of c.links ?? []; track $index; let k = $index) {
+  <div class="row">
+    <svg lucideHeart class="row-icon"></svg>
+    <select aria-label="Lien avec" (change)="setLink(k, { id: value($event) })">
+      @for (t of data.linkTargets; track t.id) {
+        <option [value]="t.id" [selected]="t.id === l.id">
+          {{ t.name }}
+        </option>
+      }
+    </select>
+    <span>au niveau</span>
+    <select
+      aria-label="Niveau"
+      class="narrow"
+      (change)="setLink(k, { level: +value($event) })"
+    >
+      @for (n of linkLevels; track n) {
+        <option [value]="n" [selected]="n === l.level">
+          {{ n }}
+        </option>
+      }
+    </select>
+    <span>ou plus</span>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer la condition"
+      title="Retirer"
+      (click)="removeLink(k)"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
 @if (!countConditions(c)) {
   <p class="help">{{ empty() }}</p>
 }
@@ -400,5 +434,13 @@
     (click)="addSpecials()"
   >
     <svg lucidePlus></svg> Jour spécial
+  </button>
+  <button
+    type="button"
+    [disabled]="!data.linkTargets.length"
+    title="Le lien avec quelqu'un atteint un niveau (une scène de lien)"
+    (click)="addLink()"
+  >
+    <svg lucidePlus></svg> Lien
   </button>
 </div>

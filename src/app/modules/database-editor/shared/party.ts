@@ -38,6 +38,10 @@ export interface PartyState {
   /** Item id → how many. */
   items: Record<string, number>;
   money: number;
+  /** Social links: character or NPC id → its points (see linkLevelOf). */
+  links?: Record<string, number>;
+  /** NPC id → the day (game date) it was last given a gift (one a day). */
+  gifts?: Record<string, number>;
 }
 
 /** The team when a new game starts. */
@@ -90,6 +94,32 @@ export function giveItem(id: string, amount: number): void {
 export function giveMoney(amount: number): void {
   const party = structuredClone(currentParty());
   party.money = Math.min(MONEY_MAX, Math.max(0, party.money + amount));
+  writeParty(party);
+}
+
+/** A link's points (0: not met). */
+export function linkPoints(id: string): number {
+  return currentParty().links?.[id] ?? 0;
+}
+
+/** Points added to a link (never below 0). */
+export function addLinkPoints(id: string, points: number): void {
+  const party = structuredClone(currentParty());
+  party.links = {
+    ...party.links,
+    [id]: Math.max(0, (party.links?.[id] ?? 0) + points),
+  };
+  writeParty(party);
+}
+
+/** The day an NPC was last given a gift (undefined: never). */
+export function lastGiftDay(id: string): number | undefined {
+  return currentParty().gifts?.[id];
+}
+
+export function markGift(id: string, day: number): void {
+  const party = structuredClone(currentParty());
+  party.gifts = { ...party.gifts, [id]: day };
   writeParty(party);
 }
 

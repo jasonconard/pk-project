@@ -245,6 +245,46 @@
       monde suit : lumière, habitants.
     </p>
   }
+  @case ("link") {
+    <div class="row">
+      <select aria-label="Avec qui" (change)="set({ target: value($event) })">
+        @for (t of data.linkTargets; track t.id) {
+          <option [value]="t.id" [selected]="t.id === action.target">
+            {{ t.name }}{{ t.team ? "" : " (PNJ)" }}
+          </option>
+        }
+      </select>
+      <input
+        type="number"
+        class="num"
+        min="-20"
+        max="20"
+        aria-label="Points"
+        [value]="action.points"
+        (change)="set({ points: wholeNumber(value($event), -20, 20) })"
+      />
+      <span>points</span>
+    </div>
+    <p class="help">
+      Le joueur voit le lien monter (et ce que le nouveau niveau apporte).
+    </p>
+  }
+  @case ("gift") {
+    <div class="row">
+      <span>À</span>
+      <select aria-label="À qui" (change)="set({ target: value($event) })">
+        @for (n of data.npcs; track n.id) {
+          <option [value]="n.id" [selected]="n.id === action.target">
+            {{ n.name }}
+          </option>
+        }
+      </select>
+    </div>
+    <p class="help">
+      Le joueur choisit un cadeau dans son sac (les objets « Cadeau ») : aimé
+      +4, détesté −2, les autres +1 ; un seul cadeau par jour.
+    </p>
+  }
   @case ("timeFlow") {
     <div class="segmented" role="radiogroup" aria-label="Le temps">
       <button

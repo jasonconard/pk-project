@@ -35,11 +35,13 @@ import { StepperComponent } from "../../stepper/stepper.component";
 /** The sheet of a row of the « character » table. */
 import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
 import { WalkFieldComponent } from "../../walk-field/walk-field.component";
+import { LinkFieldComponent } from "../../link-field/link-field.component";
 @Component({
   selector: "db-character-sheet",
   imports: [
     SheetTileComponent,
     WalkFieldComponent,
+    LinkFieldComponent,
     StepperComponent,
     LucideBan,
     LucideBox,
@@ -59,7 +61,10 @@ export class CharacterSheetComponent extends DbSheet {
    * The character sheet's tab: back to « Général » for another character only (each change makes a new row, which
    * runs this again: the same character keeps its tab).
    */
-  protected readonly charTab = linkedSignal<string, "general" | "growth">({
+  protected readonly charTab = linkedSignal<
+    string,
+    "general" | "growth" | "link"
+  >({
     source: () => this.character().id,
     computation: (id, previous) =>
       previous && previous.source === id ? previous.value : "general",

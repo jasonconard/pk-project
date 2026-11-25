@@ -1,6 +1,7 @@
 import { CODE_DATABASE } from "../../../../assets/database/database";
 import { DbCharacter, DbNpc, DbTable, GameDatabase } from "./database";
 import {
+  cachedFromStorage,
   readJson,
   removeKey,
   writeJson,
@@ -72,6 +73,9 @@ export function loadDatabase(): GameDatabase {
   const stored = readStored();
   return stored ? complete(stored.database) : structuredClone(CODE_DATABASE);
 }
+
+/** The game's database, read again only when the browser's copy changed (checked often: the events' conditions). */
+export const cachedDatabase = cachedFromStorage([DATABASE_KEY], loadDatabase);
 
 /** False if the browser refused (no room). */
 export function saveDatabase(database: GameDatabase): boolean {

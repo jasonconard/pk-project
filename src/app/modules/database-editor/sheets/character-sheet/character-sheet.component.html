@@ -33,7 +33,20 @@
   >
     Éléments et armes
   </button>
+  <button
+    type="button"
+    role="tab"
+    [class.on]="charTab() === 'link'"
+    [attr.aria-selected]="charTab() === 'link'"
+    (click)="charTab.set('link')"
+  >
+    Lien
+  </button>
 </div>
+
+@if (charTab() === "link") {
+  <db-link-field [target]="ch" />
+}
 
 @if (charTab() === "general") {
   <div class="block">

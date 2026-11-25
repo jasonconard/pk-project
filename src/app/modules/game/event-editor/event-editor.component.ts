@@ -32,6 +32,8 @@ import {
   LucideTrash,
   LucideUsers,
   LucideHeartPulse,
+  LucideHeartHandshake,
+  LucideGift,
   LucideCirclePause,
   LucideVariable,
   LucideVolume2,
@@ -95,6 +97,8 @@ const ACTIONS: {
   { type: "money", label: "Argent", icon: LucideCoins },
   { type: "party", label: "Équipe", icon: LucideUsers },
   { type: "heal", label: "Soigner l'équipe", icon: LucideHeartPulse },
+  { type: "link", label: "Lien", icon: LucideHeartHandshake },
+  { type: "gift", label: "Offrir un cadeau", icon: LucideGift },
   { type: "time", label: "Faire passer le temps", icon: LucideHourglass },
   {
     type: "timeFlow",
@@ -403,6 +407,14 @@ export class EventEditorComponent {
         return { type, mode: "until", hours: 2, moment: "evening" };
       case "timeFlow":
         return { type, stop: true };
+      case "link": {
+        const first = this.data.linkTargets[0];
+        return first ? { type, target: first.id, points: 3 } : null;
+      }
+      case "gift": {
+        const first = this.data.npcs[0];
+        return first ? { type, target: first.id } : null;
+      }
       case "item":
         return this.data.db.items[0]
           ? { type, item: this.data.db.items[0].id, amount: 1 }

@@ -298,6 +298,84 @@ export interface DbCharacter {
   excludedSkills?: string[];
   /** Stunned after a hit (ms, 0 or missing: no): its gauge waits that long, at least its « hit taken » animation. */
   stunMs?: number;
+  /** The social link with this member: its pace and the combat bonuses of each level. */
+  link?: CharacterLink;
+}
+
+/**
+ * Social links (design/database.pen, 15 · Personnage · Lien, 16 · PNJ · Lien): points given by events make the link go
+ * up, level 1 to LINK_MAX; each level brings combat bonuses (a team member) or an advantage (an NPC).
+ */
+export type LinkPace = "fast" | "normal" | "slow";
+export const LINK_PACES: { id: LinkPace; label: string; factor: number }[] = [
+  { id: "fast", label: "Rapide", factor: 2 / 3 },
+  { id: "normal", label: "Normal", factor: 1 },
+  { id: "slow", label: "Lent", factor: 4 / 3 },
+];
+export const LINK_MAX = 10;
+/** Points from a level to the next (from 0, not met, to 1…), at a normal pace. */
+const LINK_STEPS = [5, 7, 10, 12, 14, 16, 18, 20, 22, 24];
+
+/** Points to go from this level to the next. */
+export function linkStep(level: number, pace: LinkPace = "normal"): number {
+  const factor = LINK_PACES.find((p) => p.id === pace)?.factor ?? 1;
+  return Math.max(1, Math.round((LINK_STEPS[level] ?? 24) * factor));
+}
+
+/** The level reached with these points, and the points into the next level. */
+export function linkLevelOf(
+  points: number,
+  pace: LinkPace = "normal"
+): { level: number; into: number; next: number } {
+  let level = 0;
+  let rest = Math.max(0, points);
+  while (level < LINK_MAX && rest >= linkStep(level, pace)) {
+    rest -= linkStep(level, pace);
+    level++;
+  }
+  return {
+    level,
+    into: level < LINK_MAX ? rest : 0,
+    next: level < LINK_MAX ? linkStep(level, pace) : 0,
+  };
+}
+
+/** A combat bonus of a link level: stats in %, a skill learned, element or weapon experience. */
+export type LinkBonus =
+  | { kind: "stat"; stat: StatId; percent: number }
+  | { kind: "skill"; skill: string }
+  | { kind: "growth"; id: string; points: number };
+export type LinkBonusKind = LinkBonus["kind"];
+
+export interface CharacterLink {
+  pace: LinkPace;
+  /** levels[0]: the bonuses at level 1… */
+  levels: LinkBonus[][];
+}
+
+export interface NpcLink {
+  pace: LinkPace;
+  /** levels[0]: the advantage at level 1 (what the player is told; empty: none)… */
+  levels: string[];
+  /** Gifts (item ids) liked and disliked; the others: a little. */
+  liked: string[];
+  disliked: string[];
+}
+
+/** Points a gift brings. */
+export const GIFT_POINTS = { liked: 4, neutral: 1, disliked: -2 };
+
+export function newCharacterLink(): CharacterLink {
+  return { pace: "normal", levels: Array.from({ length: LINK_MAX }, () => []) };
+}
+
+export function newNpcLink(): NpcLink {
+  return {
+    pace: "normal",
+    levels: Array.from({ length: LINK_MAX }, () => ""),
+    liked: [],
+    disliked: [],
+  };
 }
 
 /** A non-player character (the baker, the mayor…): looks only, no fight. Placed on the maps with its events. */
@@ -312,6 +390,8 @@ export interface DbNpc {
   walk?: string;
   /** Where it is each day and moment (missing: always at every place it is put on the maps). */
   schedule?: NpcSchedule;
+  /** The social link with it: its pace, the advantage of each level, the gifts it likes. */
+  link?: NpcLink;
 }
 
 /**

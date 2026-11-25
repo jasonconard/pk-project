@@ -65,7 +65,7 @@ interface MenuEntry {
   /** What the tool brings, shown in the tooltip. */
   soon: string;
   /** What it opens; none yet: greyed. */
-  action?: "saves" | "agenda";
+  action?: "saves" | "agenda" | "links";
 }
 
 const ENTRIES: MenuEntry[] = [
@@ -75,6 +75,7 @@ const ENTRIES: MenuEntry[] = [
     icon: LucideHeartHandshake,
     label: "Liens",
     soon: "Les liens avec les habitants et l'équipe",
+    action: "links",
   },
   {
     icon: LucideCalendarDays,
@@ -137,6 +138,8 @@ export class GameMenuComponent {
   readonly saves = output<void>();
   /** The Agenda: the game's calendar, today's moments, the special days to come. */
   readonly agenda = output<void>();
+  /** The social links: their levels and what they bring. */
+  readonly links = output<void>();
   /** The variables test panel: the menu closes, the panel opens. */
   readonly variablesTest = output<void>();
   readonly battleSim = output<void>();
@@ -229,10 +232,23 @@ export class GameMenuComponent {
   }
 
   protected openEntry(entry: MenuEntry): void {
-    if (entry.action === "saves") {
-      this.saves.emit();
-    } else if (entry.action === "agenda") {
-      this.agenda.emit();
+    switch (entry.action) {
+      case "saves": {
+        this.saves.emit();
+
+        break;
+      }
+      case "agenda": {
+        this.agenda.emit();
+
+        break;
+      }
+      case "links": {
+        this.links.emit();
+
+        break;
+      }
+      // No default
     }
   }
 

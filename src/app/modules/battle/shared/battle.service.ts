@@ -86,6 +86,20 @@ function teamFighter(
   db: GameDatabase
 ): Fighter {
   const stats = characterStats(c, p.level, db);
+  // The social link's bonuses reached: stats in %, skills learned (the element / weapon experience is given once)
+  const bonuses = memberLinkBonuses(c, linkState(c.id, db).level);
+  const percent: Partial<Record<StatId, number>> = {};
+  for (const b of bonuses) {
+    if (b.kind === "stat") {
+      percent[b.stat] = (percent[b.stat] ?? 0) + b.percent;
+    }
+  }
+  for (const [stat, pc] of Object.entries(percent) as [StatId, number][]) {
+    stats[stat] = Math.round(stats[stat] * (1 + pc / 100));
+  }
+  const linkSkills = bonuses.flatMap((b) =>
+    b.kind === "skill" ? [b.skill] : []
+  );
   const resists: Record<string, ResistLevel> = {};
   const worn = wornItems(c, db);
   for (const item of worn) {
@@ -115,9 +129,9 @@ function teamFighter(
       .map((id) => db.states.find((s) => s.id === id))
       .filter((s) => !!s)
       .map((s) => ({ id: s.id, turns: s.turns })),
-    skills: knownSkills(c, p, db)
-      .filter((s) => s.use !== "field")
-      .map((s) => s.id),
+    skills: [
+      ...new Set([...knownSkills(c, p, db).map((s) => s.id), ...linkSkills]),
+    ].filter((id) => db.skills.find((s) => s.id === id)?.use !== "field"),
     actions: [],
     stronger: false,
     spot: { x: 0.5, y: 1 },
@@ -161,6 +175,11 @@ function foeFighter(
  * rules and timing (BattleEngine), what the interface shows (`view`, refreshed every frame of the fight), and the
  * end (the victory's experience, levels and loot, saved in the team's progress; the defeat).
  */
+import {
+  linkState,
+  memberLinkBonuses,
+} from "../../database-editor/shared/links";
+import { StatId } from "../../database-editor/shared/database";
 @Service()
 export class BattleService {
   private game: Game | null = null;

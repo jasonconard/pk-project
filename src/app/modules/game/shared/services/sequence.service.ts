@@ -29,6 +29,8 @@ import {
 import { BattleService } from "../../../battle/shared/battle.service";
 import { BattleResult } from "../../../battle/shared/battle-types";
 
+import { gainLink, LinkGain } from "../../../database-editor/shared/links";
+import { loadDatabase } from "../../../database-editor/shared/database-storage";
 /** A time action of an event: the time passes, or stops / goes on again. */
 export interface TimeRequest {
   pass?: InstructionTime;
@@ -62,6 +64,21 @@ export class SequenceService {
   private readonly timeSubject = new Subject<TimeRequest>();
   /** Emits each time action of an event (time passing, stopped, going on); the game applies it. */
   readonly time$: Observable<TimeRequest> = this.timeSubject.asObservable();
+
+  private readonly linkSubject = new Subject<LinkGain>();
+  /** A social link went up (an event): the game shows it. */
+  readonly link$: Observable<LinkGain> = this.linkSubject.asObservable();
+  /** The player shows a gift to give (an NPC id); the game calls `giftDone` once chosen or not. */
+  private readonly giftSubject = new Subject<string>();
+  readonly gift$: Observable<string> = this.giftSubject.asObservable();
+
+  /** The gift was given (its link's gain shown) or not: the event goes on. */
+  giftDone(gain: LinkGain | null): void {
+    if (gain) {
+      this.linkSubject.next(gain);
+    }
+    this.nextSequence();
+  }
 
   /** What the branches of the event being played check (hour, weather, variables now), given by the game. */
   private context: (() => EventContext) | null = null;
@@ -180,6 +197,23 @@ export class SequenceService {
         } else {
           this.nextSequence();
         }
+        break;
+      case InstructionType.LINK:
+        if (instruction.link) {
+          const gain = gainLink(
+            instruction.link.id,
+            instruction.link.points,
+            loadDatabase()
+          );
+          if (gain) {
+            this.linkSubject.next(gain);
+          }
+        }
+        this.nextSequence();
+        break;
+      case InstructionType.GIFT:
+        // (the game shows the bag's gifts; giftDone goes on)
+        this.giftSubject.next(instruction.gift?.npc ?? "");
         break;
       case InstructionType.TIME_FLOW:
         this.timeSubject.next({ stop: !!instruction.timeFlow?.stop });

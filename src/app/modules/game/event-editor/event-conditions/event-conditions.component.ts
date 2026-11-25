@@ -16,6 +16,7 @@ import {
   LucideX,
   LucideCalendar,
   LucideCalendarDays,
+  LucideHeart,
   LucideStar,
   LucideSunMoon,
 } from "@lucide/angular";
@@ -42,7 +43,11 @@ const COUNTER_TESTS: { op: VariableTest["op"]; label: string }[] = [
   { op: "lte", label: "≤" },
 ];
 
-import { DAY_TIMES, DayTime } from "../../../database-editor/shared/database";
+import {
+  DAY_TIMES,
+  DayTime,
+  LINK_MAX,
+} from "../../../database-editor/shared/database";
 import { shortWeekday } from "../../shared/model/game-calendar";
 /**
  * Conditions that must all be true (the event's, or a condition action's): variables, hours, weathers, items carried,
@@ -54,6 +59,7 @@ import { shortWeekday } from "../../shared/model/game-calendar";
     LucideBackpack,
     LucideCalendar,
     LucideCalendarDays,
+    LucideHeart,
     LucideStar,
     LucideSunMoon,
     LucideClock,
@@ -221,6 +227,42 @@ export class EventConditionsComponent {
   protected daysOf(month: number): number[] {
     const days = this.data.calendar.months[month]?.days ?? 1;
     return Array.from({ length: days }, (_, i) => i + 1);
+  }
+
+  // Social links
+
+  protected readonly linkLevels = Array.from(
+    { length: LINK_MAX },
+    (_, i) => i + 1
+  );
+
+  protected addLink(): void {
+    const first = this.data.linkTargets[0];
+    if (first) {
+      this.change(
+        (c) => (c.links = [...(c.links ?? []), { id: first.id, level: 1 }])
+      );
+    }
+  }
+
+  protected setLink(
+    index: number,
+    patch: { id?: string; level?: number }
+  ): void {
+    this.change((c) => {
+      if (c.links?.[index]) {
+        c.links[index] = { ...c.links[index], ...patch };
+      }
+    });
+  }
+
+  protected removeLink(index: number): void {
+    this.change((c) => {
+      c.links?.splice(index, 1);
+      if (!c.links?.length) {
+        delete c.links;
+      }
+    });
   }
 
   // The team: items carried, money, members

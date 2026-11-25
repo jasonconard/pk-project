@@ -46,6 +46,8 @@ export interface SceneEventCondition {
   moments?: DayTime[];
   /** One of these special days of the calendar (ids). */
   specials?: string[];
+  /** Social links at a level or more (character or NPC id). */
+  links?: { id: string; level: number }[];
 }
 
 /** A flag is true / false ('is'); a counter compared with a number. */

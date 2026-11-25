@@ -4,6 +4,7 @@ import { DbNpc } from "../../shared/database";
 import { DbSheet } from "../../shared/db-sheet";
 import { WalkFieldComponent } from "../../walk-field/walk-field.component";
 import { ScheduleFieldComponent } from "../../schedule-field/schedule-field.component";
+import { LinkFieldComponent } from "../../link-field/link-field.component";
 
 /** The sheet of a row of the « NPC » table: its looks (design/database.pen, 12 · Fiche PNJ). */
 @Component({
@@ -13,6 +14,7 @@ import { ScheduleFieldComponent } from "../../schedule-field/schedule-field.comp
     LucidePencil,
     WalkFieldComponent,
     ScheduleFieldComponent,
+    LinkFieldComponent,
   ],
   templateUrl: "./npc-sheet.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,

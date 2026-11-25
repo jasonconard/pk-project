@@ -21,6 +21,8 @@ import {
   momentAt,
   specialDayFits,
 } from "./game-calendar";
+import { cachedDatabase } from "../../../database-editor/shared/database-storage";
+import { linkState } from "../../../database-editor/shared/links";
 /**
  * An event set on an object in the map editor's event window: what starts it (talking to the object, stepping on it,
  * or on its own), the conditions that must be true (story variables, hour, weather) and the actions played one after
@@ -57,6 +59,8 @@ export interface EventConditions {
   moments?: DayTime[];
   /** One of these special days of the calendar (ids). */
   specials?: string[];
+  /** Social links at a level or more (character or NPC id). */
+  links?: { id: string; level: number }[];
 }
 
 /** A day of the year: month index and day (from 1). */
@@ -100,6 +104,10 @@ export type EventAction =
     }
   /** The time stops (until it goes on, or another map) or goes on again. */
   | { type: "timeFlow"; stop: boolean }
+  /** Points to a social link (a team member or an NPC); the player sees it go up. */
+  | { type: "link"; target: string; points: number }
+  /** The player picks a gift in the bag for an NPC (its link goes up, more for a liked one; one a day). */
+  | { type: "gift"; target: string }
   /** A fight against a group of the database, then the branch of how it ended. */
   | {
       type: "fight";
@@ -332,6 +340,7 @@ function partyConditions(c: Omit<EventConditions, "variables">) {
     ...(c.dates ? { dates: structuredClone(c.dates) } : {}),
     ...(c.moments?.length ? { moments: [...c.moments] } : {}),
     ...(c.specials?.length ? { specials: [...c.specials] } : {}),
+    ...(c.links?.length ? { links: c.links.map((l) => ({ ...l })) } : {}),
   };
 }
 
@@ -403,6 +412,13 @@ function toInstruction(
         type: InstructionType.TIME_FLOW,
         timeFlow: { stop: action.stop },
       };
+    case "link":
+      return {
+        type: InstructionType.LINK,
+        link: { id: action.target, points: action.points },
+      };
+    case "gift":
+      return { type: InstructionType.GIFT, gift: { npc: action.target } };
   }
 }
 
@@ -539,6 +555,18 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
         : null;
     case InstructionType.TIME_FLOW:
       return { type: "timeFlow", stop: !!instruction.timeFlow?.stop };
+    case InstructionType.LINK:
+      return instruction.link
+        ? {
+            type: "link",
+            target: instruction.link.id,
+            points: instruction.link.points,
+          }
+        : null;
+    case InstructionType.GIFT:
+      return instruction.gift
+        ? { type: "gift", target: instruction.gift.npc }
+        : null;
     case InstructionType.ITEM:
       return instruction.item
         ? {
@@ -586,11 +614,18 @@ export function conditionsFit(
     | "dates"
     | "moments"
     | "specials"
+    | "links"
   >,
   ctx: EventContext
 ): boolean {
   if (!calendarFits(conditions, ctx)) {
     return false;
+  }
+  if (conditions.links?.length) {
+    const db = cachedDatabase();
+    if (conditions.links.some((l) => linkState(l.id, db).level < l.level)) {
+      return false;
+    }
   }
   const hours = conditions.hours;
   if (hours && hours.from !== hours.to) {

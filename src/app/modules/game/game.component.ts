@@ -53,6 +53,10 @@ import {
 import { GameMenuComponent } from "./game-menu/game-menu.component";
 import { GameSavesComponent } from "./game-saves/game-saves.component";
 import { AgendaComponent } from "./agenda/agenda.component";
+import { LinksComponent } from "./links/links.component";
+import { LinkToastComponent } from "./link-toast/link-toast.component";
+import { GiftPickerComponent } from "./gift-picker/gift-picker.component";
+import { LinkGain } from "../database-editor/shared/links";
 import { VariablesTestComponent } from "./variables-test/variables-test.component";
 import { BattleSimComponent } from "../battle/battle-sim/battle-sim.component";
 import { MapControlsComponent } from "./map-controls/map-controls.component";
@@ -71,6 +75,9 @@ import { momentLabel } from "./shared/model/game-calendar";
     TouchPadComponent,
     MessageComponent,
     AgendaComponent,
+    LinksComponent,
+    LinkToastComponent,
+    GiftPickerComponent,
     TimeBannerComponent,
     TeleportComponent,
     FightUiComponent,
@@ -152,6 +159,9 @@ export class GameComponent {
   /** The saved games dialog (menu → Sauver). */
   protected readonly savesOpen = signal(false);
   protected readonly agendaOpen = signal(false);
+  protected readonly linksOpen = signal(false);
+  /** The Offrir action of an event: the NPC to give a gift to (null: none asked). */
+  protected readonly giftFor = signal<string | null>(null);
   /** The variables test panel (menu → Test des variables). */
   protected readonly variablesTestOpen = signal(false);
   protected readonly battleSimOpen = signal(false);
@@ -171,6 +181,11 @@ export class GameComponent {
   );
 
   constructor() {
+    // The Offrir action of an event: the bag's gifts for that NPC (the event waits)
+    const gifts = this.sequenceService.gift$.subscribe((npc) =>
+      this.giftFor.set(npc || null)
+    );
+    inject(DestroyRef).onDestroy(() => gifts.unsubscribe());
     afterNextRender(() =>
       this.gameService.init(this.canvasRef().nativeElement)
     );
@@ -212,6 +227,7 @@ export class GameComponent {
         !this.releaseNotes() &&
         !this.savesOpen() &&
         !this.agendaOpen() &&
+        !this.linksOpen() &&
         !this.variablesTestOpen() &&
         !this.battleSimOpen() &&
         !this.sequenceService.message() &&
@@ -306,6 +322,16 @@ export class GameComponent {
   protected openBattleSim(): void {
     this.menuOpen.set(false);
     this.battleSimOpen.set(true);
+  }
+
+  protected openLinks(): void {
+    this.menuOpen.set(false);
+    this.linksOpen.set(true);
+  }
+
+  protected giftDone(gain: LinkGain | null): void {
+    this.giftFor.set(null);
+    this.sequenceService.giftDone(gain);
   }
 
   protected openAgenda(): void {

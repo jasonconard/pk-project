@@ -191,10 +191,21 @@
     (releaseNotes)="openReleaseNotes()"
     (saves)="openSaves()"
     (agenda)="openAgenda()"
+    (links)="openLinks()"
     (variablesTest)="openVariablesTest()"
     (battleSim)="openBattleSim()"
   />
 }
+
+@if (linksOpen()) {
+  <game-links (closed)="linksOpen.set(false)" />
+}
+
+@if (giftFor(); as npc) {
+  <game-gift-picker [npc]="npc" (done)="giftDone($event)" />
+}
+
+<game-link-toast />
 
 @if (agendaOpen()) {
   <game-agenda (closed)="agendaOpen.set(false)" />

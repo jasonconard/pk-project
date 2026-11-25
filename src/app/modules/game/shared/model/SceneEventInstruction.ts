@@ -22,6 +22,10 @@ export enum InstructionType {
   TIME,
   /** TIME_FLOW: the time stops or goes on again (until « go on » or another map). */
   TIME_FLOW,
+  /** LINK: points to a social link. */
+  LINK,
+  /** GIFT: the player picks a gift in the bag for an NPC. */
+  GIFT,
 }
 
 export interface SceneEventInstruction {
@@ -45,6 +49,8 @@ export interface SceneEventInstruction {
   fight?: { group: string };
   time?: InstructionTime;
   timeFlow?: { stop: boolean };
+  link?: { id: string; points: number };
+  gift?: { npc: string };
   subInstructions?: SceneEventSubInstruction[];
 }
 
@@ -118,4 +124,5 @@ export interface InstructionBranch {
   };
   moments?: DayTime[];
   specials?: string[];
+  links?: { id: string; level: number }[];
 }

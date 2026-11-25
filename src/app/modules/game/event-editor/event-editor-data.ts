@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { loadDatabase } from "../../database-editor/shared/database-storage";
+import { linkTargets } from "../../database-editor/shared/links";
 import { DbGroup, newCalendar } from "../../database-editor/shared/database";
 import { loadVariables } from "../../variables-editor/shared/variable-storage";
 import {
@@ -24,6 +25,14 @@ export class EventEditorData {
   /** The database: items, characters (of the team), groups of enemies. */
   readonly db = loadDatabase();
   readonly teamCharacters = this.db.characters;
+  /** Who the player can have a social link with: the team members and the NPCs. */
+  readonly linkTargets = linkTargets(this.db);
+  readonly npcs = this.db.npcs;
+
+  linkName(id: string): string | undefined {
+    return this.linkTargets.find((t) => t.id === id)?.name;
+  }
+
   /** The game's calendar (days of the week, months, special days: the date conditions). */
   readonly calendar = this.db.calendar[0] ?? newCalendar();
   /** The portraits a message may show: the characters' and the NPCs' drawn in their sheet. */
@@ -112,7 +121,8 @@ export function countConditions(c: EventConditions): number {
     (c.weekdays ? 1 : 0) +
     (c.dates ? 1 : 0) +
     (c.moments ? 1 : 0) +
-    (c.specials ? 1 : 0)
+    (c.specials ? 1 : 0) +
+    (c.links?.length ?? 0)
   );
 }
 

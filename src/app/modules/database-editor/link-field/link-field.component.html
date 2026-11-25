@@ -1,0 +1,199 @@
+<div class="block">
+  <h3>Rythme du lien</h3>
+  <div class="segmented wide" role="group" aria-label="Rythme du lien">
+    @for (p of paces; track p.id) {
+      <button
+        type="button"
+        [class.on]="pace() === p.id"
+        (click)="setPace(p.id)"
+      >
+        {{ p.label }}
+      </button>
+    }
+  </div>
+  <p class="note">Points pour chaque niveau : {{ steps() }}.</p>
+</div>
+
+@if (member()) {
+  <div class="block">
+    <h3>Bonus en combat, par niveau</h3>
+    @for (level of characterLink().levels; track $index; let l = $index) {
+      <div class="level">
+        <span class="num"><svg lucideHeart></svg> {{ l + 1 }}</span>
+        <div class="bonuses">
+          @for (b of level; track $index; let i = $index) {
+            <div class="bonus">
+              @switch (bonusKind(b)) {
+                @case ("stat") {
+                  <select
+                    aria-label="Stat"
+                    (change)="
+                      setBonus(l, i, { stat: $any($event.target).value })
+                    "
+                  >
+                    @for (s of stats; track s.id) {
+                      <option [value]="s.id" [selected]="s.id === $any(b).stat">
+                        {{ s.label }}
+                      </option>
+                    }
+                  </select>
+                  <span>+</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    aria-label="Pour cent"
+                    [value]="$any(b).percent"
+                    (change)="
+                      setBonus(l, i, {
+                        percent: number($any($event.target).value, 1, 100),
+                      })
+                    "
+                  />
+                  <span>%</span>
+                }
+                @case ("skill") {
+                  <select
+                    aria-label="Compétence"
+                    (change)="
+                      setBonus(l, i, { skill: $any($event.target).value })
+                    "
+                  >
+                    @for (s of db().skills; track s.id) {
+                      <option
+                        [value]="s.id"
+                        [selected]="s.id === $any(b).skill"
+                      >
+                        {{ s.name }}
+                      </option>
+                    }
+                  </select>
+                }
+                @default {
+                  <select
+                    aria-label="Élément ou arme"
+                    (change)="setBonus(l, i, { id: $any($event.target).value })"
+                  >
+                    @for (g of growths(); track g.id) {
+                      <option [value]="g.id" [selected]="g.id === $any(b).id">
+                        {{ g.name }}
+                      </option>
+                    }
+                  </select>
+                  <span>+</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="999"
+                    aria-label="Expérience"
+                    [value]="$any(b).points"
+                    (change)="
+                      setBonus(l, i, {
+                        points: number($any($event.target).value, 1, 999),
+                      })
+                    "
+                  />
+                  <span>xp</span>
+                }
+              }
+              <button
+                type="button"
+                class="remove"
+                aria-label="Retirer"
+                (click)="removeBonus(l, i)"
+              >
+                <svg lucideX></svg>
+              </button>
+            </div>
+          }
+          <select
+            class="add"
+            aria-label="Ajouter un bonus"
+            (change)="
+              addBonus(l, $any($event.target).value);
+              $any($event.target).value = ''
+            "
+          >
+            <option value="" selected>+ Bonus…</option>
+            <option value="stat">Stat en plus (%)</option>
+            <option value="skill">Compétence</option>
+            <option value="growth">Expérience d'élément ou d'arme</option>
+          </select>
+        </div>
+      </div>
+    }
+    <p class="hint">
+      <svg lucideInfo></svg> Les stats et les compétences comptent en combat dès
+      que le lien atteint le niveau ; l'expérience est donnée une fois, en
+      l'atteignant.
+    </p>
+  </div>
+} @else {
+  <div class="block">
+    <h3>Avantages, par niveau</h3>
+    @for (adv of npcLink().levels; track $index; let l = $index) {
+      <label class="level">
+        <span class="num"><svg lucideHeart></svg> {{ l + 1 }}</span>
+        <input
+          type="text"
+          maxlength="80"
+          placeholder="Pas d'avantage"
+          [attr.aria-label]="'Avantage au niveau ' + (l + 1)"
+          [value]="adv"
+          (change)="setAdvantage(l, $any($event.target).value)"
+        />
+      </label>
+    }
+    <p class="hint">
+      <svg lucideInfo></svg> Ce qu'on dit au joueur (« -10 % à la boulangerie »,
+      « un pain offert chaque lundi »). Les scènes de lien sont des événements
+      avec la condition « Lien ≥ niveau ».
+    </p>
+  </div>
+  <div class="block">
+    <h3>Cadeaux</h3>
+    @for (
+      list of [
+        { id: "liked", label: "Aimés", points: "+" + giftPoints.liked },
+        {
+          id: "disliked",
+          label: "Détestés",
+          points: "" + giftPoints.disliked,
+        },
+      ];
+      track list.id
+    ) {
+      <div class="gifts">
+        <b>{{ list.label }} ({{ list.points }})</b>
+        <div class="chips">
+          @for (item of $any(npcLink())[list.id]; track item) {
+            <button
+              type="button"
+              class="chip plain on"
+              (click)="removeGift($any(list.id), item)"
+            >
+              {{ itemName(item) }} <svg lucideX></svg>
+            </button>
+          }
+          <select
+            class="add"
+            aria-label="Ajouter un cadeau"
+            (change)="
+              addGift($any(list.id), $any($event.target).value);
+              $any($event.target).value = ''
+            "
+          >
+            <option value="" selected>+ Objet…</option>
+            @for (it of giftItems(); track it.id) {
+              <option [value]="it.id">{{ it.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+    <p class="note">
+      Les autres cadeaux : +{{ giftPoints.neutral }}. Un seul cadeau par jour
+      (l'action « Offrir un cadeau » d'un événement).
+    </p>
+  </div>
+}
