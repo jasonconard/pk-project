@@ -1,6 +1,7 @@
 import { inject, Service } from "@angular/core";
 import { describeAction, sameAction } from "../model/GameAction";
 import { CAMERA_LOOK, Game, SHADE_OFFSET, TOO_FAR_LIMIT } from "../model/Game";
+import { fitPixelCamera } from "../model/pixel-scale";
 import { SCENE_PLAYER } from "../../../../../assets/characters/player";
 import { MapHelper } from "../model/MapHelper";
 import { PlayerDirection, PlayerMoveStatus } from "../model/ScenePlayer";
@@ -247,6 +248,7 @@ export class GameMapService {
       this.mapEditorService.update(game);
       return;
     }
+    fitPixelCamera(game);
     // No moves during a sequence, or while a tornado carries the player away
     const moveDetails =
       this.sequenceService.isRunning || game.weather.playerFlying

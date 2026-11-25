@@ -10,6 +10,7 @@ import { SceneChunk, SceneMap, StairsSide } from "./SceneMap";
 import { PlayerTex, ScenePlayer } from "./ScenePlayer";
 import { playerLook } from "./player-look";
 import { isNpc, makeNpcMesh } from "./npc-sprite";
+import { facingSprite } from "./pixel-scale";
 import {
   CAMERA_LOOK,
   Game,
@@ -136,6 +137,8 @@ export class MapHelper {
     this.playerShadow.castShadow = true;
     spritePlane.add(this.playerShadow);
     spritePlane.position.set(0, (tex.size.y / 2) * stretch, 0);
+    // (drawn facing the camera, pixel-sharp; after the shadow's copy, which stays upright)
+    facingSprite(mat, tex.size.y);
     return spritePlane;
   }
 

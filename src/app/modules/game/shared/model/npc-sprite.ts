@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { SceneModel } from "./SceneModel";
 import { SceneBuilding } from "./SceneBuilding";
 import { CAMERA_LOOK } from "./Game";
+import { facingSprite } from "./pixel-scale";
 import { BasicMeshService } from "../services/basic-mesh.service";
 import { cachedFromStorage } from "../../../../core/shared/local-store";
 import {
@@ -118,6 +119,7 @@ export function makeNpcMesh(modelId: string, rot: number): THREE.Group {
   plane.scale.y = stretch;
   plane.position.y = (size.y / 2) * stretch;
   plane.castShadow = false;
+  facingSprite(plane.material as THREE.Material, size.y);
 
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
 

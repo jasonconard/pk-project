@@ -85,6 +85,8 @@ export class Game {
   editCanRedo = false;
   /** Camera distance factor: 1 = normal view, the editor zooms in (< 1) and out (> 1). */
   cameraZoom = 1;
+  /** The zoom last set for pixel-sharp sprites (see pixel-scale.ts): a zoom of its own (fight, editor) differs. */
+  fittedZoom = 1;
 
   constructor(o: GameInit) {
     this.scene = o.scene;
