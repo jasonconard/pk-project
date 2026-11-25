@@ -44,6 +44,7 @@ Toutes doivent être vraies. Sans condition, l'événement se joue toujours.
 - **Date** : entre deux dates, chaque année (du 13 au 13 printemps : ce jour-là ; d'hiver à printemps : passe le nouvel an).
 - **Moment** : le matin, l'après-midi, le soir ou la nuit (aux heures du calendrier).
 - **Jour spécial** : l'un des jours spéciaux du calendrier (la fête, le marché…), à ses moments.
+- **Lien** : le lien avec quelqu'un (de l'équipe ou un PNJ) est à tel niveau ou plus. C'est ainsi qu'on fait une **scène de lien** : un événement qui ne se joue qu'à partir d'un niveau.
 
 ## Actions
 
@@ -63,6 +64,8 @@ Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'a
 | **Objet** | Donne ou retire un nombre d'un objet de la [base de données](10-base-de-donnees.md) (jamais en dessous de 0). |
 | **Argent** | Donne ou retire des pièces. |
 | **Équipe** | Un personnage entre dans l'équipe ou en sort. |
+| **Lien** | Des points de lien avec quelqu'un (de l'équipe ou un PNJ ; négatif : il baisse). Le joueur voit le lien monter, et ce que le nouveau niveau apporte. |
+| **Offrir un cadeau** | Le joueur choisit un cadeau dans son sac (les objets de la sorte « Cadeau ») pour un PNJ : aimé +4 points, détesté −2, les autres +1. Un seul par jour (le cadeau reste dans le sac). |
 | **Faire passer le temps** | Un fondu au noir, et l'horloge avance : de quelques heures, jusqu'au prochain moment choisi (le soir, la nuit…), ou jusqu'au lendemain matin. Le jour change si on passe minuit. |
 | **Arrêter / reprendre le temps** | L'heure ne bouge plus jusqu'à « Reprendre » ou au changement de carte. |
 | **Soigner l'équipe** | Toute l'équipe retrouve ses PV et ses PM, et ses états (poison…) disparaissent : une auberge, une source, un lit. |

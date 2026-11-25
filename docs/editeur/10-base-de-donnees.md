@@ -58,6 +58,7 @@ Les personnages non joueurs (le boulanger, le maire…) : ils ne se battent pas,
 - **Le portrait** des dialogues (96 × 96) : il se choisit dans l'action Message des [événements](09-evenements.md), sous « PNJ ».
 - **Description** (facultative).
 - **La planche de marche** (voir [plus bas](#planche-de-marche)).
+- **Lien** : son rythme (rapide, normal, lent), l'**avantage** de chaque niveau (ce qu'on dit au joueur : « -5 % à la boulangerie ») et les **cadeaux** aimés (+4) et détestés (−2), les autres +1. Voir [Liens sociaux](#liens-sociaux).
 - **Emploi du temps** (case « Suit un emploi du temps ») : une grille jours de la semaine × moments ; chaque case dit à quelle place il est, ou absent. Ses places sont ses poses sur les cartes (éditeur de carte, onglet PNJ ; chacune avec ses événements et son nom, « Nom de la place » dans sa fiche). Toucher le nom d'un jour met toute la journée comme le matin. **Exceptions des jours spéciaux** : un jour spécial du calendrier, ses moments (aucun : toute la journée) et la place ce jour-là. Dans le jeu, il n'est visible qu'à la place où il est (l'éditeur montre toutes ses places). Sans emploi du temps, il est toujours à toutes ses places.
 
 Les habitants des premières versions (des personnages « Habitant ») sont passés tout seuls dans cette table, avec leur nom, leur description et leurs images.
@@ -69,6 +70,16 @@ Comment un personnage ou un PNJ marche sur la carte : une image de 48 × 96, fai
 - **Toucher une image** l'ouvre dans l'éditeur pixel (16 × 24) ; le reste de la planche est gardé.
 - **Planche entière** ouvre toute la planche (48 × 96) : pour la dessiner d'un coup ou **importer un PNG** (par exemple une planche faite avec PixelLab, à la même taille).
 - L'**aperçu** le fait marcher dans les 4 directions.
+
+## Liens sociaux
+
+Un lien avec chaque membre de l'équipe et chaque PNJ. Maquette : `design/database.pen`, écrans 15 et 16, et `design/main-view.pen` (Liens).
+
+- **Points et niveaux** : les événements donnent des points (action **Lien**, ou **Offrir un cadeau** à un PNJ) ; assez de points, le niveau suivant, de 1 à 10. Points pour chaque niveau : 5, 7, 10, 12, 14, 16, 18, 20, 22, 24 (Rapide : un tiers de moins ; Lent : un tiers de plus).
+- **Un membre de l'équipe** (onglet **Lien** de sa fiche) : pour chaque niveau, des **bonus en combat** : une **stat en plus** (en %), une **compétence** (il la connaît en combat), de l'**expérience d'élément ou d'arme** (donnée une fois, en atteignant le niveau).
+- **Un PNJ** : un avantage par niveau, et ses cadeaux (voir [PNJ](#pnj)).
+- **Dans le jeu** : une carte « Lien avec Bernard · Niv. 3 → 4 » quand le lien monte, avec ce qu'apporte le nouveau niveau ; **Menu → Liens** montre chaque lien commencé (niveau, points vers le suivant, ce qu'il apporte). Les scènes de lien sont des événements avec la condition **Lien** ([Événements](09-evenements.md)).
+- Les points sont gardés dans la partie (et ses sauvegardes).
 
 ## Ennemis
 
