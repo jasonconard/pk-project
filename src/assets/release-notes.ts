@@ -14,6 +14,13 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.45',
+    date: '2026-11-25',
+    notes: [
+      'fix: Le personnage ne recule plus d\'un pixel quand il s\'arrête, et le décor défile plus régulièrement.',
+    ],
+  },
+  {
     version: '0.0.44',
     date: '2026-11-25',
     notes: [
