@@ -20907,6 +20907,2575 @@
           ]
         }
       ]
+    },
+    {
+      "type": "note",
+      "id": "ZdxXM",
+      "x": 0,
+      "y": 6699,
+      "name": "Note donjons",
+      "width": 1290,
+      "height": 200,
+      "content": "DONJONS (point 10) — un donjon (base de données) a des étages : chacun est une carte faite à la main, ou généré à chaque visite à partir de salles (des cartes de la sorte « Salle », reliées par leurs portes). Il n'ouvre qu'à certaines heures / certains jours, avec sa météo. Les ennemis sont visibles et se promènent ; les toucher lance le combat (les frapper en premier : attaque surprise, les jauges de l'équipe partent en avance ; se faire toucher de dos : embuscade). Coffres (ouverts une fois), pièges, interrupteurs et portes fermées, escaliers, points de sauvegarde et de sortie. Captures : la carte actuelle de nuit (pas encore de carte de donjon), les sprites de combat des ennemis."
+    },
+    {
+      "type": "frame",
+      "id": "d0AJW",
+      "x": 0,
+      "y": 6949,
+      "name": "Donjons · Jeu · Étage en exploration",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "KDfe2",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait-night.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "r12Jt",
+          "x": 14,
+          "y": 54,
+          "name": "Horloge (jour · heure · météo)",
+          "fill": "$panel",
+          "cornerRadius": 22,
+          "effect": {
+            "type": "background_blur",
+            "radius": 12
+          },
+          "gap": 10,
+          "padding": [
+            8,
+            14,
+            8,
+            8
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ATGhV",
+              "name": "Météo",
+              "width": 40,
+              "height": 40,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/weather/neutral-night.webp",
+                "mode": "cover"
+              },
+              "cornerRadius": 20,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1,
+              "justifyContent": "center",
+              "alignItems": "center"
+            },
+            {
+              "type": "frame",
+              "id": "aIroI",
+              "name": "Textes",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "mOwde",
+                  "name": "Lun. 12 · Matin",
+                  "fill": "$text",
+                  "content": "Ven. 5 printemps",
+                  "fontFamily": "$font",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "gHNyT",
+                  "name": "Sous-ligne",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "eNojo",
+                      "name": "sun",
+                      "width": 12,
+                      "height": 12,
+                      "icon": "sunset",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "text",
+                      "id": "H8F62f",
+                      "name": "9:30 · Pluie fine · 14 °C",
+                      "fill": "$text-dim",
+                      "content": "Nuit · 23:30 · 11 °C",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "iZrac",
+          "x": 262,
+          "y": 54,
+          "name": "Coin haut droit",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "EkDh5",
+              "name": "Bouton Créer",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "stroke": "#FFB04A80",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "R4eFH",
+                  "name": "pencil-ruler",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "pencil-ruler",
+                  "library": "lucide",
+                  "fill": "$edit"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Uzy23",
+              "name": "Bouton Menu",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "AfwxJ",
+                  "name": "menu",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "menu",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "j8np4",
+          "x": 28,
+          "y": 650,
+          "name": "Stick",
+          "width": 132,
+          "height": 132,
+          "fill": "#22232A80",
+          "cornerRadius": 66,
+          "stroke": "#FFFFFF40",
+          "strokeWidth": 1.5,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "nzxGk",
+              "name": "Pouce",
+              "fill": "#FFFFFF59",
+              "width": 56,
+              "height": 56
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "LuiSW",
+          "x": 240,
+          "y": 640,
+          "name": "Actions",
+          "layout": "vertical",
+          "gap": 12,
+          "alignItems": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "p3pM1",
+              "name": "Bouton Courir",
+              "width": 56,
+              "height": 56,
+              "fill": "#22232ACC",
+              "cornerRadius": 28,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Cb0SY",
+                  "name": "footprints",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "footprints",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "CkUrB",
+              "name": "Bouton Action (contextuel)",
+              "height": 76,
+              "fill": "$play",
+              "cornerRadius": 38,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000004D",
+                "offset": {
+                  "x": 0,
+                  "y": 6
+                },
+                "blur": 18
+              },
+              "gap": 10,
+              "padding": [
+                0,
+                26,
+                0,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "F2znuM",
+                  "name": "message-circle",
+                  "width": 24,
+                  "height": 24,
+                  "icon": "sword",
+                  "library": "lucide",
+                  "fill": "#0B1A33"
+                },
+                {
+                  "type": "text",
+                  "id": "sTH8g",
+                  "name": "Parler",
+                  "fill": "#0B1A33",
+                  "content": "Frapper",
+                  "fontFamily": "$font",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 3,
+          "id": "cZYs6",
+          "x": 128,
+          "y": 828,
+          "name": "Barre d'accueil",
+          "fill": "#FFFFFFB3",
+          "width": 134,
+          "height": 5
+        },
+        {
+          "type": "frame",
+          "id": "Ljd9K",
+          "x": 14,
+          "y": 120,
+          "name": "Étage",
+          "fill": "#1b1c22d9",
+          "cornerRadius": 14,
+          "gap": 8,
+          "padding": [
+            7,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "gCBhE",
+              "name": "castle",
+              "width": 15,
+              "height": 15,
+              "icon": "castle",
+              "library": "lucide",
+              "fill": "#c58af0"
+            },
+            {
+              "type": "frame",
+              "id": "u4sidk",
+              "name": "Textes",
+              "layout": "vertical",
+              "gap": 1,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kuee8",
+                  "name": "Grotte de cristal · Étage 2",
+                  "fill": "#ffffff",
+                  "content": "Grotte de cristal · Étage 2",
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "K7TBLF",
+                  "name": "Ferme à 6:00 · 3 ennemis",
+                  "fill": "#ffffffb3",
+                  "content": "Ferme à 6:00 · 3 ennemis",
+                  "fontFamily": "$font",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "OOTmo",
+          "x": 60,
+          "y": 560,
+          "name": "Ennemi",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/combat/slime-idle-1-se.png",
+            "mode": "contain"
+          },
+          "width": 72,
+          "height": 72
+        },
+        {
+          "type": "rectangle",
+          "id": "bFHSE",
+          "x": 250,
+          "y": 630,
+          "name": "Ennemi",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/combat/slime-idle-3-se.png",
+            "mode": "contain"
+          },
+          "width": 72,
+          "height": 72
+        },
+        {
+          "type": "frame",
+          "id": "OgBnd",
+          "x": 274,
+          "y": 620,
+          "name": "Repéré",
+          "width": 24,
+          "height": 24,
+          "fill": "#ff6a5a",
+          "cornerRadius": 12,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "K332w",
+              "name": "!",
+              "fill": "#ffffff",
+              "content": "!",
+              "fontFamily": "$font",
+              "fontSize": 15,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "WwPBv",
+          "x": 290,
+          "y": 250,
+          "name": "Ennemi",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/combat/bat-idle-1-se.png",
+            "mode": "contain"
+          },
+          "width": 72,
+          "height": 72
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "IZrjo",
+      "x": 450,
+      "y": 6949,
+      "name": "Donjons · Jeu · Attaque surprise",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "WuJOa",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du combat",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/combat-portrait.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "rectangle",
+          "id": "QQTK6",
+          "x": 150,
+          "y": 500,
+          "name": "Combattant",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/combat/hugo-idle-1-ne.png",
+            "mode": "contain"
+          },
+          "width": 120,
+          "height": 120
+        },
+        {
+          "type": "rectangle",
+          "id": "qGQpP",
+          "x": 230,
+          "y": 210,
+          "name": "Combattant",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/combat/slime-idle-3-se.png",
+            "mode": "contain"
+          },
+          "width": 90,
+          "height": 90
+        },
+        {
+          "type": "rectangle",
+          "id": "nxXUR",
+          "x": 80,
+          "y": 170,
+          "name": "Combattant",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/combat/slime-idle-1-se.png",
+            "mode": "contain"
+          },
+          "width": 90,
+          "height": 90
+        },
+        {
+          "type": "frame",
+          "id": "ORnnI",
+          "x": 0,
+          "y": 300,
+          "name": "Bandeau attaque surprise",
+          "width": 390,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#3a1a1a00",
+                "position": 0
+              },
+              {
+                "color": "#2a1414e6",
+                "position": 0.18
+              },
+              {
+                "color": "#2a1414e6",
+                "position": 0.82
+              },
+              {
+                "color": "#3a1a1a00",
+                "position": 1
+              }
+            ]
+          },
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            0,
+            18,
+            0
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "AzWLE",
+              "name": "Titre",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "kNNZ8",
+                  "name": "zap",
+                  "width": 24,
+                  "height": 24,
+                  "icon": "zap",
+                  "library": "lucide",
+                  "fill": "#ffd34d"
+                },
+                {
+                  "type": "text",
+                  "id": "DkJXG",
+                  "name": "Attaque surprise !",
+                  "fill": "#ffffff",
+                  "content": "Attaque surprise !",
+                  "fontFamily": "Pixelify Sans",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "OFBce",
+              "name": "Vos jauges partent en avance",
+              "fill": "#ffffffcc",
+              "content": "Vos jauges partent en avance",
+              "fontFamily": "$font",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "t3Nu7",
+              "name": "Autre cas",
+              "padding": [
+                8,
+                0,
+                0,
+                0
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "L6cFmf",
+                  "name": "(touché de dos : « Embuscade ! », les jauges des ennemis partent en avance)",
+                  "fill": "#ffffff80",
+                  "textGrowth": "fixed-width",
+                  "width": 330,
+                  "content": "(touché de dos : « Embuscade ! », les jauges des ennemis partent en avance)",
+                  "textAlign": "center",
+                  "fontFamily": "$font",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "f9ENh",
+      "x": 900,
+      "y": 6949,
+      "name": "Donjons · Jeu · Donjon fermé",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "BEp3H",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait-npc.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "kYIYB",
+          "x": 14,
+          "y": 54,
+          "name": "Horloge (jour · heure · météo)",
+          "fill": "$panel",
+          "cornerRadius": 22,
+          "effect": {
+            "type": "background_blur",
+            "radius": 12
+          },
+          "gap": 10,
+          "padding": [
+            8,
+            14,
+            8,
+            8
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "TDmwL",
+              "name": "Météo",
+              "width": 40,
+              "height": 40,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/weather/neutral-night.webp",
+                "mode": "cover"
+              },
+              "cornerRadius": 20,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1,
+              "justifyContent": "center",
+              "alignItems": "center"
+            },
+            {
+              "type": "frame",
+              "id": "NLBOj",
+              "name": "Textes",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "MrHve",
+                  "name": "Lun. 12 · Matin",
+                  "fill": "$text",
+                  "content": "Ven. 5 printemps",
+                  "fontFamily": "$font",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "v0J5pL",
+                  "name": "Sous-ligne",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "v80eF",
+                      "name": "sun",
+                      "width": 12,
+                      "height": 12,
+                      "icon": "sunset",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "text",
+                      "id": "n5qFOb",
+                      "name": "9:30 · Pluie fine · 14 °C",
+                      "fill": "$text-dim",
+                      "content": "Après-midi · 15:40 · 18 °C",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "pheNs",
+          "x": 262,
+          "y": 54,
+          "name": "Coin haut droit",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "gYc8X",
+              "name": "Bouton Créer",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "stroke": "#FFB04A80",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "ElkJ2",
+                  "name": "pencil-ruler",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "pencil-ruler",
+                  "library": "lucide",
+                  "fill": "$edit"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "RPyyl",
+              "name": "Bouton Menu",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "b6dEFE",
+                  "name": "menu",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "menu",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "OUunM",
+          "x": 28,
+          "y": 650,
+          "name": "Stick",
+          "width": 132,
+          "height": 132,
+          "fill": "#22232A80",
+          "cornerRadius": 66,
+          "stroke": "#FFFFFF40",
+          "strokeWidth": 1.5,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "dCK3M",
+              "name": "Pouce",
+              "fill": "#FFFFFF59",
+              "width": 56,
+              "height": 56
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "KSP11",
+          "x": 240,
+          "y": 640,
+          "name": "Actions",
+          "layout": "vertical",
+          "gap": 12,
+          "alignItems": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "n6ImTB",
+              "name": "Bouton Courir",
+              "width": 56,
+              "height": 56,
+              "fill": "#22232ACC",
+              "cornerRadius": 28,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "sqW7a",
+                  "name": "footprints",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "footprints",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "G7wqbX",
+              "name": "Bouton Action (contextuel)",
+              "height": 76,
+              "fill": "$play",
+              "cornerRadius": 38,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000004D",
+                "offset": {
+                  "x": 0,
+                  "y": 6
+                },
+                "blur": 18
+              },
+              "gap": 10,
+              "padding": [
+                0,
+                26,
+                0,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "IDNvt",
+                  "name": "message-circle",
+                  "width": 24,
+                  "height": 24,
+                  "icon": "door-open",
+                  "library": "lucide",
+                  "fill": "#0B1A33"
+                },
+                {
+                  "type": "text",
+                  "id": "uNi1O",
+                  "name": "Parler",
+                  "fill": "#0B1A33",
+                  "content": "Entrer",
+                  "fontFamily": "$font",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 3,
+          "id": "IBOyF",
+          "x": 128,
+          "y": 828,
+          "name": "Barre d'accueil",
+          "fill": "#FFFFFFB3",
+          "width": 134,
+          "height": 5
+        },
+        {
+          "type": "frame",
+          "id": "CqkLw",
+          "x": 16,
+          "y": 560,
+          "name": "Message",
+          "width": 358,
+          "fill": "#ffffff",
+          "cornerRadius": 14,
+          "layout": "vertical",
+          "gap": 6,
+          "padding": [
+            14,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "kMw0P",
+              "name": "Titre",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "VWT53",
+                  "name": "lock",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "lock",
+                  "library": "lucide",
+                  "fill": "#5a3a8a"
+                },
+                {
+                  "type": "text",
+                  "id": "LH5Lc",
+                  "name": "Grotte de cristal",
+                  "fill": "#1b1c22",
+                  "content": "Grotte de cristal",
+                  "fontFamily": "$font",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "WDhcU",
+              "name": "L'entrée est scellée. La grotte s'ouvre la nuit, de 22 h à 6 h, et toute la journée les soirs de pleine lune.",
+              "fill": "#1b1c22",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "L'entrée est scellée. La grotte s'ouvre la nuit, de 22 h à 6 h, et toute la journée les soirs de pleine lune.",
+              "lineHeight": 1.35,
+              "fontFamily": "$font",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Zt8F8",
+      "x": 1350,
+      "y": 6949,
+      "name": "Donjons · Éditeur · Onglet Donjon",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "yI5ad",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait-night.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 28,
+          "id": "Z2iaM",
+          "x": 0,
+          "y": 0,
+          "name": "Liseré mode édition",
+          "fill": "#00000000",
+          "width": 390,
+          "height": 844,
+          "stroke": "$edit",
+          "strokeWidth": 3
+        },
+        {
+          "type": "frame",
+          "id": "VLZAs",
+          "x": 10,
+          "y": 50,
+          "name": "Barre d'édition",
+          "width": 370,
+          "fill": "$panel",
+          "cornerRadius": 18,
+          "gap": 6,
+          "padding": 6,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "IY7FD",
+              "name": "Bouton Jouer",
+              "height": 40,
+              "fill": "$edit",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "uBgZZ",
+                  "name": "play",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "play",
+                  "library": "lucide",
+                  "fill": "#2A1A00"
+                },
+                {
+                  "type": "text",
+                  "id": "LUJJB",
+                  "name": "Jouer",
+                  "fill": "#2A1A00",
+                  "content": "Jouer",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "eKHla",
+              "name": "Carte ouverte",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "jJh5h",
+                  "name": "map",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "map",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                },
+                {
+                  "type": "text",
+                  "id": "FbdId",
+                  "name": "Ville",
+                  "fill": "$text",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Grotte · étage 2",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "fRVzP",
+                  "name": "chevron-down",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-down",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dQ02u",
+              "name": "undo-2",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "f5ajXc",
+                  "name": "undo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "undo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "bSPQ3",
+              "name": "redo-2",
+              "opacity": 0.4,
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "W9Min",
+                  "name": "redo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "redo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "v3vKNP",
+              "name": "Plus",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "SCaed",
+                  "name": "ellipsis-vertical",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "ellipsis-vertical",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jECzJ",
+          "x": 10,
+          "y": 104,
+          "name": "Aide contextuelle",
+          "fill": "#22232AB3",
+          "cornerRadius": 12,
+          "gap": 8,
+          "padding": [
+            6,
+            8,
+            6,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "zcaQs",
+              "name": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fill": "$text-dim",
+              "content": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fontFamily": "$font",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "icon",
+              "id": "f3fahp",
+              "name": "x",
+              "width": 14,
+              "height": 14,
+              "icon": "x",
+              "library": "lucide",
+              "fill": "$text-dim"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "hmIIR",
+          "x": 0,
+          "y": 604,
+          "name": "Dock d'outils",
+          "width": 390,
+          "height": 240,
+          "fill": "$panel-solid",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            12,
+            0,
+            34,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "EbGgA",
+              "name": "Onglets",
+              "width": "fill_container",
+              "gap": 6,
+              "padding": [
+                0,
+                12
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vQuB7",
+                  "name": "Onglet Objets",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "SGMHt",
+                      "name": "box",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "box",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "j4ONA",
+                  "name": "Onglet PNJ",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "wjesp",
+                      "name": "user-round",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "user-round",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ieZ9d",
+                  "name": "Onglet Donjon",
+                  "height": 34,
+                  "fill": "#FFB04A33",
+                  "cornerRadius": 17,
+                  "stroke": "#FFB04A80",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "VVgud",
+                      "name": "castle",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "castle",
+                      "library": "lucide",
+                      "fill": "$edit"
+                    },
+                    {
+                      "type": "text",
+                      "id": "kjs5c",
+                      "name": "Donjon",
+                      "fill": "$edit",
+                      "content": "Donjon",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fxWGw",
+                  "name": "Onglet Sols",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HpSMU",
+                      "name": "paintbrush",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "paintbrush",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "z3ml6r",
+                  "name": "Onglet Reliefs",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "hc12h",
+                      "name": "mountain",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "mountain",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Y7soQl",
+                  "name": "Onglet Morceaux",
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nsOEs",
+                      "name": "layout-grid",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "layout-grid",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "r4xEEc",
+                  "name": "Onglet Événements",
+                  "opacity": 0.45,
+                  "height": 34,
+                  "fill": "#00000000",
+                  "cornerRadius": 17,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "U7S9u",
+                      "name": "zap",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "zap",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wXFjs",
+              "name": "Palette",
+              "width": "fill_container",
+              "gap": 8,
+              "padding": [
+                0,
+                12
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dzLmr",
+                  "name": "Entrée Aucun",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "h2zToo",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#FFFFFF14",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "u7YP4A",
+                          "name": "mouse-pointer-2",
+                          "width": 26,
+                          "height": 26,
+                          "icon": "mouse-pointer-2",
+                          "library": "lucide",
+                          "fill": "#FFFFFFE6"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "mazzL",
+                      "name": "Aucun",
+                      "fill": "$text-dim",
+                      "content": "Aucun",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "SnX2N",
+                  "name": "Entrée Coffre",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "HHNEM",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#3A3B44",
+                      "cornerRadius": 14,
+                      "stroke": "$edit",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "a3skwb",
+                          "name": "package",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "package",
+                          "library": "lucide",
+                          "fill": "$edit"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "O5hfeA",
+                      "name": "Coffre",
+                      "fill": "$edit",
+                      "content": "Coffre",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "faml1",
+                  "name": "Entrée Piège",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "MJbVm",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#3A3B44",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "tAjqH",
+                          "name": "triangle-alert",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "triangle-alert",
+                          "library": "lucide",
+                          "fill": "#FFFFFFE6"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "WfLoH",
+                      "name": "Piège",
+                      "fill": "$text-dim",
+                      "content": "Piège",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "dSyEg",
+                  "name": "Entrée Interrupteur",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "EmDDD",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#3A3B44",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "SNc3r",
+                          "name": "toggle-left",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "toggle-left",
+                          "library": "lucide",
+                          "fill": "#FFFFFFE6"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "eLVgc",
+                      "name": "Interrupteur",
+                      "fill": "$text-dim",
+                      "content": "Interrupteur",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VyPyt",
+                  "name": "Entrée Porte fermée",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Wg7LS",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#3A3B44",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "B2I0B",
+                          "name": "lock",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "lock",
+                          "library": "lucide",
+                          "fill": "#FFFFFFE6"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Y7ZqO6",
+                      "name": "Porte fermée",
+                      "fill": "$text-dim",
+                      "content": "Porte fermée",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NXekU",
+                  "name": "Entrée Escalier",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "oy7bb",
+                      "name": "Vignette",
+                      "width": 58,
+                      "height": 58,
+                      "fill": "#3A3B44",
+                      "cornerRadius": 14,
+                      "stroke": "#00000000",
+                      "strokeWidth": 2.5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "E427V",
+                          "name": "arrow-down-to-line",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "arrow-down-to-line",
+                          "library": "lucide",
+                          "fill": "#FFFFFFE6"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "yV8Ck",
+                      "name": "Escalier",
+                      "fill": "$text-dim",
+                      "content": "Escalier",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HiceF",
+              "name": "Pied du dock",
+              "width": "fill_container",
+              "padding": [
+                0,
+                16
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "mphIo",
+                  "name": "Sapin : toucher le sol pour poser",
+                  "fill": "$text-dim",
+                  "content": "Coffre : toucher le sol pour le poser",
+                  "fontFamily": "$font",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "o5iNL",
+                  "name": "Recherche",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "b2yg3",
+                      "name": "search",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ussW1",
+                      "name": "Chercher",
+                      "fill": "$text-dim",
+                      "content": "Chercher",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "k2gL0s",
+          "x": 200,
+          "y": 420,
+          "name": "Coffre posé",
+          "width": 44,
+          "height": 44,
+          "fill": "#FFB04A33",
+          "cornerRadius": 8,
+          "stroke": "$edit",
+          "strokeWidth": 2,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "of88h",
+              "name": "package",
+              "width": 24,
+              "height": 24,
+              "icon": "package",
+              "library": "lucide",
+              "fill": "$edit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "UqEzn",
+      "x": 1800,
+      "y": 6949,
+      "name": "Donjons · Éditeur · Coffre sélectionné",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "tumiI",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait-night.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 28,
+          "id": "AckfV",
+          "x": 0,
+          "y": 0,
+          "name": "Liseré mode édition",
+          "fill": "#00000000",
+          "width": 390,
+          "height": 844,
+          "stroke": "$edit",
+          "strokeWidth": 3
+        },
+        {
+          "type": "frame",
+          "id": "mOwO0",
+          "x": 10,
+          "y": 50,
+          "name": "Barre d'édition",
+          "width": 370,
+          "fill": "$panel",
+          "cornerRadius": 18,
+          "gap": 6,
+          "padding": 6,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "gmKJW",
+              "name": "Bouton Jouer",
+              "height": 40,
+              "fill": "$edit",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "w1UVeM",
+                  "name": "play",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "play",
+                  "library": "lucide",
+                  "fill": "#2A1A00"
+                },
+                {
+                  "type": "text",
+                  "id": "wrzfg",
+                  "name": "Jouer",
+                  "fill": "#2A1A00",
+                  "content": "Jouer",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ueE3e",
+              "name": "Carte ouverte",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                0,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "gYeSG",
+                  "name": "map",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "map",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                },
+                {
+                  "type": "text",
+                  "id": "wSqwZ",
+                  "name": "Ville",
+                  "fill": "$text",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Grotte · étage 2",
+                  "fontFamily": "$font",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "y50Iu",
+                  "name": "chevron-down",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-down",
+                  "library": "lucide",
+                  "fill": "$text-dim"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ziNw7",
+              "name": "undo-2",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "UF4y6",
+                  "name": "undo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "undo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LosNQ",
+              "name": "redo-2",
+              "opacity": 0.4,
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "KWY3v",
+                  "name": "redo-2",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "redo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "M1VzlT",
+              "name": "Plus",
+              "width": 40,
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "K6vpv",
+                  "name": "ellipsis-vertical",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "ellipsis-vertical",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "g8X3d",
+          "x": 10,
+          "y": 104,
+          "name": "Aide contextuelle",
+          "enabled": false,
+          "fill": "#22232AB3",
+          "cornerRadius": 12,
+          "gap": 8,
+          "padding": [
+            6,
+            8,
+            6,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Wbor6",
+              "name": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fill": "$text-dim",
+              "content": "Toucher : poser · Glisser : vue · 2 doigts : zoom",
+              "fontFamily": "$font",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "icon",
+              "id": "GkCvW",
+              "name": "x",
+              "width": 14,
+              "height": 14,
+              "icon": "x",
+              "library": "lucide",
+              "fill": "$text-dim"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 14,
+          "id": "r09Vl1",
+          "x": 186,
+          "y": 406,
+          "name": "Contour sélection",
+          "fill": "#FFB04A1A",
+          "width": 72,
+          "height": 72,
+          "stroke": "$edit",
+          "strokeWidth": 2.5
+        },
+        {
+          "type": "frame",
+          "id": "kjpW8",
+          "x": 0,
+          "y": 500,
+          "name": "Fiche objet",
+          "width": 390,
+          "height": 344,
+          "fill": "$panel-solid",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            10,
+            16,
+            30,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "U1Xhd",
+              "name": "Poignée",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "Hrchz",
+                  "name": "Grip",
+                  "fill": "#FFFFFF4D",
+                  "width": 40,
+                  "height": 4
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "u35BNl",
+              "name": "En-tête",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ItYzk",
+                  "name": "Vignette",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "#3A3B44",
+                  "cornerRadius": 12,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "G8fkk",
+                      "name": "package",
+                      "width": 24,
+                      "height": 24,
+                      "icon": "package",
+                      "library": "lucide",
+                      "fill": "$edit"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JGEoR",
+                  "name": "Titre",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "huKmN",
+                      "name": "Maison rouge",
+                      "fill": "$text",
+                      "content": "Coffre",
+                      "fontFamily": "$font",
+                      "fontSize": 17,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "n2xXUd",
+                      "name": "Glisser l'objet pour le déplacer",
+                      "fill": "$text-dim",
+                      "content": "Ouvert une seule fois · glisser pour le déplacer",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "F2LYTA",
+                  "name": "Fermer",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "$chip",
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "WY6YV",
+                      "name": "x",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zirpH",
+              "name": "Actions rapides",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TBcvR",
+                  "name": "Action Tourner",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "$chip",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HHFT8",
+                      "name": "rotate-cw",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "rotate-cw",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "wqP8a",
+                      "name": "Tourner",
+                      "fill": "$text-dim",
+                      "content": "Tourner",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "u6y62M",
+                  "name": "Action Dupliquer",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "$chip",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "JupTY",
+                      "name": "copy",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "copy",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nvSrO",
+                      "name": "Dupliquer",
+                      "fill": "$text-dim",
+                      "content": "Dupliquer",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LKzrH",
+                  "name": "Action Modèle",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "$chip",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "cGV2r",
+                      "name": "box",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "square-user",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Y9JQvA",
+                      "name": "Modèle",
+                      "fill": "$text-dim",
+                      "content": "Modèle",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Ezu9R",
+                  "name": "Action Supprimer",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "#FF6B6B1F",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "TJRRW",
+                      "name": "trash",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "trash",
+                      "library": "lucide",
+                      "fill": "$danger"
+                    },
+                    {
+                      "type": "text",
+                      "id": "a9l9A",
+                      "name": "Supprimer",
+                      "fill": "$danger",
+                      "content": "Supprimer",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "X3iDq",
+              "name": "Options",
+              "width": "fill_container",
+              "fill": "$chip",
+              "cornerRadius": 14,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "l2QDPD",
+                  "name": "Option Contenu",
+                  "width": "fill_container",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "bottom": 1
+                  },
+                  "gap": 10,
+                  "padding": [
+                    9,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "jJ4hn",
+                      "name": "Contenu",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Contenu",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "U8HmD3",
+                      "name": "Potion ×2 · 150 pièces",
+                      "fill": "$edit",
+                      "content": "Potion ×2 · 150 pièces",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "jmgPE",
+                  "name": "Option Fermé à clé",
+                  "width": "fill_container",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "bottom": 1
+                  },
+                  "gap": 10,
+                  "padding": [
+                    9,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "J3iA7",
+                      "name": "Fermé à clé",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Fermé à clé",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nA0p0",
+                      "name": "Clé de cristal",
+                      "fill": "$text-dim",
+                      "content": "Clé de cristal",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "F8FphA",
+                  "name": "Option Étage généré : contenu au hasard",
+                  "width": "fill_container",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "bottom": 1
+                  },
+                  "gap": 10,
+                  "padding": [
+                    9,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bunP3",
+                      "name": "Étage généré : contenu au hasard",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Étage généré : contenu au hasard",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L1Z2m",
+                      "name": "Interrupteur",
+                      "width": 40,
+                      "height": 24,
+                      "fill": "$line",
+                      "cornerRadius": 12,
+                      "padding": 3,
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "K403vu",
+                          "name": "Bouton",
+                          "fill": "#FFFFFF",
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "sGqFY",
+              "name": "Aide",
+              "width": "fill_container",
+              "padding": [
+                0,
+                4
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "L8lCYG",
+                  "name": "Ouvert, il reste ouvert pour toute la partie (gardé dans la sauvegarde). Un piège, un interrupteur ou une porte fermée ont leur fiche du même genre.",
+                  "fill": "$text-dim",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Ouvert, il reste ouvert pour toute la partie (gardé dans la sauvegarde). Un piège, un interrupteur ou une porte fermée ont leur fiche du même genre.",
+                  "lineHeight": 1.35,
+                  "fontFamily": "$font",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qZXTz",
+          "x": 200,
+          "y": 420,
+          "name": "Coffre posé",
+          "width": 44,
+          "height": 44,
+          "fill": "#FFB04A33",
+          "cornerRadius": 8,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "m7aIg",
+              "name": "package",
+              "width": 24,
+              "height": 24,
+              "icon": "package",
+              "library": "lucide",
+              "fill": "$edit"
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
