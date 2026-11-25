@@ -54,6 +54,21 @@ Propriétés de la forme sélectionnée :
 
 Le modèle a aussi un **nom** (son id, en minuscules avec des tirets) et un réglage **Vent** (0 à 1 : plie au vent comme la végétation).
 
+## Les mouvements
+
+Une forme peut bouger : dans les réglages de la forme sélectionnée, la partie **Mouvement**. Maquette : `design/model-editor-mobile.pen` (écrans 8 et 9).
+
+- **La sorte** : **Rotation** (tourne autour d'un axe), **Déplacement** (glisse sur un axe), **Clignote** (s'allume et s'éteint), **Balance** (oscille de chaque côté), ou **Aucun**.
+- **Axe** (x, y, z), **Pivot** (le point autour duquel elle tourne : centre, bord gauche, bord droit, bas ; une porte tourne autour de son bord), **Angle** en degrés (ou **Distance** pour un déplacement) et **Durée** en secondes.
+- **Quand il bouge** :
+  - **En boucle** : toujours (un moulin : Rotation de 360° en 6 s ; un drapeau : Balance) ;
+  - **À l'approche** : quand le joueur est à moins de 2 cases, puis la forme revient quand il s'éloigne (une porte) ;
+  - **Par un événement** : l'action **Animer l'objet** d'un événement la joue ([Événements](09-evenements.md)) ;
+  - **La nuit** : seulement la nuit (une enseigne qui clignote).
+- Une phrase résume le mouvement ; **Voir le mouvement** le joue dans la vue 3D (avec **Le joueur arrive** pour essayer « À l'approche », « Par un événement » et « La nuit », et **Rejouer**).
+- Toutes les copies du modèle sur les cartes bougent de la même façon. Une forme qui bouge reste à part (elle n'est pas fusionnée avec les autres), et un modèle qui bouge n'est pas dessiné en copies groupées : à garder pour quelques objets.
+- Exemple : le **moulin** (`md-windmill.ts`), posé sur la carte du monde près du départ, ses ailes tournent en boucle.
+
 ## Dessiner
 
 Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis retour au crayon), **pot de peinture** (F), **ligne** (L), **rectangle** (R, plein ou contour). On dessine :
