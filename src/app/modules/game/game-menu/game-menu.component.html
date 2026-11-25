@@ -119,6 +119,14 @@
             Résolution ×{{ hud.pixelRatio }} · Ombres
             {{ hud.shadowMapSize || "aucune" }}
           </p>
+          <label class="check">
+            <input
+              type="checkbox"
+              [checked]="retro()"
+              (change)="setRetro($event)"
+            />
+            Rendu rétro : de gros pixels, comme sur une console portable
+          </label>
           @if (hapticsSupported) {
             <label class="check">
               <input

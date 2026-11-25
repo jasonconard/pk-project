@@ -1,6 +1,12 @@
 import { inject, Service } from "@angular/core";
 import { describeAction, sameAction } from "../model/GameAction";
-import { CAMERA_LOOK, Game, SHADE_OFFSET, TOO_FAR_LIMIT } from "../model/Game";
+import {
+  CAMERA_FOV,
+  CAMERA_LOOK,
+  Game,
+  SHADE_OFFSET,
+  TOO_FAR_LIMIT,
+} from "../model/Game";
 import { fitPixelCamera } from "../model/pixel-scale";
 import { SCENE_PLAYER } from "../../../../../assets/characters/player";
 import { MapHelper } from "../model/MapHelper";
@@ -86,7 +92,7 @@ export class GameMapService {
       const rect = game.canvas.getBoundingClientRect();
 
       game.camera = new THREE.PerspectiveCamera(
-        45,
+        CAMERA_FOV,
         rect.width / rect.height,
         1,
         TOO_FAR_LIMIT + SHADE_OFFSET

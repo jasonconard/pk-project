@@ -150,6 +150,7 @@ export class GameMenuComponent {
     Math.round(this.soundVolume() * 100)
   );
   protected readonly quality = this.gameService.quality;
+  protected readonly retro = this.gameService.retro;
   protected readonly qualityChoices = QUALITY_CHOICES;
   protected readonly qualityLabel = computed(
     () => QUALITY_CHOICES.find((q) => q.mode === this.quality())?.label ?? ""
@@ -201,6 +202,11 @@ export class GameMenuComponent {
 
   protected setQuality(mode: QualityMode): void {
     this.gameService.setQuality(mode);
+  }
+
+  /** Retro rendering: big pixels like a handheld console. */
+  protected setRetro(event: Event): void {
+    this.gameService.setRetro((event.target as HTMLInputElement).checked);
   }
 
   protected setHaptics(event: Event): void {

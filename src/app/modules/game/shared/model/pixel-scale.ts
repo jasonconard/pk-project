@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CAMERA_LOOK, Game } from "./Game";
+import { CAMERA_FOV, CAMERA_LOOK, Game } from "./Game";
 
 /**
  * Pixel-sharp sprites, after "Recreating the 2.5D effect from Pokémon Black & White" (M. Jakeman): a sprite pixel
@@ -17,9 +17,27 @@ export function pixelZoom(game: Game): number {
   const height = game.renderer.getDrawingBufferSize(new THREE.Vector2()).y;
   const tanHalf = Math.tan(THREE.MathUtils.degToRad(game.camera.fov / 2));
   const distance = CAMERA_LOOK.length();
-  // Pixels per unit at the usual distance, rounded up: the camera comes a little closer
-  const perUnit = Math.max(1, Math.ceil(height / (2 * distance * tanHalf)));
+  // Pixels per unit at the usual distance, rounded up: the camera comes a little closer. Retro rendering: one
+  // picture pixel per map unit (its height is chosen for it, see retroScale: the distance stays about the same)
+  const perUnit = game.retro
+    ? 1
+    : Math.max(1, Math.ceil(height / (2 * distance * tanHalf)));
   return height / (2 * perUnit * tanHalf) / distance;
+}
+
+/**
+ * How many screen pixels a retro picture pixel covers, for a screen `height` device pixels high.
+ * Retro rendering: the picture is computed small, one pixel per map unit (like the sprites' and the models'
+ * pixels: about 176 rows at the usual camera distance, a handheld console's screen), and enlarged a whole number
+ * of times with crisp pixels.
+ */
+export function retroScale(height: number): number {
+  // (computed here, not at load: Game.ts imports this file)
+  const retroHeight =
+    2 *
+    CAMERA_LOOK.length() *
+    Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV / 2));
+  return Math.max(1, Math.round(height / retroHeight));
 }
 
 const bufferSize = new THREE.Vector2();

@@ -77,13 +77,40 @@ export class MaterialService {
     return mat;
   }
 
+  /** Retro rendering (see pixel-scale.ts): the textures are sampled without smoothing, like a handheld console. */
+  private static retroTextures = false;
+
+  /** Retro rendering on / off: the textures to come, and those of the scene (sent to the GPU again once). */
+  public static setRetroTextures(scene: THREE.Object3D, retro: boolean) {
+    MaterialService.retroTextures = retro;
+    const filter = MaterialService.colorMinFilter();
+    scene.traverse((object) => {
+      const materials = (object as THREE.Mesh).material;
+      for (const material of [materials ?? []].flat()) {
+        for (const key of ["map", "emissiveMap"] as const) {
+          const texture = (material as THREE.MeshStandardMaterial)[key];
+          if (texture && texture.minFilter !== filter) {
+            texture.minFilter = filter;
+            texture.needsUpdate = true;
+          }
+        }
+      }
+    });
+  }
+
+  private static colorMinFilter(): THREE.MinificationTextureFilter {
+    return MaterialService.retroTextures
+      ? THREE.NearestFilter
+      : THREE.LinearMipmapLinearFilter;
+  }
+
   private static loadTexture(link: string): THREE.Texture {
     const texture = new THREE.TextureLoader().load(link);
     // Since three r152 the renderer outputs sRGB: color textures must be flagged as sRGB
     // to keep the same rendering as before (pixel-art colors unchanged).
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.minFilter = MaterialService.colorMinFilter();
     return texture;
   }
 

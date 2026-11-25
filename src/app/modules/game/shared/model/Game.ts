@@ -1,5 +1,7 @@
 import { GameAction } from "./GameAction";
 import * as THREE from "three";
+import { retroScale } from "./pixel-scale";
+import { MaterialService } from "../services/material.service";
 import { MapHelper } from "./MapHelper";
 import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
@@ -25,6 +27,8 @@ export enum GameMode {
 
 // export const CAMERA_LOOK = new THREE.Vector3(0, 30, 160);
 export const CAMERA_LOOK = new THREE.Vector3(0, 140, 160);
+/** The camera's vertical field of view (degrees). */
+export const CAMERA_FOV = 45;
 export const TOO_CLOSE_LIMIT = 40;
 export const TOO_FAR_LIMIT = 480;
 //export const TOO_FAR_LIMIT = 300;
@@ -156,6 +160,8 @@ export class Game {
   /** Graphics quality chosen, render pixel ratio and shadow texture size in use (see Quality.ts). */
   qualityMode: QualityMode = "auto";
   pixelRatio = 1;
+  /** Retro rendering (see pixel-scale.ts): a small picture, one pixel per map unit, enlarged with crisp pixels. */
+  retro = false;
   shadowMapSize = 2048;
   /** Auto quality: seconds in a row below / above the fps thresholds. */
   private slowSeconds = 0;
@@ -197,7 +203,7 @@ export class Game {
     const minShadows = medium.shadowMapSize / 2;
     if (this.slowSeconds >= AUTO_LOW_SECONDS) {
       this.slowSeconds = 0;
-      if (this.pixelRatio > AUTO_MIN_RATIO) {
+      if (!this.retro && this.pixelRatio > AUTO_MIN_RATIO) {
         this.applyQuality(
           Math.max(AUTO_MIN_RATIO, this.pixelRatio - AUTO_RATIO_STEP),
           this.shadowMapSize,
@@ -235,7 +241,7 @@ export class Game {
           this.detail,
           this.postEffects
         );
-      } else if (this.pixelRatio < maxRatio) {
+      } else if (!this.retro && this.pixelRatio < maxRatio) {
         this.applyQuality(
           Math.min(maxRatio, this.pixelRatio + AUTO_RATIO_STEP),
           this.shadowMapSize,
@@ -254,10 +260,14 @@ export class Game {
     postEffects: boolean
   ) {
     this.pixelRatio = pixelRatio;
-    this.renderer.setPixelRatio(pixelRatio);
-    // Below 1 the picture is enlarged: keep the pixels crisp (pixel art) instead of blurring them
+    if (this.retro) {
+      this.refreshRenderer();
+    } else {
+      this.renderer.setPixelRatio(pixelRatio);
+    }
+    // Below 1 (or retro) the picture is enlarged: keep the pixels crisp (pixel art) instead of blurring them
     this.renderer.domElement.style.imageRendering =
-      pixelRatio < 1 ? "pixelated" : "";
+      pixelRatio < 1 || this.retro ? "pixelated" : "";
     this.detail = detail;
     this.postEffects = postEffects;
     RENDER_DETAIL.particles = detail;
@@ -325,10 +335,39 @@ export class Game {
     hidden.forEach((object) => (object.visible = false));
   }
 
+  /** Retro rendering on or off (the picture's size changes at once). */
+  public setRetro(retro: boolean) {
+    this.retro = retro;
+    MaterialService.setRetroTextures(this.scene, retro);
+    if (!retro) {
+      this.renderer.setPixelRatio(this.pixelRatio);
+    }
+    this.applyQuality(
+      this.pixelRatio,
+      this.shadowMapSize,
+      this.detail,
+      this.postEffects
+    );
+    this.refreshRenderer();
+  }
+
   public refreshRenderer() {
     const rect = this.canvas.getBoundingClientRect();
-    this.camera.aspect = rect.width / rect.height;
+    let width = rect.width;
+    let height = rect.height;
+    if (this.retro) {
+      // A whole number of screen pixels per picture pixel: the canvas a hair smaller (centred), never stretched
+      const dpr = window.devicePixelRatio;
+      const scale = retroScale(height * dpr);
+      const columns = Math.floor((width * dpr) / scale);
+      const rows = Math.floor((height * dpr) / scale);
+      this.renderer.setPixelRatio(dpr / scale);
+      // (a hair more than the exact size: the renderer floors size × ratio)
+      width = (columns * scale + 0.01) / dpr;
+      height = (rows * scale + 0.01) / dpr;
+    }
+    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(rect.width, rect.height);
+    this.renderer.setSize(width, height);
   }
 }

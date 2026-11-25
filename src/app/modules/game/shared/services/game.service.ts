@@ -120,6 +120,8 @@ interface SavedSettings {
   fireflyColor: FireflyColor;
   leafMode: LeafMode;
   quality: QualityMode;
+  /** Retro rendering: big pixels like a handheld console (see pixel-scale.ts). */
+  retro: boolean;
 }
 
 const SETTINGS_KEY = "pk-weather-settings";
@@ -161,6 +163,7 @@ function loadSettings(): Partial<SavedSettings> {
   out.timeFlow = bool(raw["timeFlow"]);
   out.gusts = bool(raw["gusts"]);
   out.soundMuted = bool(raw["soundMuted"]);
+  out.retro = bool(raw["retro"]);
   return out;
 }
 
@@ -257,6 +260,8 @@ export class GameService {
     this.saved.quality ?? "auto"
   );
   readonly quality = this.qualityState.asReadonly();
+  private readonly retroState = signal(this.saved.retro ?? false);
+  readonly retro = this.retroState.asReadonly();
 
   constructor() {
     this.initCheckResize();
@@ -306,6 +311,7 @@ export class GameService {
         fireflyColor: this.fireflyColorState(),
         leafMode: this.leafModeState(),
         quality: this.qualityState(),
+        retro: this.retroState(),
       })
     );
   }
@@ -354,6 +360,7 @@ export class GameService {
     this.switchGameMode(gameMode, true);
 
     game.setQuality(this.qualityState());
+    game.setRetro(this.retroState());
     // In the background (home screen, other app, screen locked): the game stops (see isGameAsleep in the loops);
     // keys held when leaving would stay pressed (their keyup is lost), and the time spent away is not caught up
     onGameAsleep((hidden) => {
@@ -708,6 +715,12 @@ export class GameService {
   setQuality(mode: QualityMode) {
     this.qualityState.set(mode);
     this.game?.setQuality(mode);
+    this.syncHud();
+  }
+
+  setRetro(retro: boolean) {
+    this.retroState.set(retro);
+    this.game?.setRetro(retro);
     this.syncHud();
   }
 
