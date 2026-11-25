@@ -13,6 +13,7 @@ La nuit, l'équipe explore des donjons : des étages faits à la main ou tirés 
 
 - **Ouverture** : les moments où il est ouvert (aucun : toujours ouvert) et les jours spéciaux du calendrier où il est ouvert toute la journée.
 - **Météo** : la météo du donjon (elle remplace celle du dehors, rendue à la sortie), ou celle du dehors.
+- **Musique** : un morceau de l'[éditeur de musique](07-musique.md) pour ce donjon, ou celui du moment **Donjon** (volet Jeu de l'éditeur de musique). Les combats gardent leur musique.
 - **Étages**, dans l'ordre :
   - **Faite à la main** : une carte.
   - **Générés** : les salles où piocher, le nombre de salles (de … à …) et **Étages pareils** (plusieurs étages tirés de la même façon à la suite).

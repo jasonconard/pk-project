@@ -56,7 +56,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `model-editor.options.ts` (tools, layers, rows of numbers, saved view settings). `shared/`: `EditableModel`,
   `model-ops`, `model-history`, `model-saver` (saves a little after each change), `model-storage` (IndexedDB),
   `model-export` (→ `md-xxx.ts` + png).
-- `modules/music-editor/`: lo-fi music editor. `shared/`: `song`, `instruments` (data sheets), `synth`, `music-engine`, `song-storage`.
+- `modules/music-editor/`: lo-fi music editor. `shared/`: `song`, `instruments` (data sheets), `synth`, `music-engine`, `song-storage`, `midi-file` (Standard MIDI
+  File reader / writer), `midi-song` (MIDI ↔ song); `midi-import/` the import window.
 - `modules/variables-editor/`: story flags and counters (`GameVariable`). `shared/`: `variables`, `variable-storage`
   (browser `pk-variables`, else `assets/variables/variables.ts`), `variable-values` (values in the game being played).
 - `modules/database-editor/`: the game's database (characters, NPCs, enemies, groups, skills, items, states, elements,

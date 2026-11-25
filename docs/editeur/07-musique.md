@@ -73,16 +73,27 @@ Le volet **Jeu** choisit le morceau de chaque moment, sur la carte :
 | Nuit | la nuit (sans morceau : celui du jour) |
 | Pluie | les météos de la catégorie Pluie & tempêtes : bruine, averse, orage, mousson… (sans morceau : jour ou nuit) |
 | Combat | pendant un combat (sans morceau : la musique en cours continue) |
+| Donjon | dans un donjon ; le morceau de la fiche du donjon (base de données → Donjons → **Musique**) passe avant (sans morceau : celui de la nuit ou du jour) |
 
 **Une musique par carte** : le choix **Carte** en haut du volet passe de « Toutes les cartes » à une carte précise (le Labo, une maison…). Les moments choisis pour cette carte passent devant ceux de toutes les cartes ; un moment laissé sur « Comme toutes les cartes » prend celui de toutes les cartes. Une carte qui a ses propres morceaux est marquée « (ses morceaux) » dans la liste, et la liste des morceaux (volet Morceau) dit où chacun joue (« Jour · Labo : Nuit »). En passant d'une carte à l'autre, la musique change en fondu si le morceau n'est pas le même.
 
-Le changement de moment se fait en fondu (le morceau s'éteint, l'autre monte). La musique démarre au premier toucher ou à la première touche (le navigateur bloque le son avant), s'arrête en arrière-plan. Son volume : **Son → Musique** dans la barre du jeu (coupé avec les sons). Les donjons auront leur moment quand ils existeront.
+Le changement de moment se fait en fondu (le morceau s'éteint, l'autre monte). La musique démarre au premier toucher ou à la première touche (le navigateur bloque le son avant), s'arrête en arrière-plan. Son volume : **Son → Musique** dans la barre du jeu (coupé avec les sons).
 
 **Les morceaux du navigateur jouent tout de suite dans le jeu, sur cet appareil.** Pour les mettre dans le jeu publié : **Exporter (music.ts)** télécharge tous les morceaux et les choix de moments (toutes les cartes et chaque carte), à mettre dans `src/assets/music/music.ts`. Le jeu part de ce fichier ; les morceaux du navigateur de même id le remplacent, et les choix du navigateur passent devant. Un navigateur sans morceaux part de ceux du fichier.
 
 **Sur téléphone** : en portrait, une mesure à la fois, les tampons en bas sous le pouce ; en paysage, deux mesures, les tampons à gauche, la barre du haut glisse sur le côté ; sur grand écran, quatre mesures.
 
-À venir : le moment Donjon (quand les donjons existeront), l'import d'un fichier MIDI.
+## Fichier MIDI
+
+Dans le volet **Morceau**, sous Mes morceaux, la partie **Fichier MIDI** (maquette : `design/music-editor.pen`, écrans 4 et 5) :
+
+- **Importer un .mid** : choisir un fichier MIDI d'un autre logiciel. Une fenêtre montre son tempo, ses mesures et ses pistes (nom, instrument General MIDI, nombre de notes, aperçu) :
+  - **garder ou non** chaque piste, et choisir l'**instrument** de l'éditeur qu'elle devient (proposé d'après son numéro General MIDI) ; la piste de batterie (canal 10) devient la batterie (grosse caisse, caisse claire, charley ; les autres sons sont laissés) ;
+  - **Mesures gardées** : les 8 mesures prises dans le fichier (un morceau de l'éditeur en a 8 au plus) ;
+  - **Gamme** : trouvée d'après les notes, à changer si besoin. Les notes sont calées sur la grille (doubles croches) et ramenées sur la gamme (la note voisine), les octaves repliées dans la grille ;
+  - **Importer** crée un nouveau morceau du nom du fichier, ouvert et enregistré.
+- **Exporter en .mid** : le morceau en fichier MIDI (une piste par instrument avec son numéro General MIDI, la batterie sur le canal 10), à ouvrir dans un autre logiciel.
+- Les fichiers en 3/4 sont lus comme du 4/4 (16 doubles croches par mesure).
 
 ## Les fichiers
 
