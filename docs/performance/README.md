@@ -35,6 +35,8 @@ Code : `shared/model/Diagnostics.ts` (mesures), `shared/model/DrawCallBreakdown.
 - **Passes plein écran** : chaque effet de post-traitement redessine toute l'image. En Économie, on garde seulement ceux dont une météo dépend (monde inversé, vieux film, mirage, lanterne de la nuit sans lune).
 - **Processeur graphique** : le rendu demande le mode haute performance (`powerPreference: 'high-performance'`).
 - **Mode Auto** (par défaut) : il part de Moyenne sur mobile et de Haute sur ordinateur. Toutes les secondes, il compare les FPS à deux seuils. Sous 45 FPS pendant 3 secondes, il descend d'un cran : résolution jusqu'à ×1, puis ombres plus petites, puis réglages Économie. Au-dessus de 58 FPS pendant 8 secondes, il remonte dans l'ordre inverse.
+- **Rendu rétro** (case dans Menu → Qualité graphique, gardée dans les réglages) : l'image est calculée petite, un pixel par unité de la carte (environ 176 lignes, comme une console portable), puis agrandie d'un nombre entier de fois sans lissage, et les textures sont lues sans lissage. Les sprites, les modèles et la météo ont alors les mêmes gros pixels. C'est aussi beaucoup moins de pixels à calculer. Le mode Auto garde alors cette résolution et ne règle plus que les ombres et les particules.
+- **Sprites au pixel près** (toujours) : la caméra se place pour qu'un pixel de sprite fasse un nombre entier de pixels à l'écran, et le joueur et les PNJ sont dessinés face à la caméra (code : `pixel-scale.ts`, d'après « Recreating the 2.5D effect from Pokémon Black & White »).
 
 Activer ou couper les ombres recompile les matériaux une fois, ce qui peut provoquer un court à-coup.
 
