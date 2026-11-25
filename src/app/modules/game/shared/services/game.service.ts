@@ -1,3 +1,4 @@
+import { animationKey, currentAnimations } from "../model/model-animations";
 import {
   computed,
   effect,
@@ -575,6 +576,17 @@ export class GameService {
       diag.frameStart(game.renderer);
       diag.measure("weather", () => game.updateLights(dt));
       this.battleService.update(dt);
+      // The models' moving parts (a windmill's sails, a door opening when the player comes near)
+      game.mapHelper?.updateMotions(
+        dt,
+        isNightHour(game.weather.hourOfDay),
+        (b) =>
+          game.mapHelper
+            ? (currentAnimations()[
+                animationKey(game.mapHelper.sceneMap.id, b.id)
+              ] ?? "rest")
+            : "rest"
+      );
       diag.measure("render", () => game.renderFrame());
       diag.frameEnd(game.renderer);
     }

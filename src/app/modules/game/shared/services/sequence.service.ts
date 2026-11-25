@@ -4,6 +4,7 @@ import { CoreService } from "../../../../core/shared/service/core.service";
 import { SceneEvent } from "../model/SceneEvent";
 import { SceneEventSequence } from "../model/SceneEventSequence";
 import {
+  InstructionAnimate,
   InstructionLog,
   SceneEventInstruction,
   InstructionMessage,
@@ -33,12 +34,20 @@ import {
   BattleResult,
 } from "../../../battle/shared/battle-types";
 
+import { animationKey, setAnimation } from "../model/model-animations";
 import { gainLink, LinkGain } from "../../../database-editor/shared/links";
 import { loadDatabase } from "../../../database-editor/shared/database-storage";
 /** A time action of an event: the time passes, or stops / goes on again. */
 export interface TimeRequest {
   pass?: InstructionTime;
   stop?: boolean;
+}
+
+/** Where an event comes from: its map and object, and how long an object's movements last (s). */
+export interface EventOrigin {
+  map: string;
+  object: string;
+  durationOf: (objectId: string) => number;
 }
 
 /** A teleport's map id leading to a dungeon: `dungeon:<id>`. */
@@ -98,6 +107,9 @@ export class SequenceService {
   /** What the branches of the event being played check (hour, weather, variables now), given by the game. */
   private context: (() => EventContext) | null = null;
 
+  /** Where the event being played comes from (its map and object), for Animer l'objet. */
+  private origin: EventOrigin | null = null;
+
   /** A fight is being played (BattleService: it shows and gives the victory's loot itself). */
   private fight = false;
 
@@ -106,8 +118,13 @@ export class SequenceService {
     return this.sequence !== null;
   }
 
-  launchSequence(event: SceneEvent, context?: () => EventContext): void {
+  launchSequence(
+    event: SceneEvent,
+    context?: () => EventContext,
+    origin?: EventOrigin
+  ): void {
     this.context = context ?? null;
+    this.origin = origin ?? null;
     this.keyService.clearKeys();
     this.sequence = new SceneEventSequence(
       event.instructions.map((i) => ({ ...i }))
@@ -243,6 +260,9 @@ export class SequenceService {
       case InstructionType.DUNGEON:
         this.dungeonSubject.next(instruction);
         break;
+      case InstructionType.ANIMATE:
+        this.animate(instruction.animate);
+        break;
       default:
         this.nextSequence();
     }
@@ -264,6 +284,29 @@ export class SequenceService {
     }
     this.fight = false;
     this.nextSequence(result);
+  }
+
+  /** An object's movements « Par un événement » played, sent back, looped or stopped (kept: see model-animations). */
+  private animate(animate: InstructionAnimate | undefined): void {
+    const origin = this.origin;
+    const object = animate?.object || origin?.object;
+    if (!animate || !origin || !object) {
+      this.nextSequence();
+      return;
+    }
+    const drive = (
+      { play: "play", back: "rest", loop: "loop", stop: "hold" } as const
+    )[animate.mode];
+    setAnimation(animationKey(origin.map, object), drive);
+    const wait =
+      animate.wait && (animate.mode === "play" || animate.mode === "back")
+        ? origin.durationOf(object)
+        : 0;
+    if (wait > 0) {
+      setTimeout(() => this.nextSequence(), wait * 1000);
+    } else {
+      this.nextSequence();
+    }
   }
 
   private setLogs(log: InstructionLog | undefined): void {

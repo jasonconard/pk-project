@@ -5,6 +5,15 @@ import { Vec3 } from "../../game/shared/model/SceneUtils";
 import { ObjSide } from "../../game/shared/model/SceneMap";
 import { BOX_FACES, BoxFace } from "../../game/shared/model/model-uv";
 import {
+  applyMotions,
+  MOTION_KEY,
+  MotionDrive,
+  MotionState,
+  MotionTrigger,
+  newMotionState,
+  pivotPoint,
+} from "../../game/shared/model/model-motion";
+import {
   EditableModel,
   FaceTexture,
   LayerName,
@@ -38,6 +47,17 @@ const LAYERS: LayerName[] = ["color", "specular", "night", "bump"];
 /** Size of the preview inset (share of the view's width and height) and its margin (px), bottom right. */
 export const PREVIEW_SIZE = 0.32;
 export const PREVIEW_MARGIN = 12;
+
+/**
+ * The model's movements played in the view: one pivot group per moving part, as the game makes them
+ * (BasicMeshService.makeModel), each holding a stand-in placed where the part rests; the part's mesh copies where
+ * its stand-in goes.
+ */
+interface MotionPlay {
+  state: MotionState;
+  pivots: THREE.Group;
+  moving: { mesh: THREE.Mesh; standIn: THREE.Object3D }[];
+}
 
 /**
  * Textures of a face texture. The shininess and relief maps are values for the game's material (no color space),
@@ -90,6 +110,13 @@ export class ModelEditorScene {
   /** Called when the selected part was moved with the arrows (new position). */
   onPartMoved: ((partIndex: number, pos: Vec3) => void) | null = null;
   private readonly raycaster = new THREE.Raycaster();
+  /** Movements played (null: the parts at rest). */
+  private motions: MotionPlay | null = null;
+  private lastFrame = 0;
+  /** What the movements' triggers ask (loops always play), while they are played. */
+  motionDrive: (trigger: MotionTrigger) => MotionDrive = () => "rest";
+  /** Movements paused where they are. */
+  motionPaused = false;
 
   constructor(private readonly host: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -130,6 +157,12 @@ export class ModelEditorScene {
 
   private render() {
     this.controls.update();
+    const now = performance.now();
+    const dt = Math.min(0.1, (now - this.lastFrame) / 1000);
+    this.lastFrame = now;
+    if (this.motions && !this.motionPaused) {
+      this.stepMotions(dt);
+    }
     const { x: w, y: h } = this.renderer.getSize(this.size);
     this.renderer.setScissorTest(false);
     this.renderer.setViewport(0, 0, w, h);
@@ -280,6 +313,80 @@ export class ModelEditorScene {
       mesh.userData["partIndex"] = partIndex;
       this.group.add(mesh);
     });
+    if (this.motions) {
+      this.motions = this.motionPlay(model);
+    }
+  }
+
+  /** Plays the model's movements from rest (true), or stops them and puts the parts back at rest (false). */
+  playMotions(on: boolean) {
+    this.motions = on && this.model ? this.motionPlay(this.model) : null;
+    if (!on && this.model) {
+      this.restParts(this.model);
+    }
+  }
+
+  /** The movements again, from rest. */
+  replayMotions() {
+    if (this.motions && this.model) {
+      this.restParts(this.model);
+      this.motions = this.motionPlay(this.model);
+    }
+  }
+
+  private motionPlay(model: EditableModel): MotionPlay {
+    const pivots = new THREE.Group();
+    const moving: MotionPlay["moving"] = [];
+    model.parts.forEach((part, partIndex) => {
+      const mesh = this.meshOf(partIndex);
+      if (!part.motion || !mesh) {
+        return;
+      }
+      const pivot = new THREE.Group();
+      pivot.position.copy(pivotPoint(part, part.motion.pivot));
+      pivot.userData[MOTION_KEY] = part.motion;
+      pivot.userData["base"] = {
+        pos: pivot.position.clone(),
+        quat: pivot.quaternion.clone(),
+      };
+      const standIn = new THREE.Object3D();
+      standIn.position
+        .set(part.pos.x, part.pos.y, part.pos.z)
+        .sub(pivot.position);
+      standIn.rotation.set(part.rot.x, part.rot.y, part.rot.z);
+      pivot.add(standIn);
+      pivots.add(pivot);
+      moving.push({ mesh, standIn });
+    });
+    return { state: newMotionState(), pivots, moving };
+  }
+
+  private stepMotions(dt: number) {
+    const { state, pivots, moving } = this.motions!;
+    applyMotions(pivots, state, dt, this.motionDrive);
+    pivots.updateMatrixWorld(true);
+    const scale = new THREE.Vector3();
+    for (const { mesh, standIn } of moving) {
+      standIn.matrixWorld.decompose(mesh.position, mesh.quaternion, scale);
+      mesh.visible = standIn.parent!.visible;
+    }
+  }
+
+  private restParts(model: EditableModel) {
+    model.parts.forEach((part, partIndex) => {
+      const mesh = this.meshOf(partIndex);
+      if (mesh) {
+        mesh.position.set(part.pos.x, part.pos.y, part.pos.z);
+        mesh.rotation.set(part.rot.x, part.rot.y, part.rot.z);
+        mesh.visible = true;
+      }
+    });
+  }
+
+  private meshOf(partIndex: number): THREE.Mesh | undefined {
+    return this.group.children.find(
+      (c) => c.userData["partIndex"] === partIndex
+    ) as THREE.Mesh | undefined;
   }
 
   /**
@@ -404,6 +511,7 @@ export class ModelEditorScene {
   }
 
   dispose() {
+    this.motions = null;
     this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
     this.clear();

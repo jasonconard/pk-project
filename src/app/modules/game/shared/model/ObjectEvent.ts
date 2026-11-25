@@ -104,6 +104,14 @@ export type EventAction =
     }
   /** The time stops (until it goes on, or another map) or goes on again. */
   | { type: "timeFlow"; stop: boolean }
+  /** An object's movements « Par un événement » (its model's parts): played, sent back, looped, stopped. */
+  | {
+      type: "animate";
+      /** An object of the map (missing: this object). */
+      object: string;
+      mode: "play" | "back" | "loop" | "stop";
+      wait: boolean;
+    }
   /** Points to a social link (a team member or an NPC); the player sees it go up. */
   | { type: "link"; target: string; points: number }
   /** The player picks a gift in the bag for an NPC (its link goes up, more for a liked one; one a day). */
@@ -412,6 +420,15 @@ function toInstruction(
         type: InstructionType.TIME_FLOW,
         timeFlow: { stop: action.stop },
       };
+    case "animate":
+      return {
+        type: InstructionType.ANIMATE,
+        animate: {
+          ...(action.object ? { object: action.object } : {}),
+          mode: action.mode,
+          wait: action.wait,
+        },
+      };
     case "link":
       return {
         type: InstructionType.LINK,
@@ -555,6 +572,15 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
         : null;
     case InstructionType.TIME_FLOW:
       return { type: "timeFlow", stop: !!instruction.timeFlow?.stop };
+    case InstructionType.ANIMATE:
+      return instruction.animate
+        ? {
+            type: "animate",
+            object: instruction.animate.object ?? "",
+            mode: instruction.animate.mode,
+            wait: instruction.animate.wait,
+          }
+        : null;
     case InstructionType.LINK:
       return instruction.link
         ? {

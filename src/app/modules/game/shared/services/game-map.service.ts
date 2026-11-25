@@ -240,8 +240,14 @@ export class GameMapService {
     if (found.evt.face) {
       mapHelper.faceTowards(found.chunk, found.building, sprite.position);
     }
-    this.sequenceService.launchSequence(found.evt, () =>
-      this.eventContext(mapHelper.originGame)
+    this.sequenceService.launchSequence(
+      found.evt,
+      () => this.eventContext(mapHelper.originGame),
+      {
+        map: mapHelper.sceneMap.id,
+        object: found.building.id,
+        durationOf: (id) => mapHelper.motionDuration(id),
+      }
     );
   }
 

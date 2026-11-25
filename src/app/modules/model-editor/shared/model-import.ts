@@ -96,6 +96,7 @@ function toPart(kind: EditablePart["kind"], obj: SceneModelObj): EditablePart {
     side: obj.side,
     depthWrite: obj.depthWrite,
     depthTest: obj.depthTest,
+    motion: obj.motion ? { ...obj.motion } : undefined,
     faces: {},
   };
 }

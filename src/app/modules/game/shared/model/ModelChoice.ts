@@ -9,6 +9,7 @@ import { MD_HOUSE } from "../../../../../assets/models/md-house";
 import { MD_WOOD_PANNEL } from "../../../../../assets/models/md-wood-pannel";
 import { MD_LETTER_BOX } from "../../../../../assets/models/md-letter-box";
 import { MD_ROCK } from "../../../../../assets/models/md-rock";
+import { MD_WINDMILL } from "../../../../../assets/models/md-windmill";
 import { isNpc, npcOf } from "./npc-sprite";
 import { dungeonKindOf } from "./dungeon-object";
 
@@ -83,6 +84,7 @@ export const MODEL_CHOICES: ModelChoice[] = [
       max: { x: 40, y: 40 },
     },
   },
+  { model: MD_WINDMILL },
 ];
 
 /**
@@ -140,6 +142,7 @@ const MODEL_LABELS: Record<string, string> = {
   "wood-pannel": "Pancarte",
   "letter-box": "Boîte aux lettres",
   rock: "Rocher",
+  windmill: "Moulin",
   zone: "Zone invisible",
 };
 

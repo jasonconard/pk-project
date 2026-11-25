@@ -1,4 +1,5 @@
 import { restoreDungeonState } from "../shared/model/dungeon-state";
+import { restoreAnimations } from "../shared/model/model-animations";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -87,6 +88,7 @@ export class VariablesTestComponent {
     // (like a new game: the team and the dungeons too)
     resetParty();
     restoreDungeonState(null);
+    restoreAnimations(null);
     this.values.set(currentVariableValues());
   }
 }

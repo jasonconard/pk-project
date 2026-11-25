@@ -1,4 +1,5 @@
 import {
+  computed,
   ChangeDetectionStrategy,
   Component,
   inject,
@@ -39,6 +40,10 @@ type ChoiceAction = Extract<EventAction, { type: "choice" }>;
  * what changed; the weather window is opened by the event window (over it).
  */
 import { DAY_TIMES } from "../../../database-editor/shared/database";
+import { loadMap } from "../../shared/services/map-storage";
+import { findModel } from "../../shared/model/Zone";
+import { modelLabel } from "../../shared/model/ModelChoice";
+import { TILE_SIZE } from "../../shared/model/Terrain";
 @Component({
   selector: "game-event-action",
   imports: [
@@ -61,6 +66,31 @@ export class EventActionComponent {
   readonly pickWeather = output<void>();
 
   protected readonly data = inject(EventEditorData);
+  /** The objects of the map whose model moves « Par un événement » (Animer l'objet). */
+  protected readonly animatable = computed(() => {
+    const map = loadMap(this.currentMap());
+    if (!map) {
+      return [];
+    }
+    return map.chunks.flatMap((c) =>
+      c.buildings
+        .filter((b) =>
+          (() => {
+            const model = findModel(b.modelId);
+            return (
+              !!model &&
+              [...model.boxes, ...model.planes].some(
+                (p) => p.motion?.trigger === "event"
+              )
+            );
+          })()
+        )
+        .map((b) => ({
+          id: b.id,
+          label: `${modelLabel(b.modelId)} (${Math.round((c.pos.x + b.pos.x) / TILE_SIZE)}, ${Math.round((c.pos.z + b.pos.z) / TILE_SIZE)})`,
+        }))
+    );
+  });
   protected readonly sounds = SOUND_CHOICES;
   protected readonly portraitRef = portraitRef;
   protected readonly maxOptions = MAX_CHOICE_OPTIONS;

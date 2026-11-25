@@ -1,0 +1,144 @@
+// A part's movement (design/model-editor-mobile.pen, 8 · Formes · Mouvement) and its preview card over the 3D view
+// (9 · Aperçu du mouvement). The colors are defined in model-editor.component.scss.
+
+.motion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+
+  h3 {
+    margin: 0;
+  }
+
+  .hint {
+    margin: 0;
+  }
+
+  .primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+.kinds button {
+  padding: 6px 0;
+  font-size: 11px;
+}
+
+// Label column on the left, the control on the right
+.m-row {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+
+  > span {
+    color: #b4b7c4;
+    font-size: 13px;
+  }
+
+  .stepper {
+    height: 32px;
+
+    button {
+      width: 36px;
+    }
+  }
+}
+
+.m-label {
+  margin: 2px 0 0;
+  color: #b4b7c4;
+  font-size: 13px;
+}
+
+.triggers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    font-size: 13px;
+  }
+}
+
+// The preview card, over the bottom of the 3D view
+.motion-card {
+  position: absolute;
+  z-index: 3;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  max-width: 420px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(34, 35, 42, 0.94);
+
+  .hint {
+    margin: 0;
+  }
+}
+
+.mc-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .grow {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+}
+
+.mc-play {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 10px;
+  background: var(--highlight);
+  border-color: var(--highlight);
+  color: #22232a;
+
+  &:hover:not(:disabled) {
+    background: var(--highlight);
+  }
+}
+
+.mc-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 40px;
+  }
+}

@@ -639,6 +639,14 @@ export const PC_PALLET_TOWN: SceneChunk = {
       passable: true,
       canHide: false,
       events: []
+    },
+    {
+      id: 'windmill-1',
+      modelId: 'windmill',
+      pos: { x: 40, y: 0, z: 135 },
+      passable: false,
+      canHide: true,
+      events: []
     }
   ],
   grounds: [

@@ -160,6 +160,7 @@ function objData(part: EditablePart): SceneModelObj {
     depthTest: part.depthTest,
     shininess: part.shininess,
     side: part.side,
+    motion: part.motion ? { ...part.motion } : undefined,
   };
 }
 

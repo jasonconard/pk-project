@@ -129,3 +129,11 @@ textarea {
     }
   }
 }
+
+/* Animer l'objet: wait for the end of the movement */
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}

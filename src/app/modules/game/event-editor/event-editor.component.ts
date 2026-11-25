@@ -28,6 +28,7 @@ import {
   LucideMessageSquareText,
   LucideOctagonX,
   LucidePlus,
+  LucideMove3d,
   LucideSwords,
   LucideTrash,
   LucideUsers,
@@ -105,6 +106,7 @@ const ACTIONS: {
     label: "Arrêter / reprendre le temps",
     icon: LucideCirclePause,
   },
+  { type: "animate", label: "Animer l'objet", icon: LucideMove3d },
   { type: "fight", label: "Combat", icon: LucideSwords, branches: true },
 ];
 
@@ -407,6 +409,8 @@ export class EventEditorComponent {
         return { type, mode: "until", hours: 2, moment: "evening" };
       case "timeFlow":
         return { type, stop: true };
+      case "animate":
+        return { type, object: "", mode: "play", wait: true };
       case "link": {
         const first = this.data.linkTargets[0];
         return first ? { type, target: first.id, points: 3 } : null;

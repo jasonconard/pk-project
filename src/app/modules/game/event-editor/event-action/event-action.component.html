@@ -299,6 +299,52 @@
       +4, détesté −2, les autres +1 ; un seul cadeau par jour.
     </p>
   }
+  @case ("animate") {
+    <div class="row">
+      <span>Objet</span>
+      <select aria-label="Objet" (change)="set({ object: value($event) })">
+        <option value="" [selected]="!action.object">Cet objet</option>
+        @for (o of animatable(); track o.id) {
+          <option [value]="o.id" [selected]="o.id === action.object">
+            {{ o.label }}
+          </option>
+        }
+      </select>
+    </div>
+    <div class="segmented" role="radiogroup" aria-label="Mouvement">
+      @for (
+        m of [
+          { id: "play", label: "Jouer" },
+          { id: "back", label: "Revenir" },
+          { id: "loop", label: "Boucle" },
+          { id: "stop", label: "Arrêter" },
+        ];
+        track m.id
+      ) {
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="action.mode === m.id"
+          (click)="set({ mode: $any(m.id) })"
+        >
+          {{ m.label }}
+        </button>
+      }
+    </div>
+    <label class="check-row">
+      <input
+        type="checkbox"
+        [checked]="action.wait"
+        (change)="set({ wait: $any($event.target).checked })"
+      />
+      <span>Attendre la fin du mouvement</span>
+    </label>
+    <p class="help">
+      Seules les formes réglées « Par un événement » dans l'éditeur de modèles
+      bougent. « Revenir » les remet comme au début ; l'objet garde sa place
+      après une sauvegarde.
+    </p>
+  }
   @case ("timeFlow") {
     <div class="segmented" role="radiogroup" aria-label="Le temps">
       <button

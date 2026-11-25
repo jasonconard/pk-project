@@ -7,19 +7,27 @@ import {
   LucideArrowUp,
   LucideArrowUpRight,
   LucideEraser,
+  LucideFootprints,
   LucideMoon,
   LucideMountain,
   LucidePaintBucket,
   LucidePalette,
   LucidePencil,
   LucidePipette,
+  LucideRepeat,
   LucideSlash,
   LucideSparkles,
   LucideSquare,
+  LucideZap,
   LucideIcon,
 } from "@lucide/angular";
 import { readJson } from "../../core/shared/local-store";
 import { BoxFace } from "../game/shared/model/model-uv";
+import {
+  MOTION_TRIGGERS,
+  MotionKind,
+  MotionTrigger,
+} from "../game/shared/model/model-motion";
 import { LayerName } from "./shared/EditableModel";
 import { PaintStroke, Tool } from "./shared/pixel-tools";
 
@@ -190,4 +198,34 @@ export interface ActiveStroke {
   stroke: PaintStroke;
   /** Started on the 3D view (the pointer is followed there). */
   in3d: boolean;
+}
+
+const MOTION_TRIGGER_ICONS: Record<MotionTrigger, LucideIcon> = {
+  loop: LucideRepeat,
+  near: LucideFootprints,
+  event: LucideZap,
+  night: LucideMoon,
+};
+
+/** « Quand il bouge »: the triggers of a part's movement, with their icons. */
+export const MOTION_TRIGGER_CHOICES = MOTION_TRIGGERS.map((t) => ({
+  ...t,
+  icon: MOTION_TRIGGER_ICONS[t.id],
+}));
+
+/** Steps of the − / + of a movement: degrees (rotate, swing), units (move), seconds (duration). */
+export function motionStep(
+  kind: MotionKind,
+  key: "amount" | "duration"
+): number {
+  if (key === "duration") {
+    return 0.1;
+  }
+  return kind === "move" ? 1 : 5;
+}
+
+/** The movements played in the 3D view (« Voir le mouvement »): paused or not, the player near or not. */
+export interface MotionPreview {
+  paused: boolean;
+  near: boolean;
 }

@@ -1,3 +1,4 @@
+import { hasMotion } from "./model-motion";
 import * as THREE from "three";
 import { SceneModel } from "./SceneModel";
 import { SceneBuilding } from "./SceneBuilding";
@@ -34,9 +35,10 @@ function templateOf(model: SceneModel): Template {
     template = {
       parts,
       bounds: new THREE.Box3().setFromObject(group),
-      instanceable: parts.every(
-        (p) => (p.mesh.material as THREE.Material).depthTest
-      ),
+      // (a moving model: each copy moves on its own)
+      instanceable:
+        !hasMotion(model) &&
+        parts.every((p) => (p.mesh.material as THREE.Material).depthTest),
     };
     templates.set(model.id, template);
   }

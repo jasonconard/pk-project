@@ -2,7 +2,12 @@ import { Service } from "@angular/core";
 import * as THREE from "three";
 import { MaterialService } from "./material.service";
 import { ObjSide } from "../model/SceneMap";
-import { SceneModel } from "../model/SceneModel";
+import {
+  SceneModel,
+  SceneModelBox,
+  SceneModelPlane,
+} from "../model/SceneModel";
+import { MOTION_KEY, pivotPoint } from "../model/model-motion";
 import { Square3 } from "../model/SceneUtils";
 import { applyFaceUvs, BOX_FACES } from "../model/model-uv";
 import { RAIN_STOP_KEY } from "../weather/SurfaceHeights";
@@ -156,8 +161,9 @@ export class BasicMeshService {
           boxMat.side = THREE.FrontSide;
           break;
       }
-      boxMat.depthWrite = !!box.depthWrite;
-      boxMat.depthTest = !!box.depthTest;
+      // (missing: with the depth, like most parts; the first models' signs didn't say it)
+      boxMat.depthWrite = box.depthWrite !== false;
+      boxMat.depthTest = box.depthTest !== false;
       boxMat.alphaTest = 0.5;
 
       const mesh = new THREE.Mesh(geo, boxMat);
@@ -170,7 +176,7 @@ export class BasicMeshService {
       mesh.rotation.x = box.rot.x;
       mesh.rotation.y = box.rot.y;
       mesh.rotation.z = box.rot.z;
-      group.add(mesh);
+      BasicMeshService.addPart(group, mesh, box);
     });
 
     model.planes.forEach((plane) => {
@@ -192,8 +198,8 @@ export class BasicMeshService {
           mat.side = THREE.FrontSide;
           break;
       }
-      mat.depthWrite = !!plane.depthWrite;
-      mat.depthTest = !!plane.depthTest;
+      mat.depthWrite = plane.depthWrite !== false;
+      mat.depthTest = plane.depthTest !== false;
       // Since three r152 opaque materials force alpha=1: discard transparent texels instead of drawing them black
       mat.alphaTest = 0.5;
 
@@ -207,7 +213,7 @@ export class BasicMeshService {
       mesh.rotation.x = plane.rot.x;
       mesh.rotation.y = plane.rot.y;
       mesh.rotation.z = plane.rot.z;
-      group.add(mesh);
+      BasicMeshService.addPart(group, mesh, plane);
     });
 
     if (model.sway) {
@@ -216,6 +222,31 @@ export class BasicMeshService {
     BasicMeshService.mergeParts(group);
 
     return group;
+  }
+
+  /**
+   * A part put in the model's group. A moving part (see model-motion.ts) goes in a pivot group placed where it turns,
+   * kept apart from the merging; its movement is played by applyMotions.
+   */
+  private static addPart(
+    group: THREE.Group,
+    mesh: THREE.Mesh,
+    part: SceneModelBox | SceneModelPlane
+  ) {
+    if (!part.motion) {
+      group.add(mesh);
+      return;
+    }
+    const pivot = new THREE.Group();
+    pivot.position.copy(pivotPoint(part, part.motion.pivot));
+    pivot.userData[MOTION_KEY] = part.motion;
+    pivot.userData["base"] = {
+      pos: pivot.position.clone(),
+      quat: pivot.quaternion.clone(),
+    };
+    mesh.position.sub(pivot.position);
+    pivot.add(mesh);
+    group.add(pivot);
   }
 
   /**
@@ -228,6 +259,10 @@ export class BasicMeshService {
   private static mergeParts(group: THREE.Group) {
     const sets = new Map<string, THREE.Mesh[]>();
     for (const child of group.children) {
+      // (a moving part stays apart: see addPart)
+      if (child.userData[MOTION_KEY]) {
+        continue;
+      }
       const mesh = child as THREE.Mesh;
       const material = mesh.material as
         THREE.MeshLambertMaterial | THREE.MeshPhongMaterial;

@@ -29,6 +29,8 @@ export enum InstructionType {
   GIFT,
   /** DUNGEON: enter a dungeon, leave it, go down a floor… (see InstructionDungeon). */
   DUNGEON,
+  /** ANIMATE: an object's movements « Par un événement » played, sent back, looped or stopped. */
+  ANIMATE,
 }
 
 export interface SceneEventInstruction {
@@ -51,6 +53,7 @@ export interface SceneEventInstruction {
   /** FIGHT: a fight against a group; its sub-instructions 'win', 'lose' or 'flee' follow. */
   fight?: { group: string; opening?: BattleOpening };
   dungeon?: InstructionDungeon;
+  animate?: InstructionAnimate;
   time?: InstructionTime;
   timeFlow?: { stop: boolean };
   link?: { id: string; points: number };
@@ -77,6 +80,14 @@ export interface SceneEventSubInstruction {
 export interface InstructionDungeon {
   action: "enter" | "leave" | "next" | "save" | "beaten" | "lost" | "fled";
   id?: string;
+}
+
+/** An object of the map (its id; missing: the event's own object) moved (see model-motion.ts). */
+export interface InstructionAnimate {
+  object?: string;
+  mode: "play" | "back" | "loop" | "stop";
+  /** The event waits for the movement to end (its longest duration). */
+  wait: boolean;
 }
 
 export interface InstructionWait {

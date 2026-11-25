@@ -1,3 +1,4 @@
+import { PartMotion } from "./model-motion";
 import { Vec2, Vec3, VecBox2, VecBox3 } from "./SceneUtils";
 import { ObjSide } from "./SceneMap";
 
@@ -35,6 +36,8 @@ export interface SceneModelObj {
   side?: ObjSide;
   /** 0..1: strength of the sun reflections on this part (sunny weather). Omitted = matte. */
   shininess?: number;
+  /** Its movement (turns, slides, blinks, swings: see model-motion.ts). Omitted = still. */
+  motion?: PartMotion;
 }
 
 export interface SceneModelBox extends SceneModelObj {

@@ -1,4 +1,5 @@
 import { ObjSide } from "../../game/shared/model/SceneMap";
+import { PartMotion } from "../../game/shared/model/model-motion";
 import { Vec3, VecBox3 } from "../../game/shared/model/SceneUtils";
 import {
   BOX_FACES,
@@ -32,6 +33,8 @@ export interface EditablePart {
   depthWrite?: boolean;
   depthTest?: boolean;
   shininess?: number;
+  /** Its movement (turns, slides, blinks, swings). Omitted = still. */
+  motion?: PartMotion;
   /** Texture of each face (id in EditableModel.textures). Faces sharing an id are linked: same pixels. A plane only has 'front'. */
   faces: Partial<Record<BoxFace, string>>;
 }

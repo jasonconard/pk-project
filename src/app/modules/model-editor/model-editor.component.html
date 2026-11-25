@@ -179,7 +179,13 @@
       }
     </div>
 
-    @if (mode() === "select" && selectedPart() && !pending() && !sheet()) {
+    @if (
+      mode() === "select" &&
+      selectedPart() &&
+      !pending() &&
+      !sheet() &&
+      !motionPreview()
+    ) {
       <div
         class="selection-card"
         animate.enter="rise-in"
@@ -229,6 +235,74 @@
           </button>
         </div>
       </div>
+    }
+  }
+
+  @if (motionPreview(); as play) {
+    @if (previewedMotion(); as shown) {
+      <section
+        class="motion-card"
+        animate.enter="rise-in"
+        animate.leave="sink-out"
+        aria-label="Aperçu du mouvement"
+      >
+        <div class="mc-head">
+          <button
+            type="button"
+            class="btn mc-play"
+            [attr.aria-label]="play.paused ? 'Reprendre' : 'Pause'"
+            (click)="pauseMotion(!play.paused)"
+          >
+            @if (play.paused) {
+              <svg lucidePlay></svg>
+            } @else {
+              <svg lucidePause></svg>
+            }
+          </button>
+          <span class="grow">
+            <strong
+              >{{ shown.name }} ·
+              {{ kindLabel(shown.motion.kind) }}
+              @if (shown.motion.kind !== "blink") {
+                {{ shown.motion.axis }}
+                {{ shown.motion.amount
+                }}{{ shown.motion.kind === "move" ? "" : "°" }}
+              }
+            </strong>
+            <small
+              >{{ triggerLabel(shown.motion.trigger) }} ·
+              {{ seconds(shown.motion.duration) }} s</small
+            >
+          </span>
+          <button
+            type="button"
+            class="btn ghost icon"
+            aria-label="Arrêter l'aperçu"
+            (click)="stopMotionPreview()"
+          >
+            <svg lucideX></svg>
+          </button>
+        </div>
+        <div class="mc-actions">
+          <button
+            type="button"
+            class="btn"
+            [class.on]="play.near"
+            [attr.aria-pressed]="play.near"
+            (click)="setPlayerNear(!play.near)"
+          >
+            <svg lucideFootprints></svg> Le joueur arrive
+          </button>
+          <button type="button" class="btn" (click)="replayMotion()">
+            <svg lucideRotateCcw></svg> Rejouer
+          </button>
+        </div>
+        <p class="hint small">
+          « Le joueur arrive » joue les mouvements à l'approche, par un
+          événement ou la nuit ; sans lui, ils reviennent au repos. Les
+          mouvements en boucle tournent toujours.
+        </p>
+      </section>
     }
   }
 </div>
@@ -755,6 +829,10 @@
                 (change)="setFlag('depthWrite', $any($event.target).checked)"
               />
             </label>
+            <ng-container
+              [ngTemplateOutlet]="motionTpl"
+              [ngTemplateOutletContext]="{ $implicit: part }"
+            />
           </details>
         }
       } @else {
@@ -1190,6 +1268,10 @@
         (change)="setFlag('depthWrite', $any($event.target).checked)"
       />
     </label>
+    <ng-container
+      [ngTemplateOutlet]="motionTpl"
+      [ngTemplateOutletContext]="{ $implicit: part }"
+    />
   } @else {
     <p class="hint">Touche une forme du modèle, ou choisis-la ci-dessus.</p>
   }
@@ -1504,4 +1586,129 @@
   } @else {
     <p class="hint">Touche une face du modèle pour la choisir.</p>
   }
+</ng-template>
+
+<ng-template #motionTpl let-part>
+  <section class="motion" aria-label="Mouvement">
+    <h3>Mouvement de {{ parts()[selection()!.partIndex] }}</h3>
+    <div class="segmented kinds">
+      <button
+        type="button"
+        [class.on]="!part.motion"
+        (click)="setMotionKind(null)"
+      >
+        Aucun
+      </button>
+      @for (k of motionKinds; track k.id) {
+        <button
+          type="button"
+          [class.on]="part.motion?.kind === k.id"
+          (click)="setMotionKind(k.id)"
+        >
+          {{ k.label }}
+        </button>
+      }
+    </div>
+    @if (part.motion; as m) {
+      @if (m.kind !== "blink") {
+        <div class="m-row">
+          <span>Axe</span>
+          <div class="segmented">
+            @for (axis of axes; track axis) {
+              <button
+                type="button"
+                [class.on]="m.axis === axis"
+                (click)="setMotion('axis', axis)"
+              >
+                {{ axis }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @if (m.kind === "rotate" || m.kind === "swing") {
+        <div class="m-row">
+          <span>Pivot</span>
+          <div class="segmented">
+            @for (p of motionPivots; track p.id) {
+              <button
+                type="button"
+                [class.on]="m.pivot === p.id"
+                (click)="setMotion('pivot', p.id)"
+              >
+                {{ p.label }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @if (m.kind !== "blink") {
+        <ng-container
+          [ngTemplateOutlet]="motionNumber"
+          [ngTemplateOutletContext]="{
+            key: 'amount',
+            label: m.kind === 'move' ? 'Distance' : 'Angle °',
+            value: m.amount,
+          }"
+        />
+      }
+      <ng-container
+        [ngTemplateOutlet]="motionNumber"
+        [ngTemplateOutletContext]="{
+          key: 'duration',
+          label: 'Durée s',
+          value: m.duration,
+        }"
+      />
+      <p class="m-label">Quand il bouge</p>
+      <div class="triggers">
+        @for (t of motionTriggers; track t.id) {
+          <button
+            type="button"
+            class="btn"
+            [class.on]="m.trigger === t.id"
+            (click)="setMotion('trigger', t.id)"
+          >
+            <svg [lucideIcon]="t.icon"></svg> {{ t.label }}
+          </button>
+        }
+      </div>
+      <p class="hint small">
+        {{ motionSentence(parts()[selection()!.partIndex], m) }}
+      </p>
+      <button type="button" class="primary" (click)="previewMotion()">
+        <svg lucidePlay></svg> Voir le mouvement
+      </button>
+    }
+  </section>
+</ng-template>
+
+<ng-template #motionNumber let-key="key" let-label="label" let-value="value">
+  <div class="m-row">
+    <span>{{ label }}</span>
+    <div class="stepper">
+      <button
+        type="button"
+        [attr.aria-label]="label + ' moins'"
+        (click)="stepMotion(key, -1)"
+      >
+        <svg lucideMinus></svg>
+      </button>
+      <input
+        type="number"
+        [attr.aria-label]="label"
+        [step]="key === 'duration' ? 0.1 : 1"
+        [min]="key === 'duration' ? 0.1 : null"
+        [value]="value"
+        (change)="setMotionNumber(key, +$any($event.target).value)"
+      />
+      <button
+        type="button"
+        [attr.aria-label]="label + ' plus'"
+        (click)="stepMotion(key, 1)"
+      >
+        <svg lucidePlus></svg>
+      </button>
+    </div>
+  </div>
 </ng-template>

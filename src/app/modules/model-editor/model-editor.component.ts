@@ -26,6 +26,7 @@ import {
   LucideCopy,
   LucideDownload,
   LucideDynamicIcon,
+  LucideFootprints,
   LucideHand,
   LucideHouse,
   LucideLink,
@@ -35,6 +36,8 @@ import {
   LucideMoon,
   LucideMousePointerClick,
   LucidePackage,
+  LucidePause,
+  LucidePlay,
   LucidePalette,
   LucidePlus,
   LucideRectangleHorizontal,
@@ -138,7 +141,20 @@ import {
   CONFIRM_TIME,
   PendingFaceAction,
   ActiveStroke,
+  MOTION_TRIGGER_CHOICES,
+  motionStep,
+  MotionPreview,
 } from "./model-editor.options";
+import {
+  MOTION_KINDS,
+  MOTION_PIVOTS,
+  MOTION_TRIGGERS,
+  MotionKind,
+  MotionTrigger,
+  motionSentence,
+  newMotion,
+  PartMotion,
+} from "../game/shared/model/model-motion";
 
 /**
  * 3D model editor (/modeles): opens a model of the game or a new one, adds / removes / duplicates / moves its
@@ -153,6 +169,7 @@ import {
     "./model-editor.panel.scss",
     "./model-editor.phone.scss",
     "./model-editor.motion.scss",
+    "./model-editor.part-motion.scss",
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -169,6 +186,7 @@ import {
     LucideCopy,
     LucideDownload,
     LucideDynamicIcon,
+    LucideFootprints,
     LucideHand,
     LucideHouse,
     LucideLink,
@@ -178,6 +196,8 @@ import {
     LucideMoon,
     LucideMousePointerClick,
     LucidePackage,
+    LucidePause,
+    LucidePlay,
     LucidePalette,
     LucidePlus,
     LucideRectangleHorizontal,
@@ -267,6 +287,32 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   ];
   protected readonly vecs = VECS;
   protected readonly nudges = NUDGES;
+  protected readonly motionKinds = MOTION_KINDS;
+  protected readonly motionPivots = MOTION_PIVOTS;
+  protected readonly motionTriggers = MOTION_TRIGGER_CHOICES;
+  protected readonly motionStep = motionStep;
+  protected readonly motionSentence = motionSentence;
+  protected readonly kindLabel = (kind: MotionKind) =>
+    MOTION_KINDS.find((k) => k.id === kind)?.label;
+  /** 0.6 → « 0,6 ». */
+  protected readonly seconds = (value: number) =>
+    String(value).replace(".", ",");
+  protected readonly triggerLabel = (trigger: MotionTrigger) =>
+    MOTION_TRIGGERS.find((t) => t.id === trigger)?.label;
+  /** « Voir le mouvement »: the model's movements played in the 3D view (null: at rest). */
+  protected readonly motionPreview = signal<MotionPreview | null>(null);
+  /** The movement the preview card tells: the selected part's, else the first moving part's. */
+  protected readonly previewedMotion = computed(() => {
+    const parts = this.model()?.parts ?? [];
+    const sel = this.selection()?.partIndex;
+    const index =
+      sel !== undefined && parts[sel]?.motion
+        ? sel
+        : parts.findIndex((p) => p.motion);
+    return index === -1
+      ? null
+      : { name: this.parts()[index], motion: parts[index].motion! };
+  });
   /** Phone layout: bottom bars and sheets. */
   protected readonly phone = signal(false);
   private readonly phoneQuery = matchMedia(PHONE_QUERY);
@@ -398,6 +444,10 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     inject(EscapeService).track(
       () => this.sheet(),
       () => this.sheet.set(null)
+    );
+    inject(EscapeService).track(
+      () => this.motionPreview(),
+      () => this.stopMotionPreview()
     );
     effect((onCleanup) => {
       const inner = this.sheetInner()?.nativeElement;
@@ -686,6 +736,99 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.editPart((part) => (part[flag] = value));
   }
 
+  // --- Movement ---
+
+  /** Aucun (null: the part stays still), or a kind of movement with its usual settings. */
+  protected setMotionKind(kind: MotionKind | null) {
+    if (kind === (this.selectedPart()?.motion?.kind ?? null)) {
+      return;
+    }
+    this.editPart((part) => {
+      if (kind) {
+        part.motion = newMotion(kind);
+      } else {
+        delete part.motion;
+      }
+    });
+  }
+
+  protected setMotion<K extends keyof PartMotion>(
+    key: K,
+    value: PartMotion[K]
+  ) {
+    const motion = this.selectedPart()?.motion;
+    if (motion && motion[key] !== value) {
+      this.editPart((part) => (part.motion = { ...motion, [key]: value }));
+    }
+  }
+
+  /** The angle / distance or the duration typed (seconds: steps of 0.1, at least 0.1). */
+  protected setMotionNumber(key: "amount" | "duration", value: number) {
+    if (!Number.isFinite(value)) {
+      return;
+    }
+    this.setMotion(
+      key,
+      key === "duration"
+        ? Math.max(0.1, Math.round(value * 10) / 10)
+        : Math.round(value * 100) / 100
+    );
+  }
+
+  protected stepMotion(key: "amount" | "duration", steps: number) {
+    const motion = this.selectedPart()?.motion;
+    if (motion) {
+      this.setMotionNumber(
+        key,
+        motion[key] + steps * motionStep(motion.kind, key)
+      );
+    }
+  }
+
+  /** « Voir le mouvement »: plays the model's movements in the 3D view, the player near. */
+  protected previewMotion() {
+    if (!this.scene || !this.previewedMotion()) {
+      return;
+    }
+    this.sheet.set(null);
+    this.motionPreview.set({ paused: false, near: true });
+    this.scene.motionPaused = false;
+    this.scene.motionDrive = () =>
+      this.motionPreview()?.near ? "play" : "rest";
+    this.scene.gizmoEnabled = false;
+    this.scene.playMotions(true);
+  }
+
+  protected stopMotionPreview() {
+    if (!this.motionPreview()) {
+      return;
+    }
+    this.motionPreview.set(null);
+    if (this.scene) {
+      this.scene.motionPaused = false;
+      this.scene.playMotions(false);
+      this.scene.gizmoEnabled = this.mode() === "select";
+    }
+  }
+
+  protected pauseMotion(paused: boolean) {
+    this.motionPreview.update((p) => p && { ...p, paused });
+    if (this.scene) {
+      this.scene.motionPaused = paused;
+    }
+  }
+
+  /** « Le joueur arrive »: the triggered movements play (on) or go back to rest (off). */
+  protected setPlayerNear(near: boolean) {
+    this.motionPreview.update((p) => p && { ...p, near });
+  }
+
+  /** « Rejouer »: from rest again. */
+  protected replayMotion() {
+    this.pauseMotion(false);
+    this.scene?.replayMotions();
+  }
+
   // --- Layers ---
 
   protected setLayer(layer: LayerName) {
@@ -715,6 +858,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   // --- Painting ---
 
   protected setMode(mode: Mode) {
+    this.stopMotionPreview();
     this.mode.set(mode);
     if (this.scene) {
       this.scene.gizmoEnabled = mode === "select";
@@ -1195,6 +1339,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
   // --- Helpers ---
 
   private show(model: EditableModel, storedAs: string | null) {
+    this.stopMotionPreview();
     this.saver.flush();
     this.saver.storedAs = storedAs;
     this.history.clear();
@@ -1214,6 +1359,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.scene?.refresh(model);
     const sel = this.selection();
     this.select(sel && model.parts[sel.partIndex] ? sel : null);
+    this.stopPreviewIfStill();
     this.paintVersion.update((v) => v + 1);
     this.paletteVersion.update((v) => v + 1);
     this.saver.schedule();
@@ -1280,6 +1426,14 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       this.scene?.refresh(this.model()!);
       const sel = this.selection();
       this.scene?.highlight(sel?.partIndex ?? null, sel?.face ?? null);
+    }
+    this.stopPreviewIfStill();
+  }
+
+  /** No part moves any more: the preview stops. */
+  private stopPreviewIfStill() {
+    if (this.motionPreview() && !this.previewedMotion()) {
+      this.stopMotionPreview();
     }
   }
 

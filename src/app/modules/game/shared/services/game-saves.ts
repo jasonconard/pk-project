@@ -1,4 +1,5 @@
 import { DungeonState } from "../model/dungeon-state";
+import { AnimationStates } from "../model/model-animations";
 import { WeatherType } from "../weather/Weather";
 import { Vec3 } from "../model/SceneUtils";
 import { VariableValues } from "../../../variables-editor/shared/variable-values";
@@ -32,6 +33,8 @@ export interface GameSave {
   party?: PartyState;
   /** The dungeons (chests opened, the dungeon the team is in); missing in the saves made before them. */
   dungeon?: DungeonState;
+  /** The objects moved by events (see model-animations.ts). */
+  animations?: AnimationStates;
 }
 
 /** The slots (null: empty), always SAVE_SLOTS of them. */

@@ -19,6 +19,15 @@ import {
   makeFoeMesh,
 } from "./dungeon-object";
 import { dungeonLook } from "./dungeon-state";
+import {
+  applyMotions,
+  hasMotion,
+  MOTION_KEY,
+  MOTION_NEAR,
+  MotionDrive,
+  MotionState,
+  newMotionState,
+} from "./model-motion";
 import { npcPlaceAt, placeKey } from "./npc-schedule";
 import { facingSprite } from "./pixel-scale";
 import {
@@ -619,6 +628,13 @@ export class MapHelper {
       MapHelper.viewPos(mesh, world)
     );
     chunk.group.add(mesh);
+    if (hasMotion(model)) {
+      this.moving.set(chunk.id + "-" + building.id, {
+        building,
+        mesh,
+        state: newMotionState(),
+      });
+    }
   }
 
   /**
@@ -647,6 +663,71 @@ export class MapHelper {
   ): THREE.Vector3 {
     const shift = mesh.userData[TURN_SHIFT] as THREE.Vector3 | undefined;
     return shift ? world.clone().add(shift) : world;
+  }
+
+  /** The objects whose model has moving parts, by mesh key (see model-motion.ts). */
+  private readonly moving = new Map<
+    string,
+    { building: SceneBuilding; mesh: THREE.Object3D; state: MotionState }
+  >();
+
+  /**
+   * The moving parts played (each frame, `dt` seconds): in a loop, when the player is near, at night, or as an event
+   * asked (`eventDrive`, by object id). The editor shows them still.
+   */
+  public updateMotions(
+    dt: number,
+    night: boolean,
+    eventDrive: (building: SceneBuilding) => MotionDrive
+  ) {
+    const player = this.scenePlayer.mesh?.position;
+    const editing = this.originGame.editMode;
+    for (const [key, view] of this.moving) {
+      if (this.meshes[key] !== view.mesh) {
+        this.moving.delete(key);
+        continue;
+      }
+      if (!view.mesh.parent?.visible) {
+        continue;
+      }
+      applyMotions(view.mesh, view.state, editing ? 0 : dt, (trigger) => {
+        if (editing) {
+          return "hold";
+        }
+        switch (trigger) {
+          case "near": {
+            const box = new THREE.Box3().setFromObject(view.mesh);
+            return player &&
+              box.distanceToPoint(player.clone().setY(box.min.y)) < MOTION_NEAR
+              ? "play"
+              : "rest";
+          }
+          case "night":
+            return night ? "play" : "rest";
+          case "event":
+            return eventDrive(view.building);
+          default:
+            return "loop";
+        }
+      });
+    }
+  }
+
+  /** How long an object's movements « Par un événement » last (s; 0: none). */
+  public motionDuration(objectId: string): number {
+    const building = this.sceneMap.chunks
+      .flatMap((c) => c.buildings)
+      .find((b) => b.id === objectId);
+    const model =
+      building && (building.originModel ?? findModel(building.modelId));
+    return model
+      ? Math.max(
+          0,
+          ...[...model.boxes, ...model.planes].map((p) =>
+            p.motion?.trigger === "event" ? p.motion.duration : 0
+          )
+        )
+      : 0;
   }
 
   /** Takes a building's drawing out of the scene (its data stays in the chunk). */
@@ -913,6 +994,15 @@ export class MapHelper {
     if (!mesh) {
       return null;
     }
+    // A model with moving parts: its still parts only (a windmill's turning sails don't block the way)
+    if (this.moving.has(key)) {
+      const box = new THREE.Box3();
+      mesh.updateMatrixWorld();
+      mesh.children
+        .filter((child) => !child.userData[MOTION_KEY])
+        .forEach((child) => box.expandByObject(child));
+      return box;
+    }
     return new THREE.Box3().setFromObject(mesh);
   }
 
@@ -943,8 +1033,15 @@ export class MapHelper {
       bounds.max.z > target.z - SHADOW_AREA &&
       bounds.min.z < target.z + SHADOW_AREA;
 
-    mesh.children.forEach((child) =>
-      applyMeshOpacity(child, opacity, castsShadow)
-    );
+    mesh.children.forEach((child) => {
+      // (a moving part is in its pivot group)
+      if (child.userData[MOTION_KEY]) {
+        child.children.forEach((part) =>
+          applyMeshOpacity(part, opacity, castsShadow)
+        );
+      } else {
+        applyMeshOpacity(child, opacity, castsShadow);
+      }
+    });
   }
 }

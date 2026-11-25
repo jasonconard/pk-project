@@ -30,6 +30,10 @@ import {
   currentDungeonState,
   restoreDungeonState,
 } from "../shared/model/dungeon-state";
+import {
+  currentAnimations,
+  restoreAnimations,
+} from "../shared/model/model-animations";
 /**
  * Saved games (menu → Sauver): a few slots, each with where the player was, the time, the weather and when it was
  * saved. Sauver ici / Écraser keeps the game now; Charger goes back to it (the current progress is lost: pressed
@@ -86,6 +90,7 @@ export class GameSavesComponent {
       variables: currentVariableValues(),
       party: structuredClone(currentParty()),
       dungeon: structuredClone(currentDungeonState()),
+      animations: { ...currentAnimations() },
     };
     this.message.set(
       writeSave(slot, save)
@@ -103,6 +108,7 @@ export class GameSavesComponent {
     restoreVariableValues(save.variables ?? {});
     restoreParty(save.party);
     restoreDungeonState(save.dungeon);
+    restoreAnimations(save.animations);
     if (
       !this.gameService.restoreSpot(
         save.map,
