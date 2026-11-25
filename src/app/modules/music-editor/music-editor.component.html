@@ -670,6 +670,36 @@
           {{ confirmDelete() ? "Confirmer ?" : "Supprimer" }}
         </button>
       </div>
+      <h3>Fichier MIDI</h3>
+      <div class="pair">
+        <label class="outline-btn">
+          <svg lucideUpload></svg> Importer un .mid
+          <input
+            type="file"
+            accept=".mid,.midi,audio/midi,audio/x-midi"
+            hidden
+            (change)="importMidi($event)"
+          />
+        </label>
+        <button type="button" class="outline-btn" (click)="exportMidi()">
+          <svg lucideDownload></svg> Exporter en .mid
+        </button>
+      </div>
+      <p class="sheet-hint">
+        {{
+          midiMessage() ||
+            "Un fichier .mid d'un autre logiciel devient un nouveau morceau ; exporter enregistre celui-ci en .mid."
+        }}
+      </p>
     }
   </section>
+}
+
+@if (midiImport(); as midi) {
+  <app-midi-import
+    [file]="midi.file"
+    [name]="midi.name"
+    (imported)="addImported($event)"
+    (closed)="midiImport.set(null)"
+  />
 }

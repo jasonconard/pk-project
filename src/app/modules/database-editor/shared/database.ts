@@ -524,6 +524,8 @@ export interface DbDungeon {
   specials: string[];
   /** Its own weather (none: the weather outside). */
   weather?: `${WeatherType}`;
+  /** Its own song (a song of the music editor; none: the music settings' Donjon moment). */
+  music?: string;
   floors: DbFloor[];
 }
 

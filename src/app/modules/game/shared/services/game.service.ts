@@ -1,3 +1,4 @@
+import { DungeonService } from "./dungeon.service";
 import { animationKey, currentAnimations } from "../model/model-animations";
 import {
   computed,
@@ -226,6 +227,11 @@ export class GameService {
   private readonly gameMapService = inject(GameMapService);
   private readonly mapEditorService = inject(MapEditorService);
   private readonly battleService = inject(BattleService);
+  private readonly dungeonService = inject(DungeonService);
+  /** A fight of the battle system is shown (its music plays; the view changes every frame, this only twice). */
+  private readonly inBattle = computed(
+    () => this.battleService.view() !== null
+  );
   private readonly sequenceService = inject(SequenceService);
 
   private game: Game | null = null;
@@ -363,11 +369,15 @@ export class GameService {
       const rain = WEATHER_INFO[this.weatherState()]?.category === "rain";
       const night = this.night();
       let slot: MusicSlot = night ? "night" : "day";
-      if (fight) {
+      const dungeon = this.dungeonService.chip();
+      if (fight || this.inBattle()) {
         slot = "fight";
+      } else if (dungeon) {
+        slot = "dungeon";
       } else if (rain) {
         slot = "rain";
       }
+      this.music.setDungeonSong(dungeon?.music ?? null);
       this.music.setSlot(slot, night);
     });
     // The map's own songs (an empty id while loading: no change)

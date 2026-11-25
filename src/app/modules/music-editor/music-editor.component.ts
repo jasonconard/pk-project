@@ -47,6 +47,7 @@ import {
   LucideSquare,
   LucideTrash,
   LucideUndo2,
+  LucideUpload,
   LucideWavesHorizontal,
   LucideX,
 } from "@lucide/angular";
@@ -95,6 +96,9 @@ import { loadSongs, saveSongs } from "./shared/song-storage";
 import { FAMILIES, INSTRUMENT_DEFS } from "./shared/instruments";
 import { downloadFile } from "../game/shared/util/ts-source";
 import { listMaps } from "../game/shared/services/map-storage";
+import { MidiFile, parseMidi } from "./shared/midi-file";
+import { songToMidi } from "./shared/midi-song";
+import { MidiImportComponent } from "./midi-import/midi-import.component";
 
 type Stamp = InstrumentId | "eraser";
 type Sheet = "scale" | "song" | "mix" | "lofi" | "game" | "library";
@@ -159,6 +163,8 @@ const WIDE = "(min-width: 1200px)";
     LucideDownload,
     LucideX,
     LucideTrash,
+    LucideUpload,
+    MidiImportComponent,
   ],
   templateUrl: "./music-editor.component.html",
   styleUrls: ["./music-editor.component.scss", "./music-editor.sheets.scss"],
@@ -217,6 +223,13 @@ export class MusicEditorComponent {
   protected readonly viewStart = signal(0);
   private readonly viewBarsState = signal(1);
   protected readonly confirmDelete = signal(false);
+  /** The .mid file being imported (its import window open). */
+  protected readonly midiImport = signal<{
+    file: MidiFile;
+    name: string;
+  } | null>(null);
+  /** The last MIDI import / export, or what went wrong (Morceau sheet). */
+  protected readonly midiMessage = signal("");
   /** Bar the bar tools act on (copy, paste, clear), and the copied bar. */
   protected readonly toolBar = signal(0);
   protected readonly copied = signal<{
@@ -343,6 +356,11 @@ export class MusicEditorComponent {
     inject(EscapeService).track(
       () => this.sheet(),
       () => this.sheet.set(null)
+    );
+    // The MIDI import window, over the sheet
+    inject(EscapeService).track(
+      () => this.midiImport(),
+      () => this.midiImport.set(null)
     );
     const landscape = matchMedia(LANDSCAPE);
     const wide = matchMedia(WIDE);
@@ -1000,6 +1018,52 @@ export const CODE_MAP_MUSIC_USE: MapMusicUse = ${JSON.stringify(this.mapUse(), n
     this.openSong(song.id);
   }
 
+  // --- MIDI files ---
+
+  /** « Importer un .mid »: the file read, then its import window. */
+  protected async importMidi(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const picked = input.files?.[0];
+    input.value = "";
+    if (!picked) {
+      return;
+    }
+    try {
+      const file = parseMidi(await picked.arrayBuffer());
+      this.midiMessage.set("");
+      this.midiImport.set({
+        file,
+        name: picked.name.replace(/\.midi?$/i, "") || "Morceau importé",
+      });
+    } catch (error) {
+      this.midiMessage.set(
+        `Impossible de lire « ${picked.name} » : ${error instanceof Error ? error.message : "fichier abîmé"}.`
+      );
+    }
+  }
+
+  /** The import window's song: added to the songs, saved and opened. */
+  protected addImported(song: Song): void {
+    this.midiImport.set(null);
+    this.sheet.set(null);
+    this.songs.update((songs) => [...songs, song]);
+    this.openSong(song.id);
+    this.flushSave();
+  }
+
+  /** « Exporter en .mid »: the current song downloaded as a MIDI file. */
+  protected exportMidi(): void {
+    const song = this.song();
+    const name = `${song.name.replaceAll(/["*/:<>?\\|]/g, "_") || "morceau"}.mid`;
+    downloadFile(
+      name,
+      new Blob([songToMidi(song)], {
+        type: "audio/midi",
+      })
+    );
+    this.midiMessage.set(`${name} téléchargé.`);
+  }
+
   /** Two touches: "Supprimer", then "Confirmer ?". The last song is replaced by a new empty one. */
   protected deleteSong(): void {
     if (!this.confirmDelete()) {
@@ -1133,7 +1197,11 @@ export const CODE_MAP_MUSIC_USE: MapMusicUse = ${JSON.stringify(this.mapUse(), n
       event.preventDefault();
       this.redo();
     } else if (event.key === "Escape") {
-      this.sheet.set(null);
+      if (this.midiImport()) {
+        this.midiImport.set(null);
+      } else {
+        this.sheet.set(null);
+      }
     }
   }
 }

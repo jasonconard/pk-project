@@ -65,6 +65,16 @@ export class GameMusic {
     this.apply();
   }
 
+  /** The song of the dungeon the team is in (its sheet), over the Donjon moment's. */
+  private dungeonSong: string | null = null;
+
+  setDungeonSong(id: string | null): void {
+    if (id !== this.dungeonSong) {
+      this.dungeonSong = id;
+      this.setSlot(this.slot.slot, this.slot.night);
+    }
+  }
+
   /** The moment of the game: its song (or the closest one) plays. */
   setSlot(slot: MusicSlot, night: boolean): void {
     this.slot = { slot, night };
@@ -104,9 +114,16 @@ export class GameMusic {
       rain: ["rain", night ? "night" : "day", "day", "night"],
       night: ["night", "day"],
       day: ["day", "night"],
+      dungeon: ["dungeon", night ? "night" : "day", "day", "night"],
     };
     const order = orders[slot];
     const use = mapSlots(this.use, this.mapUse, this.mapId);
+    // (a dungeon's own song first)
+    const own =
+      slot === "dungeon" && this.songs.find((x) => x.id === this.dungeonSong);
+    if (own) {
+      return own;
+    }
     for (const s of order) {
       const song = this.songs.find((x) => x.id === use[s]);
       if (song) {

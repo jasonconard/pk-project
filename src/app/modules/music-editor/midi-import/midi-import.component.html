@@ -1,0 +1,129 @@
+<div class="sheet-backdrop" (click)="closed.emit()"></div>
+<section
+  class="sheet midi"
+  role="dialog"
+  aria-label="Importer un fichier MIDI"
+  animate.enter="sheet-in"
+  animate.leave="sheet-out"
+>
+  <span class="grip" aria-hidden="true"></span>
+  <div class="sheet-head">
+    <svg lucideFileMusic class="head-icon"></svg>
+    <div class="head-text">
+      <h2>Importer « {{ name() }}.mid »</h2>
+      <small>
+        {{ bpm() }} BPM · {{ file().meter[0] }}/{{ file().meter[1] }} ·
+        {{ info().bars }} mesure{{ info().bars > 1 ? "s" : "" }} ·
+        {{ info().tracks.length }} piste{{
+          info().tracks.length > 1 ? "s" : ""
+        }}
+      </small>
+    </div>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+
+  <h3>Pistes</h3>
+  @for (track of info().tracks; track track.index) {
+    @let on = !left().has(track.index);
+    <div class="track" [class.off]="!on">
+      <label class="track-top">
+        <input
+          type="checkbox"
+          [checked]="on"
+          (change)="toggle(track.index, $any($event.target).checked)"
+        />
+        <span class="track-text">
+          <strong>{{ track.name }}</strong>
+          <small>
+            {{ track.drums ? "Canal 10" : gm(track.program) }} ·
+            {{ track.noteCount }} note{{ track.noteCount > 1 ? "s" : "" }}
+          </small>
+        </span>
+        <svg
+          class="preview"
+          viewBox="0 0 100 20"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path [attr.d]="track.preview" />
+        </svg>
+      </label>
+      @if (track.drums) {
+        <p class="becomes">
+          <svg lucideDrum></svg> → Batterie (grosse caisse, caisse claire,
+          charley)
+        </p>
+      } @else {
+        @let instrument = instrumentOf(track.index, track.instrument);
+        <label class="becomes">
+          <span class="dot" [style.background]="colorOf(instrument)"></span>
+          <select
+            aria-label="Devient l'instrument"
+            [disabled]="!on"
+            (change)="pick(track.index, $any($event.target).value)"
+          >
+            @for (item of instruments; track item.id) {
+              <option [value]="item.id" [selected]="item.id === instrument">
+                → {{ item.label }}
+              </option>
+            }
+          </select>
+        </label>
+      }
+    </div>
+  } @empty {
+    <p class="sheet-hint">Ce fichier n'a aucune note.</p>
+  }
+
+  <h3>Réglages</h3>
+  <label class="setting">
+    <span>Mesures gardées</span>
+    <select
+      [disabled]="starts().length < 2"
+      (change)="setStart($any($event.target).value)"
+    >
+      @for (start of starts(); track start.value) {
+        <option [value]="start.value" [selected]="start.value === startBar()">
+          {{ start.label }}
+        </option>
+      }
+    </select>
+  </label>
+  <label class="setting">
+    <span>Gamme</span>
+    <select (change)="setScale($any($event.target).value)">
+      @for (item of scales(); track item.value) {
+        <option [value]="item.value" [selected]="item.value === scaleValue()">
+          {{ item.label }}
+        </option>
+      }
+    </select>
+  </label>
+  <p class="sheet-hint">
+    Les notes sont calées sur la grille (doubles croches) ; celles hors de la
+    gamme sont ramenées à la note voisine.
+  </p>
+
+  <div class="pair">
+    <button type="button" class="outline-btn" (click)="closed.emit()">
+      <svg lucideX></svg> Annuler
+    </button>
+    <button
+      type="button"
+      class="outline-btn primary"
+      [disabled]="kept().size === 0"
+      (click)="confirm()"
+    >
+      <svg lucideCheck></svg> Importer {{ kept().size }} piste{{
+        kept().size > 1 ? "s" : ""
+      }}
+    </button>
+  </div>
+</section>

@@ -1,3 +1,4 @@
+import { loadSongs } from "../../../music-editor/shared/song-storage";
 import {
   LucideArrowDown,
   LucideArrowUp,
@@ -118,6 +119,25 @@ export class DungeonSheetComponent extends DbSheet {
 
   protected openWeather(): void {
     this.weatherPick.set({ id: this.dungeon().id, for: "dungeon" });
+  }
+
+  /** The songs of the music editor (read when the sheet opens). */
+  protected readonly songs = loadSongs().songs.map((s) => ({
+    id: s.id,
+    name: s.name,
+  }));
+
+  /** Its own song (empty: the music settings' Donjon moment). */
+  protected setMusic(id: string): void {
+    this.change((d) => {
+      const next = { ...d };
+      if (id) {
+        next.music = id;
+      } else {
+        delete next.music;
+      }
+      return next;
+    });
   }
 
   /** Back to the weather outside. */

@@ -72,6 +72,8 @@ export interface DungeonChip {
   floor: string;
   closes: string;
   foes: number;
+  /** The dungeon's own song (its sheet), if any. */
+  music?: string;
 }
 
 /** A dungeon's enemy walking on the map. */
@@ -1400,6 +1402,7 @@ export class DungeonService {
       floor: `Étage ${run.floor + 1}`,
       closes: closingText(dungeon, game.weather.hourOfDay),
       foes: this.foes.length,
+      ...(dungeon.music ? { music: dungeon.music } : {}),
     };
     const before = this.chipState();
     if (JSON.stringify(before) !== JSON.stringify(chip)) {

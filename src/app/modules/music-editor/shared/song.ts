@@ -330,8 +330,8 @@ export function lofiOf(song: Song): LofiSettings {
   return { ...CLEAN, ...song.lofi };
 }
 
-/** When a song plays in the game: by day, by night, under the rain, in a fight (the dungeons will come later). */
-export type MusicSlot = "day" | "night" | "rain" | "fight";
+/** When a song plays in the game: by day, by night, under the rain, in a fight, in a dungeon. */
+export type MusicSlot = "day" | "night" | "rain" | "fight" | "dungeon";
 /** Song id per slot. */
 export type MusicUse = Partial<Record<MusicSlot, string>>;
 /** Songs of one map (map id → its slots), over the songs of every map: a slot left empty takes theirs. */
@@ -359,6 +359,11 @@ export const MUSIC_SLOTS: { id: MusicSlot; label: string; hint: string }[] = [
     hint: "Bruine, averse, orage, mousson… (sinon : jour ou nuit)",
   },
   { id: "fight", label: "Combat", hint: "Pendant un combat" },
+  {
+    id: "dungeon",
+    label: "Donjon",
+    hint: "Dans un donjon (sa fiche peut choisir le sien)",
+  },
 ];
 
 /** French note names (with the usual sharps / flats). */

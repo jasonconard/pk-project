@@ -83,6 +83,22 @@
       </button>
     </div>
   }
+
+  <h3>Musique</h3>
+  <label class="learn">
+    <span class="slot-label">Morceau</span>
+    <select
+      aria-label="Musique du donjon"
+      (change)="setMusic($any($event.target).value)"
+    >
+      <option value="" [selected]="!dg.music">Celle du moment Donjon</option>
+      @for (song of songs; track song.id) {
+        <option [value]="song.id" [selected]="song.id === dg.music">
+          {{ song.name }}
+        </option>
+      }
+    </select>
+  </label>
 </div>
 
 <div class="block">
