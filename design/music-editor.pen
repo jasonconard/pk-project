@@ -18416,6 +18416,1882 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "HQlbO",
+      "x": 1824,
+      "y": 0,
+      "name": "4 · Portrait · Morceau · MIDI",
+      "clip": true,
+      "width": 390,
+      "height": 700,
+      "fill": "#1d1f26",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "N6kOg",
+          "x": 0,
+          "y": 0,
+          "name": "Capture",
+          "width": 390,
+          "height": 590,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/music-song-sheet.png",
+            "mode": "cover"
+          }
+        },
+        {
+          "type": "frame",
+          "id": "Ah4cR",
+          "x": 0,
+          "y": 590,
+          "name": "Fichier MIDI",
+          "width": 390,
+          "fill": "#25272f",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            4,
+            12,
+            16,
+            12
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "cS1RS",
+              "name": "FICHIER MIDI",
+              "fill": "#9095a2",
+              "content": "FICHIER MIDI",
+              "fontFamily": "Inter",
+              "fontSize": 10.5,
+              "fontWeight": "700",
+              "letterSpacing": 0.6
+            },
+            {
+              "type": "frame",
+              "id": "HHuVf",
+              "name": "Boutons",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "muUMm",
+                  "name": "Importer un .mid",
+                  "width": "fill_container",
+                  "height": 42,
+                  "cornerRadius": 10,
+                  "stroke": "#555a66",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "unFx3",
+                      "name": "upload",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "upload",
+                      "library": "lucide",
+                      "fill": "#f1f2f5"
+                    },
+                    {
+                      "type": "text",
+                      "id": "s7Bhe",
+                      "name": "Importer un .mid",
+                      "fill": "#f1f2f5",
+                      "content": "Importer un .mid",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M9xRFw",
+                  "name": "Exporter en .mid",
+                  "width": "fill_container",
+                  "height": 42,
+                  "cornerRadius": 10,
+                  "stroke": "#555a66",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Pvm7Y",
+                      "name": "download",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "download",
+                      "library": "lucide",
+                      "fill": "#f1f2f5"
+                    },
+                    {
+                      "type": "text",
+                      "id": "QDQgu",
+                      "name": "Exporter en .mid",
+                      "fill": "#f1f2f5",
+                      "content": "Exporter en .mid",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "KFhC6",
+              "name": "Un fichier .mid d'un autre log",
+              "fill": "#9095a2",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Un fichier .mid d'un autre logiciel devient un nouveau morceau ; exporter enregistre celui-ci en .mid.",
+              "lineHeight": 1.35,
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "T5WOhE",
+      "x": 2284,
+      "y": 0,
+      "name": "5 · Portrait · Import MIDI",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#0e0f13",
+      "layout": "vertical",
+      "justifyContent": "end",
+      "children": [
+        {
+          "type": "frame",
+          "id": "KneRe",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Fond",
+          "opacity": 0.35,
+          "width": 390,
+          "height": 590,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/music-song-sheet.png",
+            "mode": "cover"
+          }
+        },
+        {
+          "type": "frame",
+          "id": "hhA9L",
+          "name": "Fenêtre",
+          "width": "fill_container",
+          "fill": "#1d1f26",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "stroke": "#3a3e4a",
+          "strokeWidth": {
+            "top": 1
+          },
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            10,
+            14,
+            16,
+            14
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Q1jvn",
+              "name": "Grip",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Prw1S",
+                  "name": "bar",
+                  "width": 32,
+                  "height": 4,
+                  "fill": "#555a66",
+                  "cornerRadius": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "g0t16O",
+              "name": "Head",
+              "width": "fill_container",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "uRuw9",
+                  "name": "ic",
+                  "width": 38,
+                  "height": 38,
+                  "fill": "#2a2d36",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "UfQor",
+                      "name": "file-music",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "file-music",
+                      "library": "lucide",
+                      "fill": "#f0b44c"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "s0opSq",
+                  "name": "t",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zE6zY",
+                      "name": "Importer « theme_village.mid »",
+                      "fill": "#f1f2f5",
+                      "content": "Importer « theme_village.mid »",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rkGJK",
+                      "name": "96 BPM · 4/4 · 24 mesures · 5 ",
+                      "fill": "#9095a2",
+                      "content": "96 BPM · 4/4 · 24 mesures · 5 pistes",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "dyX8l",
+                  "name": "x",
+                  "width": 34,
+                  "height": 34,
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "W8G1JZ",
+                      "name": "x",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "#f1f2f5"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "GMviJ",
+              "name": "PISTES",
+              "fill": "#9095a2",
+              "content": "PISTES",
+              "fontFamily": "Inter",
+              "fontSize": 10.5,
+              "fontWeight": "700",
+              "letterSpacing": 0.6
+            },
+            {
+              "type": "frame",
+              "id": "iBaMN",
+              "name": "Piste Mélodie",
+              "width": "fill_container",
+              "fill": "#2a2d36",
+              "cornerRadius": 11,
+              "stroke": "#7fb2ea88",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 7,
+              "padding": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Pr8c5",
+                  "name": "Haut",
+                  "width": "fill_container",
+                  "gap": 9,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "n5NOP",
+                      "name": "Case",
+                      "width": 20,
+                      "height": 20,
+                      "fill": "#3a6ea5",
+                      "cornerRadius": 5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "dsViW",
+                          "name": "check",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "#fff"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "xfit5",
+                      "name": "t",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 1,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "UTct1",
+                          "name": "Mélodie",
+                          "fill": "#f1f2f5",
+                          "content": "Mélodie",
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "SseCe",
+                          "name": "Flûte (GM 74) · 142 notes",
+                          "fill": "#9095a2",
+                          "content": "Flûte (GM 74) · 142 notes",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dg7Y8",
+                      "name": "Aperçu",
+                      "width": 64,
+                      "height": 22,
+                      "fill": "#1d1f26",
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "jVo8B",
+                          "x": 3,
+                          "y": 11,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "k9xEX",
+                          "x": 9.6,
+                          "y": 5,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "a9G1aY",
+                          "x": 16.2,
+                          "y": 12,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "MeR3c",
+                          "x": 22.799999999999997,
+                          "y": 6,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "mPu4g",
+                          "x": 29.4,
+                          "y": 13,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "rHz6T",
+                          "x": 36,
+                          "y": 7,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "fMnWF",
+                          "x": 42.599999999999994,
+                          "y": 14,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "M3aWrF",
+                          "x": 49.199999999999996,
+                          "y": 8,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "cC6IX",
+                          "x": 55.8,
+                          "y": 15,
+                          "name": "n",
+                          "fill": "#7fb2ea",
+                          "width": 4,
+                          "height": 3
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RamUu",
+                  "name": "Instrument",
+                  "width": "fill_container",
+                  "height": 34,
+                  "fill": "#1d1f26",
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "B4TGNc",
+                      "name": "music",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "music",
+                      "library": "lucide",
+                      "fill": "#7fb2ea"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xFP3y",
+                      "name": "→ Flûte douce",
+                      "fill": "#f1f2f5",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "→ Flûte douce",
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "V2pu6U",
+                      "name": "chevron-down",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#9095a2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wNfcq",
+              "name": "Piste Accords",
+              "width": "fill_container",
+              "fill": "#2a2d36",
+              "cornerRadius": 11,
+              "stroke": "#c58af088",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 7,
+              "padding": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "bSMoo",
+                  "name": "Haut",
+                  "width": "fill_container",
+                  "gap": 9,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Z7C6JI",
+                      "name": "Case",
+                      "width": 20,
+                      "height": 20,
+                      "fill": "#3a6ea5",
+                      "cornerRadius": 5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "S1bvD",
+                          "name": "check",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "#fff"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p3o2t",
+                      "name": "t",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 1,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "tQDD6",
+                          "name": "Accords",
+                          "fill": "#f1f2f5",
+                          "content": "Accords",
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "xWGWc",
+                          "name": "Piano électrique (GM 5) · 96 n",
+                          "fill": "#9095a2",
+                          "content": "Piano électrique (GM 5) · 96 notes",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "c5T3JU",
+                      "name": "Aperçu",
+                      "width": 64,
+                      "height": 22,
+                      "fill": "#1d1f26",
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "J94JVy",
+                          "x": 3,
+                          "y": 11,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "b9C1Rj",
+                          "x": 9.6,
+                          "y": 5,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "eK2ec",
+                          "x": 16.2,
+                          "y": 12,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Gdweh",
+                          "x": 22.799999999999997,
+                          "y": 6,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "cEymA",
+                          "x": 29.4,
+                          "y": 13,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "f3lwJb",
+                          "x": 36,
+                          "y": 7,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "oDs3g",
+                          "x": 42.599999999999994,
+                          "y": 14,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Pv57U",
+                          "x": 49.199999999999996,
+                          "y": 8,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "MksWW",
+                          "x": 55.8,
+                          "y": 15,
+                          "name": "n",
+                          "fill": "#c58af0",
+                          "width": 4,
+                          "height": 3
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "zeyL9",
+                  "name": "Instrument",
+                  "width": "fill_container",
+                  "height": 34,
+                  "fill": "#1d1f26",
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "bxIGd",
+                      "name": "music",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "music",
+                      "library": "lucide",
+                      "fill": "#c58af0"
+                    },
+                    {
+                      "type": "text",
+                      "id": "bbDaH",
+                      "name": "→ Nappe synthé",
+                      "fill": "#f1f2f5",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "→ Nappe synthé",
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "AzMBq",
+                      "name": "chevron-down",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#9095a2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "RuiHO",
+              "name": "Piste Basse",
+              "width": "fill_container",
+              "fill": "#2a2d36",
+              "cornerRadius": 11,
+              "stroke": "#7fd18b88",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 7,
+              "padding": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "NvyH0",
+                  "name": "Haut",
+                  "width": "fill_container",
+                  "gap": 9,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "P2xhx",
+                      "name": "Case",
+                      "width": 20,
+                      "height": 20,
+                      "fill": "#3a6ea5",
+                      "cornerRadius": 5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "yoDE1",
+                          "name": "check",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "#fff"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YJunP",
+                      "name": "t",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 1,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Gr6mE",
+                          "name": "Basse",
+                          "fill": "#f1f2f5",
+                          "content": "Basse",
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "wh9ys",
+                          "name": "Basse au doigt (GM 34) · 120 n",
+                          "fill": "#9095a2",
+                          "content": "Basse au doigt (GM 34) · 120 notes",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GYXCG",
+                      "name": "Aperçu",
+                      "width": 64,
+                      "height": 22,
+                      "fill": "#1d1f26",
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "igynX",
+                          "x": 3,
+                          "y": 5,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "wLs7I",
+                          "x": 9.6,
+                          "y": 12,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "u5YtEz",
+                          "x": 16.2,
+                          "y": 6,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "fz7cU",
+                          "x": 22.799999999999997,
+                          "y": 13,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "waxeW",
+                          "x": 29.4,
+                          "y": 7,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "koml0",
+                          "x": 36,
+                          "y": 14,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "FpDSi",
+                          "x": 42.599999999999994,
+                          "y": 8,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "kYpaN",
+                          "x": 49.199999999999996,
+                          "y": 15,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "bn6wX",
+                          "x": 55.8,
+                          "y": 9,
+                          "name": "n",
+                          "fill": "#7fd18b",
+                          "width": 4,
+                          "height": 3
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fbnfz",
+                  "name": "Instrument",
+                  "width": "fill_container",
+                  "height": 34,
+                  "fill": "#1d1f26",
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "FJEMs",
+                      "name": "music",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "music",
+                      "library": "lucide",
+                      "fill": "#7fd18b"
+                    },
+                    {
+                      "type": "text",
+                      "id": "n0UPs",
+                      "name": "→ Basse",
+                      "fill": "#f1f2f5",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "→ Basse",
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "y0pz4q",
+                      "name": "chevron-down",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#9095a2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "juzoR",
+              "name": "Piste Batterie",
+              "width": "fill_container",
+              "fill": "#2a2d36",
+              "cornerRadius": 11,
+              "stroke": "#f0b44c88",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 7,
+              "padding": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ZGkJt",
+                  "name": "Haut",
+                  "width": "fill_container",
+                  "gap": 9,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "K74l6J",
+                      "name": "Case",
+                      "width": 20,
+                      "height": 20,
+                      "fill": "#3a6ea5",
+                      "cornerRadius": 5,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "kZi88",
+                          "name": "check",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "#fff"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rb360",
+                      "name": "t",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 1,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GGOi7",
+                          "name": "Batterie",
+                          "fill": "#f1f2f5",
+                          "content": "Batterie",
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "NE6Da",
+                          "name": "Canal 10 · 210 notes",
+                          "fill": "#9095a2",
+                          "content": "Canal 10 · 210 notes",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "U9BFgM",
+                      "name": "Aperçu",
+                      "width": 64,
+                      "height": 22,
+                      "fill": "#1d1f26",
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "TI73R",
+                          "x": 3,
+                          "y": 14,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "QB97l",
+                          "x": 9.6,
+                          "y": 8,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Zkwub",
+                          "x": 16.2,
+                          "y": 15,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "gxP1Q",
+                          "x": 22.799999999999997,
+                          "y": 9,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "nqcg7",
+                          "x": 29.4,
+                          "y": 3,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "ZyXdg",
+                          "x": 36,
+                          "y": 10,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Q8v87",
+                          "x": 42.599999999999994,
+                          "y": 4,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "J16wt",
+                          "x": 49.199999999999996,
+                          "y": 11,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "B1ddum",
+                          "x": 55.8,
+                          "y": 5,
+                          "name": "n",
+                          "fill": "#f0b44c",
+                          "width": 4,
+                          "height": 3
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "a1YCjh",
+                  "name": "Instrument",
+                  "width": "fill_container",
+                  "height": 34,
+                  "fill": "#1d1f26",
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Ooef6",
+                      "name": "music",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "drum",
+                      "library": "lucide",
+                      "fill": "#f0b44c"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Y8Psr",
+                      "name": "→ Batterie (motif repris)",
+                      "fill": "#f1f2f5",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "→ Batterie (motif repris)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "fHhWF",
+                      "name": "chevron-down",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#9095a2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ekDyG",
+              "name": "Piste Cordes",
+              "opacity": 0.55,
+              "width": "fill_container",
+              "fill": "#2a2d36",
+              "cornerRadius": 11,
+              "stroke": "#3a3e4a",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 7,
+              "padding": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "u7ddlC",
+                  "name": "Haut",
+                  "width": "fill_container",
+                  "gap": 9,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Tew0z",
+                      "name": "Case",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 5,
+                      "stroke": "#6a6f7c",
+                      "strokeWidth": 1.5,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "j8eLj",
+                      "name": "t",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 1,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "UG9OK",
+                          "name": "Cordes",
+                          "fill": "#f1f2f5",
+                          "content": "Cordes",
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "xjRxc",
+                          "name": "Ensemble de cordes (GM 49) · 6",
+                          "fill": "#9095a2",
+                          "content": "Ensemble de cordes (GM 49) · 64 notes",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tQ4q8",
+                      "name": "Aperçu",
+                      "width": 64,
+                      "height": 22,
+                      "fill": "#1d1f26",
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "FKQWm",
+                          "x": 3,
+                          "y": 8,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Gb6mO",
+                          "x": 9.6,
+                          "y": 15,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "f2Igfl",
+                          "x": 16.2,
+                          "y": 9,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "P1U0TL",
+                          "x": 22.799999999999997,
+                          "y": 3,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "PTpGC",
+                          "x": 29.4,
+                          "y": 10,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "WnkUG",
+                          "x": 36,
+                          "y": 4,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Z5J8j",
+                          "x": 42.599999999999994,
+                          "y": 11,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "YdvBk",
+                          "x": 49.199999999999996,
+                          "y": 5,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "C6fOew",
+                          "x": 55.8,
+                          "y": 12,
+                          "name": "n",
+                          "fill": "#e8895a",
+                          "width": 4,
+                          "height": 3
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GSSo3",
+                  "name": "Instrument",
+                  "width": "fill_container",
+                  "height": 34,
+                  "fill": "#1d1f26",
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "v7ElvF",
+                      "name": "music",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "music",
+                      "library": "lucide",
+                      "fill": "#e8895a"
+                    },
+                    {
+                      "type": "text",
+                      "id": "s4XuKZ",
+                      "name": "→ Corde",
+                      "fill": "#f1f2f5",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "→ Corde",
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "ZZLvE",
+                      "name": "chevron-down",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#9095a2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "M03pXP",
+              "name": "RÉGLAGES",
+              "fill": "#9095a2",
+              "content": "RÉGLAGES",
+              "fontFamily": "Inter",
+              "fontSize": 10.5,
+              "fontWeight": "700",
+              "letterSpacing": 0.6
+            },
+            {
+              "type": "frame",
+              "id": "ybbU5",
+              "name": "Mesures gardées",
+              "width": "fill_container",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "JH9lr",
+                  "name": "Mesures gardées",
+                  "fill": "#f1f2f5",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Mesures gardées",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "gXA96",
+                  "name": "v",
+                  "height": 32,
+                  "fill": "#2a2d36",
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "aH6as",
+                      "name": "1 à 8 (sur 24)",
+                      "fill": "#f1f2f5",
+                      "content": "1 à 8 (sur 24)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "b2RRI",
+                      "name": "chevron-down",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#9095a2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "pLbLI",
+              "name": "Gamme",
+              "width": "fill_container",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "DswaY",
+                  "name": "Gamme",
+                  "fill": "#f1f2f5",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Gamme",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "u2hvP",
+                  "name": "v",
+                  "height": 32,
+                  "fill": "#2a2d36",
+                  "cornerRadius": 8,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Dwk17",
+                      "name": "La mineur (trouvée)",
+                      "fill": "#f1f2f5",
+                      "content": "La mineur (trouvée)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "X809U",
+                      "name": "chevron-down",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#9095a2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "YmwMu",
+              "name": "Les notes sont calées sur la g",
+              "fill": "#9095a2",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Les notes sont calées sur la grille (doubles croches) ; celles hors de la gamme sont ramenées à la note voisine.",
+              "lineHeight": 1.35,
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "jceot",
+              "name": "Actions",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "IqVn7",
+                  "name": "Annuler",
+                  "width": "fill_container",
+                  "height": 42,
+                  "cornerRadius": 10,
+                  "stroke": "#555a66",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "DEjrf",
+                      "name": "x",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "#f1f2f5"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ossnm",
+                      "name": "Annuler",
+                      "fill": "#f1f2f5",
+                      "content": "Annuler",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "m4WKz",
+                  "name": "Importer 4 pistes",
+                  "width": "fill_container",
+                  "height": 42,
+                  "fill": "#3a6ea5",
+                  "cornerRadius": 10,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nvJoa",
+                      "name": "check",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "#f1f2f5"
+                    },
+                    {
+                      "type": "text",
+                      "id": "B7dMLE",
+                      "name": "Importer 4 pistes",
+                      "fill": "#f1f2f5",
+                      "content": "Importer 4 pistes",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "D981f",
+      "x": 2744,
+      "y": 0,
+      "name": "6 · Portrait · Jeu · Donjon",
+      "clip": true,
+      "width": 390,
+      "height": 700,
+      "fill": "#1d1f26",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "o2yq8",
+          "x": 0,
+          "y": 0,
+          "name": "Capture",
+          "width": 390,
+          "height": 590,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/music-game-sheet.png",
+            "mode": "cover"
+          }
+        },
+        {
+          "type": "frame",
+          "id": "UsYSd",
+          "x": 0,
+          "y": 534,
+          "name": "Suite",
+          "width": 390,
+          "height": 166,
+          "fill": "#25272f",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            4,
+            12,
+            12,
+            12
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Vo2AO",
+              "name": "Donjon",
+              "width": "fill_container",
+              "cornerRadius": 10,
+              "stroke": "#f0b44c",
+              "strokeWidth": 1.5,
+              "gap": 10,
+              "padding": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "mJWZc",
+                  "name": "t",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pCcxw",
+                      "name": "Donjon",
+                      "fill": "#f1f2f5",
+                      "content": "Donjon",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "e9PHXF",
+                      "name": "Dans un donjon (sa fiche peut ",
+                      "fill": "#9095a2",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Dans un donjon (sa fiche peut choisir le sien)",
+                      "fontFamily": "Inter",
+                      "fontSize": 10.5,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "a4n13U",
+                  "name": "Choix",
+                  "width": 164,
+                  "height": 38,
+                  "fill": "#2a2d36",
+                  "cornerRadius": 9,
+                  "stroke": "#3a3e4a",
+                  "strokeWidth": 1,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nSwga",
+                      "name": "Grotte calme",
+                      "fill": "#f1f2f5",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Grotte calme",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "D1Lzv",
+                      "name": "chevron-down",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "#f1f2f5"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "o9nQFf",
+              "name": "Dans un donjon, le morceau de ",
+              "fill": "#9095a2",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Dans un donjon, le morceau de sa fiche (base de données → Donjons → Musique) passe avant celui-ci ; le combat garde le sien.",
+              "lineHeight": 1.35,
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "vCGik",
+              "name": "Exporter (music.ts)",
+              "width": "fill_container",
+              "height": 36,
+              "cornerRadius": 10,
+              "stroke": "#555a66",
+              "strokeWidth": 1,
+              "gap": 8,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "x7agr0",
+                  "name": "download",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "download",
+                  "library": "lucide",
+                  "fill": "#f1f2f5"
+                },
+                {
+                  "type": "text",
+                  "id": "MCFm6",
+                  "name": "Exporter (music.ts)",
+                  "fill": "#f1f2f5",
+                  "content": "Exporter (music.ts)",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
