@@ -6,7 +6,7 @@ La base de données rassemble ce que le combat, les événements et les menus vo
 
 En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en paysage) ou **⋮ → Base de données** (téléphone en portrait). L'éditeur s'ouvre par-dessus le jeu ; **Jeu** le ferme.
 
-- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, PNJ, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
+- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, PNJ, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes, Calendrier), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
 - Sur les écrans larges, **Reprendre la version du jeu**, **Dupliquer** et **Supprimer** sont à droite du nom.
@@ -189,6 +189,19 @@ Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat
 - **Rien n'est gardé** : à la fin (victoire, défaite ou fuite), l'équipe, ses niveaux, ses objets et l'argent redeviennent comme avant.
 - Les choix sont retenus pour la simulation suivante.
 
+## Calendrier
+
+Le calendrier du jeu : une seule fiche (l'onglet l'ouvre directement). Maquette : `design/database.pen`, écran 13.
+
+- **Forme du calendrier** : un modèle, **Réel** (12 mois, de janvier à décembre) ou **Saisons** (4 saisons de 28 jours, comme Stardew Valley), à toucher deux fois (il remplace la semaine et les mois). Changer la semaine ou les mois à la main donne un calendrier **Libre**.
+- **Semaine** : le nombre de jours (1 à 10) et leurs noms.
+- **Mois · saisons** : chacun a un nom, un nombre de jours, une couleur et une icône ; les flèches changent leur ordre, + Mois en ajoute. Le total d'une année s'affiche.
+- **Début de la partie** : le mois, le jour et l'heure où commence une nouvelle partie, le jour de la semaine du 1er jour de l'an 1, et la durée d'une journée en temps réel (12 minutes par défaut).
+- **Les moments de la journée** : l'heure où commencent le matin, l'après-midi, le soir et la nuit (6 h, 12 h, 18 h, 22 h par défaut), avec la barre des 24 heures.
+- **Jours spéciaux** : un nom, une couleur, quand il revient (chaque année à une date, chaque mois un jour, chaque semaine un jour de la semaine) et ses moments (aucun : toute la journée).
+
+Le jeu ne s'en sert pas encore : la date dans l'horloge et la durée des journées viennent à l'étape suivante (point 7 de la feuille de route), puis l'Agenda, les conditions des événements et les emplois du temps.
+
 ## Sauvegarde et export
 
 - Chaque changement est enregistré dans le navigateur (« Enregistré » sous le titre).
@@ -200,7 +213,7 @@ Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat
 | Fichier | Rôle |
 |---|---|
 | `src/app/modules/database-editor/database-editor.component.*` | L'éditeur : les onglets, la liste, le haut de la fiche (icône, nom, couleur), les fenêtres par-dessus |
-| `src/app/modules/database-editor/sheets/<table>-sheet/` | Une fiche par table (personnage, PNJ, ennemi, groupe, compétence, objet, état, élément, type d'arme) |
+| `src/app/modules/database-editor/sheets/<table>-sheet/` | Une fiche par table (calendrier, personnage, PNJ, ennemi, groupe, compétence, objet, état, élément, type d'arme) |
 | `src/app/modules/database-editor/shared/db-sheet.ts` | Ce que les fiches partagent (`DbSheet`) : les constantes, les noms des éléments, compétences, météos… |
 | `src/app/modules/database-editor/shared/database-store.ts` | La base en cours de modification et son enregistrement (`DatabaseStore`) |
 | `src/app/modules/database-editor/effects-editor/` | Les effets d'une compétence ou d'un objet |

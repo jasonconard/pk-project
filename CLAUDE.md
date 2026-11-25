@@ -62,7 +62,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   weapon types), opened over the game. The editor is a shell (tables, list, sheet head, windows over it);
   `sheets/<table>-sheet/` one component per table, extending `shared/db-sheet.ts` (`DbSheet`: the store, constants,
   lookups); `shared/database-store.ts` (`DatabaseStore`, provided by the editor: the database, its saving, the table
-  shown, the pixel editor / weathers windows); `effects-editor/` (skills' and items' effects), `anim-field/` (an effect animation's fields and preview: skills, weapon types), `walk-field/` (the walking sheet on the map, 16×24 × 4 directions × 3; `shared/walk-sheet.ts`; the player uses the team leader's, `game/shared/model/player-look.ts`), `learn-select/`,
+  shown, the pixel editor / weathers windows); `effects-editor/` (skills' and items' effects), `anim-field/` (an effect animation's fields and preview: skills, weapon types), `sheets/calendar-sheet/` (the game's calendar: the `calendar` table holds one row, shown without a list; `DbCalendar` in `database.ts`), `walk-field/` (the walking sheet on the map, 16×24 × 4 directions × 3; `shared/walk-sheet.ts`; the player uses the team leader's, `game/shared/model/player-look.ts`), `learn-select/`,
   `pixel-editor/`, `sheet-editor/` (combat sprite sheets; format in `shared/sprite-sheet.ts`, docs/editeur/11-planches.md;
   drawn with PixelLab through the `planche-combat` skill),
   `stepper/`; `_popup.scss` the windows over it; `_sheets.scss` the sheets' shared fields (global, inside `app-database-editor`, in
