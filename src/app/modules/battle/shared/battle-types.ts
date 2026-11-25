@@ -146,6 +146,8 @@ export interface BattleView {
   aim: string | null;
   aimScreen: { x: number; y: number } | null;
   popups: Popup[];
+  /** How the fight started, shown for a moment: « Attaque surprise ! », « Embuscade ! » (null: an even start). */
+  opening: { title: string; text: string } | null;
   /** A skill being shown off (the fight stops): its name, big under the gauge. */
   showcase: string | null;
   /** Fighters just interrupted or pushed back on the gauge (their token flashes). */
@@ -162,6 +164,12 @@ export interface BattleView {
  * the fighter acts.
  */
 export const GAUGE_DECIDE = 0.4;
+
+/**
+ * How a fight starts (a dungeon's enemy met on the map): the team hit it first (their gauges start ahead), it caught
+ * the team from behind (the enemies' gauges start ahead, if its group may attack first), or face to face.
+ */
+export type BattleOpening = "advantage" | "ambush" | "even";
 export const GAUGE_COMMAND = 0.8;
 
 /** What a team member got from a victory. */

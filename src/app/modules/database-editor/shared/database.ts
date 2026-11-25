@@ -508,6 +508,105 @@ export interface DbGroup {
 }
 
 /**
+ * A dungeon (design/database.pen, 17 · Donjon): open only at some moments (and all day on some special days), with
+ * its own weather, made of floors. A floor is a map made by hand, or generated at each visit from « Salle » maps
+ * (rooms) linked at random by their room doors. Its enemies walk on the map (they start the fight when they touch
+ * the team); a floor may have a save point that is also the way out.
+ */
+export interface DbDungeon {
+  id: string;
+  name: string;
+  icon?: string;
+  note?: string;
+  /** Moments it is open (none: always). */
+  moments: DayTime[];
+  /** Special days (calendar ids) it is open all day too. */
+  specials: string[];
+  /** Its own weather (none: the weather outside). */
+  weather?: `${WeatherType}`;
+  floors: DbFloor[];
+}
+
+/** One floor of a dungeon, or several generated floors alike (`repeat`). */
+export interface DbFloor {
+  id: string;
+  /** « Entrée », « Repos », « Boss ». */
+  name: string;
+  /** A map made by hand (its id); missing: generated from `rooms`. */
+  map?: string;
+  /** Generated: the « Salle » maps it picks its rooms from. */
+  rooms: string[];
+  roomsMin: number;
+  roomsMax: number;
+  /** Generated: how many floors alike follow each other (1 or more). */
+  repeat: number;
+  /** The enemy groups walking on the floor (one picked at random for each enemy). */
+  groups: string[];
+  enemiesMin: number;
+  enemiesMax: number;
+  /** Generated: chests placed at random, with what they may hold. */
+  chestsMin: number;
+  chestsMax: number;
+  loot: { item: string; chance: number }[];
+  /** A save point at the arrival, also the way out of the dungeon. */
+  save: boolean;
+}
+
+export const DUNGEON_LIMITS = { rooms: 20, enemies: 12, chests: 6, repeat: 20 };
+
+export function newFloor(name: string): DbFloor {
+  return {
+    id: newId("fl"),
+    name,
+    rooms: [],
+    roomsMin: 4,
+    roomsMax: 6,
+    repeat: 1,
+    groups: [],
+    enemiesMin: 2,
+    enemiesMax: 4,
+    chestsMin: 1,
+    chestsMax: 2,
+    loot: [],
+    save: false,
+  };
+}
+
+export function newDungeon(name: string): DbDungeon {
+  return {
+    id: newId("dg"),
+    name,
+    moments: ["night"],
+    specials: [],
+    floors: [{ ...newFloor("Entrée"), save: true }],
+  };
+}
+
+/** How many floors a dungeon has (generated lines count their `repeat`). */
+export function floorCount(dungeon: DbDungeon): number {
+  return dungeon.floors.reduce(
+    (sum, f) => sum + (f.map ? 1 : Math.max(1, f.repeat)),
+    0
+  );
+}
+
+/** The floor line of a floor number (0 first) and its number inside the line. */
+export function floorAt(
+  dungeon: DbDungeon,
+  floor: number
+): { floor: DbFloor; index: number } | null {
+  let rest = floor;
+  for (const f of dungeon.floors) {
+    const n = f.map ? 1 : Math.max(1, f.repeat);
+    if (rest < n) {
+      return { floor: f, index: rest };
+    }
+    rest -= n;
+  }
+  return null;
+}
+
+/**
  * A level needed to learn a skill, Grandia style: in a simple element or a weapon type (the characters' levels grow
  * as they use them). A skill of a composed element asks for a level in both of its parts.
  */
@@ -764,6 +863,7 @@ export interface GameDatabase {
   enemies: DbEnemy[];
   groups: DbGroup[];
   calendar: DbCalendar[];
+  dungeons: DbDungeon[];
 }
 
 export type DbTable = keyof GameDatabase;
@@ -1310,6 +1410,16 @@ export function withoutRow(
       const left = wearers.filter((w) => w !== id);
       return left.length > 0 ? { ...rest, wearers: left } : rest;
     });
+  }
+  if (table === "groups" || table === "items") {
+    next.dungeons = next.dungeons.map((d) => ({
+      ...d,
+      floors: d.floors.map((f) => ({
+        ...f,
+        groups: f.groups.filter((g) => g !== id),
+        loot: f.loot.filter((l) => l.item !== id),
+      })),
+    }));
   }
   return next;
 }

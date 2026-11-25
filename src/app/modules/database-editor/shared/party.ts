@@ -177,6 +177,23 @@ export function healTeam(): void {
   saveProgress(healed);
 }
 
+/** A trap: every member loses a part of its PV (never below 1). */
+export function hurtTeam(percent: number): void {
+  const db = loadDatabase();
+  const hurt: Record<string, MemberProgress> = {};
+  for (const id of currentParty().team) {
+    const c = db.characters.find((x) => x.id === id);
+    if (!c) {
+      continue;
+    }
+    const p = memberProgress(c);
+    const max = characterStats(c, p.level, db).hp;
+    const loss = Math.ceil((max * percent) / 100);
+    hurt[id] = { ...p, hp: Math.max(1, p.hp - loss) };
+  }
+  saveProgress(hurt);
+}
+
 /** A saved game's team replaces the current one. */
 export function restoreParty(party: PartyState | undefined): void {
   writeParty(

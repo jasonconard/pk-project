@@ -1,0 +1,84 @@
+// A dungeon's sheet: its floors as cards, on the shared fields (_sheets.scss)
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grow-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.line .add-select {
+  padding: 0 12px;
+}
+
+.floor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+
+  .learn,
+  .switch {
+    background: var(--field);
+  }
+}
+
+.floor-head {
+  gap: 8px;
+}
+
+.num {
+  flex-shrink: 0;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.order {
+  display: flex;
+  flex-direction: column;
+
+  button {
+    height: 16px;
+    color: var(--muted);
+  }
+}
+
+.remove {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  color: var(--muted);
+}
+
+.label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+
+  > span:first-child {
+    flex: 1;
+    min-width: 110px;
+    color: var(--muted);
+  }
+}

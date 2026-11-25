@@ -1,3 +1,5 @@
+import { DungeonChipComponent } from "./dungeon-chip/dungeon-chip.component";
+import { DungeonService } from "./shared/services/dungeon.service";
 import {
   afterNextRender,
   Component,
@@ -68,6 +70,7 @@ import { isTyping } from "../../core/shared/typing";
 
 import { TimeBannerComponent } from "./time-banner/time-banner.component";
 import { momentLabel } from "./shared/model/game-calendar";
+import { DungeonObject } from "./shared/model/dungeon-object";
 @Component({
   selector: "game-main",
   imports: [
@@ -79,6 +82,7 @@ import { momentLabel } from "./shared/model/game-calendar";
     LinkToastComponent,
     GiftPickerComponent,
     TimeBannerComponent,
+    DungeonChipComponent,
     TeleportComponent,
     FightUiComponent,
     BattleHudComponent,
@@ -186,6 +190,11 @@ export class GameComponent {
       this.giftFor.set(npc || null)
     );
     inject(DestroyRef).onDestroy(() => gifts.unsubscribe());
+    // A dungeon's save point: the saved games
+    const saves = inject(DungeonService).saveAsked$.subscribe(() =>
+      this.savesOpen.set(true)
+    );
+    inject(DestroyRef).onDestroy(() => saves.unsubscribe());
     afterNextRender(() =>
       this.gameService.init(this.canvasRef().nativeElement)
     );
@@ -402,6 +411,10 @@ export class GameComponent {
 
   protected setPlaceLabel(label: string): void {
     this.gameService.setPlaceLabel(label);
+  }
+
+  protected setDungeonObject(settings: DungeonObject): void {
+    this.gameService.setDungeonObject(settings);
   }
 
   protected setZoneSize(size: { x: number; z: number }): void {

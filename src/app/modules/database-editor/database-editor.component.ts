@@ -1,6 +1,7 @@
 import {
   LucideActivity,
   LucideCalendarDays,
+  LucideCastle,
   LucideBackpack,
   LucideChevronLeft,
   LucideChevronRight,
@@ -37,6 +38,7 @@ import {
 import {
   DbCalendar,
   DbCharacter,
+  DbDungeon,
   DbElement,
   DbEnemy,
   DbGroup,
@@ -51,9 +53,12 @@ import {
   STATS,
   StateEffect,
   castLabel,
+  DAY_TIMES,
+  floorCount,
   groupLabel,
   newCalendar,
   newCharacter,
+  newDungeon,
   newElement,
   newEnemy,
   newGroup,
@@ -85,6 +90,7 @@ import { NpcSheetComponent } from "./sheets/npc-sheet/npc-sheet.component";
 import { CalendarSheetComponent } from "./sheets/calendar-sheet/calendar-sheet.component";
 import { EnemySheetComponent } from "./sheets/enemy-sheet/enemy-sheet.component";
 import { GroupSheetComponent } from "./sheets/group-sheet/group-sheet.component";
+import { DungeonSheetComponent } from "./sheets/dungeon-sheet/dungeon-sheet.component";
 import { searchKey } from "../../core/shared/text";
 
 /** In the mockup's order. */
@@ -109,6 +115,7 @@ const TABLES: { id: DbTable; label: string; one: string; icon: LucideIcon }[] =
     { id: "states", label: "États", one: "État", icon: LucideActivity },
     { id: "elements", label: "Éléments", one: "Élément", icon: LucideFlame },
     { id: "weapons", label: "Armes", one: "Type d'arme", icon: LucideSword },
+    { id: "dungeons", label: "Donjons", one: "Donjon", icon: LucideCastle },
     {
       id: "calendar",
       label: "Calendrier",
@@ -153,6 +160,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     CalendarSheetComponent,
     EnemySheetComponent,
     GroupSheetComponent,
+    DungeonSheetComponent,
   ],
   templateUrl: "./database-editor.component.html",
   styleUrl: "./database-editor.component.scss",
@@ -226,6 +234,9 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     const pick = this.weatherPick();
     if (pick?.for === "element") {
       return pick.strong ? "Plus fort par" : "Plus faible par";
+    }
+    if (pick?.for === "dungeon") {
+      return "Météo du donjon";
     }
     return pick?.for === "enemy" ? "Météo de l'ennemi" : "Pendant la météo";
   });
@@ -301,6 +312,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
 
   protected readonly calendar = computed(() =>
     this.table() === "calendar" ? (this.current() as DbCalendar | null) : null
+  );
+
+  protected readonly dungeon = computed(() =>
+    this.table() === "dungeons" ? (this.current() as DbDungeon | null) : null
   );
 
   protected readonly npc = computed(() =>
@@ -394,6 +409,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       enemies: "Nouvel ennemi",
       groups: "Nouveau groupe",
       calendar: "Calendrier du jeu",
+      dungeons: "Nouveau donjon",
     }[table];
     const names = new Set(this.rows().map((r) => searchKey(r.name)));
     let name = base;
@@ -412,6 +428,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       enemies: () => newEnemy(name),
       groups: () => newGroup(name, this.db()),
       calendar: () => newCalendar(),
+      dungeons: () => newDungeon(name),
     };
     const row = makers[table]();
     this.store.commit({ ...this.db(), [table]: [...this.rows(), row] });
@@ -587,6 +604,17 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       }
       case "npcs":
         return (row as DbNpc).note || "PNJ";
+      case "dungeons": {
+        const dg = row as DbDungeon;
+        const floors = floorCount(dg);
+        const open =
+          dg.moments.length > 0
+            ? DAY_TIMES.filter((t) => dg.moments.includes(t.id))
+                .map((t) => t.label)
+                .join(", ")
+            : "Toujours ouvert";
+        return `${floors} étage${floors > 1 ? "s" : ""} · ${open}`;
+      }
       case "calendar": {
         const cal = row as DbCalendar;
         return `${cal.months.length} mois · semaine de ${cal.week.length} jours`;

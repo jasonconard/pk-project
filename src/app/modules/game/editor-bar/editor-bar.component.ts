@@ -16,6 +16,7 @@ import {
   LucideArrowBigDown,
   LucideArrowBigUp,
   LucideBox,
+  LucideCastle,
   LucideChartNoAxesColumnIncreasing,
   LucideCheck,
   LucideChevronDown,
@@ -73,6 +74,14 @@ import { walkFrame } from "../../database-editor/shared/walk-sheet";
 import { DbTable, WALK_STAND } from "../../database-editor/shared/database";
 import { WEATHER_CHOICES } from "../shared/weather/Weather";
 import { loadVariables } from "../../variables-editor/shared/variable-storage";
+import { cachedDatabase } from "../../database-editor/shared/database-storage";
+import {
+  DUNGEON_KINDS,
+  DungeonObject,
+  DungeonTrap,
+  dungeonKindOf,
+  dungeonModelId,
+} from "../shared/model/dungeon-object";
 import { EventEditorComponent } from "../event-editor/event-editor.component";
 import { listMaps } from "../shared/services/map-storage";
 import {
@@ -98,7 +107,10 @@ import { isTyping } from "../../../core/shared/typing";
 const EDIT_KEY = "b";
 
 type PaletteTab =
-  "objects" | "npcs" | "ground" | "relief" | "chunks" | "events";
+  "objects" | "npcs" | "dungeon" | "ground" | "relief" | "chunks" | "events";
+
+/** Prefix of a passage's target that is a dungeon of the database (`dungeon:<id>`), not a map. */
+const DUNGEON_TARGET = "dungeon:";
 
 /** Families of the palette (computer: the objects are grouped, with a search). */
 const MODEL_FAMILIES: { label: string; ids: string[] }[] = [
@@ -174,6 +186,7 @@ const LANDSCAPE_QUERY = "(orientation: landscape) and (max-height: 600px)";
 const TABS: { id: PaletteTab; label: string; icon: LucideIcon }[] = [
   { id: "objects", label: "Objets", icon: LucideBox },
   { id: "npcs", label: "PNJ", icon: LucideUserRound },
+  { id: "dungeon", label: "Donjon", icon: LucideCastle },
   { id: "ground", label: "Sols", icon: LucidePaintbrush },
   { id: "relief", label: "Reliefs", icon: LucideMountain },
   { id: "chunks", label: "Zones", icon: LucideLayoutGrid },
@@ -202,6 +215,7 @@ interface PaletteEntry {
     LucideArrowBigDown,
     LucideArrowBigUp,
     LucideBox,
+    LucideCastle,
     LucideChartNoAxesColumnIncreasing,
     LucideCheck,
     LucideChevronDown,
@@ -275,6 +289,8 @@ export class EditorBarComponent {
   readonly zoneSizeChange = output<{ x: number; z: number }>();
   /** The selected NPC's place name (its schedule picks it). */
   readonly placeLabelChange = output<string>();
+  /** The selected dungeon object's settings (chest, trap, switch, locked door). */
+  readonly dungeonChange = output<DungeonObject>();
   /** The event open in the event window (its place in the selected object's list). */
   protected readonly editingEvent = linkedSignal<
     EditSelection | null,
@@ -308,6 +324,33 @@ export class EditorBarComponent {
     this.selection();
     return listMaps();
   });
+  /** The objects of the Donjon tab (model ids `dg:<kind>`). */
+  protected readonly dungeonEntries = DUNGEON_KINDS.map((k) => ({
+    id: dungeonModelId(k.kind),
+    label: k.label,
+    roomOnly: !!k.roomOnly,
+  }));
+  /** The selected object is a dungeon object: its kind (its own fields in the sheet). */
+  protected readonly dungeonKind = computed(() => {
+    const selection = this.selection();
+    return selection?.dungeon ? dungeonKindOf(selection.modelId) : undefined;
+  });
+  /** What a dungeon object's fields choose from (database, flags), read when the selection changes. */
+  protected readonly dungeonData = computed(() => {
+    this.selection();
+    const db = cachedDatabase();
+    return {
+      // (the key items first: what a lock usually needs)
+      items: [
+        ...db.items.filter((i) => i.kind === "key"),
+        ...db.items.filter((i) => i.kind !== "key"),
+      ],
+      groups: db.groups,
+      flags: loadVariables().filter((v) => v.kind === "flag"),
+      dungeons: db.dungeons,
+    };
+  });
+  protected readonly dungeonTarget = DUNGEON_TARGET;
   /** Map manager shown. */
   protected readonly mapsOpen = signal(false);
   readonly toggled = output<void>();
@@ -390,7 +433,11 @@ export class EditorBarComponent {
       (f) => f.entries.length
     );
   });
-  protected readonly thumbs = signal<Record<string, string>>({});
+  protected readonly thumbs = signal<Record<string, string>>(
+    Object.fromEntries(
+      DUNGEON_KINDS.map((k) => [dungeonModelId(k.kind), k.thumb])
+    )
+  );
   protected readonly selectionLabel = computed(() => {
     const selection = this.selection();
     return selection ? this.label(selection.modelId) : "";
@@ -605,6 +652,73 @@ export class EditorBarComponent {
   /** Another destination: the point chosen on the old one doesn't apply. */
   protected setPassageMap(passage: Passage, map: string): void {
     this.passageChange.emit({ map, trigger: passage.trigger });
+  }
+
+  protected isDungeonTarget(map: string): boolean {
+    return map.startsWith(DUNGEON_TARGET);
+  }
+
+  // --- The selected dungeon object's settings ---
+
+  protected setDungeon(
+    dungeon: DungeonObject,
+    change: Partial<DungeonObject>
+  ): void {
+    this.dungeonChange.emit({ ...dungeon, ...change });
+  }
+
+  /** A chest's new line: the first item, once. */
+  protected addChestItem(dungeon: DungeonObject): void {
+    const first = this.dungeonData().items[0];
+    if (first) {
+      this.setDungeon(dungeon, {
+        items: [...(dungeon.items ?? []), { id: first.id, count: 1 }],
+      });
+    }
+  }
+
+  protected setChestItem(
+    dungeon: DungeonObject,
+    index: number,
+    change: Partial<{ id: string; count: number }>
+  ): void {
+    this.setDungeon(dungeon, {
+      items: (dungeon.items ?? []).map((item, i) =>
+        i === index ? { ...item, ...change } : item
+      ),
+    });
+  }
+
+  protected removeChestItem(dungeon: DungeonObject, index: number): void {
+    this.setDungeon(dungeon, {
+      items: (dungeon.items ?? []).filter((_, i) => i !== index),
+    });
+  }
+
+  /** A trap's effect (none set: hurts 10 % of the PV). */
+  protected trapOf(dungeon: DungeonObject): DungeonTrap {
+    return dungeon.trap ?? { kind: "hurt", percent: 10 };
+  }
+
+  protected setTrapKind(
+    dungeon: DungeonObject,
+    kind: DungeonTrap["kind"]
+  ): void {
+    if (kind === "hurt") {
+      this.setDungeon(dungeon, { trap: { kind, percent: 10 } });
+      return;
+    }
+    const group =
+      dungeon.trap?.kind === "fight"
+        ? dungeon.trap.group
+        : (this.dungeonData().groups[0]?.id ?? "");
+    this.setDungeon(dungeon, { trap: { kind, group } });
+  }
+
+  /** A whole number from a field, kept between min and max. */
+  protected numberOf(event: Event, min: number, max: number): number {
+    const value = Math.round(Number((event.target as HTMLInputElement).value));
+    return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : min;
   }
 
   // --- Events of the selected object ---

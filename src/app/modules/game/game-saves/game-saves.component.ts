@@ -26,6 +26,10 @@ import { currentParty, restoreParty } from "../../database-editor/shared/party";
 type SlotAction = "load" | "overwrite" | "delete";
 
 import { dateLabel, dateOf, gameCalendar } from "../shared/model/game-calendar";
+import {
+  currentDungeonState,
+  restoreDungeonState,
+} from "../shared/model/dungeon-state";
 /**
  * Saved games (menu → Sauver): a few slots, each with where the player was, the time, the weather and when it was
  * saved. Sauver ici / Écraser keeps the game now; Charger goes back to it (the current progress is lost: pressed
@@ -81,6 +85,7 @@ export class GameSavesComponent {
       weather: this.gameService.weather(),
       variables: currentVariableValues(),
       party: structuredClone(currentParty()),
+      dungeon: structuredClone(currentDungeonState()),
     };
     this.message.set(
       writeSave(slot, save)
@@ -97,6 +102,7 @@ export class GameSavesComponent {
     }
     restoreVariableValues(save.variables ?? {});
     restoreParty(save.party);
+    restoreDungeonState(save.dungeon);
     if (
       !this.gameService.restoreSpot(
         save.map,

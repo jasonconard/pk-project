@@ -8,8 +8,11 @@ export enum ObjSide {
   BOTH,
 }
 
-/** What a map is used for: the world (the default map, big), a town, an interior, a dungeon floor. */
-export type MapKind = "world" | "town" | "interior" | "dungeon";
+/**
+ * What a map is used for: the world (the default map, big), a town, an interior, a dungeon floor, a room (a piece of
+ * a generated dungeon floor, linked to others by its room doors).
+ */
+export type MapKind = "world" | "town" | "interior" | "dungeon" | "room";
 
 export interface SceneMap {
   id: string;

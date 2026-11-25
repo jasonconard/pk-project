@@ -33,6 +33,12 @@
     </div>
   </div>
 
+  @if (v.opening; as opening) {
+    <div class="showcase opening" role="status">
+      {{ opening.title }}
+      <small>{{ opening.text }}</small>
+    </div>
+  }
   @if (v.showcase; as name) {
     <div class="showcase" role="status">
       {{ name }}

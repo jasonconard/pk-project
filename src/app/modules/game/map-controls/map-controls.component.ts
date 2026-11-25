@@ -12,6 +12,9 @@ import {
   LucideDoorOpen,
   LucideDynamicIcon,
   LucideEye,
+  LucideHand,
+  LucidePackageOpen,
+  LucideSword,
   LucideFootprints,
   LucideIcon,
   LucideMessageCircle,
@@ -28,6 +31,9 @@ const ACTION_ICONS: Record<GameAction["kind"], LucideIcon> = {
   talk: LucideMessageCircle,
   read: LucideBookOpen,
   look: LucideEye,
+  open: LucidePackageOpen,
+  use: LucideHand,
+  hit: LucideSword,
 };
 
 type ControlButton = "run" | "action";

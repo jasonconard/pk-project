@@ -239,3 +239,31 @@
   margin: auto;
   color: #ffb04a;
 }
+
+/* Selected dungeon object: its settings (a chest's contents, a trap, a switch's flag, a locked door) */
+
+.dungeon {
+  .dungeon-label {
+    color: #b8bbc8;
+  }
+
+  input[type='number'] {
+    width: 64px;
+    height: 30px;
+    padding: 0 6px;
+    border: 1px solid #4a4c5a;
+    border-radius: 6px;
+    background: #2a2b33;
+    color: inherit;
+    font: inherit;
+  }
+
+  .switch-row {
+    padding: 4px 0;
+  }
+
+  .segmented button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}

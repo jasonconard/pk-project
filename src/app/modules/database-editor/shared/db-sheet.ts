@@ -5,6 +5,7 @@ import {
   CAST_MAX,
   DAY_TIMES,
   DbCharacter,
+  DbDungeon,
   DbNpc,
   DbElement,
   DbEnemy,
@@ -176,7 +177,15 @@ export abstract class DbSheet {
   ];
 
   protected setNote(
-    row: DbWeapon | DbSkill | DbItem | DbCharacter | DbNpc | DbEnemy | DbGroup,
+    row:
+      | DbWeapon
+      | DbSkill
+      | DbItem
+      | DbCharacter
+      | DbNpc
+      | DbEnemy
+      | DbGroup
+      | DbDungeon,
     note: string
   ): void {
     this.edit(row.id, (r) => {

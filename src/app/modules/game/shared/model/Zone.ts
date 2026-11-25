@@ -1,3 +1,9 @@
+import {
+  dungeonModel,
+  foeModel,
+  isDungeonObject,
+  isFoe,
+} from "./dungeon-object";
 import * as THREE from "three";
 import { SceneModel } from "./SceneModel";
 import { SceneBuilding } from "./SceneBuilding";
@@ -38,6 +44,12 @@ export function isZone(
 export function findModel(id: string): SceneModel | undefined {
   if (id === ZONE_ID) {
     return MD_ZONE;
+  }
+  if (isDungeonObject({ id })) {
+    return dungeonModel(id);
+  }
+  if (isFoe({ modelId: id })) {
+    return foeModel(id);
   }
   return isNpc({ id }) ? npcModel(id) : MODELS.find((m) => m.id === id);
 }

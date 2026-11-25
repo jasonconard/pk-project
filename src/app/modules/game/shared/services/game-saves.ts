@@ -1,3 +1,4 @@
+import { DungeonState } from "../model/dungeon-state";
 import { WeatherType } from "../weather/Weather";
 import { Vec3 } from "../model/SceneUtils";
 import { VariableValues } from "../../../variables-editor/shared/variable-values";
@@ -29,6 +30,8 @@ export interface GameSave {
   variables: VariableValues;
   /** Missing in the saves made before the database. */
   party?: PartyState;
+  /** The dungeons (chests opened, the dungeon the team is in); missing in the saves made before them. */
+  dungeon?: DungeonState;
 }
 
 /** The slots (null: empty), always SAVE_SLOTS of them. */

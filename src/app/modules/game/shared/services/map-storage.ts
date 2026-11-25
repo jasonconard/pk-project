@@ -95,7 +95,7 @@ function chunkData(chunk: SceneChunk): StoredChunk {
     id: chunk.id,
     pos: chunk.pos,
     size: chunk.size,
-    buildings: chunk.buildings.map(cleanBuilding),
+    buildings: chunk.buildings.filter((b) => !b.generated).map(cleanBuilding),
     grounds: chunk.grounds.map((ground) => omit(ground, "mesh")),
   };
   if (chunk.tiles && Object.keys(chunk.tiles).length > 0) {

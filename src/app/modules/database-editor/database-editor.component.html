@@ -279,6 +279,9 @@
         @if (character(); as ch) {
           <db-character-sheet [character]="ch" />
         }
+        @if (dungeon(); as dg) {
+          <db-dungeon-sheet [dungeon]="dg" />
+        }
         @if (npc(); as np) {
           <db-npc-sheet [npc]="np" />
         }

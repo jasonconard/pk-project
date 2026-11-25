@@ -25,6 +25,7 @@ import { BattleEngine } from "./battle-engine";
 import {
   ActionChoice,
   BattleOutcome,
+  BattleOpening,
   BattleResult,
   BattleView,
   Fighter,
@@ -180,6 +181,9 @@ import {
   memberLinkBonuses,
 } from "../../database-editor/shared/links";
 import { StatId } from "../../database-editor/shared/database";
+/** How long « Attaque surprise ! » / « Embuscade ! » stays (ms). */
+const OPENING_SHOWN_MS = 2200;
+
 @Service()
 export class BattleService {
   private game: Game | null = null;
@@ -188,6 +192,9 @@ export class BattleService {
   private db: GameDatabase | null = null;
   private onEnd: ((result: BattleResult) => void) | null = null;
   private groupName = "";
+  /** How the fight started (shown for a moment). */
+  private opening: BattleView["opening"] = null;
+  private openingUntil = 0;
   private canFlee = true;
   /** The team members' characters and progress in this fight. */
   private characters = new Map<string, DbCharacter>();
@@ -219,7 +226,11 @@ export class BattleService {
   }
 
   /** Starts a fight against a group; `onEnd` is called with how it ended. */
-  start(groupId: string, onEnd: (result: BattleResult) => void): void {
+  start(
+    groupId: string,
+    onEnd: (result: BattleResult) => void,
+    opening?: BattleOpening
+  ): void {
     const game = this.game;
     const db = loadDatabase();
     const group = db.groups.find((g) => g.id === groupId);
@@ -251,10 +262,27 @@ export class BattleService {
     });
     const fighters = [...team, ...foes];
     // Where each one starts on the gauge: the quickest further, a little luck; a surprise attack puts the enemies
-    // ahead (the team caught from behind)
+    // ahead (the team caught from behind: an event's fight when the group may attack first, a dungeon's enemy coming
+    // from behind), the team hitting first puts the team ahead
     const fastest = Math.max(1, ...fighters.map((f) => f.stats.agi));
+    const ambush = group.surprise && (opening ?? "ambush") === "ambush";
+    let aheadSide: Fighter["side"] | null = ambush ? "foe" : null;
+    this.opening = null;
+    if (opening === "advantage") {
+      aheadSide = "team";
+      this.opening = {
+        title: "Attaque surprise !",
+        text: "Vos jauges partent en avance",
+      };
+    } else if (opening === "ambush" && ambush) {
+      this.opening = {
+        title: "Embuscade !",
+        text: "Les ennemis partent en avance",
+      };
+    }
+    this.openingUntil = performance.now() + OPENING_SHOWN_MS;
     for (const f of fighters) {
-      const ahead = group.surprise && f.side === "foe" ? 0.25 : 0;
+      const ahead = f.side === aheadSide ? 0.25 : 0;
       f.gauge = Math.min(
         GAUGE_COMMAND - 0.05,
         (f.stats.agi / fastest) * 0.35 + Math.random() * 0.2 + ahead
@@ -547,6 +575,10 @@ export class BattleService {
         const at = field.screenPos(fighter.pos, 26);
         return { id, text, kind, color, x: at.x, y: at.y - line * 18 };
       }),
+      opening:
+        this.opening && performance.now() < this.openingUntil
+          ? this.opening
+          : null,
       showcase: shown?.name ?? null,
       knocked: [...engine.knocked.keys()],
       outcome: this.outcome,

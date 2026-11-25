@@ -22,6 +22,7 @@ import {
   LucideEllipsis,
   LucideGlobe,
   LucideIcon,
+  LucideLayoutDashboard,
   LucidePencil,
   LucidePlus,
   LucideRotateCcw,
@@ -44,6 +45,7 @@ const KINDS: { id: MapKind; label: string; icon: LucideIcon }[] = [
   { id: "town", label: "Ville", icon: LucideCastle },
   { id: "interior", label: "Intérieur", icon: LucideDoorOpen },
   { id: "dungeon", label: "Donjon", icon: LucideSkull },
+  { id: "room", label: "Salle", icon: LucideLayoutDashboard },
 ];
 
 /**

@@ -1,6 +1,7 @@
 import { Vec3 } from "./SceneUtils";
 import { SceneEvent } from "./SceneEvent";
 import { SceneModel } from "./SceneModel";
+import { DungeonObject } from "./dungeon-object";
 
 export interface SceneBuilding {
   id: string;
@@ -15,5 +16,9 @@ export interface SceneBuilding {
   canHide: boolean;
   /** An NPC's place name (« derrière le comptoir »): its schedule picks it (see npc-schedule.ts). */
   label?: string;
+  /** A dungeon object's settings (chest, trap, switch, locked door: see dungeon-object.ts). */
+  dungeon?: DungeonObject;
+  /** Put by the game (a generated floor's enemies, chests, stairs): never saved with the map. */
+  generated?: boolean;
   events: SceneEvent[];
 }

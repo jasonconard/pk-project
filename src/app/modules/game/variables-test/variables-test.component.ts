@@ -1,3 +1,4 @@
+import { restoreDungeonState } from "../shared/model/dungeon-state";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -83,8 +84,9 @@ export class VariablesTestComponent {
     }
     this.resetArmed.set(false);
     resetVariableValues();
-    // (like a new game: the team too)
+    // (like a new game: the team and the dungeons too)
     resetParty();
+    restoreDungeonState(null);
     this.values.set(currentVariableValues());
   }
 }

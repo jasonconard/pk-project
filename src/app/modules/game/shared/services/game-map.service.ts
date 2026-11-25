@@ -28,6 +28,8 @@ import { currentMapId, loadMap, setCurrentMapId } from "./map-storage";
 import { InstructionTeleport } from "../model/SceneEventInstruction";
 import { isPassageEvent } from "../model/Passage";
 import { DustPuff } from "../model/DustPuff";
+import { DungeonService } from "./dungeon.service";
+import { KeyCode } from "../../../../core/shared/model/PressedKey";
 
 /** Ledge hop length (s) and height (world units). */
 const HOP_TIME = 0.42;
@@ -51,6 +53,7 @@ export class GameMapService {
   private readonly keyService = inject(KeyService);
   private readonly sequenceService = inject(SequenceService);
   private readonly mapEditorService = inject(MapEditorService);
+  private readonly dungeonService = inject(DungeonService);
 
   private pixelSize = 8;
   /** Ledge hop: time since it started (s, -1 = none) and the height currently added to the sprite. */
@@ -428,7 +431,14 @@ export class GameMapService {
         this.sequenceService.isRunning || game.weather.playerFlying
           ? null
           : EventService.actionAt(mapHelper, sprite, ctx);
-      const action = found ? describeAction(found.evt, found.building) : null;
+      let action = found ? describeAction(found.evt, found.building) : null;
+      if (
+        !found &&
+        !this.sequenceService.isRunning &&
+        !game.weather.playerFlying
+      ) {
+        action = this.dungeonService.actionAt(mapHelper, sprite);
+      }
       if (!sameAction(action, game.action)) {
         game.action = action;
       }
@@ -462,8 +472,20 @@ export class GameMapService {
         this.passageGuard = !!event;
       } else if (found) {
         this.launch(mapHelper, sprite, found);
+      } else if (
+        this.keyService.pressedCodes.includes(KeyCode.confirm) &&
+        !game.weather.playerFlying
+      ) {
+        // (a dungeon object or an enemy in front: open, work, hit)
+        this.dungeonService.act(mapHelper, sprite);
       }
     }
+
+    this.dungeonService.update(
+      game,
+      sprite,
+      !this.sequenceService.isRunning && !game.weather.playerFlying
+    );
 
     // Buildings fading / hiding: 30 times per second is plenty (every building's box is computed)
     if (++this.visibilityTick % VISIBILITY_EVERY === 0) {

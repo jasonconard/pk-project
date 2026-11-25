@@ -58,7 +58,7 @@ export interface SheetEdit {
 export interface WeatherPick {
   id: string;
   strong?: boolean;
-  for: "element" | "enemy" | "condition";
+  for: "element" | "enemy" | "condition" | "dungeon";
   index?: number;
 }
 
@@ -160,34 +160,54 @@ export class DatabaseStore {
   pickWeather(weather: string): void {
     const pick = this.weatherPick();
     this.weatherPick.set(null);
-    if (pick?.for === "enemy") {
-      this.edit(pick.id, (e) => ({
-        ...e,
-        weathers: [
-          ...(e as DbEnemy).weathers,
-          { weather: weather as WeatherType, effect: "appears" },
-        ],
-      }));
-    } else if (pick?.for === "condition") {
-      this.edit(pick.id, (e) => ({
-        ...e,
-        actions: (e as DbEnemy).actions.map((a, i) =>
-          i === pick.index
-            ? {
-                ...a,
-                condition: { kind: "weather", weather: weather as WeatherType },
-              }
-            : a
-        ),
-      }));
-    } else if (pick) {
-      this.edit(pick.id, (e) => ({
-        ...e,
-        weathers: [
-          ...(e as DbElement).weathers,
-          { weather: weather as WeatherType, percent: pick.strong ? 25 : -25 },
-        ],
-      }));
+    switch (pick?.for) {
+      case "dungeon": {
+        this.edit(pick.id, (d) => ({ ...d, weather: weather as WeatherType }));
+
+        break;
+      }
+      case "enemy": {
+        this.edit(pick.id, (e) => ({
+          ...e,
+          weathers: [
+            ...(e as DbEnemy).weathers,
+            { weather: weather as WeatherType, effect: "appears" },
+          ],
+        }));
+
+        break;
+      }
+      case "condition": {
+        this.edit(pick.id, (e) => ({
+          ...e,
+          actions: (e as DbEnemy).actions.map((a, i) =>
+            i === pick.index
+              ? {
+                  ...a,
+                  condition: {
+                    kind: "weather",
+                    weather: weather as WeatherType,
+                  },
+                }
+              : a
+          ),
+        }));
+
+        break;
+      }
+      default:
+        if (pick) {
+          this.edit(pick.id, (e) => ({
+            ...e,
+            weathers: [
+              ...(e as DbElement).weathers,
+              {
+                weather: weather as WeatherType,
+                percent: pick.strong ? 25 : -25,
+              },
+            ],
+          }));
+        }
     }
   }
 

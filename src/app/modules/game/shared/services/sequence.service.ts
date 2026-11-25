@@ -5,6 +5,7 @@ import { SceneEvent } from "../model/SceneEvent";
 import { SceneEventSequence } from "../model/SceneEventSequence";
 import {
   InstructionLog,
+  SceneEventInstruction,
   InstructionMessage,
   InstructionTeleport,
   InstructionTime,
@@ -27,7 +28,10 @@ import {
   setInTeam,
 } from "../../../database-editor/shared/party";
 import { BattleService } from "../../../battle/shared/battle.service";
-import { BattleResult } from "../../../battle/shared/battle-types";
+import {
+  BattleOpening,
+  BattleResult,
+} from "../../../battle/shared/battle-types";
 
 import { gainLink, LinkGain } from "../../../database-editor/shared/links";
 import { loadDatabase } from "../../../database-editor/shared/database-storage";
@@ -36,6 +40,9 @@ export interface TimeRequest {
   pass?: InstructionTime;
   stop?: boolean;
 }
+
+/** A teleport's map id leading to a dungeon: `dungeon:<id>`. */
+export const DUNGEON_TARGET = "dungeon:";
 
 /** How long the fade to black of a « time passes » lasts (ms). */
 export const TIME_FADE_MS = 1100;
@@ -71,6 +78,14 @@ export class SequenceService {
   /** The player shows a gift to give (an NPC id); the game calls `giftDone` once chosen or not. */
   private readonly giftSubject = new Subject<string>();
   readonly gift$: Observable<string> = this.giftSubject.asObservable();
+
+  private readonly dungeonSubject = new Subject<SceneEventInstruction>();
+  /**
+   * A dungeon action (DUNGEON, or a teleport to `dungeon:<id>`): the dungeon puts what follows in the instruction's
+   * sub-instructions, then calls `nextSequence()`.
+   */
+  readonly dungeon$: Observable<SceneEventInstruction> =
+    this.dungeonSubject.asObservable();
 
   /** The gift was given (its link's gain shown) or not: the event goes on. */
   giftDone(gain: LinkGain | null): void {
@@ -220,7 +235,13 @@ export class SequenceService {
         this.nextSequence();
         break;
       case InstructionType.FIGHT:
-        this.startFight(instruction.fight?.group ?? "");
+        this.startFight(
+          instruction.fight?.group ?? "",
+          instruction.fight?.opening
+        );
+        break;
+      case InstructionType.DUNGEON:
+        this.dungeonSubject.next(instruction);
         break;
       default:
         this.nextSequence();
@@ -228,9 +249,13 @@ export class SequenceService {
   }
 
   /** The fight against a group; then the event's branch for how it ended (Victoire, Défaite, Fuite). */
-  private startFight(groupId: string): void {
+  private startFight(groupId: string, opening?: BattleOpening): void {
     this.fight = true;
-    this.battleService.start(groupId, (result) => this.fightEnded(result));
+    this.battleService.start(
+      groupId,
+      (result) => this.fightEnded(result),
+      opening
+    );
   }
 
   private fightEnded(result: BattleResult): void {
@@ -284,6 +309,11 @@ export class SequenceService {
   private setTeleport(teleport: InstructionTeleport | undefined): void {
     if (!teleport) {
       return this.nextSequence();
+    }
+    // (a passage to a dungeon: its first floor, if it is open)
+    if (teleport.map?.startsWith(DUNGEON_TARGET)) {
+      this.dungeonSubject.next(this.sequence!.current()!);
+      return;
     }
     this.teleportSubject.next(teleport);
   }

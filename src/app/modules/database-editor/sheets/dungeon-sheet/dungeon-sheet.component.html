@@ -1,0 +1,350 @@
+@let dg = dungeon();
+<div class="block">
+  <h3>Description</h3>
+  <input
+    type="text"
+    maxlength="120"
+    placeholder="Facultatif"
+    aria-label="Description"
+    [value]="dg.note ?? ''"
+    (input)="setNote(dg, $any($event.target).value)"
+  />
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Ouverture</h3>
+    @if (dg.moments.length === 0) {
+      <small>Toujours ouvert</small>
+    }
+  </div>
+  <div class="chips" role="group" aria-label="Moments où il est ouvert">
+    @for (t of dayTimes; track t.id) {
+      <button
+        type="button"
+        class="chip plain"
+        [class.on]="dg.moments.includes(t.id)"
+        [attr.aria-pressed]="dg.moments.includes(t.id)"
+        (click)="toggleMoment(t.id)"
+      >
+        {{ t.label }}
+      </button>
+    }
+  </div>
+  @if (specials().length > 0) {
+    <p class="note">Ouvert toute la journée ces jours-là :</p>
+    <div class="chips" role="group" aria-label="Jours spéciaux">
+      @for (sd of specials(); track sd.id) {
+        <button
+          type="button"
+          class="chip"
+          [style.--c]="sd.color"
+          [class.on]="dg.specials.includes(sd.id)"
+          [attr.aria-pressed]="dg.specials.includes(sd.id)"
+          [title]="specialTitle(sd)"
+          (click)="toggleSpecial(sd.id)"
+        >
+          <span class="dot"></span>
+          {{ sd.name }}
+        </button>
+      }
+    </div>
+  }
+</div>
+
+<div class="block">
+  <h3>Météo</h3>
+  @if (dg.weather; as w) {
+    <div class="weather">
+      <img
+        [src]="weatherImage(w)"
+        alt=""
+        (error)="weatherImageMissing($event, w)"
+      />
+      <b>{{ weatherLabel(w) }}</b>
+      <button type="button" class="pick-field" (click)="openWeather()">
+        Changer
+      </button>
+      <button
+        type="button"
+        class="remove"
+        title="Météo du dehors"
+        aria-label="Météo du dehors"
+        (click)="clearWeather()"
+      >
+        <svg lucideX></svg>
+      </button>
+    </div>
+  } @else {
+    <div class="line">
+      <span class="muted grow-text">Météo du dehors</span>
+      <button type="button" class="add-select" (click)="openWeather()">
+        <svg lucideCloudSun></svg> Météo du donjon
+      </button>
+    </div>
+  }
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Étages</h3>
+    <small>{{ numbers().at(-1) ?? 0 }} au total</small>
+  </div>
+  @for (f of dg.floors; track f.id; let i = $index) {
+    <div class="floor">
+      <div class="line floor-head">
+        <span class="num">{{ numbers()[i] }}</span>
+        <input
+          class="grow-text"
+          type="text"
+          maxlength="30"
+          aria-label="Nom de l'étage"
+          [value]="f.name"
+          (change)="setFloor(i, { name: $any($event.target).value })"
+        />
+        <span class="order">
+          <button
+            type="button"
+            aria-label="Monter"
+            [disabled]="i === 0"
+            (click)="moveFloor(i, -1)"
+          >
+            <svg lucideArrowUp></svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Descendre"
+            [disabled]="i === dg.floors.length - 1"
+            (click)="moveFloor(i, 1)"
+          >
+            <svg lucideArrowDown></svg>
+          </button>
+        </span>
+        <button
+          type="button"
+          class="remove"
+          aria-label="Supprimer l'étage"
+          [disabled]="dg.floors.length <= 1"
+          (click)="removeFloor(i)"
+        >
+          <svg lucideTrash></svg>
+        </button>
+      </div>
+
+      <div class="segmented wide" role="group" aria-label="Sorte d'étage">
+        <button
+          type="button"
+          [class.on]="!!f.map"
+          [disabled]="handMaps.length === 0"
+          (click)="setHandMade(i, true)"
+        >
+          Faite à la main
+        </button>
+        <button
+          type="button"
+          [class.on]="!f.map"
+          (click)="setHandMade(i, false)"
+        >
+          Générés
+        </button>
+      </div>
+
+      @if (f.map) {
+        <label class="learn">
+          <span class="slot-label">Carte</span>
+          <select
+            aria-label="Carte de l'étage"
+            (change)="setFloor(i, { map: $any($event.target).value })"
+          >
+            @if (!isHandMap(f.map)) {
+              <option selected>{{ mapName(f.map) }}</option>
+            }
+            @for (m of handMaps; track m.id) {
+              <option [value]="m.id" [selected]="m.id === f.map">
+                {{ m.name }}
+              </option>
+            }
+          </select>
+        </label>
+      } @else {
+        <span class="label">Salles</span>
+        @if (roomMaps.length > 0) {
+          <div class="chips">
+            @for (m of roomMaps; track m.id) {
+              <button
+                type="button"
+                class="chip plain"
+                [class.on]="f.rooms.includes(m.id)"
+                [attr.aria-pressed]="f.rooms.includes(m.id)"
+                (click)="toggleIn(i, 'rooms', m.id)"
+              >
+                {{ m.name }}
+              </button>
+            }
+          </div>
+        } @else {
+          <p class="warning">
+            Aucune carte de la sorte « Salle » : en faire une dans l'éditeur de
+            carte.
+          </p>
+        }
+        <div class="range">
+          <span>Nombre de salles</span>
+          <db-stepper
+            [value]="f.roomsMin"
+            [min]="1"
+            [max]="limits.rooms"
+            [label]="'Salles au moins'"
+            (changed)="setRange(i, 'rooms', 'Min', $event)"
+          />
+          <span>à</span>
+          <db-stepper
+            [value]="f.roomsMax"
+            [min]="1"
+            [max]="limits.rooms"
+            [label]="'Salles au plus'"
+            (changed)="setRange(i, 'rooms', 'Max', $event)"
+          />
+        </div>
+        <div class="range">
+          <span>Étages pareils</span>
+          <db-stepper
+            [value]="f.repeat"
+            [min]="1"
+            [max]="limits.repeat"
+            [label]="'Étages pareils'"
+            (changed)="setFloor(i, { repeat: $event })"
+          />
+        </div>
+      }
+
+      <span class="label">Groupes d'ennemis</span>
+      @if (db().groups.length > 0) {
+        <div class="chips">
+          @for (g of db().groups; track g.id) {
+            <button
+              type="button"
+              class="chip plain"
+              [class.on]="f.groups.includes(g.id)"
+              [attr.aria-pressed]="f.groups.includes(g.id)"
+              [title]="g.name"
+              (click)="toggleIn(i, 'groups', g.id)"
+            >
+              {{ groupName(g.id) }}
+            </button>
+          }
+        </div>
+      } @else {
+        <p class="note">Pas encore de groupe (table Groupes).</p>
+      }
+      @if (f.groups.length > 0) {
+        <div class="range">
+          <span>Ennemis</span>
+          <db-stepper
+            [value]="f.enemiesMin"
+            [min]="0"
+            [max]="limits.enemies"
+            [label]="'Ennemis au moins'"
+            (changed)="setRange(i, 'enemies', 'Min', $event)"
+          />
+          <span>à</span>
+          <db-stepper
+            [value]="f.enemiesMax"
+            [min]="0"
+            [max]="limits.enemies"
+            [label]="'Ennemis au plus'"
+            (changed)="setRange(i, 'enemies', 'Max', $event)"
+          />
+        </div>
+      }
+
+      @if (!f.map) {
+        <div class="range">
+          <span>Coffres</span>
+          <db-stepper
+            [value]="f.chestsMin"
+            [min]="0"
+            [max]="limits.chests"
+            [label]="'Coffres au moins'"
+            (changed)="setRange(i, 'chests', 'Min', $event)"
+          />
+          <span>à</span>
+          <db-stepper
+            [value]="f.chestsMax"
+            [min]="0"
+            [max]="limits.chests"
+            [label]="'Coffres au plus'"
+            (changed)="setRange(i, 'chests', 'Max', $event)"
+          />
+        </div>
+        @if (f.chestsMax > 0) {
+          @for (l of f.loot; track $index; let li = $index) {
+            <div class="learn">
+              <select
+                aria-label="Objet"
+                (change)="setLoot(i, li, { item: $any($event.target).value })"
+              >
+                @for (it of db().items; track it.id) {
+                  <option [value]="it.id" [selected]="it.id === l.item">
+                    {{ it.name }}
+                  </option>
+                }
+              </select>
+              <db-stepper
+                [value]="l.chance"
+                [min]="1"
+                [max]="100"
+                [label]="'Chance'"
+                [suffix]="'%'"
+                (changed)="setLoot(i, li, { chance: $event })"
+              />
+              <button
+                type="button"
+                class="remove"
+                aria-label="Retirer"
+                (click)="removeLoot(i, li)"
+              >
+                <svg lucideX></svg>
+              </button>
+            </div>
+          }
+          <label class="add-select">
+            <svg lucidePlus></svg> Objet dans les coffres
+            <select
+              aria-label="Ajouter un objet aux coffres"
+              (change)="
+                addLoot(i, $any($event.target).value);
+                $any($event.target).value = ''
+              "
+            >
+              <option value="" selected></option>
+              @for (it of db().items; track it.id) {
+                <option [value]="it.id">{{ it.name }}</option>
+              }
+            </select>
+          </label>
+        }
+      }
+
+      <label class="switch">
+        <input
+          type="checkbox"
+          [checked]="f.save"
+          (change)="setFloor(i, { save: $any($event.target).checked })"
+        />
+        <span>Point de sauvegarde et sortie</span>
+      </label>
+    </div>
+  }
+  <button type="button" class="add-select" (click)="addFloor()">
+    <svg lucidePlus></svg> Étage
+  </button>
+  <p class="hint">
+    <svg lucideInfo></svg>
+    <span>
+      Une salle est une carte de la sorte « Salle » avec ses portes (onglet
+      Donjon : Porte de salle) ; à chaque visite le jeu les relie au hasard, met
+      l'escalier dans la dernière, les ennemis et les coffres.
+    </span>
+  </p>
+</div>

@@ -26,6 +26,7 @@ import {
 import { Vec3 } from "../model/SceneUtils";
 import { SceneEvent } from "../model/SceneEvent";
 import { EditAction, EditHistory } from "./map-editor/edit-history";
+import { DungeonObject, dungeonKindOf } from "../model/dungeon-object";
 import { EditorGrid } from "./map-editor/editor-grid";
 import { EditorMarkers, slotKey } from "./map-editor/editor-markers";
 import { GroundPainter } from "./map-editor/ground-painter";
@@ -67,6 +68,8 @@ export interface EditSelection {
   zoneSize: { x: number; z: number } | null;
   /** An NPC's place name (its schedule picks it). */
   placeLabel: string;
+  /** A dungeon object's settings (null: not a dungeon object). */
+  dungeon: DungeonObject | null;
 }
 
 /** Ground brush: size in cells, or the bucket. */
@@ -740,6 +743,9 @@ export class MapEditorService {
               }
             : null,
           placeLabel: picked.building.label ?? "",
+          dungeon: dungeonKindOf(picked.building.modelId)
+            ? (picked.building.dungeon ?? {})
+            : null,
         }
       : null;
   }
@@ -991,6 +997,31 @@ export class MapEditorService {
       }
       const chunk = this.chunkOf(game, building);
       if (chunk) {
+        this.select(game, { chunk, building });
+      }
+    };
+    set(after);
+    this.record(game, { undo: () => set(before), redo: () => set(after) });
+  }
+
+  /** The selected dungeon object's settings (chest, trap, switch, locked door). Undone as one change. */
+  setDungeonObject(game: Game, settings: DungeonObject) {
+    const picked = this.selected;
+    if (!picked || !dungeonKindOf(picked.building.modelId)) {
+      return;
+    }
+    const building = picked.building;
+    const before = building.dungeon && structuredClone(building.dungeon);
+    const after = cleanDungeon(settings);
+    const set = (value: DungeonObject | undefined) => {
+      if (value) {
+        building.dungeon = structuredClone(value);
+      } else {
+        delete building.dungeon;
+      }
+      const chunk = this.chunkOf(game, building);
+      if (chunk) {
+        game.mapHelper?.refreshBuilding(chunk, building);
         this.select(game, { chunk, building });
       }
     };
@@ -1365,4 +1396,29 @@ export class MapEditorService {
       (TOO_FAR_LIMIT + SHADE_OFFSET) * Math.max(1, game.cameraZoom);
     game.camera.updateProjectionMatrix();
   }
+}
+
+/** A dungeon object's settings without the empty ones (nothing left: undefined). */
+function cleanDungeon(settings: DungeonObject): DungeonObject | undefined {
+  const clean: DungeonObject = {};
+  const items = settings.items?.filter((i) => i.id && i.count > 0);
+  if (items?.length) {
+    clean.items = items;
+  }
+  if (settings.money && settings.money > 0) {
+    clean.money = Math.round(settings.money);
+  }
+  if (settings.key) {
+    clean.key = settings.key;
+  }
+  if (settings.variable) {
+    clean.variable = settings.variable;
+  }
+  if (settings.trap) {
+    clean.trap = settings.trap;
+  }
+  if (settings.hidden) {
+    clean.hidden = true;
+  }
+  return Object.keys(clean).length > 0 ? clean : undefined;
 }

@@ -143,9 +143,23 @@
             {{ map.name }}{{ map.id === currentMap() ? " (cette carte)" : "" }}
           </option>
         }
+        @for (d of data.db.dungeons; track d.id) {
+          <option
+            [value]="'dungeon:' + d.id"
+            [selected]="'dungeon:' + d.id === action.map"
+          >
+            Donjon : {{ d.name }}
+          </option>
+        }
       </select>
     </div>
-    <p class="help">Arrivée : le point d'arrivée de la carte.</p>
+    <p class="help">
+      {{
+        action.map.startsWith("dungeon:")
+          ? "Arrivée : l'entrée du donjon (son premier étage)."
+          : "Arrivée : le point d'arrivée de la carte."
+      }}
+    </p>
   }
   @case ("weather") {
     <div class="row">

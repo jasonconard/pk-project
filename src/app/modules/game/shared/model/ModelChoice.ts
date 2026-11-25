@@ -10,6 +10,7 @@ import { MD_WOOD_PANNEL } from "../../../../../assets/models/md-wood-pannel";
 import { MD_LETTER_BOX } from "../../../../../assets/models/md-letter-box";
 import { MD_ROCK } from "../../../../../assets/models/md-rock";
 import { isNpc, npcOf } from "./npc-sprite";
+import { dungeonKindOf } from "./dungeon-object";
 
 export interface ModelChoice {
   /** Crop of the texture for the thumbnail (min = top left). Not needed when the model has a `thumb` (exported by the model editor). */
@@ -146,5 +147,5 @@ export function modelLabel(modelId: string): string {
   if (isNpc({ modelId })) {
     return npcOf(modelId)?.name ?? "PNJ retiré de la base";
   }
-  return MODEL_LABELS[modelId] ?? modelId;
+  return dungeonKindOf(modelId)?.label ?? MODEL_LABELS[modelId] ?? modelId;
 }

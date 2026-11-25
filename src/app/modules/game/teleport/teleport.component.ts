@@ -27,7 +27,11 @@ export class TeleportComponent {
     const mapHelper = this.mapHelper();
     this.teleport.set(teleport);
     setTimeout(() => {
-      this.gameMapService.travel(mapHelper.originGame, teleport);
+      this.gameMapService.travel(
+        mapHelper.originGame,
+        teleport,
+        !!teleport.rebuild
+      );
       this.teleport.set(null);
       setTimeout(() => this.sequenceService.nextSequence(), 200);
     }, 300);

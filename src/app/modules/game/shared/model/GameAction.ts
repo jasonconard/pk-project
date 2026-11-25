@@ -5,8 +5,8 @@ import { modelLabel } from "./ModelChoice";
 
 /** What the action key does right now, in front of an object: shown by the touch action button and the computer's prompt. */
 export interface GameAction {
-  kind: "enter" | "talk" | "read" | "look";
-  /** « Entrer », « Parler », « Lire », « Regarder ». */
+  kind: "enter" | "talk" | "read" | "look" | "open" | "use" | "hit";
+  /** « Entrer », « Parler », « Lire », « Regarder », and in a dungeon « Ouvrir », « Actionner », « Frapper ». */
   verb: string;
   /** The object's name (« Labo »), or who talks (« Hugo »). */
   target: string;
@@ -17,7 +17,17 @@ const VERBS: Record<GameAction["kind"], string> = {
   talk: "Parler",
   read: "Lire",
   look: "Regarder",
+  open: "Ouvrir",
+  use: "Actionner",
+  hit: "Frapper",
 };
+
+export function gameAction(
+  kind: GameAction["kind"],
+  target: string
+): GameAction {
+  return { kind, verb: VERBS[kind], target };
+}
 
 /**
  * The action of an event: a passage enters; a message with a name is someone talking (the target: their name),

@@ -10,6 +10,15 @@ import { SceneChunk, SceneMap, StairsSide } from "./SceneMap";
 import { PlayerTex, ScenePlayer } from "./ScenePlayer";
 import { playerLook } from "./player-look";
 import { isNpc, makeNpcMesh, npcOf } from "./npc-sprite";
+import {
+  dungeonKindOf,
+  foePicture,
+  isDungeonObject,
+  isFoe,
+  makeDungeonMesh,
+  makeFoeMesh,
+} from "./dungeon-object";
+import { dungeonLook } from "./dungeon-state";
 import { npcPlaceAt, placeKey } from "./npc-schedule";
 import { facingSprite } from "./pixel-scale";
 import {
@@ -260,12 +269,15 @@ export class MapHelper {
     });
   }
 
-  /** The NPCs placed on the map drawn again (their walking sheet or name changed in the database). */
+  /**
+   * The NPCs placed on the map drawn again (their walking sheet or name changed in the database), and the dungeon
+   * objects (the editor shows them as set: closed, hidden traps shown).
+   */
   public refreshNpcs() {
     this.sceneMap.chunks.forEach((chunk) => {
       if (chunk.group) {
         chunk.buildings
-          .filter((b) => isNpc(b))
+          .filter((b) => isNpc(b) || isDungeonObject(b))
           .forEach((b) => this.refreshBuilding(chunk, b));
       }
     });
@@ -539,6 +551,26 @@ export class MapHelper {
       const zone = makeZoneMesh(building.size);
       this.addMesh(chunk.id + "-" + building.id, zone, world);
       chunk.group.add(zone);
+      return;
+    }
+    if (isFoe(building)) {
+      const mesh = makeFoeMesh(foePicture(building.modelId));
+      this.addMesh(chunk.id + "-" + building.id, mesh, world);
+      chunk.group.add(mesh);
+      return;
+    }
+    if (isDungeonObject(building)) {
+      const look = dungeonLook(
+        this.sceneMap.id,
+        building,
+        this.originGame.editMode
+      );
+      if (look.gone) {
+        return;
+      }
+      const mesh = makeDungeonMesh(building.modelId, look);
+      this.addMesh(chunk.id + "-" + building.id, mesh, world);
+      chunk.group.add(mesh);
       return;
     }
     if (isNpc(building)) {
@@ -818,6 +850,10 @@ export class MapHelper {
     }
     if (isNpc({ modelId })) {
       return { passable: false, canHide: false };
+    }
+    const dungeon = dungeonKindOf(modelId);
+    if (dungeon) {
+      return { passable: !dungeon.body, canHide: false };
     }
     const votes = new Map<string, number>();
     this.sceneMap.chunks.forEach((c) =>

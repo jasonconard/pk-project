@@ -1,6 +1,7 @@
 import { VariableTest } from "./SceneEvent";
 import { Vec3 } from "./SceneUtils";
 import { DayTime } from "../../../database-editor/shared/database";
+import { BattleOpening } from "../../../battle/shared/battle-types";
 
 /** (new types at the end: the maps store the numbers) */
 export enum InstructionType {
@@ -26,6 +27,8 @@ export enum InstructionType {
   LINK,
   /** GIFT: the player picks a gift in the bag for an NPC. */
   GIFT,
+  /** DUNGEON: enter a dungeon, leave it, go down a floor… (see InstructionDungeon). */
+  DUNGEON,
 }
 
 export interface SceneEventInstruction {
@@ -46,7 +49,8 @@ export interface SceneEventInstruction {
   /** PARTY: a character joins or leaves the team. */
   party?: { id: string; join: boolean };
   /** FIGHT: a fight against a group; its sub-instructions 'win', 'lose' or 'flee' follow. */
-  fight?: { group: string };
+  fight?: { group: string; opening?: BattleOpening };
+  dungeon?: InstructionDungeon;
   time?: InstructionTime;
   timeFlow?: { stop: boolean };
   link?: { id: string; points: number };
@@ -64,6 +68,15 @@ export interface InstructionTime {
 export interface SceneEventSubInstruction {
   condition: string;
   instructions: SceneEventInstruction[];
+}
+
+/**
+ * A dungeon action: enter one (at its first floor, if open), leave it, go to the next floor, save, and what the
+ * game plays after a dungeon's enemy is met (beaten, the team lost or fled: `id` its object).
+ */
+export interface InstructionDungeon {
+  action: "enter" | "leave" | "next" | "save" | "beaten" | "lost" | "fled";
+  id?: string;
 }
 
 export interface InstructionWait {
@@ -88,8 +101,10 @@ export interface InstructionMessageChoice {
 export interface InstructionTeleport {
   /** Arrival point; the map's arrival point (spawn) when missing. */
   pos?: Vec3;
-  /** Map to go to (id); the current map when missing. */
+  /** Map to go to (id; `dungeon:<id>`: a dungeon's first floor); the current map when missing. */
   map?: string;
+  /** Built again even if it is the current map (a generated floor's next room may be the same « Salle »). */
+  rebuild?: boolean;
 }
 
 /** A story variable changes: a flag set to true / false, a counter set to or increased by a number. */

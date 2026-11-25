@@ -39,6 +39,13 @@
   animation: showcase-in 220ms ease-out;
 }
 
+/* How the fight started: « Attaque surprise ! » and what it means */
+.opening small {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 @keyframes showcase-in {
   from {
     opacity: 0;

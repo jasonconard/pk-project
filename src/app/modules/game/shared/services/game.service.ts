@@ -76,6 +76,7 @@ import {
 import { MapTime } from "../model/SceneMap";
 import { InstructionTime } from "../model/SceneEventInstruction";
 import { TIME_FADE_MS } from "./sequence.service";
+import { DungeonObject } from "../model/dungeon-object";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
 export interface GameHud {
@@ -1077,6 +1078,15 @@ export class GameService {
     const game = this.game;
     if (game) {
       this.mapEditorService.setPlaceLabel(game, label);
+      this.syncHud();
+    }
+  }
+
+  /** The selected dungeon object's settings (chest, trap, switch, locked door). */
+  setDungeonObject(settings: DungeonObject) {
+    const game = this.game;
+    if (game) {
+      this.mapEditorService.setDungeonObject(game, settings);
       this.syncHud();
     }
   }

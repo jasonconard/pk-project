@@ -334,7 +334,7 @@
           >
             <svg lucideSquareUser></svg> Fiche
           </button>
-        } @else if (!selection.zoneSize) {
+        } @else if (!selection.zoneSize && !selection.dungeon) {
           <button
             type="button"
             title="Ouvrir ce modèle dans l'éditeur de modèles 3D"
@@ -366,6 +366,290 @@
           />
         </label>
       }
+      @if (dungeonKind(); as kind) {
+        @if (selection.dungeon; as dungeon) {
+          <div class="passage dungeon">
+            <h3><svg lucideCastle></svg> {{ kind.label }}</h3>
+            @switch (kind.kind) {
+              @case ("chest") {
+                <span class="dungeon-label">Contenu</span>
+                @for (
+                  item of dungeon.items ?? [];
+                  track $index;
+                  let i = $index
+                ) {
+                  <div class="passage-row">
+                    <select
+                      aria-label="Objet"
+                      (change)="
+                        setChestItem(dungeon, i, {
+                          id: $any($event.target).value,
+                        })
+                      "
+                    >
+                      @for (option of dungeonData().items; track option.id) {
+                        <option
+                          [value]="option.id"
+                          [selected]="option.id === item.id"
+                        >
+                          {{ option.name }}
+                        </option>
+                      }
+                    </select>
+                    <input
+                      type="number"
+                      min="1"
+                      max="99"
+                      aria-label="Nombre"
+                      [value]="item.count"
+                      (change)="
+                        setChestItem(dungeon, i, {
+                          count: numberOf($event, 1, 99),
+                        })
+                      "
+                    />
+                    <button
+                      type="button"
+                      class="small-btn icon-only"
+                      aria-label="Retirer"
+                      (click)="removeChestItem(dungeon, i)"
+                    >
+                      <svg lucideX></svg>
+                    </button>
+                  </div>
+                }
+                <div class="passage-row">
+                  <span>Pièces</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="999999"
+                    aria-label="Pièces"
+                    [value]="dungeon.money ?? 0"
+                    (change)="
+                      setDungeon(dungeon, {
+                        money: numberOf($event, 0, 999999),
+                      })
+                    "
+                  />
+                </div>
+                @if (dungeonData().items.length) {
+                  <button
+                    type="button"
+                    class="add-passage"
+                    (click)="addChestItem(dungeon)"
+                  >
+                    <svg lucidePlus></svg> Ajouter un objet
+                  </button>
+                }
+                <label class="passage-row">
+                  <span>Fermé à clé</span>
+                  <select
+                    aria-label="Clé du coffre"
+                    (change)="
+                      setDungeon(dungeon, {
+                        key: $any($event.target).value || undefined,
+                      })
+                    "
+                  >
+                    <option value="" [selected]="!dungeon.key">Non</option>
+                    @for (option of dungeonData().items; track option.id) {
+                      <option
+                        [value]="option.id"
+                        [selected]="option.id === dungeon.key"
+                      >
+                        {{ option.name }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                <small class="talk-hint"
+                  >Sur un étage généré, un coffre vide reçoit un contenu au
+                  hasard (le butin de l'étage).</small
+                >
+              }
+              @case ("trap") {
+                @let trap = trapOf(dungeon);
+                <div
+                  class="segmented"
+                  role="radiogroup"
+                  aria-label="Effet du piège"
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    [attr.aria-checked]="trap.kind === 'hurt'"
+                    (click)="setTrapKind(dungeon, 'hurt')"
+                  >
+                    Blesse l'équipe
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    [attr.aria-checked]="trap.kind === 'fight'"
+                    [disabled]="!dungeonData().groups.length"
+                    (click)="setTrapKind(dungeon, 'fight')"
+                  >
+                    Lance un combat
+                  </button>
+                </div>
+                @if (trap.kind === "hurt") {
+                  <div class="passage-row">
+                    <span>PV perdus</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      aria-label="PV perdus en %"
+                      [value]="trap.percent"
+                      (change)="
+                        setDungeon(dungeon, {
+                          trap: {
+                            kind: 'hurt',
+                            percent: numberOf($event, 1, 100),
+                          },
+                        })
+                      "
+                    />
+                    <span>%</span>
+                  </div>
+                } @else {
+                  <label class="passage-row">
+                    <span>Groupe</span>
+                    <select
+                      aria-label="Groupe d'ennemis"
+                      (change)="
+                        setDungeon(dungeon, {
+                          trap: {
+                            kind: 'fight',
+                            group: $any($event.target).value,
+                          },
+                        })
+                      "
+                    >
+                      @for (group of dungeonData().groups; track group.id) {
+                        <option
+                          [value]="group.id"
+                          [selected]="group.id === trap.group"
+                        >
+                          {{ group.name }}
+                        </option>
+                      }
+                    </select>
+                  </label>
+                }
+                <label class="switch-row">
+                  <span>Caché jusqu'à ce qu'on marche dessus</span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    [checked]="!!dungeon.hidden"
+                    (change)="
+                      setDungeon(dungeon, {
+                        hidden: $any($event.target).checked,
+                      })
+                    "
+                  />
+                </label>
+              }
+              @case ("switch") {
+                <label class="passage-row">
+                  <span>Drapeau</span>
+                  <select
+                    aria-label="Drapeau allumé ou éteint"
+                    (change)="
+                      setDungeon(dungeon, {
+                        variable: $any($event.target).value || undefined,
+                      })
+                    "
+                  >
+                    <option value="" [selected]="!dungeon.variable">
+                      Aucun
+                    </option>
+                    @for (flag of dungeonData().flags; track flag.id) {
+                      <option
+                        [value]="flag.id"
+                        [selected]="flag.id === dungeon.variable"
+                      >
+                        {{ flag.name }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                <small class="talk-hint"
+                  >L'interrupteur allume ou éteint ce drapeau.</small
+                >
+              }
+              @case ("door") {
+                <label class="passage-row">
+                  <span>Clé</span>
+                  <select
+                    aria-label="Clé de la porte"
+                    (change)="
+                      setDungeon(dungeon, {
+                        key: $any($event.target).value || undefined,
+                      })
+                    "
+                  >
+                    <option value="" [selected]="!dungeon.key">Aucune</option>
+                    @for (option of dungeonData().items; track option.id) {
+                      <option
+                        [value]="option.id"
+                        [selected]="option.id === dungeon.key"
+                      >
+                        {{ option.name }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                <label class="passage-row">
+                  <span>Ou drapeau</span>
+                  <select
+                    aria-label="Drapeau qui ouvre la porte"
+                    (change)="
+                      setDungeon(dungeon, {
+                        variable: $any($event.target).value || undefined,
+                      })
+                    "
+                  >
+                    <option value="" [selected]="!dungeon.variable">
+                      Aucun
+                    </option>
+                    @for (flag of dungeonData().flags; track flag.id) {
+                      <option
+                        [value]="flag.id"
+                        [selected]="flag.id === dungeon.variable"
+                      >
+                        {{ flag.name }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                <small class="talk-hint"
+                  >S'ouvre avec la clé (dans le sac), ou quand le drapeau est
+                  vrai.</small
+                >
+              }
+              @case ("stairs") {
+                <small class="talk-hint"
+                  >Mène à l'étage suivant du donjon.</small
+                >
+              }
+              @case ("room-door") {
+                <small class="talk-hint"
+                  >Reliée au hasard à une autre salle quand l'étage est généré
+                  (sur une carte Salle).</small
+                >
+              }
+              @case ("save") {
+                <small class="talk-hint"
+                  >Sauver la partie ou sortir du donjon.</small
+                >
+              }
+            }
+          </div>
+        }
+      }
       <div class="options">
         <label class="switch-row">
           <span>Bloque le passage</span>
@@ -376,7 +660,7 @@
             (change)="send('togglePassable', $event)"
           />
         </label>
-        @if (!selection.zoneSize && !npcSelected()) {
+        @if (!selection.zoneSize && !npcSelected() && !selection.dungeon) {
           <label class="switch-row">
             <span>Transparent quand le joueur est derrière</span>
             <input
@@ -388,7 +672,9 @@
           </label>
         }
       </div>
-      @if (!npcSelected()) {
+      @if (
+        !npcSelected() && (!selection.dungeon || dungeonKind()?.kind === "door")
+      ) {
         <div class="passage">
           <h3><svg lucideDoorOpen></svg> Passage vers une carte</h3>
           @if (selection.passage; as passage) {
@@ -402,6 +688,14 @@
                   <option [value]="map.id" [selected]="map.id === passage.map">
                     {{ map.name
                     }}{{ map.id === mapId() ? " (cette carte)" : "" }}
+                  </option>
+                }
+                @for (d of dungeonData().dungeons; track d.id) {
+                  <option
+                    [value]="dungeonTarget + d.id"
+                    [selected]="dungeonTarget + d.id === passage.map"
+                  >
+                    Donjon : {{ d.name }}
                   </option>
                 }
               </select>
@@ -438,36 +732,42 @@
                 Marcher dessus
               </button>
             </div>
-            <div class="passage-row arrival">
-              <span
-                >Arrivée :
-                {{ passage.pos ? "point choisi" : "celle de la carte" }}</span
+            @if (isDungeonTarget(passage.map)) {
+              <small class="talk-hint"
+                >Arrivée : l'entrée du donjon (son premier étage).</small
               >
-              <button
-                type="button"
-                class="small-btn"
-                title="Aller sur la carte de destination et toucher le point d'arrivée"
-                (click)="pickArrival.emit()"
-              >
-                <svg lucideMapPin></svg> Choisir
-              </button>
-              @if (passage.pos) {
+            } @else {
+              <div class="passage-row arrival">
+                <span
+                  >Arrivée :
+                  {{ passage.pos ? "point choisi" : "celle de la carte" }}</span
+                >
                 <button
                   type="button"
-                  class="small-btn icon-only"
-                  aria-label="Arrivée de la carte"
-                  title="Revenir au point d'arrivée de la carte"
-                  (click)="
-                    changePassage({
-                      map: passage.map,
-                      trigger: passage.trigger,
-                    })
-                  "
+                  class="small-btn"
+                  title="Aller sur la carte de destination et toucher le point d'arrivée"
+                  (click)="pickArrival.emit()"
                 >
-                  <svg lucideX></svg>
+                  <svg lucideMapPin></svg> Choisir
                 </button>
-              }
-            </div>
+                @if (passage.pos) {
+                  <button
+                    type="button"
+                    class="small-btn icon-only"
+                    aria-label="Arrivée de la carte"
+                    title="Revenir au point d'arrivée de la carte"
+                    (click)="
+                      changePassage({
+                        map: passage.map,
+                        trigger: passage.trigger,
+                      })
+                    "
+                  >
+                    <svg lucideX></svg>
+                  </button>
+                }
+              </div>
+            }
             <button
               type="button"
               class="remove-passage"
@@ -712,6 +1012,26 @@
             <span class="pic" aria-hidden="true"><svg lucidePlus></svg></span>
             <span class="name">Nouveau</span>
           </button>
+        } @else if (tab() === "dungeon") {
+          @for (entry of dungeonEntries; track entry.id) {
+            <button
+              type="button"
+              class="entry"
+              [title]="
+                entry.roomOnly
+                  ? entry.label + ' : pour les cartes Salle (étages générés)'
+                  : entry.label
+              "
+              [class.selected]="entry.id === modelId()"
+              [attr.aria-pressed]="entry.id === modelId()"
+              (click)="pick(entry.id, $event)"
+            >
+              <span class="pic">
+                <img [src]="thumbs()[entry.id]" alt="" />
+              </span>
+              <span class="name">{{ entry.label }}</span>
+            </button>
+          }
         } @else if (tab() === "events") {
           <button
             type="button"
