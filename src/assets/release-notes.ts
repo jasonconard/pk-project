@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.44',
+    date: '2026-11-25',
+    notes: [
+      'Les personnages sur la carte sont parfaitement nets : chaque pixel du sprite a la même taille à l\'écran.',
+      'La caméra suit le joueur en douceur et le décor défile sans à-coups.',
+      'Menu → Qualité graphique : le rendu rétro donne de gros pixels, comme sur une console portable.',
+      'Menu → Qualité graphique : la caméra glissante peut être coupée pour garder la caméra collée au joueur.',
+    ],
+  },
+  {
     version: '0.0.43',
     date: '2026-11-25',
     notes: [
