@@ -43,6 +43,8 @@ const VISIBILITY_EVERY = 4;
 const ACTION_EVERY = 4;
 /** Frames between two looks at how the player is drawn (the team leader's walking sheet). */
 const LOOK_EVERY = 60;
+/** The player's places kept, one per step (see CameraFollow). */
+const STEP_HISTORY = 16;
 
 @Service()
 export class GameMapService {
@@ -245,6 +247,13 @@ export class GameMapService {
     if (!mapHelper || !sprite) {
       return;
     }
+    // (where it is when this step starts: the frames show the player in between its steps, see CameraFollow)
+    const history = game.steps.player;
+    const kept = history.length >= STEP_HISTORY ? history.shift()! : null;
+    history.push({
+      time: game.steps.time - game.steps.length,
+      pos: (kept?.pos ?? new THREE.Vector3()).copy(sprite.position),
+    });
     if (game.paused) {
       return;
     }

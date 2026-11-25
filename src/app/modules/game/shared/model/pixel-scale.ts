@@ -100,32 +100,28 @@ export function facingSprite(material: THREE.Material, height: number): void {
 const FOLLOW_LAG_TIME = 0.15;
 /** How fast the lag follows the player's speed (s): smooth starts and stops. */
 const FOLLOW_EASE_TIME = 0.12;
-/** The player's speed is averaged over this time (s). */
-const SPEED_TIME = 0.1;
-/** How fast the shown position catches up with the real one (s). */
-const CATCH_UP_TIME = 0.06;
-/** A move this long in one frame is a jump (teleport, another map, back from a fight): no smoothing. */
+/** The player is shown where it was this many steps ago (between two steps: they run in uneven bursts). */
+const SHOW_DELAY_STEPS = 2.5;
+/** How fast the shown place, moving at the walking speed, comes back to the in-between place (s). */
+const SHOWN_EASE_TIME = 0.05;
+/** A move this long in one step is a jump (teleport, another map, back from a fight): no smoothing. */
 const FOLLOW_JUMP = 32;
 /** The player changes screen pixel only past this share of a pixel (no flicker between two pixels). */
 const SNAP_MARGIN = 0.75;
 
 /**
- * Smooth moves on screen. The player moves in steps (120 per second) that reach the screen at an uneven pace (1, 2
- * or 3 between two frames): drawn as they are, the whole map jerked. While a frame is drawn (and only then: the rest
- * of the game sees the real positions):
- * - the player is shown at a smoothed position: moving at its averaged speed, catching up with the real one;
- * - the camera follows that shown position, with a lag behind a walking player that it catches up when it stops
- *   (like in Pokémon);
+ * Smooth moves on screen. The player moves in fixed steps (120 per second) that reach the screen at an uneven pace
+ * (1, 2 or 3 between two frames): drawn as they are, the whole map jerked. While a frame is drawn (and only then:
+ * the rest of the game sees the real positions):
+ * - the player is shown where it was a moment ago (2.5 steps), in between the two steps around that time (the usual
+ *   fixed time step interpolation): an even walk whatever the bursts of steps, never past where it stops;
+ * - the camera follows that shown place, with a lag behind a walking player that it catches up when it stops
+ *   (like in Pokémon; « Caméra glissante » in Menu → Qualité graphique, else no lag);
  * - the player's sprite (not the camera: the map would shake) is moved by the fraction of a pixel that puts its
  *   feet on a pixel border, so it stays pixel-sharp.
  */
 export class CameraFollow {
-  /** The player's speed (units per second), averaged. */
-  private readonly speed = new THREE.Vector3();
   private readonly lag = new THREE.Vector3();
-  /** Where the player is shown (smoothed), null: at its real place. */
-  private shownPlayer: THREE.Vector3 | null = null;
-  private readonly lastPlayer = new THREE.Vector3();
   private lastTime = 0;
   /** While a frame is drawn: the camera's offset, the player's real place. */
   private readonly cameraShift = new THREE.Vector3();
@@ -133,18 +129,16 @@ export class CameraFollow {
   private shifted: THREE.Object3D | null = null;
   /** The screen pixel the player's feet were put on last frame. */
   private snapped: { x: number; y: number } | null = null;
+  private readonly shown = new THREE.Vector3();
+  /** Where the player is shown (moving at the walking speed), null: not yet. */
+  private display: THREE.Vector3 | null = null;
+  private readonly between = new THREE.Vector3();
+  private readonly velocity = new THREE.Vector3();
   private readonly point = new THREE.Vector3();
   private readonly target = new THREE.Vector3();
   private readonly right = new THREE.Vector3();
   private readonly up = new THREE.Vector3();
   private readonly size = new THREE.Vector2();
-
-  private reset(): void {
-    this.speed.set(0, 0, 0);
-    this.lag.set(0, 0, 0);
-    this.shownPlayer = null;
-    this.snapped = null;
-  }
 
   /** Before drawing a frame. */
   apply(game: Game): void {
@@ -155,40 +149,101 @@ export class CameraFollow {
     const player = game.mapHelper?.scenePlayer.mesh;
     // The editor and the fights move the camera themselves (a zoom of their own)
     if (!player || game.editMode || game.cameraZoom !== game.fittedZoom) {
-      this.reset();
+      this.lag.set(0, 0, 0);
+      this.display = null;
+      this.snapped = null;
       return;
     }
     const real = player.position;
-    if (
-      !this.shownPlayer ||
-      this.point.copy(real).sub(this.lastPlayer).length() > FOLLOW_JUMP
-    ) {
-      this.reset();
-      this.shownPlayer = real.clone();
-    } else if (dt > 0) {
-      const moved = this.point.copy(real).sub(this.lastPlayer);
-      this.speed.lerp(moved.divideScalar(dt), 1 - Math.exp(-dt / SPEED_TIME));
-      // At the averaged speed, then towards the real place
-      this.shownPlayer
-        .addScaledVector(this.speed, dt)
-        .lerp(real, 1 - Math.exp(-dt / CATCH_UP_TIME));
-      // (no lag when the camera stays locked on the player: Menu → Qualité graphique)
+    const steps = game.steps;
+    // The places at the start of the last steps, and the real one at the end of the last step
+    const history = steps.player;
+    const last = history.at(-1);
+    const shownAt = now - SHOW_DELAY_STEPS * steps.length;
+    this.velocity.set(0, 0, 0);
+    if (!last || this.point.copy(real).sub(last.pos).length() > FOLLOW_JUMP) {
+      this.shown.copy(real);
+      this.display = null;
+      this.lag.set(0, 0, 0);
+    } else {
+      const end = last.time + steps.length;
+      if (shownAt >= end) {
+        this.between.copy(real);
+      } else {
+        // The two places around that time
+        let from = history[0];
+        let to: { time: number; pos: THREE.Vector3 } = { time: end, pos: real };
+        for (let i = 0; i < history.length; i++) {
+          const next = history[i + 1] ?? { time: end, pos: real };
+          if (history[i].time <= shownAt && shownAt <= next.time) {
+            from = history[i];
+            to = next;
+            break;
+          }
+        }
+        const span = to.time - from.time;
+        const t =
+          span > 0
+            ? THREE.MathUtils.clamp((shownAt - from.time) / span, 0, 1)
+            : 1;
+        if (this.point.copy(to.pos).sub(from.pos).length() > FOLLOW_JUMP) {
+          this.between.copy(to.pos);
+        } else {
+          this.between.copy(from.pos).lerp(to.pos, t);
+        }
+      }
+      // The walking speed over all the steps kept (one step's move is 0 or 1 unit: too uneven for the lag)
+      const first = history[0];
+      const kept = end - first.time;
+      if (
+        kept > 0 &&
+        this.point.copy(real).sub(first.pos).length() < FOLLOW_JUMP
+      ) {
+        this.velocity.copy(this.point).divideScalar(kept / 1000);
+      }
+      // Shown moving at the walking speed (an even move: one step's move is 0 or 1 unit), coming back to the
+      // in-between place, and never past the real place in the walking direction (no step back when stopping)
+      if (this.display) {
+        this.target.copy(this.display);
+        this.display
+          .addScaledVector(this.velocity, dt)
+          .lerp(this.between, 1 - Math.exp(-dt / SHOWN_EASE_TIME));
+        for (const axis of ["x", "y", "z"] as const) {
+          const way = Math.sign(this.velocity[axis]);
+          if (!way) {
+            continue;
+          }
+          // (never backwards, never past the real place)
+          if ((this.display[axis] - this.target[axis]) * way < 0) {
+            this.display[axis] = this.target[axis];
+          }
+          if ((this.display[axis] - real[axis]) * way > 0) {
+            this.display[axis] = real[axis];
+          }
+        }
+      } else {
+        this.display = this.between.clone();
+      }
+      this.shown.copy(this.display);
+      // The lag: the walking speed, eased
       this.target
-        .copy(this.speed)
+        .copy(this.velocity)
         .setY(0)
         .multiplyScalar(game.smoothCamera ? -FOLLOW_LAG_TIME : 0);
       this.lag.lerp(this.target, 1 - Math.exp(-dt / FOLLOW_EASE_TIME));
+      if (this.lag.lengthSq() < 1e-6) {
+        this.lag.set(0, 0, 0);
+      }
     }
-    this.lastPlayer.copy(real);
 
     // The camera: locked on the shown player, with its lag
-    this.cameraShift.copy(this.shownPlayer).sub(real).add(this.lag);
+    this.cameraShift.copy(this.shown).sub(real).add(this.lag);
     camera.position.add(this.cameraShift);
     camera.updateMatrixWorld();
     // The player at its shown place, its feet on a pixel border
     this.realPlayer.copy(real);
     this.shifted = player;
-    player.position.copy(this.shownPlayer);
+    player.position.copy(this.shown);
     const size = game.renderer.getDrawingBufferSize(this.size);
     const feet = this.point.copy(player.position).project(camera);
     const px = ((feet.x + 1) / 2) * size.x;
@@ -201,9 +256,9 @@ export class CameraFollow {
       .project(camera);
     const perUnit = ((beside.x + 1) / 2) * size.x - px;
     if (perUnit > 0) {
-      const keep = (value: number, before: number | undefined) =>
-        before !== undefined && Math.abs(value - before) < SNAP_MARGIN
-          ? before
+      const keep = (value: number, previous: number | undefined) =>
+        previous !== undefined && Math.abs(value - previous) < SNAP_MARGIN
+          ? previous
           : Math.round(value);
       const x = keep(px, this.snapped?.x);
       const y = keep(py, this.snapped?.y);

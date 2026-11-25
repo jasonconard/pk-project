@@ -164,6 +164,16 @@ export class Game {
   retro = false;
   /** The camera follows the player with a lag it catches up (see pixel-scale.ts), else stays locked on it. */
   smoothCamera = true;
+  /**
+   * The moves' fixed steps (see GameService: 120 per second): the step's length, the (simulated) time the step
+   * being run ends at, and the player's place at the start of the last steps, so a frame shows the player where it
+   * was a moment ago, in between two steps (see CameraFollow).
+   */
+  readonly steps = {
+    length: 1000 / 120,
+    time: 0,
+    player: [] as { time: number; pos: THREE.Vector3 }[],
+  };
   shadowMapSize = 2048;
   /** Auto quality: seconds in a row below / above the fps thresholds. */
   private slowSeconds = 0;

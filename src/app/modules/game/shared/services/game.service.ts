@@ -410,6 +410,9 @@ export class GameService {
       lastInput = now;
       let steps = 0;
       while (pending >= INPUT_STEP && steps < MAX_INPUT_STEPS) {
+        // (the time this step ends at: its moves are shown at their own time, see CameraFollow)
+        game.steps.length = INPUT_STEP;
+        game.steps.time = now - pending + INPUT_STEP;
         this.inputLoop(game);
         pending -= INPUT_STEP;
         steps++;
