@@ -138,7 +138,8 @@
 
   .tabs {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    // 6 tabs: two rows of 3 (their names stay whole)
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px;
 
     button {

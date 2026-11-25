@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { SceneModel } from "./SceneModel";
 import { SceneBuilding } from "./SceneBuilding";
 import { MODELS } from "../../../../../assets/models/models";
+import { isNpc, npcModel } from "./npc-sprite";
 
 /**
  * An invisible zone: an object of the map editor (tab Événements) that only exists for its events (walking into
@@ -33,9 +34,12 @@ export function isZone(
   return ("modelId" in item ? item.modelId : item.id) === ZONE_ID;
 }
 
-/** A model by its id: the exported and browser models, and the zone. */
+/** A model by its id: the exported and browser models, the zone, and the NPCs (see npc-sprite.ts). */
 export function findModel(id: string): SceneModel | undefined {
-  return id === ZONE_ID ? MD_ZONE : MODELS.find((m) => m.id === id);
+  if (id === ZONE_ID) {
+    return MD_ZONE;
+  }
+  return isNpc({ id }) ? npcModel(id) : MODELS.find((m) => m.id === id);
 }
 
 const fillMaterial = new THREE.MeshBasicMaterial({

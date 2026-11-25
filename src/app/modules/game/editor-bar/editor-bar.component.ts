@@ -30,6 +30,7 @@ import {
   LucideMinus,
   LucideSearch,
   LucideSquareDashed,
+  LucideSquareUser,
   LucideArrowUp,
   LucideUserRound,
   LucideRotateCw,
@@ -62,6 +63,14 @@ import { MapManagerComponent } from "../map-manager/map-manager.component";
 import { Passage } from "../shared/model/Passage";
 import { newObjectEvent, ObjectEvent } from "../shared/model/ObjectEvent";
 import { ZONE_ID, ZONE_MAX_CELLS } from "../shared/model/Zone";
+import {
+  allNpcs,
+  isNpc,
+  NPC_PREFIX,
+  npcModelId,
+} from "../shared/model/npc-sprite";
+import { walkFrame } from "../../database-editor/shared/walk-sheet";
+import { DbTable, WALK_STAND } from "../../database-editor/shared/database";
 import { WEATHER_CHOICES } from "../shared/weather/Weather";
 import { loadVariables } from "../../variables-editor/shared/variable-storage";
 import { EventEditorComponent } from "../event-editor/event-editor.component";
@@ -88,7 +97,8 @@ import { isTyping } from "../../../core/shared/typing";
 /** Keyboard shortcut opening / closing the map editor (free key: the game uses z q s d a e r f p o). */
 const EDIT_KEY = "b";
 
-type PaletteTab = "objects" | "ground" | "relief" | "chunks" | "events";
+type PaletteTab =
+  "objects" | "npcs" | "ground" | "relief" | "chunks" | "events";
 
 /** Families of the palette (computer: the objects are grouped, with a search). */
 const MODEL_FAMILIES: { label: string; ids: string[] }[] = [
@@ -138,7 +148,7 @@ const EDITORS: {
   {
     id: null,
     label: "Portraits et sprites",
-    sub: "Pixel art · bientôt",
+    sub: "Personnages et PNJ · base de données",
     icon: LucideUserRound,
   },
   {
@@ -153,7 +163,7 @@ const EDITORS: {
 export type EditorPanel =
   | { kind: "music" }
   | { kind: "variables" }
-  | { kind: "database" }
+  | { kind: "database"; table?: DbTable; rowId?: string }
   | { kind: "models"; modelId?: string };
 
 /** Layouts of the editor: phone held upright (bar + bottom dock), phone on its side (side panels, height is short), computer. */
@@ -163,6 +173,7 @@ const LANDSCAPE_QUERY = "(orientation: landscape) and (max-height: 600px)";
 
 const TABS: { id: PaletteTab; label: string; icon: LucideIcon }[] = [
   { id: "objects", label: "Objets", icon: LucideBox },
+  { id: "npcs", label: "PNJ", icon: LucideUserRound },
   { id: "ground", label: "Sols", icon: LucidePaintbrush },
   { id: "relief", label: "Reliefs", icon: LucideMountain },
   { id: "chunks", label: "Zones", icon: LucideLayoutGrid },
@@ -223,6 +234,8 @@ interface PaletteEntry {
     LucideZap,
     LucideMinus,
     LucideSquareDashed,
+    LucideSquareUser,
+    LucideUserRound,
     LucideArrowUp,
     EventEditorComponent,
   ],
@@ -274,6 +287,13 @@ export class EditorBarComponent {
         : null,
   });
   protected readonly zoneId = ZONE_ID;
+  /** The NPCs of the database (tab PNJ), read again when the tab opens. */
+  protected readonly npcs = signal<PaletteEntry[]>([]);
+  /** The selected object is an NPC: its sheet opens the database, no passage, never see-through. */
+  protected readonly npcSelected = computed(() => {
+    const selection = this.selection();
+    return !!selection && isNpc(selection);
+  });
   protected readonly zoneMax = ZONE_MAX_CELLS;
   protected readonly zoneAxes: { id: "x" | "z"; label: string }[] = [
     { id: "x", label: "Largeur" },
@@ -428,6 +448,12 @@ export class EditorBarComponent {
       desktop.removeEventListener("change", onLayout);
       landscape.removeEventListener("change", onLayout);
     });
+    // The NPCs (their names and thumbnails) read again each time the editor opens (changed in the database)
+    effect(() => {
+      if (this.editMode()) {
+        this.readNpcs();
+      }
+    });
     effect(() => {
       this.modelsVersion();
       MODEL_CHOICES.forEach((choice) =>
@@ -462,6 +488,35 @@ export class EditorBarComponent {
   protected setTab(tab: PaletteTab, event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.tab.set(tab);
+    if (tab === "npcs") {
+      this.readNpcs();
+    }
+  }
+
+  /** The NPCs of the database for the palette, with their standing picture facing down as thumbnail. */
+  private readNpcs(): void {
+    const npcs = allNpcs();
+    this.npcs.set(npcs.map((n) => ({ id: npcModelId(n.id), label: n.name })));
+    for (const npc of npcs) {
+      void walkFrame(npc.walk, { col: WALK_STAND, row: 0 }).then((pic) => {
+        if (pic) {
+          this.thumbs.update((thumbs) => ({
+            ...thumbs,
+            [npcModelId(npc.id)]: pic,
+          }));
+        }
+      });
+    }
+  }
+
+  /** An NPC's sheet in the database (Fiche), or the NPC table (Nouveau). */
+  protected openNpcSheet(modelId?: string): void {
+    this.moreOpen.set(false);
+    this.editorPanel.emit({
+      kind: "database",
+      table: "npcs",
+      rowId: modelId?.slice(NPC_PREFIX.length),
+    });
   }
 
   protected setBrush(brush: EditBrush, event: Event): void {

@@ -309,10 +309,24 @@ export class GameComponent {
   /** The editor's Jeu: back to the game, which takes the editor's changes (the songs, the models). */
   protected closeEditorPanel(): void {
     const kind = this.editorPanel()?.kind;
-    if (kind === "music") {
-      this.gameService.reloadMusic();
-    } else if (kind === "models") {
-      void this.gameService.reloadModels();
+    switch (kind) {
+      case "music": {
+        this.gameService.reloadMusic();
+
+        break;
+      }
+      case "models": {
+        void this.gameService.reloadModels();
+
+        break;
+      }
+      case "database": {
+        // (an NPC's walking sheet or name may have changed)
+        this.gameService.refreshNpcs();
+
+        break;
+      }
+      // No default
     }
     this.editorPanel.set(null);
   }

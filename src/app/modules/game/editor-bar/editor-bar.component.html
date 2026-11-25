@@ -287,6 +287,8 @@
             <svg lucideSquareDashed class="zone-thumb"></svg>
           } @else if (thumbs()[selection.modelId]; as thumb) {
             <img [src]="thumb" alt="" />
+          } @else if (npcSelected()) {
+            <svg lucideUserRound class="zone-thumb"></svg>
           }
         </span>
         <span class="title">
@@ -324,7 +326,15 @@
         >
           <svg lucideCopy></svg> Dupliquer
         </button>
-        @if (!selection.zoneSize) {
+        @if (npcSelected()) {
+          <button
+            type="button"
+            title="Ouvrir sa fiche dans la base de données (nom, portrait, planche de marche)"
+            (click)="openNpcSheet(selection.modelId)"
+          >
+            <svg lucideSquareUser></svg> Fiche
+          </button>
+        } @else if (!selection.zoneSize) {
           <button
             type="button"
             title="Ouvrir ce modèle dans l'éditeur de modèles 3D"
@@ -353,7 +363,7 @@
             (change)="send('togglePassable', $event)"
           />
         </label>
-        @if (!selection.zoneSize) {
+        @if (!selection.zoneSize && !npcSelected()) {
           <label class="switch-row">
             <span>Transparent quand le joueur est derrière</span>
             <input
@@ -365,95 +375,101 @@
           </label>
         }
       </div>
-      <div class="passage">
-        <h3><svg lucideDoorOpen></svg> Passage vers une carte</h3>
-        @if (selection.passage; as passage) {
-          <label class="passage-row">
-            <span>Vers</span>
-            <select
-              aria-label="Carte de destination"
-              (change)="setPassageMap(passage, $any($event.target).value)"
-            >
-              @for (map of maps(); track map.id) {
-                <option [value]="map.id" [selected]="map.id === passage.map">
-                  {{ map.name }}{{ map.id === mapId() ? " (cette carte)" : "" }}
-                </option>
-              }
-            </select>
-          </label>
-          <div class="segmented" role="radiogroup" aria-label="Déclenchement">
-            <button
-              type="button"
-              role="radio"
-              [attr.aria-checked]="passage.trigger === 'door'"
-              title="En avançant vers l'objet (comme une porte), ou avec la touche d'action devant"
-              (click)="
-                changePassage({
-                  map: passage.map,
-                  pos: passage.pos,
-                  trigger: 'door',
-                })
-              "
-            >
-              Porte
-            </button>
-            <button
-              type="button"
-              role="radio"
-              [attr.aria-checked]="passage.trigger === 'walk'"
-              title="En marchant sur l'objet (il laisse alors passer le joueur)"
-              (click)="
-                changePassage({
-                  map: passage.map,
-                  pos: passage.pos,
-                  trigger: 'walk',
-                })
-              "
-            >
-              Marcher dessus
-            </button>
-          </div>
-          <div class="passage-row arrival">
-            <span
-              >Arrivée :
-              {{ passage.pos ? "point choisi" : "celle de la carte" }}</span
-            >
-            <button
-              type="button"
-              class="small-btn"
-              title="Aller sur la carte de destination et toucher le point d'arrivée"
-              (click)="pickArrival.emit()"
-            >
-              <svg lucideMapPin></svg> Choisir
-            </button>
-            @if (passage.pos) {
+      @if (!npcSelected()) {
+        <div class="passage">
+          <h3><svg lucideDoorOpen></svg> Passage vers une carte</h3>
+          @if (selection.passage; as passage) {
+            <label class="passage-row">
+              <span>Vers</span>
+              <select
+                aria-label="Carte de destination"
+                (change)="setPassageMap(passage, $any($event.target).value)"
+              >
+                @for (map of maps(); track map.id) {
+                  <option [value]="map.id" [selected]="map.id === passage.map">
+                    {{ map.name
+                    }}{{ map.id === mapId() ? " (cette carte)" : "" }}
+                  </option>
+                }
+              </select>
+            </label>
+            <div class="segmented" role="radiogroup" aria-label="Déclenchement">
               <button
                 type="button"
-                class="small-btn icon-only"
-                aria-label="Arrivée de la carte"
-                title="Revenir au point d'arrivée de la carte"
+                role="radio"
+                [attr.aria-checked]="passage.trigger === 'door'"
+                title="En avançant vers l'objet (comme une porte), ou avec la touche d'action devant"
                 (click)="
-                  changePassage({ map: passage.map, trigger: passage.trigger })
+                  changePassage({
+                    map: passage.map,
+                    pos: passage.pos,
+                    trigger: 'door',
+                  })
                 "
               >
-                <svg lucideX></svg>
+                Porte
               </button>
-            }
-          </div>
-          <button
-            type="button"
-            class="remove-passage"
-            data-haptic="warning"
-            (click)="passageChange.emit(null)"
-          >
-            Retirer le passage
-          </button>
-        } @else {
-          <button type="button" class="add-passage" (click)="addPassage()">
-            <svg lucidePlus></svg> Ajouter un passage
-          </button>
-        }
-      </div>
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-checked]="passage.trigger === 'walk'"
+                title="En marchant sur l'objet (il laisse alors passer le joueur)"
+                (click)="
+                  changePassage({
+                    map: passage.map,
+                    pos: passage.pos,
+                    trigger: 'walk',
+                  })
+                "
+              >
+                Marcher dessus
+              </button>
+            </div>
+            <div class="passage-row arrival">
+              <span
+                >Arrivée :
+                {{ passage.pos ? "point choisi" : "celle de la carte" }}</span
+              >
+              <button
+                type="button"
+                class="small-btn"
+                title="Aller sur la carte de destination et toucher le point d'arrivée"
+                (click)="pickArrival.emit()"
+              >
+                <svg lucideMapPin></svg> Choisir
+              </button>
+              @if (passage.pos) {
+                <button
+                  type="button"
+                  class="small-btn icon-only"
+                  aria-label="Arrivée de la carte"
+                  title="Revenir au point d'arrivée de la carte"
+                  (click)="
+                    changePassage({
+                      map: passage.map,
+                      trigger: passage.trigger,
+                    })
+                  "
+                >
+                  <svg lucideX></svg>
+                </button>
+              }
+            </div>
+            <button
+              type="button"
+              class="remove-passage"
+              data-haptic="warning"
+              (click)="passageChange.emit(null)"
+            >
+              Retirer le passage
+            </button>
+          } @else {
+            <button type="button" class="add-passage" (click)="addPassage()">
+              <svg lucidePlus></svg> Ajouter un passage
+            </button>
+          }
+        </div>
+      }
       @if (selection.zoneSize; as size) {
         <div class="passage zone-size">
           <h3><svg lucideSquareDashed></svg> Zone invisible</h3>
@@ -653,6 +669,35 @@
           >
             <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
             <span class="name">Gomme</span>
+          </button>
+        } @else if (tab() === "npcs") {
+          @for (entry of npcs(); track entry.id) {
+            <button
+              type="button"
+              class="entry npc"
+              [title]="entry.label + ' : toucher le sol pour le poser'"
+              [class.selected]="entry.id === modelId()"
+              [attr.aria-pressed]="entry.id === modelId()"
+              (click)="pick(entry.id, $event)"
+            >
+              <span class="pic">
+                @if (thumbs()[entry.id]; as thumb) {
+                  <img [src]="thumb" alt="" />
+                } @else {
+                  <svg lucideUserRound></svg>
+                }
+              </span>
+              <span class="name">{{ entry.label }}</span>
+            </button>
+          }
+          <button
+            type="button"
+            class="entry tile"
+            title="Créer ou modifier les PNJ dans la base de données"
+            (click)="openNpcSheet()"
+          >
+            <span class="pic" aria-hidden="true"><svg lucidePlus></svg></span>
+            <span class="name">Nouveau</span>
           </button>
         } @else if (tab() === "events") {
           <button

@@ -557,6 +557,11 @@ export class GameService {
       .subscribe(() => this.game?.refreshRenderer());
   }
 
+  /** Back from the database: the NPCs placed on the map drawn again (their walking sheet or name may have changed). */
+  refreshNpcs(): void {
+    this.game?.mapHelper?.refreshNpcs();
+  }
+
   /**
    * Back from the model editor: the models saved there replace the game's, the map draws them again, and the map
    * editor's palette shows them (modelsVersion). The selection and the model in hand are taken again.

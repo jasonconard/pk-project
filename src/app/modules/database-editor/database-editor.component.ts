@@ -29,6 +29,7 @@ import {
   ElementRef,
   inject,
   input,
+  OnInit,
   output,
   signal,
 } from "@angular/core";
@@ -148,13 +149,16 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { "(document:keydown)": "keydown($event)" },
 })
-export class DatabaseEditorComponent extends DbSheet {
+export class DatabaseEditorComponent extends DbSheet implements OnInit {
   protected readonly saveFailed = this.store.saveFailed;
   protected readonly iconEdit = this.store.iconEdit;
   protected readonly sheetEdit = this.store.sheetEdit;
 
   /** Opened over the game (Jeu closes the panel instead of going to the game's page). */
   readonly embedded = input(false);
+  /** Opened on a table (and one of its rows), e.g. an NPC's Fiche from the map editor. */
+  readonly startTable = input<DbTable>();
+  readonly startRow = input<string>();
 
   readonly closed = output<void>();
 
@@ -281,6 +285,17 @@ export class DatabaseEditorComponent extends DbSheet {
   protected readonly npc = computed(() =>
     this.table() === "npcs" ? (this.current() as DbNpc | null) : null
   );
+
+  ngOnInit(): void {
+    const table = this.startTable();
+    if (table) {
+      this.openTable(table);
+      const row = this.startRow();
+      if (row && this.rows().some((r) => r.id === row)) {
+        this.select(row);
+      }
+    }
+  }
 
   constructor() {
     super();

@@ -9,6 +9,7 @@ import {
 import { SceneChunk, SceneMap, StairsSide } from "./SceneMap";
 import { PlayerTex, ScenePlayer } from "./ScenePlayer";
 import { playerLook } from "./player-look";
+import { isNpc, makeNpcMesh } from "./npc-sprite";
 import {
   CAMERA_LOOK,
   Game,
@@ -251,6 +252,17 @@ export class MapHelper {
         this.buildChunk(chunk);
         chunk.group!.visible = shown;
         chunk.visible = visible;
+      }
+    });
+  }
+
+  /** The NPCs placed on the map drawn again (their walking sheet or name changed in the database). */
+  public refreshNpcs() {
+    this.sceneMap.chunks.forEach((chunk) => {
+      if (chunk.group) {
+        chunk.buildings
+          .filter((b) => isNpc(b))
+          .forEach((b) => this.refreshBuilding(chunk, b));
       }
     });
   }
@@ -525,6 +537,13 @@ export class MapHelper {
       chunk.group.add(zone);
       return;
     }
+    if (isNpc(building)) {
+      // (turned by its picture, not by its mesh: the sheet's row of the direction)
+      const npc = makeNpcMesh(building.modelId, rot);
+      this.addMesh(chunk.id + "-" + building.id, npc, world);
+      chunk.group.add(npc);
+      return;
+    }
     if (rot === (building.rot ?? 0) && canInstance(model, building)) {
       let byModel = this.instances.get(chunk.id);
       if (!byModel) {
@@ -775,6 +794,9 @@ export class MapHelper {
   } {
     if (modelId === ZONE_ID) {
       return { passable: true, canHide: false };
+    }
+    if (isNpc({ modelId })) {
+      return { passable: false, canHide: false };
     }
     const votes = new Map<string, number>();
     this.sceneMap.chunks.forEach((c) =>

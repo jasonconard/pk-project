@@ -237,6 +237,8 @@
         @case ("database") {
           <app-database-editor
             [embedded]="true"
+            [startTable]="panel.table"
+            [startRow]="panel.rowId"
             (closed)="closeEditorPanel()"
           />
         }
