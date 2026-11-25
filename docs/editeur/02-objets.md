@@ -42,6 +42,16 @@ Chaque changement enregistre une action `{ undo, redo }` (`MapEditorService.reco
 
 `md-rock.ts` : un bloc bas avec la tuile « Sea Rocks » de la planche d'animations (le fond rouge, couleur de transparence de la planche, est rendu transparent). Il bloque le passage et se pose dans l'eau comme sur la terre.
 
+## PNJ
+
+L'onglet **PNJ** de la palette (à côté d'Objets) montre les PNJ de la [base de données](10-base-de-donnees.md#pnj), avec leur image à l'arrêt ; **Nouveau** ouvre la table des PNJ pour en créer un. Choisir un PNJ puis toucher le sol le pose (il regarde vers le bas). Maquette : `design/main-view.pen` (Poser un PNJ, PNJ sélectionné).
+
+- Sur la carte, il est dessiné avec l'image à l'arrêt de sa **planche de marche**, dans sa direction (sans planche : l'ancien sprite du joueur).
+- Sélectionné : **Tourner** change la direction où il regarde (bas, gauche, haut, droite), **Fiche** ouvre sa fiche dans la base, **Dupliquer** et **Supprimer** comme un objet. Il bloque le passage (réglable) et n'a pas de passage vers une carte.
+- Ses **événements** se règlent comme ceux d'un objet : pour lui parler, le déclencheur **Parler** avec « Se tourner vers le joueur » ; dans l'action Message, choisir son portrait (le nom se remplit tout seul).
+- Changer sa planche ou son nom dans la base met à jour la carte en fermant la base.
+- À venir : un PNJ qui regarde autour de lui ou se promène.
+
 ## Événements
 
 Un objet sélectionné peut recevoir des événements (parler, entrer dessus, automatique) : voir [Événements](09-evenements.md). L'onglet **Événements** de la palette pose les zones invisibles.
