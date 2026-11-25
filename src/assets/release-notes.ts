@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.43',
+    date: '2026-11-25',
+    notes: [
+      'Hugo marche sur la carte avec un nouveau sprite, dans le même style que les autres personnages.',
+      'Dans les dialogues de la ville, Hugo et Jason ont leurs nouveaux portraits.',
+      'Éditeur : la base de données a une table PNJ, avec le premier habitant, Bernard le boulanger.',
+      'Éditeur : chaque personnage et PNJ a une planche de marche, à dessiner image par image ou à importer.',
+      'Éditeur : le nouvel onglet PNJ pose les habitants sur la carte. On peut leur parler, et ils se tournent vers le joueur.',
+    ],
+  },
+  {
     version: '0.0.42',
     date: '2026-11-23',
     notes: [
