@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { loadDatabase } from "../../database-editor/shared/database-storage";
-import { DbGroup } from "../../database-editor/shared/database";
+import { DbGroup, newCalendar } from "../../database-editor/shared/database";
 import { loadVariables } from "../../variables-editor/shared/variable-storage";
 import {
   clampCounter,
@@ -24,6 +24,8 @@ export class EventEditorData {
   /** The database: items, characters (of the team), groups of enemies. */
   readonly db = loadDatabase();
   readonly teamCharacters = this.db.characters;
+  /** The game's calendar (days of the week, months, special days: the date conditions). */
+  readonly calendar = this.db.calendar[0] ?? newCalendar();
   /** The portraits a message may show: the characters' and the NPCs' drawn in their sheet. */
   readonly portraits = [
     ...this.db.characters.map((c) => ({ row: c, owner: "character" as const })),
@@ -106,7 +108,11 @@ export function countConditions(c: EventConditions): number {
     (c.weathers ? 1 : 0) +
     (c.items?.length ?? 0) +
     (c.money ? 1 : 0) +
-    (c.members?.length ?? 0)
+    (c.members?.length ?? 0) +
+    (c.weekdays ? 1 : 0) +
+    (c.dates ? 1 : 0) +
+    (c.moments ? 1 : 0) +
+    (c.specials ? 1 : 0)
   );
 }
 

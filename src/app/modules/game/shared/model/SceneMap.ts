@@ -17,6 +17,8 @@ export interface SceneMap {
   kind: MapKind;
   /** Where the player arrives when nothing else is said (a passage without a point, a new game). */
   spawn?: Vec3;
+  /** The time on this map (missing: it passes as outside). */
+  time?: MapTime;
   chunks: SceneChunk[];
 }
 
@@ -54,3 +56,9 @@ export interface ChunkGround {
   canHide: boolean;
   mesh?: THREE.Mesh;
 }
+
+/**
+ * The time on a map (design/map-manager.pen, Réglages de la carte): it stops (a dungeon: the clock keeps the hour
+ * the player came in at) or stays frozen at an hour (whatever the hour outside); outside it goes on again.
+ */
+export type MapTime = { mode: "stop" } | { mode: "frozen"; hour: number };

@@ -4,6 +4,8 @@ import { PlayerDirection } from "./ScenePlayer";
 import { SceneEventInstruction } from "./SceneEventInstruction";
 import * as THREE from "three";
 
+import { DayTime } from "../../../database-editor/shared/database";
+import { CalendarDay } from "./ObjectEvent";
 export interface SceneEvent {
   conditions: SceneEventCondition;
   instructions: SceneEventInstruction[];
@@ -36,6 +38,14 @@ export interface SceneEventCondition {
   money?: number;
   /** Characters who must be in the team (database ids). */
   members?: string[];
+  /** Days of the week (indexes in the calendar's week). */
+  weekdays?: number[];
+  /** Dates each year, from … to (included; from after to goes over the new year). */
+  dates?: { from: CalendarDay; to: CalendarDay };
+  /** Moments of the day. */
+  moments?: DayTime[];
+  /** One of these special days of the calendar (ids). */
+  specials?: string[];
 }
 
 /** A flag is true / false ('is'); a counter compared with a number. */

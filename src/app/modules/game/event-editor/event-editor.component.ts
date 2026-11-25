@@ -32,6 +32,7 @@ import {
   LucideTrash,
   LucideUsers,
   LucideHeartPulse,
+  LucideCirclePause,
   LucideVariable,
   LucideVolume2,
   LucideX,
@@ -94,6 +95,12 @@ const ACTIONS: {
   { type: "money", label: "Argent", icon: LucideCoins },
   { type: "party", label: "Équipe", icon: LucideUsers },
   { type: "heal", label: "Soigner l'équipe", icon: LucideHeartPulse },
+  { type: "time", label: "Faire passer le temps", icon: LucideHourglass },
+  {
+    type: "timeFlow",
+    label: "Arrêter / reprendre le temps",
+    icon: LucideCirclePause,
+  },
   { type: "fight", label: "Combat", icon: LucideSwords, branches: true },
 ];
 
@@ -392,6 +399,10 @@ export class EventEditorComponent {
       case "stop":
       case "heal":
         return { type };
+      case "time":
+        return { type, mode: "until", hours: 2, moment: "evening" };
+      case "timeFlow":
+        return { type, stop: true };
       case "item":
         return this.data.db.items[0]
           ? { type, item: this.data.db.items[0].id, amount: 1 }

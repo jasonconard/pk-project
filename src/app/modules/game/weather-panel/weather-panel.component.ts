@@ -120,6 +120,10 @@ export class WeatherPanelComponent {
   readonly night = input(false);
   /** Time of day, 0..24 h. */
   readonly hour = input(12);
+  /** The clock: the date (« Ven. 5 printemps »), the moment of the day and the hour shown (frozen on some maps). */
+  readonly dateText = input("");
+  readonly momentText = input("");
+  readonly clockHour = input<number | null>(null);
   /** The time goes on by itself. */
   readonly timeFlow = input(true);
   readonly windStrength = input(0);
@@ -223,6 +227,9 @@ export class WeatherPanelComponent {
     () => TIME_ICONS[timeOfDayAt(this.hour())]
   );
   protected readonly hourLabel = computed(() => formatHour(this.hour()));
+  protected readonly clockLabel = computed(() =>
+    formatHour(this.clockHour() ?? this.hour())
+  );
   /**
    * Time of day of the current weather's screenshot: the current one, unless the weather only exists at the other
    * one (only one picture then: e.g. sunny-day, while the time going by brought the night).

@@ -310,6 +310,26 @@ export interface DbNpc {
   portrait?: string;
   /** The walking sheet on the map (see WALK_CELL). */
   walk?: string;
+  /** Where it is each day and moment (missing: always at every place it is put on the maps). */
+  schedule?: NpcSchedule;
+}
+
+/**
+ * An NPC's schedule (design/database.pen, 14 · PNJ · Emploi du temps). Its places are the NPC put on the maps (each
+ * one with its own events and place name): a place is « <map id>/<object id> », null where it is nowhere (absent).
+ */
+export interface NpcSchedule {
+  /** One row per day of the calendar's week, one place per moment of the day (DAY_TIMES' order). */
+  week: (string | null)[][];
+  /** On a special day of the calendar (at some moments, none: all day), somewhere else. */
+  exceptions: NpcException[];
+}
+
+export interface NpcException {
+  id: string;
+  special: string;
+  times: DayTime[];
+  place: string | null;
 }
 
 /**

@@ -13,5 +13,7 @@ export interface SceneBuilding {
   /** An invisible zone's size in cells (x wide, z deep; see Zone.ts). */
   size?: { x: number; z: number };
   canHide: boolean;
+  /** An NPC's place name (« derrière le comptoir »): its schedule picks it (see npc-schedule.ts). */
+  label?: string;
   events: SceneEvent[];
 }

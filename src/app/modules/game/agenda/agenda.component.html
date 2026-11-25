@@ -1,0 +1,139 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="agenda-title"
+>
+  <header>
+    <h2 id="agenda-title">Agenda</h2>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer"
+      title="Fermer (Échap)"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
+  </header>
+  <div class="content">
+    <div class="month">
+      <button type="button" aria-label="Mois d'avant" (click)="moveMonth(-1)">
+        <svg lucideChevronLeft></svg>
+      </button>
+      <b [style.--c]="monthColor()">
+        @switch (monthIcon()) {
+          @case ("sprout") {
+            <svg lucideSprout></svg>
+          }
+          @case ("sun") {
+            <svg lucideSun></svg>
+          }
+          @case ("leaf") {
+            <svg lucideLeaf></svg>
+          }
+          @case ("snowflake") {
+            <svg lucideSnowflake></svg>
+          }
+          @case ("flower") {
+            <svg lucideFlower></svg>
+          }
+          @case ("cloud-rain") {
+            <svg lucideCloudRain></svg>
+          }
+          @case ("moon") {
+            <svg lucideMoon></svg>
+          }
+          @default {
+            <svg lucideStar></svg>
+          }
+        }
+        {{ monthTitle() }}
+      </b>
+      <button type="button" aria-label="Mois d'après" (click)="moveMonth(1)">
+        <svg lucideChevronRight></svg>
+      </button>
+    </div>
+    <div class="grid" [style.--cols]="weekNames.length">
+      @for (d of weekNames; track $index) {
+        <span class="weekday">{{ d }}</span>
+      }
+      @for (week of weeks(); track $index) {
+        @for (cell of week; track $index) {
+          @if (cell) {
+            <span
+              class="day"
+              [class.today]="cell.today"
+              [class.past]="cell.past"
+            >
+              {{ cell.day }}
+              @if (cell.colors.length) {
+                <span class="marks">
+                  @for (c of cell.colors; track $index) {
+                    <i [style.background]="c"></i>
+                  }
+                </span>
+              }
+            </span>
+          } @else {
+            <span></span>
+          }
+        }
+      }
+    </div>
+
+    <div class="today-head">
+      <b>{{ todayText() }}</b>
+      <span>{{ hourText() }}</span>
+    </div>
+    @for (sd of todaySpecials(); track sd.id) {
+      <p class="today-special" [style.--c]="sd.color">
+        <i></i> {{ sd.name }} · toute la journée
+      </p>
+    }
+    <ol class="moments">
+      @for (m of moments(); track m.id) {
+        <li [class.now]="m.now" [class.past]="m.past">
+          @switch (m.id) {
+            @case ("morning") {
+              <svg lucideSunrise></svg>
+            }
+            @case ("afternoon") {
+              <svg lucideSun></svg>
+            }
+            @case ("evening") {
+              <svg lucideSunset></svg>
+            }
+            @default {
+              <svg lucideMoon></svg>
+            }
+          }
+          <span class="texts">
+            <b>{{ m.label }}</b>
+            <small>{{ m.hours }}</small>
+          </span>
+          <small class="what">{{ m.now ? "En cours" : m.specials }}</small>
+        </li>
+      }
+    </ol>
+
+    @if (coming().length) {
+      <h3>À venir</h3>
+      <ul class="coming">
+        @for (c of coming(); track c.special.id) {
+          <li [style.--c]="c.special.color">
+            <i></i>
+            <b>{{ c.when }}</b>
+            <span
+              >{{ c.special.name }}
+              @if (c.special.times.length) {
+                · {{ momentTimes(c.special) }}
+              }
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

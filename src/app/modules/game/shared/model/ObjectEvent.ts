@@ -14,6 +14,13 @@ import {
 } from "../../../database-editor/shared/database-storage";
 import { cachedFromStorage } from "../../../../core/shared/local-store";
 
+import { DayTime } from "../../../database-editor/shared/database";
+import {
+  dateOf,
+  gameCalendar,
+  momentAt,
+  specialDayFits,
+} from "./game-calendar";
 /**
  * An event set on an object in the map editor's event window: what starts it (talking to the object, stepping on it,
  * or on its own), the conditions that must be true (story variables, hour, weather) and the actions played one after
@@ -42,6 +49,20 @@ export interface EventConditions {
   money?: number;
   /** These characters are in the team. */
   members?: string[];
+  /** Days of the week (indexes in the calendar's week). */
+  weekdays?: number[];
+  /** Dates each year, from … to (included; from after to goes over the new year). */
+  dates?: { from: CalendarDay; to: CalendarDay };
+  /** Moments of the day. */
+  moments?: DayTime[];
+  /** One of these special days of the calendar (ids). */
+  specials?: string[];
+}
+
+/** A day of the year: month index and day (from 1). */
+export interface CalendarDay {
+  month: number;
+  day: number;
 }
 
 export type EventAction =
@@ -70,6 +91,15 @@ export type EventAction =
   | { type: "party"; character: string; join: boolean }
   /** The team healed: PV and PM full, states gone. */
   | { type: "heal" }
+  /** The time passes (a fade to black): some hours, until a moment of the day, or the next morning. */
+  | {
+      type: "time";
+      mode: "hours" | "until" | "nextDay";
+      hours: number;
+      moment: DayTime;
+    }
+  /** The time stops (until it goes on, or another map) or goes on again. */
+  | { type: "timeFlow"; stop: boolean }
   /** A fight against a group of the database, then the branch of how it ended. */
   | {
       type: "fight";
@@ -298,6 +328,10 @@ function partyConditions(c: Omit<EventConditions, "variables">) {
     ...(c.items?.length ? { items: c.items.map((i) => ({ ...i })) } : {}),
     ...(c.money ? { money: c.money } : {}),
     ...(c.members?.length ? { members: [...c.members] } : {}),
+    ...(c.weekdays?.length ? { weekdays: [...c.weekdays] } : {}),
+    ...(c.dates ? { dates: structuredClone(c.dates) } : {}),
+    ...(c.moments?.length ? { moments: [...c.moments] } : {}),
+    ...(c.specials?.length ? { specials: [...c.specials] } : {}),
   };
 }
 
@@ -355,6 +389,20 @@ function toInstruction(
       };
     case "heal":
       return { type: InstructionType.HEAL };
+    case "time":
+      return {
+        type: InstructionType.TIME,
+        time: {
+          mode: action.mode,
+          ...(action.mode === "hours" ? { hours: action.hours } : {}),
+          ...(action.mode === "until" ? { moment: action.moment } : {}),
+        },
+      };
+    case "timeFlow":
+      return {
+        type: InstructionType.TIME_FLOW,
+        timeFlow: { stop: action.stop },
+      };
   }
 }
 
@@ -480,6 +528,17 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
       return { type: "stop" };
     case InstructionType.HEAL:
       return { type: "heal" };
+    case InstructionType.TIME:
+      return instruction.time
+        ? {
+            type: "time",
+            mode: instruction.time.mode,
+            hours: instruction.time.hours ?? 2,
+            moment: instruction.time.moment ?? "evening",
+          }
+        : null;
+    case InstructionType.TIME_FLOW:
+      return { type: "timeFlow", stop: !!instruction.timeFlow?.stop };
     case InstructionType.ITEM:
       return instruction.item
         ? {
@@ -508,6 +567,8 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
 /** Does the event's conditions fit now? */
 export interface EventContext {
   hour: number;
+  /** The game's date (a day number, see game-calendar.ts). */
+  day: number;
   weather: string;
   values: Record<string, boolean | number>;
 }
@@ -515,10 +576,22 @@ export interface EventContext {
 export function conditionsFit(
   conditions: Pick<
     SceneEvent["conditions"],
-    "variables" | "hours" | "weathers" | "items" | "money" | "members"
+    | "variables"
+    | "hours"
+    | "weathers"
+    | "items"
+    | "money"
+    | "members"
+    | "weekdays"
+    | "dates"
+    | "moments"
+    | "specials"
   >,
   ctx: EventContext
 ): boolean {
+  if (!calendarFits(conditions, ctx)) {
+    return false;
+  }
   const hours = conditions.hours;
   if (hours && hours.from !== hours.to) {
     const h = ctx.hour;
@@ -570,4 +643,47 @@ export function conditionsFit(
         return typeof value === "number" && value <= Number(test.value);
     }
   });
+}
+
+/** The day of the week, date, moment and special day conditions (the game's calendar). */
+function calendarFits(
+  conditions: Pick<
+    EventConditions,
+    "weekdays" | "dates" | "moments" | "specials"
+  >,
+  ctx: EventContext
+): boolean {
+  const { weekdays, dates, moments, specials } = conditions;
+  if (!weekdays?.length && !dates && !moments?.length && !specials?.length) {
+    return true;
+  }
+  const calendar = gameCalendar();
+  const date = dateOf(ctx.day, calendar);
+  const moment = momentAt(ctx.hour, calendar);
+  if (weekdays?.length && !weekdays.includes(date.weekday)) {
+    return false;
+  }
+  if (moments?.length && !moments.includes(moment)) {
+    return false;
+  }
+  if (dates) {
+    const at = (d: CalendarDay) => d.month * 1000 + d.day;
+    const now = at(date);
+    const from = at(dates.from);
+    const to = at(dates.to);
+    const inside =
+      from <= to ? now >= from && now <= to : now >= from || now <= to;
+    if (!inside) {
+      return false;
+    }
+  }
+  if (
+    specials?.length &&
+    !calendar.special.some(
+      (sd) => specials.includes(sd.id) && specialDayFits(sd, date, moment)
+    )
+  ) {
+    return false;
+  }
+  return true;
 }

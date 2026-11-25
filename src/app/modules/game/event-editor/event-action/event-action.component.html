@@ -199,6 +199,79 @@
       <span>secondes</span>
     </div>
   }
+  @case ("time") {
+    <div class="segmented" role="radiogroup" aria-label="Jusqu'où">
+      @for (m of timeModes; track m.id) {
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="action.mode === m.id"
+          (click)="set({ mode: m.id })"
+        >
+          {{ m.label }}
+        </button>
+      }
+    </div>
+    @if (action.mode === "hours") {
+      <div class="row">
+        <input
+          type="number"
+          class="num"
+          min="1"
+          max="72"
+          aria-label="Heures"
+          [value]="action.hours"
+          (change)="set({ hours: wholeNumber(value($event), 1, 72) })"
+        />
+        <span>heures de plus</span>
+      </div>
+    } @else if (action.mode === "until") {
+      <div class="row">
+        <span>Jusqu'au</span>
+        <select
+          aria-label="Moment"
+          (change)="set({ moment: $any(value($event)) })"
+        >
+          @for (t of dayTimes; track t.id) {
+            <option [value]="t.id" [selected]="t.id === action.moment">
+              {{ t.label }} (prochain)
+            </option>
+          }
+        </select>
+      </div>
+    }
+    <p class="help">
+      Fondu au noir, l'horloge avance (le jour aussi si on passe minuit), le
+      monde suit : lumière, habitants.
+    </p>
+  }
+  @case ("timeFlow") {
+    <div class="segmented" role="radiogroup" aria-label="Le temps">
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="action.stop"
+        (click)="set({ stop: true })"
+      >
+        Arrêter
+      </button>
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="!action.stop"
+        (click)="set({ stop: false })"
+      >
+        Reprendre
+      </button>
+    </div>
+    <p class="help">
+      {{
+        action.stop
+          ? "L'heure ne bouge plus jusqu'à « Reprendre » ou au changement de carte."
+          : "L'heure avance de nouveau."
+      }}
+    </p>
+  }
   @case ("heal") {
     <p class="help">
       Toute l'équipe retrouve ses PV et ses PM, et ses états (poison…)

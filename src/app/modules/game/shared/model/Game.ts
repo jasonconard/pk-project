@@ -70,6 +70,8 @@ export class Game {
   frame = 0;
   framePerSec = 0;
   paused = false;
+  /** The game's date: a day number (see game-calendar.ts), kept by GameService. */
+  day = 0;
 
   /** What the action key would do in front of the player (null: nothing), see GameMapService.updateAction. */
   action: GameAction | null = null;

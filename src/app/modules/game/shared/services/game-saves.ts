@@ -23,6 +23,8 @@ export interface GameSave {
   pos: Vec3;
   /** 0 ≤ hour < 24, with the minutes (14.5 = 14:30). */
   hour: number;
+  /** The game's date (a day number, see game-calendar.ts); missing in the saves made before the calendar. */
+  day?: number;
   weather: WeatherType;
   variables: VariableValues;
   /** Missing in the saves made before the database. */

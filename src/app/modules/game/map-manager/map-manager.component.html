@@ -90,6 +90,38 @@
             </button>
           </div>
           @if (isExpanded(map)) {
+            <div class="time-row" animate.enter="anim-fade-in">
+              <span>Le temps</span>
+              <div
+                class="time-modes"
+                role="radiogroup"
+                aria-label="Le temps sur cette carte"
+              >
+                @for (mode of timeModes; track mode.id) {
+                  <button
+                    type="button"
+                    role="radio"
+                    [title]="mode.help"
+                    [attr.aria-checked]="timeMode(map) === mode.id"
+                    (click)="setTime(map, mode.id)"
+                  >
+                    {{ mode.label }}
+                  </button>
+                }
+              </div>
+              @if (map.time?.mode === "frozen") {
+                <select
+                  aria-label="Heure figée"
+                  (change)="setFrozenHour(map, +$any($event.target).value)"
+                >
+                  @for (h of hours; track h) {
+                    <option [value]="h" [selected]="$any(map.time).hour === h">
+                      {{ h }} h
+                    </option>
+                  }
+                </select>
+              }
+            </div>
             <div class="actions" animate.enter="anim-fade-in">
               <button type="button" (click)="startRename(map)">
                 <svg lucidePencil></svg> Renommer

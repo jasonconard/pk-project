@@ -9,7 +9,8 @@ import {
 import { SceneChunk, SceneMap, StairsSide } from "./SceneMap";
 import { PlayerTex, ScenePlayer } from "./ScenePlayer";
 import { playerLook } from "./player-look";
-import { isNpc, makeNpcMesh } from "./npc-sprite";
+import { isNpc, makeNpcMesh, npcOf } from "./npc-sprite";
+import { npcPlaceAt, placeKey } from "./npc-schedule";
 import { facingSprite } from "./pixel-scale";
 import {
   CAMERA_LOOK,
@@ -541,6 +542,23 @@ export class MapHelper {
       return;
     }
     if (isNpc(building)) {
+      // Its schedule: shown at the place it is at now (the editor shows every place)
+      if (!this.originGame.editMode) {
+        const npc = npcOf(building.modelId);
+        const place =
+          npc &&
+          npcPlaceAt(
+            npc,
+            this.originGame.day,
+            this.originGame.weather.hourOfDay
+          );
+        if (
+          place !== undefined &&
+          place !== placeKey(this.sceneMap.id, building.id)
+        ) {
+          return;
+        }
+      }
       // (turned by its picture, not by its mesh: the sheet's row of the direction)
       const npc = makeNpcMesh(building.modelId, rot);
       this.addMesh(chunk.id + "-" + building.id, npc, world);

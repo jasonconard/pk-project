@@ -7,6 +7,7 @@ import {
   InstructionLog,
   InstructionMessage,
   InstructionTeleport,
+  InstructionTime,
   InstructionType,
   InstructionVariable,
   InstructionWait,
@@ -28,6 +29,15 @@ import {
 import { BattleService } from "../../../battle/shared/battle.service";
 import { BattleResult } from "../../../battle/shared/battle-types";
 
+/** A time action of an event: the time passes, or stops / goes on again. */
+export interface TimeRequest {
+  pass?: InstructionTime;
+  stop?: boolean;
+}
+
+/** How long the fade to black of a « time passes » lasts (ms). */
+export const TIME_FADE_MS = 1100;
+
 @Service()
 export class SequenceService {
   private readonly coreService = inject(CoreService);
@@ -48,6 +58,10 @@ export class SequenceService {
   private readonly weatherSubject = new Subject<string>();
   /** Emits each weather change asked by an event (WeatherType); the game applies it. */
   readonly weather$: Observable<string> = this.weatherSubject.asObservable();
+
+  private readonly timeSubject = new Subject<TimeRequest>();
+  /** Emits each time action of an event (time passing, stopped, going on); the game applies it. */
+  readonly time$: Observable<TimeRequest> = this.timeSubject.asObservable();
 
   /** What the branches of the event being played check (hour, weather, variables now), given by the game. */
   private context: (() => EventContext) | null = null;
@@ -156,6 +170,19 @@ export class SequenceService {
         break;
       case InstructionType.HEAL:
         healTeam();
+        this.nextSequence();
+        break;
+      case InstructionType.TIME:
+        if (instruction.time) {
+          this.timeSubject.next({ pass: instruction.time });
+          // (the fade to black and back)
+          setTimeout(() => this.nextSequence(), TIME_FADE_MS);
+        } else {
+          this.nextSequence();
+        }
+        break;
+      case InstructionType.TIME_FLOW:
+        this.timeSubject.next({ stop: !!instruction.timeFlow?.stop });
         this.nextSequence();
         break;
       case InstructionType.FIGHT:

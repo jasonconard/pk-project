@@ -14,12 +14,16 @@ import {
   LucideUsers,
   LucideVariable,
   LucideX,
+  LucideCalendar,
+  LucideCalendarDays,
+  LucideStar,
+  LucideSunMoon,
 } from "@lucide/angular";
 import {
   ITEM_COUNT_MAX,
   MONEY_MAX,
 } from "../../../database-editor/shared/party";
-import { EventConditions } from "../../shared/model/ObjectEvent";
+import { CalendarDay, EventConditions } from "../../shared/model/ObjectEvent";
 import { VariableTest } from "../../shared/model/SceneEvent";
 import {
   countConditions,
@@ -38,6 +42,8 @@ const COUNTER_TESTS: { op: VariableTest["op"]; label: string }[] = [
   { op: "lte", label: "≤" },
 ];
 
+import { DAY_TIMES, DayTime } from "../../../database-editor/shared/database";
+import { shortWeekday } from "../../shared/model/game-calendar";
 /**
  * Conditions that must all be true (the event's, or a condition action's): variables, hours, weathers, items carried,
  * money, team members. Gives back a changed copy; the weather window is opened by the event window (over it).
@@ -46,6 +52,10 @@ const COUNTER_TESTS: { op: VariableTest["op"]; label: string }[] = [
   selector: "game-event-conditions",
   imports: [
     LucideBackpack,
+    LucideCalendar,
+    LucideCalendarDays,
+    LucideStar,
+    LucideSunMoon,
     LucideClock,
     LucideCloudSun,
     LucideCoins,
@@ -130,6 +140,87 @@ export class EventConditionsComponent {
         delete c.weathers;
       }
     });
+  }
+
+  // The calendar: days of the week, dates, moments, special days
+
+  protected readonly dayTimes = DAY_TIMES;
+  protected readonly shortDay = shortWeekday;
+
+  protected clear(key: "weekdays" | "dates" | "moments" | "specials"): void {
+    this.change((c) => delete c[key]);
+  }
+
+  /** Adds or removes a value of a list condition (an empty list: the condition goes). */
+  private toggleIn<K extends "weekdays" | "moments" | "specials">(
+    key: K,
+    value: NonNullable<EventConditions[K]>[number]
+  ): void {
+    this.change((c) => {
+      const list = (c[key] ?? []) as (typeof value)[];
+      const next = list.includes(value)
+        ? list.filter((v) => v !== value)
+        : [...list, value];
+      if (next.length > 0) {
+        (c as Record<K, unknown>)[key] = next;
+      } else {
+        delete c[key];
+      }
+    });
+  }
+
+  protected toggleWeekday(index: number): void {
+    this.toggleIn("weekdays", index);
+  }
+
+  protected toggleMoment(time: DayTime): void {
+    this.toggleIn("moments", time);
+  }
+
+  protected toggleSpecial(id: string): void {
+    this.toggleIn("specials", id);
+  }
+
+  protected addWeekdays(): void {
+    const week = this.data.calendar.week.length;
+    // (the weekend of a 7 days week, else the last day)
+    this.change(
+      (c) => (c.weekdays = week === 7 ? [5, 6] : [Math.max(0, week - 1)])
+    );
+  }
+
+  protected addDates(): void {
+    this.change(
+      (c) =>
+        (c.dates = { from: { month: 0, day: 1 }, to: { month: 0, day: 7 } })
+    );
+  }
+
+  protected addMoments(): void {
+    this.change((c) => (c.moments = ["evening"]));
+  }
+
+  protected addSpecials(): void {
+    const first = this.data.calendar.special[0];
+    if (first) {
+      this.change((c) => (c.specials = [first.id]));
+    }
+  }
+
+  protected setDate(end: "from" | "to", patch: Partial<CalendarDay>): void {
+    this.change((c) => {
+      if (c.dates) {
+        const next = { ...c.dates[end], ...patch };
+        const days = this.data.calendar.months[next.month]?.days ?? 1;
+        next.day = Math.min(next.day, days);
+        c.dates = { ...c.dates, [end]: next };
+      }
+    });
+  }
+
+  protected daysOf(month: number): number[] {
+    const days = this.data.calendar.months[month]?.days ?? 1;
+    return Array.from({ length: days }, (_, i) => i + 1);
   }
 
   // The team: items carried, money, members

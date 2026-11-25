@@ -52,6 +52,7 @@ import {
 } from "./shared/weather/Weather";
 import { GameMenuComponent } from "./game-menu/game-menu.component";
 import { GameSavesComponent } from "./game-saves/game-saves.component";
+import { AgendaComponent } from "./agenda/agenda.component";
 import { VariablesTestComponent } from "./variables-test/variables-test.component";
 import { BattleSimComponent } from "../battle/battle-sim/battle-sim.component";
 import { MapControlsComponent } from "./map-controls/map-controls.component";
@@ -61,12 +62,16 @@ import { SequenceService } from "./shared/services/sequence.service";
 import { LucideMenu, LucidePencilRuler } from "@lucide/angular";
 import { isTyping } from "../../core/shared/typing";
 
+import { TimeBannerComponent } from "./time-banner/time-banner.component";
+import { momentLabel } from "./shared/model/game-calendar";
 @Component({
   selector: "game-main",
   imports: [
     StickComponent,
     TouchPadComponent,
     MessageComponent,
+    AgendaComponent,
+    TimeBannerComponent,
     TeleportComponent,
     FightUiComponent,
     BattleHudComponent,
@@ -105,6 +110,12 @@ export class GameComponent {
   protected readonly weather = this.gameService.weather;
   protected readonly night = this.gameService.night;
   protected readonly hour = this.gameService.hour;
+  protected readonly shownHour = this.gameService.shownHour;
+  protected readonly dateText = this.gameService.dateText;
+  protected readonly momentText = computed(() =>
+    momentLabel(this.gameService.moment())
+  );
+  protected readonly timeFade = this.gameService.timeFade;
   protected readonly timeFlow = this.gameService.timeFlow;
   protected readonly windStrength = this.gameService.windStrength;
   protected readonly windDirection = this.gameService.windDirection;
@@ -140,6 +151,7 @@ export class GameComponent {
   protected readonly releaseNotes = signal(false);
   /** The saved games dialog (menu → Sauver). */
   protected readonly savesOpen = signal(false);
+  protected readonly agendaOpen = signal(false);
   /** The variables test panel (menu → Test des variables). */
   protected readonly variablesTestOpen = signal(false);
   protected readonly battleSimOpen = signal(false);
@@ -199,6 +211,7 @@ export class GameComponent {
         !this.menuOpen() &&
         !this.releaseNotes() &&
         !this.savesOpen() &&
+        !this.agendaOpen() &&
         !this.variablesTestOpen() &&
         !this.battleSimOpen() &&
         !this.sequenceService.message() &&
@@ -295,6 +308,11 @@ export class GameComponent {
     this.battleSimOpen.set(true);
   }
 
+  protected openAgenda(): void {
+    this.menuOpen.set(false);
+    this.agendaOpen.set(true);
+  }
+
   protected openSaves(): void {
     this.menuOpen.set(false);
     this.savesOpen.set(true);
@@ -354,6 +372,10 @@ export class GameComponent {
 
   protected setObjectEvents(events: ObjectEvent[]): void {
     this.gameService.setObjectEvents(events);
+  }
+
+  protected setPlaceLabel(label: string): void {
+    this.gameService.setPlaceLabel(label);
   }
 
   protected setZoneSize(size: { x: number; z: number }): void {

@@ -222,6 +222,7 @@ export class GameMapService {
   private eventContext(game: Game): EventContext {
     return {
       hour: game.weather.hourOfDay,
+      day: game.day,
       weather: game.weather.type,
       values: currentVariableValues(),
     };

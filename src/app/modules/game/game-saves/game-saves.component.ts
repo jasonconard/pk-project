@@ -25,6 +25,7 @@ import { currentParty, restoreParty } from "../../database-editor/shared/party";
 
 type SlotAction = "load" | "overwrite" | "delete";
 
+import { dateLabel, dateOf, gameCalendar } from "../shared/model/game-calendar";
 /**
  * Saved games (menu → Sauver): a few slots, each with where the player was, the time, the weather and when it was
  * saved. Sauver ici / Écraser keeps the game now; Charger goes back to it (the current progress is lost: pressed
@@ -76,6 +77,7 @@ export class GameSavesComponent {
       appVersion: this.version(),
       ...spot,
       hour: this.gameService.hour(),
+      day: this.gameService.day(),
       weather: this.gameService.weather(),
       variables: currentVariableValues(),
       party: structuredClone(currentParty()),
@@ -96,7 +98,13 @@ export class GameSavesComponent {
     restoreVariableValues(save.variables ?? {});
     restoreParty(save.party);
     if (
-      !this.gameService.restoreSpot(save.map, save.pos, save.hour, save.weather)
+      !this.gameService.restoreSpot(
+        save.map,
+        save.pos,
+        save.hour,
+        save.weather,
+        save.day
+      )
     ) {
       this.message.set(
         `La carte « ${save.mapName} » n'existe plus : retour à la carte de départ.`
@@ -122,6 +130,9 @@ export class GameSavesComponent {
     const weather = WEATHER_CHOICES.find((w) => w.type === save.weather)?.label;
     return [
       save.mapName,
+      save.day === undefined
+        ? ""
+        : dateLabel(dateOf(save.day, gameCalendar()), gameCalendar()),
       `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
       weather,
     ]

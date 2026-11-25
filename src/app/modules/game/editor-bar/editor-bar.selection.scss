@@ -161,3 +161,28 @@
     }
   }
 }
+
+// An NPC's place name (its schedule in the database picks it)
+.place-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+  font-size: 13px;
+
+  span {
+    flex-shrink: 0;
+    color: #b8bbc8;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: inherit;
+  }
+}

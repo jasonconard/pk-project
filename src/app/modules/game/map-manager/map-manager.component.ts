@@ -31,7 +31,7 @@ import {
 } from "@lucide/angular";
 import { GameService } from "../shared/services/game.service";
 import { listMaps, MapSummary } from "../shared/services/map-storage";
-import { MapKind } from "../shared/model/SceneMap";
+import { MapKind, MapTime } from "../shared/model/SceneMap";
 
 /** Time to confirm a reset / delete (ms). */
 const CONFIRM_TIME = 3000;
@@ -79,6 +79,28 @@ export class MapManagerComponent implements OnInit {
   readonly closed = output<void>();
 
   protected readonly kinds = KINDS;
+  protected readonly timeModes: {
+    id: "pass" | "stop" | "frozen";
+    label: string;
+    help: string;
+  }[] = [
+    {
+      id: "pass",
+      label: "Passe",
+      help: "Comme dehors : l'heure et la lumière avancent",
+    },
+    {
+      id: "stop",
+      label: "S'arrête",
+      help: "L'horloge reste à l'heure d'entrée (conseillé pour un donjon)",
+    },
+    {
+      id: "frozen",
+      label: "Figé",
+      help: "Toujours la même heure, quelle que soit l'heure dehors",
+    },
+  ];
+  protected readonly hours = Array.from({ length: 24 }, (_, h) => h);
   protected readonly maps = signal<MapSummary[]>(listMaps());
   protected readonly view = signal<"list" | "new">("list");
   /** Map whose actions are shown (the current one at first). */
@@ -132,6 +154,27 @@ export class MapManagerComponent implements OnInit {
       this.gameService.openMap(map.id);
     }
     this.closed.emit();
+  }
+
+  protected timeMode(map: MapSummary): "pass" | "stop" | "frozen" {
+    return map.time?.mode ?? "pass";
+  }
+
+  /** The time on a map: it passes, stops, or is frozen (at midnight first). */
+  protected setTime(map: MapSummary, mode: "pass" | "stop" | "frozen"): void {
+    let time: MapTime | null = null;
+    if (mode === "stop") {
+      time = { mode };
+    } else if (mode === "frozen") {
+      time = { mode, hour: map.time?.mode === "frozen" ? map.time.hour : 0 };
+    }
+    this.gameService.setMapTime(map.id, time);
+    this.maps.set(listMaps());
+  }
+
+  protected setFrozenHour(map: MapSummary, hour: number): void {
+    this.gameService.setMapTime(map.id, { mode: "frozen", hour });
+    this.maps.set(listMaps());
   }
 
   protected toggleActions(map: MapSummary, event: Event): void {

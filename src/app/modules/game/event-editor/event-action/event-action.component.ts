@@ -38,6 +38,7 @@ type ChoiceAction = Extract<EventAction, { type: "choice" }>;
  * the weather, the sound…). Its branches and a condition's conditions are drawn by the event window. Gives back
  * what changed; the weather window is opened by the event window (over it).
  */
+import { DAY_TIMES } from "../../../database-editor/shared/database";
 @Component({
   selector: "game-event-action",
   imports: [
@@ -65,6 +66,16 @@ export class EventActionComponent {
   protected readonly maxOptions = MAX_CHOICE_OPTIONS;
   protected readonly countMax = ITEM_COUNT_MAX;
   protected readonly moneyMax = MONEY_MAX;
+  protected readonly dayTimes = DAY_TIMES;
+  protected readonly wholeNumber = wholeNumber;
+  protected readonly timeModes: {
+    id: "hours" | "until" | "nextDay";
+    label: string;
+  }[] = [
+    { id: "hours", label: "Des heures" },
+    { id: "until", label: "Jusqu'au moment" },
+    { id: "nextDay", label: "Lendemain matin" },
+  ];
   protected readonly value = fieldValue;
   protected readonly counterValue = counterValue;
   protected readonly weatherLabel = weatherLabel;

@@ -65,6 +65,8 @@ export interface EditSelection {
   events: ObjectEvent[];
   /** An invisible zone's size in cells (null: not a zone). */
   zoneSize: { x: number; z: number } | null;
+  /** An NPC's place name (its schedule picks it). */
+  placeLabel: string;
 }
 
 /** Ground brush: size in cells, or the bucket. */
@@ -737,6 +739,7 @@ export class MapEditorService {
                 z: picked.building.size?.z ?? 2,
               }
             : null,
+          placeLabel: picked.building.label ?? "",
         }
       : null;
   }
@@ -971,6 +974,30 @@ export class MapEditorService {
   }
 
   /** The selected zone's size in cells. Undone as one change. */
+  /** The selected NPC's place name (empty: none). */
+  setPlaceLabel(game: Game, label: string) {
+    const picked = this.selected;
+    if (!picked) {
+      return;
+    }
+    const building = picked.building;
+    const before = building.label;
+    const after = label.trim() || undefined;
+    const set = (value: string | undefined) => {
+      if (value) {
+        building.label = value;
+      } else {
+        delete building.label;
+      }
+      const chunk = this.chunkOf(game, building);
+      if (chunk) {
+        this.select(game, { chunk, building });
+      }
+    };
+    set(after);
+    this.record(game, { undo: () => set(before), redo: () => set(after) });
+  }
+
   setZoneSize(game: Game, size: { x: number; z: number }) {
     const picked = this.selected;
     if (!picked || !isZone(picked.building)) {

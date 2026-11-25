@@ -1,5 +1,6 @@
 import { VariableTest } from "./SceneEvent";
 import { Vec3 } from "./SceneUtils";
+import { DayTime } from "../../../database-editor/shared/database";
 
 /** (new types at the end: the maps store the numbers) */
 export enum InstructionType {
@@ -17,6 +18,10 @@ export enum InstructionType {
   PARTY,
   FIGHT,
   HEAL,
+  /** TIME: the time passes (a fade to black), see InstructionTime. */
+  TIME,
+  /** TIME_FLOW: the time stops or goes on again (until « go on » or another map). */
+  TIME_FLOW,
 }
 
 export interface SceneEventInstruction {
@@ -38,7 +43,16 @@ export interface SceneEventInstruction {
   party?: { id: string; join: boolean };
   /** FIGHT: a fight against a group; its sub-instructions 'win', 'lose' or 'flee' follow. */
   fight?: { group: string };
+  time?: InstructionTime;
+  timeFlow?: { stop: boolean };
   subInstructions?: SceneEventSubInstruction[];
+}
+
+/** Some hours more, until a moment of the day (the next one of that name), or the next morning. */
+export interface InstructionTime {
+  mode: "hours" | "until" | "nextDay";
+  hours?: number;
+  moment?: DayTime;
 }
 
 export interface SceneEventSubInstruction {
@@ -97,4 +111,11 @@ export interface InstructionBranch {
   items?: { id: string; count: number }[];
   money?: number;
   members?: string[];
+  weekdays?: number[];
+  dates?: {
+    from: { month: number; day: number };
+    to: { month: number; day: number };
+  };
+  moments?: DayTime[];
+  specials?: string[];
 }

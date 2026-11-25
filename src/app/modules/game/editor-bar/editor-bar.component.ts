@@ -273,6 +273,8 @@ export class EditorBarComponent {
   readonly eventsChange = output<ObjectEvent[]>();
   /** The selected zone's size in cells. */
   readonly zoneSizeChange = output<{ x: number; z: number }>();
+  /** The selected NPC's place name (its schedule picks it). */
+  readonly placeLabelChange = output<string>();
   /** The event open in the event window (its place in the selected object's list). */
   protected readonly editingEvent = linkedSignal<
     EditSelection | null,

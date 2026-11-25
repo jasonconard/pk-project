@@ -1,4 +1,11 @@
-import { computed, effect, inject, Service, signal } from "@angular/core";
+import {
+  computed,
+  effect,
+  inject,
+  Service,
+  signal,
+  untracked,
+} from "@angular/core";
 import { MODELS } from "../../../../../assets/models/models";
 import { reloadBrowserModels } from "../model/browser-models";
 import { GameAction } from "../model/GameAction";
@@ -59,6 +66,16 @@ import {
 } from "../weather/Weather";
 import { MusicSlot } from "../../../music-editor/shared/song";
 import { readJson, writeJson } from "../../../../core/shared/local-store";
+import {
+  dateLabel,
+  dateOf,
+  gameCalendar,
+  momentAt,
+  startDayNumber,
+} from "../model/game-calendar";
+import { MapTime } from "../model/SceneMap";
+import { InstructionTime } from "../model/SceneEventInstruction";
+import { TIME_FADE_MS } from "./sequence.service";
 
 /** Snapshot of the game state displayed by the Angular UI (HUD, overlays). */
 export interface GameHud {
@@ -108,6 +125,8 @@ const sameHud = (a: GameHud | null, b: GameHud | null): boolean =>
 interface SavedSettings {
   weather: WeatherType;
   hour: number;
+  /** The game's date: a day number (see game-calendar.ts). */
+  day: number;
   timeFlow: boolean;
   windStrength: number;
   windDirection: WindDirection;
@@ -145,6 +164,9 @@ function loadSettings(): Partial<SavedSettings> {
   }
   if (typeof raw["hour"] === "number" && raw["hour"] >= 0 && raw["hour"] < 24) {
     out.hour = raw["hour"];
+  }
+  if (typeof raw["day"] === "number" && raw["day"] >= 0) {
+    out.day = Math.floor(raw["day"]);
   }
   if (raw["windDirection"] === "east" || raw["windDirection"] === "west") {
     out.windDirection = raw["windDirection"];
@@ -192,8 +214,7 @@ function saveSettings(settings: SavedSettings) {
   }
 }
 
-/** Real duration of a whole day (s) when the time goes by itself, and the time step (ms). */
-const DAY_DURATION = 12 * 60;
+/** The time step (ms) when the time goes by itself (a whole day lasts the calendar's minutes). */
 const TIME_STEP = 250;
 
 @Service()
@@ -218,11 +239,45 @@ export class GameService {
     this.saved.weather ?? WeatherType.NEUTRAL
   );
   readonly weather = this.weatherState.asReadonly();
-  /** Time of day, 0..24 h (dawn 6-8 h, dusk 18-20 h). */
-  private readonly hourState = signal(this.saved.hour ?? 12);
+  /** Time of day, 0..24 h (dawn 6-8 h, dusk 18-20 h); a new game: the calendar's start. */
+  private readonly hourState = signal(
+    this.saved.hour ?? gameCalendar().start.hour
+  );
   readonly hour = this.hourState.asReadonly();
+  /** The game's date: a day number (see game-calendar.ts); goes on at midnight. */
+  private readonly dayState = signal(
+    this.saved.day ?? startDayNumber(gameCalendar())
+  );
+  readonly day = this.dayState.asReadonly();
+  /** Changes when the calendar may have changed (the database closed): the date's words are read again. */
+  private readonly calendarVersion = signal(0);
+  /** The time on the map being played (stopped, frozen at an hour; null: it passes). */
+  private readonly mapTimeState = signal<MapTime | null>(null, {
+    equal: (a, b) => JSON.stringify(a) === JSON.stringify(b),
+  });
+  readonly mapTime = this.mapTimeState.asReadonly();
+  /** An event stopped the time (until one makes it go on, or another map). */
+  private readonly timeStoppedState = signal(false);
+  /** The hour shown (frozen on a map that says so, else the time of day). */
+  readonly shownHour = computed(() => {
+    const mapTime = this.mapTimeState();
+    return mapTime?.mode === "frozen" ? mapTime.hour : this.hourState();
+  });
+  readonly date = computed(() => {
+    this.calendarVersion();
+    return dateOf(this.dayState(), gameCalendar());
+  });
+  readonly moment = computed(() => {
+    this.calendarVersion();
+    return momentAt(this.shownHour(), gameCalendar());
+  });
+  /** « Ven. 5 printemps » (the clock). */
+  readonly dateText = computed(() => dateLabel(this.date(), gameCalendar()));
+  /** A « time passes » action of an event: the screen fades to black and back. */
+  private readonly timeFadeState = signal(false);
+  readonly timeFade = this.timeFadeState.asReadonly();
   readonly night = computed(() => isNightHour(this.hourState()));
-  /** The time of day goes on by itself (a whole day in DAY_DURATION). */
+  /** The time of day goes on by itself (a whole day in the calendar's minutes). */
   private readonly timeFlowState = signal(this.saved.timeFlow ?? true);
   readonly timeFlow = this.timeFlowState.asReadonly();
   /** Wind strength 0..1 and where it blows towards. */
@@ -272,6 +327,26 @@ export class GameService {
     this.initCheckResize();
     // The sound effects of the events follow the sound settings; an event may change the weather
     effect(() => setSfxVolume(this.soundVolumeState(), this.soundMutedState()));
+    this.sequenceService.time$.subscribe((request) => {
+      if (request.pass) {
+        this.passTime(request.pass);
+      } else {
+        this.timeStoppedState.set(!!request.stop);
+      }
+    });
+    // (the date's day kept by the game: the events' conditions read it)
+    effect(() => {
+      const day = this.dayState();
+      if (this.game) {
+        this.game.day = day;
+      }
+    });
+    // A new moment or day: the NPCs with a schedule move to where they are now
+    effect(() => {
+      this.moment();
+      this.dayState();
+      untracked(() => this.game?.mapHelper?.refreshNpcs());
+    });
     this.sequenceService.weather$.subscribe((type) => {
       if (Object.values(WeatherType).includes(type as WeatherType)) {
         this.setWeather(type as WeatherType);
@@ -305,6 +380,7 @@ export class GameService {
       saveSettings({
         weather: this.weatherState(),
         hour: this.hourState(),
+        day: this.dayState(),
         timeFlow: this.timeFlowState(),
         windStrength: this.windStrengthState(),
         windDirection: this.windDirectionState(),
@@ -428,14 +504,18 @@ export class GameService {
     }, INPUT_STEP);
 
     // Time going by: small steps (the light and the sun move smoothly in between, see WeatherHelper)
+    game.day = this.dayState();
     setInterval(() => {
+      this.followMapTime(game);
       if (
         this.timeFlowState() &&
         !game.paused &&
         !game.loading &&
-        !isGameAsleep()
+        !isGameAsleep() &&
+        !this.timeHeld(game)
       ) {
-        this.advanceHour(((TIME_STEP / 1000) * 24) / DAY_DURATION);
+        const dayMinutes = Math.max(1, gameCalendar().dayMinutes);
+        this.advanceHour(((TIME_STEP / 1000) * 24) / (dayMinutes * 60));
       }
     }, TIME_STEP);
 
@@ -576,6 +656,7 @@ export class GameService {
 
   /** Back from the database: the NPCs placed on the map drawn again (their walking sheet or name may have changed). */
   refreshNpcs(): void {
+    this.calendarChanged();
     this.game?.mapHelper?.refreshNpcs();
   }
 
@@ -683,9 +764,107 @@ export class GameService {
    * time of day (a sunny day simply turns into a clear night, see WeatherHelper day / night mix).
    */
   private advanceHour(hours: number) {
-    const hour = (this.hourState() + hours) % 24;
-    this.game?.weather.setHour(hour);
+    const total = this.hourState() + hours;
+    const hour = total % 24;
+    if (total >= 24) {
+      this.dayState.update((day) => day + Math.floor(total / 24));
+    }
+    if (this.mapTimeState()?.mode !== "frozen") {
+      this.game?.weather.setHour(hour);
+    }
     this.hourState.set(hour);
+  }
+
+  /**
+   * The time doesn't pass: in a dialogue or an event, in a fight, on a map where it stops or is frozen, after an
+   * event stopped it.
+   */
+  private timeHeld(game: Game): boolean {
+    return (
+      game.mode !== GameMode.MAP ||
+      game.editMode ||
+      this.sequenceService.isRunning ||
+      this.battleService.running ||
+      !!this.mapTimeState() ||
+      this.timeStoppedState()
+    );
+  }
+
+  private lastMapId = "";
+
+  /** The time of the map being played (each time step): a frozen hour shown, the real one back outside. */
+  private followMapTime(game: Game) {
+    const map = game.mapHelper?.sceneMap;
+    if (!map) {
+      return;
+    }
+    if (map.id !== this.lastMapId) {
+      this.lastMapId = map.id;
+      this.timeStoppedState.set(false); // (« until it goes on, or another map »)
+    }
+    const before = this.mapTimeState();
+    const now = map.time ?? null;
+    this.mapTimeState.set(now);
+    const frozenBefore = before?.mode === "frozen" ? before.hour : null;
+    const frozenNow = now?.mode === "frozen" ? now.hour : null;
+    if (frozenNow !== frozenBefore) {
+      game.weather.setHour(frozenNow ?? this.hourState());
+    }
+  }
+
+  /** An event makes the time pass: a fade to black, the clock moved meanwhile. */
+  private passTime(request: InstructionTime) {
+    const calendar = gameCalendar();
+    const hour = this.hourState();
+    let target = hour;
+    let days = 0;
+    switch (request.mode) {
+      case "hours":
+        target = hour + Math.max(0, request.hours ?? 1);
+        days = Math.floor(target / 24);
+        target %= 24;
+        break;
+      case "until": {
+        const start = calendar.moments[request.moment ?? "morning"];
+        target = start;
+        days = start > hour ? 0 : 1;
+        break;
+      }
+      case "nextDay":
+        target = calendar.moments.morning;
+        days = 1;
+        break;
+    }
+    this.timeFadeState.set(true);
+    setTimeout(() => {
+      this.dayState.update((day) => day + days);
+      this.setHour(target);
+    }, TIME_FADE_MS / 2);
+    setTimeout(() => this.timeFadeState.set(false), TIME_FADE_MS);
+  }
+
+  /** A saved game's date. */
+  setDay(day: number) {
+    this.dayState.set(Math.max(0, Math.floor(day)));
+  }
+
+  /** Back from the database: the calendar may have changed. */
+  calendarChanged() {
+    this.calendarVersion.update((v) => v + 1);
+  }
+
+  /** The time on a map (null: it passes as outside). */
+  setMapTime(id: string, time: MapTime | null) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      if (time) {
+        map.time = time;
+      } else {
+        delete map.time;
+      }
+      saveMap(map);
+    }
   }
 
   setHour(hour: number) {
@@ -711,6 +890,8 @@ export class GameService {
       this.sequenceService.stop();
       this.mapEditorService.enter(game);
     }
+    // (the editor shows the NPCs at every place, the game only where their schedule puts them)
+    game.mapHelper?.refreshNpcs();
     this.syncHud();
   }
 
@@ -843,10 +1024,14 @@ export class GameService {
     map: string,
     pos: Vec3,
     hour: number,
-    weather: WeatherType
+    weather: WeatherType,
+    day?: number
   ): boolean {
     const game = this.game;
     const exists = listMaps().some((m) => m.id === map);
+    if (day !== undefined) {
+      this.setDay(day);
+    }
     this.setHour(hour);
     this.setWeather(weather);
     if (game) {
@@ -883,6 +1068,15 @@ export class GameService {
     const game = this.game;
     if (game) {
       this.mapEditorService.setObjectEvents(game, events);
+      this.syncHud();
+    }
+  }
+
+  /** The selected NPC's place name. */
+  setPlaceLabel(label: string) {
+    const game = this.game;
+    if (game) {
+      this.mapEditorService.setPlaceLabel(game, label);
       this.syncHud();
     }
   }

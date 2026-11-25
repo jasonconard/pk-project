@@ -65,7 +65,7 @@ interface MenuEntry {
   /** What the tool brings, shown in the tooltip. */
   soon: string;
   /** What it opens; none yet: greyed. */
-  action?: "saves";
+  action?: "saves" | "agenda";
 }
 
 const ENTRIES: MenuEntry[] = [
@@ -80,6 +80,7 @@ const ENTRIES: MenuEntry[] = [
     icon: LucideCalendarDays,
     label: "Agenda",
     soon: "Les jours, les activités, les donjons ouverts",
+    action: "agenda",
   },
   { icon: LucideMap, label: "Carte", soon: "La carte du monde" },
   {
@@ -134,6 +135,8 @@ export class GameMenuComponent {
   readonly releaseNotes = output<void>();
   /** The saved games (Sauver): the menu closes, the dialog opens. */
   readonly saves = output<void>();
+  /** The Agenda: the game's calendar, today's moments, the special days to come. */
+  readonly agenda = output<void>();
   /** The variables test panel: the menu closes, the panel opens. */
   readonly variablesTest = output<void>();
   readonly battleSim = output<void>();
@@ -228,6 +231,8 @@ export class GameMenuComponent {
   protected openEntry(entry: MenuEntry): void {
     if (entry.action === "saves") {
       this.saves.emit();
+    } else if (entry.action === "agenda") {
+      this.agenda.emit();
     }
   }
 

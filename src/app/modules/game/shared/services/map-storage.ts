@@ -1,6 +1,7 @@
 import {
   ChunkGround,
   MapKind,
+  MapTime,
   SceneChunk,
   SceneMap,
   StairsSide,
@@ -48,6 +49,7 @@ interface StoredMap {
   name: string;
   kind: MapKind;
   spawn?: Vec3;
+  time?: MapTime;
   /** Every chunk of the map, in order. */
   chunks: StoredChunk[];
 }
@@ -68,6 +70,8 @@ export interface MapSummary {
   inCode: boolean;
   /** Changed in the browser. */
   edited: boolean;
+  /** The time on it (missing: it passes as outside). */
+  time?: MapTime;
   /** Size in chunks (columns × rows of the area its chunks cover). */
   cols: number;
   rows: number;
@@ -212,6 +216,7 @@ export function listMaps(): MapSummary[] {
     id: map.id,
     name: stored[map.id]?.name ?? map.name,
     kind: stored[map.id]?.kind ?? map.kind,
+    time: stored[map.id] ? stored[map.id].time : map.time,
     inCode: true,
     edited: !!stored[map.id],
     ...gridSize(stored[map.id]?.chunks ?? map.chunks),
@@ -222,6 +227,7 @@ export function listMaps(): MapSummary[] {
       id,
       name: map.name,
       kind: map.kind,
+      time: map.time,
       inCode: false,
       edited: true,
       ...gridSize(map.chunks),
@@ -356,6 +362,9 @@ export function loadMap(id: string): SceneMap | null {
     name: saved?.name ?? code!.name,
     kind: saved?.kind ?? code!.kind,
     spawn: saved ? saved.spawn : code!.spawn,
+    ...((saved ? saved.time : code!.time)
+      ? { time: structuredClone(saved ? saved.time : code!.time) }
+      : {}),
     chunks: copy,
   };
 }
@@ -367,6 +376,7 @@ export function saveMap(map: SceneMap) {
     name: map.name,
     kind: map.kind,
     spawn: map.spawn,
+    ...(map.time ? { time: map.time } : {}),
     chunks: map.chunks.map(chunkData),
   };
   writeStored(stored);
@@ -430,6 +440,7 @@ export function exportMapFile(map: SceneMap): string {
           `  spawn: { x: ${map.spawn.x}, y: ${map.spawn.y}, z: ${map.spawn.z} },`,
         ]
       : []),
+    ...(map.time ? [`  time: ${JSON.stringify(map.time)},`] : []),
     "  chunks: [",
     ...map.chunks.map((chunk) => `    ${constName(chunk.id)},`),
     "  ],",

@@ -1,0 +1,139 @@
+@let npc = this.npc();
+<div class="block">
+  <h3>Emploi du temps</h3>
+  <label class="switch">
+    <input
+      type="checkbox"
+      [checked]="!!npc.schedule"
+      (change)="setFollows($any($event.target).checked)"
+    />
+    <span
+      >Suit un emploi du temps (sinon, il est toujours à toutes ses
+      places)</span
+    >
+  </label>
+  @if (!places().length) {
+    <p class="hint">
+      <svg lucideInfo></svg> Pose d'abord ce PNJ sur une carte (éditeur de
+      carte, onglet PNJ) : chaque fois qu'il est posé, c'est une de ses places,
+      avec ses propres événements. Donne-lui un nom dans sa fiche (« derrière le
+      comptoir »).
+    </p>
+  }
+  @if (npc.schedule) {
+    <div class="grid" role="table" aria-label="Où il est">
+      <span></span>
+      @for (t of times; track t.id) {
+        <span class="moment">{{ t.label }}</span>
+      }
+      @for (row of rows(); track $index; let d = $index) {
+        <button
+          type="button"
+          class="day"
+          title="Toute la journée comme le matin"
+          (click)="fillDay(d)"
+        >
+          {{ row.name }}
+        </button>
+        @for (cell of row.cells; track $index; let m = $index) {
+          <label
+            class="cell"
+            [class.absent]="!cell"
+            [style.--c]="placeColor(cell)"
+          >
+            {{ placeShort(cell) }}
+            <select
+              [attr.aria-label]="row.name + ', ' + times[m].label"
+              (change)="setCell(d, m, $any($event.target).value)"
+            >
+              <option value="" [selected]="!cell">Absent</option>
+              @for (p of places(); track p.key) {
+                <option [value]="p.key" [selected]="p.key === cell">
+                  {{ p.label }}
+                </option>
+              }
+            </select>
+          </label>
+        }
+      }
+    </div>
+    @if (places().length) {
+      <ul class="legend">
+        @for (p of places(); track p.key) {
+          <li [style.--c]="p.color">
+            <i></i>
+            {{ p.label }}
+          </li>
+        }
+      </ul>
+    }
+    <p class="note">
+      Touche une case pour choisir sa place, le nom d'un jour pour mettre toute
+      la journée comme le matin.
+    </p>
+
+    <h3>Exceptions des jours spéciaux</h3>
+    @for (e of npc.schedule.exceptions; track e.id) {
+      <div class="exception">
+        <div class="line">
+          <select
+            aria-label="Jour spécial"
+            (change)="
+              setException(e.id, { special: $any($event.target).value })
+            "
+          >
+            @for (sd of calendar().special; track sd.id) {
+              <option [value]="sd.id" [selected]="sd.id === e.special">
+                {{ sd.name }}
+              </option>
+            }
+          </select>
+          <select
+            aria-label="Place"
+            (change)="
+              setException(e.id, { place: $any($event.target).value || null })
+            "
+          >
+            <option value="" [selected]="!e.place">Absent</option>
+            @for (p of places(); track p.key) {
+              <option [value]="p.key" [selected]="p.key === e.place">
+                {{ p.label }}
+              </option>
+            }
+          </select>
+          <button
+            type="button"
+            class="remove"
+            aria-label="Retirer l'exception"
+            (click)="removeException(e.id)"
+          >
+            <svg lucideX></svg>
+          </button>
+        </div>
+        <div class="chips">
+          @for (t of times; track t.id) {
+            <button
+              type="button"
+              class="chip plain"
+              [class.on]="e.times.includes(t.id)"
+              (click)="toggleExceptionTime(e, t.id)"
+            >
+              {{ t.label }}
+            </button>
+          }
+          @if (!e.times.length) {
+            <span class="muted">toute la journée</span>
+          }
+        </div>
+      </div>
+    }
+    <button
+      type="button"
+      class="add-line"
+      [disabled]="!calendar().special.length"
+      (click)="addException()"
+    >
+      <svg lucidePlus></svg> Exception
+    </button>
+  }
+</div>

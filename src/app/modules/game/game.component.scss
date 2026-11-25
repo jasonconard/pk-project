@@ -249,3 +249,26 @@
     animation-duration: 1ms;
   }
 }
+
+// An event makes the time pass: the screen goes black and back (sequence TIME_FADE_MS)
+.time-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 760;
+  background: #000;
+  pointer-events: none;
+}
+
+.time-fade-in {
+  animation: time-fade 0.45s ease-in;
+}
+
+.time-fade-out {
+  animation: time-fade 0.45s ease-out reverse;
+}
+
+@keyframes time-fade {
+  from {
+    opacity: 0;
+  }
+}

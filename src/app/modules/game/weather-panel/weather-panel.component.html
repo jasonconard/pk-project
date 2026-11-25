@@ -15,12 +15,10 @@
       }
     </span>
     <span class="clock-text">
-      <span class="clock-main"
-        ><svg [lucideIcon]="timeIcon()"></svg> {{ timeOfDay().label }} ·
-        {{ hourLabel() }}</span
-      >
+      <span class="clock-main">{{ dateText() }}</span>
       <span class="clock-sub"
-        >{{ current().label }} ·
+        ><svg [lucideIcon]="timeIcon()"></svg> {{ momentText() }} ·
+        {{ clockLabel() }} ·
         <span class="temperature" [style.color]="temperatureColor()"
           >{{ temperature() }} °C</span
         ></span

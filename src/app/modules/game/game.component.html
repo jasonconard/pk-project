@@ -85,6 +85,7 @@
       (passageChange)="setPassage($event)"
       (eventsChange)="setObjectEvents($event)"
       (zoneSizeChange)="setZoneSize($event)"
+      (placeLabelChange)="setPlaceLabel($event)"
       (pickArrival)="pickArrival()"
       (cancelPick)="cancelPick()"
       (ambiance)="openAmbiance()"
@@ -130,6 +131,9 @@
   [weather]="weather()"
   [night]="night()"
   [hour]="hour()"
+  [clockHour]="shownHour()"
+  [dateText]="dateText()"
+  [momentText]="momentText()"
   [timeFlow]="timeFlow()"
   [windStrength]="windStrength()"
   [windDirection]="windDirection()"
@@ -186,9 +190,14 @@
     (ambiance)="openAmbiance()"
     (releaseNotes)="openReleaseNotes()"
     (saves)="openSaves()"
+    (agenda)="openAgenda()"
     (variablesTest)="openVariablesTest()"
     (battleSim)="openBattleSim()"
   />
+}
+
+@if (agendaOpen()) {
+  <game-agenda (closed)="agendaOpen.set(false)" />
 }
 
 @if (savesOpen()) {
@@ -257,6 +266,15 @@
 }
 
 <core-message />
+<game-time-banner [playing]="playing()" />
+@if (timeFade()) {
+  <div
+    class="time-fade"
+    aria-hidden="true"
+    animate.enter="time-fade-in"
+    animate.leave="time-fade-out"
+  ></div>
+}
 @if (hud()?.mapHelper; as mapHelper) {
   <core-teleport [mapHelper]="mapHelper" />
 }

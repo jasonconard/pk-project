@@ -199,6 +199,122 @@
     </button>
   </div>
 }
+@if (c.weekdays; as weekdays) {
+  <div class="row wrap">
+    <svg lucideCalendarDays class="row-icon"></svg>
+    @for (d of data.calendar.week; track $index) {
+      <button
+        type="button"
+        class="chip toggle"
+        [class.on]="weekdays.includes($index)"
+        [attr.aria-pressed]="weekdays.includes($index)"
+        (click)="toggleWeekday($index)"
+      >
+        {{ shortDay(d) }}
+      </button>
+    }
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer les jours"
+      title="Retirer"
+      (click)="clear('weekdays')"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@if (c.dates; as dates) {
+  <div class="row wrap">
+    <svg lucideCalendar class="row-icon"></svg>
+    @for (end of ["from", "to"]; track end) {
+      <span>{{ end === "from" ? "Du" : "au" }}</span>
+      <select
+        class="narrow"
+        aria-label="Jour"
+        (change)="setDate($any(end), { day: +value($event) })"
+      >
+        @for (n of daysOf($any(dates)[end].month); track n) {
+          <option [value]="n" [selected]="n === $any(dates)[end].day">
+            {{ n }}
+          </option>
+        }
+      </select>
+      <select
+        aria-label="Mois"
+        (change)="setDate($any(end), { month: +value($event) })"
+      >
+        @for (m of data.calendar.months; track $index) {
+          <option
+            [value]="$index"
+            [selected]="$index === $any(dates)[end].month"
+          >
+            {{ m.name }}
+          </option>
+        }
+      </select>
+    }
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer les dates"
+      title="Retirer"
+      (click)="clear('dates')"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@if (c.moments; as moments) {
+  <div class="row wrap">
+    <svg lucideSunMoon class="row-icon"></svg>
+    @for (t of dayTimes; track t.id) {
+      <button
+        type="button"
+        class="chip toggle"
+        [class.on]="moments.includes(t.id)"
+        [attr.aria-pressed]="moments.includes(t.id)"
+        (click)="toggleMoment(t.id)"
+      >
+        {{ t.label }}
+      </button>
+    }
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer les moments"
+      title="Retirer"
+      (click)="clear('moments')"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
+@if (c.specials; as specials) {
+  <div class="row wrap">
+    <svg lucideStar class="row-icon"></svg>
+    @for (sd of data.calendar.special; track sd.id) {
+      <button
+        type="button"
+        class="chip toggle"
+        [class.on]="specials.includes(sd.id)"
+        [attr.aria-pressed]="specials.includes(sd.id)"
+        (click)="toggleSpecial(sd.id)"
+      >
+        {{ sd.name }}
+      </button>
+    }
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Retirer les jours spéciaux"
+      title="Retirer"
+      (click)="clear('specials')"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+}
 @if (!countConditions(c)) {
   <p class="help">{{ empty() }}</p>
 }
@@ -252,5 +368,37 @@
     (click)="addMemberTest()"
   >
     <svg lucidePlus></svg> Équipe
+  </button>
+  <button
+    type="button"
+    [disabled]="!!c.weekdays"
+    title="Certains jours de la semaine"
+    (click)="addWeekdays()"
+  >
+    <svg lucidePlus></svg> Jour
+  </button>
+  <button
+    type="button"
+    [disabled]="!!c.dates"
+    title="Entre deux dates, chaque année"
+    (click)="addDates()"
+  >
+    <svg lucidePlus></svg> Date
+  </button>
+  <button
+    type="button"
+    [disabled]="!!c.moments"
+    title="Le matin, l'après-midi, le soir ou la nuit"
+    (click)="addMoments()"
+  >
+    <svg lucidePlus></svg> Moment
+  </button>
+  <button
+    type="button"
+    [disabled]="!!c.specials || !data.calendar.special.length"
+    title="Un jour spécial du calendrier (fête, marché…)"
+    (click)="addSpecials()"
+  >
+    <svg lucidePlus></svg> Jour spécial
   </button>
 </div>

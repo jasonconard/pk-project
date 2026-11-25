@@ -353,6 +353,19 @@
           <svg lucideTrash></svg> Supprimer
         </button>
       </div>
+      @if (npcSelected()) {
+        <label class="place-row">
+          <span>Nom de la place</span>
+          <input
+            type="text"
+            maxlength="40"
+            placeholder="ex. derrière le comptoir"
+            aria-label="Nom de la place"
+            [value]="selection.placeLabel"
+            (change)="placeLabelChange.emit($any($event.target).value)"
+          />
+        </label>
+      }
       <div class="options">
         <label class="switch-row">
           <span>Bloque le passage</span>
