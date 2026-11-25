@@ -1451,5 +1451,95 @@ export const CODE_DATABASE: GameDatabase = {
       "canFlee": false,
       "surprise": false
     }
+  ],
+  "calendar": [
+    {
+      "id": "calendar",
+      "name": "Calendrier du jeu",
+      "week": [
+        "Lundi",
+        "Mardi",
+        "Mercredi",
+        "Jeudi",
+        "Vendredi",
+        "Samedi",
+        "Dimanche"
+      ],
+      "months": [
+        {
+          "name": "Printemps",
+          "days": 28,
+          "color": "#7fd18b",
+          "icon": "sprout"
+        },
+        {
+          "name": "Été",
+          "days": 28,
+          "color": "#f4c06a",
+          "icon": "sun"
+        },
+        {
+          "name": "Automne",
+          "days": 28,
+          "color": "#e8895a",
+          "icon": "leaf"
+        },
+        {
+          "name": "Hiver",
+          "days": 28,
+          "color": "#7db7e8",
+          "icon": "snowflake"
+        }
+      ],
+      "start": {
+        "month": 0,
+        "day": 1,
+        "hour": 7
+      },
+      "firstWeekday": 0,
+      "dayMinutes": 12,
+      "moments": {
+        "morning": 6,
+        "afternoon": 12,
+        "evening": 18,
+        "night": 22
+      },
+      "special": [
+        {
+          "id": "sd-spring-feast",
+          "name": "Fête du printemps",
+          "color": "#ffb04a",
+          "repeat": "year",
+          "month": 0,
+          "day": 13,
+          "weekday": 0,
+          "times": []
+        },
+        {
+          "id": "sd-market",
+          "name": "Jour de marché",
+          "color": "#7fd18b",
+          "repeat": "week",
+          "month": 0,
+          "day": 1,
+          "weekday": 2,
+          "times": [
+            "morning"
+          ]
+        },
+        {
+          "id": "sd-full-moon",
+          "name": "Pleine lune",
+          "color": "#ff6a5a",
+          "repeat": "month",
+          "month": 0,
+          "day": 28,
+          "weekday": 0,
+          "times": [
+            "night"
+          ]
+        }
+      ]
+    }
   ]
 };

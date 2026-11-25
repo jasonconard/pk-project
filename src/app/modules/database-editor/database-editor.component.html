@@ -19,7 +19,11 @@
   </button>
 </header>
 
-<div class="body" [class.sheet-open]="!!current()">
+<div
+  class="body"
+  [class.sheet-open]="!!current() && !single()"
+  [class.single]="single()"
+>
   <nav class="tables" aria-label="Tables">
     @for (t of tables; track t.id) {
       <button
@@ -30,7 +34,9 @@
       >
         <svg [lucideIcon]="t.icon"></svg>
         <span class="label">{{ t.label }}</span>
-        <small>{{ db()[t.id].length }}</small>
+        @if (t.id !== "calendar") {
+          <small>{{ db()[t.id].length }}</small>
+        }
       </button>
     }
   </nav>
@@ -107,7 +113,26 @@
   </section>
 
   <section class="sheet-pane" aria-label="Fiche">
-    @if (current(); as row) {
+    @if (calendar(); as cal) {
+      <div class="sheet">
+        <db-calendar-sheet [calendar]="cal" />
+        @if (gameVersion()) {
+          <button
+            type="button"
+            class="restore-line"
+            [class.armed]="restoring() === cal.id"
+            (click)="restore(cal)"
+          >
+            <svg lucideRotateCcw></svg>
+            {{
+              restoring() === cal.id
+                ? "Toucher encore pour reprendre la version du jeu"
+                : "Reprendre la version du jeu"
+            }}
+          </button>
+        }
+      </div>
+    } @else if (current(); as row) {
       <ng-template #actions>
         @if (gameVersion()) {
           <button

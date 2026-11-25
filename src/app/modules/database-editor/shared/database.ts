@@ -444,6 +444,215 @@ export interface DbSkill {
   learn: SkillLearn[];
 }
 
+/**
+ * The game's calendar (the table holds this one row; design/database.pen, 13 · Calendrier): its shape (the week, the
+ * months or seasons), the start of a game, how long a day lasts, the moments of the day and the special days.
+ */
+export interface DbCalendar {
+  id: string;
+  name: string;
+  /** (the rows' icon: unused here) */
+  icon?: string;
+  /** The days of the week (full names, shown shortened to their 3 first letters). */
+  week: string[];
+  months: DbMonth[];
+  /** A new game starts on this day of year 1 (month index, day from 1), at this hour. */
+  start: { month: number; day: number; hour: number };
+  /** The day of the week of the 1st day of year 1 (index in `week`). */
+  firstWeekday: number;
+  /** Real minutes a day of the game lasts. */
+  dayMinutes: number;
+  /** The hour each moment of the day starts at. */
+  moments: Record<DayTime, number>;
+  special: DbSpecialDay[];
+}
+
+/** A month (or a season): its name, its days, its color and icon (the Agenda). */
+export interface DbMonth {
+  name: string;
+  days: number;
+  color: string;
+  icon: MonthIcon;
+}
+
+/** The icons a month may have (Lucide). */
+export type MonthIcon =
+  | "sprout"
+  | "sun"
+  | "leaf"
+  | "snowflake"
+  | "flower"
+  | "cloud-rain"
+  | "star"
+  | "moon";
+export const MONTH_ICONS: { id: MonthIcon; label: string }[] = [
+  { id: "sprout", label: "Pousse" },
+  { id: "sun", label: "Soleil" },
+  { id: "leaf", label: "Feuille" },
+  { id: "snowflake", label: "Flocon" },
+  { id: "flower", label: "Fleur" },
+  { id: "cloud-rain", label: "Pluie" },
+  { id: "star", label: "Étoile" },
+  { id: "moon", label: "Lune" },
+];
+
+/** How a special day comes back: a date each year, a day each month, a day of the week. */
+export type SpecialRepeat = "year" | "month" | "week";
+export const SPECIAL_REPEATS: { id: SpecialRepeat; label: string }[] = [
+  { id: "year", label: "Chaque année" },
+  { id: "month", label: "Chaque mois" },
+  { id: "week", label: "Chaque semaine" },
+];
+
+/** A special day (a feast, the market, the full moon): shown in the Agenda, a condition for events and schedules. */
+export interface DbSpecialDay {
+  id: string;
+  name: string;
+  color: string;
+  repeat: SpecialRepeat;
+  /** « year »: the month (index) and the day; « month »: the day; « week »: the day of the week (index). */
+  month: number;
+  day: number;
+  weekday: number;
+  /** The moments it lasts (empty: the whole day). */
+  times: DayTime[];
+}
+
+export const CALENDAR_LIMITS = {
+  weekDays: { min: 1, max: 10 },
+  months: { min: 1, max: 24 },
+  monthDays: { min: 1, max: 99 },
+  dayMinutes: { min: 1, max: 240 },
+};
+
+/** The ready-made shapes: the real calendar, four seasons of 28 days (like Stardew Valley). */
+export type CalendarShape = "real" | "seasons";
+const FRENCH_WEEK = [
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+  "Dimanche",
+];
+export const CALENDAR_SHAPES: Record<
+  CalendarShape,
+  { label: string; week: string[]; months: DbMonth[] }
+> = {
+  real: {
+    label: "Réel · 12 mois",
+    week: FRENCH_WEEK,
+    months: (
+      [
+        ["Janvier", 31, "#7db7e8", "snowflake"],
+        ["Février", 28, "#7db7e8", "snowflake"],
+        ["Mars", 31, "#7fd18b", "sprout"],
+        ["Avril", 30, "#7fd18b", "flower"],
+        ["Mai", 31, "#7fd18b", "flower"],
+        ["Juin", 30, "#f4c06a", "sun"],
+        ["Juillet", 31, "#f4c06a", "sun"],
+        ["Août", 31, "#f4c06a", "sun"],
+        ["Septembre", 30, "#e8895a", "leaf"],
+        ["Octobre", 31, "#e8895a", "leaf"],
+        ["Novembre", 30, "#e8895a", "cloud-rain"],
+        ["Décembre", 31, "#7db7e8", "snowflake"],
+      ] as const
+    ).map(([name, days, color, icon]) => ({ name, days, color, icon })),
+  },
+  seasons: {
+    label: "Saisons · 4 × 28 j",
+    week: FRENCH_WEEK,
+    months: (
+      [
+        ["Printemps", "#7fd18b", "sprout"],
+        ["Été", "#f4c06a", "sun"],
+        ["Automne", "#e8895a", "leaf"],
+        ["Hiver", "#7db7e8", "snowflake"],
+      ] as const
+    ).map(([name, color, icon]) => ({ name, days: 28, color, icon })),
+  },
+};
+
+/** The ready-made shape the calendar has (its week and months unchanged), else null (its own). */
+export function calendarShape(calendar: DbCalendar): CalendarShape | null {
+  const same = (a: unknown, b: unknown) =>
+    JSON.stringify(a) === JSON.stringify(b);
+  return (
+    (Object.keys(CALENDAR_SHAPES) as CalendarShape[]).find(
+      (shape) =>
+        same(calendar.week, CALENDAR_SHAPES[shape].week) &&
+        same(calendar.months, CALENDAR_SHAPES[shape].months)
+    ) ?? null
+  );
+}
+
+/** The calendar of a new game: four seasons, spring 1st at 7:00, a few special days. */
+export function newCalendar(): DbCalendar {
+  return {
+    id: "calendar",
+    name: "Calendrier du jeu",
+    week: [...CALENDAR_SHAPES.seasons.week],
+    months: structuredClone(CALENDAR_SHAPES.seasons.months),
+    start: { month: 0, day: 1, hour: 7 },
+    firstWeekday: 0,
+    dayMinutes: 12,
+    moments: { morning: 6, afternoon: 12, evening: 18, night: 22 },
+    special: [
+      newSpecialDay("Fête du printemps", "#ffb04a", {
+        repeat: "year",
+        day: 13,
+      }),
+      newSpecialDay("Jour de marché", "#7fd18b", {
+        repeat: "week",
+        weekday: 2,
+        times: ["morning"],
+      }),
+      newSpecialDay("Pleine lune", "#ff6a5a", {
+        repeat: "month",
+        day: 28,
+        times: ["night"],
+      }),
+    ],
+  };
+}
+
+export function newSpecialDay(
+  name: string,
+  color: string,
+  rule: Partial<DbSpecialDay> = {}
+): DbSpecialDay {
+  return {
+    id: newId("sd"),
+    name,
+    color,
+    repeat: "year",
+    month: 0,
+    day: 1,
+    weekday: 0,
+    times: [],
+    ...rule,
+  };
+}
+
+/** « 13 printemps · chaque année », « chaque mercredi · matin », « le 28 de chaque mois · nuit ». */
+export function specialDayLabel(
+  sd: DbSpecialDay,
+  calendar: DbCalendar
+): string {
+  const month = calendar.months[sd.month]?.name.toLowerCase() ?? "?";
+  const weekday = calendar.week[sd.weekday]?.toLowerCase() ?? "?";
+  const when = {
+    year: `${sd.day} ${month} · chaque année`,
+    month: `le ${sd.day} de chaque mois`,
+    week: `chaque ${weekday}`,
+  }[sd.repeat];
+  const times = sd.times
+    .map((t) => DAY_TIMES.find((d) => d.id === t)?.label.toLowerCase())
+    .join(", ");
+  return times ? `${when} · ${times}` : `${when} · toute la journée`;
+}
+
 export interface GameDatabase {
   elements: DbElement[];
   weapons: DbWeapon[];
@@ -454,6 +663,7 @@ export interface GameDatabase {
   npcs: DbNpc[];
   enemies: DbEnemy[];
   groups: DbGroup[];
+  calendar: DbCalendar[];
 }
 
 export type DbTable = keyof GameDatabase;

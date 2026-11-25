@@ -1,0 +1,363 @@
+@let cal = this.calendar();
+<div class="block">
+  <h3>Forme du calendrier</h3>
+  <div class="segmented wide" role="group" aria-label="Modèle de calendrier">
+    @for (s of shapes; track s[0]) {
+      <button
+        type="button"
+        [class.on]="shape() === s[0]"
+        [class.armed]="replacing() === s[0]"
+        (click)="useShape(s[0])"
+      >
+        {{ replacing() === s[0] ? "Remplacer ?" : s[1].label }}
+      </button>
+    }
+    <button type="button" disabled [class.on]="!shape()">Libre</button>
+  </div>
+  <p class="note">
+    Un modèle remplace la semaine et les mois (toucher deux fois). Les changer à
+    la main donne un calendrier libre.
+  </p>
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Semaine</h3>
+    <db-stepper
+      [value]="cal.week.length"
+      [min]="limits.weekDays.min"
+      [max]="limits.weekDays.max"
+      [label]="'Jours dans la semaine'"
+      [suffix]="'jours'"
+      (changed)="setWeekDays($event)"
+    />
+  </div>
+  <div class="week">
+    @for (d of cal.week; track $index) {
+      <input
+        type="text"
+        maxlength="16"
+        [attr.aria-label]="'Jour ' + ($index + 1)"
+        [value]="d"
+        (change)="renameDay($index, $any($event.target).value)"
+      />
+    }
+  </div>
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Mois · saisons</h3>
+    <small>une année = {{ yearDays() }} jours</small>
+  </div>
+  <div class="list">
+    @for (m of cal.months; track $index; let i = $index) {
+      <div class="item" [style.--c]="m.color">
+        <span class="order">
+          <button
+            type="button"
+            aria-label="Monter"
+            [disabled]="i === 0"
+            (click)="moveMonth(i, -1)"
+          >
+            <svg lucideArrowUp></svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Descendre"
+            [disabled]="i === cal.months.length - 1"
+            (click)="moveMonth(i, 1)"
+          >
+            <svg lucideArrowDown></svg>
+          </button>
+        </span>
+        <label class="color" title="Couleur">
+          <input
+            type="color"
+            aria-label="Couleur"
+            [value]="m.color"
+            (change)="setMonth(i, { color: $any($event.target).value })"
+          />
+        </label>
+        <label class="icon" title="Icône">
+          @switch (m.icon) {
+            @case ("sprout") {
+              <svg lucideSprout></svg>
+            }
+            @case ("sun") {
+              <svg lucideSun></svg>
+            }
+            @case ("leaf") {
+              <svg lucideLeaf></svg>
+            }
+            @case ("snowflake") {
+              <svg lucideSnowflake></svg>
+            }
+            @case ("flower") {
+              <svg lucideFlower></svg>
+            }
+            @case ("cloud-rain") {
+              <svg lucideCloudRain></svg>
+            }
+            @case ("moon") {
+              <svg lucideMoon></svg>
+            }
+            @default {
+              <svg lucideStar></svg>
+            }
+          }
+          <select
+            aria-label="Icône"
+            (change)="setMonth(i, { icon: $any($event.target).value })"
+          >
+            @for (ic of monthIcons; track ic.id) {
+              <option [value]="ic.id" [selected]="ic.id === m.icon">
+                {{ ic.label }}
+              </option>
+            }
+          </select>
+        </label>
+        <input
+          class="name"
+          type="text"
+          maxlength="20"
+          aria-label="Nom du mois"
+          [value]="m.name"
+          (change)="setMonth(i, { name: $any($event.target).value })"
+        />
+        <db-stepper
+          [value]="m.days"
+          [min]="limits.monthDays.min"
+          [max]="limits.monthDays.max"
+          [label]="'Jours'"
+          [suffix]="'j'"
+          (changed)="setMonth(i, { days: $event })"
+        />
+        @if (cal.months.length > limits.months.min) {
+          <button
+            type="button"
+            class="remove"
+            aria-label="Retirer ce mois"
+            (click)="removeMonth(i)"
+          >
+            <svg lucideX></svg>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  @if (cal.months.length < limits.months.max) {
+    <button type="button" class="add-line" (click)="addMonth()">
+      <svg lucidePlus></svg> Mois
+    </button>
+  }
+</div>
+
+<div class="block">
+  <h3>Début de la partie</h3>
+  <div class="fields">
+    <label class="field">
+      <span>Mois</span>
+      <select (change)="setStart({ month: +$any($event.target).value })">
+        @for (m of cal.months; track $index) {
+          <option [value]="$index" [selected]="$index === cal.start.month">
+            {{ m.name }}
+          </option>
+        }
+      </select>
+    </label>
+    <label class="field">
+      <span>Jour</span>
+      <select (change)="setStart({ day: +$any($event.target).value })">
+        @for (d of daysOf(cal.start.month); track d) {
+          <option [value]="d" [selected]="d === cal.start.day">
+            {{ d }}
+          </option>
+        }
+      </select>
+    </label>
+    <div class="field">
+      <span>Heure</span>
+      <db-stepper
+        [value]="cal.start.hour"
+        [min]="0"
+        [max]="23"
+        [label]="'Heure de départ'"
+        [suffix]="'h'"
+        (changed)="setStart({ hour: $event })"
+      />
+    </div>
+  </div>
+  <div class="fields">
+    <label class="field">
+      <span>Le 1er jour de l'an 1 est un</span>
+      <select (change)="setFirstWeekday(+$any($event.target).value)">
+        @for (d of cal.week; track $index) {
+          <option [value]="$index" [selected]="$index === cal.firstWeekday">
+            {{ d }}
+          </option>
+        }
+      </select>
+    </label>
+    <div class="field">
+      <span>Une journée dure</span>
+      <db-stepper
+        [value]="cal.dayMinutes"
+        [min]="limits.dayMinutes.min"
+        [max]="limits.dayMinutes.max"
+        [label]="'Durée d\'une journée'"
+        [suffix]="'min'"
+        (changed)="setDayMinutes($event)"
+      />
+    </div>
+  </div>
+  <p class="note">
+    En temps réel, quand l'heure passe toute seule. Le jeu se servira du
+    calendrier à la prochaine étape (la date dans l'horloge).
+  </p>
+</div>
+
+<div class="block">
+  <h3>Les moments de la journée</h3>
+  <div class="day-bar" aria-hidden="true">
+    @for (t of dayBar(); track $index) {
+      <span [style.background]="momentColor(t)"></span>
+    }
+  </div>
+  <div class="list">
+    @for (t of times; track t.id) {
+      <div class="item moment">
+        <span class="swatch" [style.background]="momentColor(t.id)"></span>
+        <b class="grow">{{ t.label }}</b>
+        <span class="muted">dès</span>
+        <db-stepper
+          [value]="cal.moments[t.id]"
+          [min]="0"
+          [max]="23"
+          [label]="t.label"
+          [suffix]="'h'"
+          (changed)="setMoment(t.id, $event)"
+        />
+      </div>
+    }
+  </div>
+</div>
+
+<div class="block">
+  <h3>Jours spéciaux</h3>
+  <div class="list">
+    @for (sd of cal.special; track sd.id) {
+      <div class="item special" [style.--c]="sd.color">
+        <div class="line">
+          <label class="color" title="Couleur">
+            <input
+              type="color"
+              aria-label="Couleur"
+              [value]="sd.color"
+              (change)="setSpecial(sd.id, { color: $any($event.target).value })"
+            />
+          </label>
+          <input
+            class="name"
+            type="text"
+            maxlength="30"
+            aria-label="Nom du jour spécial"
+            [value]="sd.name"
+            (change)="setSpecial(sd.id, { name: $any($event.target).value })"
+          />
+          <button
+            type="button"
+            class="remove"
+            aria-label="Retirer ce jour spécial"
+            (click)="removeSpecial(sd.id)"
+          >
+            <svg lucideX></svg>
+          </button>
+        </div>
+        <div class="line rule">
+          <select
+            aria-label="Revient"
+            (change)="setRepeat(sd.id, $any($event.target).value)"
+          >
+            @for (r of repeats; track r.id) {
+              <option [value]="r.id" [selected]="r.id === sd.repeat">
+                {{ r.label }}
+              </option>
+            }
+          </select>
+          @switch (sd.repeat) {
+            @case ("week") {
+              <select
+                aria-label="Jour de la semaine"
+                (change)="
+                  setSpecial(sd.id, { weekday: +$any($event.target).value })
+                "
+              >
+                @for (d of cal.week; track $index) {
+                  <option [value]="$index" [selected]="$index === sd.weekday">
+                    {{ d }}
+                  </option>
+                }
+              </select>
+            }
+            @default {
+              <select
+                aria-label="Jour"
+                (change)="
+                  setSpecial(sd.id, { day: +$any($event.target).value })
+                "
+              >
+                @for (
+                  d of daysOf(sd.repeat === "month" ? -1 : sd.month);
+                  track d
+                ) {
+                  <option [value]="d" [selected]="d === sd.day">
+                    {{ d }}
+                  </option>
+                }
+              </select>
+              @if (sd.repeat === "year") {
+                <select
+                  aria-label="Mois"
+                  (change)="
+                    setSpecial(sd.id, { month: +$any($event.target).value })
+                  "
+                >
+                  @for (m of cal.months; track $index) {
+                    <option [value]="$index" [selected]="$index === sd.month">
+                      {{ m.name }}
+                    </option>
+                  }
+                </select>
+              }
+            }
+          }
+        </div>
+        <div class="chips" role="group" aria-label="Moments">
+          @for (t of times; track t.id) {
+            <button
+              type="button"
+              class="chip plain"
+              [class.on]="sd.times.includes(t.id)"
+              (click)="toggleTime(sd, t.id)"
+            >
+              {{ t.label }}
+            </button>
+          }
+          @if (!sd.times.length) {
+            <span class="muted">toute la journée</span>
+          }
+        </div>
+      </div>
+    } @empty {
+      <p class="note">Aucun pour l'instant.</p>
+    }
+  </div>
+  <button type="button" class="add-line" (click)="addSpecial()">
+    <svg lucidePlus></svg> Jour spécial
+  </button>
+  <p class="hint">
+    <svg lucideInfo></svg> Ils s'afficheront dans l'Agenda du joueur et
+    serviront de condition aux événements et aux emplois du temps.
+  </p>
+</div>

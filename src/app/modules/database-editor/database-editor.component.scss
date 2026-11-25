@@ -517,3 +517,45 @@
     animation: none;
   }
 }
+
+/* A table of one row (the calendar): its sheet on the list's place too, the tables kept */
+
+.body.single {
+  grid-template-areas: 'tables' 'sheet';
+
+  .list-pane {
+    display: none;
+  }
+
+  .sheet-pane {
+    grid-area: sheet;
+    display: block;
+  }
+}
+
+@media (min-width: 760px) {
+  .body.single {
+    grid-template-areas: 'tables tables' 'sheet sheet';
+  }
+}
+
+@media (min-width: 1100px) {
+  .body.single {
+    grid-template-areas: 'tables sheet sheet';
+  }
+}
+
+.restore-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  margin-top: 20px;
+  border-radius: 9px;
+  background: var(--surface);
+
+  &.armed {
+    background: var(--danger, #b0413e);
+  }
+}

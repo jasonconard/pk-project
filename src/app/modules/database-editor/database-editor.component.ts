@@ -1,5 +1,6 @@
 import {
   LucideActivity,
+  LucideCalendarDays,
   LucideBackpack,
   LucideChevronLeft,
   LucideChevronRight,
@@ -34,6 +35,7 @@ import {
   signal,
 } from "@angular/core";
 import {
+  DbCalendar,
   DbCharacter,
   DbElement,
   DbEnemy,
@@ -50,6 +52,7 @@ import {
   StateEffect,
   castLabel,
   groupLabel,
+  newCalendar,
   newCharacter,
   newElement,
   newEnemy,
@@ -79,6 +82,7 @@ import { SkillSheetComponent } from "./sheets/skill-sheet/skill-sheet.component"
 import { ItemSheetComponent } from "./sheets/item-sheet/item-sheet.component";
 import { CharacterSheetComponent } from "./sheets/character-sheet/character-sheet.component";
 import { NpcSheetComponent } from "./sheets/npc-sheet/npc-sheet.component";
+import { CalendarSheetComponent } from "./sheets/calendar-sheet/calendar-sheet.component";
 import { EnemySheetComponent } from "./sheets/enemy-sheet/enemy-sheet.component";
 import { GroupSheetComponent } from "./sheets/group-sheet/group-sheet.component";
 import { searchKey } from "../../core/shared/text";
@@ -105,6 +109,12 @@ const TABLES: { id: DbTable; label: string; one: string; icon: LucideIcon }[] =
     { id: "states", label: "États", one: "État", icon: LucideActivity },
     { id: "elements", label: "Éléments", one: "Élément", icon: LucideFlame },
     { id: "weapons", label: "Armes", one: "Type d'arme", icon: LucideSword },
+    {
+      id: "calendar",
+      label: "Calendrier",
+      one: "Calendrier",
+      icon: LucideCalendarDays,
+    },
   ];
 
 /** Wide enough for the list and the sheet side by side. */
@@ -140,6 +150,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     ItemSheetComponent,
     CharacterSheetComponent,
     NpcSheetComponent,
+    CalendarSheetComponent,
     EnemySheetComponent,
     GroupSheetComponent,
   ],
@@ -241,9 +252,15 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     );
   });
 
+  /** A table of one row (the calendar): its sheet only, on the list's place too (no list, no adding). */
+  protected readonly single = computed(() => this.table() === "calendar");
+
   /** The open sheet: the chosen row; side by side, the first one when none is chosen. */
   protected readonly current = computed<Row | null>(() => {
     const rows = this.rows();
+    if (this.single()) {
+      return rows[0] ?? null;
+    }
     const chosen = rows.find((r) => r.id === this.selectedId());
     return chosen ?? (this.sideBySide() ? (rows[0] ?? null) : null);
   });
@@ -280,6 +297,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     this.table() === "characters"
       ? (this.current() as DbCharacter | null)
       : null
+  );
+
+  protected readonly calendar = computed(() =>
+    this.table() === "calendar" ? (this.current() as DbCalendar | null) : null
   );
 
   protected readonly npc = computed(() =>
@@ -372,6 +393,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       npcs: "Nouveau PNJ",
       enemies: "Nouvel ennemi",
       groups: "Nouveau groupe",
+      calendar: "Calendrier du jeu",
     }[table];
     const names = new Set(this.rows().map((r) => searchKey(r.name)));
     let name = base;
@@ -389,6 +411,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       npcs: () => newNpc(name),
       enemies: () => newEnemy(name),
       groups: () => newGroup(name, this.db()),
+      calendar: () => newCalendar(),
     };
     const row = makers[table]();
     this.store.commit({ ...this.db(), [table]: [...this.rows(), row] });
@@ -564,6 +587,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       }
       case "npcs":
         return (row as DbNpc).note || "PNJ";
+      case "calendar": {
+        const cal = row as DbCalendar;
+        return `${cal.months.length} mois · semaine de ${cal.week.length} jours`;
+      }
       case "items": {
         const it = row as DbItem;
         const kind =
