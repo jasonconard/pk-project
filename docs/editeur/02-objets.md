@@ -53,6 +53,10 @@ L'onglet **PNJ** de la palette (à côté d'Objets) montre les PNJ de la [base d
 - Changer sa planche ou son nom dans la base met à jour la carte en fermant la base.
 - À venir : un PNJ qui regarde autour de lui ou se promène.
 
+## Donjon
+
+L'onglet **Donjon** de la palette pose les objets des donjons : coffre, piège, interrupteur, porte fermée, escalier, porte de salle et cristal de sauvegarde. Sélectionnés, leur fiche montre leurs réglages (contenu du coffre, clé, effet du piège, drapeau). Voir [Donjons](12-donjons.md).
+
 ## Événements
 
 Un objet sélectionné peut recevoir des événements (parler, entrer dessus, automatique) : voir [Événements](09-evenements.md). L'onglet **Événements** de la palette pose les zones invisibles.

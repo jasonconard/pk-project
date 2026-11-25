@@ -219,6 +219,10 @@ Dans le jeu :
 - **Les événements** : conditions jour, date, moment, jour spécial ; actions « Faire passer le temps » et « Arrêter / reprendre le temps » ([Événements](09-evenements.md)).
 - **Les sauvegardes de partie** gardent la date.
 
+## Donjons
+
+Un donjon : ses heures d'ouverture (moments, jours spéciaux), sa météo, ses étages (une carte faite à la main, ou générés à partir de salles), les groupes d'ennemis et leur nombre, les coffres des étages générés et leur butin, les points de sauvegarde. Maquette : `design/database.pen`, écran 17. Voir [Donjons](12-donjons.md).
+
 ## Sauvegarde et export
 
 - Chaque changement est enregistré dans le navigateur (« Enregistré » sous le titre).

@@ -75,6 +75,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   the camera, put back after), `sheet-sprite` (a fighter drawn from its sprite sheet), `progress` (experience, levels, element / weapon
   growth, skills known), `battle-types`; `battle-hud/` the interface, `battle-outcome/` the end window, `battle-sim/` the fight simulation (menu → Simuler un combat; `BattleService.simulateNext`, the party put back after)
   (design/combat.pen). The team's progress is kept in `party.ts` (`members`, `memberProgress`, `saveProgress`). Steps in docs/idees.md (point 9).
+- Dungeons (`docs/editeur/12-donjons.md`): `game/shared/services/dungeon.service.ts` (entering, floors, generated rooms
+  linked by their doors, visible enemies, chests, traps, switches, locked doors, save point), `model/dungeon-object.ts`
+  (`dg:<kind>` objects of the editor's Donjon tab, `foe:<group>` enemies, pictures in `src/assets/dungeon/`),
+  `model/dungeon-state.ts` (`pk-dungeon`: chests opened, the run), `game/dungeon-chip/`; the database table `dungeons`
+  (`sheets/dungeon-sheet/`); the `DUNGEON` instruction and `dungeon:<id>` teleports.
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

@@ -15,6 +15,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 9. [Événements](09-evenements.md) : faire parler un objet, zones invisibles, déclencheurs, conditions (variables, heure, météo) et actions.
 10. [Base de données](10-base-de-donnees.md) : personnages (apparence, niveaux, stats, éléments et armes à la Grandia), ennemis (faiblesses, butin, comportement, météo) et groupes (placés sur le terrain), compétences (coût, incantation, effets, niveaux pour les apprendre), objets (consommables, équipement, objets clés, cadeaux), états, éléments (simples ou composés, liés aux météos), types d'armes, icônes en pixel art, export.
 11. [Planches de combat](11-planches.md) : les animations d'un personnage ou d'un ennemi en combat (attente, marche, attaques, incantation, magie, coup reçu, mort), le découpage de l'image, l'aperçu.
+12. [Donjons](12-donjons.md) : la fiche d'un donjon (heures d'ouverture, météo, étages faits à la main ou générés à partir de salles), l'onglet Donjon (coffres, pièges, interrupteurs, portes fermées, escaliers, portes de salle, cristal de sauvegarde), les ennemis visibles sur la carte.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 
