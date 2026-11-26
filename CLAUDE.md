@@ -101,6 +101,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   (items on sale now, prices, buyback), `party.ts` `trade` / `boughtToday` (`PartyState.shops`), `game/shop/` the
   window, the `SHOP` instruction (`SequenceService.shop$`). `:where(.event-fields)` in `styles.scss` lends the event
   window's fields to `game-event-conditions` outside it.
+- Crops (`docs/editeur/17-cultures.md`): the `farmland` terrain, the database table `crops` (`DbCrop`: seed, 4 stage
+  pictures 16×24 with watered days, harvest, regrow, months, frost, weathers; `sheets/crop-sheet/`), `DbItem.tool`
+  (hoe, watering can), `model/farm.ts` (`pk-farm`: plots per map, the days' weather, `advanceFarm`), `farm-view.ts`
+  (soil and plants drawn), `services/farm.service.ts` (the action key on farmland; internal `PLANT` instruction),
+  `game/farm/` (seed picker, harvest toast). Plant pictures source: `design-resources/crops/`.
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

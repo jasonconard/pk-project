@@ -21,7 +21,7 @@ Faire de l'appli un **moteur de jeu** : les éditeurs (carte, modèles, et ceux 
 
 ## Les outils à construire
 
-Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Les outils 0 à 16 sont faits ; chacun garde ses « À suivre ».
+Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Les outils 0 à 17 sont faits ; chacun garde ses « À suivre ».
 
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
@@ -42,6 +42,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 14 | **Mode test** (fait : maquette `design/main-view.pen` (Mode test) ; tester depuis l'éditeur de carte (toucher où le joueur apparaît), la fenêtre d'un événement, l'éditeur de cinématiques ou Menu → Mode test ; les tests gardés avec leurs réglages (jour, moment, météo, variables, équipe et niveaux, sac, argent, liens, cinématiques vues) ; la partie mise de côté pendant le test et rendue en quittant, même si l'application se ferme ; bandeau vert, Recommencer, Quitter, voir [14](editeur/14-mode-test.md)) | Lancer le jeu depuis n'importe où, au jour et avec les drapeaux voulus, pour essayer une scène | Tout |
 | 15 | **Zones d'action** (fait : maquette `design/main-view.pen` (Zones d'action) et `model-editor-mobile.pen` écran 11 ; la zone d'un modèle (des cases vues de dessus et un côté), changée pour un objet posé en touchant ses cases sur la carte, ou propre à un événement ; en jeu, parler, les portes et marcher dessus suivent la zone, voir [15](editeur/15-zones-action.md)) | Où le joueur agit sur un objet : la porte seule de la maison, le devant d'un panneau | Tout |
 | 16 | **Boutiques** (fait : maquette `design/database.pen` écrans 18-19 et `design/main-view.pen` (Boutiques) ; la table Boutiques (vendeur, rachat, réduction par niveau de lien, objets avec prix propre, stock du jour, conditions, niveau de lien) ; l'action « Ouvrir la boutique » ; en jeu Acheter / Vendre avec la quantité, voir [16](editeur/16-boutiques.md). À suivre : des prix qui changent selon la saison ou la météo, vendre ses récoltes) | Acheter, vendre, une petite économie ; le lien avec le vendeur baisse les prix | Jour |
+| 17 | **Cultures** (fait : maquette `design/database.pen` écran 20 et `design/main-view.pen` (Cultures) ; le sol Terre cultivable ; la table Cultures (graine, 4 images de pousse, jours arrosés, récolte, repousse, saisons, gel, météos qui aident) ; la houe et l'arrosoir ; en jeu labourer, planter, arroser, récolter, arracher ; la pluie arrose, le gel abîme ; 4 plantes fantastiques dessinées avec PixelLab, voir [17](editeur/17-cultures.md). À suivre : des graines dans les boutiques, des métiers avec des niveaux) | Labourer, planter, arroser, récolter ; la météo et les saisons comptent | Jour |
 
 ## Retenues
 
@@ -108,7 +109,7 @@ Aujourd'hui, une porte (passage) ou un événement occupe toute la largeur de l'
 
 ### Pour la vie quotidienne (le jour)
 
-- **Cultures** : cases de sol à labourer (comme la peinture des sols), plantes qui poussent jour après jour ; la pluie arrose, le gel abîme.
+- **Cultures** (fait, point 17, voir [17](editeur/17-cultures.md)) : cases de sol à labourer (comme la peinture des sols), plantes qui poussent jour après jour ; la pluie arrose, le gel abîme.
 - **Saisons et calendrier** : la météo tirée au sort suit la saison, des fêtes à certaines dates.
 - **Métiers** avec des niveaux : pêche (selon la météo et l'heure), minage, cueillette, cuisine.
 - **Construire et décorer** en jeu : l'éditeur de carte, version joueur (poser des meubles, des clôtures).

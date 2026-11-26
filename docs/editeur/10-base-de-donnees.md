@@ -227,6 +227,10 @@ Un donjon : ses heures d'ouverture (moments, jours spéciaux), sa météo, ses �
 
 Une boutique : son vendeur (un PNJ), ce qu'elle rachète, la réduction du lien, les objets vendus (prix propre, stock du jour, moments et conditions, niveau de lien). Ouverte par l'action « Ouvrir la boutique » d'un événement. Maquette : `design/database.pen`, écrans 18 et 19. Voir [Boutiques](16-boutiques.md).
 
+## Cultures
+
+Une culture : sa graine, ses 4 images de pousse (16 × 24) et leurs jours, sa récolte (objet, combien, repousse ou non), ses mois, si elle craint le gel, les météos qui la font pousser plus vite. Un objet clé peut être un **outil** (houe, arrosoir). Maquette : `design/database.pen`, écran 20. Voir [Cultures](17-cultures.md).
+
 ## Sauvegarde et export
 
 - Chaque changement est enregistré dans le navigateur (« Enregistré » sous le titre).

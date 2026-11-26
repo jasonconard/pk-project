@@ -8,6 +8,8 @@ Onglet **Sols** : choisir un terrain, puis clic ou glisser. Le carré orange mon
 - **Pot de peinture** : remplit toute la zone continue du même sol que la case cliquée (voisins haut, bas, gauche, droite ; 4096 cases au plus).
 - **Gomme** : revient au sol d'origine (et enlève les escaliers).
 
+**Terre cultivable** a l'air de la Terre, mais c'est là que le joueur peut labourer et planter (voir [Cultures](17-cultures.md)).
+
 Une case fait **16 unités** ; elle est rangée dans `chunk.tiles` : `'colonne,ligne' → terrain`, la case (0, 0) étant le coin nord-ouest du morceau de carte.
 
 ## Le sol peint : un canvas

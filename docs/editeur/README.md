@@ -20,6 +20,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 14. [Mode test](14-mode-test.md) : essayer une scène depuis l'éditeur, un événement, une cinématique ou le menu, avec le jour, les variables, l'équipe et les liens voulus ; ta partie revient comme avant en quittant.
 15. [Zones d'action](15-zones-action.md) : où le joueur agit sur un objet (la porte de la maison, le devant d'un panneau) : des cases et un côté, dans le modèle, sur la carte ou pour un événement.
 16. [Boutiques](16-boutiques.md) : une boutique dans la base de données (vendeur, objets, prix, stock du jour, moments, réduction du lien), ouverte par un événement ; acheter et vendre en jeu.
+17. [Cultures](17-cultures.md) : la terre cultivable, labourer, planter, arroser, récolter des plantes fantastiques ; leurs saisons, la pluie, le gel ; la table Cultures.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 
