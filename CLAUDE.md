@@ -82,6 +82,12 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   (`dg:<kind>` objects of the editor's Donjon tab, `foe:<group>` enemies, pictures in `src/assets/dungeon/`),
   `model/dungeon-state.ts` (`pk-dungeon`: chests opened, the run), `game/dungeon-chip/`; the database table `dungeons`
   (`sheets/dungeon-sheet/`); the `DUNGEON` instruction and `dungeon:<id>` teleports.
+- Cutscenes (`docs/editeur/13-cinematiques.md`): kept in their map (`SceneMap.cutscenes`); `model/cutscene.ts` (tracks,
+  blocks), `model/cutscene-eval.ts` (the scene at a time: actors, camera, screen — pure, used by the editor preview and
+  skipping), `model/cutscene-seen.ts` (`pk-cutscenes-seen`), `services/cutscene.service.ts` (plays them: `game.cutscene`
+  freezes the input and the camera follow; `preview` for the editor), `game/cutscene-overlay/` (bars, fade, title,
+  bubbles, Passer held 2 s, ⏩), `game/cutscene-editor/` (opened from Éditeurs → Cinématiques over the map editor, talks
+  to the game through `CutsceneHost`, see `GameService.cutsceneHost`); the `CUTSCENE` instruction.
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

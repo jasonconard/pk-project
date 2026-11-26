@@ -21,7 +21,7 @@ Faire de l'appli un **moteur de jeu** : les éditeurs (carte, modèles, et ceux 
 
 ## Les outils à construire
 
-Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. **On commence par la musique** (12) : elle ne dépend de rien d'autre.
+Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Reste le **mode test** (14).
 
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
@@ -38,7 +38,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 10 | **Donjons** (fait : maquette `design/main-view.pen` (Donjons) et `database.pen` écran 17 ; la table Donjons (heures d'ouverture, météo, étages faits à la main ou générés à partir de salles, ennemis, coffres, sauvegarde) ; l'onglet Donjon de l'éditeur (coffre, piège, interrupteur, porte fermée, escalier, porte de salle, cristal de sauvegarde) et les cartes « Salle » ; en jeu : l'entrée fermée hors des heures, les étages, les salles reliées au hasard, les ennemis visibles qui poursuivent l'équipe (Frapper : attaque surprise ; par derrière : embuscade), la sortie et la sauvegarde ; voir [12-donjons](editeur/12-donjons.md). À suivre : blocs à pousser, boss propres, musique de donjon) | Étages (cartes) faits à la main ou générés à partir de salles ; heures d'ouverture ; météo propre ; coffres, pièges, énigmes, ennemis visibles | Nuit |
 | 11 | **Animation des modèles** (fait : maquette `design/model-editor-mobile.pen` écrans 8 à 10 ; le mouvement d'une forme dans l'éditeur de modèles (rotation, déplacement, clignotement, balancement ; axe, pivot, angle, durée ; en boucle, à l'approche, par un événement, la nuit) et son aperçu ; l'action « Animer l'objet » ; le moulin de la carte du monde, voir [06](editeur/06-modeles.md#les-mouvements)) | Portes, mécanismes, décors qui bougent (voir plus bas) | Jour et nuit |
 | 12 | **Musique** (fait : l'éditeur, voir [07](editeur/07-musique.md) ; le moment Donjon et la musique de chaque donjon ; l'import d'un fichier MIDI (pistes, instruments, mesures, gamme) et l'export en MIDI) | L'éditeur MIDI lo-fi (voir plus bas), une musique par lieu, jour / nuit / donjon / combat | Tout |
-| 13 | **Cinématiques** | Une ligne de temps : caméra, déplacements, dialogues, musique, à lancer depuis un événement | Histoire |
+| 13 | **Cinématiques** (fait : maquette `design/main-view.pen` (Cinématiques) ; l'éditeur sur la carte (ligne de temps, pistes caméra / écran / texte / son / monde / personnages, blocs qui se chevauchent, aperçu sur la carte avec le cadre de la caméra) ; l'action « Jouer la cinématique » ; en jeu : bandes noires, fondus, titres, bulles, messages, musique, Passer maintenu 2 s, ⏩ ×3, une seule fois ; voir [13](editeur/13-cinematiques.md). À suivre : des chemins qui contournent les obstacles) | Une ligne de temps : caméra, déplacements, dialogues, musique, à lancer depuis un événement | Histoire |
 | 14 | **Mode test** | Lancer le jeu depuis n'importe où, au jour et avec les drapeaux voulus, pour essayer une scène | Tout |
 
 ## Retenues
