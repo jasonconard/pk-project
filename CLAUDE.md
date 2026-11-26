@@ -96,6 +96,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `zoneFacing`), on `SceneModel.zone` / `SceneBuilding.zone` / `SceneEventCondition.zone` (`EventService.zoneOf`),
   `game/zone-editor/` (grid + side, shared by the model editor, the object sheet, the event window),
   `map-editor/zone-overlay.ts` (cells shown on the map, `MapEditorService.editZone` / `setZone`).
+- Shops (`docs/editeur/16-boutiques.md`): the database table `shops` (`DbShop`: shopkeeper NPC, buyback %, link discount
+  per level, items with own price, daily stock, `EventConditions`, link level; `sheets/shop-sheet/`), `model/shop.ts`
+  (items on sale now, prices, buyback), `party.ts` `trade` / `boughtToday` (`PartyState.shops`), `game/shop/` the
+  window, the `SHOP` instruction (`SequenceService.shop$`). `:where(.event-fields)` in `styles.scss` lends the event
+  window's fields to `game-event-conditions` outside it.
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
