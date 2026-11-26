@@ -8,6 +8,8 @@ import { MD_WOOD_PANNEL } from './md-wood-pannel';
 import { MD_LETTER_BOX } from './md-letter-box';
 import { MD_ROCK } from './md-rock';
 import { MD_WINDMILL } from './md-windmill';
+import { MD_LAMP } from './md-lamp';
+import { MD_CAMPFIRE } from './md-campfire';
 import { SceneModel } from '../../app/modules/game/shared/model/SceneModel';
 
 export const MODELS: SceneModel[] = [
@@ -20,5 +22,7 @@ export const MODELS: SceneModel[] = [
   MD_WOOD_PANNEL,
   MD_LETTER_BOX,
   MD_ROCK,
-  MD_WINDMILL
+  MD_WINDMILL,
+  MD_LAMP,
+  MD_CAMPFIRE
 ];

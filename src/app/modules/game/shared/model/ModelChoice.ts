@@ -10,6 +10,8 @@ import { MD_WOOD_PANNEL } from "../../../../../assets/models/md-wood-pannel";
 import { MD_LETTER_BOX } from "../../../../../assets/models/md-letter-box";
 import { MD_ROCK } from "../../../../../assets/models/md-rock";
 import { MD_WINDMILL } from "../../../../../assets/models/md-windmill";
+import { MD_LAMP } from "../../../../../assets/models/md-lamp";
+import { MD_CAMPFIRE } from "../../../../../assets/models/md-campfire";
 import { isNpc, npcOf } from "./npc-sprite";
 import { dungeonKindOf } from "./dungeon-object";
 
@@ -85,6 +87,8 @@ export const MODEL_CHOICES: ModelChoice[] = [
     },
   },
   { model: MD_WINDMILL },
+  { model: MD_LAMP },
+  { model: MD_CAMPFIRE },
 ];
 
 /**
@@ -143,6 +147,8 @@ const MODEL_LABELS: Record<string, string> = {
   "letter-box": "Boîte aux lettres",
   rock: "Rocher",
   windmill: "Moulin",
+  lamp: "Lampadaire",
+  campfire: "Feu de camp",
   zone: "Zone invisible",
 };
 
