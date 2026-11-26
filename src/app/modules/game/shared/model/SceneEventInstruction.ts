@@ -37,6 +37,8 @@ export enum InstructionType {
   SHOP,
   /** PLANT: the player picks a seed to plant (the farmland; FarmService goes on once chosen). Not in the editor. */
   PLANT,
+  /** TEAM: the members behind the leader follow again or hide. */
+  TEAM,
 }
 
 export interface SceneEventInstruction {
@@ -67,6 +69,8 @@ export interface SceneEventInstruction {
   gift?: { npc: string };
   /** SHOP: the shop's id (database table Boutiques). */
   shop?: { id: string };
+  /** TEAM: they follow (true) or hide (false). */
+  team?: { follow: boolean };
   subInstructions?: SceneEventSubInstruction[];
 }
 

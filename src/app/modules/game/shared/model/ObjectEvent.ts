@@ -123,6 +123,8 @@ export type EventAction =
   | { type: "gift"; target: string }
   /** A shop of the database opens (buy, sell); the event goes on once it is closed. */
   | { type: "shop"; shop: string }
+  /** The members behind the leader follow again or hide (story scenes). */
+  | { type: "team"; follow: boolean }
   /** A fight against a group of the database, then the branch of how it ended. */
   | {
       type: "fight";
@@ -425,6 +427,8 @@ function toInstruction(
           ...(action.mode === "until" ? { moment: action.moment } : {}),
         },
       };
+    case "team":
+      return { type: InstructionType.TEAM, team: { follow: action.follow } };
     case "timeFlow":
       return {
         type: InstructionType.TIME_FLOW,
@@ -590,6 +594,8 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
         : null;
     case InstructionType.TIME_FLOW:
       return { type: "timeFlow", stop: !!instruction.timeFlow?.stop };
+    case InstructionType.TEAM:
+      return { type: "team", follow: instruction.team?.follow !== false };
     case InstructionType.ANIMATE:
       return instruction.animate
         ? {

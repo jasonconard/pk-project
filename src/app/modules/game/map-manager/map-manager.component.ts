@@ -174,6 +174,11 @@ export class MapManagerComponent implements OnInit {
     this.maps.set(listMaps());
   }
 
+  protected setFollowers(map: MapSummary, followers: boolean): void {
+    this.gameService.setMapFollowers(map.id, followers);
+    this.maps.set(listMaps());
+  }
+
   protected setFrozenHour(map: MapSummary, hour: number): void {
     this.gameService.setMapTime(map.id, { mode: "frozen", hour });
     this.maps.set(listMaps());

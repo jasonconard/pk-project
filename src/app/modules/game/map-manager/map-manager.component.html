@@ -122,6 +122,17 @@
                 </select>
               }
             </div>
+            <label class="team-row" animate.enter="anim-fade-in">
+              <input
+                type="checkbox"
+                [checked]="map.followers !== false"
+                (change)="setFollowers(map, $any($event.target).checked)"
+              />
+              <span>
+                L'équipe suit le joueur
+                <small>Décochée : seul le chef d'équipe est dessiné</small>
+              </span>
+            </label>
             <div class="actions" animate.enter="anim-fade-in">
               <button type="button" (click)="startRename(map)">
                 <svg lucidePencil></svg> Renommer

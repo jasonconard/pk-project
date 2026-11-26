@@ -39,6 +39,7 @@ import {
   LucideHeartPulse,
   LucideHeartHandshake,
   LucideGift,
+  LucideFootprints,
   LucideStore,
   LucideCirclePause,
   LucideVariable,
@@ -102,6 +103,7 @@ const ACTIONS: {
   { type: "item", label: "Objet", icon: LucideBackpack },
   { type: "money", label: "Argent", icon: LucideCoins },
   { type: "party", label: "Équipe", icon: LucideUsers },
+  { type: "team", label: "L'équipe suit / se cache", icon: LucideFootprints },
   { type: "heal", label: "Soigner l'équipe", icon: LucideHeartPulse },
   { type: "link", label: "Lien", icon: LucideHeartHandshake },
   { type: "gift", label: "Offrir un cadeau", icon: LucideGift },
@@ -457,6 +459,8 @@ export class EventEditorComponent {
         return { type, mode: "until", hours: 2, moment: "evening" };
       case "timeFlow":
         return { type, stop: true };
+      case "team":
+        return { type, follow: false };
       case "animate":
         return { type, object: "", mode: "play", wait: true };
       case "cutscene": {

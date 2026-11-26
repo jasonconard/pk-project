@@ -384,6 +384,33 @@
       </p>
     }
   }
+  @case ("team") {
+    <div class="segmented" role="radiogroup" aria-label="L'équipe">
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="action.follow"
+        (click)="set({ follow: true })"
+      >
+        Suit
+      </button>
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="!action.follow"
+        (click)="set({ follow: false })"
+      >
+        Se cache
+      </button>
+    </div>
+    <p class="help">
+      {{
+        action.follow
+          ? "Les membres reviennent juste derrière le joueur."
+          : "Les membres qui suivent disparaissent (le chef reste), jusqu'à la prochaine action « L'équipe »."
+      }}
+    </p>
+  }
   @case ("timeFlow") {
     <div class="segmented" role="radiogroup" aria-label="Le temps">
       <button

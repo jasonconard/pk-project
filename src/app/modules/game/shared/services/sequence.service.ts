@@ -27,6 +27,7 @@ import {
   giveMoney,
   healTeam,
   setInTeam,
+  setTeamHidden,
 } from "../../../database-editor/shared/party";
 import { BattleService } from "../../../battle/shared/battle.service";
 import {
@@ -286,6 +287,10 @@ export class SequenceService {
         } else {
           this.nextSequence();
         }
+        break;
+      case InstructionType.TEAM:
+        setTeamHidden(instruction.team?.follow === false);
+        this.nextSequence();
         break;
       case InstructionType.PLANT:
         // (the seeds window is open: FarmService goes on once one is chosen or none)

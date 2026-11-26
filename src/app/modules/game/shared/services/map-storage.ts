@@ -51,6 +51,7 @@ interface StoredMap {
   kind: MapKind;
   spawn?: Vec3;
   time?: MapTime;
+  followers?: boolean;
   cutscenes?: Cutscene[];
   /** Every chunk of the map, in order. */
   chunks: StoredChunk[];
@@ -74,6 +75,8 @@ export interface MapSummary {
   edited: boolean;
   /** The time on it (missing: it passes as outside). */
   time?: MapTime;
+  /** false: the team doesn't walk behind the player there. */
+  followers?: boolean;
   /** Size in chunks (columns × rows of the area its chunks cover). */
   cols: number;
   rows: number;
@@ -219,6 +222,7 @@ export function listMaps(): MapSummary[] {
     name: stored[map.id]?.name ?? map.name,
     kind: stored[map.id]?.kind ?? map.kind,
     time: stored[map.id] ? stored[map.id].time : map.time,
+    followers: stored[map.id] ? stored[map.id].followers : map.followers,
     inCode: true,
     edited: !!stored[map.id],
     ...gridSize(stored[map.id]?.chunks ?? map.chunks),
@@ -230,6 +234,7 @@ export function listMaps(): MapSummary[] {
       name: map.name,
       kind: map.kind,
       time: map.time,
+      followers: map.followers,
       inCode: false,
       edited: true,
       ...gridSize(map.chunks),
@@ -367,6 +372,9 @@ export function loadMap(id: string): SceneMap | null {
     ...((saved ? saved.time : code!.time)
       ? { time: structuredClone(saved ? saved.time : code!.time) }
       : {}),
+    ...((saved ? saved.followers : code!.followers) === false
+      ? { followers: false }
+      : {}),
     ...((saved ? saved.cutscenes : code!.cutscenes)?.length
       ? {
           cutscenes: structuredClone(
@@ -386,6 +394,7 @@ export function saveMap(map: SceneMap) {
     kind: map.kind,
     spawn: map.spawn,
     ...(map.time ? { time: map.time } : {}),
+    ...(map.followers === false ? { followers: false } : {}),
     ...(map.cutscenes?.length ? { cutscenes: map.cutscenes } : {}),
     chunks: map.chunks.map(chunkData),
   };
@@ -451,6 +460,7 @@ export function exportMapFile(map: SceneMap): string {
         ]
       : []),
     ...(map.time ? [`  time: ${JSON.stringify(map.time)},`] : []),
+    ...(map.followers === false ? ["  followers: false,"] : []),
     ...(map.cutscenes?.length
       ? [`  cutscenes: ${JSON.stringify(map.cutscenes)},`]
       : []),

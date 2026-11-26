@@ -30,6 +30,10 @@ import { isPassageEvent } from "../model/Passage";
 import { DustPuff } from "../model/DustPuff";
 import { DungeonService } from "./dungeon.service";
 import { FarmService } from "./farm.service";
+import { TeamFollowers } from "../model/team-followers";
+import { currentParty } from "../../../database-editor/shared/party";
+import { cachedDatabase } from "../../../database-editor/shared/database-storage";
+import { DbCharacter } from "../../../database-editor/shared/database";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 
 /** Ledge hop length (s) and height (world units). */
@@ -56,6 +60,7 @@ export class GameMapService {
   private readonly mapEditorService = inject(MapEditorService);
   private readonly dungeonService = inject(DungeonService);
   private readonly farmService = inject(FarmService);
+  private readonly followers = new TeamFollowers();
 
   private pixelSize = 8;
   /** Ledge hop: time since it started (s, -1 = none) and the height currently added to the sprite. */
@@ -221,6 +226,36 @@ export class GameMapService {
         (mesh) => (mesh.visible = false)
       );
     }
+  }
+
+  /** The team walking behind the player (hidden by the setting, the map, an event, or while a fight hides the player). */
+  private updateFollowers(
+    game: Game,
+    mapHelper: MapHelper,
+    sprite: THREE.Object3D
+  ): void {
+    const party = currentParty();
+    const db = cachedDatabase();
+    const members = party.team
+      .slice(1)
+      .map((id) => db.characters.find((c) => c.id === id))
+      .filter((c): c is DbCharacter => !!c);
+    this.followers.update(
+      game.scene,
+      mapHelper.sceneMap,
+      sprite,
+      mapHelper.scenePlayer.dir,
+      members,
+      game.teamFollows &&
+        mapHelper.sceneMap.followers !== false &&
+        !party.teamHidden &&
+        sprite.scale.x > 0.01,
+      {
+        frame: game.frame,
+        framePerSecond: game.framePerSec,
+        running: this.moveStatus === PlayerMoveStatus.RUNNING,
+      }
+    );
   }
 
   /** What the events' conditions read: the hour, the weather, the story variables. */
@@ -453,6 +488,7 @@ export class GameMapService {
         framePerSecond: game.framePerSec,
       });
     }
+    this.updateFollowers(game, mapHelper, sprite);
 
     // What the action key would do (the action button, the prompt), the events starting on their own: 30 times per
     // second is plenty

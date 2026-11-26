@@ -168,6 +168,8 @@ export class Game {
   retro = false;
   /** The camera follows the player with a lag it catches up (see pixel-scale.ts), else stays locked on it. */
   smoothCamera = true;
+  /** The team walks behind the player (Menu → L'équipe me suit). */
+  teamFollows = true;
   /**
    * The moves' fixed steps (see GameService: 120 per second): the step's length, the (simulated) time the step
    * being run ends at, and the player's place at the start of the last steps, so a frame shows the player where it

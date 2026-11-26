@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { CAMERA_FOV, CAMERA_LOOK, Game } from "./Game";
 
+/** The team following the player (team-followers.ts): its group in the scene, moved like the player while drawing. */
+export const FOLLOWERS_NAME = "team-followers";
+
 /**
  * Pixel-sharp sprites, after "Recreating the 2.5D effect from Pokémon Black & White" (M. Jakeman): a sprite pixel
  * covers a whole number of screen pixels (3, 4, 5… depending on the screen) and its edges fall on the screen's pixel
@@ -127,6 +130,9 @@ export class CameraFollow {
   private readonly cameraShift = new THREE.Vector3();
   private readonly realPlayer = new THREE.Vector3();
   private shifted: THREE.Object3D | null = null;
+  /** The team walking behind (team-followers.ts), moved like the player while a frame is drawn. */
+  private followers: THREE.Object3D | null = null;
+  private readonly followersShift = new THREE.Vector3();
   /** The screen pixel the player's feet were put on last frame. */
   private snapped: { x: number; y: number } | null = null;
   private readonly shown = new THREE.Vector3();
@@ -273,6 +279,13 @@ export class CameraFollow {
         .addScaledVector(this.up, (py - y) / perUnit);
     }
     player.updateMatrixWorld();
+    // The followers stand on the leader's real steps: the same shift keeps them as smooth and sharp as the player
+    this.followers = game.scene.getObjectByName(FOLLOWERS_NAME) ?? null;
+    if (this.followers) {
+      this.followersShift.copy(player.position).sub(this.realPlayer);
+      this.followers.position.add(this.followersShift);
+      this.followers.updateMatrixWorld();
+    }
   }
 
   /** After drawing: the camera and the player at their real places again. */
@@ -280,6 +293,11 @@ export class CameraFollow {
     game.camera.position.sub(this.cameraShift);
     game.camera.updateMatrixWorld();
     this.cameraShift.set(0, 0, 0);
+    if (this.followers) {
+      this.followers.position.sub(this.followersShift);
+      this.followers.updateMatrixWorld();
+      this.followers = null;
+    }
     if (this.shifted) {
       this.shifted.position.copy(this.realPlayer);
       this.shifted.updateMatrixWorld();

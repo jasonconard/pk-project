@@ -23,6 +23,8 @@ export interface SceneMap {
   spawn?: Vec3;
   /** The time on this map (missing: it passes as outside). */
   time?: MapTime;
+  /** The team walks behind the player on this map (missing: yes; false: only the leader is drawn). */
+  followers?: boolean;
   /** Its cutscenes (see cutscene.ts), played by the event action « Jouer la cinématique ». */
   cutscenes?: Cutscene[];
   chunks: SceneChunk[];

@@ -38,6 +38,9 @@ import {
   LucideX,
 } from "@lucide/angular";
 import { GameService } from "../shared/services/game.service";
+import { cachedDatabase } from "../../database-editor/shared/database-storage";
+import { currentParty } from "../../database-editor/shared/party";
+import { FOLLOWERS_MAX } from "../shared/model/team-followers";
 import { CoreService } from "../../../core/shared/service/core.service";
 import { KeyService } from "../../../core/shared/service/key.service";
 import { QUALITY_CHOICES, QualityMode } from "../shared/model/Quality";
@@ -121,6 +124,7 @@ const ENTRIES: MenuEntry[] = [
     LucideUpload,
     LucideSwords,
     LucideVariable,
+    LucideUsers,
   ],
   templateUrl: "./game-menu.component.html",
   styleUrl: "./game-menu.component.scss",
@@ -221,6 +225,28 @@ export class GameMenuComponent {
   }
 
   /** The camera follows the player with a lag, or stays locked on it. */
+  protected readonly teamFollows = this.gameService.teamFollows;
+  /** « Jason marche derrière vous sur la carte ». */
+  protected readonly followersLabel = computed(() => {
+    const db = cachedDatabase();
+    const names = currentParty()
+      .team.slice(1, 1 + FOLLOWERS_MAX)
+      .map((id) => db.characters.find((c) => c.id === id)?.name)
+      .filter(Boolean);
+    if (names.length === 0) {
+      return "Personne d'autre dans l'équipe pour l'instant";
+    }
+    const who =
+      names.length === 1
+        ? names[0]
+        : `${names.slice(0, -1).join(", ")} et ${names.at(-1)}`;
+    return `${who} ${names.length > 1 ? "marchent" : "marche"} derrière vous sur la carte`;
+  });
+
+  protected toggleTeamFollows(): void {
+    this.gameService.setTeamFollows(!this.teamFollows());
+  }
+
   protected setSmoothCamera(event: Event): void {
     this.gameService.setSmoothCamera(
       (event.target as HTMLInputElement).checked

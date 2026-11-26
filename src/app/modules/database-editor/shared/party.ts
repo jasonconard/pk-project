@@ -42,6 +42,8 @@ export interface PartyState {
   links?: Record<string, number>;
   /** NPC id → the day (game date) it was last given a gift (one a day). */
   gifts?: Record<string, number>;
+  /** An event hid the members following the leader (« L'équipe : se cache »). */
+  teamHidden?: boolean;
   /** Shop id → what was bought there on a day (item id → how many; the stock comes back the next day). */
   shops?: Record<string, { day: number; bought: Record<string, number> }>;
 }
@@ -162,6 +164,17 @@ export function trade(
   }
   writeParty(party);
   return true;
+}
+
+/** The members behind the leader hidden or shown again (the event action « L'équipe »). */
+export function setTeamHidden(hidden: boolean): void {
+  const party = structuredClone(currentParty());
+  if (hidden) {
+    party.teamHidden = true;
+  } else {
+    delete party.teamHidden;
+  }
+  writeParty(party);
 }
 
 /** A character joins the team (at the end) or leaves it. */

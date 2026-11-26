@@ -169,6 +169,8 @@ interface SavedSettings {
   retro: boolean;
   /** The camera follows the player with a lag (else locked on it). */
   smoothCamera: boolean;
+  /** The team walks behind the player. */
+  teamFollows: boolean;
 }
 
 const SETTINGS_KEY = "pk-weather-settings";
@@ -215,6 +217,7 @@ function loadSettings(): Partial<SavedSettings> {
   out.soundMuted = bool(raw["soundMuted"]);
   out.retro = bool(raw["retro"]);
   out.smoothCamera = bool(raw["smoothCamera"]);
+  out.teamFollows = bool(raw["teamFollows"]);
   return out;
 }
 
@@ -354,6 +357,8 @@ export class GameService {
   readonly retro = this.retroState.asReadonly();
   private readonly smoothCameraState = signal(this.saved.smoothCamera ?? true);
   readonly smoothCamera = this.smoothCameraState.asReadonly();
+  private readonly teamFollowsState = signal(this.saved.teamFollows ?? true);
+  readonly teamFollows = this.teamFollowsState.asReadonly();
 
   constructor() {
     this.initCheckResize();
@@ -447,6 +452,7 @@ export class GameService {
         quality: this.qualityState(),
         retro: this.retroState(),
         smoothCamera: this.smoothCameraState(),
+        teamFollows: this.teamFollowsState(),
       })
     );
   }
@@ -497,6 +503,7 @@ export class GameService {
     game.setQuality(this.qualityState());
     game.setRetro(this.retroState());
     game.smoothCamera = this.smoothCameraState();
+    game.teamFollows = this.teamFollowsState();
     // In the background (home screen, other app, screen locked): the game stops (see isGameAsleep in the loops);
     // keys held when leaving would stay pressed (their keyup is lost), and the time spent away is not caught up
     onGameAsleep((hidden) => {
@@ -931,6 +938,20 @@ export class GameService {
   }
 
   /** The time on a map (null: it passes as outside). */
+  /** The team walks behind the player on a map (false: only the leader). */
+  setMapFollowers(id: string, followers: boolean) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      if (followers) {
+        delete map.followers;
+      } else {
+        map.followers = false;
+      }
+      saveMap(map);
+    }
+  }
+
   setMapTime(id: string, time: MapTime | null) {
     const current = this.game?.mapHelper?.sceneMap;
     const map = current?.id === id ? current : loadMap(id);
@@ -985,6 +1006,13 @@ export class GameService {
     this.qualityState.set(mode);
     this.game?.setQuality(mode);
     this.syncHud();
+  }
+
+  setTeamFollows(follows: boolean) {
+    this.teamFollowsState.set(follows);
+    if (this.game) {
+      this.game.teamFollows = follows;
+    }
   }
 
   setSmoothCamera(smooth: boolean) {

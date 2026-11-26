@@ -80,6 +80,20 @@
     <button
       type="button"
       class="row"
+      role="switch"
+      [attr.aria-checked]="teamFollows()"
+      (click)="toggleTeamFollows()"
+    >
+      <svg lucideUsers class="row-icon"></svg>
+      <span class="row-text">
+        <b>L'équipe me suit</b>
+        <small>{{ followersLabel() }}</small>
+      </span>
+      <span class="toggle" [class.on]="teamFollows()" aria-hidden="true"></span>
+    </button>
+    <button
+      type="button"
+      class="row"
       [attr.aria-expanded]="qualityOpen()"
       (click)="qualityOpen.set(!qualityOpen())"
     >
