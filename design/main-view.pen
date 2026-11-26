@@ -50875,6 +50875,3401 @@
           ]
         }
       ]
+    },
+    {
+      "type": "note",
+      "id": "yRquV",
+      "x": 0,
+      "y": 13500,
+      "name": "Note boutiques",
+      "width": 1290,
+      "height": 200,
+      "content": "BOUTIQUES (point 16) — une boutique est une fiche de la base de données (table Boutiques, design/database.pen écrans 18 et 19) : son nom, son vendeur (un PNJ), les objets vendus (prix propre ou celui de l'objet, stock par jour qui revient chaque matin, moments et conditions, niveau de lien avec le vendeur), le taux de rachat (50 % par défaut) et la réduction par niveau de lien. Un événement l'ouvre avec l'action « Ouvrir la boutique ». En jeu : une feuille en bas avec le vendeur, l'argent, Acheter / Vendre ; on touche un objet pour choisir la quantité. Les objets clés et ceux à prix 0 ne se vendent pas. Couleur de l'argent : jaune."
+    },
+    {
+      "type": "frame",
+      "id": "mffEW",
+      "x": 0,
+      "y": 13750,
+      "name": "Boutique · Jeu · Acheter",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "O2HOPY",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait-npc.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "CLEaq",
+          "x": 14,
+          "y": 54,
+          "name": "Horloge (jour · heure · météo)",
+          "fill": "$panel",
+          "cornerRadius": 22,
+          "effect": {
+            "type": "background_blur",
+            "radius": 12
+          },
+          "gap": 10,
+          "padding": [
+            8,
+            14,
+            8,
+            8
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "MSavs",
+              "name": "Météo",
+              "width": 40,
+              "height": 40,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/weather/neutral-day.webp",
+                "mode": "cover"
+              },
+              "cornerRadius": 20,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1,
+              "justifyContent": "center",
+              "alignItems": "center"
+            },
+            {
+              "type": "frame",
+              "id": "N87sK",
+              "name": "Textes",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "i9wnwn",
+                  "name": "Lun. 12 · Matin",
+                  "fill": "$text",
+                  "content": "Ven. 5 printemps",
+                  "fontFamily": "$font",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "L3c4Z",
+                  "name": "Sous-ligne",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "tTAjL",
+                      "name": "sun",
+                      "width": 12,
+                      "height": 12,
+                      "icon": "sun",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "text",
+                      "id": "HXDwl",
+                      "name": "9:30 · Pluie fine · 14 °C",
+                      "fill": "$text-dim",
+                      "content": "Après-midi · 14:40 · 18 °C",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "vDFT7",
+          "x": 262,
+          "y": 54,
+          "name": "Coin haut droit",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "dbHWt",
+              "name": "Bouton Créer",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "stroke": "#FFB04A80",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "gUcGn",
+                  "name": "pencil-ruler",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "pencil-ruler",
+                  "library": "lucide",
+                  "fill": "$edit"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "t1xvz",
+              "name": "Bouton Menu",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "NHR8z",
+                  "name": "menu",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "menu",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Nm8GT",
+          "x": 28,
+          "y": 650,
+          "name": "Stick",
+          "width": 132,
+          "height": 132,
+          "fill": "#22232A80",
+          "cornerRadius": 66,
+          "stroke": "#FFFFFF40",
+          "strokeWidth": 1.5,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "eHJJ9",
+              "name": "Pouce",
+              "fill": "#FFFFFF59",
+              "width": 56,
+              "height": 56
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "MyrOm",
+          "x": 240,
+          "y": 640,
+          "name": "Actions",
+          "layout": "vertical",
+          "gap": 12,
+          "alignItems": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "e2YNY5",
+              "name": "Bouton Courir",
+              "width": 56,
+              "height": 56,
+              "fill": "#22232ACC",
+              "cornerRadius": 28,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "WFOkv",
+                  "name": "footprints",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "footprints",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EMv10",
+              "name": "Bouton Action (contextuel)",
+              "height": 76,
+              "fill": "$play",
+              "cornerRadius": 38,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000004D",
+                "offset": {
+                  "x": 0,
+                  "y": 6
+                },
+                "blur": 18
+              },
+              "gap": 10,
+              "padding": [
+                0,
+                26,
+                0,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "nMsOh",
+                  "name": "message-circle",
+                  "width": 24,
+                  "height": 24,
+                  "icon": "door-open",
+                  "library": "lucide",
+                  "fill": "#0B1A33"
+                },
+                {
+                  "type": "text",
+                  "id": "sQ4q8",
+                  "name": "Parler",
+                  "fill": "#0B1A33",
+                  "content": "Entrer",
+                  "fontFamily": "$font",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "t2X63",
+          "x": 286,
+          "y": 470,
+          "name": "Repère d'interaction",
+          "fill": "$panel",
+          "cornerRadius": 14,
+          "gap": 6,
+          "padding": [
+            6,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "cp2UR",
+              "name": "message-circle",
+              "width": 14,
+              "height": 14,
+              "icon": "door-open",
+              "library": "lucide",
+              "fill": "$play"
+            },
+            {
+              "type": "text",
+              "id": "JiLnC",
+              "name": "Mira",
+              "fill": "$text",
+              "content": "Labo",
+              "fontFamily": "$font",
+              "fontSize": 13,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 3,
+          "id": "AqRJe",
+          "x": 128,
+          "y": 828,
+          "name": "Barre d'accueil",
+          "fill": "#FFFFFFB3",
+          "width": 134,
+          "height": 5
+        },
+        {
+          "type": "rectangle",
+          "id": "UH2sw",
+          "x": 0,
+          "y": 0,
+          "name": "Voile",
+          "fill": "#0000008C",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "U2z8zD",
+          "x": 0,
+          "y": 150,
+          "name": "Feuille Boutique",
+          "width": 390,
+          "height": 694,
+          "fill": "$panel-solid",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            10,
+            18,
+            30,
+            18
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Uyjm9",
+              "name": "Poignée",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "VC54I",
+                  "name": "Grip",
+                  "fill": "#FFFFFF4D",
+                  "width": 40,
+                  "height": 4
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "KmXc4",
+              "name": "En-tête",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "BDE0X",
+                  "name": "Portrait",
+                  "width": 48,
+                  "height": 48,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/faces/portrait-bernard.png",
+                    "mode": "cover"
+                  },
+                  "cornerRadius": 12
+                },
+                {
+                  "type": "frame",
+                  "id": "cgF5S",
+                  "name": "Titre",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Hja4D",
+                      "name": "Bazar de la place",
+                      "fill": "$text",
+                      "content": "Bazar de la place",
+                      "fontFamily": "$font",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "p7jZk",
+                      "name": "Bernard",
+                      "fill": "$text-dim",
+                      "content": "Bernard",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "A2dsn",
+                  "name": "Argent",
+                  "height": 32,
+                  "fill": "#ffd34d26",
+                  "cornerRadius": 16,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "AN2mr",
+                      "name": "coins",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "coins",
+                      "library": "lucide",
+                      "fill": "#ffd34d"
+                    },
+                    {
+                      "type": "text",
+                      "id": "JTuLY",
+                      "name": "1 250",
+                      "fill": "#ffd34d",
+                      "content": "1 250",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "s1b2V1",
+                  "name": "Fermer",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "$chip",
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "m3pO2N",
+                      "name": "x",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "YuIko",
+              "name": "Onglets",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "gap": 3,
+              "padding": 3,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "sLgqd",
+                  "name": "Acheter",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#ffd34d",
+                  "cornerRadius": 9,
+                  "gap": 6,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "XxB68",
+                      "name": "shopping-bag",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "shopping-bag",
+                      "library": "lucide",
+                      "fill": "#2a2205"
+                    },
+                    {
+                      "type": "text",
+                      "id": "XRVWz",
+                      "name": "Acheter",
+                      "fill": "#2a2205",
+                      "content": "Acheter",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "X0eil",
+                  "name": "Vendre",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "cornerRadius": 9,
+                  "gap": 6,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ko7WY",
+                      "name": "hand-coins",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "hand-coins",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "EIimw",
+                      "name": "Vendre",
+                      "fill": "$text",
+                      "content": "Vendre",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "A1ocp",
+              "name": "Réduction",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "K9mRV",
+                  "name": "heart",
+                  "width": 13,
+                  "height": 13,
+                  "icon": "heart",
+                  "library": "lucide",
+                  "fill": "#ff6a8a"
+                },
+                {
+                  "type": "text",
+                  "id": "X7Z1o",
+                  "name": "Lien niveau 3 avec Bernard : tout à −15 %",
+                  "fill": "#ff9ab0",
+                  "content": "Lien niveau 3 avec Bernard : tout à −15 %",
+                  "fontFamily": "$font",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iwlNE",
+              "name": "Liste",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ZJPos",
+                  "name": "Potion",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "stroke": "#ffd34d",
+                  "strokeWidth": 1.5,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "BCdoQ",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LM1aw",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "MTYcu",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/potion.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "NTG6F",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "e1YbYe",
+                              "name": "Potion",
+                              "fill": "$text",
+                              "content": "Potion",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "FsdJY",
+                              "name": "Rend 50 PV · vous en avez 3",
+                              "fill": "$text-dim",
+                              "content": "Rend 50 PV · vous en avez 3",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dQKuk",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "hhkgE",
+                              "name": "50",
+                              "fill": "$text-dim",
+                              "content": "50",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "uTo3X",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "WLMFF",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "wZEiF",
+                                  "name": "43",
+                                  "fill": "#ffd34d",
+                                  "content": "43",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VmvFW",
+                      "name": "Acheter combien",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "f04xQW",
+                          "name": "minus",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff14",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "YwrIg",
+                              "name": "minus",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "minus",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "XH4Y7",
+                          "name": "2",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": 28,
+                          "content": "2",
+                          "textAlign": "center",
+                          "fontFamily": "$font",
+                          "fontSize": 17,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "XNbNP",
+                          "name": "plus",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff14",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "G8n7F",
+                              "name": "plus",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "N9rZ2",
+                          "name": "Acheter",
+                          "width": "fill_container",
+                          "height": 44,
+                          "fill": "#ffd34d",
+                          "cornerRadius": 12,
+                          "gap": 6,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rCJW4",
+                              "name": "Acheter · 86",
+                              "fill": "#2a2205",
+                              "content": "Acheter · 86",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "M0CNp",
+                              "name": "coins",
+                              "width": 15,
+                              "height": 15,
+                              "icon": "coins",
+                              "library": "lucide",
+                              "fill": "#2a2205"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wkimo",
+                  "name": "Remède",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "riwnq",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "n0dBn",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "tIb9h",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/heal.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "YNNHD",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "aXF5L",
+                              "name": "Remède",
+                              "fill": "$text",
+                              "content": "Remède",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "r8iHJz",
+                              "name": "Soigne le poison · vous en avez 0",
+                              "fill": "$text-dim",
+                              "content": "Soigne le poison · vous en avez 0",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "IYeYZ",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "HJCSC",
+                              "name": "25",
+                              "fill": "$text-dim",
+                              "content": "25",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "iiqwr",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "q8KU1h",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "m4zB08",
+                                  "name": "21",
+                                  "fill": "#ffd34d",
+                                  "content": "21",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "q2zOY",
+                  "name": "Cristal de feu",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "QJKuU",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "y8FWyi",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Y8K1NU",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/fire.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "v77u7D",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "D1yqB",
+                              "name": "Cristal de feu",
+                              "fill": "$text",
+                              "content": "Cristal de feu",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ftZEA",
+                              "name": "Plus que 1 aujourd'hui",
+                              "fill": "#ffb04a",
+                              "content": "Plus que 1 aujourd'hui",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Ksln9",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "aD4uf",
+                              "name": "200",
+                              "fill": "$text-dim",
+                              "content": "200",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Bu2iP",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "XHkkf",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "D8bbR",
+                                  "name": "170",
+                                  "fill": "#ffd34d",
+                                  "content": "170",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JRqwd",
+                  "name": "Épée courte",
+                  "opacity": 0.45,
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "g4Zef",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "dcSCO",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "nCcCo",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/sword.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hRH3E",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "b1wnZt",
+                              "name": "Épée courte",
+                              "fill": "$text",
+                              "content": "Épée courte",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "c9yc7T",
+                              "name": "Épuisé, revient demain matin",
+                              "fill": "$text-dim",
+                              "content": "Épuisé, revient demain matin",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "oxuc8",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZSErD",
+                              "name": "120",
+                              "fill": "$text-dim",
+                              "content": "120",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "QJ2HH",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "ZqygW",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "R4DW85",
+                                  "name": "102",
+                                  "fill": "#ffd34d",
+                                  "content": "102",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "GJbbI",
+              "name": "Les prix tiennent compte du lien. Le stock revient chaque matin.",
+              "fill": "$text-dim",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Les prix tiennent compte du lien. Le stock revient chaque matin.",
+              "fontFamily": "$font",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "le96j",
+      "x": 450,
+      "y": 13750,
+      "name": "Boutique · Jeu · Vendre",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "cornerRadius": 28,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "ggJ7b",
+          "x": 0,
+          "y": 0,
+          "name": "Capture du jeu",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/screens/game-portrait-npc.png",
+            "mode": "cover"
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "C3wMst",
+          "x": 14,
+          "y": 54,
+          "name": "Horloge (jour · heure · météo)",
+          "fill": "$panel",
+          "cornerRadius": 22,
+          "effect": {
+            "type": "background_blur",
+            "radius": 12
+          },
+          "gap": 10,
+          "padding": [
+            8,
+            14,
+            8,
+            8
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "JXYxR",
+              "name": "Météo",
+              "width": 40,
+              "height": 40,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/weather/neutral-day.webp",
+                "mode": "cover"
+              },
+              "cornerRadius": 20,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1,
+              "justifyContent": "center",
+              "alignItems": "center"
+            },
+            {
+              "type": "frame",
+              "id": "zDksS",
+              "name": "Textes",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "v4zNr",
+                  "name": "Lun. 12 · Matin",
+                  "fill": "$text",
+                  "content": "Ven. 5 printemps",
+                  "fontFamily": "$font",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "Njcr8",
+                  "name": "Sous-ligne",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "exmvQ",
+                      "name": "sun",
+                      "width": 12,
+                      "height": 12,
+                      "icon": "sun",
+                      "library": "lucide",
+                      "fill": "$text-dim"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yvVr7",
+                      "name": "9:30 · Pluie fine · 14 °C",
+                      "fill": "$text-dim",
+                      "content": "Après-midi · 14:40 · 18 °C",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "o8G16n",
+          "x": 262,
+          "y": 54,
+          "name": "Coin haut droit",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "rpvWG",
+              "name": "Bouton Créer",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "stroke": "#FFB04A80",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "VAe5Z",
+                  "name": "pencil-ruler",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "pencil-ruler",
+                  "library": "lucide",
+                  "fill": "$edit"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "p7MsF",
+              "name": "Bouton Menu",
+              "width": 52,
+              "height": 52,
+              "fill": "$panel",
+              "cornerRadius": 26,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "y4iveD",
+                  "name": "menu",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "menu",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lJIHD",
+          "x": 28,
+          "y": 650,
+          "name": "Stick",
+          "width": 132,
+          "height": 132,
+          "fill": "#22232A80",
+          "cornerRadius": 66,
+          "stroke": "#FFFFFF40",
+          "strokeWidth": 1.5,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "Q9u7Z",
+              "name": "Pouce",
+              "fill": "#FFFFFF59",
+              "width": 56,
+              "height": 56
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "m4hnUY",
+          "x": 240,
+          "y": 640,
+          "name": "Actions",
+          "layout": "vertical",
+          "gap": 12,
+          "alignItems": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "GYQkO",
+              "name": "Bouton Courir",
+              "width": 56,
+              "height": 56,
+              "fill": "#22232ACC",
+              "cornerRadius": 28,
+              "stroke": "#FFFFFF40",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "gybGI",
+                  "name": "footprints",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "footprints",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xhOpi",
+              "name": "Bouton Action (contextuel)",
+              "height": 76,
+              "fill": "$play",
+              "cornerRadius": 38,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000004D",
+                "offset": {
+                  "x": 0,
+                  "y": 6
+                },
+                "blur": 18
+              },
+              "gap": 10,
+              "padding": [
+                0,
+                26,
+                0,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "l34f6S",
+                  "name": "message-circle",
+                  "width": 24,
+                  "height": 24,
+                  "icon": "door-open",
+                  "library": "lucide",
+                  "fill": "#0B1A33"
+                },
+                {
+                  "type": "text",
+                  "id": "T8Lf5",
+                  "name": "Parler",
+                  "fill": "#0B1A33",
+                  "content": "Entrer",
+                  "fontFamily": "$font",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "QwM0U",
+          "x": 286,
+          "y": 470,
+          "name": "Repère d'interaction",
+          "fill": "$panel",
+          "cornerRadius": 14,
+          "gap": 6,
+          "padding": [
+            6,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "O27bh",
+              "name": "message-circle",
+              "width": 14,
+              "height": 14,
+              "icon": "door-open",
+              "library": "lucide",
+              "fill": "$play"
+            },
+            {
+              "type": "text",
+              "id": "FXdRa",
+              "name": "Mira",
+              "fill": "$text",
+              "content": "Labo",
+              "fontFamily": "$font",
+              "fontSize": 13,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 3,
+          "id": "jBkLs",
+          "x": 128,
+          "y": 828,
+          "name": "Barre d'accueil",
+          "fill": "#FFFFFFB3",
+          "width": 134,
+          "height": 5
+        },
+        {
+          "type": "rectangle",
+          "id": "FNgzv",
+          "x": 0,
+          "y": 0,
+          "name": "Voile",
+          "fill": "#0000008C",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "H40dPs",
+          "x": 0,
+          "y": 150,
+          "name": "Feuille Boutique",
+          "width": 390,
+          "height": 694,
+          "fill": "$panel-solid",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            10,
+            18,
+            30,
+            18
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "kTVR9",
+              "name": "Poignée",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "lMiiF",
+                  "name": "Grip",
+                  "fill": "#FFFFFF4D",
+                  "width": 40,
+                  "height": 4
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "qAKxW",
+              "name": "En-tête",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dF7E1",
+                  "name": "Portrait",
+                  "width": 48,
+                  "height": 48,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/faces/portrait-bernard.png",
+                    "mode": "cover"
+                  },
+                  "cornerRadius": 12
+                },
+                {
+                  "type": "frame",
+                  "id": "R9bCQV",
+                  "name": "Titre",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n2IK1",
+                      "name": "Bazar de la place",
+                      "fill": "$text",
+                      "content": "Bazar de la place",
+                      "fontFamily": "$font",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lmWfV",
+                      "name": "Bernard",
+                      "fill": "$text-dim",
+                      "content": "Bernard",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ygz0d",
+                  "name": "Argent",
+                  "height": 32,
+                  "fill": "#ffd34d26",
+                  "cornerRadius": 16,
+                  "gap": 5,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "qeaPy",
+                      "name": "coins",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "coins",
+                      "library": "lucide",
+                      "fill": "#ffd34d"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pz1YE",
+                      "name": "1 250",
+                      "fill": "#ffd34d",
+                      "content": "1 250",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mEfif",
+                  "name": "Fermer",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "$chip",
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "b2hYt0",
+                      "name": "x",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xeD6m",
+              "name": "Onglets",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$chip",
+              "cornerRadius": 12,
+              "gap": 3,
+              "padding": 3,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "qbKEB",
+                  "name": "Acheter",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#00000000",
+                    "enabled": false
+                  },
+                  "cornerRadius": 9,
+                  "gap": 6,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "evJcC",
+                      "name": "shopping-bag",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "shopping-bag",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vZ0pz",
+                      "name": "Acheter",
+                      "fill": "$text",
+                      "content": "Acheter",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "snhBH",
+                  "name": "Vendre",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#ffd34d",
+                  "cornerRadius": 9,
+                  "gap": 6,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "p8kUK",
+                      "name": "hand-coins",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "hand-coins",
+                      "library": "lucide",
+                      "fill": "#2a2205"
+                    },
+                    {
+                      "type": "text",
+                      "id": "X6kqU8",
+                      "name": "Vendre",
+                      "fill": "#2a2205",
+                      "content": "Vendre",
+                      "fontFamily": "$font",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iT11m",
+              "name": "Réduction",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "q8wFst",
+                  "name": "heart",
+                  "width": 13,
+                  "height": 13,
+                  "icon": "hand-coins",
+                  "library": "lucide",
+                  "fill": "#ffd34d"
+                },
+                {
+                  "type": "text",
+                  "id": "PHwVx",
+                  "name": "Lien niveau 3 avec Bernard : tout à −15 %",
+                  "fill": "$text-dim",
+                  "content": "Bernard rachète à 50 % du prix",
+                  "fontFamily": "$font",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "mlTjo",
+              "name": "Liste",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "il5Eh",
+                  "name": "Potion",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "stroke": "#ffd34d",
+                  "strokeWidth": 1.5,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "F4A7xu",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "rq8K1",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "c0ervp",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/potion.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "reHLV",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "bWHuB",
+                              "name": "Potion",
+                              "fill": "$text",
+                              "content": "Potion",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "pNPcd",
+                              "name": "Rend 50 PV · vous en avez 3",
+                              "fill": "$text-dim",
+                              "content": "Vous en avez 3",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "qtobq",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "j3tCv",
+                              "x": 22,
+                              "y": 0,
+                              "name": "50",
+                              "enabled": false,
+                              "fill": "$text-dim",
+                              "content": "50",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "I6h4U",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "uFsRb",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "fz9e3",
+                                  "name": "43",
+                                  "fill": "#ffd34d",
+                                  "content": "25",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "gCx1N",
+                      "name": "Acheter combien",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "zuksc",
+                          "name": "minus",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff14",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "z6i4GH",
+                              "name": "minus",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "minus",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "WUdlE",
+                          "name": "2",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": 28,
+                          "content": "1",
+                          "textAlign": "center",
+                          "fontFamily": "$font",
+                          "fontSize": 17,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "aTrlI",
+                          "name": "plus",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff14",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "lRw9F",
+                              "name": "plus",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "gtTa7",
+                          "name": "Acheter",
+                          "width": "fill_container",
+                          "height": 44,
+                          "fill": "#ffd34d",
+                          "cornerRadius": 12,
+                          "gap": 6,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Xik45",
+                              "name": "Acheter · 86",
+                              "fill": "#2a2205",
+                              "content": "Vendre · 25",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "wIMbz",
+                              "name": "coins",
+                              "width": 15,
+                              "height": 15,
+                              "icon": "coins",
+                              "library": "lucide",
+                              "fill": "#2a2205"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ojkyY",
+                  "name": "Remède",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DcJPd",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "fTgM7",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "kVhh3",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/shield.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "bvbWO",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "fQsDY",
+                              "name": "Remède",
+                              "fill": "$text",
+                              "content": "Bouclier de bois",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sRjAW",
+                              "name": "Soigne le poison · vous en avez 0",
+                              "fill": "$text-dim",
+                              "content": "Vous en avez 1 (pas porté)",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "SztpP",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "j3ZDxc",
+                              "x": 22,
+                              "y": 0,
+                              "name": "25",
+                              "enabled": false,
+                              "fill": "$text-dim",
+                              "content": "25",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "oUyyk",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "Z0RJk7",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "aF07Q",
+                                  "name": "21",
+                                  "fill": "#ffd34d",
+                                  "content": "50",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gahAP",
+                  "name": "Cristal de feu",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Us7bM",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "tSim1",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "hJE1j",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/fire.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yWzRd",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dltER",
+                              "name": "Cristal de feu",
+                              "fill": "$text",
+                              "content": "Cristal de feu",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Y38Jae",
+                              "name": "Plus que 1 aujourd'hui",
+                              "fill": "$text-dim",
+                              "content": "Vous en avez 2",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZFDID",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "MFWcg",
+                              "x": 24,
+                              "y": 0,
+                              "name": "200",
+                              "enabled": false,
+                              "fill": "$text-dim",
+                              "content": "200",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "h5DmR",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "mPamS",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "RyYaf",
+                                  "name": "170",
+                                  "fill": "#ffd34d",
+                                  "content": "100",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "OpWr6",
+                  "name": "Épée courte",
+                  "width": "fill_container",
+                  "fill": "$chip",
+                  "cornerRadius": 16,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "S1IprU",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "V7a6J",
+                          "name": "Icône",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#ffffff12",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "ATkw0",
+                              "name": "img",
+                              "width": 28,
+                              "height": 28,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/db/gift.png",
+                                "mode": "contain"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "v9UlL",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "xEVgU",
+                              "name": "Épée courte",
+                              "fill": "$text",
+                              "content": "Boîte à musique",
+                              "fontFamily": "$font",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "V4bOZT",
+                              "name": "Épuisé, revient demain matin",
+                              "fill": "$text-dim",
+                              "content": "Un cadeau · vous en avez 1",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "A8dvcm",
+                          "name": "Prix",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "alignItems": "end",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "P2hxb",
+                              "x": 24,
+                              "y": 0,
+                              "name": "120",
+                              "enabled": false,
+                              "fill": "$text-dim",
+                              "content": "120",
+                              "fontFamily": "$font",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "odIFO",
+                              "name": "Valeur",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "XU36M",
+                                  "name": "coins",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "coins",
+                                  "library": "lucide",
+                                  "fill": "#ffd34d"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "SPpLf",
+                                  "name": "102",
+                                  "fill": "#ffd34d",
+                                  "content": "40",
+                                  "fontFamily": "$font",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "E6PXcV",
+              "name": "Les prix tiennent compte du lien. Le stock revient chaque matin.",
+              "fill": "$text-dim",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Les objets clés, ceux sans prix et l'équipement porté ne se vendent pas. Ce qu'on vend ne revient pas dans la boutique.",
+              "fontFamily": "$font",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "phtSd",
+      "x": 900,
+      "y": 13750,
+      "name": "Boutique · Événement · Ouvrir la boutique",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#22232a",
+      "layout": "vertical",
+      "padding": [
+        44,
+        0,
+        0,
+        0
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "kHNwi",
+          "name": "En-tête fenêtre",
+          "width": "fill_container",
+          "gap": 6,
+          "padding": [
+            12,
+            12,
+            8,
+            16
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "hMG5k",
+              "name": "Titre",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "hb2uD",
+                  "name": "Événement 1",
+                  "fill": "#ffffff",
+                  "content": "Comptoir",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "nW1Id",
+                  "name": "Maire",
+                  "fill": "#b8bbc8",
+                  "content": "Objet · comptoir de la place",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "icon",
+              "id": "m3nJD4",
+              "name": "Icône x",
+              "width": 20,
+              "height": 20,
+              "icon": "x",
+              "library": "lucide",
+              "fill": "#ffffff"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "o2C4s",
+          "name": "Contenu",
+          "clip": true,
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            0,
+            12,
+            12,
+            12
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "RpYMW",
+              "name": "Bloc Déclencheur",
+              "width": "fill_container",
+              "fill": "#2c2d35",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "rAMwh",
+                  "name": "Titre bloc",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "xaZsR",
+                      "name": "Déclencheur",
+                      "fill": "#ffffff",
+                      "content": "Déclencheur",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gjQCQ",
+                  "name": "Segments",
+                  "width": "fill_container",
+                  "fill": "#2a2b33",
+                  "cornerRadius": 8,
+                  "padding": 2,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "jPy9B",
+                      "name": "Segment Parler",
+                      "width": "fill_container",
+                      "fill": "#ffb04a40",
+                      "cornerRadius": 6,
+                      "stroke": "#ffb04a",
+                      "strokeWidth": 1,
+                      "padding": [
+                        8,
+                        0
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "giIdZ",
+                          "name": "Parler",
+                          "fill": "#ffffff",
+                          "content": "Parler",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qp0VB",
+                      "name": "Segment Entrer dessus",
+                      "width": "fill_container",
+                      "cornerRadius": 6,
+                      "padding": [
+                        8,
+                        0
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "fb3a5",
+                          "name": "Entrer dessus",
+                          "fill": "#ffffff",
+                          "content": "Entrer dessus",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "pLgx4",
+                      "name": "Segment Automatique",
+                      "width": "fill_container",
+                      "cornerRadius": 6,
+                      "padding": [
+                        8,
+                        0
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "XuHbR",
+                          "name": "Automatique",
+                          "fill": "#ffffff",
+                          "content": "Automatique",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "olR2N",
+                  "name": "Se tourner",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "jTOHm",
+                      "name": "Case",
+                      "width": 16,
+                      "height": 16,
+                      "fill": "#5aa8ff",
+                      "cornerRadius": 4,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "text",
+                      "id": "wpUcl",
+                      "name": "Se tourner vers le joueu",
+                      "fill": "#ffffff",
+                      "content": "Se tourner vers le joueur (un personnage)",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gEmAe",
+              "name": "Bloc Conditions",
+              "width": "fill_container",
+              "fill": "#2c2d35",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "JsrBX",
+                  "name": "Titre bloc",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HQkWP",
+                      "name": "Conditions",
+                      "fill": "#ffffff",
+                      "content": "Conditions",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "o5gv2",
+                      "name": "toutes doivent être vrai",
+                      "fill": "#b8bbc8",
+                      "content": "toutes doivent être vraies",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "izP7v",
+                  "name": "Ajouts",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "yuxMK",
+                      "name": "Ajouter Variable",
+                      "cornerRadius": 15,
+                      "stroke": "#4a4c5a",
+                      "strokeWidth": 1,
+                      "gap": 4,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "RcGJ5",
+                          "name": "Icône plus",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#ffffff"
+                        },
+                        {
+                          "type": "text",
+                          "id": "GvtsM",
+                          "name": "Variable",
+                          "fill": "#ffffff",
+                          "content": "Variable",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "m3KmHm",
+                      "name": "Ajouter Heure",
+                      "cornerRadius": 15,
+                      "stroke": "#4a4c5a",
+                      "strokeWidth": 1,
+                      "gap": 4,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "eG1wc",
+                          "name": "Icône plus",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#ffffff"
+                        },
+                        {
+                          "type": "text",
+                          "id": "p28KYH",
+                          "name": "Heure",
+                          "fill": "#ffffff",
+                          "content": "Heure",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fFHqX",
+                      "name": "Ajouter Météo",
+                      "cornerRadius": 15,
+                      "stroke": "#4a4c5a",
+                      "strokeWidth": 1,
+                      "gap": 4,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "e76C8",
+                          "name": "Icône plus",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#ffffff"
+                        },
+                        {
+                          "type": "text",
+                          "id": "PII36",
+                          "name": "Météo",
+                          "fill": "#ffffff",
+                          "content": "Météo",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "od3Sx",
+                      "name": "Ajouter Jour",
+                      "cornerRadius": 15,
+                      "stroke": "#4a4c5a",
+                      "strokeWidth": 1,
+                      "gap": 4,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "KiIiG",
+                          "name": "Icône plus",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#ffffff"
+                        },
+                        {
+                          "type": "text",
+                          "id": "kFPEv",
+                          "name": "Jour, date",
+                          "fill": "#ffffff",
+                          "content": "Jour, date",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NwLof",
+                      "name": "Ajouter Lien",
+                      "cornerRadius": 15,
+                      "stroke": "#4a4c5a",
+                      "strokeWidth": 1,
+                      "gap": 4,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "fSb6z",
+                          "name": "Icône plus",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#ffffff"
+                        },
+                        {
+                          "type": "text",
+                          "id": "FFPNy",
+                          "name": "Lien",
+                          "fill": "#ffffff",
+                          "content": "Lien",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GCJ3y",
+              "name": "Bloc Actions",
+              "width": "fill_container",
+              "fill": "#2c2d35",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "iPoLk",
+                  "name": "Titre bloc",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uZRyk",
+                      "name": "Actions",
+                      "fill": "#ffffff",
+                      "content": "Actions",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RSOlT",
+                      "name": "l'une après l'autre",
+                      "fill": "#b8bbc8",
+                      "content": "l'une après l'autre",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "k2DdB5",
+                  "name": "Action Message",
+                  "width": "fill_container",
+                  "fill": "#1b1c22",
+                  "cornerRadius": 10,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 8,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "oU8bn",
+                      "name": "En-tête Message",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "WtYRa",
+                          "name": "Icône message-square-text",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "message-square-text",
+                          "library": "lucide",
+                          "fill": "#ffb04a"
+                        },
+                        {
+                          "type": "text",
+                          "id": "aUCjB",
+                          "name": "Message",
+                          "fill": "#ffffff",
+                          "content": "Message",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "lbshg",
+                          "name": "Espace",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "icon",
+                          "id": "tFfu7",
+                          "name": "Icône ellipsis-vertical",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "ellipsis-vertical",
+                          "library": "lucide",
+                          "fill": "#b8bbc8"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XmclF",
+                      "name": "Qui parle",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "lfFyH",
+                          "name": "Portrait",
+                          "width": 36,
+                          "height": 36,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/faces/portrait-bernard.png",
+                            "mode": "cover"
+                          },
+                          "cornerRadius": 6
+                        },
+                        {
+                          "type": "frame",
+                          "id": "iCk8r",
+                          "name": "Champ",
+                          "width": "fill_container",
+                          "fill": "#2a2b33",
+                          "cornerRadius": 6,
+                          "stroke": "#4a4c5a",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            7,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "LPVkk",
+                              "name": "Le maire",
+                              "fill": "#ffffff",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Bernard",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jGgmi",
+                      "name": "Champ",
+                      "width": "fill_container",
+                      "fill": "#2a2b33",
+                      "cornerRadius": 6,
+                      "stroke": "#4a4c5a",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        7,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "HmriI",
+                          "name": "Tu veux m'aider ?",
+                          "fill": "#ffffff",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Bienvenue ! Qu'est-ce qu'il vous faut ?",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "sFN6A",
+                  "name": "Action Ouvrir la boutique",
+                  "width": "fill_container",
+                  "fill": "#1b1c22",
+                  "cornerRadius": 10,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 8,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "hmGrd",
+                      "name": "En-tête",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "xvSfs",
+                          "name": "heart-handshake",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "store",
+                          "library": "lucide",
+                          "fill": "#ffd34d"
+                        },
+                        {
+                          "type": "text",
+                          "id": "P3cEOr",
+                          "name": "Lien",
+                          "fill": "#ffffff",
+                          "content": "Ouvrir la boutique",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "j5grC",
+                          "name": "Espace",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "icon",
+                          "id": "iGko6",
+                          "name": "ellipsis-vertical",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "ellipsis-vertical",
+                          "library": "lucide",
+                          "fill": "#b8bbc8"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "k9zYr",
+                      "name": "Ligne",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "n580mE",
+                          "name": "Champ",
+                          "width": "fill_container",
+                          "fill": "#2a2b33",
+                          "cornerRadius": 6,
+                          "stroke": "#4a4c5a",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            7,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "x73fT",
+                              "name": "Bernard",
+                              "fill": "#ffffff",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Bazar de la place",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "Q5YtYI",
+                              "name": "chevron-down",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "chevron-down",
+                              "library": "lucide",
+                              "fill": "#b8bbc8"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "cZ3g3",
+                      "name": "Le joueur voit le lien monter (et le nouveau bonus s'il change de niveau).",
+                      "fill": "#b8bbc8",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Vendu par Bernard · 4 objets. L'action suivante attend que le joueur ferme la boutique.",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "aFdRn",
+          "name": "Pied",
+          "width": "fill_container",
+          "stroke": "#ffffff14",
+          "strokeWidth": {
+            "top": 1
+          },
+          "gap": 6,
+          "padding": [
+            10,
+            12
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "pijfm",
+              "name": "Supprimer",
+              "fill": "#ff5a5026",
+              "cornerRadius": 8,
+              "gap": 6,
+              "padding": [
+                9,
+                14
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "p9Zfq",
+                  "name": "Icône trash",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "trash",
+                  "library": "lucide",
+                  "fill": "#ff9a92"
+                },
+                {
+                  "type": "text",
+                  "id": "Q2RGyp",
+                  "name": "Supprimer l'événement",
+                  "fill": "#ff9a92",
+                  "content": "Supprimer l'événement",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "e2bmje",
+              "name": "Terminé",
+              "fill": "#ffb04a",
+              "cornerRadius": 8,
+              "gap": 6,
+              "padding": [
+                9,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PkTp6",
+                  "name": "Terminé",
+                  "fill": "#22232a",
+                  "content": "Terminé",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
