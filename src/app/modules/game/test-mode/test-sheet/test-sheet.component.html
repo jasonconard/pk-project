@@ -1,0 +1,92 @@
+<div
+  class="backdrop"
+  [class.clear]="request().target.kind === 'here'"
+  (click)="close()"
+></div>
+<section class="sheet" role="dialog" [attr.aria-label]="title()">
+  <div class="grip"></div>
+  <div class="head">
+    <svg lucideFlaskConical></svg>
+    <div class="title">
+      <h2>{{ title() }}</h2>
+      <small>{{ request().place }}</small>
+    </div>
+    <button type="button" class="square" aria-label="Fermer" (click)="close()">
+      <svg lucideX></svg>
+    </button>
+  </div>
+
+  <p class="label">Réglages</p>
+  <div class="chips">
+    <button
+      type="button"
+      class="chip"
+      [class.on]="!chosenTest()"
+      (click)="choose(null)"
+    >
+      <svg lucideSave></svg>Comme ma partie
+    </button>
+    @for (test of tests(); track test.id) {
+      <button
+        type="button"
+        class="chip"
+        [class.on]="chosen() === test.id"
+        (click)="choose(test.id)"
+      >
+        <svg lucideFlaskConical></svg>{{ test.name }}
+      </button>
+    }
+  </div>
+
+  @let s = summary();
+  <div class="card">
+    <button type="button" class="row" (click)="settings()">
+      <svg lucideCalendarClock></svg>
+      <span class="text"
+        ><span>Jour et moment</span><small>{{ s.time }}</small></span
+      >
+      <svg lucideChevronRight></svg>
+    </button>
+    <button type="button" class="row" (click)="settings()">
+      <svg lucideFlag></svg>
+      <span class="text"
+        ><span>Variables</span><small>{{ s.variables }}</small></span
+      >
+      <svg lucideChevronRight></svg>
+    </button>
+    <button type="button" class="row" (click)="settings()">
+      <svg lucideUsers></svg>
+      <span class="text"
+        ><span>Équipe et sac</span><small>{{ s.team }}</small></span
+      >
+      <svg lucideChevronRight></svg>
+    </button>
+    <button type="button" class="row" (click)="settings()">
+      <svg lucideHeartHandshake></svg>
+      <span class="text"
+        ><span>Liens</span><small>{{ s.links }}</small></span
+      >
+      <svg lucideChevronRight></svg>
+    </button>
+    <button type="button" class="row" (click)="settings()">
+      <svg lucideClapperboard></svg>
+      <span class="text"
+        ><span>Cinématiques vues</span><small>{{ s.cutscenes }}</small></span
+      >
+      <svg lucideChevronRight></svg>
+    </button>
+  </div>
+
+  <p class="info">
+    <svg lucideArchive></svg>
+    Ta partie est mise de côté : en quittant le test, tout revient comme avant.
+  </p>
+  <div class="actions">
+    <button type="button" class="btn" (click)="keep()">
+      <svg lucideBookmarkPlus></svg>Garder
+    </button>
+    <button type="button" class="btn go" (click)="launch()">
+      <svg lucidePlay></svg>Lancer le test
+    </button>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+@use "../test-sheet";
+
+.chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background: var(--chip);
+  font-size: 12px;
+  white-space: nowrap;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    color: var(--dim);
+  }
+
+  &.on {
+    border-color: var(--test);
+    background: #5fd68a33;
+    font-weight: 700;
+
+    svg {
+      color: var(--test);
+    }
+  }
+}

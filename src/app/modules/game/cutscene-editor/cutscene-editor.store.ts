@@ -474,6 +474,17 @@ export class CutsceneEditorStore {
     this.host.play(cut, from >= this.length() - 0.05 ? 0 : from);
   }
 
+  /** « Tester avec des réglages »: the cutscene tried in a test (design/main-view.pen, Mode test). */
+  test(): void {
+    const cut = this.cut();
+    if (!cut || !this.host?.test) {
+      return;
+    }
+    this.stop();
+    this.flush();
+    this.host.test(cut);
+  }
+
   zoomBy(factor: number): void {
     this.zoom.update((z) => Math.min(320, Math.max(6, z * factor)));
   }

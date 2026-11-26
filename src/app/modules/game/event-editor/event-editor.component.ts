@@ -12,6 +12,7 @@ import {
 import { NgTemplateOutlet } from "@angular/common";
 import {
   LucideArrowDown,
+  LucideFlaskConical,
   LucideArrowUp,
   LucideBackpack,
   LucideChevronDown,
@@ -202,6 +203,7 @@ interface Branch {
     NgTemplateOutlet,
     LucideDynamicIcon,
     LucideArrowDown,
+    LucideFlaskConical,
     LucideArrowUp,
     LucideChevronDown,
     LucideChevronRight,
@@ -229,6 +231,8 @@ export class EventEditorComponent {
   /** Closed: the event as edited. */
   readonly closed = output<ObjectEvent>();
   readonly removed = output<void>();
+  /** Tester (design/main-view.pen, Mode test): the event as edited, tried in a test. */
+  readonly test = output<ObjectEvent>();
 
   protected readonly draft = linkedSignal(() => structuredClone(this.event()));
   protected readonly triggers = TRIGGERS;

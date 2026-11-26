@@ -76,6 +76,11 @@ import { isTyping } from "../../core/shared/typing";
 import { TimeBannerComponent } from "./time-banner/time-banner.component";
 import { momentLabel } from "./shared/model/game-calendar";
 import { DungeonObject } from "./shared/model/dungeon-object";
+import { TestModeService } from "./shared/services/test-mode.service";
+import { TestSheetComponent } from "./test-mode/test-sheet/test-sheet.component";
+import { TestListComponent } from "./test-mode/test-list/test-list.component";
+import { TestSettingsComponent } from "./test-mode/test-settings/test-settings.component";
+import { TestBannerComponent } from "./test-mode/test-banner/test-banner.component";
 @Component({
   selector: "game-main",
   imports: [
@@ -104,6 +109,10 @@ import { DungeonObject } from "./shared/model/dungeon-object";
     VariablesEditorComponent,
     DatabaseEditorComponent,
     CutsceneOverlayComponent,
+    TestSheetComponent,
+    TestListComponent,
+    TestSettingsComponent,
+    TestBannerComponent,
     GameCutsceneEditorComponent,
     DecimalPipe,
     LucideMenu,
@@ -178,6 +187,9 @@ export class GameComponent {
   /** The variables test panel (menu → Test des variables). */
   protected readonly variablesTestOpen = signal(false);
   protected readonly battleSimOpen = signal(false);
+  /** Menu → Mode test: the named tests. */
+  protected readonly testListOpen = signal(false);
+  protected readonly testMode = inject(TestModeService);
   /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
   protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
   /** Weather and hour, for the editor's Ambiance button (computer). */
@@ -261,6 +273,7 @@ export class GameComponent {
         !this.linksOpen() &&
         !this.variablesTestOpen() &&
         !this.battleSimOpen() &&
+        !this.testListOpen() &&
         !this.sequenceService.message() &&
         !isTyping(ev)
       ) {
@@ -271,6 +284,21 @@ export class GameComponent {
     inject(DestroyRef).onDestroy(() =>
       window.removeEventListener("keydown", onKeyDown)
     );
+    // A test was being played when the app closed: the game set aside comes back, once the map is loaded
+    let recovered = false;
+    effect(() => {
+      const hud = this.hud();
+      if (!recovered && hud && !hud.loading) {
+        recovered = true;
+        untracked(() => this.testMode.recover());
+      }
+    });
+    // Leaving the editor: no more waiting for Tester's tap
+    effect(() => {
+      if (!this.hud()?.editMode && untracked(() => this.testMode.picking())) {
+        untracked(() => this.testMode.cancelPick());
+      }
+    });
     // After an update: what's new, once the loading screen is gone
     effect(() => {
       const hud = this.hud();
@@ -350,6 +378,25 @@ export class GameComponent {
     this.variablesTestOpen.set(true);
   }
 
+  protected openTestList(): void {
+    this.menuOpen.set(false);
+    this.testListOpen.set(true);
+  }
+
+  protected backToMenu(): void {
+    this.testListOpen.set(false);
+    this.menuOpen.set(true);
+  }
+
+  /** The editor's Tester: waiting for the tap on the map (pressed again: no more). */
+  protected toggleTestPick(): void {
+    if (this.testMode.picking()) {
+      this.testMode.cancelPick();
+    } else {
+      this.testMode.pickHere();
+    }
+  }
+
   protected openBattleSim(): void {
     this.menuOpen.set(false);
     this.battleSimOpen.set(true);
@@ -408,6 +455,7 @@ export class GameComponent {
         this.cutsceneWatching.set(true);
         host.play(cut, from);
       },
+      test: (cut) => this.testMode.askCutscene(cut),
     });
   }
 

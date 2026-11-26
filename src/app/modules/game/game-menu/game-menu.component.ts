@@ -18,6 +18,7 @@ import {
   LucideCloudSun,
   LucideDownload,
   LucideDynamicIcon,
+  LucideFlaskConical,
   LucideFolderArchive,
   LucideGauge,
   LucideHeartHandshake,
@@ -102,6 +103,7 @@ const ENTRIES: MenuEntry[] = [
   selector: "game-menu",
   imports: [
     LucideDynamicIcon,
+    LucideFlaskConical,
     LucideX,
     LucideMaximize,
     LucideMinimize,
@@ -143,6 +145,8 @@ export class GameMenuComponent {
   /** The variables test panel: the menu closes, the panel opens. */
   readonly variablesTest = output<void>();
   readonly battleSim = output<void>();
+  /** Menu → Mode test: the named tests. */
+  readonly testMode = output<void>();
 
   protected readonly entries = ENTRIES;
   protected readonly hud = this.gameService.hud;

@@ -37,7 +37,8 @@ import {
 } from "./map-storage";
 import { MapKind } from "../model/SceneMap";
 import { Passage } from "../model/Passage";
-import { ObjectEvent } from "../model/ObjectEvent";
+import { ObjectEvent, toSceneEvent } from "../model/ObjectEvent";
+import { Cutscene } from "../model/cutscene";
 import { SequenceService } from "./sequence.service";
 import { setSfxVolume } from "./sfx";
 import { Vec3 } from "../model/SceneUtils";
@@ -1253,6 +1254,78 @@ export class GameService {
       this.mapEditorService.selectModel(this.game, modelId);
       this.syncHud();
     }
+  }
+
+  // --- Mode test (design/main-view.pen, Mode test) ---
+
+  /** The map editor is open. */
+  isEditing(): boolean {
+    return !!this.game?.editMode;
+  }
+
+  /** Opens or closes the map editor (nothing if it already is so). */
+  setEditing(editing: boolean): void {
+    if (!!this.game?.editMode !== editing) {
+      this.toggleEditMode();
+    }
+  }
+
+  /** The next tap on the map gives a point (the editor's Tester), null: stops waiting. */
+  pickPoint(onPick: ((point: Vec3) => void) | null): void {
+    this.mapEditorService.pickGround(onPick);
+  }
+
+  /** The map editor's selected object (its chunk and id). */
+  selectedObject(): { chunkId: string; buildingId: string } | null {
+    const ref = this.mapEditorService.selectedRef();
+    return ref ? { chunkId: ref.chunkId, buildingId: ref.buildingId } : null;
+  }
+
+  /** A point of the open map, on the grid: « Ville · case 12, 8 ». */
+  placeLabel(pos: { x: number; z: number }): string {
+    const name = this.game?.mapHelper?.sceneMap.name ?? "";
+    return `${name} · case ${Math.round(pos.x / TILE_SIZE)}, ${Math.round(pos.z / TILE_SIZE)}`;
+  }
+
+  /** In front of an object of the open map (below it, where the player talks to it). */
+  besideObject(
+    chunkId: string,
+    buildingId: string
+  ): { map: string; pos: { x: number; z: number } } | null {
+    const mapHelper = this.game?.mapHelper;
+    const chunk = mapHelper?.sceneMap.chunks.find((c) => c.id === chunkId);
+    const building = chunk?.buildings.find((b) => b.id === buildingId);
+    const bounds =
+      mapHelper && chunk && building
+        ? mapHelper.buildingBounds(chunk, building)
+        : null;
+    if (!mapHelper || !bounds) {
+      return null;
+    }
+    return {
+      map: mapHelper.sceneMap.id,
+      pos: {
+        x: Math.round((bounds.min.x + bounds.max.x) / 2),
+        z: Math.round(bounds.max.z + TILE_SIZE / 2),
+      },
+    };
+  }
+
+  /** An object's event plays now (the test of an event). */
+  playObjectEvent(chunkId: string, buildingId: string, event: ObjectEvent) {
+    if (this.game) {
+      this.gameMapService.launchObjectEvent(
+        this.game,
+        chunkId,
+        buildingId,
+        toSceneEvent(event)
+      );
+    }
+  }
+
+  /** A cutscene of the open map plays now (the test of a cutscene). */
+  playCutscene(cut: Cutscene) {
+    this.cutsceneService.play(cut, 0, () => this.syncHud());
   }
 
   // --- Cutscenes (design/main-view.pen, Cinématiques) ---

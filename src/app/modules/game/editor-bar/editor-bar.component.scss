@@ -79,6 +79,15 @@ kbd {
   }
 }
 
+.test-btn.on {
+  width: auto;
+  gap: 6px;
+  padding: 0 12px;
+  background: #5fd68a;
+  color: #0e2a18;
+  font-weight: 700;
+}
+
 .icon-btn {
   flex: none;
   width: 40px;
@@ -473,7 +482,8 @@ kbd {
   }
 }
 
-@media (max-width: 360px) {
+/* (narrow phones: Jouer as an icon, room for the map's name next to Tester) */
+@media (max-width: 440px) {
   .play-btn .label {
     display: none;
   }

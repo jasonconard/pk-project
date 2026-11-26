@@ -241,6 +241,14 @@
         }
       </div>
     }
+    <button type="button" class="row" (click)="testMode.emit()">
+      <svg lucideFlaskConical class="row-icon"></svg>
+      <span class="row-text"
+        ><b>Mode test</b
+        ><small>Essayer une scène sans jouer depuis le début</small></span
+      >
+      <svg lucideChevronRight class="chevron"></svg>
+    </button>
     <button type="button" class="row" (click)="battleSim.emit()">
       <svg lucideSwords class="row-icon"></svg>
       <span class="row-text"

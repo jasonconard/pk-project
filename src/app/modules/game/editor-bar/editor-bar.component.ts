@@ -14,6 +14,7 @@ import { isGameCovered } from "../../../core/shared/app-visibility";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import {
   LucideArrowBigDown,
+  LucideFlaskConical,
   LucideArrowBigUp,
   LucideBox,
   LucideCastle,
@@ -216,6 +217,7 @@ interface PaletteEntry {
     LucideDynamicIcon,
     LucideClapperboard,
     LucideArrowBigDown,
+    LucideFlaskConical,
     LucideArrowBigUp,
     LucideBox,
     LucideCastle,
@@ -357,6 +359,12 @@ export class EditorBarComponent {
   /** Map manager shown. */
   protected readonly mapsOpen = signal(false);
   readonly toggled = output<void>();
+  /** Tester (design/main-view.pen, Mode test): choosing where the player appears, or no more. */
+  readonly test = output<void>();
+  /** An event's Tester: the event and its object's name. */
+  readonly testEvent = output<{ event: ObjectEvent; objectName: string }>();
+  /** Waiting for the tap on the map of Tester. */
+  readonly testPicking = input(false);
   readonly modelSelected = output<string | null>();
   readonly tileSelected = output<string | null>();
   readonly brushChange = output<EditBrush>();
@@ -576,6 +584,13 @@ export class EditorBarComponent {
     this.brushChange.emit(brush);
   }
 
+  /** Tester: the next tap on the map gives where the player appears (pressed again: no more). */
+  protected startTest(event: Event): void {
+    (event.currentTarget as HTMLElement).blur();
+    this.moreOpen.set(false);
+    this.test.emit();
+  }
+
   protected send(command: EditCommand, event: Event): void {
     (event.currentTarget as HTMLElement).blur();
     this.moreOpen.set(false);
@@ -743,6 +758,16 @@ export class EditorBarComponent {
     if (JSON.stringify(events[index]) !== JSON.stringify(event)) {
       this.eventsChange.emit(events.map((e, i) => (i === index ? event : e)));
     }
+  }
+
+  /** The event window's Tester: the event kept as edited, then tried in a test. */
+  protected tryEvent(
+    events: ObjectEvent[],
+    index: number,
+    event: ObjectEvent
+  ): void {
+    this.saveEvent(events, index, event);
+    this.testEvent.emit({ event, objectName: this.selectionLabel() });
   }
 
   protected removeEvent(events: ObjectEvent[], index: number): void {

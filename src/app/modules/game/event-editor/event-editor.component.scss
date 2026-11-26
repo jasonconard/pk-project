@@ -23,6 +23,27 @@
   }
 }
 
+header .test {
+  margin-left: auto;
+  margin-right: 8px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 1px solid #5fd68a;
+  border-radius: 10px;
+  background: #5fd68a26;
+  color: #5fd68a;
+  font-size: 13px;
+  font-weight: 700;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
 header h2 small {
   display: block;
   margin-top: 2px;

@@ -11,6 +11,14 @@
     </h2>
     <button
       type="button"
+      class="test"
+      title="Tester : le joueur apparaît à côté de l'objet, puis l'événement se joue"
+      (click)="test.emit(draft())"
+    >
+      <svg lucideFlaskConical></svg>Tester
+    </button>
+    <button
+      type="button"
       class="close"
       aria-label="Fermer"
       title="Fermer (Échap)"

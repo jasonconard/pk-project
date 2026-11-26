@@ -277,3 +277,21 @@
 game-cutscene-editor.watching {
   display: none;
 }
+
+/* Tester (map editor): waiting for the tap on the map */
+.test-hint {
+  position: fixed;
+  z-index: 700;
+  top: calc(var(--safe-top, 0px) + 108px);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 5px 12px;
+  border: 1px solid #5fd68a;
+  border-radius: 13px;
+  background: #22232ae6;
+  color: #fafafa;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}

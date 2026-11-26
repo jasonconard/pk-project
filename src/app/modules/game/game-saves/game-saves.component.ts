@@ -15,29 +15,19 @@ import {
 } from "@lucide/angular";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import { GameService } from "../shared/services/game.service";
-import { GameSave, loadSaves, writeSave } from "../shared/services/game-saves";
-import { WEATHER_CHOICES } from "../shared/weather/Weather";
+import { TestModeService } from "../shared/services/test-mode.service";
 import {
-  currentVariableValues,
-  restoreVariableValues,
-} from "../../variables-editor/shared/variable-values";
-import { currentParty, restoreParty } from "../../database-editor/shared/party";
+  captureGame,
+  GameSave,
+  loadSaves,
+  restoreProgress,
+  writeSave,
+} from "../shared/services/game-saves";
+import { WEATHER_CHOICES } from "../shared/weather/Weather";
 
 type SlotAction = "load" | "overwrite" | "delete";
 
 import { dateLabel, dateOf, gameCalendar } from "../shared/model/game-calendar";
-import {
-  currentDungeonState,
-  restoreDungeonState,
-} from "../shared/model/dungeon-state";
-import {
-  currentAnimations,
-  restoreAnimations,
-} from "../shared/model/model-animations";
-import {
-  restoreCutscenesSeen,
-  seenCutscenes,
-} from "../shared/model/cutscene-seen";
 /**
  * Saved games (menu → Sauver): a few slots, each with where the player was, the time, the weather and when it was
  * saved. Sauver ici / Écraser keeps the game now; Charger goes back to it (the current progress is lost: pressed
@@ -57,6 +47,7 @@ export class GameSavesComponent {
   readonly loaded = output<void>();
 
   private readonly gameService = inject(GameService);
+  private readonly testMode = inject(TestModeService);
   protected readonly slots = signal(loadSaves());
   protected readonly message = signal("");
   /** The action pressed once (pressed again within 3 s: done). */
@@ -77,6 +68,9 @@ export class GameSavesComponent {
   }
 
   protected saveTo(slot: number): void {
+    if (this.duringTest()) {
+      return;
+    }
     if (this.slots()[slot] && !this.confirm(slot, "overwrite")) {
       return;
     }
@@ -84,19 +78,15 @@ export class GameSavesComponent {
     if (!spot) {
       return;
     }
-    const save: GameSave = {
-      savedAt: new Date().toISOString(),
-      appVersion: this.version(),
-      ...spot,
-      hour: this.gameService.hour(),
-      day: this.gameService.day(),
-      weather: this.gameService.weather(),
-      variables: currentVariableValues(),
-      party: structuredClone(currentParty()),
-      dungeon: structuredClone(currentDungeonState()),
-      animations: { ...currentAnimations() },
-      cutscenesSeen: [...seenCutscenes()],
-    };
+    const save = captureGame(
+      spot,
+      {
+        hour: this.gameService.hour(),
+        day: this.gameService.day(),
+        weather: this.gameService.weather(),
+      },
+      this.version()
+    );
     this.message.set(
       writeSave(slot, save)
         ? `Partie sauvée dans l'emplacement ${slot + 1}.`
@@ -107,14 +97,10 @@ export class GameSavesComponent {
 
   protected load(slot: number): void {
     const save = this.slots()[slot];
-    if (!save || !this.confirm(slot, "load")) {
+    if (this.duringTest() || !save || !this.confirm(slot, "load")) {
       return;
     }
-    restoreVariableValues(save.variables ?? {});
-    restoreParty(save.party);
-    restoreDungeonState(save.dungeon);
-    restoreAnimations(save.animations);
-    restoreCutscenesSeen(save.cutscenesSeen);
+    restoreProgress(save);
     if (
       !this.gameService.restoreSpot(
         save.map,
@@ -131,6 +117,17 @@ export class GameSavesComponent {
       return;
     }
     this.loaded.emit();
+  }
+
+  /** No saving or loading during a test (its game is set aside, and comes back when it ends). */
+  private duringTest(): boolean {
+    if (!this.testMode.running()) {
+      return false;
+    }
+    this.message.set(
+      "Pendant un test, pas de sauvegarde : quitte le test pour retrouver ta partie."
+    );
+    return true;
   }
 
   protected remove(slot: number): void {

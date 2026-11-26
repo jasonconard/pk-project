@@ -12,6 +12,7 @@ import {
 import {
   LucideChevronDown,
   LucideClapperboard,
+  LucideFlaskConical,
   LucidePlay,
   LucideRedo2,
   LucideUndo2,
@@ -47,6 +48,7 @@ const typing = (target: EventTarget | null): boolean =>
   imports: [
     LucideChevronDown,
     LucideClapperboard,
+    LucideFlaskConical,
     LucidePlay,
     LucideRedo2,
     LucideUndo2,
@@ -69,6 +71,8 @@ export class GameCutsceneEditorComponent implements OnInit {
   readonly closed = output<void>();
 
   protected readonly store = inject(CutsceneEditorStore);
+  /** « Voir »'s menu: Voir ici, Tester avec des réglages. */
+  protected readonly seeMenu = signal(false);
   protected readonly layout = signal<Layout>("portrait");
   protected readonly wide = computed(() => this.layout() !== "portrait");
   protected readonly cut = this.store.cut;

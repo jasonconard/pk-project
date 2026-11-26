@@ -231,6 +231,24 @@ export class GameMapService {
     };
   }
 
+  /** Plays an object's event now, whatever its trigger and conditions (the mode test). False: no such object. */
+  launchObjectEvent(
+    game: Game,
+    chunkId: string,
+    buildingId: string,
+    evt: SceneEvent
+  ): boolean {
+    const mapHelper = game.mapHelper;
+    const sprite = mapHelper?.scenePlayer.mesh;
+    const chunk = mapHelper?.sceneMap.chunks.find((c) => c.id === chunkId);
+    const building = chunk?.buildings.find((b) => b.id === buildingId);
+    if (!mapHelper || !sprite || !chunk || !building) {
+      return false;
+    }
+    this.launch(mapHelper, sprite, { evt, chunk, building });
+    return true;
+  }
+
   /** Plays an event (its object turns towards the player first if asked). */
   private launch(
     mapHelper: MapHelper,

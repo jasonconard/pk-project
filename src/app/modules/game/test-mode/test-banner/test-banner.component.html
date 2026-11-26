@@ -1,0 +1,55 @@
+@if (running(); as run) {
+  <div class="border"></div>
+  <div class="banner">
+    <svg lucideFlaskConical></svg>
+    <span class="text"
+      ><b>Test</b><span>{{ run.name }}</span></span
+    >
+    <button
+      type="button"
+      class="square"
+      aria-label="Recommencer"
+      title="Recommencer"
+      (click)="testMode.restart()"
+    >
+      <svg lucideRotateCcw></svg>
+    </button>
+    <button type="button" class="quit" (click)="asking.set(true)">
+      <svg lucideLogOut></svg>Quitter
+    </button>
+  </div>
+
+  @if (asking()) {
+    <div class="backdrop" (click)="asking.set(false)"></div>
+    <section class="dialog" role="dialog" aria-label="Quitter le test">
+      <h2><svg lucideFlaskConical></svg>Quitter le test ?</h2>
+      <p>
+        Ta partie revient comme avant le test. Ce qui s'est passé pendant le
+        test n'est pas gardé.
+      </p>
+      <div class="back-to">
+        @if (run.fromEditor) {
+          <svg lucidePencilRuler class="edit"></svg>
+          <span
+            ><b>Retour à l'éditeur</b
+            ><small>Là où tu as lancé le test</small></span
+          >
+        } @else {
+          <svg lucideSave></svg>
+          <span
+            ><b>Retour à ta partie</b
+            ><small>Là où tu étais avant le test</small></span
+          >
+        }
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" (click)="restart()">
+          <svg lucideRotateCcw></svg>Recommencer
+        </button>
+        <button type="button" class="btn go" (click)="quit()">
+          <svg lucideLogOut></svg>Quitter
+        </button>
+      </div>
+    </section>
+  }
+}

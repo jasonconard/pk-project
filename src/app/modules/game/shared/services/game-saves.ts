@@ -5,6 +5,23 @@ import { Vec3 } from "../model/SceneUtils";
 import { VariableValues } from "../../../variables-editor/shared/variable-values";
 import { PartyState } from "../../../database-editor/shared/party";
 import { readJson, writeJson } from "../../../../core/shared/local-store";
+import {
+  currentVariableValues,
+  restoreVariableValues,
+} from "../../../variables-editor/shared/variable-values";
+import {
+  currentParty,
+  restoreParty,
+} from "../../../database-editor/shared/party";
+import {
+  currentDungeonState,
+  restoreDungeonState,
+} from "../model/dungeon-state";
+import {
+  currentAnimations,
+  restoreAnimations,
+} from "../model/model-animations";
+import { restoreCutscenesSeen, seenCutscenes } from "../model/cutscene-seen";
 
 /**
  * The saved games: a few slots, in the browser of this device (they are the player's progress, not creations: not
@@ -65,4 +82,32 @@ function isSave(value: unknown): value is GameSave {
     typeof save.pos.x === "number" &&
     typeof save.pos.z === "number"
   );
+}
+
+/** The game now (where the player is, the time, the weather, the progress), as a saved game. */
+export function captureGame(
+  spot: { map: string; mapName: string; pos: Vec3 },
+  time: { hour: number; day: number; weather: WeatherType },
+  appVersion: string
+): GameSave {
+  return {
+    savedAt: new Date().toISOString(),
+    appVersion,
+    ...spot,
+    ...time,
+    variables: currentVariableValues(),
+    party: structuredClone(currentParty()),
+    dungeon: structuredClone(currentDungeonState()),
+    animations: { ...currentAnimations() },
+    cutscenesSeen: [...seenCutscenes()],
+  };
+}
+
+/** A saved game's progress comes back (the variables, the team, the dungeons, the objects moved, the cutscenes seen). */
+export function restoreProgress(save: GameSave): void {
+  restoreVariableValues(save.variables ?? {});
+  restoreParty(save.party);
+  restoreDungeonState(save.dungeon);
+  restoreAnimations(save.animations);
+  restoreCutscenesSeen(save.cutscenesSeen);
 }

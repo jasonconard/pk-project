@@ -1,0 +1,205 @@
+/* The mode test's sheets at the bottom of the game (« Tester ici », Menu → Mode test): green, the test's colour.
+   Use: @use '../test-sheet'. Above the game menus (900), under the dialogs (2000). */
+
+:host {
+  --panel: #22232a;
+  --chip: #ffffff14;
+  --line: #ffffff26;
+  --text: #fafafa;
+  --dim: #fafafaa6;
+  --test: #5fd68a;
+  --on-test: #0e2a18;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: rgba(0, 0, 0, 0.35);
+
+  &.clear {
+    background: transparent;
+  }
+}
+
+.sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 1501;
+  width: min(480px, 100vw);
+  max-height: calc(100dvh - 60px - var(--safe-top, 0px));
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: 24px 24px 0 0;
+  background: var(--panel);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.45);
+  color: var(--text);
+  font-size: 14px;
+}
+
+button {
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--test);
+  }
+}
+
+svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.grip {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: 2px;
+  background: #ffffff4d;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  > svg {
+    width: 18px;
+    height: 18px;
+    color: var(--test);
+  }
+
+  .title {
+    flex: 1;
+    min-width: 0;
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    small {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--dim);
+    }
+  }
+}
+
+.square {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--chip);
+
+  &.go {
+    background: var(--test);
+    color: var(--on-test);
+  }
+}
+
+.label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--test);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: var(--chip);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  > svg {
+    color: var(--dim);
+  }
+
+  .text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+
+    small {
+      font-size: 11px;
+      color: var(--dim);
+    }
+  }
+}
+
+.info {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--dim);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--chip);
+  font-weight: 600;
+
+  &.go {
+    flex: 1;
+    background: var(--test);
+    color: var(--on-test);
+    font-weight: 700;
+  }
+
+  &.soft {
+    flex: none;
+    background: #5fd68a26;
+    color: var(--test);
+    font-weight: 700;
+  }
+}

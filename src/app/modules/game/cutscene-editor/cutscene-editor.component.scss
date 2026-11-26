@@ -218,3 +218,51 @@ cutscene-timeline {
 :host([data-layout='desktop']) cutscene-timeline {
   height: min(400px, 46%);
 }
+
+.see-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+}
+
+.see-menu {
+  position: absolute;
+  z-index: 3;
+  top: calc(64px + var(--safe-top));
+  right: 10px;
+  width: 240px;
+  padding: 6px;
+  border-radius: 14px;
+  background: #40424ef2;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+
+  button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    background: transparent;
+    text-align: left;
+
+    &:hover {
+      background: var(--chip);
+    }
+
+    &.test svg {
+      color: #5fd68a;
+    }
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+  }
+
+  small {
+    font-size: 11px;
+    color: var(--dim);
+  }
+}

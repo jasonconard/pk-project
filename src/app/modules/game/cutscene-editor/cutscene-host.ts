@@ -38,4 +38,6 @@ export interface CutsceneHost {
   preview(cut: Cutscene | null, t: number): void;
   /** Plays the cutscene in the game (from a time), then comes back to the editor. */
   play(cut: Cutscene, from: number): void;
+  /** Tries the cutscene in a test (the settings chosen first, see TestModeService). */
+  test?(cut: Cutscene): void;
 }

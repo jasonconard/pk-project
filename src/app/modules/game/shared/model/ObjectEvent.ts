@@ -232,7 +232,7 @@ export function newObjectEvent(): ObjectEvent {
   };
 }
 
-function toSceneEvent(event: ObjectEvent): SceneEvent {
+export function toSceneEvent(event: ObjectEvent): SceneEvent {
   const checks = conditionsData(event.conditions);
   // Where the player must stand (or step), and the key waited for, by trigger
   const placements: Record<EventTrigger, SceneEvent["conditions"]> = {

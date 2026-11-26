@@ -15,6 +15,20 @@
     </button>
     <button
       type="button"
+      class="icon-btn test-btn"
+      title="Tester : touche la carte, le joueur y apparaît"
+      aria-label="Tester ici"
+      [class.on]="testPicking()"
+      [attr.aria-pressed]="testPicking()"
+      (click)="startTest($event)"
+    >
+      <svg lucideFlaskConical></svg>
+      @if (testPicking()) {
+        <span>Tester</span>
+      }
+    </button>
+    <button
+      type="button"
       class="map-btn"
       title="Cartes : ouvrir, créer, renommer une carte"
       (click)="openMaps($event)"
@@ -1174,6 +1188,7 @@
           [currentMap]="mapId()"
           (closed)="saveEvent(selection.events, editing.index, $event)"
           (removed)="removeEvent(selection.events, editing.index)"
+          (test)="tryEvent(selection.events, editing.index, $event)"
         />
       }
     }

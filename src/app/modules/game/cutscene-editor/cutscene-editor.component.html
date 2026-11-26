@@ -46,14 +46,41 @@
   <button
     type="button"
     class="see"
-    title="Voir la cinématique dans le jeu, depuis la tête de lecture"
+    title="Voir la cinématique dans le jeu, ou la tester"
     [disabled]="!cut()"
-    (click)="store.play()"
+    [attr.aria-expanded]="seeMenu()"
+    (click)="seeMenu.set(!seeMenu())"
   >
     <svg lucidePlay></svg>
     Voir
   </button>
 </header>
+
+@if (seeMenu()) {
+  <div class="see-backdrop" (click)="seeMenu.set(false)"></div>
+  <div class="see-menu" role="menu">
+    <button
+      type="button"
+      role="menuitem"
+      (click)="seeMenu.set(false); store.play()"
+    >
+      <svg lucidePlay></svg>
+      <span><b>Voir ici</b><small>Avec la partie de maintenant</small></span>
+    </button>
+    <button
+      type="button"
+      role="menuitem"
+      class="test"
+      (click)="seeMenu.set(false); store.test()"
+    >
+      <svg lucideFlaskConical></svg>
+      <span
+        ><b>Tester avec des réglages</b
+        ><small>Le jour, les variables, l'équipe…</small></span
+      >
+    </button>
+  </div>
+}
 
 @if (pickHint(); as hint) {
   <p class="pick-hint">

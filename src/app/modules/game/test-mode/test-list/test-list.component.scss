@@ -1,0 +1,23 @@
+@use "../test-sheet";
+
+.back {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  background: none;
+  font-size: 12px;
+  color: var(--dim);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--dim);
+}

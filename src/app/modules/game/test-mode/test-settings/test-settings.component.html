@@ -1,0 +1,372 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="test-settings-title"
+>
+  <aside class="saved">
+    <h3>Tests gardés</h3>
+    @for (t of testMode.tests(); track t.id) {
+      <button
+        type="button"
+        [class.on]="t.id === selected()"
+        [attr.aria-current]="t.id === selected()"
+        (click)="select(t.id)"
+      >
+        <svg lucideFlaskConical></svg>
+        {{ t.name }}
+      </button>
+    }
+    <button type="button" class="new" (click)="newTest()">
+      <svg lucidePlus></svg> Nouveau test
+    </button>
+  </aside>
+  <div class="main">
+    <header>
+      <svg class="head-icon" lucideFlaskConical></svg>
+      <div class="title">
+        <input
+          #nameInput
+          id="test-settings-title"
+          aria-label="Nom du test"
+          maxlength="40"
+          [value]="test()?.name ?? ''"
+          (change)="rename(nameInput.value, nameInput)"
+          (keydown.enter)="nameInput.blur()"
+        />
+        <small>{{ mapName() }}</small>
+      </div>
+      <button
+        type="button"
+        class="close"
+        aria-label="Fermer"
+        title="Fermer (Échap)"
+        (click)="closed.emit()"
+      >
+        <svg lucideX></svg>
+      </button>
+    </header>
+    @if (test(); as t) {
+      <div class="content">
+        <section>
+          <h4><svg lucideCalendarClock></svg> Jour et moment</h4>
+          <div class="card">
+            <div class="row">
+              <span class="label">Jour</span>
+              <div class="stepper">
+                <button
+                  type="button"
+                  aria-label="Jour d'avant"
+                  [disabled]="t.day <= 0"
+                  (click)="shiftDay(-1)"
+                >
+                  <svg lucideMinus></svg>
+                </button>
+                <span class="value wide">{{ dateText() }}</span>
+                <button
+                  type="button"
+                  aria-label="Jour d'après"
+                  (click)="shiftDay(1)"
+                >
+                  <svg lucidePlus></svg>
+                </button>
+              </div>
+            </div>
+            <div class="row segmented" role="group" aria-label="Moment">
+              @for (m of dayTimes; track m.id) {
+                <button
+                  type="button"
+                  [class.on]="t.moment === m.id"
+                  [attr.aria-pressed]="t.moment === m.id"
+                  (click)="setMoment(m.id)"
+                >
+                  {{ m.label }}
+                </button>
+              }
+            </div>
+            <label class="row">
+              <span class="label">Météo</span>
+              <select
+                [value]="t.weather"
+                (change)="setWeather($any($event.target).value)"
+              >
+                @for (w of weathers; track w.type) {
+                  <option [value]="w.type" [selected]="w.type === t.weather">
+                    {{ w.label }}
+                  </option>
+                }
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h4>
+            <svg lucideFlag></svg> Variables
+            <small>{{
+              changedCount() > 1
+                ? changedCount() + " changées"
+                : changedCount() + " changée"
+            }}</small>
+          </h4>
+          <div class="card">
+            @for (v of shownVariables(); track v.id) {
+              <div class="row">
+                <span class="label">{{ v.name }}</span>
+                @if (v.kind === "flag") {
+                  <button
+                    type="button"
+                    class="switch"
+                    role="switch"
+                    [attr.aria-label]="v.name"
+                    [attr.aria-checked]="valueOf(v) === true"
+                    (click)="setVariable(v, !valueOf(v))"
+                  ></button>
+                } @else {
+                  <div class="stepper">
+                    <button
+                      type="button"
+                      aria-label="Moins"
+                      (click)="setVariable(v, counter(v) - 1)"
+                    >
+                      <svg lucideMinus></svg>
+                    </button>
+                    <input
+                      type="number"
+                      inputmode="numeric"
+                      [attr.aria-label]="v.name"
+                      [value]="counter(v)"
+                      (change)="
+                        setVariable(v, +$any($event.target).value);
+                        $any($event.target).value = counter(v)
+                      "
+                    />
+                    <button
+                      type="button"
+                      aria-label="Plus"
+                      (click)="setVariable(v, counter(v) + 1)"
+                    >
+                      <svg lucidePlus></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @empty {
+              <p class="empty">Aucune variable.</p>
+            }
+            @if (shownVariables().length < variables.length) {
+              <button
+                type="button"
+                class="row more"
+                (click)="allVariables.set(true)"
+              >
+                Voir les {{ variables.length }} variables
+              </button>
+            }
+          </div>
+        </section>
+
+        <section>
+          <h4><svg lucideUsers></svg> Équipe</h4>
+          <div class="card">
+            @for (c of characters; track c.id) {
+              <div class="row">
+                <button
+                  type="button"
+                  class="switch"
+                  role="switch"
+                  [attr.aria-label]="'Dans l\'équipe : ' + c.name"
+                  [attr.aria-checked]="inTeam(c.id)"
+                  (click)="toggleTeam(c.id)"
+                ></button>
+                <span class="label">{{ c.name }}</span>
+                <div class="stepper">
+                  <button
+                    type="button"
+                    aria-label="Niveau moins"
+                    (click)="shiftLevel(c.id, -1)"
+                  >
+                    <svg lucideMinus></svg>
+                  </button>
+                  <span class="value">Niv. {{ levelOf(c.id) }}</span>
+                  <button
+                    type="button"
+                    aria-label="Niveau plus"
+                    (click)="shiftLevel(c.id, 1)"
+                  >
+                    <svg lucidePlus></svg>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <p class="empty">Aucun personnage dans la base.</p>
+            }
+          </div>
+        </section>
+
+        <section>
+          <h4><svg lucideBackpack></svg> Sac et argent</h4>
+          <div class="card">
+            <div class="row">
+              <span class="label">Argent</span>
+              <div class="stepper">
+                <button
+                  type="button"
+                  aria-label="100 de moins"
+                  (click)="shiftMoney(-100)"
+                >
+                  <svg lucideMinus></svg>
+                </button>
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  aria-label="Argent"
+                  [value]="t.money"
+                  (change)="
+                    setMoney(+$any($event.target).value);
+                    $any($event.target).value = test()?.money
+                  "
+                />
+                <button
+                  type="button"
+                  aria-label="100 de plus"
+                  (click)="shiftMoney(100)"
+                >
+                  <svg lucidePlus></svg>
+                </button>
+              </div>
+            </div>
+            @for (item of bag(); track item.id) {
+              <div class="row">
+                <span class="label">{{ item.name }}</span>
+                <div class="stepper">
+                  <button
+                    type="button"
+                    aria-label="Un de moins"
+                    (click)="setItem(item.id, item.count - 1)"
+                  >
+                    <svg lucideMinus></svg>
+                  </button>
+                  <span class="value">×{{ item.count }}</span>
+                  <button
+                    type="button"
+                    aria-label="Un de plus"
+                    (click)="setItem(item.id, item.count + 1)"
+                  >
+                    <svg lucidePlus></svg>
+                  </button>
+                </div>
+              </div>
+            }
+            @if (adding()) {
+              <label class="row">
+                <span class="label">Objet</span>
+                <select
+                  #itemSelect
+                  (change)="addItem(itemSelect.value)"
+                  (blur)="adding.set(false)"
+                >
+                  <option value="">Choisir…</option>
+                  @for (i of addable(); track i.id) {
+                    <option [value]="i.id">{{ i.name }}</option>
+                  }
+                </select>
+              </label>
+            } @else if (addable().length) {
+              <button type="button" class="row more" (click)="adding.set(true)">
+                <svg lucidePlus></svg> Objet
+              </button>
+            }
+          </div>
+        </section>
+
+        <section>
+          <h4><svg lucideHeartHandshake></svg> Liens</h4>
+          <div class="card">
+            @for (l of links; track l.id) {
+              <div class="row">
+                <span class="label">{{ l.name }}</span>
+                <div class="stepper">
+                  <button
+                    type="button"
+                    aria-label="Niveau moins"
+                    [disabled]="linkOf(l.id) <= 0"
+                    (click)="shiftLink(l.id, -1)"
+                  >
+                    <svg lucideMinus></svg>
+                  </button>
+                  <span class="value">Niv. {{ linkOf(l.id) }}</span>
+                  <button
+                    type="button"
+                    aria-label="Niveau plus"
+                    [disabled]="linkOf(l.id) >= linkMax"
+                    (click)="shiftLink(l.id, 1)"
+                  >
+                    <svg lucidePlus></svg>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <p class="empty">Personne avec qui lier.</p>
+            }
+          </div>
+        </section>
+
+        <section>
+          <h4>
+            <svg lucideClapperboard></svg> Cinématiques vues
+            <small>Vue : ne se rejoue pas</small>
+          </h4>
+          <div class="card">
+            @for (c of cutscenes; track c.key) {
+              <div class="row">
+                <span class="label">
+                  {{ c.name }}
+                  <small>{{ c.map }}</small>
+                </span>
+                <button
+                  type="button"
+                  class="switch"
+                  role="switch"
+                  [attr.aria-label]="'Vue : ' + c.name"
+                  [attr.aria-checked]="seen(c.key)"
+                  (click)="toggleSeen(c.key)"
+                ></button>
+              </div>
+            } @empty {
+              <p class="empty">
+                Aucune cinématique « Une seule fois » dans les cartes.
+              </p>
+            }
+          </div>
+        </section>
+      </div>
+      <footer>
+        <button
+          type="button"
+          class="danger"
+          [class.armed]="armed() === 'remove'"
+          (click)="remove()"
+        >
+          <svg lucideTrash></svg>
+          {{ armed() === "remove" ? "Supprimer ?" : "Supprimer" }}
+        </button>
+        <button
+          type="button"
+          [class.armed]="armed() === 'reset'"
+          title="Reprendre les réglages de ma partie"
+          (click)="resetToGame()"
+        >
+          <svg lucideCopy></svg>
+          {{ armed() === "reset" ? "Remplacer ?" : "Ma partie" }}
+        </button>
+        <button type="button" class="launch" (click)="launch()">
+          <svg lucidePlay></svg> Lancer
+        </button>
+      </footer>
+    } @else {
+      <p class="empty gone">Ce test n'existe plus.</p>
+    }
+  </div>
+</section>

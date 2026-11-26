@@ -78,6 +78,9 @@
       [pickMap]="hud.editPick"
       [ambianceLabel]="ambianceLabel()"
       (toggled)="toggleEditMode()"
+      [testPicking]="testMode.picking()"
+      (test)="toggleTestPick()"
+      (testEvent)="testMode.askEvent($event.event, $event.objectName)"
       (modelSelected)="selectEditModel($event)"
       (tileSelected)="selectEditTile($event)"
       (brushChange)="setEditBrush($event)"
@@ -195,8 +198,27 @@
     (links)="openLinks()"
     (variablesTest)="openVariablesTest()"
     (battleSim)="openBattleSim()"
+    (testMode)="openTestList()"
   />
 }
+
+@if (testListOpen()) {
+  <game-test-list (closed)="testListOpen.set(false)" (back)="backToMenu()" />
+}
+
+@if (testMode.request(); as request) {
+  <game-test-sheet [request]="request" />
+}
+
+@if (testMode.editing(); as testId) {
+  <game-test-settings [testId]="testId" (closed)="testMode.editing.set(null)" />
+}
+
+@if (testMode.picking()) {
+  <p class="test-hint">Touche la carte : le joueur apparaît là</p>
+}
+
+<game-test-banner />
 
 @if (linksOpen()) {
   <game-links (closed)="linksOpen.set(false)" />

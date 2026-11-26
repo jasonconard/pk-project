@@ -1,0 +1,65 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section class="sheet" role="dialog" aria-label="Mode test">
+  <div class="grip"></div>
+  <button type="button" class="back" (click)="back.emit()">
+    <svg lucideChevronLeft></svg>Menu
+  </button>
+  <div class="head">
+    <svg lucideFlaskConical></svg>
+    <div class="title">
+      <h2>Mode test</h2>
+      <small>Essayer une scène sans jouer depuis le début</small>
+    </div>
+    <button
+      type="button"
+      class="square"
+      aria-label="Fermer"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+
+  @if (tests().length) {
+    <div class="card">
+      @for (test of tests(); track test.id) {
+        <div class="row">
+          <svg lucideFlaskConical></svg>
+          <span class="text"
+            ><span>{{ test.name }}</span
+            ><small>{{ place(test) }}</small></span
+          >
+          <button
+            type="button"
+            class="square"
+            aria-label="Régler"
+            (click)="testMode.editing.set(test.id)"
+          >
+            <svg lucideSlidersHorizontal></svg>
+          </button>
+          <button
+            type="button"
+            class="square go"
+            aria-label="Lancer"
+            (click)="launch(test.id)"
+          >
+            <svg lucidePlay></svg>
+          </button>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="empty">
+      Aucun test gardé. Un test garde l'endroit où le joueur apparaît, le jour,
+      les variables, l'équipe, les liens et les cinématiques vues.
+    </p>
+  }
+  <button type="button" class="btn soft" (click)="add()">
+    <svg lucidePlus></svg>Nouveau test
+  </button>
+  <p class="info">
+    <svg lucideArchive></svg>
+    Un nouveau test part de ta partie, là où tu es. Pendant un test, ta partie
+    est mise de côté.
+  </p>
+</section>

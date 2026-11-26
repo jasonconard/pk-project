@@ -28,6 +28,7 @@ import {
   storedDatabaseData,
 } from "../../../database-editor/shared/database-storage";
 
+import { loadTests, saveTests, TestPreset } from "../model/test-preset";
 /**
  * The game project file (`.pk`): every creation saved in the browser (maps, models, songs, variables, database) in one file, to move them
  * between the phone and the computer. Gzipped JSON; the models' pixels in base64. Importing replaces every creation.
@@ -57,6 +58,8 @@ export interface ProjectFile {
   variables?: StoredVariables | null;
   /** Missing in the files written before the database editor. */
   database?: StoredDatabase | null;
+  /** The named tests of the mode test; missing in the files written before it. */
+  tests?: TestPreset[];
 }
 
 /** What a project holds, shown before importing. */
@@ -132,6 +135,7 @@ export async function collectProject(appVersion: string): Promise<ProjectFile> {
     songs: storedSongsData(),
     variables: storedVariablesData(),
     database: storedDatabaseData(),
+    tests: loadTests(),
   };
 }
 
@@ -226,4 +230,7 @@ export async function applyProject(project: ProjectFile): Promise<void> {
   replaceStoredSongs(project.songs);
   replaceStoredVariables(project.variables);
   replaceStoredDatabase(project.database);
+  if (project.tests) {
+    saveTests(project.tests);
+  }
 }

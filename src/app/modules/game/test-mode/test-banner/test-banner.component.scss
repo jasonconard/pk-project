@@ -1,0 +1,197 @@
+:host {
+  --test: #5fd68a;
+  --on-test: #0e2a18;
+}
+
+button {
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--test);
+  }
+}
+
+svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+/* (a thin green frame: the game being played is a test) */
+.border {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  border: 3px solid var(--test);
+  pointer-events: none;
+}
+
+.banner {
+  position: fixed;
+  z-index: 800;
+  top: calc(var(--safe-top, 0px) + 72px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 28px));
+  box-sizing: border-box;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--test);
+  border-radius: 14px;
+  background: #22232ae6;
+  color: #fafafa;
+
+  > svg {
+    color: var(--test);
+  }
+
+  .text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+
+    b {
+      font-size: 11px;
+      color: var(--test);
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.square {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #ffffff14;
+}
+
+.quit {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--test);
+  color: var(--on-test);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* On a computer and in landscape, the clock sits on the left: the banner at the top, in the middle */
+@media (orientation: landscape) {
+  .banner {
+    top: calc(var(--safe-top, 0px) + 14px);
+    width: min(360px, calc(100vw - 560px));
+    min-width: 260px;
+  }
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2001;
+  width: min(342px, calc(100vw - 32px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 20px;
+  background: #22232a;
+  color: #fafafa;
+  font-size: 14px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 17px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      color: var(--test);
+    }
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #fafafaa6;
+  }
+}
+
+.back-to {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ffffff14;
+  font-size: 13px;
+
+  .edit {
+    color: #ffb04a;
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+  }
+
+  small {
+    font-size: 11px;
+    color: #fafafaa6;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  background: #ffffff14;
+  font-size: 13px;
+  font-weight: 600;
+
+  &.go {
+    background: var(--test);
+    color: var(--on-test);
+    font-weight: 700;
+  }
+}
