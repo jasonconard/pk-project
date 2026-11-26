@@ -32,6 +32,8 @@ La première fois le 1 se joue ; ensuite le drapeau est vrai, le 1 ne convient p
 
 Pour qu'un événement ne se joue **qu'une fois**, ajoute une condition sur un drapeau (« Vu la scène » est faux) et une action qui le met à vrai.
 
+**Zone** (sauf Automatique) : **Celle de l'objet** ou **Sa propre zone**, des cases de l'objet et le côté d'où le joueur agit (un panneau qui se lit seulement de face). Voir [Zones d'action](15-zones-action.md).
+
 ## Conditions
 
 Toutes doivent être vraies. Sans condition, l'événement se joue toujours.

@@ -34,6 +34,10 @@ Le panneau de l'objet sélectionné a une section **Passage vers une carte** : *
 
 Le **point d'arrivée de la carte** se règle avec l'outil **Arrivée** de l'onglet Zones (repère jaune, visible dans l'éditeur).
 
+## Zone d'action
+
+Dans la fiche de l'objet, **Zone d'action** montre où le joueur agit (celle du modèle, ou une propre à cet objet) ; **Changer** affiche ses cases sur la carte pour les toucher. Voir [Zones d'action](15-zones-action.md).
+
 ## Annuler / refaire
 
 Chaque changement enregistre une action `{ undo, redo }` (`MapEditorService.record`). Les actions retrouvent le morceau de carte de l'objet au moment où elles s'exécutent (`chunkOf`), car un déplacement peut l'avoir changé de morceau.

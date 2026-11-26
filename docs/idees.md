@@ -21,7 +21,7 @@ Faire de l'appli un **moteur de jeu** : les éditeurs (carte, modèles, et ceux 
 
 ## Les outils à construire
 
-Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Tous les outils de la liste sont faits ; chacun garde ses « À suivre ».
+Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Les outils 0 à 15 sont faits ; chacun garde ses « À suivre ».
 
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
@@ -40,6 +40,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 12 | **Musique** (fait : l'éditeur, voir [07](editeur/07-musique.md) ; le moment Donjon et la musique de chaque donjon ; l'import d'un fichier MIDI (pistes, instruments, mesures, gamme) et l'export en MIDI) | L'éditeur MIDI lo-fi (voir plus bas), une musique par lieu, jour / nuit / donjon / combat | Tout |
 | 13 | **Cinématiques** (fait : maquette `design/main-view.pen` (Cinématiques) ; l'éditeur sur la carte (ligne de temps, pistes caméra / écran / texte / son / monde / personnages, blocs qui se chevauchent, aperçu sur la carte avec le cadre de la caméra) ; l'action « Jouer la cinématique » ; en jeu : bandes noires, fondus, titres, bulles, messages, musique, Passer maintenu 2 s, ⏩ ×3, une seule fois ; voir [13](editeur/13-cinematiques.md). À suivre : des chemins qui contournent les obstacles) | Une ligne de temps : caméra, déplacements, dialogues, musique, à lancer depuis un événement | Histoire |
 | 14 | **Mode test** (fait : maquette `design/main-view.pen` (Mode test) ; tester depuis l'éditeur de carte (toucher où le joueur apparaît), la fenêtre d'un événement, l'éditeur de cinématiques ou Menu → Mode test ; les tests gardés avec leurs réglages (jour, moment, météo, variables, équipe et niveaux, sac, argent, liens, cinématiques vues) ; la partie mise de côté pendant le test et rendue en quittant, même si l'application se ferme ; bandeau vert, Recommencer, Quitter, voir [14](editeur/14-mode-test.md)) | Lancer le jeu depuis n'importe où, au jour et avec les drapeaux voulus, pour essayer une scène | Tout |
+| 15 | **Zones d'action** (fait : maquette `design/main-view.pen` (Zones d'action) et `model-editor-mobile.pen` écran 11 ; la zone d'un modèle (des cases vues de dessus et un côté), changée pour un objet posé en touchant ses cases sur la carte, ou propre à un événement ; en jeu, parler, les portes et marcher dessus suivent la zone, voir [15](editeur/15-zones-action.md)) | Où le joueur agit sur un objet : la porte seule de la maison, le devant d'un panneau | Tout |
 
 ## Retenues
 
@@ -88,7 +89,7 @@ Une page à part (`/#/base`), comme les variables ou la musique : un onglet par 
 - **Événements** : donner / retirer un objet, donner de l'argent ; conditions « a l'objet », « argent ≥ » ; faire entrer / sortir un personnage de l'équipe, soigner l'équipe ; lancer un combat avec les branches Victoire / Défaite / Fuite.
 - **Étapes** (une par session, validée) : 1) maquette `design/database.pen` (téléphone et ordinateur) — fait ; 2) la page, Éléments, Types d'armes et États, avec l'éditeur pixel des icônes — fait ; 3) Compétences — fait ; 4) Objets — fait ; 5) Personnages — fait ; 6) Ennemis et groupes — fait ; 7) les liens avec les événements — fait, avec « Soigner l'équipe » depuis le combat (point 9).
 
-### Zones d'action sur les objets
+### Zones d'action sur les objets — fait (point 15)
 
 Aujourd'hui, une porte (passage) ou un événement occupe toute la largeur de l'objet. Pouvoir dessiner la zone d'action dans l'éditeur (la porte seule de la maison, le devant d'un panneau), sur la carte ou dans le modèle.
 

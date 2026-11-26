@@ -18,6 +18,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 12. [Donjons](12-donjons.md) : la fiche d'un donjon (heures d'ouverture, météo, étages faits à la main ou générés à partir de salles), l'onglet Donjon (coffres, pièges, interrupteurs, portes fermées, escaliers, portes de salle, cristal de sauvegarde), les ennemis visibles sur la carte.
 13. [Cinématiques](13-cinematiques.md) : une ligne de temps sur la carte (caméra, personnages qui marchent, bulles, fondus, bandes noires, messages, musique), jouée par un événement ; passer, accélérer, une seule fois.
 14. [Mode test](14-mode-test.md) : essayer une scène depuis l'éditeur, un événement, une cinématique ou le menu, avec le jour, les variables, l'équipe et les liens voulus ; ta partie revient comme avant en quittant.
+15. [Zones d'action](15-zones-action.md) : où le joueur agit sur un objet (la porte de la maison, le devant d'un panneau) : des cases et un côté, dans le modèle, sur la carte ou pour un événement.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 

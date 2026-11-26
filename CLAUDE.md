@@ -92,6 +92,10 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `testFromGame`, `applyTest`), `services/test-mode.service.ts` (the sheet asked, start / restart / quit; the game set
   aside in `pk-test-run`, given back at the next start), `game-saves.ts` `captureGame` / `restoreProgress`,
   `game/test-mode/` (`test-sheet` Tester ici, `test-settings`, `test-list` Menu → Mode test, `test-banner`).
+- Action zones (`docs/editeur/15-zones-action.md`): `model/action-zone.ts` (cells of the footprint + side; `inZone`,
+  `zoneFacing`), on `SceneModel.zone` / `SceneBuilding.zone` / `SceneEventCondition.zone` (`EventService.zoneOf`),
+  `game/zone-editor/` (grid + side, shared by the model editor, the object sheet, the event window),
+  `map-editor/zone-overlay.ts` (cells shown on the map, `MapEditorService.editZone` / `setZone`).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

@@ -69,6 +69,10 @@ Une forme peut bouger : dans les réglages de la forme sélectionnée, la partie
 - Toutes les copies du modèle sur les cartes bougent de la même façon. Une forme qui bouge reste à part (elle n'est pas fusionnée avec les autres), et un modèle qui bouge n'est pas dessiné en copies groupées : à garder pour quelques objets.
 - Exemple : le **moulin** (`md-windmill.ts`), posé sur la carte du monde près du départ, ses ailes tournent en boucle.
 
+## La zone d'action
+
+Fiche **Modèle**, partie **Zone d'action** : où le joueur agit sur tous les objets de ce modèle (la porte d'une maison). Les cases du modèle vu de dessus et le côté d'où il agit ; voir [Zones d'action](15-zones-action.md). Sans zone, tout l'objet compte.
+
 ## Dessiner
 
 Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis retour au crayon), **pot de peinture** (F), **ligne** (L), **rectangle** (R, plein ou contour). On dessine :
