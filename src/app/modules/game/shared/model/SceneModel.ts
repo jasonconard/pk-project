@@ -1,3 +1,4 @@
+import { ActionZone } from "./action-zone";
 import { PartMotion } from "./model-motion";
 import { Vec2, Vec3, VecBox2, VecBox3 } from "./SceneUtils";
 import { ObjSide } from "./SceneMap";
@@ -12,6 +13,8 @@ export interface SceneModel {
   sway?: number;
   /** Rectangle of the texture shown as the model's thumbnail in the map editor (pixels, min = top left). */
   thumb?: VecBox2;
+  /** Where the player acts on the objects of this model (a house's door; see action-zone.ts). Omitted: the whole object. */
+  zone?: ActionZone;
 }
 
 export interface SceneModelTex {

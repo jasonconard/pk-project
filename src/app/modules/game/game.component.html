@@ -80,6 +80,8 @@
       (toggled)="toggleEditMode()"
       [testPicking]="testMode.picking()"
       (test)="toggleTestPick()"
+      (zoneEdit)="editZone($event)"
+      (zoneChange)="setZone($event)"
       (testEvent)="testMode.askEvent($event.event, $event.objectName)"
       (modelSelected)="selectEditModel($event)"
       (tileSelected)="selectEditTile($event)"

@@ -1,3 +1,4 @@
+import { ActionZone } from "../../game/shared/model/action-zone";
 import { ObjSide } from "../../game/shared/model/SceneMap";
 import { PartMotion } from "../../game/shared/model/model-motion";
 import { Vec3, VecBox3 } from "../../game/shared/model/SceneUtils";
@@ -43,6 +44,8 @@ export interface EditablePart {
 export interface EditableModel {
   id: string;
   sway?: number;
+  /** Where the player acts on the objects of this model (see action-zone.ts). Omitted: the whole object. */
+  zone?: ActionZone;
   bumpScale?: number;
   hitBox: VecBox3;
   parts: EditablePart[];

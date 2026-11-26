@@ -1,0 +1,54 @@
+@let zone = current();
+<div class="top">
+  <small class="label back">Arrière</small>
+  <div class="middle">
+    <small class="label">Gauche</small>
+    <div
+      class="grid"
+      role="group"
+      aria-label="Les cases de l'objet, vu de dessus"
+      [style.grid-template-columns]="
+        'repeat(' + grid().cols + ', ' + cellSize() + 'px)'
+      "
+    >
+      @for (r of rows(); track r) {
+        @for (c of cols(); track c) {
+          <button
+            type="button"
+            class="cell"
+            [class.on]="isOn(c, r)"
+            [style.height.px]="cellSize()"
+            [attr.aria-pressed]="isOn(c, r)"
+            [attr.aria-label]="'Case ' + (c + 1) + ', ' + (r + 1)"
+            (click)="toggle(c, r)"
+          ></button>
+        }
+      }
+    </div>
+    <small class="label">Droite</small>
+  </div>
+  <small class="label front"> <svg lucideArrowDown></svg>Devant </small>
+</div>
+
+<p class="title">Le joueur agit de ce côté</p>
+<div class="sides" role="radiogroup" aria-label="Le côté d'où le joueur agit">
+  @for (side of sides; track side.id) {
+    <button
+      type="button"
+      role="radio"
+      [class.on]="zone.side === side.id"
+      [attr.aria-checked]="zone.side === side.id"
+      (click)="setSide(side.id)"
+    >
+      {{ side.label }}
+    </button>
+  }
+</div>
+<div class="foot">
+  <p class="hint">
+    Toucher une case l'ajoute ou la retire. Sans case, tout l'objet compte.
+  </p>
+  <button type="button" class="whole" (click)="whole()">
+    <svg lucideMaximize></svg>Tout l'objet
+  </button>
+</div>

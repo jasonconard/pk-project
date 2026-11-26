@@ -12,6 +12,7 @@ import {
 import { NgTemplateOutlet } from "@angular/common";
 import {
   LucideArrowDown,
+  LucideScan,
   LucideFlaskConical,
   LucideArrowUp,
   LucideBackpack,
@@ -197,13 +198,17 @@ interface Branch {
  * in RPG Maker). Works on a copy, given back when the window closes (✕, Terminé, Escape, the backdrop): one undo step
  * in the editor.
  */
+import { ZoneEditorComponent } from "../zone-editor/zone-editor.component";
+import { ActionZone, zoneSummary } from "../shared/model/action-zone";
 @Component({
   selector: "game-event-editor",
   imports: [
     NgTemplateOutlet,
+    ZoneEditorComponent,
     LucideDynamicIcon,
     LucideArrowDown,
     LucideFlaskConical,
+    LucideScan,
     LucideArrowUp,
     LucideChevronDown,
     LucideChevronRight,
@@ -228,6 +233,13 @@ export class EventEditorComponent {
   readonly objectName = input("");
   readonly maps = input<{ id: string; name: string }[]>([]);
   readonly currentMap = input("");
+  /** The object's action zone (its own or its model's; null: the whole object) and its grid. */
+  readonly objectZone = input<ActionZone | null>(null);
+  readonly zoneGrid = input<{ cols: number; rows: number }>({
+    cols: 1,
+    rows: 1,
+  });
+  protected readonly zoneSummary = zoneSummary;
   /** Closed: the event as edited. */
   readonly closed = output<ObjectEvent>();
   readonly removed = output<void>();
@@ -303,6 +315,29 @@ export class EventEditorComponent {
 
   protected triggerHelp(): string {
     return TRIGGERS.find((t) => t.id === this.draft().trigger)?.help ?? "";
+  }
+
+  /** Its own action zone (starting as the object's), or the object's again. */
+  protected setOwnZone(own: boolean): void {
+    this.change((e) => {
+      if (!own) {
+        delete e.zone;
+        return;
+      }
+      const base = this.objectZone();
+      const grid = this.zoneGrid();
+      const fits =
+        base?.grid.cols === grid.cols && base?.grid.rows === grid.rows;
+      e.zone = {
+        grid,
+        cells: fits ? [...base.cells] : [],
+        side: base?.side ?? "front",
+      };
+    });
+  }
+
+  protected setZone(zone: ActionZone): void {
+    this.change((e) => (e.zone = zone));
   }
 
   protected setFace(face: boolean): void {

@@ -1,3 +1,4 @@
+import { ActionZone } from "./action-zone";
 import { SceneBuilding } from "./SceneBuilding";
 import { SceneEvent, VariableTest } from "./SceneEvent";
 import {
@@ -35,6 +36,8 @@ export interface ObjectEvent {
   face?: boolean;
   conditions: EventConditions;
   actions: EventAction[];
+  /** Its own action zone (else the object's; see action-zone.ts). Not for « auto ». */
+  zone?: ActionZone;
 }
 
 /** 'action': the action key next to the object; 'enter': walking onto it (a zone); 'auto': when the conditions become true. */
@@ -255,6 +258,9 @@ export function toSceneEvent(event: ObjectEvent): SceneEvent {
   const conditions: SceneEvent["conditions"] = {
     ...placements[event.trigger],
     ...checks,
+    ...(event.zone && event.trigger !== "auto"
+      ? { zone: structuredClone(event.zone) }
+      : {}),
   };
   return {
     edited: true,
@@ -457,6 +463,7 @@ function toObjectEvent(event: SceneEvent): ObjectEvent {
       ...partyConditions(c),
     },
     actions: toActions(event.instructions),
+    ...(c.zone ? { zone: structuredClone(c.zone) } : {}),
   };
 }
 

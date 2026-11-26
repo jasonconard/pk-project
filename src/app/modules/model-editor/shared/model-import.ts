@@ -187,6 +187,7 @@ export function importModel(
   return {
     id: model.id,
     sway: model.sway,
+    zone: model.zone && structuredClone(model.zone),
     bumpScale: model.tex.bumpScale,
     hitBox: structuredClone(model.hitBox),
     parts,

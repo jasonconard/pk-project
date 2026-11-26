@@ -1,6 +1,7 @@
 import { VecBox3 } from "./SceneUtils";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 import { PlayerDirection } from "./ScenePlayer";
+import { ActionZone } from "./action-zone";
 import { SceneEventInstruction } from "./SceneEventInstruction";
 import * as THREE from "three";
 
@@ -26,6 +27,8 @@ export interface SceneEventCondition {
    * the other conditions become true (anywhere on the map). Both play again only after having been false.
    */
   trigger?: "enter" | "auto";
+  /** This event's own action zone (else the object's, else its model's; see action-zone.ts). */
+  zone?: ActionZone;
   /** Story variables to check (all must be true). */
   variables?: VariableTest[];
   /** Game hours (from included, to excluded; from > to goes over midnight, e.g. 20 → 6). */

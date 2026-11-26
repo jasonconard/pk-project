@@ -427,3 +427,48 @@ h4 {
     cursor: default;
   }
 }
+
+/* Zone d'action (design/main-view.pen, Zones d'action) */
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.zone-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: #4fd1e8;
+  }
+}
+
+.zone-choice {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #ffffff14;
+
+  button {
+    flex: 1;
+    height: 34px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    font-size: 12px;
+
+    &.on {
+      border-color: #4fd1e8;
+      background: #4fd1e833;
+      color: #4fd1e8;
+      font-weight: 700;
+    }
+  }
+}

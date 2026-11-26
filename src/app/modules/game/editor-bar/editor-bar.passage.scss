@@ -267,3 +267,50 @@
     cursor: default;
   }
 }
+
+/* Zone d'action (design/main-view.pen, Zones d'action): cyan */
+.zone h3 svg {
+  color: #4fd1e8;
+}
+
+.zone-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .zone-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  small {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+}
+
+.zone-change,
+.zone-done {
+  background: #4fd1e826;
+  color: #4fd1e8;
+  font-weight: 700;
+}
+
+.zone-hint {
+  margin: 4px 0;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.zone-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Changing the zone: only its section (the map stays visible, its cells shown on the object) */
+.selection.zone-editing > :not(.sheet-head, .zone) {
+  display: none;
+}

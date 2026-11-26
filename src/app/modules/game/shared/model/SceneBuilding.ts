@@ -2,6 +2,7 @@ import { Vec3 } from "./SceneUtils";
 import { SceneEvent } from "./SceneEvent";
 import { SceneModel } from "./SceneModel";
 import { DungeonObject } from "./dungeon-object";
+import { ActionZone } from "./action-zone";
 
 export interface SceneBuilding {
   id: string;
@@ -18,6 +19,8 @@ export interface SceneBuilding {
   label?: string;
   /** A dungeon object's settings (chest, trap, switch, locked door: see dungeon-object.ts). */
   dungeon?: DungeonObject;
+  /** Where the player acts on it, this object only (else its model's zone; see action-zone.ts). */
+  zone?: ActionZone;
   /** Put by the game (a generated floor's enemies, chests, stairs): never saved with the map. */
   generated?: boolean;
   events: SceneEvent[];

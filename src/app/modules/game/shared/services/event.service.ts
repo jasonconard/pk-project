@@ -9,6 +9,13 @@ import { MapHelper } from "../model/MapHelper";
 import { SceneBuilding } from "../model/SceneBuilding";
 import { SceneChunk } from "../model/SceneMap";
 import { conditionsFit, EventContext } from "../model/ObjectEvent";
+import {
+  ActionZone,
+  inZone,
+  isWholeObject,
+  zoneFacing,
+} from "../model/action-zone";
+import { findModel } from "../model/Zone";
 
 /** An event found for the player, with its object. */
 export interface FoundEvent {
@@ -31,10 +38,10 @@ export class EventService {
       mapHelper,
       playerMesh,
       ctx,
-      (evt) =>
+      (evt, building) =>
         !evt.conditions.trigger &&
         EventService.checkPressedKeys(
-          evt.conditions.pressedKeys,
+          EventService.keysOf(evt, building, mapHelper),
           evt.conditions.held ? [...pressedCodes, ...holdedCodes] : pressedCodes
         )
     );
@@ -71,7 +78,6 @@ export class EventService {
     const found: FoundEvent[] = [];
     mapHelper.sceneMap.chunks.forEach((chunk) => {
       chunk.buildings.forEach((building) => {
-        let bounds: THREE.Box3 | null | undefined;
         const evt = building.events.find((evt) => {
           const trigger = evt.conditions.trigger;
           if (
@@ -84,10 +90,11 @@ export class EventService {
           if (trigger === "auto") {
             return true;
           }
-          bounds ??= mapHelper.getBounds(chunk.id + "-" + building.id);
-          return EventService.checkBounds(
-            evt.conditions.bounds,
-            bounds,
+          return EventService.fitsPlace(
+            evt,
+            chunk,
+            building,
+            mapHelper,
             playerMesh
           );
         });
@@ -104,7 +111,7 @@ export class EventService {
     mapHelper: MapHelper,
     playerMesh: THREE.Object3D,
     ctx: EventContext,
-    keep: (evt: SceneEvent) => boolean
+    keep: (evt: SceneEvent, building: SceneBuilding) => boolean
   ): FoundEvent | null {
     const found: (SceneEventHelper & FoundEvent)[] = [];
     mapHelper.sceneMap.chunks.forEach((chunk) => {
@@ -114,14 +121,12 @@ export class EventService {
           // (of one object, the first event that fits)
           const evt = building.events.find(
             (evt) =>
-              EventService.checkDirection(
-                evt.conditions.direction,
-                mapHelper
-              ) &&
-              keep(evt) &&
-              EventService.checkBounds(
-                evt.conditions.bounds,
-                mapHelper.getBounds(buildingKey),
+              keep(evt, building) &&
+              EventService.fitsPlace(
+                evt,
+                chunk,
+                building,
+                mapHelper,
                 playerMesh
               ) &&
               conditionsFit(evt.conditions, ctx)
@@ -151,6 +156,93 @@ export class EventService {
             return d1 > d2 ? 1 : -1;
           })[0];
     return { evt: best.evt, building: best.building, chunk: best.chunk };
+  }
+
+  /** The action zone an event uses: its own, else its object's, else its model's (null: the whole object). */
+  static zoneOf(evt: SceneEvent, building: SceneBuilding): ActionZone | null {
+    const zone =
+      evt.conditions.zone ?? building.zone ?? findModel(building.modelId)?.zone;
+    return zone && !isWholeObject(zone) ? zone : null;
+  }
+
+  /**
+   * Is the player where the event waits for them: the place around the object (its bounds), and for a door facing it;
+   * with an action zone, its cells and side instead (see action-zone.ts).
+   */
+  private static fitsPlace(
+    evt: SceneEvent,
+    chunk: SceneChunk,
+    building: SceneBuilding,
+    mapHelper: MapHelper,
+    playerMesh: THREE.Object3D
+  ): boolean {
+    const place = evt.conditions.bounds;
+    const zone = place ? EventService.zoneOf(evt, building) : null;
+    if (!place || !zone) {
+      return (
+        EventService.checkDirection(evt.conditions.direction, mapHelper) &&
+        EventService.checkBounds(
+          place,
+          mapHelper.getBounds(chunk.id + "-" + building.id),
+          playerMesh
+        )
+      );
+    }
+    const bounds = mapHelper.buildingBounds(chunk, building);
+    if (!bounds) {
+      return false;
+    }
+    const reach = Math.max(place.max.x, place.max.z, place.min.x, place.min.z);
+    const rot = building.rot ?? 0;
+    if (!inZone(zone, bounds, rot, playerMesh.position, reach, reach === 0)) {
+      return false;
+    }
+    // (a door: facing the object, from the zone's side)
+    return (
+      evt.conditions.direction === undefined ||
+      mapHelper.scenePlayer.dir ===
+        EventService.facing(zone, rot, bounds, playerMesh)
+    );
+  }
+
+  /** Where the player faces to act: towards the object from the zone's side (every side: towards its centre). */
+  private static facing(
+    zone: ActionZone,
+    rot: number,
+    bounds: THREE.Box3,
+    playerMesh: THREE.Object3D
+  ): PlayerDirection {
+    const dir = zoneFacing(zone, rot);
+    if (dir !== undefined) {
+      return dir;
+    }
+    const dx = (bounds.min.x + bounds.max.x) / 2 - playerMesh.position.x;
+    const dz = (bounds.min.z + bounds.max.z) / 2 - playerMesh.position.z;
+    if (Math.abs(dx) > Math.abs(dz)) {
+      return dx > 0 ? PlayerDirection.RIGHT : PlayerDirection.LEFT;
+    }
+    return dz > 0 ? PlayerDirection.DOWN : PlayerDirection.UP;
+  }
+
+  /** The keys an event waits for; a door with a zone: the action key or walking into it from the zone's side. */
+  private static keysOf(
+    evt: SceneEvent,
+    building: SceneBuilding,
+    mapHelper: MapHelper
+  ): KeyCode[] | undefined {
+    const keys = evt.conditions.pressedKeys;
+    const zone = EventService.zoneOf(evt, building);
+    if (evt.conditions.direction === undefined || !zone || !keys) {
+      return keys;
+    }
+    const walkKeys: Record<PlayerDirection, KeyCode> = {
+      [PlayerDirection.UP]: KeyCode.up,
+      [PlayerDirection.DOWN]: KeyCode.down,
+      [PlayerDirection.LEFT]: KeyCode.left,
+      [PlayerDirection.RIGHT]: KeyCode.right,
+    };
+    // (the player faces the door already: fitsPlace checked it)
+    return [KeyCode.confirm, walkKeys[mapHelper.scenePlayer.dir]];
   }
 
   private static checkDirection(

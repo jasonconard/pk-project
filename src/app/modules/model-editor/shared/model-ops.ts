@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { ObjSide } from "../../game/shared/model/SceneMap";
 import { Vec3 } from "../../game/shared/model/SceneUtils";
 import { BoxFace } from "../../game/shared/model/model-uv";
@@ -289,4 +290,38 @@ function sampledCopy(
     }
   }
   return out;
+}
+
+/**
+ * The model's footprint, not turned, in map units (x = width, z = depth), measured as the game measures a placed
+ * object (`Box3.setFromObject` of `BasicMeshService.makeModel`'s group: each part's box or plane turned and moved,
+ * its vertices bounded). A model with moving parts counts its still parts only, as `MapHelper.getBounds` does.
+ */
+export function modelFootprint(model: EditableModel): {
+  width: number;
+  depth: number;
+} {
+  const still = model.parts.filter((part) => !part.motion);
+  const parts = still.length > 0 ? still : model.parts;
+  const box = new THREE.Box3();
+  const matrix = new THREE.Matrix4();
+  for (const part of parts) {
+    const geometry =
+      part.kind === "box"
+        ? new THREE.BoxGeometry(part.size.x, part.size.y, part.size.z)
+        : new THREE.PlaneGeometry(part.size.x, part.size.y);
+    matrix.compose(
+      new THREE.Vector3(part.pos.x, part.pos.y, part.pos.z),
+      new THREE.Quaternion().setFromEuler(
+        new THREE.Euler(part.rot.x, part.rot.y, part.rot.z)
+      ),
+      new THREE.Vector3(1, 1, 1)
+    );
+    geometry.applyMatrix4(matrix).computeBoundingBox();
+    box.union(geometry.boundingBox!);
+    geometry.dispose();
+  }
+  return box.isEmpty()
+    ? { width: 0, depth: 0 }
+    : { width: box.max.x - box.min.x, depth: box.max.z - box.min.z };
 }

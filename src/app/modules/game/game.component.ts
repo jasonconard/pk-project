@@ -81,6 +81,7 @@ import { TestSheetComponent } from "./test-mode/test-sheet/test-sheet.component"
 import { TestListComponent } from "./test-mode/test-list/test-list.component";
 import { TestSettingsComponent } from "./test-mode/test-settings/test-settings.component";
 import { TestBannerComponent } from "./test-mode/test-banner/test-banner.component";
+import { ActionZone } from "./shared/model/action-zone";
 @Component({
   selector: "game-main",
   imports: [
@@ -376,6 +377,14 @@ export class GameComponent {
   protected openVariablesTest(): void {
     this.menuOpen.set(false);
     this.variablesTestOpen.set(true);
+  }
+
+  protected editZone(on: boolean): void {
+    this.gameService.editZone(on);
+  }
+
+  protected setZone(zone: ActionZone | null): void {
+    this.gameService.setZone(zone);
   }
 
   protected openTestList(): void {

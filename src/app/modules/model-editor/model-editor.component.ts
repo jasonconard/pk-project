@@ -44,6 +44,7 @@ import {
   LucideRedo2,
   LucideRotateCcw,
   LucideRotateCw,
+  LucideScan,
   LucideSettings2,
   LucideShapes,
   LucideSquare,
@@ -84,12 +85,20 @@ import {
   duplicatePart,
   flipTexture,
   linkFace,
+  modelFootprint,
   newModel,
   removePart,
   resizePart,
   unlinkFace,
 } from "./shared/model-ops";
 import { ModelHistory } from "./shared/model-history";
+import { ZoneEditorComponent } from "../game/zone-editor/zone-editor.component";
+import {
+  ActionZone,
+  isWholeObject,
+  zoneGrid,
+  zoneSummary,
+} from "../game/shared/model/action-zone";
 import { ModelSaver } from "./shared/model-saver";
 import {
   forgetStoredModel,
@@ -170,10 +179,12 @@ import {
     "./model-editor.phone.scss",
     "./model-editor.motion.scss",
     "./model-editor.part-motion.scss",
+    "./model-editor.zone.scss",
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PixelCanvasComponent,
+    ZoneEditorComponent,
     NgTemplateOutlet,
     LucideArrowLeftRight,
     LucideArrowUpDown,
@@ -204,6 +215,7 @@ import {
     LucideRedo2,
     LucideRotateCcw,
     LucideRotateCw,
+    LucideScan,
     LucideSettings2,
     LucideShapes,
     LucideSquare,
@@ -256,6 +268,18 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.storedIds().filter((id) => !this.modelIds.includes(id))
   );
   /** The open model is the browser's version of a model of the game. */
+  /** The action zone's grid: the model's footprint (not turned) in map cells, as the game measures it. */
+  protected readonly zoneGrid = computed(() => {
+    const model = this.model();
+    if (!model) {
+      return { cols: 1, rows: 1 };
+    }
+    const { width, depth } = modelFootprint(model);
+    return zoneGrid(width, depth);
+  });
+  protected readonly zoneSummary = computed(() =>
+    zoneSummary(this.model()?.zone)
+  );
   protected readonly isEditedGameModel = computed(() => {
     const id = this.model()?.id;
     return !!id && this.modelIds.includes(id) && this.storedIds().includes(id);
@@ -592,6 +616,15 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     value = Math.round(value * 10) / 10; // the − / + steps add up without float noise
     this.edit(
       (model) => (model.sway = value > 0 ? Math.min(1, value) : undefined),
+      false
+    );
+  }
+
+  /** The model's action zone (the whole object: none kept). */
+  protected setZone(zone: ActionZone) {
+    this.edit(
+      (model) =>
+        (model.zone = isWholeObject(zone) ? undefined : structuredClone(zone)),
       false
     );
   }

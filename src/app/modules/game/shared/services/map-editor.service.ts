@@ -70,6 +70,12 @@ export interface EditSelection {
   placeLabel: string;
   /** A dungeon object's settings (null: not a dungeon object). */
   dungeon: DungeonObject | null;
+  /** Its own action zone (null: its model's), its model's (null: the whole object), its grid. */
+  zone: ActionZone | null;
+  modelZone: ActionZone | null;
+  zoneGrid: { cols: number; rows: number };
+  /** Its zone is being changed on the map (its cells shown, a tap toggles one). */
+  zoneEditing: boolean;
 }
 
 /** Ground brush: size in cells, or the bucket. */
@@ -124,6 +130,8 @@ interface Drag {
  *   (passable, fades when the player is behind) can be switched. Every change can be undone / redone.
  * - On a touch screen: dragging always moves the view, a tap places / paints / selects, two fingers zoom.
  */
+import { ActionZone, cellAt, toggleCell, zoneGrid } from "../model/action-zone";
+import { ZoneOverlay } from "./map-editor/zone-overlay";
 @Service()
 export class MapEditorService {
   private readonly keyService = inject(KeyService);
@@ -241,8 +249,9 @@ export class MapEditorService {
         dragging: false,
         moving: false,
       };
-      // Pressing on the selected object: dragging will move it
+      // Pressing on the selected object: dragging will move it (not while its zone is changed)
       if (
+        !this.zoneEditing &&
         hit &&
         this.selected &&
         hit.building === this.selected.building &&
@@ -339,7 +348,12 @@ export class MapEditorService {
         const ground = this.groundPick
           ? this.groundAt(game, ev.clientX, ev.clientY)
           : null;
-        if (this.groundPick) {
+        if (this.zoneEditing && this.selected) {
+          const point = this.groundAt(game, ev.clientX, ev.clientY);
+          if (point) {
+            this.tapZone(game, point);
+          }
+        } else if (this.groundPick) {
           if (ground) {
             haptic("success");
             this.groundPick({
@@ -715,6 +729,9 @@ export class MapEditorService {
   // --- Selection, move, delete, options ---
 
   private select(game: Game, picked: Picked | null) {
+    if (picked?.building !== this.selected?.building) {
+      this.zoneEditing = false;
+    }
     this.selected = picked;
     this.refreshSelection(game);
   }
@@ -746,8 +763,134 @@ export class MapEditorService {
           dungeon: dungeonKindOf(picked.building.modelId)
             ? (picked.building.dungeon ?? {})
             : null,
+          zone: picked.building.zone ?? null,
+          modelZone: findModel(picked.building.modelId)?.zone ?? null,
+          zoneGrid: bounds
+            ? this.gridOf(bounds, picked.building.rot ?? 0)
+            : { cols: 1, rows: 1 },
+          zoneEditing: this.zoneEditing,
         }
       : null;
+    this.refreshZoneOverlay(game);
+  }
+
+  // --- Action zone (design/main-view.pen, Zones d'action) ---
+
+  private zoneEditing = false;
+  private readonly zoneOverlay = new ZoneOverlay();
+
+  /** The grid of an object's footprint, not turned (as the model editor draws it). */
+  private gridOf(bounds: THREE.Box3, rot: number) {
+    const w = bounds.max.x - bounds.min.x;
+    const d = bounds.max.z - bounds.min.z;
+    return rot % 2 === 0 ? zoneGrid(w, d) : zoneGrid(d, w);
+  }
+
+  /** The zone the selected object uses now: its own, else its model's, else the whole object on its grid. */
+  private selectedZone(game: Game): {
+    zone: ActionZone;
+    bounds: THREE.Box3;
+    rot: number;
+  } | null {
+    const picked = this.selected;
+    const bounds =
+      picked && game.mapHelper?.buildingBounds(picked.chunk, picked.building);
+    if (!picked || !bounds) {
+      return null;
+    }
+    const rot = picked.building.rot ?? 0;
+    const grid = this.gridOf(bounds, rot);
+    const own =
+      picked.building.zone ?? findModel(picked.building.modelId)?.zone;
+    const fits = own?.grid.cols === grid.cols && own?.grid.rows === grid.rows;
+    return {
+      zone: {
+        grid,
+        cells: fits ? own.cells : [],
+        side: own?.side ?? "all",
+      },
+      bounds,
+      rot,
+    };
+  }
+
+  /** Changing the selected object's zone on the map (Zone d'action → Changer / Fini). */
+  editZone(game: Game, on: boolean) {
+    this.zoneEditing = on && !!this.selected;
+    if (this.zoneEditing) {
+      this.showAbove(game);
+    }
+    this.refreshSelection(game);
+  }
+
+  /** The view moves so the selected object is in the upper part of the screen (its zone's sheet under it). */
+  private showAbove(game: Game) {
+    const current = this.selectedZone(game);
+    if (!current) {
+      return;
+    }
+    const center = current.bounds.getCenter(new THREE.Vector3());
+    center.y = current.bounds.min.y;
+    game.camera.updateMatrixWorld();
+    const ndc = center.project(game.camera);
+    const width = game.canvas.clientWidth;
+    const height = game.canvas.clientHeight;
+    const x = ((ndc.x + 1) / 2) * width;
+    const y = ((1 - ndc.y) / 2) * height;
+    // (a phone upright: the sheet covers the bottom half; else the middle of the screen)
+    const targetY = height > width ? height * 0.3 : height * 0.5;
+    this.pan(game, width / 2 - x, targetY - y);
+  }
+
+  private refreshZoneOverlay(game: Game) {
+    const current = this.zoneEditing ? this.selectedZone(game) : null;
+    if (current) {
+      this.zoneOverlay.show(
+        game.scene,
+        current.zone,
+        current.bounds,
+        current.rot
+      );
+    } else {
+      this.zoneOverlay.hide();
+    }
+  }
+
+  /** A tap on the map while changing the zone: the cell under it in or out. */
+  private tapZone(game: Game, point: THREE.Vector3) {
+    const current = this.selectedZone(game);
+    const cell = current
+      ? cellAt(current.zone.grid, current.bounds, current.rot, point)
+      : null;
+    if (current && cell) {
+      haptic("tick");
+      this.setZone(game, toggleCell(current.zone, cell.c, cell.r));
+    }
+  }
+
+  /** The selected object's own zone (null: its model's again). Undone as one change. */
+  setZone(game: Game, zone: ActionZone | null) {
+    const picked = this.selected;
+    if (!picked) {
+      return;
+    }
+    const building = picked.building;
+    const before = building.zone ? structuredClone(building.zone) : undefined;
+    const after = zone ? structuredClone(zone) : undefined;
+    const set = (value: ActionZone | undefined) => {
+      if (value) {
+        building.zone = structuredClone(value);
+      } else {
+        delete building.zone;
+      }
+      const chunk = this.chunkOf(game, building);
+      if (chunk && this.selected?.building === building) {
+        this.selected = { chunk, building };
+        this.refreshSelection(game);
+      }
+    };
+    set(after);
+    this.record(game, { undo: () => set(before), redo: () => set(after) });
   }
 
   /** The object under the mouse (its meshes, not hidden near the camera). */

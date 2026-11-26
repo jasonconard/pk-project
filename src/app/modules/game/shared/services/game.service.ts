@@ -39,6 +39,7 @@ import { MapKind } from "../model/SceneMap";
 import { Passage } from "../model/Passage";
 import { ObjectEvent, toSceneEvent } from "../model/ObjectEvent";
 import { Cutscene } from "../model/cutscene";
+import { ActionZone } from "../model/action-zone";
 import { SequenceService } from "./sequence.service";
 import { setSfxVolume } from "./sfx";
 import { Vec3 } from "../model/SceneUtils";
@@ -1252,6 +1253,24 @@ export class GameService {
   selectEditModel(modelId: string | null) {
     if (this.game) {
       this.mapEditorService.selectModel(this.game, modelId);
+      this.syncHud();
+    }
+  }
+
+  // --- Action zones (design/main-view.pen, Zones d'action) ---
+
+  /** Changing the selected object's action zone on the map (its cells shown, a tap toggles one), or no more. */
+  editZone(on: boolean) {
+    if (this.game) {
+      this.mapEditorService.editZone(this.game, on);
+      this.syncHud();
+    }
+  }
+
+  /** The selected object's own action zone (null: its model's). */
+  setZone(zone: ActionZone | null) {
+    if (this.game) {
+      this.mapEditorService.setZone(this.game, zone);
       this.syncHud();
     }
   }

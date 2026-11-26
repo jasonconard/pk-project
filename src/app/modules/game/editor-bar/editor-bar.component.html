@@ -300,6 +300,7 @@
     <section
       class="sheet selection"
       aria-label="Objet sélectionné"
+      [class.zone-editing]="selection.zoneEditing"
       animate.enter="anim-sheet-in"
       animate.leave="anim-fade-out"
     >
@@ -316,9 +317,11 @@
         <span class="title">
           <h2>{{ selectionLabel() }}</h2>
           <small>{{
-            touch()
-              ? "Glisser l'objet pour le déplacer"
-              : "Glisser l'objet pour le déplacer · Échap : désélectionner"
+            selection.zoneEditing
+              ? "Touche les cases de l'objet : sa zone d'action"
+              : touch()
+                ? "Glisser l'objet pour le déplacer"
+                : "Glisser l'objet pour le déplacer · Échap : désélectionner"
           }}</small>
         </span>
         <button
@@ -841,6 +844,57 @@
           }
         </div>
       }
+      @if (!selection.zoneSize) {
+        <div class="passage zone">
+          <h3><svg lucideScan></svg> Zone d'action</h3>
+          @if (selection.zoneEditing) {
+            <game-zone-editor
+              [zone]="selection.zone ?? selection.modelZone"
+              [grid]="selection.zoneGrid"
+              (zoneChange)="zoneChange.emit($event)"
+            />
+            <p class="zone-hint">
+              On peut aussi toucher les cases sur la carte.
+            </p>
+            <div class="zone-actions">
+              <button
+                type="button"
+                class="small-btn"
+                [disabled]="!selection.zone"
+                (click)="zoneChange.emit(null)"
+              >
+                <svg lucideRotateCcw></svg> Comme le modèle
+              </button>
+              <button
+                type="button"
+                class="small-btn zone-done"
+                (click)="zoneEdit.emit(false)"
+              >
+                <svg lucideCheck></svg> Fini
+              </button>
+            </div>
+          } @else {
+            <div class="zone-row">
+              <span class="zone-text"
+                ><b>{{
+                  selection.zone ? "Propre à cet objet" : "Comme le modèle"
+                }}</b
+                ><small>{{
+                  zoneSummary(selection.zone ?? selection.modelZone)
+                }}</small></span
+              >
+              <button
+                type="button"
+                class="small-btn zone-change"
+                title="Changer la zone d'action de cet objet, sur la carte"
+                (click)="zoneEdit.emit(true)"
+              >
+                <svg lucidePencil></svg> Changer
+              </button>
+            </div>
+          }
+        </div>
+      }
       <div class="passage events">
         <h3><svg lucideZap></svg> Événements</h3>
         @for (evt of selection.events; track $index; let i = $index) {
@@ -1186,6 +1240,8 @@
           [objectName]="selectionLabel()"
           [maps]="maps()"
           [currentMap]="mapId()"
+          [objectZone]="selection.zone ?? selection.modelZone"
+          [zoneGrid]="selection.zoneGrid"
           (closed)="saveEvent(selection.events, editing.index, $event)"
           (removed)="removeEvent(selection.events, editing.index)"
           (test)="tryEvent(selection.events, editing.index, $event)"

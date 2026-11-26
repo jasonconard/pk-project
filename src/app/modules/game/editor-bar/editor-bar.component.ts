@@ -14,6 +14,9 @@ import { isGameCovered } from "../../../core/shared/app-visibility";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import {
   LucideArrowBigDown,
+  LucideRotateCcw,
+  LucidePencil,
+  LucideScan,
   LucideFlaskConical,
   LucideArrowBigUp,
   LucideBox,
@@ -210,13 +213,19 @@ interface PaletteEntry {
  * objects by family), the sheet on the right, the keyboard help at the bottom. Shortcuts while editing: Escape (put
  * the model back / deselect), Delete (remove the selection), Ctrl+Z / Ctrl+Y (undo / redo).
  */
+import { ZoneEditorComponent } from "../zone-editor/zone-editor.component";
+import { ActionZone, zoneSummary } from "../shared/model/action-zone";
 @Component({
   selector: "game-editor-bar",
   imports: [
     MapManagerComponent,
+    ZoneEditorComponent,
     LucideDynamicIcon,
     LucideClapperboard,
     LucideArrowBigDown,
+    LucideRotateCcw,
+    LucidePencil,
+    LucideScan,
     LucideFlaskConical,
     LucideArrowBigUp,
     LucideBox,
@@ -361,6 +370,11 @@ export class EditorBarComponent {
   readonly toggled = output<void>();
   /** Tester (design/main-view.pen, Mode test): choosing where the player appears, or no more. */
   readonly test = output<void>();
+  /** Zone d'action → Changer / Fini: the selected object's zone changed on the map, or no more. */
+  readonly zoneEdit = output<boolean>();
+  /** The selected object's own action zone (null: its model's again). */
+  readonly zoneChange = output<ActionZone | null>();
+  protected readonly zoneSummary = zoneSummary;
   /** An event's Tester: the event and its object's name. */
   readonly testEvent = output<{ event: ObjectEvent; objectName: string }>();
   /** Waiting for the tap on the map of Tester. */

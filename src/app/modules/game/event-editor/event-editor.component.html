@@ -71,6 +71,44 @@
             <span>Se tourner vers le joueur (un personnage)</span>
           </label>
         }
+        @if (e.trigger !== "auto") {
+          <div class="zone">
+            <span class="zone-title"><svg lucideScan></svg> Zone</span>
+            <div
+              class="zone-choice"
+              role="radiogroup"
+              aria-label="La zone d'action de l'événement"
+            >
+              <button
+                type="button"
+                role="radio"
+                [class.on]="!e.zone"
+                [attr.aria-checked]="!e.zone"
+                (click)="setOwnZone(false)"
+              >
+                Celle de l'objet
+              </button>
+              <button
+                type="button"
+                role="radio"
+                [class.on]="!!e.zone"
+                [attr.aria-checked]="!!e.zone"
+                (click)="setOwnZone(true)"
+              >
+                Sa propre zone
+              </button>
+            </div>
+            @if (e.zone; as zone) {
+              <game-zone-editor
+                [zone]="zone"
+                [grid]="zoneGrid()"
+                (zoneChange)="setZone($event)"
+              />
+            } @else {
+              <p class="help">{{ zoneSummary(objectZone()) }}</p>
+            }
+          </div>
+        }
         <h4>Conditions <small>toutes doivent être vraies</small></h4>
         <game-event-conditions
           empty="Aucune : l'événement se joue toujours."

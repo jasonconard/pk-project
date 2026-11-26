@@ -234,6 +234,7 @@ export function exportModel(model: EditableModel): ExportedModel {
       bumpScale: painted.includes("bump") ? (model.bumpScale ?? 1) : undefined,
     },
     sway: model.sway,
+    zone: model.zone && structuredClone(model.zone),
     thumb: thumbSlot && {
       min: { x: thumbSlot.x, y: thumbSlot.y },
       max: {

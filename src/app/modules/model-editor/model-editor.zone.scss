@@ -1,0 +1,47 @@
+// The model's action zone (« Modèle » sheet and panel): design/model-editor-mobile.pen screen 11.
+.zone-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0;
+  padding: 10px;
+  border: 1px solid rgb(79 209 232 / 35%);
+  border-radius: 10px;
+  background: rgb(79 209 232 / 6%);
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      color: #4fd1e8;
+    }
+
+    small {
+      margin-left: auto;
+      overflow: hidden;
+      font-size: 11px;
+      color: #4fd1e8;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.zone-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.zone-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.7;
+}
