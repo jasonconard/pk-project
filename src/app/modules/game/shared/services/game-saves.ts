@@ -1,4 +1,5 @@
 import { DungeonState } from "../model/dungeon-state";
+import { currentFarm, FarmState, restoreFarm } from "../model/farm";
 import { AnimationStates } from "../model/model-animations";
 import { WeatherType } from "../weather/Weather";
 import { Vec3 } from "../model/SceneUtils";
@@ -50,6 +51,8 @@ export interface GameSave {
   party?: PartyState;
   /** The dungeons (chests opened, the dungeon the team is in); missing in the saves made before them. */
   dungeon?: DungeonState;
+  /** The crops (tilled cells, what grows there); missing in the saves made before them. */
+  farm?: FarmState;
   /** The objects moved by events (see model-animations.ts). */
   animations?: AnimationStates;
   /** The cutscenes « Une seule fois » already seen (see cutscene-seen.ts). */
@@ -98,6 +101,7 @@ export function captureGame(
     variables: currentVariableValues(),
     party: structuredClone(currentParty()),
     dungeon: structuredClone(currentDungeonState()),
+    farm: structuredClone(currentFarm()),
     animations: { ...currentAnimations() },
     cutscenesSeen: [...seenCutscenes()],
   };
@@ -108,6 +112,7 @@ export function restoreProgress(save: GameSave): void {
   restoreVariableValues(save.variables ?? {});
   restoreParty(save.party);
   restoreDungeonState(save.dungeon);
+  restoreFarm(save.farm);
   restoreAnimations(save.animations);
   restoreCutscenesSeen(save.cutscenesSeen);
 }

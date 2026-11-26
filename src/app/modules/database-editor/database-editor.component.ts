@@ -3,6 +3,7 @@ import {
   LucideCalendarDays,
   LucideCastle,
   LucideStore,
+  LucideSprout,
   LucideBackpack,
   LucideChevronLeft,
   LucideChevronRight,
@@ -41,6 +42,8 @@ import {
   DbCharacter,
   DbDungeon,
   DbShop,
+  DbCrop,
+  daysToRipe,
   DbElement,
   DbEnemy,
   DbGroup,
@@ -62,6 +65,7 @@ import {
   newCharacter,
   newDungeon,
   newShop,
+  newCrop,
   newElement,
   newEnemy,
   newGroup,
@@ -95,6 +99,7 @@ import { EnemySheetComponent } from "./sheets/enemy-sheet/enemy-sheet.component"
 import { GroupSheetComponent } from "./sheets/group-sheet/group-sheet.component";
 import { DungeonSheetComponent } from "./sheets/dungeon-sheet/dungeon-sheet.component";
 import { ShopSheetComponent } from "./sheets/shop-sheet/shop-sheet.component";
+import { CropSheetComponent } from "./sheets/crop-sheet/crop-sheet.component";
 import { searchKey } from "../../core/shared/text";
 
 /** In the mockup's order. */
@@ -121,6 +126,7 @@ const TABLES: { id: DbTable; label: string; one: string; icon: LucideIcon }[] =
     { id: "weapons", label: "Armes", one: "Type d'arme", icon: LucideSword },
     { id: "dungeons", label: "Donjons", one: "Donjon", icon: LucideCastle },
     { id: "shops", label: "Boutiques", one: "Boutique", icon: LucideStore },
+    { id: "crops", label: "Cultures", one: "Culture", icon: LucideSprout },
     {
       id: "calendar",
       label: "Calendrier",
@@ -167,6 +173,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     GroupSheetComponent,
     DungeonSheetComponent,
     ShopSheetComponent,
+    CropSheetComponent,
   ],
   templateUrl: "./database-editor.component.html",
   styleUrl: "./database-editor.component.scss",
@@ -222,6 +229,13 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
   /** The weathers the element already has (not offered again). */
   protected readonly pickExclude = computed(() => {
     const pick = this.weatherPick();
+    if (pick?.for === "crop") {
+      return (
+        this.db()
+          .crops.find((c) => c.id === pick.id)
+          ?.weathers.map((w) => w.weather) ?? []
+      );
+    }
     if (pick?.for === "shop") {
       const shop = this.db().shops.find((sh) => sh.id === pick.id);
       return shop?.items[pick.index ?? 0]?.conditions?.weathers ?? [];
@@ -250,6 +264,9 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     }
     if (pick?.for === "shop") {
       return "En vente pendant la météo";
+    }
+    if (pick?.for === "crop") {
+      return "Pousse plus vite par";
     }
     return pick?.for === "enemy" ? "Météo de l'ennemi" : "Pendant la météo";
   });
@@ -333,6 +350,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
 
   protected readonly shop = computed(() =>
     this.table() === "shops" ? (this.current() as DbShop | null) : null
+  );
+
+  protected readonly crop = computed(() =>
+    this.table() === "crops" ? (this.current() as DbCrop | null) : null
   );
 
   protected readonly npc = computed(() =>
@@ -428,6 +449,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       calendar: "Calendrier du jeu",
       dungeons: "Nouveau donjon",
       shops: "Nouvelle boutique",
+      crops: "Nouvelle culture",
     }[table];
     const names = new Set(this.rows().map((r) => searchKey(r.name)));
     let name = base;
@@ -448,6 +470,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       calendar: () => newCalendar(),
       dungeons: () => newDungeon(name),
       shops: () => newShop(name),
+      crops: () => newCrop(name),
     };
     const row = makers[table]();
     this.store.commit({ ...this.db(), [table]: [...this.rows(), row] });
@@ -538,6 +561,26 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       return;
     }
     let picture = drawn;
+    if (target.stage !== undefined) {
+      const stage = target.stage;
+      this.edit(target.id, (r) => {
+        const crop = r as DbCrop;
+        return {
+          ...crop,
+          stages: crop.stages.map((st, i) => {
+            if (i !== stage) {
+              return st;
+            }
+            const next = { ...st, pic: picture };
+            if (!picture) {
+              delete next.pic;
+            }
+            return next;
+          }),
+        };
+      });
+      return;
+    }
     if (target.cell) {
       const row = this.rows().find((r) => r.id === target.id) as
         DbCharacter | DbNpc | undefined;
@@ -546,7 +589,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     this.edit(target.id, (r) => {
       const next = { ...r, [target.field]: picture } as Row;
       if (!picture) {
-        delete (next as DbCharacter)[target.field];
+        delete (next as unknown as Record<string, unknown>)[target.field];
       }
       return next;
     });
@@ -576,6 +619,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     }
     if ("sprite" in row && row.sprite) {
       return row.sprite;
+    }
+    if (this.table() === "crops") {
+      const crop = row as DbCrop;
+      return crop.icon ?? crop.stages.at(-1)?.pic;
     }
     if (this.table() === "shops") {
       const keeper = (row as DbShop).keeper;
@@ -637,6 +684,17 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
                 .join(", ")
             : "Toujours ouvert";
         return `${floors} étage${floors > 1 ? "s" : ""} · ${open}`;
+      }
+      case "crops": {
+        const cr = row as DbCrop;
+        const days = daysToRipe(cr);
+        return [
+          `mûre en ${days} jour${days > 1 ? "s" : ""}`,
+          cr.regrow ? "repousse" : "",
+          cr.fearsFrost ? "" : "résiste au gel",
+        ]
+          .filter(Boolean)
+          .join(" · ");
       }
       case "shops": {
         const sh = row as DbShop;

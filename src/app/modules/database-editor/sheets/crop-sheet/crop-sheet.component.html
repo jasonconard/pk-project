@@ -1,0 +1,224 @@
+@let cr = crop();
+<div class="block">
+  <h3>Description</h3>
+  <input
+    type="text"
+    maxlength="120"
+    placeholder="Facultatif"
+    aria-label="Description"
+    [value]="cr.note ?? ''"
+    (input)="setNote(cr, $any($event.target).value)"
+  />
+</div>
+
+<div class="block">
+  <h3>Graine</h3>
+  <label class="learn">
+    <span class="slot-label">Se plante avec</span>
+    <select
+      aria-label="Graine"
+      (change)="set({ seed: $any($event.target).value })"
+    >
+      <option value="" [selected]="!cr.seed">Aucun objet</option>
+      @for (it of items(); track it.id) {
+        <option [value]="it.id" [selected]="it.id === cr.seed">
+          {{ it.name }}
+        </option>
+      }
+    </select>
+  </label>
+  @if (!cr.seed) {
+    <p class="warning">Sans graine, elle ne peut pas être plantée.</p>
+  }
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Pousse</h3>
+    <small
+      >mûre en {{ ripeIn() }} jour{{ ripeIn() > 1 ? "s" : "" }} arrosés</small
+    >
+  </div>
+  <div class="stages">
+    @for (st of cr.stages; track $index; let i = $index) {
+      <div class="stage" [class.ripe]="$last">
+        <button
+          type="button"
+          class="pic"
+          [attr.aria-label]="'Dessiner : ' + stageNames[i]"
+          (click)="drawStage(i)"
+        >
+          @if (st.pic) {
+            <img [src]="st.pic" alt="" />
+          }
+          <span class="pen"><svg lucidePencil></svg></span>
+        </button>
+        <b>{{ stageNames[i] }}</b>
+        @if ($last) {
+          <span class="ripe-label">récolte</span>
+        } @else {
+          <db-stepper
+            [value]="st.days"
+            [min]="1"
+            [max]="limits.days"
+            [label]="'Jours : ' + stageNames[i]"
+            [suffix]="'j'"
+            (changed)="setDays(i, $event)"
+          />
+        }
+      </div>
+    }
+  </div>
+  <p class="note">
+    Chaque image : 16 × 24 pixels (une case de large). Un jour compte seulement
+    si la culture a été arrosée, ou s'il a plu.
+  </p>
+</div>
+
+<div class="block">
+  <h3>Récolte</h3>
+  <label class="learn">
+    <span class="slot-label">Donne</span>
+    <select
+      aria-label="Objet récolté"
+      (change)="set({ harvest: $any($event.target).value })"
+    >
+      <option value="" [selected]="!cr.harvest">Aucun objet</option>
+      @for (it of items(); track it.id) {
+        <option [value]="it.id" [selected]="it.id === cr.harvest">
+          {{ it.name }}
+        </option>
+      }
+    </select>
+  </label>
+  <div class="range">
+    <span>Combien</span>
+    <db-stepper
+      [value]="cr.harvestMin"
+      [min]="1"
+      [max]="limits.harvest"
+      [label]="'Au moins'"
+      (changed)="setHarvest('min', $event)"
+    />
+    <span>à</span>
+    <db-stepper
+      [value]="cr.harvestMax"
+      [min]="1"
+      [max]="limits.harvest"
+      [label]="'Au plus'"
+      (changed)="setHarvest('max', $event)"
+    />
+  </div>
+  <div class="segmented wide" role="group" aria-label="Après la récolte">
+    <button
+      type="button"
+      [class.on]="cr.regrow === undefined"
+      (click)="setRegrow(null)"
+    >
+      Une seule récolte
+    </button>
+    <button
+      type="button"
+      [class.on]="cr.regrow !== undefined"
+      (click)="setRegrow(cr.regrow ?? 2)"
+    >
+      Repousse
+    </button>
+  </div>
+  @if (cr.regrow !== undefined) {
+    <div class="range">
+      <span>Mûre de nouveau en</span>
+      <db-stepper
+        [value]="cr.regrow"
+        [min]="1"
+        [max]="limits.days"
+        [label]="'Jours pour repousser'"
+        [suffix]="'j'"
+        (changed)="setRegrow($event)"
+      />
+    </div>
+  } @else {
+    <p class="note">
+      Après la récolte, la case redevient de la terre labourée.
+    </p>
+  }
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Saison</h3>
+    @if (cr.months.length === 0) {
+      <small>toute l'année</small>
+    }
+  </div>
+  <div class="chips" role="group" aria-label="Mois où elle pousse">
+    @for (m of months(); track $index; let i = $index) {
+      <button
+        type="button"
+        class="chip plain"
+        [class.on]="cr.months.includes(i)"
+        [attr.aria-pressed]="cr.months.includes(i)"
+        (click)="toggleMonth(i)"
+      >
+        {{ m }}
+      </button>
+    }
+  </div>
+  <p class="note">
+    Hors de ces mois elle ne se plante pas, et celles déjà plantées meurent.
+  </p>
+</div>
+
+<div class="block">
+  <h3>Météo</h3>
+  <label class="switch">
+    <input
+      type="checkbox"
+      [checked]="cr.fearsFrost"
+      (change)="set({ fearsFrost: $any($event.target).checked })"
+    />
+    <span><svg lucideSnowflake></svg> Craint le gel</span>
+  </label>
+  <p class="note">
+    Neige, gel, blizzard… : elle fane le premier jour, meurt le second. La pluie
+    arrose toutes les cultures.
+  </p>
+  <span class="label">Pousse plus vite par</span>
+  @for (w of cr.weathers; track w.weather; let i = $index) {
+    <div class="weather">
+      <img
+        [src]="weatherImage(w.weather)"
+        alt=""
+        (error)="weatherImageMissing($event, w.weather)"
+      />
+      <b>{{ weatherLabel(w.weather) }}</b>
+      <db-stepper
+        [value]="w.days"
+        [min]="1"
+        [max]="limits.bonus"
+        [label]="'Jours en plus'"
+        [suffix]="'j'"
+        (changed)="setBonus(i, $event)"
+      />
+      <button
+        type="button"
+        class="remove"
+        aria-label="Retirer"
+        (click)="removeWeather(i)"
+      >
+        <svg lucideX></svg>
+      </button>
+    </div>
+  }
+  <button type="button" class="add-select" (click)="addWeather()">
+    <svg lucideCloudSun></svg> Météo
+  </button>
+  <p class="hint">
+    <svg lucideInfo></svg>
+    <span>
+      Elle pousse sur le sol « Terre cultivable » (éditeur de carte, onglet
+      Sols). Le joueur laboure avec la houe et arrose avec l'arrosoir (des
+      objets clés, réglés dans leur fiche).
+    </span>
+  </p>
+</div>

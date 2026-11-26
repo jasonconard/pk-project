@@ -101,6 +101,28 @@ export const TERRAINS: Terrain[] = [
     ],
   },
   {
+    // (the farm's soil: the same tiles as « Terre »; the player tills it and plants there, see farm.ts)
+    id: "farmland",
+    label: "Terre cultivable",
+    center: [0, 6],
+    blocking: false,
+    variants: [
+      [0, 6, 0],
+      [3, 8, 16],
+      [1, 8, 32],
+      [2, 8, 64],
+      [4, 8, 128],
+      [2, 6, 50],
+      [4, 6, 100],
+      [3, 6, 145],
+      [1, 6, 200],
+      [2, 7, 118],
+      [4, 7, 179],
+      [3, 7, 217],
+      [1, 7, 236],
+    ],
+  },
+  {
     id: "speckled",
     label: "Herbe mouchetée",
     center: [0, 9],

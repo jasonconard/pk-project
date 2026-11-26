@@ -29,6 +29,7 @@ import { InstructionTeleport } from "../model/SceneEventInstruction";
 import { isPassageEvent } from "../model/Passage";
 import { DustPuff } from "../model/DustPuff";
 import { DungeonService } from "./dungeon.service";
+import { FarmService } from "./farm.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
 
 /** Ledge hop length (s) and height (world units). */
@@ -54,6 +55,7 @@ export class GameMapService {
   private readonly sequenceService = inject(SequenceService);
   private readonly mapEditorService = inject(MapEditorService);
   private readonly dungeonService = inject(DungeonService);
+  private readonly farmService = inject(FarmService);
 
   private pixelSize = 8;
   /** Ledge hop: time since it started (s, -1 = none) and the height currently added to the sprite. */
@@ -462,7 +464,9 @@ export class GameMapService {
           : EventService.actionAt(mapHelper, sprite, ctx);
       let action = found ? describeAction(found.evt, found.building) : null;
       if (!found && !busy && !game.weather.playerFlying) {
-        action = this.dungeonService.actionAt(mapHelper, sprite);
+        action =
+          this.dungeonService.actionAt(mapHelper, sprite) ??
+          this.farmService.actionAt(mapHelper, sprite);
       }
       if (!sameAction(action, game.action)) {
         game.action = action;
@@ -499,13 +503,14 @@ export class GameMapService {
         this.launch(mapHelper, sprite, found);
       } else if (
         this.keyService.pressedCodes.includes(KeyCode.confirm) &&
-        !game.weather.playerFlying
+        !game.weather.playerFlying && // (a dungeon object or an enemy in front: open, work, hit; else a farmland cell: till, plant, water, harvest)
+        !this.dungeonService.act(mapHelper, sprite)
       ) {
-        // (a dungeon object or an enemy in front: open, work, hit)
-        this.dungeonService.act(mapHelper, sprite);
+        this.farmService.act(mapHelper, sprite);
       }
     }
 
+    this.farmService.update(game, mapHelper);
     this.dungeonService.update(
       game,
       sprite,

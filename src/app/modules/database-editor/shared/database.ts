@@ -235,7 +235,15 @@ export interface DbItem {
   growth?: { id: string; percent: number }[];
   /** Equipment: the characters who can wear it (none: everyone). */
   wearers?: string[];
+  /** Key item: a farming tool (the hoe tills the farmland, the watering can waters the crops). */
+  tool?: FarmTool;
 }
+
+export type FarmTool = "hoe" | "can";
+export const FARM_TOOLS: { id: FarmTool; label: string }[] = [
+  { id: "hoe", label: "Houe (labourer)" },
+  { id: "can", label: "Arrosoir (arroser)" },
+];
 
 /** How fast a character grows in an element or a weapon type. */
 export type Affinity = "fast" | "normal" | "slow" | "never";
@@ -434,6 +442,8 @@ export const PICTURE_SIZES = {
   portrait: { w: 96, h: 96 },
   sprite: { w: 48, h: 48 },
   walk: { w: WALK_CELL.w * WALK_FRAMES, h: WALK_CELL.h * WALK_DIRS.length },
+  /** A crop's growth stage: one map cell wide, taller (it stands on the cell). */
+  crop: { w: 16, h: 24 },
 };
 
 /** The moments of the day (the calendar, point 7, will use them too). */
@@ -620,6 +630,58 @@ export const SHOP_LIMITS = { stock: 99, percent: 100, discount: 20 };
 
 export function newShop(name: string): DbShop {
   return { id: newId("sh"), name, buyback: 50, discount: 5, items: [] };
+}
+
+/**
+ * A crop (design/database.pen, 20 · Culture): planted with a seed item on the farmland, it grows through 4 stages
+ * (each a 16 × 24 picture) on the days it is watered (or it rained), in its months only; frost hurts it unless it is
+ * hardy; some weathers make it grow faster. Ripe, it gives its harvest item, then the cell is soil again or it grows
+ * back.
+ */
+export interface DbCrop {
+  id: string;
+  name: string;
+  icon?: string;
+  note?: string;
+  /** The item that plants it (a seed). */
+  seed: string;
+  /** Seeds, sprout, grown, ripe: the picture of each and how many watered days it lasts (the last one: ripe). */
+  stages: { pic?: string; days: number }[];
+  /** The item harvested and how many. */
+  harvest: string;
+  harvestMin: number;
+  harvestMax: number;
+  /** Grows back to the grown stage after a harvest, ripe again in this many days (none: one harvest). */
+  regrow?: number;
+  /** Months it grows in (indexes in the calendar's months; none: all year). */
+  months: number[];
+  /** Frost (snow, ice) wilts it, then kills it. */
+  fearsFrost: boolean;
+  /** Weathers that make it grow faster: days added on a watered day under that weather. */
+  weathers: { weather: `${WeatherType}`; days: number }[];
+}
+
+export const CROP_STAGES = ["Semis", "Pousse", "Grande", "Mûre"];
+export const CROP_LIMITS = { days: 30, harvest: 9, bonus: 3 };
+
+export function newCrop(name: string): DbCrop {
+  return {
+    id: newId("cr"),
+    name,
+    seed: "",
+    stages: [{ days: 1 }, { days: 1 }, { days: 2 }, { days: 0 }],
+    harvest: "",
+    harvestMin: 1,
+    harvestMax: 1,
+    months: [],
+    fearsFrost: true,
+    weathers: [],
+  };
+}
+
+/** Watered days from planting to ripe. */
+export function daysToRipe(crop: DbCrop): number {
+  return crop.stages.slice(0, -1).reduce((sum, st) => sum + st.days, 0);
 }
 
 /** How many floors a dungeon has (generated lines count their `repeat`). */
@@ -905,6 +967,7 @@ export interface GameDatabase {
   calendar: DbCalendar[];
   dungeons: DbDungeon[];
   shops: DbShop[];
+  crops: DbCrop[];
 }
 
 export type DbTable = keyof GameDatabase;
@@ -1193,9 +1256,14 @@ export function withItemKind(item: DbItem, kind: ItemKind): DbItem {
     bonuses,
     resists,
     growth,
+    tool,
     ...base
   } = item;
-  const next: DbItem = { ...base, kind };
+  const next: DbItem = {
+    ...base,
+    kind,
+    ...(kind === "key" && tool ? { tool } : {}),
+  };
   switch (kind) {
     case "consumable": {
       Object.assign(next, {
@@ -1451,6 +1519,17 @@ export function withoutRow(
       const left = wearers.filter((w) => w !== id);
       return left.length > 0 ? { ...rest, wearers: left } : rest;
     });
+  }
+  if (table === "items") {
+    next.crops = next.crops.map((cr) =>
+      cr.seed === id || cr.harvest === id
+        ? {
+            ...cr,
+            seed: cr.seed === id ? "" : cr.seed,
+            harvest: cr.harvest === id ? "" : cr.harvest,
+          }
+        : cr
+    );
   }
   if (table === "items") {
     next.shops = next.shops.map((sh) =>

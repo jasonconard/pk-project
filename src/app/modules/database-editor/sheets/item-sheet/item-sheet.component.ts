@@ -8,6 +8,7 @@ import {
 import {
   DbItem,
   EquipSlot,
+  FARM_TOOLS,
   ItemKind,
   ResistLevel,
   STATS,
@@ -39,6 +40,7 @@ export class ItemSheetComponent extends DbSheet {
   readonly item = input.required<DbItem>();
 
   protected readonly teamCharacters = computed(() => this.db().characters);
+  protected readonly farmTools = FARM_TOOLS;
 
   protected setItemKind(item: DbItem, kind: ItemKind): void {
     this.edit(item.id, (i) => withItemKind(i as DbItem, kind));
@@ -47,7 +49,7 @@ export class ItemSheetComponent extends DbSheet {
   protected setItem(item: DbItem, change: Partial<DbItem>): void {
     this.edit(item.id, (i) => {
       const next = { ...i, ...change } as DbItem;
-      for (const key of ["weapon", "attackElement"] as const) {
+      for (const key of ["weapon", "attackElement", "tool"] as const) {
         if (!next[key]) {
           delete next[key];
         }

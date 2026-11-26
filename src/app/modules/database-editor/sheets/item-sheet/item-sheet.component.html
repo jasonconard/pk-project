@@ -293,10 +293,31 @@
     </div>
   }
   @case ("key") {
+    <div class="block">
+      <h3>Outil</h3>
+      <label class="learn">
+        <span class="slot-label">Sert à</span>
+        <select
+          aria-label="Outil"
+          (change)="
+            setItem(it, { tool: $any($event.target).value || undefined })
+          "
+        >
+          <option value="" [selected]="!it.tool">
+            Rien (objet de l'histoire)
+          </option>
+          @for (t of farmTools; track t.id) {
+            <option [value]="t.id" [selected]="t.id === it.tool">
+              {{ t.label }}
+            </option>
+          }
+        </select>
+      </label>
+    </div>
     <p class="hint">
       <svg lucideInfo></svg> Un objet clé sert à l'histoire : il ne se vend pas
-      et ne s'utilise pas. Les événements pourront le donner et vérifier qu'on
-      l'a (bientôt).
+      et ne s'utilise pas. Une houe dans le sac laboure la terre cultivable, un
+      arrosoir arrose les cultures.
     </p>
   }
   @case ("gift") {

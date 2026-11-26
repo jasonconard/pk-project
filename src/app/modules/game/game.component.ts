@@ -64,6 +64,9 @@ import { LinksComponent } from "./links/links.component";
 import { LinkToastComponent } from "./link-toast/link-toast.component";
 import { GiftPickerComponent } from "./gift-picker/gift-picker.component";
 import { ShopComponent } from "./shop/shop.component";
+import { SeedPickerComponent } from "./farm/seed-picker.component";
+import { FarmToastComponent } from "./farm/farm-toast.component";
+import { FarmService } from "./shared/services/farm.service";
 import { currentVariableValues } from "../variables-editor/shared/variable-values";
 import { LinkGain } from "../database-editor/shared/links";
 import { VariablesTestComponent } from "./variables-test/variables-test.component";
@@ -95,6 +98,8 @@ import { ActionZone } from "./shared/model/action-zone";
     LinkToastComponent,
     GiftPickerComponent,
     ShopComponent,
+    SeedPickerComponent,
+    FarmToastComponent,
     TimeBannerComponent,
     DungeonChipComponent,
     TeleportComponent,
@@ -188,6 +193,9 @@ export class GameComponent {
   protected readonly linksOpen = signal(false);
   /** The Offrir action of an event: the NPC to give a gift to (null: none asked). */
   protected readonly giftFor = signal<string | null>(null);
+  /** The crops: the seeds window, the harvest's message. */
+  protected readonly farm = inject(FarmService);
+  protected readonly gameDay = this.gameService.day;
   /** The « Ouvrir la boutique » action of an event: the shop open and what its items' conditions read then. */
   protected readonly shopOpen = signal<{
     id: string;

@@ -287,6 +287,9 @@ export class SequenceService {
           this.nextSequence();
         }
         break;
+      case InstructionType.PLANT:
+        // (the seeds window is open: FarmService goes on once one is chosen or none)
+        break;
       case InstructionType.TIME_FLOW:
         this.timeSubject.next({ stop: !!instruction.timeFlow?.stop });
         this.nextSequence();

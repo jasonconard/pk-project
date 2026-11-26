@@ -8,6 +8,8 @@ import {
   DbGroup,
   DbItem,
   DbShop,
+  DbCrop,
+  CROP_STAGES,
   DbSkill,
   DbState,
   DbTable,
@@ -35,7 +37,8 @@ export type Row =
   | DbNpc
   | DbEnemy
   | DbGroup
-  | DbShop;
+  | DbShop
+  | DbCrop;
 /** A picture drawn in the pixel editor (icon: the small face of a character or an enemy). */
 export type PictureField = keyof typeof PICTURE_SIZES;
 
@@ -48,6 +51,8 @@ export interface IconEdit {
   h: number;
   /** One picture of the walking sheet (the rest of the sheet is kept). */
   cell?: WalkCell;
+  /** A crop's growth stage (its picture in `stages`). */
+  stage?: number;
 }
 
 /** The combat sprite sheet being edited: whose, the window's title, the sheet. */
@@ -60,7 +65,7 @@ export interface SheetEdit {
 export interface WeatherPick {
   id: string;
   strong?: boolean;
-  for: "element" | "enemy" | "condition" | "dungeon" | "shop";
+  for: "element" | "enemy" | "condition" | "dungeon" | "shop" | "crop";
   index?: number;
 }
 
@@ -106,14 +111,28 @@ export class DatabaseStore {
       portrait: `Portrait de ${name}`,
       sprite: `Image fixe de ${name}`,
       walk: `Planche de marche de ${name}`,
+      crop: `Image de ${name}`,
     };
     const size = PICTURE_SIZES[field];
     this.iconEdit.set({
       id: row.id,
       field,
       title: title ?? titles[field],
-      value: (row as DbCharacter)[field],
+      value: (row as unknown as Record<string, string | undefined>)[field],
       ...size,
+    });
+  }
+
+  /** Draws one growth stage of a crop. */
+  editCropStage(row: DbCrop, stage: number): void {
+    const name = row.name.trim() || "sans nom";
+    this.iconEdit.set({
+      id: row.id,
+      field: "crop",
+      title: `${name} · ${CROP_STAGES[stage]?.toLowerCase() ?? stage + 1}`,
+      value: row.stages[stage]?.pic,
+      ...PICTURE_SIZES.crop,
+      stage,
     });
   }
 
@@ -166,6 +185,19 @@ export class DatabaseStore {
       case "dungeon": {
         this.edit(pick.id, (d) => ({ ...d, weather: weather as WeatherType }));
 
+        break;
+      }
+      case "crop": {
+        this.edit(pick.id, (row) => {
+          const crop = row as DbCrop;
+          return {
+            ...crop,
+            weathers: [
+              ...crop.weathers,
+              { weather: weather as WeatherType, days: 1 },
+            ],
+          };
+        });
         break;
       }
       case "shop": {

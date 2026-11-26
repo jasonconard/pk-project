@@ -35,6 +35,8 @@ export enum InstructionType {
   CUTSCENE,
   /** SHOP: a shop of the database opens; the event goes on once the player closes it. */
   SHOP,
+  /** PLANT: the player picks a seed to plant (the farmland; FarmService goes on once chosen). Not in the editor. */
+  PLANT,
 }
 
 export interface SceneEventInstruction {

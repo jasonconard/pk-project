@@ -5,8 +5,23 @@ import { modelLabel } from "./ModelChoice";
 
 /** What the action key does right now, in front of an object: shown by the touch action button and the computer's prompt. */
 export interface GameAction {
-  kind: "enter" | "talk" | "read" | "look" | "open" | "use" | "hit";
-  /** « Entrer », « Parler », « Lire », « Regarder », and in a dungeon « Ouvrir », « Actionner », « Frapper ». */
+  kind:
+    | "enter"
+    | "talk"
+    | "read"
+    | "look"
+    | "open"
+    | "use"
+    | "hit"
+    | "till"
+    | "plant"
+    | "water"
+    | "harvest"
+    | "clear";
+  /**
+   * « Entrer », « Parler », « Lire », « Regarder », in a dungeon « Ouvrir », « Actionner », « Frapper », on the
+   * farmland « Labourer », « Planter », « Arroser », « Récolter », « Arracher ».
+   */
   verb: string;
   /** The object's name (« Labo »), or who talks (« Hugo »). */
   target: string;
@@ -20,6 +35,11 @@ const VERBS: Record<GameAction["kind"], string> = {
   open: "Ouvrir",
   use: "Actionner",
   hit: "Frapper",
+  till: "Labourer",
+  plant: "Planter",
+  water: "Arroser",
+  harvest: "Récolter",
+  clear: "Arracher",
 };
 
 export function gameAction(

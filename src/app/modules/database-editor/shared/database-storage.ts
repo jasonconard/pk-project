@@ -18,11 +18,38 @@ export interface StoredDatabase {
 function complete(database: Partial<GameDatabase>): GameDatabase {
   const code = structuredClone(CODE_DATABASE);
   const tables = Object.keys(code) as DbTable[];
-  return withVillagersAsNpcs(
-    Object.fromEntries(
-      tables.map((t) => [t, Array.isArray(database[t]) ? database[t] : code[t]])
-    ) as unknown as GameDatabase
+  return withCropItems(
+    withVillagersAsNpcs(
+      Object.fromEntries(
+        tables.map((t) => [
+          t,
+          Array.isArray(database[t]) ? database[t] : code[t],
+        ])
+      ) as unknown as GameDatabase
+    ),
+    !Array.isArray(database.crops),
+    code
   );
+}
+
+/**
+ * A database saved before the crops gets the code's crops with their items: seeds, harvests, the hoe and the watering
+ * can (the items it already has are kept).
+ */
+function withCropItems(
+  db: GameDatabase,
+  noCrops: boolean,
+  code: GameDatabase
+): GameDatabase {
+  if (!noCrops) {
+    return db;
+  }
+  const used = new Set(code.crops.flatMap((c) => [c.seed, c.harvest]));
+  const have = new Set(db.items.map((i) => i.id));
+  const added = code.items.filter(
+    (i) => (used.has(i.id) || i.tool) && !have.has(i.id)
+  );
+  return added.length > 0 ? { ...db, items: [...db.items, ...added] } : db;
 }
 
 /** A character of the first versions: `team` false was a villager. */

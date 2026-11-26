@@ -226,6 +226,14 @@
   <game-links (closed)="linksOpen.set(false)" />
 }
 
+@if (farm.plantAsk()) {
+  <game-seed-picker [day]="gameDay()" (done)="farm.plantDone($event)" />
+}
+
+@if (farm.toast(); as t) {
+  <game-farm-toast [text]="t.text" [pic]="t.pic" />
+}
+
 @if (shopOpen(); as shop) {
   <game-shop
     [shopId]="shop.id"

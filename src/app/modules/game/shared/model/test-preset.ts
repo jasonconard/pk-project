@@ -25,6 +25,7 @@ import {
 import { WeatherType } from "../weather/Weather";
 import { restoreCutscenesSeen, seenCutscenes } from "./cutscene-seen";
 import { restoreDungeonState } from "./dungeon-state";
+import { restoreFarm } from "./farm";
 import { restoreAnimations } from "./model-animations";
 
 /**
@@ -178,6 +179,7 @@ export function applyTest(test: TestPreset): void {
   restoreParty(party);
   restoreCutscenesSeen(test.cutscenesSeen);
   restoreDungeonState(null);
+  restoreFarm(null);
   restoreAnimations(null);
 }
 

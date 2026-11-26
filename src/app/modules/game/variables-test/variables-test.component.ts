@@ -1,4 +1,5 @@
 import { restoreDungeonState } from "../shared/model/dungeon-state";
+import { restoreFarm } from "../shared/model/farm";
 import { restoreAnimations } from "../shared/model/model-animations";
 import { restoreCutscenesSeen } from "../shared/model/cutscene-seen";
 import {
@@ -89,6 +90,7 @@ export class VariablesTestComponent {
     // (like a new game: the team and the dungeons too)
     resetParty();
     restoreDungeonState(null);
+    restoreFarm(null);
     restoreAnimations(null);
     restoreCutscenesSeen(null);
     this.values.set(currentVariableValues());

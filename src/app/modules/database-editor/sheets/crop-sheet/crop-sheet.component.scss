@@ -1,0 +1,105 @@
+// A crop's sheet: its 4 growth stages side by side, on the shared fields (_sheets.scss)
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stages {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 2px;
+  border-radius: 10px;
+  background: var(--field);
+  font-size: 11px;
+
+  &.ripe {
+    box-shadow: inset 0 0 0 1px #7fd16b;
+  }
+
+  db-stepper {
+    max-width: 100%;
+  }
+}
+
+.pic {
+  position: relative;
+  width: 56px;
+  height: 72px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--surface);
+
+  img {
+    width: 48px;
+    height: 72px;
+    image-rendering: pixelated;
+  }
+}
+
+.pen {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+
+  svg {
+    width: 11px;
+    height: 11px;
+  }
+}
+
+.ripe-label {
+  line-height: 28px;
+  color: #7fd16b;
+  font-weight: 600;
+}
+
+.range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+
+  > span:first-child {
+    flex: 1;
+    min-width: 110px;
+    color: var(--muted);
+  }
+}
+
+.label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.remove {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  color: var(--muted);
+}
+
+.switch svg {
+  width: 14px;
+  height: 14px;
+  color: #8fd8ff;
+}

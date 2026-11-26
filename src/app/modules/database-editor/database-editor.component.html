@@ -282,6 +282,9 @@
         @if (dungeon(); as dg) {
           <db-dungeon-sheet [dungeon]="dg" />
         }
+        @if (crop(); as cr) {
+          <db-crop-sheet [crop]="cr" />
+        }
         @if (shop(); as sh) {
           <db-shop-sheet [shop]="sh" />
         }

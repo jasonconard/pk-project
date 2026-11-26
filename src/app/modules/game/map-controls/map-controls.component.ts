@@ -15,6 +15,10 @@ import {
   LucideHand,
   LucidePackageOpen,
   LucideSword,
+  LucideShovel,
+  LucideSprout,
+  LucideDroplets,
+  LucideWheat,
   LucideFootprints,
   LucideIcon,
   LucideMessageCircle,
@@ -34,6 +38,11 @@ const ACTION_ICONS: Record<GameAction["kind"], LucideIcon> = {
   open: LucidePackageOpen,
   use: LucideHand,
   hit: LucideSword,
+  till: LucideShovel,
+  plant: LucideSprout,
+  water: LucideDroplets,
+  harvest: LucideWheat,
+  clear: LucideShovel,
 };
 
 type ControlButton = "run" | "action";

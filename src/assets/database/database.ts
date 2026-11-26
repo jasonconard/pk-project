@@ -719,6 +719,100 @@ export const CODE_DATABASE: GameDatabase = {
       "note": "Un joli cadeau.",
       "kind": "gift",
       "price": 300
+    },
+    {
+      "id": "it-seed-lunelle",
+      "name": "Graines de lunelle",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAvElEQVR4nGNgGGjACGMoiGv/J0Xjg5dXwXoZYZqvnGkHS1w5uINBx94DLxsEdEwqwYYwkmM7sitYYByYC4gBINdEFB8Es1nQJbnF7cC0oqw1XOz+46MMX18ewmoYCzZBkOY9N66A2coCDAyKEjo4XciES/Pmoy8ZXDR0GBh+fwS7ABdgYqAQMKELgGwD2exrLQ7xBis/SngQFQb3Hx9lUJTVIS8Qv0IVIgcaLs1YvUAqQCSkgzvIMoDizAQAJSlQkUSA9yYAAAAASUVORK5CYII=",
+      "note": "Se plante dans la terre cultivable : Lunelle.",
+      "kind": "consumable",
+      "price": 20,
+      "use": "field",
+      "target": "ally",
+      "effects": []
+    },
+    {
+      "id": "it-lunelle",
+      "name": "Bulbe de lune",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA4UlEQVR4nGNgoAdQENf+j0uOhRgDRG19GRgOM4ANefDyKiNRBigg2WrtZM1wFMY5zPAf2RAWXBrb18+Hi5288JLh9eHNDNhcgKG5YNrm/2e//ft/4NNfFLz82Kn/piEV/9HDgwnVCAaGgBgvMM3LgmqRpI4x2CvogAnZ9oD6DgZ8wNxAHBygyK5gwqbw85//YIwMSpOqsRrKhNdKApqxGvD8ylmcmkGxgQ4YkTmwcAD5FVnx0X1HIWlh31FwdCJHJSO6iciGINuMTTNWA2CGgJMvEsCmGacBMEOQ+XhTICUAAB/Fc+UA4kOxAAAAAElFTkSuQmCC",
+      "note": "Un bulbe d'argent qui brille doucement, comme une petite lune tombée dans la main.",
+      "kind": "gift",
+      "price": 45
+    },
+    {
+      "id": "it-seed-braisepomme",
+      "name": "Graines de braisepomme",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAuElEQVR4nGNgGGjACGMoiGv/J0Xjg5dXwXoZYZqvnGkHS1w5uINBx94DLxsEdEwqwYYwkmM7sitYYByYC4gBINdEFB8Es1nQJbnF7eBsRVlrMH3/8VGGry8PYTWMCZctIM1SwqwEXcOES/P90/YMR3dYMdwv/gx3CVEGKEI1g8GKLeS5gAGkccUWBusFQgQNYEEXAAUYwsm/GRR7efEGIgu6AEghepTi0ozbCyQAREI6uIMsAyjOTADS60qZa+hAbgAAAABJRU5ErkJggg==",
+      "note": "Se plante dans la terre cultivable : Braisepomme.",
+      "kind": "consumable",
+      "price": 30,
+      "use": "field",
+      "target": "ally",
+      "effects": []
+    },
+    {
+      "id": "it-braisepomme",
+      "name": "Braisepomme",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAsklEQVR4nGNgGGjASIwiBXHt/8j8By+vwvUxEas59Os7MCbKBQpoNuKyHasBClDN58wfgPlrrksz3H7+mWE1txCGZgwDFLBoRgZtn1gxDGFCN7GK7zdWzSBXNHN/x/AeE7oBIIXEiOE0AAZCNJ8yEAOY0AVAgYVsCMz2SqdPDLVfOTEMYEQXAPlR9PMnhjwJVgZvnZdwcaOTCsRFIwNSbIAMAoHXvHxYNRMEIIPwJarBAQDrL0wzW7on/AAAAABJRU5ErkJggg==",
+      "note": "Un fruit tiède qui rougeoie comme une braise. Il garde la chaleur du soleil.",
+      "kind": "gift",
+      "price": 25
+    },
+    {
+      "id": "it-seed-givrelys",
+      "name": "Graines de givrelys",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAvklEQVR4nGNgGGjACGMoiGv/J0Xjg5dXwXoZYZqvnGkHS1w5uINBx94DLxsEdEwqwYYwkmM7sitYYByYC4gBINdEFB8Es1nQJbnF7cC0oqw1mL7/+CiY/vryEFbDmLAJgjTff3GFYcnNK3CDcAEmbJpBGmHAb/1evIYw4ZI4+pGBYdW1lwxnNh0gzQX3Hx9liFHXgWt+Nr8ZHg7YAAs2QZAG9EAk2oCv0NCGRSuu0MfpBVIBIiEd3EGWARRnJgBz1lUCEcse0wAAAABJRU5ErkJggg==",
+      "note": "Se plante dans la terre cultivable : Givrelys.",
+      "kind": "consumable",
+      "price": 40,
+      "use": "field",
+      "target": "ally",
+      "effects": []
+    },
+    {
+      "id": "it-givrelys",
+      "name": "Pétale de givre",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA70lEQVR4nGNgGNRAQVz7PwiTrdmndv3/wr13yTNEQVz7//I7r/7f//QNrwEsMAbINlUHPYb1UX4oCk68+gI3EEQHLtsE5vc7KzOiGHBlVg2DqsMmhv23TzNMOv2c4faBS2DxUw8/M+iktTCADM8zlQQbWGntCLeAEd3ZIMXR8dZgjTBDQJrN5HnBYiAXPnh5Fa6PBdkAsMSsmv9LGVrA/ONLpkJlshkYoN5D1ozVBftvnwY7c+nCoyhhAXKVhRgPg6OqKYYhWKMNFgsgDOOD5PBGqwJSwsEWjdgSFgsyB91pIG+cctDDKU8QUJSU6QYA7yeR4m8yMXQAAAAASUVORK5CYII=",
+      "note": "Un pétale de glace qui ne fond jamais. Il pousse même quand il gèle.",
+      "kind": "gift",
+      "price": 80
+    },
+    {
+      "id": "it-seed-bullefeuille",
+      "name": "Graines de bullefeuille",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAsElEQVR4nGNgGGjACGMoiGv/J0Xjg5dXwXoZYZqvnGkHS1w5uINBx94DLxsEdEwqwYYwkmM7sitYYByYC4gBINdEFB8Es1nQJbnF7RgUZa1RxO4/Psrw9eUhrIaxoAuANN9/cYVh5V1kMR2cLmTCJgjSHK5M0Ce4DQABmAumTt7JQLIBU6GaCGnGGgb3Hx8Fh0PFimLyAvHry0MYAYZLMwjgDANiASIhHdxBlgEUZyYAJc5L58pzJtoAAAAASUVORK5CYII=",
+      "note": "Se plante dans la terre cultivable : Bullefeuille.",
+      "kind": "consumable",
+      "price": 15,
+      "use": "field",
+      "target": "ally",
+      "effects": []
+    },
+    {
+      "id": "it-bullefeuille",
+      "name": "Cosse de pluie",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA5ElEQVR4nGNgoCVQENf+D8L41DBi0wRj+/dxgumNRd/B9IOXVzHUM2LTDNPobWoKpreePo1iELJhjMiaH7y8ytCzfyeYrye9AcO5yAbBDGBCVgDSrKCuAcafeCowDAC56OevvyhiTDDbc1b0gTUig0tPAzAMgXkR5l0WrCrQnA2yed3RE2D+2YvcDK+Xv0d1AQw8uHkDgw1yMkwzMkAJgwcvrzJOiSiCa4RpvvMANRxAtqMDJmQOzBBiNeNMB6KRggzG+l+xaoT5HyMdMGAxBB2ANKOnRgwDsBmCbivRgJjMRDEAANQSdN7k/r9MAAAAAElFTkSuQmCC",
+      "note": "Une cosse pleine d'eau de pluie, ronde et fraîche comme une bulle.",
+      "kind": "gift",
+      "price": 20
+    },
+    {
+      "id": "it-hoe",
+      "name": "Houe",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAiElEQVR4nGNgoBAwEqtQTU7lPzL/1qM7ROtlAGleteUwGD989uE/smFMxGgOSimC810tTFBsZyHW2efOXWZYN6ePeKeryan8z3PTgDsXPQzwekFNTuV/gZsEihgum5lwab7x6A3Djht/CDqZiRLNKAaokaEZboAamZpRXHCDDM0oQA1HNI0AAAAGPVsIQ2v8mAAAAABJRU5ErkJggg==",
+      "note": "Pour labourer la terre cultivable.",
+      "kind": "key",
+      "price": 0,
+      "tool": "hoe"
+    },
+    {
+      "id": "it-watering-can",
+      "name": "Arrosoir",
+      "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAf0lEQVR4nGNgGGjAiEtCTU7lPzL/1qM7ONUS1IxLDAQYsSnUyluCTS3DtUkxGC5hxKbZxkYDzD9y5AZOQ2AuYsJqFQ7NyBalrTqD2wWEAMgVIAByCQtB1QTCgQldwaPLuJ2ODTBhE8RlCDZxFlwmE+sSRnQBXAkGBkhKkUMDAAAobDh9Q/jFuwAAAABJRU5ErkJggg==",
+      "note": "Pour arroser les cultures.",
+      "kind": "key",
+      "price": 0,
+      "tool": "can"
     }
   ],
   "characters": [
@@ -1543,5 +1637,177 @@ export const CODE_DATABASE: GameDatabase = {
     }
   ],
   "dungeons": [],
-  "shops": []
+  "shops": [],
+  "crops": [
+    {
+      "id": "cr-lunelle",
+      "name": "Lunelle",
+      "note": "Une fleur pâle qui aime les nuits claires.",
+      "seed": "it-seed-lunelle",
+      "stages": [
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAVklEQVR4nGNgGAWjYBSMgpEBFMS1/4Mw2ZrvvP8PxvgMYcSmEURnOXPCxa48eMNw6C43mP3g5VUUPSgckGZkjTDN6ABkGMwgFmTNdspfGRgYOLFqwgUA/3MkfWCMTKIAAAAASUVORK5CYII=",
+          "days": 1
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAbElEQVR4nGNgGAWjYBSMAloBBXHt/yBMSAyn5skHrv0HAZgGEA0CIHFshjBhM2jKwesMxStXgzWDaBAfF2DE5gr9jDww28XRlmHP/sNg9sUZkxgevLyKoR6nV2DeIeR/rF5AtwmfzVgNIAUAAAPFOomSL6mKAAAAAElFTkSuQmCC",
+          "days": 1
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAyUlEQVR4nGNgGAWjgIGBEZeEgrj2fxj7wcurONXh1Hzn/X8wANHIhqEDJlwSm4++ZLj7AUKTBRTEtf/3b3mB13a8LgABFp53DIQAE4wBsomQbdjUMMEkileuZrj/4gpK6KNrBsmD1CGrYUJWNOXgdQwFyBaA5NEBI7Ii/Yw8MNvF0RZD4Z79h8H0xRmTUNIFI7pNyHyQrb3hoSgGoScqFlySxKZEJgYKAROyjQMSjSgKJh+4BsYwm9DZMD6yPpyxALIJBpBjAj1AAVf5iM81USunAAAAAElFTkSuQmCC",
+          "days": 2
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAA9ElEQVR4nGNgGAXUAf+/7fhPrnpGXIoUxLXhih68vIpTHVaNIHzn/X84gIkRpfnO+/9wjAxAfGyGMGELg81HX4Lpux8QGBkgq2cCEYxcHozIpvtaizNgMxDmSpB6DKdPPnAN7l9kb8AwSBwEQOqQLWNBNmjKwesM919cYVCU0MEIH5A4SB4dMCK7onjlahTJ3vBQBmxiyNHKiO4VZD5IM0gDMkBPEyy4JIlNSEzIGgglFmxqmGASIOeCAgqXISBxkDxIHbIaJmRFoFBGV4BsAcFY0M/IA7NdHG0xFO7ZfxhMX5wxabDGAgOZAKsByKkSW6AiAwCQdNTPkHd34gAAAABJRU5ErkJggg==",
+          "days": 0
+        }
+      ],
+      "harvest": "it-lunelle",
+      "harvestMin": 1,
+      "harvestMax": 2,
+      "months": [
+        0,
+        1,
+        2
+      ],
+      "fearsFrost": true,
+      "weathers": [
+        {
+          "weather": "starry-night",
+          "days": 1
+        },
+        {
+          "weather": "aurora",
+          "days": 1
+        }
+      ]
+    },
+    {
+      "id": "cr-braisepomme",
+      "name": "Braisepomme",
+      "note": "Un buisson qui aime la chaleur ; il repousse après la récolte.",
+      "seed": "it-seed-braisepomme",
+      "stages": [
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAX0lEQVR4nGNgGAWjYBSMgpEBFMS1/4MwPjUs+DRfKJYHsw16Gf4/eHmVEZs6DEGYjVnOnHCxKw/eMBy6yw1moxuEwgFpRtYI04wOQIbBDIJ7AaTZTvkrAwMDJ1ZNuAAAEvAhSwc/6ZUAAAAASUVORK5CYII=",
+          "days": 1
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAdElEQVR4nGNgGAWjYBSMAloBBXHt/yBMSAwGmNAVXiiWZ1hiyQxmw8RAfJA4NkOY0AWuHHsCpmGGgGhkcXTAiM0LMcKMDB5qCLN33PrHsOTtf4YHL69iqMcQgBkCc0XM8b9gMWyasXoBWTHIZnyacRpACgAAwwMwggJxtsIAAAAASUVORK5CYII=",
+          "days": 2
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAtElEQVR4nGNgGAWjYHgDBXHt/8SoY8KmAcS+UCyPYQg2Q5nwaVhiyQwXw6WGCZsGkMIrx56g2IwuBgOM6JI6VjIYCtHFYo7/ZXjw8iojhgtAAKZwx61/GGIww5C9xoRLk4caqtkwOXTXMcFMxacJXQ5ZnAndVGI0IQMWZEmQBpgmdINAGJsh4JAEBUiMMJhJFFjy9j88FuC6sKUyb+3fYHrrVVYUcZhmFAOQAcgwZM3IGtABAAdhcCSOWhvJAAAAAElFTkSuQmCC",
+          "days": 2
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAABCklEQVR4nGNgGAWjgNrg/6Os/5TIUxcoiGsTZRsTNg0g9oVieQxDsBnKhE/DEktmuBguNUzYNIAUXjn2BMVmdDEYYESX1LGSwVBoPckGTB/NOwKmY47/ZXjw8iojhgusJ9kw8EcogNk7bv1D0cywYguDtdUHsAXIXmMBESAbURWCGAJwPggo9vIySAmzMnSpobqOBeZsTIX/oK4QADsZ7IUdYJMZaj0OoYbBEktmuN9A4P5pexQ/o3sFZhEoHFiQ/QsyCN0rtQv4GDzUmDBcyMDwG+ICWDTFCIOZDM0Jn1AUOjH8QUTzW0QSgMUCRBeOVOatDbFl61WQjQgA04xiADIAGYasGVkDOgAACrKHcnkGrd4AAAAASUVORK5CYII=",
+          "days": 0
+        }
+      ],
+      "harvest": "it-braisepomme",
+      "harvestMin": 1,
+      "harvestMax": 3,
+      "regrow": 2,
+      "months": [
+        1,
+        2
+      ],
+      "fearsFrost": true,
+      "weathers": [
+        {
+          "weather": "sunny",
+          "days": 1
+        },
+        {
+          "weather": "heatwave",
+          "days": 2
+        }
+      ]
+    },
+    {
+      "id": "cr-givrelys",
+      "name": "Givrelys",
+      "note": "Un lys de cristal : la seule culture qui résiste au gel.",
+      "seed": "it-seed-givrelys",
+      "stages": [
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAVklEQVR4nGNgGAWjYBSMgpEBFMS1/4Mw2ZqPfPgPxvgMYcSmEURnOXPCxa48eMNw6C43mP3g5VUUPSgckGZkjTDN6ABkGMwgFmTNdspfGRgYOLFqwgUA1kskT5kkOJ0AAAAASUVORK5CYII=",
+          "days": 2
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAXElEQVR4nGNgGAWjYBSMAloBBXHt/6SIYygCAXTFuMRBgAld4OhHBga/9XvhNoJoEB8kThRQENf+n3fsxf8jHyA2gmgQnygvYDOEZM3ohhDSjBEGyODMpgMEbQIALjdAZ1U9r+gAAAAASUVORK5CYII=",
+          "days": 2
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAm0lEQVR4nGNgGAWjYBTQHiiIa/8nW7GCuPZ/EMAmjsxnggnef3EFQ/LoR0xL0NUxISv2W78Xp7NB4iB5dEOZQMSDl1cZY9R1wAJLbiJsWHXtJVwzSBwEQOpA6nGGQ96xF/+PfID4HcQG0SA+jI1VIy5DkGlcmhmxCcL8CwObAp1xOhseiOgApOnMpgNgGh/AagC6bTgDDZ8LiAUAOq5sIvSYS5cAAAAASUVORK5CYII=",
+          "days": 2
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAA+UlEQVR4nO1SrQ4CMQzeFhwCOTuHGE+AxZPgeQY0D4TAXXL+EgSgkCBISEAejktAl3Rky+5ox0+QfMnSrWu/dusnxB8OAACCgNGW9L8Foy3yAkUSF1SpaquKJpZSyhqB0RaO5fZly1SciqvN9jwJ+vGe6ioELC/glt+XcK2d/V5wMNrCZF2GZIQnQT+V3OLIDlVbiM7tYROQVBdoh1kRfPlo4OzpvHuKZ4FE/ek8/eZ4Ct9CfSrbZpz6qZCGWZEUEt43haT87467Peeg1OhViMA4dhomElI8hZSQRIoktlwy2Yp/rwcKiWub1QEmbfJFUCEHkqBZLSXhO+7J1bG1dDuSAAAAAElFTkSuQmCC",
+          "days": 0
+        }
+      ],
+      "harvest": "it-givrelys",
+      "harvestMin": 1,
+      "harvestMax": 1,
+      "months": [
+        2,
+        3
+      ],
+      "fearsFrost": false,
+      "weathers": [
+        {
+          "weather": "snow",
+          "days": 1
+        },
+        {
+          "weather": "frost",
+          "days": 1
+        }
+      ]
+    },
+    {
+      "id": "cr-bullefeuille",
+      "name": "Bullefeuille",
+      "note": "Une fougère qui adore la pluie.",
+      "seed": "it-seed-bullefeuille",
+      "stages": [
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAX0lEQVR4nGNgGAWjYBSMgpEBFMS1/4MwPjUs+DS3HdQHs6vsGf4/eHmVEZs6DEGYjVnOnHCxKw/eMBy6yw1moxuEwgFpRtYI04wOQIbBDIJ7AaTZTvkrAwMDJ1ZNuAAAIWAhW7LUS+MAAAAASUVORK5CYII=",
+          "days": 1
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAVUlEQVR4nGNgGAWjYBSMAloBBXHt/yBMSAwGmNAVWkwUZmg7qA9mw8RAfJA4NkOYsJlaZX8RL5+gFyJW2MGdjM4n2RCSNeNyCS6ANQxg4NrhbwRtAgCz0Czw74dvGQAAAABJRU5ErkJggg==",
+          "days": 1
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAyklEQVR4nGNgGAWjYPgDBXHt/2QrVhDX/r/sRtR/bOLIfCaYYNtBfQzJTReeYFiCro4JWTE2Q9A1oxvKBJM4kf8WpyHImkHqMNQoIPk3YoUdChsmh8zG6koFLIYg07g0M+IKYYuJwnBxkLNh4MHLq4xYY2HZjSiwP5HBtcPfUPggeXRXMII4yLaBgJ+BDEOV/UUGvhBOhk9rvoM1ooc+yFUg14CdAzMRpAEGQBphBqCLI3sFxT/o4QAzAJf/QYAFXQCmCNkgbBphAAAknaUHsvKTeAAAAABJRU5ErkJggg==",
+          "days": 1
+        },
+        {
+          "pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAABNklEQVR4nGNgGAWjAAps83f8B2EGcoBt/o7/ILDizn+iDEG3jAVErLxLvGWHJrhD1e/4f3iiByMLiABxQEIQNkIxuhheyxTEtf8T4y10LzDBNLcd1EcxBJtNIPnMzEUMj1cUM6CEAQhsuvCEAWRIlT3Df2RvwRTDLAGpQwEK4tr/l92I+g+iI1bYwdkwPowNEofxYWoIGhKBpAGXZkYQAQsUkP+q7C8yWEwUZvAzkAE7F0afyH8L9eJFhgcvr8JjhhE5bqdO3gn3M8gQGABphgHZiF4G5Ohlwhe31w5/Q+GDNIMsy851h7uaBWTjVKgCacs2BmlLiPNBTuUL4YQ7HeSNp8cxLQM7AxYoIA0w8GnNdzAfRsMAP0sLihdQkimyYTADQQbAAHLgwQA8IaErQjYIm0YYAACzjuO5fxuvkwAAAABJRU5ErkJggg==",
+          "days": 0
+        }
+      ],
+      "harvest": "it-bullefeuille",
+      "harvestMin": 2,
+      "harvestMax": 3,
+      "months": [
+        0,
+        1
+      ],
+      "fearsFrost": true,
+      "weathers": [
+        {
+          "weather": "rainy",
+          "days": 1
+        },
+        {
+          "weather": "spring-shower",
+          "days": 1
+        }
+      ]
+    }
+  ]
 };
