@@ -1,5 +1,5 @@
 {
-  "version": "2.22",
+  "version": "2.25",
   "children": [
     {
       "type": "frame",
@@ -3478,6 +3478,843 @@
                     {
                       "type": "text",
                       "id": "v8yXPH",
+                      "name": "Label",
+                      "fill": "$text",
+                      "content": "Enregistrer",
+                      "fontFamily": "Roboto",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "zJz41",
+      "x": 1350,
+      "y": 0,
+      "name": "Portrait – Réglages de la carte (équipe, défile)",
+      "clip": true,
+      "width": 390,
+      "height": 1010,
+      "fill": [
+        "#1f3a2a",
+        {
+          "type": "image",
+          "opacity": 0.55,
+          "enabled": true,
+          "url": "../src/assets/tex/ground2.png",
+          "mode": "cover"
+        }
+      ],
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "E6VDj",
+          "x": 107,
+          "y": 14,
+          "name": "Map chip",
+          "height": 36,
+          "fill": "#22232ae6",
+          "cornerRadius": 18,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "gap": 8,
+          "padding": [
+            0,
+            14
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "yVVCv",
+              "name": "map",
+              "width": 16,
+              "height": 16,
+              "icon": "map",
+              "library": "lucide",
+              "fill": "$highlight"
+            },
+            {
+              "type": "text",
+              "id": "q1fx4K",
+              "name": "Name",
+              "fill": "$text",
+              "content": "Maison de Hugo",
+              "fontFamily": "Roboto",
+              "fontSize": 14,
+              "fontWeight": "500"
+            },
+            {
+              "type": "icon",
+              "id": "Xq9Yq",
+              "name": "chevron-down",
+              "width": 16,
+              "height": 16,
+              "icon": "chevron-down",
+              "library": "lucide",
+              "fill": "$muted"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "mldw4",
+          "x": 0,
+          "y": 0,
+          "name": "Scrim",
+          "fill": "#00000080",
+          "width": 390,
+          "height": 1010
+        },
+        {
+          "type": "frame",
+          "id": "kN0ax",
+          "x": 0,
+          "y": 154,
+          "name": "Sheet",
+          "clip": true,
+          "width": 390,
+          "height": 856,
+          "fill": "$panel",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "JZiw2",
+              "name": "Sheet top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                8,
+                16,
+                10,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "nS8zT",
+                  "name": "Grip",
+                  "fill": "$border",
+                  "width": 40,
+                  "height": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "yjtRg",
+                  "name": "Title row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "TDYF0",
+                      "name": "Back",
+                      "height": 36,
+                      "fill": "$surface",
+                      "cornerRadius": 18,
+                      "gap": 4,
+                      "padding": [
+                        0,
+                        12,
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "QCmHH",
+                          "name": "chevron-left",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "chevron-left",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "text",
+                          "id": "RFnnh",
+                          "name": "Label",
+                          "fill": "$text",
+                          "content": "Cartes",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "mCzT2",
+                      "name": "Title",
+                      "fill": "$text",
+                      "content": "Réglages de la carte",
+                      "fontFamily": "Roboto",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ATCw7",
+              "name": "Form",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                8,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "RiTtO",
+                  "name": "Name field",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "e7zpD",
+                      "name": "Label NOM",
+                      "fill": "$muted",
+                      "content": "NOM",
+                      "fontFamily": "Roboto",
+                      "fontSize": 12,
+                      "fontWeight": "500",
+                      "letterSpacing": 0.4
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QJtbR",
+                      "name": "Input",
+                      "width": "fill_container",
+                      "height": 44,
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": 1.5,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "PIdnR",
+                          "name": "Value",
+                          "fill": "$text",
+                          "content": "Maison de Hugo",
+                          "fontFamily": "Roboto",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "O1NoVp",
+                  "name": "Kind field",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "f0DSVm",
+                      "name": "Label TYPE",
+                      "fill": "$muted",
+                      "content": "TYPE",
+                      "fontFamily": "Roboto",
+                      "fontSize": 12,
+                      "fontWeight": "500",
+                      "letterSpacing": 0.4
+                    },
+                    {
+                      "type": "frame",
+                      "id": "U3M3y",
+                      "name": "Kinds",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "sGbBt",
+                          "name": "Monde",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "o1YYu",
+                              "name": "globe",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "globe",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "I36wm",
+                              "name": "Label",
+                              "fill": "$text",
+                              "content": "Monde",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "trtwa",
+                          "name": "Ville",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "iWxpI",
+                              "name": "castle",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "castle",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Ww7Y8",
+                              "name": "Label",
+                              "fill": "$text",
+                              "content": "Ville",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "E6peCR",
+                          "name": "Intérieur",
+                          "width": "fill_container",
+                          "fill": "$accent-soft",
+                          "cornerRadius": 10,
+                          "stroke": "$accent",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "kPYdW",
+                              "name": "door-open",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "door-open",
+                              "library": "lucide",
+                              "fill": "$highlight"
+                            },
+                            {
+                              "type": "text",
+                              "id": "VeZ5u",
+                              "name": "Label",
+                              "fill": "$text",
+                              "content": "Intérieur",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "EjHeC",
+                          "name": "Donjon",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "SdaYz",
+                              "name": "skull",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "skull",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "mJ1se",
+                              "name": "Label",
+                              "fill": "$text",
+                              "content": "Donjon",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "q96af",
+                  "name": "Time field",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "CzCUc",
+                      "name": "LE TEMPS SUR CETTE CARTE",
+                      "fill": "$muted",
+                      "content": "LE TEMPS SUR CETTE CARTE",
+                      "fontFamily": "Roboto",
+                      "fontSize": 12,
+                      "fontWeight": "500",
+                      "letterSpacing": 0.4
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GxXJD",
+                      "name": "Option Il passe",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "a6IKKU",
+                          "name": "hourglass",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "hourglass",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yl8Lx",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rM8cB",
+                              "name": "Il passe",
+                              "fill": "$text",
+                              "content": "Il passe",
+                              "fontFamily": "Roboto",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "lErjO",
+                              "name": "Comme dehors : l'heure et la lumière avancent.",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Comme dehors : l'heure et la lumière avancent.",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "R6vxk",
+                      "name": "Option Il s'arrête",
+                      "width": "fill_container",
+                      "fill": "$accent-soft",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": 1,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "P8yibH",
+                          "name": "circle-pause",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "circle-pause",
+                          "library": "lucide",
+                          "fill": "$highlight"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "efL13",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Y0Tlv3",
+                              "name": "Il s'arrête",
+                              "fill": "$text",
+                              "content": "Il s'arrête",
+                              "fontFamily": "Roboto",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "oqzxj",
+                              "name": "L'horloge reste à l'heure d'entrée. Conseillé pour un donjon.",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "L'horloge reste à l'heure d'entrée. Conseillé pour un donjon.",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Qjgjf",
+                      "name": "Option Figé à une heure",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "LIkcc",
+                          "name": "moon",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "moon",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GMOOm",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rPo8B",
+                              "name": "Figé à une heure",
+                              "fill": "$text",
+                              "content": "Figé à une heure",
+                              "fontFamily": "Roboto",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "bPA6T",
+                              "name": "Toujours la même heure, quelle que soit l'heure dehors.",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Toujours la même heure, quelle que soit l'heure dehors.",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "D1n0R1",
+                          "name": "Heure",
+                          "opacity": 0.5,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "gap": 4,
+                          "padding": [
+                            6,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GW2fX",
+                              "name": "00:00",
+                              "fill": "$text",
+                              "content": "00:00",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "IzxU2",
+                              "name": "chevron-down",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "chevron-down",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "cop3u",
+                  "name": "Team field",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HEjEZ",
+                      "name": "L'ÉQUIPE",
+                      "fill": "$muted",
+                      "content": "L'ÉQUIPE",
+                      "fontFamily": "Roboto",
+                      "fontSize": 12,
+                      "fontWeight": "500",
+                      "letterSpacing": 0.4
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Z11HF",
+                      "name": "Option L'équipe suit",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "uXMAV",
+                          "name": "users",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "users",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "D5Pwdh",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "FGTh4",
+                              "name": "L'équipe suit le joueur",
+                              "fill": "$text",
+                              "content": "L'équipe suit le joueur",
+                              "fontFamily": "Roboto",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "CRprc",
+                              "name": "En file derrière le chef d'équipe. Décochée : seul le chef est dessiné (une petite pièce, une scène à part).",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "En file derrière le chef d'équipe. Décochée : seul le chef est dessiné (une petite pièce, une scène à part).",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "S3MI6o",
+                          "name": "Interrupteur",
+                          "width": 44,
+                          "height": 26,
+                          "fill": "#4a4c5a",
+                          "cornerRadius": 13,
+                          "padding": 3,
+                          "children": [
+                            {
+                              "type": "ellipse",
+                              "id": "YG0D4",
+                              "name": "Pastille",
+                              "fill": "#ffffff",
+                              "width": 20,
+                              "height": 20
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "pI9Ys",
+                      "name": "Un événement peut aussi la cacher ou la faire revenir (action « L'équipe »), et le joueur peut la cacher dans ses réglages.",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Un événement peut aussi la cacher ou la faire revenir (action « L'équipe »), et le joueur peut la cacher dans ses réglages.",
+                      "fontFamily": "Roboto",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "E9wIPP",
+              "name": "Footer",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "padding": [
+                10,
+                16,
+                24,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "CBLi2",
+                  "name": "Create",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "$accent",
+                  "cornerRadius": 12,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HOdyb",
+                      "name": "check",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "PAWkL",
                       "name": "Label",
                       "fill": "$text",
                       "content": "Enregistrer",
