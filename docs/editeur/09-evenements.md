@@ -72,6 +72,7 @@ Jouées l'une après l'autre. **+ Action** ouvre une feuille avec les sortes d'a
 | **Ouvrir la boutique** | Ouvre une boutique de la base de données (voir [Boutiques](16-boutiques.md)) : le joueur achète et vend ; l'action suivante attend qu'il la ferme. |
 | **Offrir un cadeau** | Le joueur choisit un cadeau dans son sac (les objets de la sorte « Cadeau ») pour un PNJ : aimé +4 points, détesté −2, les autres +1. Un seul par jour (le cadeau reste dans le sac). |
 | **Faire passer le temps** | Un fondu au noir, et l'horloge avance : de quelques heures, jusqu'au prochain moment choisi (le soir, la nuit…), ou jusqu'au lendemain matin. Le jour change si on passe minuit. |
+| **L'équipe suit / se cache** | « Se cache » : les membres qui marchent derrière le joueur disparaissent (le chef reste) ; « Suit » les fait revenir juste derrière lui. Voir [L'équipe qui suit](18-equipe.md). |
 | **Arrêter / reprendre le temps** | L'heure ne bouge plus jusqu'à « Reprendre » ou au changement de carte. |
 | **Jouer la cinématique** | Une [cinématique](13-cinematiques.md) de la carte ; l'événement continue après elle. Une cinématique « Une seule fois » déjà vue est sautée. |
 | **Animer l'objet** | Les formes de l'objet (cet objet ou un autre de la carte) réglées « Par un événement » dans l'[éditeur de modèles](06-modeles.md#les-mouvements) : **Jouer**, **Revenir** (comme au début), **Boucle**, **Arrêter** ; « Attendre la fin du mouvement » fait patienter l'événement. L'objet garde sa place (aussi dans les sauvegardes de partie). |

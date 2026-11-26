@@ -21,7 +21,7 @@ Faire de l'appli un **moteur de jeu** : les éditeurs (carte, modèles, et ceux 
 
 ## Les outils à construire
 
-Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Les outils 0 à 17 sont faits ; chacun garde ses « À suivre ».
+Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Les outils 0 à 18 sont faits ; chacun garde ses « À suivre ».
 
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
@@ -43,6 +43,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 15 | **Zones d'action** (fait : maquette `design/main-view.pen` (Zones d'action) et `model-editor-mobile.pen` écran 11 ; la zone d'un modèle (des cases vues de dessus et un côté), changée pour un objet posé en touchant ses cases sur la carte, ou propre à un événement ; en jeu, parler, les portes et marcher dessus suivent la zone, voir [15](editeur/15-zones-action.md)) | Où le joueur agit sur un objet : la porte seule de la maison, le devant d'un panneau | Tout |
 | 16 | **Boutiques** (fait : maquette `design/database.pen` écrans 18-19 et `design/main-view.pen` (Boutiques) ; la table Boutiques (vendeur, rachat, réduction par niveau de lien, objets avec prix propre, stock du jour, conditions, niveau de lien) ; l'action « Ouvrir la boutique » ; en jeu Acheter / Vendre avec la quantité, voir [16](editeur/16-boutiques.md). À suivre : des prix qui changent selon la saison ou la météo, vendre ses récoltes) | Acheter, vendre, une petite économie ; le lien avec le vendeur baisse les prix | Jour |
 | 17 | **Cultures** (fait : maquette `design/database.pen` écran 20 et `design/main-view.pen` (Cultures) ; le sol Terre cultivable ; la table Cultures (graine, 4 images de pousse, jours arrosés, récolte, repousse, saisons, gel, météos qui aident) ; la houe et l'arrosoir ; en jeu labourer, planter, arroser, récolter, arracher ; la pluie arrose, le gel abîme ; 4 plantes fantastiques dessinées avec PixelLab, voir [17](editeur/17-cultures.md). À suivre : des graines dans les boutiques, des métiers avec des niveaux) | Labourer, planter, arroser, récolter ; la météo et les saisons comptent | Jour |
+| 18 | **L'équipe qui suit** (fait : maquette `design/main-view.pen` (Équipe) et `design/map-manager.pen` ; les membres en file derrière le chef (jusqu'à 3, leur planche de marche, on les traverse, ils se regroupent après une porte) ; cachés par carte, par l'action « L'équipe suit / se cache » ou par Menu → L'équipe me suit, voir [18](editeur/18-equipe.md). À suivre : leur parler sur la carte, leur ombre) | Voir l'équipe marcher avec le joueur | Jour et nuit |
 
 ## Retenues
 
@@ -119,7 +120,7 @@ Aujourd'hui, une porte (passage) ou un événement occupe toute la largeur de l'
 ### Pour les donjons et les combats (la nuit)
 
 - **La météo en combat** : la pluie affaiblit le feu, l'orage renforce l'électrique, le brouillard fait rater les attaques. Les 61 météos deviennent une vraie mécanique.
-- **Une équipe** qui suit le joueur sur la carte, des compétences, de l'expérience (faits : les compétences et l'expérience, points 5 et 9 ; reste : l'équipe qui suit le joueur).
+- **Une équipe** qui suit le joueur sur la carte, des compétences, de l'expérience (faits : les compétences et l'expérience, points 5 et 9 ; l'équipe qui suit, point 18).
 - **Donjons avec énigmes** : interrupteurs, blocs à pousser, portes, avec les déclencheurs de l'éditeur de carte.
 - **Dialogues à choix** (fait, point 4) qui changent la suite de l'histoire.
 - **Carte du monde** et voyages entre les zones.

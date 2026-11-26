@@ -21,6 +21,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 15. [Zones d'action](15-zones-action.md) : où le joueur agit sur un objet (la porte de la maison, le devant d'un panneau) : des cases et un côté, dans le modèle, sur la carte ou pour un événement.
 16. [Boutiques](16-boutiques.md) : une boutique dans la base de données (vendeur, objets, prix, stock du jour, moments, réduction du lien), ouverte par un événement ; acheter et vendre en jeu.
 17. [Cultures](17-cultures.md) : la terre cultivable, labourer, planter, arroser, récolter des plantes fantastiques ; leurs saisons, la pluie, le gel ; la table Cultures.
+18. [L'équipe qui suit](18-equipe.md) : les membres de l'équipe marchent en file derrière le joueur ; les cacher par carte, par un événement ou dans le menu.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 

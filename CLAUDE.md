@@ -106,6 +106,10 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   (hoe, watering can), `model/farm.ts` (`pk-farm`: plots per map, the days' weather, `advanceFarm`), `farm-view.ts`
   (soil and plants drawn), `services/farm.service.ts` (the action key on farmland; internal `PLANT` instruction),
   `game/farm/` (seed picker, harvest toast). Plant pictures source: `design-resources/crops/`.
+- Team following (`docs/editeur/18-equipe.md`): `model/team-followers.ts` (`TeamFollowers`: the leader's trail, up to 3
+  members in single file, regrouped after a jump), updated by `GameMapService.updateFollowers`; hidden by
+  `SceneMap.followers === false`, `PartyState.teamHidden` (the `TEAM` instruction / `team` action) or `Game.teamFollows`
+  (Menu → L'équipe me suit).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
