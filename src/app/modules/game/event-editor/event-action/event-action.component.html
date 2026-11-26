@@ -345,6 +345,30 @@
       après une sauvegarde.
     </p>
   }
+  @case ("cutscene") {
+    @if (cutscenes().length > 0) {
+      <div class="row">
+        <span>Cinématique</span>
+        <select
+          aria-label="Cinématique"
+          (change)="set({ cutscene: value($event) })"
+        >
+          @for (c of cutscenes(); track c.id) {
+            <option [value]="c.id" [selected]="c.id === action.cutscene">
+              {{ c.name }}
+            </option>
+          }
+        </select>
+      </div>
+      <p class="help">
+        Le joueur regarde la cinématique, puis l'événement continue.
+      </p>
+    } @else {
+      <p class="help">
+        Cette carte n'a pas encore de cinématique : Éditeurs → Cinématiques.
+      </p>
+    }
+  }
   @case ("timeFlow") {
     <div class="segmented" role="radiogroup" aria-label="Le temps">
       <button

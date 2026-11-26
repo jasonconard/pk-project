@@ -1,3 +1,7 @@
+import { GameCutsceneEditorComponent } from "./cutscene-editor/cutscene-editor.component";
+import { CutsceneHost } from "./cutscene-editor/cutscene-host";
+import { CutsceneOverlayComponent } from "./cutscene-overlay/cutscene-overlay.component";
+import { CutsceneService } from "./shared/services/cutscene.service";
 import { DungeonChipComponent } from "./dungeon-chip/dungeon-chip.component";
 import { DungeonService } from "./shared/services/dungeon.service";
 import {
@@ -9,6 +13,7 @@ import {
   ElementRef,
   inject,
   signal,
+  untracked,
   viewChild,
 } from "@angular/core";
 import {
@@ -98,6 +103,8 @@ import { DungeonObject } from "./shared/model/dungeon-object";
     ModelEditorComponent,
     VariablesEditorComponent,
     DatabaseEditorComponent,
+    CutsceneOverlayComponent,
+    GameCutsceneEditorComponent,
     DecimalPipe,
     LucideMenu,
     LucidePencilRuler,
@@ -139,6 +146,7 @@ export class GameComponent {
   protected readonly musicVolume = this.gameService.musicVolume;
   protected readonly GameMode = GameMode;
   private readonly battle = inject(BattleService);
+  private readonly cutscene = inject(CutsceneService);
   /** Goes up when the models change (back from the model editor). */
   protected readonly modelsVersion = this.gameService.modelsVersion;
   /** Playing on the map (not editing, not fighting, loaded): the game mode's own interface (clock, Créer, Menu). */
@@ -149,7 +157,8 @@ export class GameComponent {
       hud.mode === GameMode.MAP &&
       !hud.editMode &&
       !hud.loading &&
-      !this.battle.view()
+      !this.battle.view() &&
+      !this.cutscene.view()
     );
   });
   /** An editor opened over the game (a full screen panel), null: none. */
@@ -200,6 +209,19 @@ export class GameComponent {
     );
     // An editor over the game: the game sleeps (no frames, moves, time, sounds, music, keys) until it is closed
     effect(() => setGameCovered(!!this.editorPanel()));
+    // The map editor closed (B) or another map: the cutscene editor closes too (not while one of its cutscenes plays)
+    effect(() => {
+      const host = this.cutsceneHost();
+      const hud = this.hud();
+      if (
+        host &&
+        hud &&
+        !this.cutsceneWatching() &&
+        (!hud.editMode || hud.mapId !== host.mapId)
+      ) {
+        untracked(() => this.closeCutscenes());
+      }
+    });
     // The back button closes the editor like its Jeu (saved first); the Escape key stays the editor's own
     inject(EscapeService).track(
       () => this.editorPanel(),
@@ -357,6 +379,43 @@ export class GameComponent {
     (event?.currentTarget as HTMLElement | undefined)?.blur();
     this.menuOpen.set(false);
     this.releaseNotes.set(true);
+  }
+
+  /** An editor of the Éditeurs menu: a full screen panel over the game, or the cutscene editor (over the map). */
+  protected openEditorPanel(panel: EditorPanel): void {
+    if (panel.kind === "cutscenes") {
+      this.openCutscenes();
+    } else {
+      this.editorPanel.set(panel);
+    }
+  }
+
+  /** The cutscene editor's link to the map (open over the map editor), null: closed. */
+  protected readonly cutsceneHost = signal<CutsceneHost | null>(null);
+  /** A cutscene played from its editor (« Voir »): the editor hidden meanwhile. */
+  protected readonly cutsceneWatching = signal(false);
+
+  private openCutscenes(): void {
+    const host = this.gameService.cutsceneHost(() =>
+      this.cutsceneWatching.set(false)
+    );
+    if (!host) {
+      return;
+    }
+    this.cutsceneHost.set({
+      ...host,
+      play: (cut, from) => {
+        this.cutsceneWatching.set(true);
+        host.play(cut, from);
+      },
+    });
+  }
+
+  protected closeCutscenes(): void {
+    const host = this.cutsceneHost();
+    host?.preview(null, 0);
+    host?.pickGround(null);
+    this.cutsceneHost.set(null);
   }
 
   /** The editor's Jeu: back to the game, which takes the editor's changes (the songs, the models). */

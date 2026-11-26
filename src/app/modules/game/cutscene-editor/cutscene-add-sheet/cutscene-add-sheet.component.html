@@ -1,0 +1,52 @@
+<div class="grip"></div>
+<div class="head">
+  <div class="title">
+    <h2>Ajouter à {{ seconds(store.playhead()) }}</h2>
+    <small>Le bloc va sur la piste de qui le joue</small>
+  </div>
+  <button
+    type="button"
+    class="close"
+    aria-label="Fermer"
+    (click)="store.sheet.set(null)"
+  >
+    <svg lucideX></svg>
+  </button>
+</div>
+
+@for (group of groups; track group.name) {
+  <h3 class="section" [style.color]="group.color">
+    {{ group.name }}
+  </h3>
+  @if (group.name === "Personnages") {
+    <div class="for">
+      <span>Pour :</span>
+      @for (a of store.actors(); track a.id) {
+        <button
+          type="button"
+          class="chip"
+          [class.on]="a.id === actor()"
+          [style.--c]="a.id === PLAYER ? playerColor : group.color"
+          (click)="actor.set(a.id)"
+        >
+          {{ a.label }}
+        </button>
+      }
+    </div>
+  }
+  <div class="tiles">
+    @for (k of group.kinds; track k.kind) {
+      <button
+        type="button"
+        class="tile"
+        [title]="
+          group.name === 'Personnages' ? k.label + ' · ' + actorName() : k.label
+        "
+        (click)="add(k.kind)"
+      >
+        <svg [lucideIcon]="kindIcon(k.kind)" [style.color]="group.color"></svg>
+        <span>{{ k.label }}</span>
+      </button>
+    }
+  </div>
+}

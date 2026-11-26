@@ -1,5 +1,6 @@
 import { restoreDungeonState } from "../shared/model/dungeon-state";
 import { restoreAnimations } from "../shared/model/model-animations";
+import { restoreCutscenesSeen } from "../shared/model/cutscene-seen";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -89,6 +90,7 @@ export class VariablesTestComponent {
     resetParty();
     restoreDungeonState(null);
     restoreAnimations(null);
+    restoreCutscenesSeen(null);
     this.values.set(currentVariableValues());
   }
 }

@@ -112,6 +112,8 @@ export type EventAction =
       mode: "play" | "back" | "loop" | "stop";
       wait: boolean;
     }
+  /** A cutscene of the map is played (see cutscene.ts), then the event goes on. */
+  | { type: "cutscene"; cutscene: string }
   /** Points to a social link (a team member or an NPC); the player sees it go up. */
   | { type: "link"; target: string; points: number }
   /** The player picks a gift in the bag for an NPC (its link goes up, more for a liked one; one a day). */
@@ -429,6 +431,11 @@ function toInstruction(
           wait: action.wait,
         },
       };
+    case "cutscene":
+      return {
+        type: InstructionType.CUTSCENE,
+        cutscene: { id: action.cutscene },
+      };
     case "link":
       return {
         type: InstructionType.LINK,
@@ -580,6 +587,10 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
             mode: instruction.animate.mode,
             wait: instruction.animate.wait,
           }
+        : null;
+    case InstructionType.CUTSCENE:
+      return instruction.cutscene
+        ? { type: "cutscene", cutscene: instruction.cutscene.id }
         : null;
     case InstructionType.LINK:
       return instruction.link

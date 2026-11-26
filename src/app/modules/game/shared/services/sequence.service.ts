@@ -96,6 +96,29 @@ export class SequenceService {
   readonly dungeon$: Observable<SceneEventInstruction> =
     this.dungeonSubject.asObservable();
 
+  private readonly cutsceneSubject = new Subject<string>();
+  /** A cutscene of the current map to play (its id); the game calls `nextSequence()` once it ends. */
+  readonly cutscene$: Observable<string> = this.cutsceneSubject.asObservable();
+
+  /** A message shown by a cutscene: closing it calls this instead of going on with the event. */
+  private messageDone: (() => void) | null = null;
+
+  /** Shows a message outside the event (a cutscene's): `done` once the player closes it. */
+  showMessage(msg: InstructionMessage, done: () => void): void {
+    this.messageDone = done;
+    this.messageState.set(
+      msg.pic ? { ...msg, pic: portraitSrc(msg.pic) } : msg
+    );
+  }
+
+  /** Closes a cutscene's message without going on (the cutscene is skipped). */
+  dismissMessage(): void {
+    if (this.messageDone) {
+      this.messageDone = null;
+      this.messageState.set(null);
+    }
+  }
+
   /** The gift was given (its link's gain shown) or not: the event goes on. */
   giftDone(gain: LinkGain | null): void {
     if (gain) {
@@ -137,12 +160,19 @@ export class SequenceService {
     this.sequence = null;
     this.fight = false;
     this.battleService.cancel();
+    this.messageDone = null;
     this.messageState.set(null);
   }
 
   /** Closes the current message and resumes the sequence with the (optional) chosen answer. */
   closeMessage(choiceKey?: string): void {
     this.messageState.set(null);
+    const done = this.messageDone;
+    if (done) {
+      this.messageDone = null;
+      done();
+      return;
+    }
     this.nextSequence(choiceKey);
   }
 
@@ -262,6 +292,13 @@ export class SequenceService {
         break;
       case InstructionType.ANIMATE:
         this.animate(instruction.animate);
+        break;
+      case InstructionType.CUTSCENE:
+        if (instruction.cutscene?.id) {
+          this.cutsceneSubject.next(instruction.cutscene.id);
+        } else {
+          this.nextSequence();
+        }
         break;
       default:
         this.nextSequence();

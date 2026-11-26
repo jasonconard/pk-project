@@ -35,6 +35,8 @@ export interface GameSave {
   dungeon?: DungeonState;
   /** The objects moved by events (see model-animations.ts). */
   animations?: AnimationStates;
+  /** The cutscenes « Une seule fois » already seen (see cutscene-seen.ts). */
+  cutscenesSeen?: string[];
 }
 
 /** The slots (null: empty), always SAVE_SLOTS of them. */

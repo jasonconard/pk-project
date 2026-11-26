@@ -1,0 +1,85 @@
+<div class="frame"></div>
+
+<header class="bar">
+  <button
+    type="button"
+    class="icon"
+    aria-label="Fermer l'éditeur de cinématiques"
+    title="Fermer"
+    (click)="close()"
+  >
+    <svg lucideX></svg>
+  </button>
+  <button
+    type="button"
+    class="name"
+    [class.open]="sheet() === 'list'"
+    title="Les cinématiques de la carte"
+    (click)="toggleList()"
+  >
+    <svg lucideClapperboard></svg>
+    <span>{{ cut()?.name ?? "Aucune cinématique" }}</span>
+    <svg lucideChevronDown></svg>
+  </button>
+  <button
+    type="button"
+    class="icon"
+    aria-label="Annuler"
+    title="Annuler (Ctrl+Z)"
+    [disabled]="!store.canUndo()"
+    (click)="store.undo()"
+  >
+    <svg lucideUndo2></svg>
+  </button>
+  @if (wide()) {
+    <button
+      type="button"
+      class="icon"
+      aria-label="Rétablir"
+      title="Rétablir (Ctrl+Maj+Z)"
+      [disabled]="!store.canRedo()"
+      (click)="store.redo()"
+    >
+      <svg lucideRedo2></svg>
+    </button>
+  }
+  <button
+    type="button"
+    class="see"
+    title="Voir la cinématique dans le jeu, depuis la tête de lecture"
+    [disabled]="!cut()"
+    (click)="store.play()"
+  >
+    <svg lucidePlay></svg>
+    Voir
+  </button>
+</header>
+
+@if (pickHint(); as hint) {
+  <p class="pick-hint">
+    <span>{{ hint }}</span>
+    @if (picking() && layout() !== "desktop") {
+      <button type="button" (click)="picking.set(false)">Fini</button>
+    }
+  </p>
+}
+
+@if (cut()) {
+  @if (showTimeline()) {
+    <cutscene-timeline />
+  }
+  @if (showBlock()) {
+    <cutscene-block-sheet class="side" />
+  }
+}
+
+@if (sheet(); as open) {
+  @if (!wide()) {
+    <div class="veil" (click)="sheet.set(null)"></div>
+  }
+  @if (open === "add") {
+    <cutscene-add-sheet class="side over" />
+  } @else {
+    <cutscene-list-sheet class="side over" />
+  }
+}

@@ -89,6 +89,8 @@ export class Game {
   editSelection: EditSelection | null = null;
   editCanUndo = false;
   editCanRedo = false;
+  /** A cutscene is played (see CutsceneService): it moves the player and the camera itself. */
+  cutscene = false;
   /** Camera distance factor: 1 = normal view, the editor zooms in (< 1) and out (> 1). */
   cameraZoom = 1;
   /** The zoom last set for pixel-sharp sprites (see pixel-scale.ts): a zoom of its own (fight, editor) differs. */

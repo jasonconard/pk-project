@@ -1380,6 +1380,7 @@ export class DungeonService {
       !run ||
       !dungeon ||
       this.sequenceService.isRunning ||
+      game.cutscene ||
       dungeonOpen(dungeon, game.weather.hourOfDay, game.day)
     ) {
       return;

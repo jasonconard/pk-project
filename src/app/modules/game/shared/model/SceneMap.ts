@@ -1,3 +1,4 @@
+import { Cutscene } from "./cutscene";
 import { Square3, Vec2, Vec3 } from "./SceneUtils";
 import { SceneBuilding } from "./SceneBuilding";
 import * as THREE from "three";
@@ -22,6 +23,8 @@ export interface SceneMap {
   spawn?: Vec3;
   /** The time on this map (missing: it passes as outside). */
   time?: MapTime;
+  /** Its cutscenes (see cutscene.ts), played by the event action « Jouer la cinématique ». */
+  cutscenes?: Cutscene[];
   chunks: SceneChunk[];
 }
 

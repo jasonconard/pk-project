@@ -272,3 +272,8 @@
     opacity: 0;
   }
 }
+
+// (the cutscene editor stays open, hidden, while one of its cutscenes plays)
+game-cutscene-editor.watching {
+  display: none;
+}

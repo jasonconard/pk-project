@@ -1,0 +1,215 @@
+:host {
+  // (no box of its own: the bars, the fade and the bubbles go under the messages, the buttons over them)
+  display: contents;
+}
+
+.bar,
+.fade,
+.title,
+.bubble,
+.controls,
+.speed {
+  position: fixed;
+  z-index: 850;
+  pointer-events: none;
+  font-family: Roboto, sans-serif;
+  color: #fafafa;
+}
+
+.bar {
+  left: 0;
+  right: 0;
+  background: #000;
+
+  &.top {
+    top: 0;
+  }
+
+  &.bottom {
+    bottom: 0;
+  }
+}
+
+.fade {
+  inset: 0;
+  background: #000;
+
+  &.white {
+    background: #fff;
+  }
+}
+
+.title {
+  left: 16px;
+  right: 16px;
+  top: 40%;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(22px, 5vw, 40px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 12px #000c;
+}
+
+.bubble {
+  width: 40px;
+  height: 36px;
+  margin: -44px 0 0 -20px;
+  border-radius: 13px;
+  background: #fff;
+  color: #1b1c22;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 6px #0005;
+  animation: pop 0.25s ease-out;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 14px;
+    bottom: -7px;
+    border: 6px solid transparent;
+    border-top: 7px solid #fff;
+    border-bottom: 0;
+  }
+
+  b {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .heart {
+    color: #e5486b;
+    fill: #e5486b;
+  }
+
+  .anger {
+    color: #e8563a;
+  }
+
+  .sweat {
+    color: #4a9fe8;
+  }
+
+  .idea {
+    color: #e8b62a;
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
+
+.controls {
+  right: calc(16px + var(--safe-right, 0px));
+  bottom: calc(22px + var(--safe-bottom, 0px));
+  z-index: 950;
+
+  // A message open (core-message, 80 px high on phones, 160 px wider): the buttons above it
+  &.raised {
+    bottom: calc(106px + var(--safe-bottom, 0px));
+
+    @media (min-width: 851px) {
+      bottom: calc(186px + var(--safe-bottom, 0px));
+    }
+  }
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: #fafafab3;
+  text-shadow: 0 1px 4px #000;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+button {
+  border: 2px solid #fafafa80;
+  color: #fafafa;
+  background: #ffffff1f;
+  font: 700 15px Roboto, sans-serif;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.fast {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+
+  &.on {
+    background: #fafafa;
+    color: #111;
+    border-color: #fafafa;
+  }
+}
+
+.skip {
+  position: relative;
+  width: 142px;
+  height: 48px;
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 0;
+
+  .fill {
+    position: absolute;
+    inset: 0;
+    background: #c58af0;
+    transform-origin: left;
+  }
+
+  .label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+.speed {
+  z-index: 950;
+  top: calc(14px + var(--safe-top, 0px));
+  right: calc(16px + var(--safe-right, 0px));
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #ffffff26;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}

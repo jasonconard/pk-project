@@ -164,9 +164,9 @@ const EDITORS: {
     icon: LucideUserRound,
   },
   {
-    id: null,
+    id: "cutscenes",
     label: "Cinématiques",
-    sub: "Caméra, scènes · bientôt",
+    sub: "Scènes de la carte : caméra, personnages",
     icon: LucideClapperboard,
   },
 ];
@@ -176,7 +176,9 @@ export type EditorPanel =
   | { kind: "music" }
   | { kind: "variables" }
   | { kind: "database"; table?: DbTable; rowId?: string }
-  | { kind: "models"; modelId?: string };
+  | { kind: "models"; modelId?: string }
+  /** The cutscene editor: over the game in edit mode (not a full screen panel). */
+  | { kind: "cutscenes" };
 
 /** Layouts of the editor: phone held upright (bar + bottom dock), phone on its side (side panels, height is short), computer. */
 export type EditorLayout = "portrait" | "landscape" | "desktop";
@@ -212,6 +214,7 @@ interface PaletteEntry {
   imports: [
     MapManagerComponent,
     LucideDynamicIcon,
+    LucideClapperboard,
     LucideArrowBigDown,
     LucideArrowBigUp,
     LucideBox,
@@ -630,7 +633,9 @@ export class EditorBarComponent {
   }
 
   /** Music, variables or database editor: a full screen panel over the game (the game sleeps meanwhile, see GameComponent). */
-  protected openPanel(kind: "music" | "variables" | "database"): void {
+  protected openPanel(
+    kind: "music" | "variables" | "database" | "cutscenes"
+  ): void {
     this.moreOpen.set(false);
     this.editorsOpen.set(false);
     this.editorPanel.emit({ kind });

@@ -76,7 +76,28 @@ import {
   startDayNumber,
 } from "../model/game-calendar";
 import { MapTime } from "../model/SceneMap";
-import { InstructionTime } from "../model/SceneEventInstruction";
+import {
+  InstructionTime,
+  InstructionType,
+  SceneEventInstruction,
+} from "../model/SceneEventInstruction";
+import { CutsceneService } from "./cutscene.service";
+import { CutsceneHost } from "../../cutscene-editor/cutscene-host";
+import { PLAYER_ACTOR } from "../model/cutscene";
+import {
+  cutsceneKey,
+  markCutsceneSeen,
+  seenCutscenes,
+} from "../model/cutscene-seen";
+import { SceneChunk } from "../model/SceneMap";
+import { SceneBuilding } from "../model/SceneBuilding";
+import { isNpc, NPC_PREFIX, npcOf } from "../model/npc-sprite";
+import { modelLabel } from "../model/ModelChoice";
+import { findModel } from "../model/Zone";
+import { TILE_SIZE } from "../model/Terrain";
+import { loadSongs } from "../../../music-editor/shared/song-storage";
+import { currentParty } from "../../../database-editor/shared/party";
+import { loadDatabase } from "../../../database-editor/shared/database-storage";
 import { TIME_FADE_MS } from "./sequence.service";
 import { DungeonObject } from "../model/dungeon-object";
 
@@ -233,6 +254,7 @@ export class GameService {
     () => this.battleService.view() !== null
   );
   private readonly sequenceService = inject(SequenceService);
+  private readonly cutsceneService = inject(CutsceneService);
 
   private game: Game | null = null;
 
@@ -354,6 +376,23 @@ export class GameService {
       this.moment();
       this.dayState();
       untracked(() => this.game?.mapHelper?.refreshNpcs());
+    });
+    // An event plays a cutscene of the map (once only: not again in this game), then goes on
+    this.sequenceService.cutscene$.subscribe((id) => {
+      const map = this.game?.mapHelper?.sceneMap;
+      const cut = map?.cutscenes?.find((c) => c.id === id);
+      const key = map ? cutsceneKey(map.id, id) : "";
+      if (!cut || (cut.once && seenCutscenes().includes(key))) {
+        this.sequenceService.nextSequence();
+        return;
+      }
+      if (cut.once) {
+        markCutsceneSeen(key);
+      }
+      this.cutsceneService.play(cut, 0, () => {
+        this.syncHud();
+        this.sequenceService.nextSequence();
+      });
     });
     this.sequenceService.weather$.subscribe((type) => {
       if (Object.values(WeatherType).includes(type as WeatherType)) {
@@ -532,6 +571,17 @@ export class GameService {
     }, TIME_STEP);
 
     this.battleService.attach(game);
+    this.cutsceneService.attach(game, {
+      music: (song) => this.music.setCutsceneSong(song),
+      weather: (type) => {
+        if (Object.values(WeatherType).includes(type as WeatherType)) {
+          this.setWeather(type as WeatherType);
+        }
+      },
+      moment: (moment) => this.setHour(gameCalendar().moments[moment]),
+      message: (msg, done) => this.sequenceService.showMessage(msg, done),
+      dismissMessage: () => this.sequenceService.dismissMessage(),
+    });
     this.animate(game);
 
     return game;
@@ -586,6 +636,7 @@ export class GameService {
       diag.frameStart(game.renderer);
       diag.measure("weather", () => game.updateLights(dt));
       this.battleService.update(dt);
+      this.cutsceneService.update(dt);
       // The models' moving parts (a windmill's sails, a door opening when the player comes near)
       game.mapHelper?.updateMotions(
         dt,
@@ -806,6 +857,7 @@ export class GameService {
     return (
       game.mode !== GameMode.MAP ||
       game.editMode ||
+      game.cutscene ||
       this.sequenceService.isRunning ||
       this.battleService.running ||
       !!this.mapTimeState() ||
@@ -911,6 +963,7 @@ export class GameService {
       this.mapEditorService.exit(game);
     } else {
       this.sequenceService.stop();
+      this.cutsceneService.stop();
       this.mapEditorService.enter(game);
     }
     // (the editor shows the NPCs at every place, the game only where their schedule puts them)
@@ -1201,4 +1254,111 @@ export class GameService {
       this.syncHud();
     }
   }
+
+  // --- Cutscenes (design/main-view.pen, Cinématiques) ---
+
+  /** What the cutscene editor works on: the open map (see CutsceneHost). */
+  cutsceneHost(onPlayed: () => void): CutsceneHost | null {
+    const game = this.game;
+    const mapHelper = game?.mapHelper;
+    if (!game || !mapHelper) {
+      return null;
+    }
+    const map = mapHelper.sceneMap;
+    const objectLabel = (chunk: SceneChunk, b: SceneBuilding) =>
+      isNpc(b)
+        ? `${npcOf(b.modelId)?.name ?? "PNJ"}${b.label?.trim() ? ` · ${b.label.trim()}` : ""}`
+        : `${modelLabel(b.modelId)} (${Math.round((chunk.pos.x + b.pos.x) / TILE_SIZE)}, ${Math.round((chunk.pos.z + b.pos.z) / TILE_SIZE)})`;
+    return {
+      mapId: map.id,
+      mapName: map.name,
+      cutscenes: () => structuredClone(map.cutscenes ?? []),
+      save: (cutscenes) => {
+        if (cutscenes.length > 0) {
+          map.cutscenes = structuredClone(cutscenes);
+        } else {
+          delete map.cutscenes;
+        }
+        saveMap(map);
+      },
+      actors: () => {
+        const leader = currentParty().team[0];
+        const name = loadDatabase().characters.find(
+          (c) => c.id === leader
+        )?.name;
+        return [
+          {
+            id: PLAYER_ACTOR,
+            label: name ? `${name} (joueur)` : "Joueur",
+          },
+          ...map.chunks.flatMap((chunk) =>
+            chunk.buildings
+              .filter((b) => isNpc(b) && !b.generated)
+              .map((b) => ({
+                id: b.id,
+                label: objectLabel(chunk, b),
+                npc: b.modelId.slice(NPC_PREFIX.length),
+              }))
+          ),
+        ];
+      },
+      start: () => this.cutsceneService.startOf(mapHelper),
+      objects: () =>
+        map.chunks.flatMap((chunk) =>
+          chunk.buildings
+            .filter((b) => {
+              const model = findModel(b.modelId);
+              return (
+                !!model &&
+                [...model.boxes, ...model.planes].some(
+                  (part) => part.motion?.trigger === "event"
+                )
+              );
+            })
+            .map((b) => ({ id: b.id, label: objectLabel(chunk, b) }))
+        ),
+      songs: () => loadSongs().songs.map((x) => ({ id: x.id, name: x.name })),
+      uses: () =>
+        map.chunks.flatMap((chunk) =>
+          chunk.buildings.flatMap((b) =>
+            b.events.flatMap((evt) =>
+              cutscenesPlayed(evt.instructions).map((id) => ({
+                cutscene: id,
+                label: objectLabel(chunk, b),
+              }))
+            )
+          )
+        ),
+      pickGround: (onPick) =>
+        this.mapEditorService.pickGround(
+          onPick ? (p) => onPick({ x: p.x, z: p.z }) : null
+        ),
+      preview: (cut, t) => this.cutsceneService.preview(cut, t),
+      play: (cut, from) => {
+        this.cutsceneService.endPreview();
+        this.mapEditorService.pickGround(null);
+        if (game.editMode) {
+          this.toggleEditMode();
+        }
+        this.cutsceneService.play(cut, from, () => {
+          if (!game.editMode) {
+            this.toggleEditMode();
+          }
+          onPlayed();
+        });
+      },
+    };
+  }
+}
+
+/** The cutscenes an event's instructions play (in its branches too). */
+function cutscenesPlayed(instructions: SceneEventInstruction[]): string[] {
+  return instructions.flatMap((i) => [
+    ...(i.type === InstructionType.CUTSCENE && i.cutscene?.id
+      ? [i.cutscene.id]
+      : []),
+    ...(i.subInstructions ?? []).flatMap((sub) =>
+      cutscenesPlayed(sub.instructions)
+    ),
+  ]);
 }

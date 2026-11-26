@@ -1,0 +1,158 @@
+<div class="grip"></div>
+<div class="head">
+  <div class="title">
+    <h2>Cinématiques de la carte</h2>
+    <small>{{ store.mapName() }} · {{ count() }}</small>
+  </div>
+  <button type="button" class="new" (click)="store.create()">
+    <svg lucidePlus></svg>
+    Nouvelle
+  </button>
+  @if (cut()) {
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer"
+      (click)="store.sheet.set(null)"
+    >
+      <svg lucideX></svg>
+    </button>
+  }
+</div>
+
+@if (store.cutscenes().length > 0) {
+  <div class="group list">
+    @for (c of store.cutscenes(); track c.id) {
+      <button
+        type="button"
+        class="item"
+        [class.current]="c.id === cut()?.id"
+        (click)="open(c.id)"
+      >
+        <svg lucideClapperboard></svg>
+        <span class="text">
+          <b>{{ c.name }}</b>
+          <small>{{ details(c) }}</small>
+        </span>
+        @if (c.id === cut()?.id) {
+          <svg lucideCheck></svg>
+        } @else {
+          <svg lucideChevronRight></svg>
+        }
+      </button>
+    }
+  </div>
+} @else {
+  <p class="help">
+    Aucune cinématique sur cette carte. Une cinématique fait bouger la caméra et
+    les personnages, montre des messages, joue de la musique… puis un événement
+    la lance avec l'action « Jouer la cinématique ».
+  </p>
+}
+
+@if (cut(); as c) {
+  <h3 class="section">{{ c.name }}</h3>
+  <div class="group">
+    <div class="field">
+      <input
+        type="text"
+        class="name"
+        aria-label="Nom de la cinématique"
+        maxlength="40"
+        [value]="c.name"
+        (change)="rename($event)"
+      />
+      <button
+        type="button"
+        class="chip"
+        title="Dupliquer"
+        (click)="store.duplicate(c.id)"
+      >
+        <svg lucideCopy></svg>
+      </button>
+      <button
+        type="button"
+        class="chip danger"
+        [class.ask]="confirming()"
+        title="Supprimer"
+        (click)="remove()"
+      >
+        <svg lucideTrash></svg>
+        @if (confirming()) {
+          Supprimer ?
+        }
+      </button>
+      @if (confirming()) {
+        <button type="button" class="chip" (click)="confirming.set(false)">
+          Non
+        </button>
+      }
+    </div>
+    <button
+      type="button"
+      class="field toggle"
+      (click)="store.setOptions({ once: !c.once })"
+    >
+      <span class="text">
+        Une seule fois
+        <small>Gardé dans la sauvegarde de partie</small>
+      </span>
+      <span class="switch" [class.on]="c.once"></span>
+    </button>
+    <button
+      type="button"
+      class="field toggle"
+      (click)="store.setOptions({ skippable: !c.skippable })"
+    >
+      <span class="text">
+        Le joueur peut la passer
+        <small>Maintenir le bouton 2 s ; chacun va à sa place finale</small>
+      </span>
+      <span class="switch" [class.on]="c.skippable"></span>
+    </button>
+    <button
+      type="button"
+      class="field toggle"
+      (click)="store.setOptions({ fastForward: !c.fastForward })"
+    >
+      <span class="text">
+        Accélérer
+        <small> Le bouton <svg lucideFastForward></svg> en jeu : ×3 </small>
+      </span>
+      <span class="switch" [class.on]="c.fastForward"></span>
+    </button>
+    <div class="field">
+      <span>À la fin</span>
+      <div class="seg">
+        <button
+          type="button"
+          [class.on]="c.atEnd === 'stay'"
+          (click)="store.setOptions({ atEnd: 'stay' })"
+        >
+          Chacun reste où il est
+        </button>
+        <button
+          type="button"
+          [class.on]="c.atEnd === 'back'"
+          (click)="store.setOptions({ atEnd: 'back' })"
+        >
+          Chacun revient à sa place
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <p class="help">Lancée par (action « Jouer la cinématique ») :</p>
+  <div class="uses">
+    @for (u of uses(); track $index) {
+      <span class="chip">
+        <svg lucideMapPin></svg>
+        {{ u.label }}
+      </span>
+    } @empty {
+      <p class="help">
+        Aucun événement : ajoutez l'action « Jouer la cinématique » à un objet.
+      </p>
+    }
+  </div>
+}

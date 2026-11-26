@@ -1,0 +1,485 @@
+@if (selection(); as s) {
+  @let b = s.block;
+  <div class="grip"></div>
+  <div class="head" [style.--c]="color()">
+    <span class="thumb" [style.color]="color()">
+      <svg [lucideIcon]="kindIcon(b.kind)"></svg>
+    </span>
+    <div class="title">
+      <h2>{{ title() }}</h2>
+      <small>
+        De {{ seconds(b.start) }} à {{ seconds(b.start + b.duration) }} sur la
+        piste {{ trackName() }}
+      </small>
+    </div>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer"
+      (click)="store.select(null)"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+
+  <div class="actions">
+    <button
+      type="button"
+      title="Voir la cinématique dans le jeu à partir de ce bloc"
+      (click)="store.play(b.start)"
+    >
+      <svg lucidePlay></svg>
+      Voir d'ici
+    </button>
+    <button
+      type="button"
+      title="Dupliquer (Ctrl+D)"
+      (click)="store.duplicateSelected()"
+    >
+      <svg lucideCopy></svg>
+      Dupliquer
+    </button>
+    <button
+      type="button"
+      class="danger"
+      title="Supprimer (Suppr)"
+      (click)="store.removeSelected()"
+    >
+      <svg lucideTrash></svg>
+      Supprimer
+    </button>
+  </div>
+
+  <div class="group" [style.--c]="color()">
+    @if (b.kind === "walk" || b.kind === "cam-goto") {
+      <div class="field">
+        <span>{{ b.kind === "walk" ? "Jusqu'à" : "Où" }}</span>
+        @if (b.x !== undefined && b.z !== undefined) {
+          <b class="value point">{{ cellLabel(b.x, b.z) }}</b>
+        } @else {
+          <span class="value">Pas encore choisi</span>
+        }
+        <button
+          type="button"
+          class="chip pick"
+          (click)="store.picking.set(true)"
+        >
+          <svg lucideMapPin></svg>
+          Choisir sur la carte
+        </button>
+      </div>
+    }
+    @switch (b.kind) {
+      @case ("walk") {
+        <div class="field">
+          <span>Allure</span>
+          <div class="seg">
+            @for (p of paces; track p.id) {
+              <button
+                type="button"
+                [class.on]="(b.pace ?? 'walk') === p.id"
+                (click)="set({ pace: p.id })"
+              >
+                {{ p.label }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="field">
+          <label for="cut-look">Regarde à la fin</label>
+          <select id="cut-look" (change)="setLook(value($event))">
+            <option value="" [selected]="look(b) === ''">
+              Comme il arrive
+            </option>
+            <ng-container
+              *ngTemplateOutlet="looks; context: { $implicit: b }"
+            />
+          </select>
+        </div>
+      }
+      @case ("turn") {
+        <div class="field">
+          <label for="cut-turn">Vers</label>
+          <select id="cut-turn" (change)="setLook(value($event))">
+            <ng-container
+              *ngTemplateOutlet="looks; context: { $implicit: b }"
+            />
+          </select>
+        </div>
+      }
+      @case ("bubble") {
+        <div class="field emotes">
+          @for (e of emotes; track e.id) {
+            <button
+              type="button"
+              class="chip"
+              [class.on]="(b.emote ?? 'exclaim') === e.id"
+              [title]="e.label"
+              [attr.aria-label]="e.label"
+              (click)="set({ emote: e.id })"
+            >
+              @if (emoteIcons[e.id]; as icon) {
+                <svg [lucideIcon]="icon"></svg>
+              } @else {
+                <b>{{ e.id === "question" ? "?" : "!" }}</b>
+              }
+            </button>
+          }
+        </div>
+      }
+      @case ("cam-follow") {
+        <div class="field">
+          <label for="cut-follow">Qui</label>
+          <select id="cut-follow" (change)="set({ target: value($event) })">
+            @for (a of store.actors(); track a.id) {
+              <option [value]="a.id" [selected]="a.id === b.target">
+                {{ a.label }}
+              </option>
+            }
+          </select>
+        </div>
+      }
+      @case ("cam-zoom") {
+        <div class="field">
+          <span>Zoom</span>
+          <span class="value">{{ zoomLabel(b.zoom ?? 1) }}</span>
+          <input
+            type="range"
+            aria-label="Zoom"
+            min="0.4"
+            max="2"
+            step="0.1"
+            [value]="b.zoom ?? 1"
+            (pointerdown)="store.snapshot()"
+            (keydown)="store.snapshot()"
+            (input)="live({ zoom: +value($event) })"
+          />
+        </div>
+      }
+      @case ("cam-shake") {
+        <div class="field">
+          <span>Force</span>
+          <div class="seg">
+            @for (st of strengths; track st.id) {
+              <button
+                type="button"
+                [class.on]="(b.strength ?? 2) === st.id"
+                (click)="set({ strength: st.id })"
+              >
+                {{ st.label }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @case ("cam-orbit") {
+        <div class="field">
+          <span>Tourner de</span>
+          <div class="stepper">
+            <button
+              type="button"
+              aria-label="Moins"
+              [disabled]="(b.degrees ?? 0) <= -360"
+              (click)="set({ degrees: (b.degrees ?? 0) - 15 })"
+            >
+              <svg lucideMinus></svg>
+            </button>
+            <output>{{ b.degrees ?? 0 }}°</output>
+            <button
+              type="button"
+              aria-label="Plus"
+              [disabled]="(b.degrees ?? 0) >= 360"
+              (click)="set({ degrees: (b.degrees ?? 0) + 15 })"
+            >
+              <svg lucidePlus></svg>
+            </button>
+          </div>
+        </div>
+      }
+      @case ("fade") {
+        <div class="field">
+          <span>Couleur</span>
+          <div class="seg">
+            <button
+              type="button"
+              [class.on]="b.color !== 'white'"
+              (click)="set({ color: 'black' })"
+            >
+              Noir
+            </button>
+            <button
+              type="button"
+              [class.on]="b.color === 'white'"
+              (click)="set({ color: 'white' })"
+            >
+              Blanc
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <span>Sens</span>
+          <div class="seg">
+            <button
+              type="button"
+              [class.on]="!b.in"
+              (click)="set({ in: false })"
+            >
+              Vers la couleur
+            </button>
+            <button type="button" [class.on]="b.in" (click)="set({ in: true })">
+              Revenir
+            </button>
+          </div>
+        </div>
+      }
+      @case ("title") {
+        <div class="field">
+          <input
+            type="text"
+            class="wide"
+            aria-label="Le titre"
+            placeholder="Le titre"
+            maxlength="60"
+            [value]="b.text ?? ''"
+            (change)="set({ text: value($event) })"
+          />
+        </div>
+      }
+      @case ("message") {
+        <div class="field">
+          @let portrait = data.portraitSrc(b.pic);
+          @let speaker = portraitRef(b.pic);
+          <label
+            class="portrait"
+            [title]="b.pic ? 'Changer le portrait' : 'Ajouter un portrait'"
+          >
+            @if (portrait) {
+              <img [src]="portrait" alt="" />
+            } @else {
+              <svg lucideImagePlus></svg>
+            }
+            <select aria-label="Portrait" (change)="setPortrait(value($event))">
+              <option value="" [selected]="!b.pic">Sans portrait</option>
+              @for (group of data.portraitGroups; track group.label) {
+                <optgroup [label]="group.label">
+                  @for (p of group.portraits; track p.pic) {
+                    <option [value]="p.pic" [selected]="p.pic === speaker">
+                      {{ p.label }}
+                    </option>
+                  }
+                </optgroup>
+              }
+              @if (b.pic && !data.hasPortrait(speaker)) {
+                <option [value]="b.pic" selected>Autre image</option>
+              }
+            </select>
+          </label>
+          <input
+            type="text"
+            class="wide"
+            aria-label="Qui parle"
+            placeholder="Qui parle (facultatif)"
+            maxlength="40"
+            [value]="b.name ?? ''"
+            (change)="set({ name: value($event) })"
+          />
+        </div>
+        <div class="field">
+          <textarea
+            aria-label="Ce qui est dit"
+            placeholder="Ce qui est dit…"
+            rows="3"
+            maxlength="400"
+            [value]="b.text ?? ''"
+            (change)="set({ text: value($event) })"
+          ></textarea>
+        </div>
+      }
+      @case ("music") {
+        <div class="field">
+          <label for="cut-song">Musique</label>
+          <select id="cut-song" (change)="set({ song: value($event) })">
+            <option value="" [selected]="!b.song">Silence</option>
+            @for (song of store.songs(); track song.id) {
+              <option [value]="song.id" [selected]="song.id === b.song">
+                {{ song.name }}
+              </option>
+            }
+          </select>
+        </div>
+      }
+      @case ("sound") {
+        <div class="field">
+          <label for="cut-sound">Son</label>
+          <select id="cut-sound" (change)="set({ sound: value($event) })">
+            @for (snd of sounds; track snd.id) {
+              <option [value]="snd.id" [selected]="snd.id === b.sound">
+                {{ snd.label }}
+              </option>
+            }
+          </select>
+          <button
+            type="button"
+            class="try"
+            aria-label="Écouter"
+            title="Écouter"
+            (click)="trySound(b.sound)"
+          >
+            <svg lucidePlay></svg>
+          </button>
+        </div>
+      }
+      @case ("weather") {
+        <div class="field">
+          <label for="cut-weather">Météo</label>
+          <select id="cut-weather" (change)="set({ weather: value($event) })">
+            @for (w of weathers; track w.type) {
+              <option [value]="w.type" [selected]="w.type === b.weather">
+                {{ w.label }}
+              </option>
+            }
+          </select>
+        </div>
+      }
+      @case ("time") {
+        <div class="field">
+          <span>Moment</span>
+          <div class="seg">
+            @for (m of moments; track m.id) {
+              <button
+                type="button"
+                [class.on]="b.moment === m.id"
+                (click)="set({ moment: m.id })"
+              >
+                {{ m.label }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @case ("animate") {
+        @if (store.objects().length > 0) {
+          <div class="field">
+            <label for="cut-object">Objet</label>
+            <select id="cut-object" (change)="set({ object: value($event) })">
+              <option value="" [selected]="!b.object">Choisir…</option>
+              @for (o of store.objects(); track o.id) {
+                <option [value]="o.id" [selected]="o.id === b.object">
+                  {{ o.label }}
+                </option>
+              }
+            </select>
+          </div>
+        }
+        <div class="field">
+          <div class="seg">
+            @for (m of modes; track m.id) {
+              <button
+                type="button"
+                [class.on]="(b.mode ?? 'play') === m.id"
+                (click)="set({ mode: m.id })"
+              >
+                {{ m.label }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    }
+
+    <div class="field">
+      <span>Début</span>
+      <div class="stepper">
+        <button
+          type="button"
+          aria-label="Plus tôt"
+          [disabled]="b.start <= 0"
+          (click)="setStart(b.start - 0.1)"
+        >
+          <svg lucideMinus></svg>
+        </button>
+        <output>{{ seconds(b.start) }}</output>
+        <button
+          type="button"
+          aria-label="Plus tard"
+          (click)="setStart(b.start + 0.1)"
+        >
+          <svg lucidePlus></svg>
+        </button>
+      </div>
+    </div>
+    <div class="field">
+      <span>Durée</span>
+      @if (pathDuration(); as path) {
+        @if (path !== b.duration) {
+          <button
+            type="button"
+            class="chip path"
+            title="La durée du chemin à cette allure"
+            (click)="setDuration(path)"
+          >
+            Selon le chemin : {{ seconds(path) }}
+          </button>
+        } @else {
+          <small class="path">selon le chemin</small>
+        }
+      }
+      <div class="stepper">
+        <button
+          type="button"
+          aria-label="Plus court"
+          [disabled]="b.duration <= 0.2"
+          (click)="setDuration(b.duration - 0.1)"
+        >
+          <svg lucideMinus></svg>
+        </button>
+        <output>{{ seconds(b.duration) }}</output>
+        <button
+          type="button"
+          aria-label="Plus long"
+          (click)="setDuration(b.duration + 0.1)"
+        >
+          <svg lucidePlus></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @switch (b.kind) {
+    @case ("message") {
+      <p class="help">
+        Le temps s'arrête tant que le joueur n'a pas fermé le message.
+      </p>
+    }
+    @case ("music") {
+      <p class="help">
+        Jusqu'à la fin de la cinématique ; ensuite la musique du moment revient.
+      </p>
+    }
+    @case ("animate") {
+      @if (store.objects().length === 0) {
+        <p class="help">
+          Aucun objet de la carte ne bouge « Par un événement » : réglez les
+          mouvements d'un modèle dans l'éditeur de modèles.
+        </p>
+      }
+    }
+  }
+}
+
+<ng-template #looks let-b>
+  <optgroup label="Une direction">
+    @for (d of dirs; track d.id) {
+      <option [value]="'d:' + d.id" [selected]="look(b) === 'd:' + d.id">
+        {{ d.label }}
+      </option>
+    }
+  </optgroup>
+  <optgroup label="Quelqu'un">
+    @for (a of store.actors(); track a.id) {
+      <option [value]="'a:' + a.id" [selected]="look(b) === 'a:' + a.id">
+        {{ a.label }}
+      </option>
+    }
+  </optgroup>
+</ng-template>

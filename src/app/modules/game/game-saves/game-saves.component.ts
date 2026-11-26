@@ -34,6 +34,10 @@ import {
   currentAnimations,
   restoreAnimations,
 } from "../shared/model/model-animations";
+import {
+  restoreCutscenesSeen,
+  seenCutscenes,
+} from "../shared/model/cutscene-seen";
 /**
  * Saved games (menu → Sauver): a few slots, each with where the player was, the time, the weather and when it was
  * saved. Sauver ici / Écraser keeps the game now; Charger goes back to it (the current progress is lost: pressed
@@ -91,6 +95,7 @@ export class GameSavesComponent {
       party: structuredClone(currentParty()),
       dungeon: structuredClone(currentDungeonState()),
       animations: { ...currentAnimations() },
+      cutscenesSeen: [...seenCutscenes()],
     };
     this.message.set(
       writeSave(slot, save)
@@ -109,6 +114,7 @@ export class GameSavesComponent {
     restoreParty(save.party);
     restoreDungeonState(save.dungeon);
     restoreAnimations(save.animations);
+    restoreCutscenesSeen(save.cutscenesSeen);
     if (
       !this.gameService.restoreSpot(
         save.map,

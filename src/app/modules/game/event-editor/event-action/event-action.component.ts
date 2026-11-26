@@ -91,6 +91,10 @@ export class EventActionComponent {
         }))
     );
   });
+  /** The cutscenes of the map (Jouer la cinématique). */
+  protected readonly cutscenes = computed(
+    () => loadMap(this.currentMap())?.cutscenes ?? []
+  );
   protected readonly sounds = SOUND_CHOICES;
   protected readonly portraitRef = portraitRef;
   protected readonly maxOptions = MAX_CHOICE_OPTIONS;

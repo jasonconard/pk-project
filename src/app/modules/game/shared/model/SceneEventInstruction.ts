@@ -31,6 +31,8 @@ export enum InstructionType {
   DUNGEON,
   /** ANIMATE: an object's movements « Par un événement » played, sent back, looped or stopped. */
   ANIMATE,
+  /** CUTSCENE: a cutscene of the event's map is played (see cutscene.ts), then the event goes on. */
+  CUTSCENE,
 }
 
 export interface SceneEventInstruction {
@@ -54,6 +56,7 @@ export interface SceneEventInstruction {
   fight?: { group: string; opening?: BattleOpening };
   dungeon?: InstructionDungeon;
   animate?: InstructionAnimate;
+  cutscene?: InstructionCutscene;
   time?: InstructionTime;
   timeFlow?: { stop: boolean };
   link?: { id: string; points: number };
@@ -62,6 +65,11 @@ export interface SceneEventInstruction {
 }
 
 /** Some hours more, until a moment of the day (the next one of that name), or the next morning. */
+/** A cutscene of the event's map (its id in `SceneMap.cutscenes`). */
+export interface InstructionCutscene {
+  id: string;
+}
+
 export interface InstructionTime {
   mode: "hours" | "until" | "nextDay";
   hours?: number;

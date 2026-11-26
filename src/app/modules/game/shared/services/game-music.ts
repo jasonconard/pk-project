@@ -75,9 +75,24 @@ export class GameMusic {
     }
   }
 
+  /** A cutscene's song ("": silence) over everything else; null: none (the moment's song again). */
+  private cutsceneSong: string | null = null;
+
+  setCutsceneSong(id: string | null): void {
+    if (id !== this.cutsceneSong) {
+      this.cutsceneSong = id;
+      this.setSlot(this.slot.slot, this.slot.night);
+    }
+  }
+
   /** The moment of the game: its song (or the closest one) plays. */
   setSlot(slot: MusicSlot, night: boolean): void {
     this.slot = { slot, night };
+    if (this.cutsceneSong !== null) {
+      this.wanted = this.songs.find((x) => x.id === this.cutsceneSong) ?? null;
+      this.apply();
+      return;
+    }
     const song = this.songFor(slot, night);
     if (song === null && slot === "fight") {
       return; // no fight music: the current one goes on

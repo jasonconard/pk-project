@@ -63,7 +63,7 @@
 }
 
 @if (hud(); as hud) {
-  @if (hud.mode === GameMode.MAP) {
+  @if (hud.mode === GameMode.MAP && !cutsceneHost()) {
     <game-editor-bar
       [editMode]="hud.editMode"
       [modelId]="hud.editModelId"
@@ -91,7 +91,7 @@
       (cancelPick)="cancelPick()"
       (ambiance)="openAmbiance()"
       (settings)="menuOpen.set(true)"
-      (editorPanel)="editorPanel.set($event)"
+      (editorPanel)="openEditorPanel($event)"
       [modelsVersion]="modelsVersion()"
     />
   }
@@ -295,6 +295,20 @@
 @if (hud()?.mode === GameMode.FIGHT) {
   <fight-ui />
 }
+
+<!-- The cutscene editor, over the map editor (hidden while one of its cutscenes plays: Voir) -->
+@if (cutsceneHost(); as host) {
+  @defer (on immediate) {
+    <game-cutscene-editor
+      [host]="host"
+      [class.watching]="cutsceneWatching()"
+      (closed)="closeCutscenes()"
+    />
+  }
+}
+
+<!-- A cutscene being played: black bars, fade, title, bubbles, Passer -->
+<game-cutscene-overlay />
 
 <!-- The Grandia-like fight, played on the map -->
 <battle-hud />

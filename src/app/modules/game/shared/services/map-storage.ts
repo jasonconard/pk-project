@@ -1,3 +1,4 @@
+import { Cutscene } from "../model/cutscene";
 import {
   ChunkGround,
   MapKind,
@@ -50,6 +51,7 @@ interface StoredMap {
   kind: MapKind;
   spawn?: Vec3;
   time?: MapTime;
+  cutscenes?: Cutscene[];
   /** Every chunk of the map, in order. */
   chunks: StoredChunk[];
 }
@@ -365,6 +367,13 @@ export function loadMap(id: string): SceneMap | null {
     ...((saved ? saved.time : code!.time)
       ? { time: structuredClone(saved ? saved.time : code!.time) }
       : {}),
+    ...((saved ? saved.cutscenes : code!.cutscenes)?.length
+      ? {
+          cutscenes: structuredClone(
+            (saved ? saved.cutscenes : code!.cutscenes)!
+          ),
+        }
+      : {}),
     chunks: copy,
   };
 }
@@ -377,6 +386,7 @@ export function saveMap(map: SceneMap) {
     kind: map.kind,
     spawn: map.spawn,
     ...(map.time ? { time: map.time } : {}),
+    ...(map.cutscenes?.length ? { cutscenes: map.cutscenes } : {}),
     chunks: map.chunks.map(chunkData),
   };
   writeStored(stored);
@@ -441,6 +451,9 @@ export function exportMapFile(map: SceneMap): string {
         ]
       : []),
     ...(map.time ? [`  time: ${JSON.stringify(map.time)},`] : []),
+    ...(map.cutscenes?.length
+      ? [`  cutscenes: ${JSON.stringify(map.cutscenes)},`]
+      : []),
     "  chunks: [",
     ...map.chunks.map((chunk) => `    ${constName(chunk.id)},`),
     "  ],",

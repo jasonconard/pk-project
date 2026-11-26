@@ -127,3 +127,36 @@ export function makeNpcMesh(modelId: string, rot: number): THREE.Group {
   group.add(plane, body);
   return group;
 }
+
+/** The sheet's row of each PlayerDirection (up, right, down, left), see WALK_DIRS: down, left, right, up. */
+const ROW_OF_DIR = [3, 2, 0, 1];
+
+/**
+ * An NPC drawn walking or standing (a cutscene moves it): the picture of its walking sheet for a direction and a
+ * column (WALK_STAND: standing). Without a walking sheet nothing changes.
+ */
+export function setNpcFrame(
+  group: THREE.Object3D,
+  modelId: string,
+  dir: number,
+  column: number
+): void {
+  if (!npcOf(modelId)?.walk) {
+    return;
+  }
+  const plane = group.children[0] as THREE.Mesh | undefined;
+  const uv = plane?.geometry.getAttribute("uv");
+  if (!uv) {
+    return;
+  }
+  const row = ROW_OF_DIR[((dir % 4) + 4) % 4];
+  const u0 = column / WALK_FRAMES;
+  const u1 = (column + 1) / WALK_FRAMES;
+  const v0 = 1 - (row + 1) / WALK_DIRS.length;
+  const v1 = 1 - row / WALK_DIRS.length;
+  uv.setXY(0, u0, v1);
+  uv.setXY(1, u1, v1);
+  uv.setXY(2, u0, v0);
+  uv.setXY(3, u1, v0);
+  uv.needsUpdate = true;
+}

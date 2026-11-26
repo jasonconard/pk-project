@@ -1,3 +1,4 @@
+import { loadMap } from "../shared/services/map-storage";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -29,6 +30,7 @@ import {
   LucideOctagonX,
   LucidePlus,
   LucideMove3d,
+  LucideClapperboard,
   LucideSwords,
   LucideTrash,
   LucideUsers,
@@ -107,6 +109,11 @@ const ACTIONS: {
     icon: LucideCirclePause,
   },
   { type: "animate", label: "Animer l'objet", icon: LucideMove3d },
+  {
+    type: "cutscene",
+    label: "Jouer la cinématique",
+    icon: LucideClapperboard,
+  },
   { type: "fight", label: "Combat", icon: LucideSwords, branches: true },
 ];
 
@@ -411,6 +418,10 @@ export class EventEditorComponent {
         return { type, stop: true };
       case "animate":
         return { type, object: "", mode: "play", wait: true };
+      case "cutscene": {
+        const first = loadMap(this.currentMap())?.cutscenes?.[0];
+        return { type, cutscene: first?.id ?? "" };
+      }
       case "link": {
         const first = this.data.linkTargets[0];
         return first ? { type, target: first.id, points: 3 } : null;

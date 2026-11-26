@@ -1,0 +1,167 @@
+<div class="grip"></div>
+<div class="transport">
+  <button
+    type="button"
+    class="icon"
+    aria-label="Au début"
+    title="Au début"
+    (click)="store.setPlayhead(0)"
+  >
+    <svg lucideSkipBack></svg>
+  </button>
+  <button
+    type="button"
+    class="icon play"
+    [attr.aria-label]="store.playing() ? 'Pause' : 'Lire ici'"
+    [title]="store.playing() ? 'Pause (Espace)' : 'Lire ici (Espace)'"
+    (click)="store.togglePlay()"
+  >
+    @if (store.playing()) {
+      <svg lucidePause></svg>
+    } @else {
+      <svg lucidePlay></svg>
+    }
+  </button>
+  <span class="time">
+    <b>{{ seconds(store.playhead()) }}</b>
+    / {{ seconds(store.length()) }}
+  </span>
+  <button
+    type="button"
+    class="icon"
+    aria-label="Voir plus de temps"
+    title="Dézoomer"
+    (click)="store.zoomBy(1 / 1.5)"
+  >
+    <svg lucideZoomOut></svg>
+  </button>
+  <button
+    type="button"
+    class="icon"
+    aria-label="Voir moins de temps"
+    title="Zoomer"
+    (click)="store.zoomBy(1.5)"
+  >
+    <svg lucideZoomIn></svg>
+  </button>
+  <button
+    type="button"
+    class="add"
+    title="Ajouter un bloc à la tête de lecture"
+    (click)="store.sheet.set('add')"
+  >
+    <svg lucidePlus></svg>
+    Bloc
+  </button>
+</div>
+
+<div
+  #scroller
+  class="scroller"
+  (pointermove)="pointerMove($event)"
+  (pointerup)="pointerUp($event)"
+  (pointercancel)="pointerCancel()"
+>
+  <div #content class="content" [style.width.px]="contentWidth()">
+    <div class="ruler-row">
+      <div class="corner"></div>
+      <div class="ruler" (pointerdown)="rulerDown($event)">
+        @for (tick of ticks(); track tick.t) {
+          <span class="tick" [style.left.px]="PAD + tick.t * pps()">
+            {{ tick.label }}
+          </span>
+        }
+      </div>
+    </div>
+
+    @for (row of store.rows(); track row.key) {
+      <div class="row">
+        <button
+          type="button"
+          class="label"
+          [class.chosen]="row.track && row.track.id === store.trackId()"
+          [style.color]="row.color"
+          (click)="labelClick(row)"
+        >
+          <svg [lucideIcon]="trackIcons[row.kind]"></svg>
+          <span>{{ row.label }}</span>
+        </button>
+        <div class="lane" (pointerdown)="laneDown($event)">
+          @for (block of row.track?.blocks ?? []; track block.id) {
+            @let width = blockWidth(block);
+            <div
+              class="block"
+              [class.selected]="block.id === store.selectedId()"
+              [style.left.px]="left(block)"
+              [style.width.px]="width"
+              [style.--c]="row.color"
+              [title]="store.summary(block)"
+              (pointerdown)="blockDown($event, block, 'move')"
+            >
+              @if (block.kind === "bubble" && width < NARROW) {
+                <b>{{ glyph(block.emote) }}</b>
+              } @else if (width < NARROW) {
+                <svg [lucideIcon]="kindIcon(block.kind)"></svg>
+              } @else {
+                <span>{{ store.summary(block) }}</span>
+              }
+              <i
+                class="edge"
+                (pointerdown)="blockDown($event, block, 'size')"
+              ></i>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <div
+      class="playhead"
+      [style.left.px]="LABEL + PAD + store.playhead() * pps()"
+    ></div>
+  </div>
+</div>
+
+<div class="foot">
+  @let open = menu();
+  @if (open === "add") {
+    <span class="dim">Pour :</span>
+    @for (actor of store.freeActors(); track actor.id) {
+      <button type="button" class="chip" (click)="addCharacter(actor.id)">
+        {{ actor.label }}
+      </button>
+    } @empty {
+      <span class="dim">Tout le monde a déjà sa piste.</span>
+    }
+    <button type="button" class="chip" (click)="menu.set(null)">Annuler</button>
+  } @else if (open) {
+    @for (row of store.rows(); track row.key) {
+      @if (row.track?.id === open) {
+        <span [style.color]="row.color">{{ row.label }}</span>
+        <button type="button" class="chip danger" (click)="removeTrack(row)">
+          <svg lucideTrash></svg>
+          {{
+            confirmRemove()
+              ? "Retirer avec ses " + row.track.blocks.length + " blocs ?"
+              : "Retirer la piste"
+          }}
+        </button>
+        <button type="button" class="chip" (click)="menu.set(null)">
+          Annuler
+        </button>
+      }
+    }
+  } @else {
+    <button type="button" class="link" (click)="menu.set('add')">
+      <svg lucideUserPlus></svg>
+      Ajouter un personnage (joueur, PNJ de la carte)
+    </button>
+  }
+</div>
+<p class="hint touch">
+  Toucher un bloc : le régler · le glisser : le déplacer · ses bords : sa durée
+</p>
+<p class="hint keys">
+  Espace : lire · Suppr : retirer le bloc · Ctrl+D : le dupliquer · Ctrl+Z :
+  annuler
+</p>

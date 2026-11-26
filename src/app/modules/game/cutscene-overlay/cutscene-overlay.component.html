@@ -1,0 +1,97 @@
+@if (view(); as v) {
+  <div class="bar top" [style.height]="barHeight()"></div>
+  <div class="bar bottom" [style.height]="barHeight()"></div>
+  @if (v.fade > 0) {
+    <div
+      class="fade"
+      [class.white]="v.fadeColor === 'white'"
+      [style.opacity]="v.fade"
+    ></div>
+  }
+  @if (v.title) {
+    <p class="title" [style.opacity]="v.titleOpacity">
+      {{ v.title }}
+    </p>
+  }
+  @for (b of v.bubbles; track b.id) {
+    <div
+      class="bubble"
+      [style.left.px]="b.x"
+      [style.top.px]="b.y"
+      aria-hidden="true"
+    >
+      @switch (b.emote) {
+        @case ("exclaim") {
+          <b>!</b>
+        }
+        @case ("question") {
+          <b>?</b>
+        }
+        @case ("heart") {
+          <svg lucideHeart class="heart"></svg>
+        }
+        @case ("music") {
+          <svg lucideMusic></svg>
+        }
+        @case ("dots") {
+          <svg lucideEllipsis></svg>
+        }
+        @case ("anger") {
+          <svg lucideZap class="anger"></svg>
+        }
+        @case ("sweat") {
+          <svg lucideDroplet class="sweat"></svg>
+        }
+        @case ("idea") {
+          <svg lucideLightbulb class="idea"></svg>
+        }
+      }
+    </div>
+  }
+  @if (v.skippable || v.fastForward) {
+    <div class="controls" [class.raised]="messageOpen()">
+      @if (v.skippable) {
+        <p class="hint">
+          {{
+            holding() ? "Encore un peu…" : "Maintenir « Passer » 2 s : la fin"
+          }}
+        </p>
+      }
+      <div class="buttons">
+        @if (v.fastForward) {
+          <button
+            type="button"
+            class="fast"
+            [class.on]="v.fast"
+            [attr.aria-pressed]="v.fast"
+            title="Plus vite (×3)"
+            (click)="toggleFast()"
+          >
+            <svg lucideFastForward></svg>
+          </button>
+        }
+        @if (v.skippable) {
+          <button
+            type="button"
+            class="skip"
+            title="Maintenir 2 s pour passer (Entrée)"
+            (pointerdown)="press($event)"
+            (pointerup)="release()"
+            (pointerleave)="release()"
+            (pointercancel)="release()"
+            (contextmenu)="$event.preventDefault()"
+          >
+            <span
+              class="fill"
+              [style.transform]="'scaleX(' + hold() + ')'"
+            ></span>
+            <span class="label"><svg lucideSkipForward></svg>Passer</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+  @if (v.fast) {
+    <p class="speed"><svg lucideFastForward></svg>×3</p>
+  }
+}

@@ -148,7 +148,12 @@ export class CameraFollow {
     this.lastTime = now;
     const player = game.mapHelper?.scenePlayer.mesh;
     // The editor and the fights move the camera themselves (a zoom of their own)
-    if (!player || game.editMode || game.cameraZoom !== game.fittedZoom) {
+    if (
+      !player ||
+      game.editMode ||
+      game.cutscene ||
+      game.cameraZoom !== game.fittedZoom
+    ) {
       this.lag.set(0, 0, 0);
       this.display = null;
       this.snapped = null;

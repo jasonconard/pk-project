@@ -1,0 +1,102 @@
+/* The map's cutscenes: the list, the open one's options. */
+@use '../sheet';
+
+.head .new {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px 0 10px;
+  border-radius: 10px;
+  background: rgba(197, 138, 240, 0.22);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.list {
+  overflow: hidden;
+}
+
+.item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: none;
+  text-align: left;
+
+  & + .item {
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  &.current {
+    background: rgba(197, 138, 240, 0.16);
+  }
+
+  > svg:first-child {
+    color: var(--accent);
+  }
+
+  > svg:last-child {
+    color: var(--dim);
+  }
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+
+  small {
+    font-size: 12px;
+    color: var(--dim);
+
+    svg {
+      width: 13px;
+      height: 13px;
+      vertical-align: -2px;
+    }
+  }
+}
+
+.section {
+  color: var(--accent);
+}
+
+.name {
+  flex: 1;
+}
+
+.danger {
+  color: #ff8a8a;
+
+  &.ask {
+    background: rgba(255, 90, 90, 0.2);
+  }
+}
+
+.toggle {
+  width: 100%;
+  flex-wrap: nowrap;
+  background: none;
+}
+
+.seg {
+  flex-wrap: wrap;
+}
+
+.uses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  .chip svg {
+    width: 15px;
+    height: 15px;
+  }
+}

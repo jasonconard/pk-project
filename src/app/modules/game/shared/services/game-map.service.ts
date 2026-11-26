@@ -274,9 +274,11 @@ export class GameMapService {
       return;
     }
     fitPixelCamera(game);
-    // No moves during a sequence, or while a tornado carries the player away
+    // (an event or a cutscene is being played)
+    const busy = this.sequenceService.isRunning || game.cutscene;
+    // No moves during a sequence or a cutscene, or while a tornado carries the player away
     const moveDetails =
-      this.sequenceService.isRunning || game.weather.playerFlying
+      busy || game.weather.playerFlying
         ? {
             move: { x: 0, y: 0, z: 0 },
             speed: 0,
@@ -421,34 +423,33 @@ export class GameMapService {
     if (game.frame % LOOK_EVERY === 0) {
       mapHelper.refreshPlayerLook();
     }
-    PlayerService.updatePlayerSprite({
-      mapHelper: mapHelper,
-      player: mapHelper.scenePlayer,
-      status: this.moveStatus,
-      currentFrame: game.frame,
-      framePerSecond: game.framePerSec,
-    });
+    // (a cutscene draws the player itself)
+    if (!game.cutscene) {
+      PlayerService.updatePlayerSprite({
+        mapHelper: mapHelper,
+        player: mapHelper.scenePlayer,
+        status: this.moveStatus,
+        currentFrame: game.frame,
+        framePerSecond: game.framePerSec,
+      });
+    }
 
     // What the action key would do (the action button, the prompt), the events starting on their own: 30 times per
     // second is plenty
     if (++this.actionTick % ACTION_EVERY === 0) {
       const ctx = this.eventContext(game);
       const found =
-        this.sequenceService.isRunning || game.weather.playerFlying
+        busy || game.weather.playerFlying
           ? null
           : EventService.actionAt(mapHelper, sprite, ctx);
       let action = found ? describeAction(found.evt, found.building) : null;
-      if (
-        !found &&
-        !this.sequenceService.isRunning &&
-        !game.weather.playerFlying
-      ) {
+      if (!found && !busy && !game.weather.playerFlying) {
         action = this.dungeonService.actionAt(mapHelper, sprite);
       }
       if (!sameAction(action, game.action)) {
         game.action = action;
       }
-      if (!this.sequenceService.isRunning && !game.weather.playerFlying) {
+      if (!busy && !game.weather.playerFlying) {
         // An event that just became possible (stepped in, conditions now true) plays, one at a time; it plays again
         // only after having been impossible
         const armed = EventService.armed(mapHelper, sprite, ctx);
@@ -464,7 +465,7 @@ export class GameMapService {
       }
     }
 
-    if (!this.sequenceService.isRunning) {
+    if (!busy) {
       const found = EventService.checkEvents(
         mapHelper,
         sprite,
@@ -490,7 +491,7 @@ export class GameMapService {
     this.dungeonService.update(
       game,
       sprite,
-      !this.sequenceService.isRunning && !game.weather.playerFlying
+      !busy && !game.weather.playerFlying
     );
 
     // Buildings fading / hiding: 30 times per second is plenty (every building's box is computed)
