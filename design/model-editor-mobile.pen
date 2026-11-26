@@ -1,5 +1,5 @@
 {
-  "version": "2.22",
+  "version": "2.25",
   "children": [
     {
       "type": "frame",
@@ -16069,6 +16069,1135 @@
                   "content": "Action",
                   "fontFamily": "Inter",
                   "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "xso2d",
+      "x": 4500,
+      "y": 0,
+      "name": "11 · Modèle · Zone d'action",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$panel",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "XUjgW",
+          "name": "Status bar",
+          "width": "fill_container",
+          "height": 47,
+          "padding": [
+            0,
+            28
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "zuivf",
+              "name": "Time",
+              "fill": "$text",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "pAcBg",
+              "name": "Status icons",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Z7RXCJ",
+                  "name": "signal",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "signal",
+                  "library": "lucide",
+                  "fill": "$text"
+                },
+                {
+                  "type": "icon",
+                  "id": "fEEup",
+                  "name": "wifi",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "wifi",
+                  "library": "lucide",
+                  "fill": "$text"
+                },
+                {
+                  "type": "icon",
+                  "id": "sSFaG",
+                  "name": "battery-full",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "battery-full",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Tcg5t",
+          "name": "Top bar",
+          "width": "fill_container",
+          "height": 48,
+          "gap": 4,
+          "padding": [
+            0,
+            8
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "jhjEc",
+              "name": "Back",
+              "height": 44,
+              "gap": 4,
+              "padding": [
+                0,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "cdvkN",
+                  "name": "Back icon",
+                  "width": 20,
+                  "height": 20,
+                  "icon": "chevron-left",
+                  "library": "lucide",
+                  "fill": "#9fc3ff"
+                },
+                {
+                  "type": "text",
+                  "id": "gz1EP",
+                  "name": "Back label",
+                  "fill": "#9fc3ff",
+                  "content": "Jeu",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vi5XG",
+              "name": "Title",
+              "width": "fill_container",
+              "layout": "vertical",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "lacCd",
+                  "name": "Model name",
+                  "fill": "$text",
+                  "content": "house",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "HRcii",
+                  "name": "Saved",
+                  "fill": "$muted",
+                  "content": "Enregistré",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "f6FIPn",
+              "name": "Undo",
+              "width": 44,
+              "height": 44,
+              "cornerRadius": 10,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "yg7tw",
+                  "name": "Undo icon",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "undo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DIjll",
+              "name": "Redo",
+              "width": 44,
+              "height": 44,
+              "cornerRadius": 10,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "qyGZR",
+                  "name": "Redo icon",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "redo-2",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ea1Zp",
+          "name": "Mode switch wrap",
+          "width": "fill_container",
+          "padding": [
+            4,
+            16,
+            10,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "GcBXu",
+              "name": "Mode switch",
+              "width": "fill_container",
+              "height": 44,
+              "fill": "$surface",
+              "cornerRadius": 12,
+              "gap": 3,
+              "padding": 3,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "GZruC",
+                  "name": "Mode Modélisation",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$accent",
+                  "cornerRadius": 9,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "QU6Yz",
+                      "name": "Modélisation icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "box",
+                      "library": "lucide",
+                      "fill": "#ffffff"
+                    },
+                    {
+                      "type": "text",
+                      "id": "J8WmO",
+                      "name": "Modélisation label",
+                      "fill": "#ffffff",
+                      "content": "Modélisation",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "b6kAbl",
+                  "name": "Mode Dessin",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#00000000",
+                  "cornerRadius": 9,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "dM2VW",
+                      "name": "Dessin icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "paintbrush",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "oX5Ot",
+                      "name": "Dessin label",
+                      "fill": "$muted",
+                      "content": "Dessin",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qzVcq",
+          "name": "Vue 3D",
+          "width": "fill_container",
+          "height": 240,
+          "fill": [
+            "$bg",
+            {
+              "type": "image",
+              "enabled": true,
+              "url": "images/house-3d.png",
+              "mode": "contain"
+            }
+          ],
+          "layout": "vertical",
+          "padding": 12,
+          "children": [
+            {
+              "type": "frame",
+              "id": "JFI6R",
+              "name": "Gesture hint",
+              "fill": "#22232acc",
+              "cornerRadius": 8,
+              "gap": 6,
+              "padding": [
+                6,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "s2EQa",
+                  "name": "Hint icon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "hand",
+                  "library": "lucide",
+                  "fill": "$muted"
+                },
+                {
+                  "type": "text",
+                  "id": "k6lP8H",
+                  "name": "Hint",
+                  "fill": "#c8cad6",
+                  "content": "Toucher une forme · 1 doigt tourner · 2 doigts zoomer",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "oQFHS",
+          "name": "Bottom nav",
+          "width": "fill_container",
+          "fill": "$panel",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "gap": 6,
+          "padding": [
+            8,
+            12,
+            26,
+            12
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "aP2TR",
+              "name": "Nav Modèle",
+              "width": "fill_container",
+              "height": 54,
+              "fill": "$accent-soft",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 3,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "KomNN",
+                  "name": "Modèle icon",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "package",
+                  "library": "lucide",
+                  "fill": "#9fc3ff"
+                },
+                {
+                  "type": "text",
+                  "id": "uLfK6",
+                  "name": "Modèle label",
+                  "fill": "#9fc3ff",
+                  "content": "Modèle",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xa1cK",
+              "name": "Nav Formes",
+              "width": "fill_container",
+              "height": 54,
+              "fill": "#00000000",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 3,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "B7xhZz",
+                  "name": "Formes icon",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "layers",
+                  "library": "lucide",
+                  "fill": "$muted"
+                },
+                {
+                  "type": "text",
+                  "id": "qwS1Q",
+                  "name": "Formes label",
+                  "fill": "$muted",
+                  "content": "Formes",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "r3VZp5",
+              "name": "Nav Ajouter",
+              "width": "fill_container",
+              "height": 54,
+              "fill": "#00000000",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 3,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "s9CiV",
+                  "name": "Ajouter icon",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "plus",
+                  "library": "lucide",
+                  "fill": "$muted"
+                },
+                {
+                  "type": "text",
+                  "id": "RfjNb",
+                  "name": "Ajouter label",
+                  "fill": "$muted",
+                  "content": "Ajouter",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "UTbTU",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 379,
+          "name": "Sheet Modèle",
+          "width": 390,
+          "fill": "$panel",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000080",
+            "offset": {
+              "x": 0,
+              "y": -6
+            },
+            "blur": 24
+          },
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            8,
+            16,
+            28,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "WrtoD",
+              "name": "Handle wrap",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 3,
+                  "id": "MrjWw",
+                  "name": "Handle",
+                  "fill": "$border",
+                  "width": 36,
+                  "height": 5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "O4V3S",
+              "name": "Sheet header",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "H5JSA",
+                  "name": "Sheet title",
+                  "fill": "$text",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Modèle",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "WeI4s",
+              "name": "Zone d'action",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "P2nbF",
+                  "name": "Titre",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "qbjNd",
+                      "name": "scan",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "scan",
+                      "library": "lucide",
+                      "fill": "#4FD1E8"
+                    },
+                    {
+                      "type": "text",
+                      "id": "wCF5N",
+                      "name": "Zone d'action",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Zone d'action",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "I4nFZo",
+                      "name": "Tout l'objet",
+                      "height": 32,
+                      "fill": "$surface",
+                      "cornerRadius": 8,
+                      "gap": 6,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "RkOKR",
+                          "name": "maximize",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "maximize",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "text",
+                          "id": "w790OW",
+                          "name": "Tout l'objet",
+                          "fill": "$text",
+                          "content": "Tout l'objet",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "he6A9",
+                  "name": "Où le joueur agit sur toutes les maisons : entrer, parler, marcher dessus.",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Où le joueur agit sur toutes les maisons : entrer, parler, marcher dessus.",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "Ga8Cx",
+                  "name": "Vue de dessus",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    4,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "W6XC0",
+                      "name": "Arrière",
+                      "fill": "$muted",
+                      "content": "Arrière",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z7uR5J",
+                      "name": "Milieu",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Q0JCvm",
+                          "name": "Gauche",
+                          "fill": "$muted",
+                          "content": "Gauche",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "A2WaiK",
+                          "name": "Cases du modèle (5 × 3)",
+                          "fill": "$border-soft",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 3,
+                          "padding": 3,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "vsuZ9",
+                              "name": "Rangée 1",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "eMt1M",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "FCf5A",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "qT7CS",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "wDgF5",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "Q9xGJM",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "hSdYg",
+                              "name": "Rangée 2",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "jar9T",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "EyqwJ",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "PoUGE",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "l0wusC",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "fV21s",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "to2HB",
+                              "name": "Rangée 3",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "wpg2z",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "KV4GR",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "BynPF",
+                                  "name": "Case de la porte",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "#4FD1E855",
+                                  "cornerRadius": 5,
+                                  "stroke": "#4FD1E8",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "YsTS4",
+                                      "name": "door-open",
+                                      "width": 18,
+                                      "height": 18,
+                                      "icon": "door-open",
+                                      "library": "lucide",
+                                      "fill": "#4FD1E8"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "UUdCv",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "t8pLbA",
+                                  "name": "Case",
+                                  "width": 40,
+                                  "height": 40,
+                                  "fill": "$surface",
+                                  "cornerRadius": 5,
+                                  "stroke": "#00000000",
+                                  "strokeWidth": 2,
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "X4A35",
+                          "name": "Droite",
+                          "fill": "$muted",
+                          "content": "Droite",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "TRpED",
+                      "name": "Devant",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "beUVc",
+                          "name": "arrow-down",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "arrow-down",
+                          "library": "lucide",
+                          "fill": "#4FD1E8"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZYCgw",
+                          "name": "Devant : le joueur se tient ici",
+                          "fill": "#4FD1E8",
+                          "content": "Devant : le joueur se tient ici",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "i0SuHr",
+                  "name": "Le joueur agit de ce côté",
+                  "fill": "$muted",
+                  "content": "Le joueur agit de ce côté",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "ZC3yj",
+                  "name": "Côté",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": 10,
+                  "gap": 4,
+                  "padding": 3,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZUsWg",
+                      "name": "Devant",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#4FD1E833",
+                      "cornerRadius": 8,
+                      "stroke": "#4FD1E8",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "tzwU7",
+                          "name": "Devant",
+                          "fill": "#4FD1E8",
+                          "content": "Devant",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HYv4k",
+                      "name": "Derrière",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#00000000",
+                      "cornerRadius": 8,
+                      "stroke": "#00000000",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "M492m",
+                          "name": "Derrière",
+                          "fill": "$text",
+                          "content": "Derrière",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p4mI9h",
+                      "name": "Gauche",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#00000000",
+                      "cornerRadius": 8,
+                      "stroke": "#00000000",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YN23C",
+                          "name": "Gauche",
+                          "fill": "$text",
+                          "content": "Gauche",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "a8eWFq",
+                      "name": "Droite",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#00000000",
+                      "cornerRadius": 8,
+                      "stroke": "#00000000",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "XbHvh",
+                          "name": "Droite",
+                          "fill": "$text",
+                          "content": "Droite",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "UsDJg",
+                      "name": "Tous",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#00000000",
+                      "cornerRadius": 8,
+                      "stroke": "#00000000",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "D0npGM",
+                          "name": "Tous",
+                          "fill": "$text",
+                          "content": "Tous",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Hg2t8",
+                  "name": "Toucher une case l'ajoute ou la retire. Sur la carte, un objet posé peut avoir sa propre zone.",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Toucher une case l'ajoute ou la retire. Sur la carte, un objet posé peut avoir sa propre zone.",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
                   "fontWeight": "normal"
                 }
               ]
