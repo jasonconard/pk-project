@@ -121,6 +121,8 @@ export type EventAction =
   | { type: "link"; target: string; points: number }
   /** The player picks a gift in the bag for an NPC (its link goes up, more for a liked one; one a day). */
   | { type: "gift"; target: string }
+  /** A shop of the database opens (buy, sell); the event goes on once it is closed. */
+  | { type: "shop"; shop: string }
   /** A fight against a group of the database, then the branch of how it ended. */
   | {
       type: "fight";
@@ -449,6 +451,8 @@ function toInstruction(
       };
     case "gift":
       return { type: InstructionType.GIFT, gift: { npc: action.target } };
+    case "shop":
+      return { type: InstructionType.SHOP, shop: { id: action.shop } };
   }
 }
 
@@ -606,6 +610,10 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
             target: instruction.link.id,
             points: instruction.link.points,
           }
+        : null;
+    case InstructionType.SHOP:
+      return instruction.shop
+        ? { type: "shop", shop: instruction.shop.id }
         : null;
     case InstructionType.GIFT:
       return instruction.gift

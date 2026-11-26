@@ -7,6 +7,7 @@ import {
   DbEnemy,
   DbGroup,
   DbItem,
+  DbShop,
   DbSkill,
   DbState,
   DbTable,
@@ -33,7 +34,8 @@ export type Row =
   | DbCalendar
   | DbNpc
   | DbEnemy
-  | DbGroup;
+  | DbGroup
+  | DbShop;
 /** A picture drawn in the pixel editor (icon: the small face of a character or an enemy). */
 export type PictureField = keyof typeof PICTURE_SIZES;
 
@@ -58,7 +60,7 @@ export interface SheetEdit {
 export interface WeatherPick {
   id: string;
   strong?: boolean;
-  for: "element" | "enemy" | "condition" | "dungeon";
+  for: "element" | "enemy" | "condition" | "dungeon" | "shop";
   index?: number;
 }
 
@@ -164,6 +166,28 @@ export class DatabaseStore {
       case "dungeon": {
         this.edit(pick.id, (d) => ({ ...d, weather: weather as WeatherType }));
 
+        break;
+      }
+      case "shop": {
+        // (an item of the shop: a weather added to its conditions)
+        this.edit(pick.id, (row) => {
+          const shop = row as DbShop;
+          return {
+            ...shop,
+            items: shop.items.map((it, i) =>
+              i === pick.index
+                ? {
+                    ...it,
+                    conditions: {
+                      variables: [],
+                      ...it.conditions,
+                      weathers: [...(it.conditions?.weathers ?? []), weather],
+                    },
+                  }
+                : it
+            ),
+          };
+        });
         break;
       }
       case "enemy": {

@@ -91,6 +91,26 @@ export class EventActionComponent {
         }))
     );
   });
+  protected shopOf(id: string) {
+    return this.data.db.shops.find((sh) => sh.id === id);
+  }
+
+  /** « Vendu par Bernard · 4 objets. » and what the event does meanwhile. */
+  protected shopHelp(id: string): string {
+    const shop = this.shopOf(id);
+    if (!shop) {
+      return "";
+    }
+    const keeper = this.data.npcs.find((n) => n.id === shop.keeper)?.name;
+    const count = shop.items.length;
+    return [
+      keeper ? `Vendu par ${keeper}` : "Sans vendeur",
+      count === 0 ? "rien à vendre" : `${count} objet${count > 1 ? "s" : ""}`,
+    ]
+      .join(" · ")
+      .concat(". L'action suivante attend que le joueur ferme la boutique.");
+  }
+
   /** The cutscenes of the map (Jouer la cinématique). */
   protected readonly cutscenes = computed(
     () => loadMap(this.currentMap())?.cutscenes ?? []

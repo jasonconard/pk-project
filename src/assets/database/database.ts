@@ -1542,5 +1542,6 @@ export const CODE_DATABASE: GameDatabase = {
       ]
     }
   ],
-  "dungeons": []
+  "dungeons": [],
+  "shops": []
 };

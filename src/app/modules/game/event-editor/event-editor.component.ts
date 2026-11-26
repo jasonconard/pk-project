@@ -39,6 +39,7 @@ import {
   LucideHeartPulse,
   LucideHeartHandshake,
   LucideGift,
+  LucideStore,
   LucideCirclePause,
   LucideVariable,
   LucideVolume2,
@@ -104,6 +105,7 @@ const ACTIONS: {
   { type: "heal", label: "Soigner l'équipe", icon: LucideHeartPulse },
   { type: "link", label: "Lien", icon: LucideHeartHandshake },
   { type: "gift", label: "Offrir un cadeau", icon: LucideGift },
+  { type: "shop", label: "Ouvrir la boutique", icon: LucideStore },
   { type: "time", label: "Faire passer le temps", icon: LucideHourglass },
   {
     type: "timeFlow",
@@ -468,6 +470,10 @@ export class EventEditorComponent {
       case "gift": {
         const first = this.data.npcs[0];
         return first ? { type, target: first.id } : null;
+      }
+      case "shop": {
+        const first = this.data.db.shops[0];
+        return first ? { type, shop: first.id } : null;
       }
       case "item":
         return this.data.db.items[0]

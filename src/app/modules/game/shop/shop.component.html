@@ -1,0 +1,163 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="dialog sheet"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="shop-title"
+>
+  <div class="grip"></div>
+  <header>
+    @if (keeper()?.portrait; as pic) {
+      <img class="portrait" [src]="pic" alt="" />
+    }
+    <span class="titles">
+      <h2 id="shop-title">{{ shop()?.name ?? "Boutique" }}</h2>
+      @if (keeper(); as k) {
+        <small>{{ k.name }}</small>
+      }
+    </span>
+    <span class="money" title="Votre argent">
+      <svg lucideCoins></svg>
+      {{ money().toLocaleString("fr-FR") }}
+    </span>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer la boutique"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      [class.on]="tab() === 'buy'"
+      [attr.aria-selected]="tab() === 'buy'"
+      (click)="setTab('buy')"
+    >
+      <svg lucideShoppingBag></svg> Acheter
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [class.on]="tab() === 'sell'"
+      [attr.aria-selected]="tab() === 'sell'"
+      [disabled]="!shop()?.buyback"
+      (click)="setTab('sell')"
+    >
+      <svg lucideHandCoins></svg> Vendre
+    </button>
+  </div>
+
+  @if (tab() === "buy") {
+    @if (discount() > 0) {
+      <p class="info link">
+        <svg lucideHeart></svg>
+        Lien niveau {{ level() }} avec {{ keeper()?.name }} : tout à −{{
+          discount()
+        }}
+        %
+      </p>
+    }
+  } @else {
+    <p class="info">
+      <svg lucideHandCoins></svg>
+      {{ keeper()?.name ?? "La boutique" }} rachète à {{ shop()?.buyback }} % du
+      prix
+    </p>
+  }
+
+  <div class="list">
+    @for (line of lines(); track line.id) {
+      <div
+        class="line"
+        [class.selected]="selected() === line.id"
+        [class.off]="tab() === 'buy' && line.max < 1 && selected() !== line.id"
+      >
+        <button
+          type="button"
+          class="pick"
+          [attr.aria-expanded]="selected() === line.id"
+          (click)="select(line)"
+        >
+          <span class="icon">
+            @if (line.icon) {
+              <img [src]="line.icon" alt="" />
+            } @else {
+              <svg lucidePackage></svg>
+            }
+          </span>
+          <span class="texts">
+            <b>{{ line.name }}</b>
+            <small [class.warn]="line.warn">{{ line.sub }}</small>
+          </span>
+          <span class="price">
+            @if (line.was) {
+              <s>{{ line.was }}</s>
+            }
+            <span><svg lucideCoins></svg>{{ line.price }}</span>
+          </span>
+        </button>
+        @if (selected() === line.id) {
+          @let why = blocked(line);
+          <div class="buy">
+            <button
+              type="button"
+              class="step"
+              aria-label="Un de moins"
+              [disabled]="count() <= 1"
+              (click)="step(-1, line.max)"
+            >
+              <svg lucideMinus></svg>
+            </button>
+            <b class="count">{{ count() }}</b>
+            <button
+              type="button"
+              class="step"
+              aria-label="Un de plus"
+              [disabled]="count() >= line.max"
+              (click)="step(1, line.max)"
+            >
+              <svg lucidePlus></svg>
+            </button>
+            <button
+              type="button"
+              class="go"
+              [disabled]="!!why"
+              (click)="confirm(line)"
+            >
+              @if (why) {
+                {{ why }}
+              } @else {
+                {{ tab() === "buy" ? "Acheter" : "Vendre" }} ·
+                {{ line.price * count() }}
+                <svg lucideCoins></svg>
+              }
+            </button>
+          </div>
+        }
+      </div>
+    } @empty {
+      <p class="empty">
+        {{
+          tab() === "buy"
+            ? "Rien à vendre pour le moment."
+            : "Rien dans le sac que la boutique rachète."
+        }}
+      </p>
+    }
+  </div>
+
+  <p class="foot">
+    @if (notice()) {
+      <b>{{ notice() }}</b>
+    } @else if (tab() === "buy") {
+      Les prix tiennent compte du lien. Le stock revient chaque matin.
+    } @else {
+      Les objets clés et ceux sans prix ne se vendent pas.
+    }
+  </p>
+</section>

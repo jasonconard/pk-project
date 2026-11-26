@@ -33,6 +33,8 @@ export enum InstructionType {
   ANIMATE,
   /** CUTSCENE: a cutscene of the event's map is played (see cutscene.ts), then the event goes on. */
   CUTSCENE,
+  /** SHOP: a shop of the database opens; the event goes on once the player closes it. */
+  SHOP,
 }
 
 export interface SceneEventInstruction {
@@ -61,6 +63,8 @@ export interface SceneEventInstruction {
   timeFlow?: { stop: boolean };
   link?: { id: string; points: number };
   gift?: { npc: string };
+  /** SHOP: the shop's id (database table Boutiques). */
+  shop?: { id: string };
   subInstructions?: SceneEventSubInstruction[];
 }
 

@@ -131,3 +131,8 @@ app-database-editor {
 :where(game-event-editor .event-editor) {
   @include event-editor.fields;
 }
+
+// The same fields elsewhere: an item's conditions in a shop's sheet (database editor)
+:where(.event-fields) {
+  @include event-editor.fields;
+}

@@ -21,7 +21,7 @@ import {
   setGameCovered,
 } from "../../core/shared/app-visibility";
 import { Passage } from "./shared/model/Passage";
-import { ObjectEvent } from "./shared/model/ObjectEvent";
+import { EventContext, ObjectEvent } from "./shared/model/ObjectEvent";
 import { DecimalPipe } from "@angular/common";
 import { isFirstStartOfNewVersion } from "./release-notes/whats-new";
 import { GameMode } from "./shared/model/Game";
@@ -63,6 +63,8 @@ import { AgendaComponent } from "./agenda/agenda.component";
 import { LinksComponent } from "./links/links.component";
 import { LinkToastComponent } from "./link-toast/link-toast.component";
 import { GiftPickerComponent } from "./gift-picker/gift-picker.component";
+import { ShopComponent } from "./shop/shop.component";
+import { currentVariableValues } from "../variables-editor/shared/variable-values";
 import { LinkGain } from "../database-editor/shared/links";
 import { VariablesTestComponent } from "./variables-test/variables-test.component";
 import { BattleSimComponent } from "../battle/battle-sim/battle-sim.component";
@@ -92,6 +94,7 @@ import { ActionZone } from "./shared/model/action-zone";
     LinksComponent,
     LinkToastComponent,
     GiftPickerComponent,
+    ShopComponent,
     TimeBannerComponent,
     DungeonChipComponent,
     TeleportComponent,
@@ -185,6 +188,11 @@ export class GameComponent {
   protected readonly linksOpen = signal(false);
   /** The Offrir action of an event: the NPC to give a gift to (null: none asked). */
   protected readonly giftFor = signal<string | null>(null);
+  /** The « Ouvrir la boutique » action of an event: the shop open and what its items' conditions read then. */
+  protected readonly shopOpen = signal<{
+    id: string;
+    context: EventContext;
+  } | null>(null);
   /** The variables test panel (menu → Test des variables). */
   protected readonly variablesTestOpen = signal(false);
   protected readonly battleSimOpen = signal(false);
@@ -212,6 +220,19 @@ export class GameComponent {
       this.giftFor.set(npc || null)
     );
     inject(DestroyRef).onDestroy(() => gifts.unsubscribe());
+    // The Ouvrir la boutique action of an event: the shop (the event waits until it is closed)
+    const shops = this.sequenceService.shop$.subscribe((id) =>
+      this.shopOpen.set({
+        id,
+        context: {
+          hour: this.hour(),
+          day: this.gameService.day(),
+          weather: this.weather(),
+          values: currentVariableValues(),
+        },
+      })
+    );
+    inject(DestroyRef).onDestroy(() => shops.unsubscribe());
     // A dungeon's save point: the saved games
     const saves = inject(DungeonService).saveAsked$.subscribe(() =>
       this.savesOpen.set(true)
@@ -414,6 +435,11 @@ export class GameComponent {
   protected openLinks(): void {
     this.menuOpen.set(false);
     this.linksOpen.set(true);
+  }
+
+  protected shopDone(): void {
+    this.shopOpen.set(null);
+    this.sequenceService.nextSequence();
   }
 
   protected giftDone(gain: LinkGain | null): void {

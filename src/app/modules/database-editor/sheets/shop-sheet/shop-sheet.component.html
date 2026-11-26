@@ -1,0 +1,262 @@
+@let sh = shop();
+<div class="block">
+  <h3>Description</h3>
+  <input
+    type="text"
+    maxlength="120"
+    placeholder="Facultatif"
+    aria-label="Description"
+    [value]="sh.note ?? ''"
+    (input)="setNote(sh, $any($event.target).value)"
+  />
+</div>
+
+<div class="block">
+  <h3>Vendeur</h3>
+  <div class="keeper">
+    @if (keeper()?.portrait; as pic) {
+      <img class="portrait" [src]="pic" alt="" />
+    }
+    <label class="learn grow">
+      <select
+        aria-label="Vendeur"
+        (change)="setKeeper($any($event.target).value)"
+      >
+        <option value="" [selected]="!sh.keeper">Personne</option>
+        @for (n of db().npcs; track n.id) {
+          <option [value]="n.id" [selected]="n.id === sh.keeper">
+            {{ n.name }}
+          </option>
+        }
+      </select>
+    </label>
+  </div>
+  <p class="note">
+    Son portrait et son nom s'affichent dans la boutique ; son lien baisse les
+    prix.
+  </p>
+</div>
+
+<div class="block">
+  <h3>Réglages</h3>
+  <div class="range">
+    <span>Rachète les objets à</span>
+    <db-stepper
+      [value]="sh.buyback"
+      [min]="0"
+      [max]="limits.percent"
+      [label]="'Rachat'"
+      [suffix]="'%'"
+      (changed)="set('buyback', $event)"
+    />
+  </div>
+  @if (sh.keeper) {
+    <div class="range">
+      <span>Réduction par niveau de lien</span>
+      <db-stepper
+        [value]="sh.discount"
+        [min]="0"
+        [max]="limits.discount"
+        [label]="'Réduction par niveau'"
+        [suffix]="'%'"
+        (changed)="set('discount', $event)"
+      />
+    </div>
+  }
+  <p class="note">
+    {{ example() }}
+    @if (sh.buyback === 0) {
+      Elle n'achète rien.
+    } @else {
+      Les objets clés et ceux sans prix ne se vendent jamais.
+    }
+  </p>
+</div>
+
+<div class="block">
+  <div class="block-head">
+    <h3>Objets en vente</h3>
+    <small>{{ sh.items.length }}</small>
+  </div>
+  @for (entry of sh.items; track $index; let i = $index) {
+    @let it = itemOf(entry);
+    <button type="button" class="shop-item" (click)="open.set(i)">
+      <span class="icon">
+        @if (it?.icon) {
+          <img [src]="it!.icon" alt="" />
+        } @else {
+          <svg lucidePackage></svg>
+        }
+      </span>
+      <span class="texts">
+        <span class="top">
+          <b>{{ it?.name ?? "?" }}</b>
+          @if (entry.price !== undefined && it) {
+            <s>{{ it.price }}</s>
+          }
+          <span class="price">{{ priceOf(entry) }} pièces</span>
+        </span>
+        <span class="tags">
+          <span class="tag">
+            {{
+              entry.stock === undefined
+                ? "Stock illimité"
+                : entry.stock + " par jour"
+            }}
+          </span>
+          @if (entry.price !== undefined) {
+            <span class="tag own">Prix propre</span>
+          }
+          @if (whenLabel(entry); as when) {
+            <span class="tag when">{{ when }}</span>
+          }
+          @if (entry.linkLevel) {
+            <span class="tag link">Lien niveau {{ entry.linkLevel }}</span>
+          }
+        </span>
+      </span>
+    </button>
+  }
+  <label class="add-select">
+    <svg lucidePlus></svg> Objet
+    <select
+      aria-label="Ajouter un objet à la boutique"
+      (change)="
+        addItem($any($event.target).value); $any($event.target).value = ''
+      "
+    >
+      <option value="" selected></option>
+      @for (it of addable(); track it.id) {
+        <option [value]="it.id">{{ it.name }}</option>
+      }
+    </select>
+  </label>
+  <p class="hint">
+    <svg lucideInfo></svg>
+    <span>
+      Une boutique s'ouvre depuis un événement (l'action « Ouvrir la boutique »)
+      : depuis un comptoir ou depuis le vendeur lui-même. Le stock revient
+      chaque matin.
+    </span>
+  </p>
+</div>
+
+@if (current(); as cur) {
+  <div class="dim" (click)="open.set(null)"></div>
+  <section
+    class="item-window"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="shop-item-title"
+  >
+    <div class="grip"></div>
+    <header>
+      <span class="icon">
+        @if (cur.item.icon) {
+          <img [src]="cur.item.icon" alt="" />
+        } @else {
+          <svg lucidePackage></svg>
+        }
+      </span>
+      <span class="titles">
+        <b id="shop-item-title">{{ cur.item.name }}</b>
+        <small>Prix de l'objet : {{ cur.item.price }} pièces</small>
+      </span>
+      <button type="button" class="ok" (click)="open.set(null)">OK</button>
+    </header>
+
+    <h3>Prix ici</h3>
+    <div class="segmented wide" role="group" aria-label="Prix ici">
+      <button
+        type="button"
+        [class.on]="cur.entry.price === undefined"
+        [disabled]="cur.item.price <= 0"
+        (click)="setOwnPrice(cur.index, false, cur.item.price)"
+      >
+        Celui de l'objet
+      </button>
+      <button
+        type="button"
+        [class.on]="cur.entry.price !== undefined"
+        (click)="setOwnPrice(cur.index, true, cur.item.price)"
+      >
+        Propre
+      </button>
+    </div>
+    @if (cur.entry.price !== undefined) {
+      <div class="range">
+        <span>Prix</span>
+        <db-stepper
+          [value]="cur.entry.price"
+          [min]="1"
+          [max]="priceMax"
+          [label]="'Prix ici'"
+          (changed)="setItem(cur.index, { price: $event })"
+        />
+      </div>
+    }
+
+    <h3>Stock par jour</h3>
+    <div class="segmented wide" role="group" aria-label="Stock par jour">
+      <button
+        type="button"
+        [class.on]="cur.entry.stock === undefined"
+        (click)="setItem(cur.index, { stock: undefined })"
+      >
+        Illimité
+      </button>
+      <button
+        type="button"
+        [class.on]="cur.entry.stock !== undefined"
+        (click)="setItem(cur.index, { stock: cur.entry.stock ?? 3 })"
+      >
+        Limité
+      </button>
+    </div>
+    @if (cur.entry.stock !== undefined) {
+      <div class="range">
+        <span>Chaque matin</span>
+        <db-stepper
+          [value]="cur.entry.stock"
+          [min]="1"
+          [max]="limits.stock"
+          [label]="'Stock de chaque jour'"
+          (changed)="setItem(cur.index, { stock: $event })"
+        />
+      </div>
+    }
+
+    <h3>En vente</h3>
+    <div class="event-fields">
+      <game-event-conditions
+        [conditions]="cur.entry.conditions ?? emptyConditions"
+        [empty]="'Toujours en vente.'"
+        (changed)="setConditions(cur.index, $event)"
+        (pickWeather)="pickWeather(cur.index)"
+      />
+    </div>
+
+    @if (keeper(); as k) {
+      <h3>Lien avec {{ k.name }}</h3>
+      <div class="range">
+        <span>
+          Visible dès le niveau
+          @if (!cur.entry.linkLevel) {
+            (toujours)
+          }
+        </span>
+        <db-stepper
+          [value]="cur.entry.linkLevel ?? 0"
+          [min]="0"
+          [max]="linkMax"
+          [label]="'Niveau de lien'"
+          (changed)="setItem(cur.index, { linkLevel: $event || undefined })"
+        />
+      </div>
+    }
+
+    <button type="button" class="remove-item" (click)="removeItem(cur.index)">
+      <svg lucideTrash></svg> Retirer de la boutique
+    </button>
+  </section>
+}

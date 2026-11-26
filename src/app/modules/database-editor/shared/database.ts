@@ -2,6 +2,7 @@ import { WeatherType } from "../../game/shared/weather/Weather";
 import { omit } from "../../../core/shared/omit";
 import { SkillAnim } from "./skill-anim";
 import { SpriteSheet } from "./sprite-sheet";
+import type { EventConditions } from "../../game/shared/model/ObjectEvent";
 
 /**
  * The game's database (docs/idees.md, point 5): what the combat, the events and the menus read. Built table by
@@ -584,6 +585,43 @@ export function newDungeon(name: string): DbDungeon {
   };
 }
 
+/**
+ * A shop (design/database.pen, 18 · Boutique): opened by the « Ouvrir la boutique » action of an event. Its
+ * shopkeeper (an NPC: portrait, name, and the link that lowers the prices), the items sold, how much it buys back.
+ */
+export interface DbShop {
+  id: string;
+  name: string;
+  icon?: string;
+  note?: string;
+  /** The shopkeeper (an NPC id; none: nobody shown, no link discount). */
+  keeper?: string;
+  /** What the player gets for an item sold, in % of its price (0: the shop buys nothing). */
+  buyback: number;
+  /** Lower prices for each level of the link with the shopkeeper, in %. */
+  discount: number;
+  items: DbShopItem[];
+}
+
+/** An item sold in a shop (design/database.pen, 19 · Un objet). */
+export interface DbShopItem {
+  item: string;
+  /** Its own price here (none: the item's). */
+  price?: number;
+  /** How many can be bought each day (none: no limit); it comes back every morning. */
+  stock?: number;
+  /** Shown only when these fit (moments, weathers, days, variables…: the events' conditions). */
+  conditions?: EventConditions;
+  /** Shown from this level of the link with the shopkeeper (none: always). */
+  linkLevel?: number;
+}
+
+export const SHOP_LIMITS = { stock: 99, percent: 100, discount: 20 };
+
+export function newShop(name: string): DbShop {
+  return { id: newId("sh"), name, buyback: 50, discount: 5, items: [] };
+}
+
 /** How many floors a dungeon has (generated lines count their `repeat`). */
 export function floorCount(dungeon: DbDungeon): number {
   return dungeon.floors.reduce(
@@ -866,6 +904,7 @@ export interface GameDatabase {
   groups: DbGroup[];
   calendar: DbCalendar[];
   dungeons: DbDungeon[];
+  shops: DbShop[];
 }
 
 export type DbTable = keyof GameDatabase;
@@ -1411,6 +1450,23 @@ export function withoutRow(
       const { wearers, ...rest } = it;
       const left = wearers.filter((w) => w !== id);
       return left.length > 0 ? { ...rest, wearers: left } : rest;
+    });
+  }
+  if (table === "items") {
+    next.shops = next.shops.map((sh) =>
+      sh.items.some((i) => i.item === id)
+        ? { ...sh, items: sh.items.filter((i) => i.item !== id) }
+        : sh
+    );
+  }
+  if (table === "npcs") {
+    next.shops = next.shops.map((sh) => {
+      if (sh.keeper !== id) {
+        return sh;
+      }
+      const rest = { ...sh };
+      delete rest.keeper;
+      return rest;
     });
   }
   if (table === "groups" || table === "items") {

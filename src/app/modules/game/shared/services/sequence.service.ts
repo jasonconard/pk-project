@@ -87,6 +87,9 @@ export class SequenceService {
   /** The player shows a gift to give (an NPC id); the game calls `giftDone` once chosen or not. */
   private readonly giftSubject = new Subject<string>();
   readonly gift$: Observable<string> = this.giftSubject.asObservable();
+  /** A shop to open (its id); the game calls `nextSequence()` once the player closes it. */
+  private readonly shopSubject = new Subject<string>();
+  readonly shop$: Observable<string> = this.shopSubject.asObservable();
 
   private readonly dungeonSubject = new Subject<SceneEventInstruction>();
   /**
@@ -276,6 +279,13 @@ export class SequenceService {
       case InstructionType.GIFT:
         // (the game shows the bag's gifts; giftDone goes on)
         this.giftSubject.next(instruction.gift?.npc ?? "");
+        break;
+      case InstructionType.SHOP:
+        if (instruction.shop?.id) {
+          this.shopSubject.next(instruction.shop.id);
+        } else {
+          this.nextSequence();
+        }
         break;
       case InstructionType.TIME_FLOW:
         this.timeSubject.next({ stop: !!instruction.timeFlow?.stop });

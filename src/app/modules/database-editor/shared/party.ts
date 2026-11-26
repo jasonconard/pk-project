@@ -42,6 +42,8 @@ export interface PartyState {
   links?: Record<string, number>;
   /** NPC id → the day (game date) it was last given a gift (one a day). */
   gifts?: Record<string, number>;
+  /** Shop id → what was bought there on a day (item id → how many; the stock comes back the next day). */
+  shops?: Record<string, { day: number; bought: Record<string, number> }>;
 }
 
 /** The team when a new game starts. */
@@ -121,6 +123,45 @@ export function markGift(id: string, day: number): void {
   const party = structuredClone(currentParty());
   party.gifts = { ...party.gifts, [id]: day };
   writeParty(party);
+}
+
+/** How many of an item were bought in a shop on that day. */
+export function boughtToday(shop: string, item: string, day: number): number {
+  const today = currentParty().shops?.[shop];
+  return today?.day === day ? (today.bought[item] ?? 0) : 0;
+}
+
+/**
+ * A purchase (`count` > 0) or a sale (< 0) in a shop: the items and the money change together; a purchase counts in
+ * the day's stock. False: not enough money, nor items to sell.
+ */
+export function trade(
+  shop: string,
+  item: string,
+  count: number,
+  money: number,
+  day: number
+): boolean {
+  const party = structuredClone(currentParty());
+  const have = party.items[item] ?? 0;
+  if (party.money + money < 0 || have + count < 0) {
+    return false;
+  }
+  const left = Math.min(ITEM_COUNT_MAX, have + count);
+  if (left) {
+    party.items[item] = left;
+  } else {
+    delete party.items[item];
+  }
+  party.money = Math.min(MONEY_MAX, party.money + money);
+  if (count > 0) {
+    const today = party.shops?.[shop];
+    const bought = today?.day === day ? { ...today.bought } : {};
+    bought[item] = (bought[item] ?? 0) + count;
+    party.shops = { ...party.shops, [shop]: { day, bought } };
+  }
+  writeParty(party);
+  return true;
 }
 
 /** A character joins the team (at the end) or leaves it. */

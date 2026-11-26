@@ -2,6 +2,7 @@ import {
   LucideActivity,
   LucideCalendarDays,
   LucideCastle,
+  LucideStore,
   LucideBackpack,
   LucideChevronLeft,
   LucideChevronRight,
@@ -39,6 +40,7 @@ import {
   DbCalendar,
   DbCharacter,
   DbDungeon,
+  DbShop,
   DbElement,
   DbEnemy,
   DbGroup,
@@ -59,6 +61,7 @@ import {
   newCalendar,
   newCharacter,
   newDungeon,
+  newShop,
   newElement,
   newEnemy,
   newGroup,
@@ -91,6 +94,7 @@ import { CalendarSheetComponent } from "./sheets/calendar-sheet/calendar-sheet.c
 import { EnemySheetComponent } from "./sheets/enemy-sheet/enemy-sheet.component";
 import { GroupSheetComponent } from "./sheets/group-sheet/group-sheet.component";
 import { DungeonSheetComponent } from "./sheets/dungeon-sheet/dungeon-sheet.component";
+import { ShopSheetComponent } from "./sheets/shop-sheet/shop-sheet.component";
 import { searchKey } from "../../core/shared/text";
 
 /** In the mockup's order. */
@@ -116,6 +120,7 @@ const TABLES: { id: DbTable; label: string; one: string; icon: LucideIcon }[] =
     { id: "elements", label: "Éléments", one: "Élément", icon: LucideFlame },
     { id: "weapons", label: "Armes", one: "Type d'arme", icon: LucideSword },
     { id: "dungeons", label: "Donjons", one: "Donjon", icon: LucideCastle },
+    { id: "shops", label: "Boutiques", one: "Boutique", icon: LucideStore },
     {
       id: "calendar",
       label: "Calendrier",
@@ -161,6 +166,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     EnemySheetComponent,
     GroupSheetComponent,
     DungeonSheetComponent,
+    ShopSheetComponent,
   ],
   templateUrl: "./database-editor.component.html",
   styleUrl: "./database-editor.component.scss",
@@ -216,6 +222,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
   /** The weathers the element already has (not offered again). */
   protected readonly pickExclude = computed(() => {
     const pick = this.weatherPick();
+    if (pick?.for === "shop") {
+      const shop = this.db().shops.find((sh) => sh.id === pick.id);
+      return shop?.items[pick.index ?? 0]?.conditions?.weathers ?? [];
+    }
     if (pick?.for === "element") {
       return (
         this.db()
@@ -237,6 +247,9 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     }
     if (pick?.for === "dungeon") {
       return "Météo du donjon";
+    }
+    if (pick?.for === "shop") {
+      return "En vente pendant la météo";
     }
     return pick?.for === "enemy" ? "Météo de l'ennemi" : "Pendant la météo";
   });
@@ -316,6 +329,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
 
   protected readonly dungeon = computed(() =>
     this.table() === "dungeons" ? (this.current() as DbDungeon | null) : null
+  );
+
+  protected readonly shop = computed(() =>
+    this.table() === "shops" ? (this.current() as DbShop | null) : null
   );
 
   protected readonly npc = computed(() =>
@@ -410,6 +427,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       groups: "Nouveau groupe",
       calendar: "Calendrier du jeu",
       dungeons: "Nouveau donjon",
+      shops: "Nouvelle boutique",
     }[table];
     const names = new Set(this.rows().map((r) => searchKey(r.name)));
     let name = base;
@@ -429,6 +447,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       groups: () => newGroup(name, this.db()),
       calendar: () => newCalendar(),
       dungeons: () => newDungeon(name),
+      shops: () => newShop(name),
     };
     const row = makers[table]();
     this.store.commit({ ...this.db(), [table]: [...this.rows(), row] });
@@ -558,6 +577,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     if ("sprite" in row && row.sprite) {
       return row.sprite;
     }
+    if (this.table() === "shops") {
+      const keeper = (row as DbShop).keeper;
+      return this.db().npcs.find((n) => n.id === keeper)?.portrait;
+    }
     if (this.table() === "npcs" && "portrait" in row && row.portrait) {
       return row.portrait;
     }
@@ -614,6 +637,17 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
                 .join(", ")
             : "Toujours ouvert";
         return `${floors} étage${floors > 1 ? "s" : ""} · ${open}`;
+      }
+      case "shops": {
+        const sh = row as DbShop;
+        const keeper = this.db().npcs.find((n) => n.id === sh.keeper)?.name;
+        const count = sh.items.length;
+        return [
+          keeper ?? "Sans vendeur",
+          count === 0
+            ? "rien à vendre"
+            : `${count} objet${count > 1 ? "s" : ""}`,
+        ].join(" · ");
       }
       case "calendar": {
         const cal = row as DbCalendar;

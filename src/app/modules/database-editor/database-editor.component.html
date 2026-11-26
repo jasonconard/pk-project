@@ -282,6 +282,9 @@
         @if (dungeon(); as dg) {
           <db-dungeon-sheet [dungeon]="dg" />
         }
+        @if (shop(); as sh) {
+          <db-shop-sheet [shop]="sh" />
+        }
         @if (npc(); as np) {
           <db-npc-sheet [npc]="np" />
         }

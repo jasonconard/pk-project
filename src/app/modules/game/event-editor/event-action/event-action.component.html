@@ -283,6 +283,21 @@
       Le joueur voit le lien monter (et ce que le nouveau niveau apporte).
     </p>
   }
+  @case ("shop") {
+    <div class="row">
+      <select aria-label="Boutique" (change)="set({ shop: value($event) })">
+        @if (!shopOf(action.shop)) {
+          <option selected>Boutique supprimée</option>
+        }
+        @for (sh of data.db.shops; track sh.id) {
+          <option [value]="sh.id" [selected]="sh.id === action.shop">
+            {{ sh.name }}
+          </option>
+        }
+      </select>
+    </div>
+    <p class="help">{{ shopHelp(action.shop) }}</p>
+  }
   @case ("gift") {
     <div class="row">
       <span>À</span>
