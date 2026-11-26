@@ -88,6 +88,10 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   freezes the input and the camera follow; `preview` for the editor), `game/cutscene-overlay/` (bars, fade, title,
   bubbles, Passer held 2 s, ⏩), `game/cutscene-editor/` (opened from Éditeurs → Cinématiques over the map editor, talks
   to the game through `CutsceneHost`, see `GameService.cutsceneHost`); the `CUTSCENE` instruction.
+- Mode test (`docs/editeur/14-mode-test.md`): `model/test-preset.ts` (named tests `pk-tests`, also in the `.pk`;
+  `testFromGame`, `applyTest`), `services/test-mode.service.ts` (the sheet asked, start / restart / quit; the game set
+  aside in `pk-test-run`, given back at the next start), `game-saves.ts` `captureGame` / `restoreProgress`,
+  `game/test-mode/` (`test-sheet` Tester ici, `test-settings`, `test-list` Menu → Mode test, `test-banner`).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

@@ -49,7 +49,7 @@ Le fichier du code générait certains objets en boucle (`[...].map(...)`) : l'e
 Pour passer **toutes les créations** d'un appareil à l'autre (téléphone ↔ ordinateur) : **Menu → Projet de jeu**.
 
 - En ouvrant **Projet de jeu**, le panneau montre ce que contient l'appareil : « Sur cet appareil : 3 cartes · 12 modèles · 4 musiques · 5 variables · 85 ko ».
-- **Exporter** télécharge `pk-projet-<date>.pk` : les cartes modifiées ou créées, les modèles de l'éditeur de modèles, les musiques (avec leurs choix par moment et par carte), les [variables](08-variables.md) et la [base de données](10-base-de-donnees.md), tels qu'ils sont enregistrés dans le navigateur. Le message donne ce qu'il contient et sa taille.
+- **Exporter** télécharge `pk-projet-<date>.pk` : les cartes modifiées ou créées, les modèles de l'éditeur de modèles, les musiques (avec leurs choix par moment et par carte), les [variables](08-variables.md), la [base de données](10-base-de-donnees.md) et les [tests gardés](14-mode-test.md), tels qu'ils sont enregistrés dans le navigateur. Le message donne ce qu'il contient et sa taille.
 - **Sur l'application Android**, le bouton s'appelle **Envoyer…** : il ouvre la fenêtre de partage d'Android pour envoyer le fichier où on veut (Drive, mail, Bluetooth, Fichiers…). Fermer la fenêtre sans choisir affiche « Envoi annulé ».
 - **Importer…** : on choisit un fichier `.pk`, le jeu montre ce qu'il contient (« Ce fichier : 3 cartes · 12 modèles · 4 musiques · 5 variables · du 19/11/2026 · 85 ko ») et ce qu'il va remplacer (« Sera remplacé : … »), puis demande de confirmer. **Remplacer** efface les créations de l'appareil, met celles du fichier à la place et relance le jeu. **Annuler** ne change rien.
 - Un fichier qui n'est pas un projet, ou fait avec une version plus récente du jeu, est refusé avec un message.
@@ -66,6 +66,7 @@ Pour garder où en est la partie : **Menu → Sauver** (pendant le jeu ; grisé 
 - **Charger** ramène à la sauvegarde : la carte, la position du joueur, l'heure, la météo, la valeur des [variables](08-variables.md) et l'équipe (ses membres, ses objets, son argent). La partie en cours est perdue si elle n'a pas été sauvée.
 - **Écraser**, **Charger** et la corbeille demandent deux appuis (pendant 3 secondes ; le texte sous les emplacements dit ce qui va se passer).
 - Si la carte d'une sauvegarde n'existe plus, le joueur revient à la carte de départ.
+- Pendant un [test](14-mode-test.md), on ne peut ni sauver ni charger.
 - Les sauvegardes restent sur l'appareil : elles ne sont pas dans le projet de jeu (ce sont les parties, pas les créations).
 
 Dans le code : `game-saves/` (la fenêtre), `shared/services/game-saves.ts` (les emplacements, `pk-saves`), `GameService.playerSpot` / `restoreSpot`, et `variables-editor/shared/variable-values.ts` (la valeur des variables dans la partie, `pk-variable-values`).

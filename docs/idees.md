@@ -21,7 +21,7 @@ Faire de l'appli un **moteur de jeu** : les éditeurs (carte, modèles, et ceux 
 
 ## Les outils à construire
 
-Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Reste le **mode test** (14).
+Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Tous les outils de la liste sont faits ; chacun garde ses « À suivre ».
 
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
@@ -39,7 +39,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 11 | **Animation des modèles** (fait : maquette `design/model-editor-mobile.pen` écrans 8 à 10 ; le mouvement d'une forme dans l'éditeur de modèles (rotation, déplacement, clignotement, balancement ; axe, pivot, angle, durée ; en boucle, à l'approche, par un événement, la nuit) et son aperçu ; l'action « Animer l'objet » ; le moulin de la carte du monde, voir [06](editeur/06-modeles.md#les-mouvements)) | Portes, mécanismes, décors qui bougent (voir plus bas) | Jour et nuit |
 | 12 | **Musique** (fait : l'éditeur, voir [07](editeur/07-musique.md) ; le moment Donjon et la musique de chaque donjon ; l'import d'un fichier MIDI (pistes, instruments, mesures, gamme) et l'export en MIDI) | L'éditeur MIDI lo-fi (voir plus bas), une musique par lieu, jour / nuit / donjon / combat | Tout |
 | 13 | **Cinématiques** (fait : maquette `design/main-view.pen` (Cinématiques) ; l'éditeur sur la carte (ligne de temps, pistes caméra / écran / texte / son / monde / personnages, blocs qui se chevauchent, aperçu sur la carte avec le cadre de la caméra) ; l'action « Jouer la cinématique » ; en jeu : bandes noires, fondus, titres, bulles, messages, musique, Passer maintenu 2 s, ⏩ ×3, une seule fois ; voir [13](editeur/13-cinematiques.md). À suivre : des chemins qui contournent les obstacles) | Une ligne de temps : caméra, déplacements, dialogues, musique, à lancer depuis un événement | Histoire |
-| 14 | **Mode test** | Lancer le jeu depuis n'importe où, au jour et avec les drapeaux voulus, pour essayer une scène | Tout |
+| 14 | **Mode test** (fait : maquette `design/main-view.pen` (Mode test) ; tester depuis l'éditeur de carte (toucher où le joueur apparaît), la fenêtre d'un événement, l'éditeur de cinématiques ou Menu → Mode test ; les tests gardés avec leurs réglages (jour, moment, météo, variables, équipe et niveaux, sac, argent, liens, cinématiques vues) ; la partie mise de côté pendant le test et rendue en quittant, même si l'application se ferme ; bandeau vert, Recommencer, Quitter, voir [14](editeur/14-mode-test.md)) | Lancer le jeu depuis n'importe où, au jour et avec les drapeaux voulus, pour essayer une scène | Tout |
 
 ## Retenues
 

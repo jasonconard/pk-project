@@ -8,6 +8,8 @@ Un événement fait réagir un objet : un habitant qui parle, un panneau qu'on l
 2. Dans sa fiche, partie **Événements** : **+ Ajouter un événement**. La fenêtre de l'événement s'ouvre.
 3. Règle le déclencheur, les conditions et les actions, puis **Terminé** (ou ✕, Échap, le bouton retour : tout est gardé).
 
+**Tester** (en haut de la fenêtre) essaie l'événement tout de suite, devant son objet, avec les réglages voulus : voir le [mode test](14-mode-test.md).
+
 La fiche montre chaque événement en résumé (« 1. Parler · si A parlé au maire est faux · 3 actions : « Bonjour… » »). Le toucher rouvre sa fenêtre. **Supprimer l'événement** est en bas de la fenêtre. Annuler (Ctrl+Z) défait toute la modification faite dans la fenêtre d'un coup.
 
 ## Plusieurs événements sur un objet

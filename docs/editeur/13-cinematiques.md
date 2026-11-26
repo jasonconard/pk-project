@@ -9,7 +9,7 @@ Dans l'éditeur de carte, **Éditeurs → Cinématiques**. La barre d'édition l
 - **✕** ferme l'éditeur de cinématiques.
 - **Le nom** de la cinématique ouvre la liste des cinématiques de la carte (voir plus bas).
 - **Annuler** revient sur la dernière modification.
-- **Voir** joue la cinématique dans le jeu, depuis la tête de lecture (ou depuis le début), puis revient à l'éditeur.
+- **Voir** ouvre un petit menu : **Voir ici** joue la cinématique dans le jeu, depuis la tête de lecture (ou depuis le début), puis revient à l'éditeur ; **Tester avec des réglages** la joue dans un [test](14-mode-test.md) (le jour, les variables, l'équipe… choisis).
 
 ## La ligne de temps
 
