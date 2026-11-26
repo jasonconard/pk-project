@@ -33725,6 +33725,1418 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "RzUaH",
+      "x": 8740,
+      "y": 0,
+      "name": "20 · Portrait · Culture (défile)",
+      "clip": true,
+      "width": 390,
+      "height": 980,
+      "fill": "$panel",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "xTBxq",
+          "name": "Status bar",
+          "width": "fill_container",
+          "height": 47
+        },
+        {
+          "type": "frame",
+          "id": "W0s09",
+          "name": "Top bar",
+          "width": "fill_container",
+          "height": 48,
+          "gap": 4,
+          "padding": [
+            0,
+            56,
+            0,
+            8
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "nJVej",
+              "name": "Back",
+              "height": 40,
+              "gap": 2,
+              "padding": [
+                0,
+                8,
+                0,
+                4
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Fh30H",
+                  "name": "chevron-left",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "chevron-left",
+                  "library": "lucide",
+                  "fill": "$link"
+                },
+                {
+                  "type": "text",
+                  "id": "tGg3n",
+                  "name": "Personnages",
+                  "fill": "$link",
+                  "content": "Cultures",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Z8Tt8",
+              "name": "Spacer",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "L0Pas",
+              "x": 294,
+              "y": 4,
+              "name": "trash",
+              "enabled": false,
+              "width": 40,
+              "height": 40,
+              "fill": "$surface",
+              "cornerRadius": 10,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "BzQxw",
+                  "x": 11,
+                  "y": 11,
+                  "name": "trash",
+                  "enabled": false,
+                  "width": 18,
+                  "height": 18,
+                  "icon": "trash",
+                  "library": "lucide",
+                  "fill": "$text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qmexx",
+          "name": "Body",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            6,
+            16,
+            16,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Z9bXC",
+              "name": "Nom",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$bg",
+              "cornerRadius": 8,
+              "gap": 10,
+              "padding": [
+                0,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "NcJxC",
+                  "name": "sprout",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "sprout",
+                  "library": "lucide",
+                  "fill": "#7fd16b"
+                },
+                {
+                  "type": "text",
+                  "id": "VzqX6",
+                  "name": "Navet",
+                  "fill": "$text",
+                  "content": "Navet",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "m0d5FV",
+              "name": "GRAINE",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "YU0dC",
+                  "name": "GRAINE",
+                  "fill": "$muted",
+                  "content": "GRAINE",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 0.6
+                },
+                {
+                  "type": "frame",
+                  "id": "t1Kqnx",
+                  "name": "Se plante avec",
+                  "width": "fill_container",
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "gap": 10,
+                  "padding": [
+                    8,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "EHkWn",
+                      "name": "Icône",
+                      "width": 34,
+                      "height": 34,
+                      "fill": "$surface",
+                      "cornerRadius": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "DvQYl",
+                          "name": "img",
+                          "width": 26,
+                          "height": 26,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "images/crops/turnip-seeds.png",
+                            "mode": "contain"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "pXvuZ",
+                      "name": "Se plante avec",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Se plante avec",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "v4WhA",
+                      "name": "Graines de navet",
+                      "fill": "$text",
+                      "content": "Graines de navet",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "j2zWdq",
+                      "name": "chevron-down",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "d1krk",
+              "name": "POUSSE",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WwBFl",
+                  "name": "Tête POUSSE",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "oEQg8",
+                      "name": "POUSSE",
+                      "fill": "$muted",
+                      "content": "POUSSE",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "EQLCH",
+                      "name": "mûr en 4 jours arrosés",
+                      "fill": "$muted",
+                      "content": "mûr en 4 jours arrosés",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "C12HSP",
+                  "name": "Étapes",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "j6AEW2",
+                      "name": "Semis",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        8,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "MiuQn",
+                          "name": "Image",
+                          "width": 56,
+                          "height": 56,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Mhw6t",
+                              "x": 4,
+                              "y": 4,
+                              "name": "img",
+                              "width": 48,
+                              "height": 48,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/crops/turnip-0.png",
+                                "mode": "contain"
+                              }
+                            },
+                            {
+                              "type": "frame",
+                              "id": "uvckh",
+                              "x": 36,
+                              "y": 36,
+                              "name": "Dessiner",
+                              "width": 18,
+                              "height": 18,
+                              "fill": "$accent",
+                              "cornerRadius": 9,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "bYqfD",
+                                  "name": "pencil",
+                                  "width": 10,
+                                  "height": 10,
+                                  "icon": "pencil",
+                                  "library": "lucide",
+                                  "fill": "#ffffff"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "pt7Uw",
+                          "name": "Semis",
+                          "fill": "$text",
+                          "content": "Semis",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "A7tgiN",
+                          "name": "Jours",
+                          "height": 24,
+                          "fill": "$surface",
+                          "cornerRadius": 6,
+                          "padding": [
+                            0,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "CpC0w",
+                              "name": "1 j",
+                              "fill": "$text",
+                              "content": "1 j",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "c0v5hr",
+                      "name": "Pousse",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        8,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "UrVvU",
+                          "name": "Image",
+                          "width": 56,
+                          "height": 56,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "HYGh1",
+                              "x": 4,
+                              "y": 4,
+                              "name": "img",
+                              "width": 48,
+                              "height": 48,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/crops/turnip-1.png",
+                                "mode": "contain"
+                              }
+                            },
+                            {
+                              "type": "frame",
+                              "id": "A2Ij8P",
+                              "x": 36,
+                              "y": 36,
+                              "name": "Dessiner",
+                              "width": 18,
+                              "height": 18,
+                              "fill": "$accent",
+                              "cornerRadius": 9,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "q34CL",
+                                  "name": "pencil",
+                                  "width": 10,
+                                  "height": 10,
+                                  "icon": "pencil",
+                                  "library": "lucide",
+                                  "fill": "#ffffff"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "MMTjp",
+                          "name": "Pousse",
+                          "fill": "$text",
+                          "content": "Pousse",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "eJPaH",
+                          "name": "Jours",
+                          "height": 24,
+                          "fill": "$surface",
+                          "cornerRadius": 6,
+                          "padding": [
+                            0,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "DXHqq",
+                              "name": "1 j",
+                              "fill": "$text",
+                              "content": "1 j",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qYxkU",
+                      "name": "Grande",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        8,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "KhzVB",
+                          "name": "Image",
+                          "width": 56,
+                          "height": 56,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "BvmIk",
+                              "x": 4,
+                              "y": 4,
+                              "name": "img",
+                              "width": 48,
+                              "height": 48,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/crops/turnip-2.png",
+                                "mode": "contain"
+                              }
+                            },
+                            {
+                              "type": "frame",
+                              "id": "d5NKvW",
+                              "x": 36,
+                              "y": 36,
+                              "name": "Dessiner",
+                              "width": 18,
+                              "height": 18,
+                              "fill": "$accent",
+                              "cornerRadius": 9,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "wVPIj",
+                                  "name": "pencil",
+                                  "width": 10,
+                                  "height": 10,
+                                  "icon": "pencil",
+                                  "library": "lucide",
+                                  "fill": "#ffffff"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Gr45D",
+                          "name": "Grande",
+                          "fill": "$text",
+                          "content": "Grande",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "K3XURg",
+                          "name": "Jours",
+                          "height": 24,
+                          "fill": "$surface",
+                          "cornerRadius": 6,
+                          "padding": [
+                            0,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GiPsb",
+                              "name": "2 j",
+                              "fill": "$text",
+                              "content": "2 j",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "D6hgK",
+                      "name": "Mûre",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "#7fd16b",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        8,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "mR0mZ",
+                          "name": "Image",
+                          "width": 56,
+                          "height": 56,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "uWn1I",
+                              "x": 4,
+                              "y": 4,
+                              "name": "img",
+                              "width": 48,
+                              "height": 48,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "images/crops/turnip-3.png",
+                                "mode": "contain"
+                              }
+                            },
+                            {
+                              "type": "frame",
+                              "id": "YIHHG",
+                              "x": 36,
+                              "y": 36,
+                              "name": "Dessiner",
+                              "width": 18,
+                              "height": 18,
+                              "fill": "$accent",
+                              "cornerRadius": 9,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "XCB2A",
+                                  "name": "pencil",
+                                  "width": 10,
+                                  "height": 10,
+                                  "icon": "pencil",
+                                  "library": "lucide",
+                                  "fill": "#ffffff"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Fm1Gh",
+                          "name": "Mûre",
+                          "fill": "$text",
+                          "content": "Mûre",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "C4z91",
+                          "name": "Jours",
+                          "height": 24,
+                          "fill": "#00000000",
+                          "cornerRadius": 6,
+                          "padding": [
+                            0,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "PfIi9",
+                              "name": "récolte",
+                              "fill": "#7fd16b",
+                              "content": "récolte",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "z2Yh4",
+                  "name": "Chaque image : 16 × 16 pixels, dessinée comme les icônes. Un jour compte seulement si la culture a été arrosée (ou s'il a plu).",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Chaque image : 16 × 16 pixels, dessinée comme les icônes. Un jour compte seulement si la culture a été arrosée (ou s'il a plu).",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VoxBv",
+              "name": "RÉCOLTE",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "w5tYT",
+                  "name": "RÉCOLTE",
+                  "fill": "$muted",
+                  "content": "RÉCOLTE",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 0.6
+                },
+                {
+                  "type": "frame",
+                  "id": "htd7x",
+                  "name": "Récolte",
+                  "width": "fill_container",
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DBiwb",
+                      "name": "Donne",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": 8,
+                      "padding": [
+                        9,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "N88QW",
+                          "name": "Donne",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Donne",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "z4twP4",
+                          "name": "Navet (objet)",
+                          "fill": "$text",
+                          "content": "Navet (objet)",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "zmiOH",
+                      "name": "Combien",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": 8,
+                      "padding": [
+                        9,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "t4cgs",
+                          "name": "Combien",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Combien",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "XwUvU",
+                          "name": "1 à 2",
+                          "fill": "$text",
+                          "content": "1 à 2",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rxJse",
+                      "name": "Ensuite",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "padding": [
+                        9,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "MD0ab",
+                          "name": "Ensuite",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Ensuite",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "mdo4W",
+                          "name": "La case redevient terre",
+                          "fill": "$text",
+                          "content": "La case redevient terre",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LbSu8",
+                  "name": "Repousse",
+                  "width": "fill_container",
+                  "height": 34,
+                  "fill": "$bg",
+                  "cornerRadius": 9,
+                  "gap": 3,
+                  "padding": 3,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "puyFZ",
+                      "name": "Une seule récolte",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "fill": "$accent",
+                      "cornerRadius": 7,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "oSIFf",
+                          "name": "Une seule récolte",
+                          "fill": "#ffffff",
+                          "content": "Une seule récolte",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "t9j3g",
+                      "name": "Repousse",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "cornerRadius": 7,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GaQMu",
+                          "name": "Repousse",
+                          "fill": "$text",
+                          "content": "Repousse",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dBqwV",
+              "name": "SAISON",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "BgaEz",
+                  "name": "Tête SAISON",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "J9tn0l",
+                      "name": "SAISON",
+                      "fill": "$muted",
+                      "content": "SAISON",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "ounFZ",
+                      "name": "pousse ces mois-là",
+                      "fill": "$muted",
+                      "content": "pousse ces mois-là",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VYKg6",
+                  "name": "Mois",
+                  "width": "fill_container",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Z0rIO7",
+                      "name": "Printemps",
+                      "height": 28,
+                      "fill": "#3a6ea540",
+                      "cornerRadius": 14,
+                      "stroke": "#3a6ea5",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GJVGK",
+                          "name": "Printemps",
+                          "fill": "$text",
+                          "content": "Printemps",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z4x3LQ",
+                      "name": "Été",
+                      "height": 28,
+                      "fill": "#ffffff0f",
+                      "cornerRadius": 14,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "G42COw",
+                          "name": "Été",
+                          "fill": "$text",
+                          "content": "Été",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "r1J0Q2",
+                      "name": "Automne",
+                      "height": 28,
+                      "fill": "#3a6ea540",
+                      "cornerRadius": 14,
+                      "stroke": "#3a6ea5",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "m6Scr6",
+                          "name": "Automne",
+                          "fill": "$text",
+                          "content": "Automne",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DvLlu",
+                      "name": "Hiver",
+                      "height": 28,
+                      "fill": "#ffffff0f",
+                      "cornerRadius": 14,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "wOpXa",
+                          "name": "Hiver",
+                          "fill": "$text",
+                          "content": "Hiver",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "fcPyd",
+                  "name": "Hors de ces mois, elle meurt (et ne se plante pas). Aucun mois choisi : toute l'année.",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Hors de ces mois, elle meurt (et ne se plante pas). Aucun mois choisi : toute l'année.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LhPVU",
+              "name": "GEL",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "pEd7y",
+                  "name": "MÉTÉO",
+                  "fill": "$muted",
+                  "content": "MÉTÉO",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 0.6
+                },
+                {
+                  "type": "frame",
+                  "id": "oOnC9",
+                  "name": "Craint le gel",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "$bg",
+                  "cornerRadius": 9,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "xObrF",
+                      "name": "snowflake",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "snowflake",
+                      "library": "lucide",
+                      "fill": "#8fd8ff"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OcdHb",
+                      "name": "Craint le gel",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Craint le gel",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cRAg8",
+                      "name": "Interrupteur",
+                      "width": 38,
+                      "height": 22,
+                      "fill": "$accent",
+                      "cornerRadius": 11,
+                      "padding": 2,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "ZjJ1j",
+                          "name": "Pastille",
+                          "fill": "#ffffff",
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "uk8Sr",
+                  "name": "Neige, gel, blizzard… : elle fane le premier jour, meurt le second. La pluie arrose toutes les cultures de la carte.",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Neige, gel, blizzard… : elle fane le premier jour, meurt le second. La pluie arrose toutes les cultures de la carte.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "DS9pj",
+                  "name": "Poussent plus vite par",
+                  "fill": "$muted",
+                  "content": "Poussent plus vite par",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "L5k4ZE",
+                  "name": "Ensoleillé",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$bg",
+                  "cornerRadius": 9,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "N0eOa",
+                      "name": "Image",
+                      "width": 34,
+                      "height": 34,
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "images/weather/sunny-day.jpg",
+                        "mode": "cover"
+                      },
+                      "cornerRadius": 6
+                    },
+                    {
+                      "type": "text",
+                      "id": "cc2JN",
+                      "name": "Ensoleillé",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Ensoleillé",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "yW5P2",
+                      "name": "Effet",
+                      "height": 24,
+                      "fill": "#7fd16b33",
+                      "cornerRadius": 12,
+                      "stroke": "#7fd16b",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YLTZU",
+                          "name": "+1 jour",
+                          "fill": "$text",
+                          "content": "+1 jour",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "KLXQI",
+                      "name": "x",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PsBem",
+                  "name": "Forêt",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$bg",
+                  "cornerRadius": 9,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Bybio",
+                      "name": "Image",
+                      "width": 34,
+                      "height": 34,
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "images/weather/forest-day.jpg",
+                        "mode": "cover"
+                      },
+                      "cornerRadius": 6
+                    },
+                    {
+                      "type": "text",
+                      "id": "WogiU",
+                      "name": "Forêt",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Forêt",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "P048S",
+                      "name": "Effet",
+                      "height": 24,
+                      "fill": "#7fd16b33",
+                      "cornerRadius": 12,
+                      "stroke": "#7fd16b",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "QFVlp",
+                          "name": "+1 jour",
+                          "fill": "$text",
+                          "content": "+1 jour",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "UbH3k",
+                      "name": "x",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GF8D9",
+                  "name": "Ajouter",
+                  "width": "fill_container",
+                  "height": 34,
+                  "cornerRadius": 9,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "gap": 6,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "RkaKc",
+                      "name": "cloud-sun",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "cloud-sun",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uaQQQ",
+                      "name": "Météo",
+                      "fill": "$text",
+                      "content": "Météo",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
