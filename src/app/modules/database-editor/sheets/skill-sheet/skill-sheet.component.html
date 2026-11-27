@@ -256,6 +256,23 @@
 </div>
 
 <div class="block">
+  <h3>Déroulé</h3>
+  <button type="button" class="flow-open" (click)="editFlow('skills', sk.id)">
+    <svg lucideClapperboard></svg>
+    <span class="texts">
+      <b>{{ sk.flow ? "Déroulé réglé à la main" : "Déroulé d'origine" }}</b>
+      <small>{{ flowSummary(flowOf(sk), sk.anim) }}</small>
+    </span>
+    <svg lucideChevronRight></svg>
+  </button>
+  <p class="note">
+    Le déroulé place dans le temps l'animation du lanceur, l'image d'effet, les
+    sons et les coups (plusieurs coups se partagent la puissance des effets
+    ci-dessous), avec un aperçu qui rejoue la compétence.
+  </p>
+</div>
+
+<div class="block">
   <h3>Utilisable</h3>
   <div class="segmented wide" role="group" aria-label="Utilisable">
     @for (u of uses; track u.id) {

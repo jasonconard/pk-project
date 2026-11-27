@@ -323,6 +323,20 @@
   />
 }
 
+@if (store.flowView(); as flow) {
+  <db-flow-editor
+    [title]="flow.title"
+    [value]="flow.value"
+    [own]="flow.own"
+    [picture]="flow.picture"
+    [melee]="flow.melee"
+    [power]="flow.power"
+    [heals]="flow.heals"
+    (changed)="store.flowDone($event)"
+    (dismissed)="store.flowEdit.set(null)"
+  />
+}
+
 @if (sheetEdit(); as target) {
   <db-sheet-editor
     [title]="target.title"

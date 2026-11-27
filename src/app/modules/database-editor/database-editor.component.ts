@@ -89,6 +89,7 @@ import { withWalkFrame } from "./shared/walk-sheet";
 import { downloadFile } from "../game/shared/util/ts-source";
 import { PixelEditorComponent } from "./pixel-editor/pixel-editor.component";
 import { SheetEditorComponent } from "./sheet-editor/sheet-editor.component";
+import { FlowEditorComponent } from "./flow-editor/flow-editor.component";
 import { WeatherPickerComponent } from "../game/weather-picker/weather-picker.component";
 import { ElementSheetComponent } from "./sheets/element-sheet/element-sheet.component";
 import { WeaponSheetComponent } from "./sheets/weapon-sheet/weapon-sheet.component";
@@ -173,6 +174,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     NgTemplateOutlet,
     PixelEditorComponent,
     SheetEditorComponent,
+    FlowEditorComponent,
     WeatherPickerComponent,
     ElementSheetComponent,
     WeaponSheetComponent,

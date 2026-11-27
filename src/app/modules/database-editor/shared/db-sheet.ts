@@ -1,3 +1,5 @@
+import { SkillAnim } from "./skill-anim";
+import { flowLength, SkillFlow } from "./skill-flow";
 import { Directive, inject } from "@angular/core";
 import {
   AFFINITIES,
@@ -233,6 +235,22 @@ export abstract class DbSheet {
 
   protected editPicture(row: Row, field: PictureField, title?: string): void {
     this.store.editPicture(row, field, title);
+  }
+
+  /** Opens the flow window: a skill's flow, a weapon type's attack or heavy blow. */
+  protected editFlow(
+    table: "skills" | "weapons",
+    id: string,
+    field: "flow" | "flowHeavy" = "flow"
+  ): void {
+    this.store.flowEdit.set({ table, id, field });
+  }
+
+  /** « 2 coups · 1,40 s »: a flow in a few words, for its button. */
+  protected flowSummary(flow: SkillFlow, picture?: SkillAnim): string {
+    const hits = flow.blocks.filter((b) => b.track === "hit").length;
+    const length = flowLength(flow, picture).toFixed(2).replace(".", ",");
+    return `${hits} coup${hits > 1 ? "s" : ""} · ${length} s`;
   }
 
   protected editSheet(row: DbCharacter | DbEnemy): void {

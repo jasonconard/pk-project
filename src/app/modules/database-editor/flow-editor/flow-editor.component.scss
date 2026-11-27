@@ -1,0 +1,336 @@
+/* The flow editor (design/database.pen, 21 and 22): the scene, the transport and the block's settings; the
+   timeline is in flow-editor.blocks.scss. */
+@use '../popup';
+
+:host {
+  --bg: #2a2b33;
+  --panel: #22232a;
+  --surface: #33353f;
+  --border: #4a4c5a;
+  --muted: #8a8d9c;
+  --accent: #3a6ea5;
+  --highlight: #ffd34d;
+
+  color: #eceef4;
+  font-size: 13px;
+}
+
+.sheet {
+  max-width: 1060px;
+}
+
+svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.head,
+.transport,
+.card-head,
+.line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+}
+
+.pill,
+.round {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 36px;
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.pill {
+  max-width: 45%;
+  padding: 0 12px 0 8px;
+  overflow: hidden;
+  white-space: nowrap;
+
+  &.add {
+    padding: 0 14px 0 10px;
+    background: var(--accent);
+    font-weight: 600;
+  }
+}
+
+.round {
+  width: 36px;
+
+  &.play {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: var(--accent);
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stage {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #3d6b42;
+
+  canvas {
+    display: block;
+    width: 100%;
+    image-rendering: pixelated;
+  }
+}
+
+.who {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 6px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 28px;
+    padding: 0 8px 0 10px;
+    border-radius: 14px;
+    background: #000a;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  small {
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.fighters {
+  position: absolute;
+  inset: 42px 8px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  padding: 8px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: #000c;
+
+  p {
+    margin: 0;
+    color: var(--muted);
+  }
+}
+
+.fighters button,
+.chips button,
+.add-menu button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid var(--bg);
+  background: var(--bg);
+
+  &[aria-checked='true'],
+  &[aria-selected='true'] {
+    border-color: var(--accent);
+    background: rgba(58, 110, 165, 0.25);
+  }
+}
+
+.time {
+  color: var(--muted);
+
+  b {
+    font-size: 17px;
+    color: #eceef4;
+  }
+}
+
+.grow {
+  flex: 1;
+}
+
+.add-menu,
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chips.sounds {
+  max-height: 132px;
+  overflow-y: auto;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.card-head b {
+  flex: 1;
+  font-size: 15px;
+}
+
+.line {
+  width: 100%;
+  text-align: left;
+}
+
+.texts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  b {
+    font-weight: 600;
+  }
+}
+
+small,
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.hint {
+  margin: 0;
+
+  &.card {
+    flex-direction: row;
+    gap: 8px;
+  }
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface);
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+  }
+
+  b {
+    min-width: 58px;
+    text-align: center;
+  }
+}
+
+.switch {
+  flex: none;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--border);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.15s;
+  }
+
+  [aria-checked='true'] > & {
+    background: var(--accent);
+
+    &::after {
+      left: 21px;
+    }
+  }
+}
+
+.summary {
+  gap: 4px;
+
+  b {
+    font-size: 13px;
+  }
+
+  span {
+    color: var(--muted);
+  }
+}
+
+.reset {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+@media (min-width: 900px) {
+  .main {
+    flex-direction: row;
+  }
+
+  .preview {
+    flex: 1;
+  }
+
+  .side {
+    width: 330px;
+    flex: none;
+  }
+}

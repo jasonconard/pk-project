@@ -1,6 +1,8 @@
+import { attackFlow, skillFlow, SkillFlow } from "./skill-flow";
 import { computed, Injectable, signal } from "@angular/core";
 import {
   DbCalendar,
+  skillRange,
   DbSettings,
   DbCharacter,
   DbNpc,
@@ -64,6 +66,13 @@ export interface SheetEdit {
   value?: SpriteSheet;
 }
 
+/** The flow being edited: a skill's, or a weapon type's attack or heavy blow. */
+export interface FlowEdit {
+  table: "skills" | "weapons";
+  id: string;
+  field: "flow" | "flowHeavy";
+}
+
 export interface WeatherPick {
   id: string;
   strong?: boolean;
@@ -85,6 +94,76 @@ export class DatabaseStore {
   readonly iconEdit = signal<IconEdit | null>(null);
   /** The combat sprite sheet being edited (a character's, an enemy's). */
   readonly sheetEdit = signal<SheetEdit | null>(null);
+  /** The flow being edited (a skill's, a weapon's attack), and what its window needs. */
+  readonly flowEdit = signal<FlowEdit | null>(null);
+  readonly flowView = computed(() => {
+    const edit = this.flowEdit();
+    const db = this.db();
+    if (edit?.table === "skills") {
+      const skill = db.skills.find((s) => s.id === edit.id);
+      if (!skill) {
+        return null;
+      }
+      const power = (kind: "damage" | "heal") =>
+        skill.effects.reduce(
+          (sum, e) => sum + (e.kind === kind ? e.power : 0),
+          0
+        );
+      return {
+        title: skill.name,
+        value: skillFlow(skill),
+        own: !!skill.flow?.blocks.length,
+        picture: skill.anim,
+        melee: skillRange(skill) === "contact",
+        power: power("damage") || power("heal") || 50,
+        heals: power("damage") === 0 && power("heal") > 0,
+      };
+    }
+    const weapon = edit && db.weapons.find((w) => w.id === edit.id);
+    if (!edit || !weapon) {
+      return null;
+    }
+    const heavy = edit.field === "flowHeavy";
+    return {
+      title: `${weapon.name} · ${heavy ? "attaque forte" : "attaque"}`,
+      value: attackFlow(weapon, heavy, !!weapon.ranged),
+      own: !!(heavy ? weapon.flowHeavy : weapon.flow)?.blocks.length,
+      picture: weapon.anim,
+      melee: !weapon.ranged,
+      power: heavy ? 75 : 50,
+      heals: false,
+    };
+  });
+
+  /** The flow window's change: the owner's new flow (none: back to the one its sheet gives). */
+  flowDone(flow: SkillFlow | undefined): void {
+    const edit = this.flowEdit();
+    if (!edit) {
+      return;
+    }
+    const set = <T extends object>(row: T): T => {
+      const next = { ...row } as Record<string, unknown>;
+      if (flow?.blocks.length) {
+        next[edit.field] = flow;
+      } else {
+        delete next[edit.field];
+      }
+      return next as T;
+    };
+    const db = this.db();
+    this.commit(
+      edit.table === "skills"
+        ? {
+            ...db,
+            skills: db.skills.map((s) => (s.id === edit.id ? set(s) : s)),
+          }
+        : {
+            ...db,
+            weapons: db.weapons.map((w) => (w.id === edit.id ? set(w) : w)),
+          }
+    );
+  }
+
   /** The weathers window: for an element (stronger / weaker), an enemy, or an enemy's skill condition. */
   readonly weatherPick = signal<WeatherPick | null>(null);
   /** What a skill can be learned with: the simple elements, the weapon types. */

@@ -1,4 +1,9 @@
-import { LucideInfo } from "@lucide/angular";
+import {
+  LucideChevronRight,
+  LucideClapperboard,
+  LucideInfo,
+} from "@lucide/angular";
+import { attackFlow, SkillFlow } from "../../shared/skill-flow";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { DbWeapon } from "../../shared/database";
 import { DbSheet } from "../../shared/db-sheet";
@@ -8,7 +13,12 @@ import { AnimFieldComponent } from "../../anim-field/anim-field.component";
 /** The sheet of a row of the « weapon » table. */
 @Component({
   selector: "db-weapon-sheet",
-  imports: [AnimFieldComponent, LucideInfo],
+  imports: [
+    AnimFieldComponent,
+    LucideChevronRight,
+    LucideClapperboard,
+    LucideInfo,
+  ],
   templateUrl: "./weapon-sheet.component.html",
   styleUrl: "./weapon-sheet.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,5 +48,15 @@ export class WeaponSheetComponent extends DbSheet {
       }
       return next;
     });
+  }
+
+  protected readonly flows = [
+    { field: "flow", label: "Attaque" },
+    { field: "flowHeavy", label: "Attaque forte" },
+  ] as const;
+
+  /** A weapon type's flow as it plays now (its own, else the one its sheet gives). */
+  protected flowOf(weapon: DbWeapon, field: "flow" | "flowHeavy"): SkillFlow {
+    return attackFlow(weapon, field === "flowHeavy", !!weapon.ranged);
   }
 }

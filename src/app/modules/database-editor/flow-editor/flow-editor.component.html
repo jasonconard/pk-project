@@ -1,0 +1,421 @@
+<div class="dim" (click)="dismissed.emit()"></div>
+<section class="sheet" role="dialog" aria-modal="true" aria-label="Déroulé">
+  <header class="head">
+    <button type="button" class="pill" (click)="dismissed.emit()">
+      <svg lucideChevronLeft></svg>{{ title() }}
+    </button>
+    <h2>Déroulé</h2>
+    <button
+      type="button"
+      class="round"
+      aria-label="Annuler"
+      title="Annuler (Ctrl Z)"
+      [disabled]="!canUndo()"
+      (click)="undo()"
+    >
+      <svg lucideUndo2></svg>
+    </button>
+    <button
+      type="button"
+      class="round"
+      aria-label="Refaire"
+      title="Refaire (Ctrl Maj Z)"
+      [disabled]="!canRedo()"
+      (click)="redo()"
+    >
+      <svg lucideRedo2></svg>
+    </button>
+  </header>
+
+  <div class="main">
+    <div class="preview">
+      <div class="stage">
+        <canvas
+          #scene
+          [width]="sceneSize.w"
+          [height]="sceneSize.h"
+          aria-label="Aperçu de la compétence"
+        ></canvas>
+        <div class="who">
+          <button type="button" (click)="choosing.set('caster')">
+            <small>Lanceur</small>{{ caster()?.name ?? "Aucun" }}
+            <svg lucideChevronDown></svg>
+          </button>
+          <button type="button" (click)="choosing.set('target')">
+            <small>Cible</small>{{ target()?.name ?? "Aucune" }}
+            <svg lucideChevronDown></svg>
+          </button>
+        </div>
+        @if (choosing(); as side) {
+          <div class="fighters" role="listbox">
+            @for (f of fighters; track f.id) {
+              <button
+                type="button"
+                role="option"
+                [attr.aria-selected]="
+                  f.id === (side === 'caster' ? casterId() : targetId())
+                "
+                (click)="pickFighter(f.id)"
+              >
+                {{ f.name }}
+              </button>
+            } @empty {
+              <p>Aucun combattant n'a de planche de combat.</p>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="transport">
+        <button
+          type="button"
+          class="round"
+          aria-label="Au début"
+          (click)="toStart()"
+        >
+          <svg lucideSkipBack></svg>
+        </button>
+        <button
+          type="button"
+          class="round play"
+          [attr.aria-label]="playing() ? 'Pause' : 'Lecture'"
+          title="Lecture / pause (Espace)"
+          (click)="togglePlay()"
+        >
+          @if (playing()) {
+            <svg lucidePause></svg>
+          } @else {
+            <svg lucidePlay></svg>
+          }
+        </button>
+        <span class="time"
+          ><b>{{ seconds(playhead()) }}</b> / {{ seconds(length()) }} s</span
+        >
+        <span class="grow"></span>
+        <button
+          type="button"
+          class="round"
+          aria-label="Dézoomer"
+          (click)="zoomBy(0.8)"
+        >
+          <svg lucideZoomOut></svg>
+        </button>
+        <button
+          type="button"
+          class="round"
+          aria-label="Zoomer"
+          (click)="zoomBy(1.25)"
+        >
+          <svg lucideZoomIn></svg>
+        </button>
+        <button type="button" class="pill add" (click)="adding.set(!adding())">
+          <svg lucidePlus></svg>Bloc
+        </button>
+      </div>
+      @if (adding()) {
+        <div class="add-menu">
+          @for (t of tracks; track t.id) {
+            <button type="button" (click)="add(t.id)">
+              <svg [lucideIcon]="t.icon" [style.color]="t.color"></svg
+              >{{ t.label }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <aside class="side">
+      @if (selected(); as b) {
+        <div class="card">
+          <div class="card-head">
+            <svg
+              [lucideIcon]="look(b.track).icon"
+              [style.color]="look(b.track).color"
+            ></svg>
+            <b>{{ trackLabel(b.track) }}</b>
+            <button
+              type="button"
+              class="round"
+              aria-label="Dupliquer"
+              title="Dupliquer"
+              (click)="duplicate(b)"
+            >
+              <svg lucideCopy></svg>
+            </button>
+            <button
+              type="button"
+              class="round"
+              aria-label="Supprimer"
+              title="Supprimer (Suppr)"
+              (click)="remove(b)"
+            >
+              <svg lucideTrash></svg>
+            </button>
+          </div>
+
+          <div class="line">
+            <span class="texts"
+              ><b>Moment</b
+              ><small>Depuis le début du geste du lanceur</small></span
+            >
+            <span class="counter">
+              <button
+                type="button"
+                aria-label="Plus tôt"
+                (click)="step(b, 'start', -fine, 0, 20)"
+              >
+                <svg lucideMinus></svg>
+              </button>
+              <b>{{ seconds(b.start) }} s</b>
+              <button
+                type="button"
+                aria-label="Plus tard"
+                (click)="step(b, 'start', fine, 0, 20)"
+              >
+                <svg lucidePlus></svg>
+              </button>
+            </span>
+          </div>
+
+          @switch (b.track) {
+            @case ("caster") {
+              <div class="chips" role="radiogroup" aria-label="Animation">
+                @for (a of casterAnims(); track a.id) {
+                  <button
+                    type="button"
+                    role="radio"
+                    [attr.aria-checked]="a.id === b.anim"
+                    (click)="patch(b, { anim: a.id })"
+                  >
+                    {{ a.label }}
+                  </button>
+                }
+              </div>
+            }
+            @case ("effect") {
+              <div class="line">
+                <span class="texts"
+                  ><b>Temps de vol</b
+                  ><small
+                    >0 : l'effet apparaît sur la cible ; sinon il vole jusqu'à
+                    elle</small
+                  ></span
+                >
+                <span class="counter">
+                  <button
+                    type="button"
+                    aria-label="Vol plus court"
+                    (click)="step(b, 'duration', -snap, 0, 5)"
+                  >
+                    <svg lucideMinus></svg>
+                  </button>
+                  <b>{{ seconds(b.duration) }} s</b>
+                  <button
+                    type="button"
+                    aria-label="Vol plus long"
+                    (click)="step(b, 'duration', snap, 0, 5)"
+                  >
+                    <svg lucidePlus></svg>
+                  </button>
+                </span>
+              </div>
+              <button
+                type="button"
+                class="line"
+                role="switch"
+                [attr.aria-checked]="!!b.arrow"
+                (click)="patch(b, { arrow: !b.arrow })"
+              >
+                <span class="texts"
+                  ><b>Flèche simple</b
+                  ><small>À la place de l'image d'effet</small></span
+                >
+                <span class="switch" aria-hidden="true"></span>
+              </button>
+              @if (!picture() && !b.arrow) {
+                <p class="hint">
+                  Pas d'image d'effet : en mettre une dans la fiche, partie
+                  Animation.
+                </p>
+              }
+            }
+            @case ("sound") {
+              <div class="line">
+                <span class="texts"><b>Hauteur</b></span>
+                <span class="counter">
+                  <button
+                    type="button"
+                    aria-label="Plus grave"
+                    (click)="step(b, 'pitch', -0.1, 0.4, 2.5)"
+                  >
+                    <svg lucideMinus></svg>
+                  </button>
+                  <b>{{ ((b.pitch ?? 1) * 100).toFixed(0) }} %</b>
+                  <button
+                    type="button"
+                    aria-label="Plus aigu"
+                    (click)="step(b, 'pitch', 0.1, 0.4, 2.5)"
+                  >
+                    <svg lucidePlus></svg>
+                  </button>
+                </span>
+              </div>
+              <div class="chips sounds" role="radiogroup" aria-label="Son">
+                @for (s of sounds; track s.id) {
+                  <button
+                    type="button"
+                    role="radio"
+                    [attr.aria-checked]="s.id === b.sound"
+                    (click)="setSound(b, s.id)"
+                  >
+                    {{ s.label }}
+                  </button>
+                }
+              </div>
+            }
+            @case ("hit") {
+              <div class="line">
+                <span class="texts"
+                  ><b>Part de la puissance</b
+                  ><small>Total des coups : {{ totalPower() }} %</small></span
+                >
+                <span class="counter">
+                  <button
+                    type="button"
+                    aria-label="Moins fort"
+                    (click)="step(b, 'percent', -5, 0, 300)"
+                  >
+                    <svg lucideMinus></svg>
+                  </button>
+                  <b>{{ b.percent ?? 100 }} %</b>
+                  <button
+                    type="button"
+                    aria-label="Plus fort"
+                    (click)="step(b, 'percent', 5, 0, 300)"
+                  >
+                    <svg lucidePlus></svg>
+                  </button>
+                </span>
+              </div>
+              <button
+                type="button"
+                class="line"
+                role="switch"
+                [attr.aria-checked]="b.states !== false"
+                (click)="patch(b, { states: b.states === false })"
+              >
+                <span class="texts"
+                  ><b>Applique les états</b
+                  ><small
+                    >Poison, sommeil, guérisons, renforts : avec ce coup</small
+                  ></span
+                >
+                <span class="switch" aria-hidden="true"></span>
+              </button>
+            }
+            @case ("screen") {
+              <div class="line">
+                <span class="texts"><b>Durée du tremblement</b></span>
+                <span class="counter">
+                  <button
+                    type="button"
+                    aria-label="Plus court"
+                    (click)="step(b, 'duration', -snap, 0.1, 3)"
+                  >
+                    <svg lucideMinus></svg>
+                  </button>
+                  <b>{{ seconds(b.duration) }} s</b>
+                  <button
+                    type="button"
+                    aria-label="Plus long"
+                    (click)="step(b, 'duration', snap, 0.1, 3)"
+                  >
+                    <svg lucidePlus></svg>
+                  </button>
+                </span>
+              </div>
+            }
+          }
+        </div>
+      } @else {
+        <p class="hint card">
+          <svg lucideInfo></svg>
+          Toucher un bloc pour le régler. Le glisser le déplace ; le bord droit
+          d'un bloc long l'allonge. Toucher la règle va à un moment.
+        </p>
+      }
+      <div class="card summary">
+        <small>EN TOUT</small>
+        <b
+          >{{ hitCount() }} coup{{ hitCount() > 1 ? "s" : "" }} ·
+          {{ totalPower() }} % de la puissance</b
+        >
+        <span>Durée : {{ seconds(length()) }} s</span>
+        @if (own()) {
+          <button type="button" class="reset" (click)="reset()">
+            <svg lucideRotateCcw></svg>Déroulé d'origine
+          </button>
+        }
+      </div>
+    </aside>
+  </div>
+
+  <div
+    class="timeline"
+    (pointermove)="pointerMoved($event)"
+    (pointerup)="pointerUp()"
+    (pointercancel)="pointerUp()"
+  >
+    <div class="scroll">
+      <div class="rows" [style.width.px]="label + laneWidth()">
+        <div class="row ruler">
+          <span class="name"></span>
+          <div class="lane" (pointerdown)="scrub($event)">
+            @for (tick of ticks(); track tick.x) {
+              <span class="tick" [style.left.px]="tick.x">{{
+                tick.label
+              }}</span>
+            }
+          </div>
+        </div>
+        @for (t of tracks; track t.id) {
+          <div class="row">
+            <span class="name"
+              ><svg [lucideIcon]="t.icon" [style.color]="t.color"></svg
+              >{{ t.label }}</span
+            >
+            <div class="lane" (pointerdown)="scrub($event)">
+              @for (b of blocksOf(t.id); track b.id) {
+                <div
+                  class="block"
+                  role="button"
+                  tabindex="0"
+                  [class.instant]="isInstant(b)"
+                  [class.selected]="b.id === selectedId()"
+                  [style.--color]="t.color"
+                  [style.left.px]="left(b)"
+                  [style.width.px]="width(b)"
+                  [attr.aria-label]="t.label + ' : ' + blockLabel(b)"
+                  (pointerdown)="grab($event, b)"
+                  (keydown.enter)="selectedId.set(b.id)"
+                >
+                  <span>{{ blockLabel(b) }}</span>
+                  @if (!isInstant(b)) {
+                    <span
+                      class="edge"
+                      (pointerdown)="grab($event, b, true)"
+                    ></span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+        <span
+          class="playhead"
+          [style.left.px]="label + playhead() * zoom()"
+        ></span>
+      </div>
+    </div>
+  </div>
+</section>

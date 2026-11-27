@@ -1,5 +1,8 @@
+import { skillFlow, SkillFlow } from "../../shared/skill-flow";
 import {
   LucideChevronDown,
+  LucideChevronRight,
+  LucideClapperboard,
   LucidePlus,
   LucideSigma,
   LucideX,
@@ -49,6 +52,8 @@ import { AnimFieldComponent } from "../../anim-field/anim-field.component";
     EffectsEditorComponent,
     AnimFieldComponent,
     LucideChevronDown,
+    LucideChevronRight,
+    LucideClapperboard,
     LucidePlus,
     LucideSigma,
     LucideX,
@@ -136,6 +141,11 @@ export class SkillSheetComponent extends DbSheet {
   }
 
   /** Its effect animation changed (undefined: removed). */
+  /** A skill's flow as it plays now (its own, else the one its sheet gives). */
+  protected flowOf(skill: DbSkill): SkillFlow {
+    return skillFlow(skill);
+  }
+
   protected setAnim(skill: DbSkill, anim: SkillAnim | undefined): void {
     this.edit(skill.id, (s) => {
       const next = { ...s, anim } as DbSkill;

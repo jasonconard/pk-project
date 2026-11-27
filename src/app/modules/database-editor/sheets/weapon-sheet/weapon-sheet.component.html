@@ -42,3 +42,28 @@
   <svg lucideInfo></svg> Frapper avec ce type d'arme fait monter son niveau, qui
   apprend des compétences.
 </p>
+
+<div class="block">
+  <h3>Déroulé des attaques</h3>
+  @for (f of flows; track f.field) {
+    <button
+      type="button"
+      class="flow-open"
+      (click)="editFlow('weapons', wp.id, f.field)"
+    >
+      <svg lucideClapperboard></svg>
+      <span class="texts">
+        <b>{{ f.label }}</b>
+        <small
+          >{{ wp[f.field] ? "Réglé à la main" : "D'origine" }} ·
+          {{ flowSummary(flowOf(wp, f.field), wp.anim) }}</small
+        >
+      </span>
+      <svg lucideChevronRight></svg>
+    </button>
+  }
+  <p class="note">
+    Le déroulé place dans le temps le geste du combattant, l'image d'effet ou la
+    flèche, les sons et les coups.
+  </p>
+</div>
