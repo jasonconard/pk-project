@@ -203,7 +203,7 @@ Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat
 
 ## Réglages
 
-Une seule fiche, sans liste : les **transitions** jouées quand la carte change, à l'entrée et à la sortie d'un combat. Voir [Transitions](20-transitions.md).
+Une seule fiche, sans liste : les **transitions** jouées quand la carte change, à l'entrée et à la sortie d'un combat. Voir [Transitions](20-transitions.md). Et l'**arène par défaut** des combats, voir [Arènes de combat](21-arenes.md).
 
 ## Calendrier
 

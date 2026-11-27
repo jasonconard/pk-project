@@ -131,6 +131,10 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `settings`, one row, `sheets/settings-sheet/`), `game/transition/` the canvas; played by `teleport.component` (another
   map; the arrival map's own `SceneMap.transition` first) and `BattleService.start` / `end` (the group's own
   `DbGroup.transitionIn` / `transitionOut` first).
+- Arenas (`docs/editeur/21-arenes.md`): a fight is played in an arena map (kind `arena`) shown in place of the map,
+  which stays loaded (`MapHelper.showArena` / `hideArena`: the arena's chunks built far east, the map's hidden;
+  `shownChunks`); `model/arena.ts` (`arenaFor`: the group's, the map's, the dungeon's, the settings'; `FIGHT_AREA`),
+  `BattleService.enterArena` / `leaveArena`; the editor's fight guide in `editor-markers.ts`. Maps `arene-*`.
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
