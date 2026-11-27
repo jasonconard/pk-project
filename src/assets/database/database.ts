@@ -505,17 +505,78 @@ export const CODE_DATABASE: GameDatabase = {
         "ms": 63,
         "hit": 4
       },
+      "flow": {
+        "blocks": [
+          {
+            "id": "d1",
+            "track": "caster",
+            "start": 0,
+            "duration": 0.54,
+            "anim": "attack"
+          },
+          {
+            "id": "d2",
+            "track": "effect",
+            "start": 0.05,
+            "duration": 0
+          },
+          {
+            "id": "d3",
+            "track": "sound",
+            "start": 0.3,
+            "duration": 0,
+            "sound": "slash"
+          },
+          {
+            "id": "d4",
+            "track": "hit",
+            "start": 0.3,
+            "duration": 0,
+            "percent": 40,
+            "states": false
+          },
+          {
+            "id": "d5",
+            "track": "caster",
+            "start": 0.55,
+            "duration": 0.8,
+            "anim": "heavy"
+          },
+          {
+            "id": "d6",
+            "track": "effect",
+            "start": 0.9,
+            "duration": 0
+          },
+          {
+            "id": "d7",
+            "track": "sound",
+            "start": 1.15,
+            "duration": 0,
+            "sound": "heavy"
+          },
+          {
+            "id": "d8",
+            "track": "hit",
+            "start": 1.15,
+            "duration": 0,
+            "percent": 60,
+            "states": true
+          },
+          {
+            "id": "d9",
+            "track": "screen",
+            "start": 1.15,
+            "duration": 0.25
+          }
+        ]
+      },
       "use": "fight",
       "effects": [
         {
           "kind": "damage",
           "stat": "str",
-          "power": 30
-        },
-        {
-          "kind": "damage",
-          "stat": "str",
-          "power": 30
+          "power": 60
         }
       ],
       "learn": [

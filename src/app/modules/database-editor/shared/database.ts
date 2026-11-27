@@ -1,6 +1,7 @@
 import { WeatherType } from "../../game/shared/weather/Weather";
 import { omit } from "../../../core/shared/omit";
 import { SkillAnim } from "./skill-anim";
+import type { SkillFlow } from "./skill-flow";
 import { SpriteSheet } from "./sprite-sheet";
 import type { EventConditions } from "../../game/shared/model/ObjectEvent";
 import type {
@@ -62,6 +63,9 @@ export interface DbWeapon {
    * a slash on the target (see skill-anim.ts; never on a zone). The blow lands on its hit frame.
    */
   anim?: SkillAnim;
+  /** How its attack and its heavy blow play in time (see skill-flow.ts); missing: one blow (attackFlow). */
+  flow?: SkillFlow;
+  flowHeavy?: SkillFlow;
 }
 
 /** What a state does each turn or while it lasts. */
@@ -781,6 +785,8 @@ export interface DbSkill {
   zone?: number;
   /** Its effect animation, played during its showcase (see skill-anim.ts). */
   anim?: SkillAnim;
+  /** How it plays in time (see skill-flow.ts); missing: one blow, from its sheet (skillFlow). */
+  flow?: SkillFlow;
   use: SkillUse;
   effects: SkillEffect[];
   /** Replaces the power of its damage and heals (« a.mag * 2 - b.end »: a = who uses it, b = the target). */

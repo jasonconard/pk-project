@@ -1,3 +1,10 @@
+import {
+  attackFlow,
+  FlowBlock,
+  flowLength,
+  itemFlow,
+  skillFlow,
+} from "../../database-editor/shared/skill-flow";
 import { playSound } from "../../game/shared/services/sfx";
 import { FIGHT_AREA } from "../../game/shared/model/arena";
 import {
@@ -58,8 +65,6 @@ const DELAY_BACK = 0.12;
 const KNOCK_TIME = 0.6;
 const FADE_TIME = 0.6;
 const END_DELAY = 1.8;
-/** An arrow's speed (world units per second; a ranged attack lands when it arrives). */
-const ARROW_SPEED = 180;
 /**
  * A skill's showcase (Grandia): the whole fight stops while the caster plays it. Its name shows and the camera closes
  * on the caster for SHOWCASE_INTRO (s), then the skill plays; once its effects land the camera turns to the targets,
@@ -72,6 +77,8 @@ const SHOWCASE_HOLD = 0.9;
  * A stunned one (its sheet's « Étourdi après un coup ») waits longer if its stun is longer.
  */
 const HIT_RECOVER = 2;
+/** A hit's numbers go under those shown on the same fighter less than this long ago (s). */
+const POPUP_STACK = 0.35;
 /** A fighter walking makes a step sound every this many units, this loud. */
 const STEP_LENGTH = 16;
 const STEP_GAIN = 0.4;
@@ -88,17 +95,6 @@ const BOSS_SHAKE = 2.6;
 const BOSS_BLAST_EVERY = 0.55;
 const BOSS_FADE = 1.6;
 const BOSS_END = 5.4;
-/** The sound of a skill without one of its own, by the name of its element (found in the element's id). */
-const ELEMENT_SOUNDS: [string, string][] = [
-  ["fire", "fire"],
-  ["ice", "ice"],
-  ["thunder", "thunder"],
-  ["wind", "wind"],
-  ["earth", "earth"],
-  ["light", "light"],
-  ["dark", "dark"],
-  ["water", "ice"],
-];
 /**
  * Once recovered, this long (s) when a new hit is only its « hit taken » animation (nothing locks a fighter for
  * good).
@@ -127,15 +123,15 @@ interface Action {
   step: "wait" | "go" | "strike" | "move";
   /** Where it goes after acting (its new place). */
   dest?: THREE.Vector3;
-  /** A ranged attack's arrow in flight: the time left before it lands. */
-  flight?: number;
-  /** A skill's effect animation playing (its id on the field): its effects land on its hit frame. */
-  anim?: number;
   /**
-   * Its blow left (the sprite's hit frame was taken): only once per action, even when a hit taken plays the sprite's
-   * animations again (each would reach a hit frame again: endless arrows).
+   * Its flow being played since it struck (see skill-flow.ts): the blocks, how long it lasts, the time on its clock,
+   * the effect picture of its skill or weapon, who it lands on (taken when it strikes).
    */
-  struck?: boolean;
+  flow?: FlowBlock[];
+  length?: number;
+  clock?: number;
+  picture?: SkillAnim;
+  targets?: Fighter[];
 }
 
 /** The most hurt first. */
@@ -654,40 +650,103 @@ export class BattleEngine {
   }
 
   /**
-   * Its blow, spell or item now: an attack (shot from afar or not) its attack animation, a skill at contact its heavy
-   * one, a spell its magic, an item its attack.
+   * Its blow, spell or item now: its flow starts (its caster's animations, effects, sounds and hits, each at its
+   * moment), on the targets it has now.
    */
   private strike(action: Action): void {
     const f = action.actor;
     const command = f.command;
-    let anim = command?.kind === "item" ? "attack" : "magic";
-    if (command?.kind === "attack" || command?.kind === "heavy") {
-      anim = command.kind;
-    } else if (command?.kind === "skill" && action.melee) {
-      anim = "heavy";
-    }
     action.step = "strike";
-    action.struck = false;
     this.cry(f, VOICE_STRIKE);
-    this.field.play(f.id, anim, facing(f.pos, action.focus.pos), true);
-    // A skill whose animation plays on its targets: the camera turns to them as the caster starts (it is there when
-    // the effect plays); a projectile's follows it when it leaves
-    const skill =
-      command?.kind === "skill" ? this.skill(command.id) : undefined;
-    if (
-      this.showcase?.actor === f &&
-      skill?.anim &&
-      skill.anim.mode !== "projectile"
-    ) {
-      this.showcase.landed = true;
+    if (!command) {
+      action.flow = [];
+      action.length = 0;
+      action.clock = 0;
+      return;
+    }
+    const skill = command.kind === "skill" ? this.skill(command.id) : undefined;
+    const weapon = this.db.weapons.find((w) => w.id === f.weaponType);
+    let flow = itemFlow();
+    let picture: SkillAnim | undefined;
+    if (skill) {
+      flow = skillFlow(skill);
+      picture = skill.anim;
+    } else if (command.kind === "attack" || command.kind === "heavy") {
+      flow = attackFlow(weapon, command.kind === "heavy", !!f.ranged);
+      picture = weapon?.anim;
+    }
+    action.flow = flow.blocks;
+    action.picture = picture;
+    action.length = flowLength(flow, picture);
+    action.clock = 0;
+    action.targets = this.targetsOf(f, command);
+    // (the blocks at the very start play now: the caster's first animation)
+    this.playFlow(action, -1, 0);
+  }
+
+  /** The blocks of an action's flow starting between two moments of its clock (after `from`, up to `to`). */
+  private playFlow(a: Action, from: number, to: number): void {
+    const actor = a.actor;
+    const command = actor.command;
+    if (!command) {
+      return;
+    }
+    const due = (a.flow ?? []).filter((b) => b.start > from && b.start <= to);
+    for (const block of due) {
+      switch (block.track) {
+        case "caster":
+          this.field.play(
+            actor.id,
+            block.anim ?? "attack",
+            facing(actor.pos, a.focus.pos),
+            true
+          );
+          break;
+        case "effect":
+          this.playEffect(a, block, command);
+          break;
+        case "sound":
+          playSound(block.sound ?? "", false, { pitch: block.pitch ?? 1 });
+          break;
+        case "hit":
+          this.land(a, block.percent ?? 100, block.states !== false);
+          break;
+        case "screen":
+          this.field.shake(Math.max(0.1, block.duration));
+          break;
+      }
     }
   }
 
-  /** The animation its weapon type plays for its attacks (none: the sheet's alone, a plain arrow from afar). */
-  private weaponAnim(f: Fighter): SkillAnim | undefined {
-    return f.weaponType
-      ? this.db.weapons.find((w) => w.id === f.weaponType)?.anim
-      : undefined;
+  /** An effect block: the skill's or the weapon's picture on the targets (flying there first), or a plain arrow. */
+  private playEffect(a: Action, block: FlowBlock, command: Command): void {
+    const actor = a.actor;
+    const targets = (a.targets ?? []).filter((t) => t.hp > 0);
+    if (this.showcase?.actor === actor) {
+      this.showcase.landed = true;
+    }
+    if (block.arrow || !a.picture) {
+      if (block.arrow) {
+        this.field.shoot(
+          actor.pos,
+          a.focus.pos,
+          Math.max(0.05, block.duration)
+        );
+      }
+      return;
+    }
+    if (targets.length === 0) {
+      return;
+    }
+    const skill = command.kind === "skill" ? this.skill(command.id) : undefined;
+    const all = skill?.target === "enemies" || skill?.target === "allies";
+    this.field.skillAnims.play(
+      a.picture,
+      actor.pos,
+      targets.map((t) => t.pos),
+      all ? null : this.zoneRadius(command),
+      Math.max(0, block.duration)
+    );
   }
 
   /** A team member's action trains its levels: a skill's, or its weapon type for the attacks. */
@@ -803,64 +862,11 @@ export class BattleEngine {
         this.strike(a);
       }
     } else if (a.step === "strike") {
-      if (!a.struck && this.field.consumeHit(actor.id)) {
-        a.struck = true;
-        const attack =
-          actor.command?.kind === "attack" || actor.command?.kind === "heavy";
-        const shot = actor.ranged && attack;
-        const weaponAnim = attack ? this.weaponAnim(actor) : undefined;
-        const skill =
-          actor.command?.kind === "skill"
-            ? this.skill(actor.command.id)
-            : undefined;
-        if (weaponAnim) {
-          // Its weapon type's animation (an arrow flying, a slash): the blow lands on its hit frame
-          a.anim = this.field.skillAnims.play(
-            weaponAnim,
-            actor.pos,
-            [a.focus.pos],
-            0
-          );
-        } else if (shot) {
-          // A ranged attack: an arrow flies, the blow lands when it arrives
-          a.flight = actor.pos.distanceTo(a.focus.pos) / ARROW_SPEED;
-          this.field.shoot(actor.pos, a.focus.pos, a.flight);
-        } else if (skill?.anim && actor.command) {
-          // A skill with its animation: its effects land on the animation's hit frame
-          const all = skill.target === "enemies" || skill.target === "allies";
-          a.anim = this.field.skillAnims.play(
-            skill.anim,
-            actor.pos,
-            this.targetsOf(actor, actor.command).map((t) => t.pos),
-            all ? null : this.zoneRadius(actor.command)
-          );
-          if (this.showcase?.actor === actor) {
-            this.showcase.landed = true;
-          }
-        } else {
-          this.land(actor);
-        }
-      }
-      if (a.anim !== undefined) {
-        if (this.field.skillAnims.takeHit(a.anim)) {
-          this.land(actor);
-        }
-        if (this.field.skillAnims.done(a.anim)) {
-          a.anim = undefined;
-        }
-      }
-      if (a.flight !== undefined) {
-        a.flight -= dt;
-        if (a.flight <= 0) {
-          a.flight = undefined;
-          this.land(actor);
-        }
-      }
-      // Done: its blow's animation played to the end, or cut by a hit taken (back to a loop) once the blow left
-      const ended =
-        this.field.finished(actor.id) ||
-        (!!a.struck && this.field.looping(actor.id));
-      if (ended && a.flight === undefined && a.anim === undefined) {
+      // Its flow goes on: what starts now is played; over at its end
+      const before = a.clock ?? 0;
+      a.clock = before + dt;
+      this.playFlow(a, before, a.clock);
+      if (a.clock >= (a.length ?? 0)) {
         this.walkBack(a);
       }
     } else if (this.walk(actor, a.dest ?? actor.home, dt)) {
@@ -954,41 +960,12 @@ export class BattleEngine {
     playSound(f.voice, false, { pitch: (f.voicePitch ?? 1) * tone });
   }
 
-  /** The sound of a blow landing: the weapon's, the skill's own (played with its animation) or its element's. */
-  private landSound(actor: Fighter, command: Command): void {
-    if (command.kind === "attack" || command.kind === "heavy") {
-      if (!this.weaponAnim(actor)?.sound) {
-        const blow = actor.ranged ? "arrow" : "slash";
-        playSound(command.kind === "heavy" ? "heavy" : blow);
-      }
-      return;
-    }
-    const skill = this.skill(command.id);
-    if (skill?.anim?.sound) {
-      return;
-    }
-    if (!skill) {
-      playSound("item");
-      return;
-    }
-    const element = skill.element ?? "";
-    const found = ELEMENT_SOUNDS.find(([name]) => element.includes(name));
-    const has = (kind: string) => skill.effects.some((e) => e.kind === kind);
-    let sound = isMelee(skill) ? "heavy" : "magic";
-    if (found && has("damage")) {
-      sound = found[1];
-    } else if (has("heal") || has("removeState")) {
-      sound = "heal";
-    } else if (has("stat")) {
-      sound = "boost";
-    } else if (has("addState") && !has("damage")) {
-      sound = "poison";
-    }
-    playSound(sound);
-  }
-
-  /** The hit frame: the command's effects on each of its targets. */
-  private land(actor: Fighter): void {
+  /**
+   * A hit of an action's flow: the command's effects on each of its targets still standing, with this share of
+   * their power (%); the states and boosts only when the hit carries them.
+   */
+  private land(a: Action, percent: number, states: boolean): void {
+    const actor = a.actor;
     const command = actor.command;
     if (!command) {
       return;
@@ -996,27 +973,44 @@ export class BattleEngine {
     if (this.showcase?.actor === actor) {
       this.showcase.landed = true;
     }
-    this.landSound(actor, command);
-    for (const target of this.targetsOf(actor, command)) {
+    const share = Math.max(0, percent) / 100;
+    for (const target of a.targets ?? []) {
+      if (target.hp <= 0) {
+        continue;
+      }
+      // (its numbers go under those a hit just before left on it)
+      let line = this.popups.filter(
+        (p) => p.fighter === target && p.age < POPUP_STACK
+      ).length;
       if (command.kind === "attack" || command.kind === "heavy") {
         const amount =
           baseAmount(actor, target, "str", ATTACK_POWER, true, this.db) *
-          (command.kind === "heavy" ? HEAVY_FACTOR : 1);
+          (command.kind === "heavy" ? HEAVY_FACTOR : 1) *
+          share;
         this.hit(
           actor,
           target,
           amount,
           actor.attackElement,
-          0,
+          line,
           command.kind === "heavy"
         );
         continue;
       }
       const skill = this.skill(command.id);
       const effects = skill?.effects ?? this.item(command.id)?.effects ?? [];
-      let line = 0;
       for (const e of effects) {
-        line = this.applyEffect(actor, target, e, skill, line);
+        const scaled = e.kind === "damage" || e.kind === "heal";
+        if (!scaled && !states) {
+          continue;
+        }
+        line = this.applyEffect(
+          actor,
+          target,
+          scaled ? { ...e, power: e.power * share } : e,
+          skill,
+          line
+        );
       }
     }
   }
@@ -1145,7 +1139,9 @@ export class BattleEngine {
       // (a fighter in the middle of its own blow finishes it)
       if (this.showcase?.actor === actor) {
         // (shown off: the hit is taken once the fight goes on)
-        this.showcase.hurts.push({ target, from: actor });
+        if (!this.showcase.hurts.some((h) => h.target === target)) {
+          this.showcase.hurts.push({ target, from: actor });
+        }
       } else if (!this.striking(target)) {
         this.takeHit(target, actor);
       }

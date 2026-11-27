@@ -66,7 +66,8 @@ export class SkillAnimPlayer {
     anim: SkillAnim,
     from: THREE.Vector3,
     targets: THREE.Vector3[],
-    zone: number | null
+    zone: number | null,
+    flight?: number
   ): number {
     const spots = this.spotsOf(anim, targets, zone);
     const show: Show = {
@@ -77,13 +78,15 @@ export class SkillAnimPlayer {
       pieces: [],
       spots,
       hitFired: false,
-      hitTaken: false,
+      // (a flight time given: played by a flow, which lands its hits itself; the show ends on its own)
+      hitTaken: flight !== undefined,
     };
     if (anim.mode === "projectile" && anim.flyFrames) {
       show.stage = "fly";
       const start = from.clone().setY(from.y + FLY_HEIGHT);
       const far = Math.max(...targets.map((t) => t.distanceTo(from)), 1);
-      show.flight = (far / FLY_SPEED) * 1000;
+      show.flight =
+        flight === undefined ? (far / FLY_SPEED) * 1000 : flight * 1000;
       show.pieces = targets.map((t) => {
         const piece = this.piece(anim, 1, 1);
         piece.from = start;
@@ -189,7 +192,8 @@ export class SkillAnimPlayer {
 
   private startEffect(show: Show): void {
     // (once, however many targets)
-    if (show.anim.sound) {
+    // (played by a flow: its sounds are the flow's own blocks)
+    if (show.anim.sound && !show.hitTaken) {
       playSound(show.anim.sound);
     }
     show.pieces = show.spots.map((spot) => {
