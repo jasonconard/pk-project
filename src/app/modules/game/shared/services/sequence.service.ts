@@ -1,3 +1,4 @@
+import { LANTERN_KEY, lightKey } from "../model/light";
 import { inject, Service, signal } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { CoreService } from "../../../../core/shared/service/core.service";
@@ -28,6 +29,7 @@ import {
   healTeam,
   setInTeam,
   setTeamHidden,
+  switchLight,
 } from "../../../database-editor/shared/party";
 import { BattleService } from "../../../battle/shared/battle.service";
 import {
@@ -288,6 +290,19 @@ export class SequenceService {
           this.nextSequence();
         }
         break;
+      case InstructionType.LIGHT: {
+        const target = instruction.light?.target || this.origin?.object;
+        if (target === LANTERN_KEY) {
+          switchLight(LANTERN_KEY, instruction.light?.on !== false);
+        } else if (target && this.origin) {
+          switchLight(
+            lightKey(this.origin.map, target),
+            instruction.light?.on !== false
+          );
+        }
+        this.nextSequence();
+        break;
+      }
       case InstructionType.TEAM:
         setTeamHidden(instruction.team?.follow === false);
         this.nextSequence();

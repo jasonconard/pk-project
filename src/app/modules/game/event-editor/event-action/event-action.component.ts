@@ -1,3 +1,4 @@
+import { isLightObject } from "../../shared/model/light";
 import {
   computed,
   ChangeDetectionStrategy,
@@ -91,6 +92,24 @@ export class EventActionComponent {
         }))
     );
   });
+  /** The objects of the map that light (a « Lumière » object, a model with light points). */
+  protected readonly lightObjects = computed(() => {
+    const map = loadMap(this.currentMap());
+    if (!map) {
+      return [];
+    }
+    return map.chunks.flatMap((c) =>
+      c.buildings
+        .filter(
+          (b) => isLightObject(b) || !!findModel(b.modelId)?.lights?.length
+        )
+        .map((b) => ({
+          id: b.id,
+          label: `${modelLabel(b.modelId)} (${Math.round((c.pos.x + b.pos.x) / TILE_SIZE)}, ${Math.round((c.pos.z + b.pos.z) / TILE_SIZE)})`,
+        }))
+    );
+  });
+
   protected shopOf(id: string) {
     return this.data.db.shops.find((sh) => sh.id === id);
   }

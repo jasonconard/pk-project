@@ -1,3 +1,4 @@
+import { ModelLight } from "./light";
 import { ActionZone } from "./action-zone";
 import { PartMotion } from "./model-motion";
 import { Vec2, Vec3, VecBox2, VecBox3 } from "./SceneUtils";
@@ -15,6 +16,8 @@ export interface SceneModel {
   thumb?: VecBox2;
   /** Where the player acts on the objects of this model (a house's door; see action-zone.ts). Omitted: the whole object. */
   zone?: ActionZone;
+  /** Light points (a lamp's glass, a window): every object of the model lights (see light.ts). */
+  lights?: ModelLight[];
 }
 
 export interface SceneModelTex {

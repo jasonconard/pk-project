@@ -36,7 +36,12 @@ export const QUALITY_PRESETS: Record<
  * Current rendering detail, read by the weather (particle counts, full screen effects). Set by the game
  * quality (Game.setQuality / adaptQuality).
  */
-export const RENDER_DETAIL = { particles: 1, postEffects: true };
+export const RENDER_DETAIL = {
+  particles: 1,
+  postEffects: true,
+  /** How many lights are real three.js lights (the nearest; see lights-view.ts): 4 with fine shadows, 2, else 0. */
+  realLights: 0,
+};
 
 export const QUALITY_CHOICES: {
   mode: QualityMode;

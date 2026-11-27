@@ -40,6 +40,7 @@ import {
   LucidePlay,
   LucidePalette,
   LucidePlus,
+  LucideLightbulb,
   LucideRectangleHorizontal,
   LucideRedo2,
   LucideRotateCcw,
@@ -93,6 +94,12 @@ import {
 } from "./shared/model-ops";
 import { ModelHistory } from "./shared/model-history";
 import { ZoneEditorComponent } from "../game/zone-editor/zone-editor.component";
+import { LightFieldsComponent } from "../game/light-fields/light-fields.component";
+import {
+  defaultLight,
+  LightSpec,
+  lightSummary,
+} from "../game/shared/model/light";
 import {
   ActionZone,
   isWholeObject,
@@ -180,11 +187,13 @@ import {
     "./model-editor.motion.scss",
     "./model-editor.part-motion.scss",
     "./model-editor.zone.scss",
+    "./model-editor.lights.scss",
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PixelCanvasComponent,
     ZoneEditorComponent,
+    LightFieldsComponent,
     NgTemplateOutlet,
     LucideArrowLeftRight,
     LucideArrowUpDown,
@@ -211,6 +220,7 @@ import {
     LucidePlay,
     LucidePalette,
     LucidePlus,
+    LucideLightbulb,
     LucideRectangleHorizontal,
     LucideRedo2,
     LucideRotateCcw,
@@ -473,6 +483,16 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       () => this.motionPreview(),
       () => this.stopMotionPreview()
     );
+    // The light points drawn over the model (the selected one bigger)
+    effect(() => {
+      this.model();
+      this.lightIndex();
+      this.syncLights();
+    });
+    inject(EscapeService).track(
+      () => this.placingLight(),
+      () => this.placingLight.set(false)
+    );
     effect((onCleanup) => {
       const inner = this.sheetInner()?.nativeElement;
       if (!inner) {
@@ -493,6 +513,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     this.scene = new ModelEditorScene(this.viewport().nativeElement);
     this.scene.onPartMoved = (partIndex, pos) =>
       this.edit((model) => (model.parts[partIndex].pos = pos));
+    this.syncLights();
     // Capture phase: decides before the camera controls whether a press paints the model or turns the camera
     const viewport = this.viewport().nativeElement;
     viewport.addEventListener("pointerdown", (e) => this.paint3dDown(e), {
@@ -618,6 +639,78 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       (model) => (model.sway = value > 0 ? Math.min(1, value) : undefined),
       false
     );
+  }
+
+  // --- Light points (design/model-editor-mobile.pen screen 12) ---
+
+  /** The light point shown in the sheet (its index), and whether the next tap on the model places it. */
+  protected readonly lightIndex = signal<number | null>(null);
+  protected readonly placingLight = signal(false);
+  protected readonly lightSummary = lightSummary;
+
+  private syncLights(): void {
+    this.scene?.setLights(this.model()?.lights ?? [], this.lightIndex());
+  }
+
+  protected addLight(): void {
+    const model = this.model();
+    const count = model?.lights?.length ?? 0;
+    this.edit(
+      (m) =>
+        (m.lights = [
+          ...(m.lights ?? []),
+          {
+            ...defaultLight(),
+            name: `Lumière ${count + 1}`,
+            // (above the model's middle until it is placed)
+            pos: { x: 0, y: Math.round(m.hitBox.max.y || 8), z: 0 },
+          },
+        ]),
+      false
+    );
+    this.lightIndex.set(count);
+    this.placingLight.set(true);
+  }
+
+  protected setLight(index: number, spec: LightSpec): void {
+    this.edit(
+      (m) =>
+        (m.lights = (m.lights ?? []).map((l, i) =>
+          i === index
+            ? { ...spec, pos: l.pos, ...(l.name ? { name: l.name } : {}) }
+            : l
+        )),
+      false
+    );
+  }
+
+  protected removeLight(index: number): void {
+    this.edit((m) => {
+      const left = (m.lights ?? []).filter((_, i) => i !== index);
+      m.lights = left.length > 0 ? left : undefined;
+    }, false);
+    this.lightIndex.set(null);
+    this.placingLight.set(false);
+  }
+
+  /** A tap on the model while placing: the light point goes there. */
+  private placeLight(event: PointerEvent): boolean {
+    const index = this.lightIndex();
+    if (!this.placingLight() || index === null || !this.scene) {
+      return false;
+    }
+    const point = this.scene.pickPoint(event.clientX, event.clientY);
+    if (point) {
+      this.edit(
+        (m) =>
+          (m.lights = (m.lights ?? []).map((l, i) =>
+            i === index ? { ...l, pos: point } : l
+          )),
+        false
+      );
+      this.placingLight.set(false);
+    }
+    return true;
   }
 
   /** The model's action zone (the whole object: none kept). */
@@ -1216,6 +1309,9 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       Math.hypot(event.clientX - press.x, event.clientY - press.y) >
         CLICK_TOLERANCE
     ) {
+      return;
+    }
+    if (this.placeLight(event)) {
       return;
     }
     const pick = this.scene?.pick(

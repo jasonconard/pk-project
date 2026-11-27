@@ -42,6 +42,8 @@ export interface PartyState {
   links?: Record<string, number>;
   /** NPC id → the day (game date) it was last given a gift (one a day). */
   gifts?: Record<string, number>;
+  /** Lights switched by events (`<map>/<object>`, `lantern`): on or off (see light.ts). */
+  lights?: Record<string, boolean>;
   /** An event hid the members following the leader (« L'équipe : se cache »). */
   teamHidden?: boolean;
   /** Shop id → what was bought there on a day (item id → how many; the stock comes back the next day). */
@@ -164,6 +166,13 @@ export function trade(
   }
   writeParty(party);
   return true;
+}
+
+/** A light switched on or off by an event (see light.ts). */
+export function switchLight(key: string, on: boolean): void {
+  const party = structuredClone(currentParty());
+  party.lights = { ...party.lights, [key]: on };
+  writeParty(party);
 }
 
 /** The members behind the leader hidden or shown again (the event action « L'équipe »). */

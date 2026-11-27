@@ -1,0 +1,127 @@
+// A light's settings: colour dots, range and strength, three switches (dark panels: the map and model editors)
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: #fff;
+}
+
+button {
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+svg {
+  width: 14px;
+  height: 14px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.colors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  input[type="color"] {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px dashed rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+}
+
+.color {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+
+  &[aria-checked="true"] {
+    box-shadow:
+      0 0 0 2px #22232a,
+      0 0 0 4px #fff;
+  }
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: default;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  > span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  > button:not(.strength) {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  b {
+    min-width: 64px;
+    text-align: center;
+  }
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #ffb04a;
+    cursor: pointer;
+  }
+}
+
+label.row {
+  cursor: pointer;
+}
+
+.strength {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+
+  &[aria-checked="true"] {
+    background: #ffb04a;
+    color: #2a1a05;
+    font-weight: 700;
+  }
+}

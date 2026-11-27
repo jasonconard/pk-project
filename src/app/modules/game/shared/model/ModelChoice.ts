@@ -150,6 +150,7 @@ const MODEL_LABELS: Record<string, string> = {
   lamp: "Lampadaire",
   campfire: "Feu de camp",
   zone: "Zone invisible",
+  light: "Lumière",
 };
 
 export function modelLabel(modelId: string): string {

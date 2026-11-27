@@ -1,3 +1,4 @@
+import { LightSpec } from "../model/light";
 import { DungeonService } from "./dungeon.service";
 import { animationKey, currentAnimations } from "../model/model-animations";
 import {
@@ -1192,6 +1193,15 @@ export class GameService {
     const game = this.game;
     if (game) {
       this.mapEditorService.setDungeonObject(game, settings);
+      this.syncHud();
+    }
+  }
+
+  /** The selected « Lumière » object's light. */
+  setLight(light: LightSpec) {
+    const game = this.game;
+    if (game) {
+      this.mapEditorService.setLight(game, light);
       this.syncHud();
     }
   }

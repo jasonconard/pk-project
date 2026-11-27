@@ -1,3 +1,9 @@
+import {
+  defaultLight,
+  isLightObject,
+  LightSpec,
+  makeLightMarker,
+} from "../model/light";
 import { inject, Service } from "@angular/core";
 import { haptic } from "../../../../core/shared/haptics";
 import * as THREE from "three";
@@ -66,6 +72,8 @@ export interface EditSelection {
   events: ObjectEvent[];
   /** An invisible zone's size in cells (null: not a zone). */
   zoneSize: { x: number; z: number } | null;
+  /** A « Lumière » object's light (null: not one; see light.ts). */
+  light: LightSpec | null;
   /** An NPC's place name (its schedule picks it). */
   placeLabel: string;
   /** A dungeon object's settings (null: not a dungeon object). */
@@ -459,7 +467,11 @@ export class MapEditorService {
       this.ghost = null;
     }
     const model = modelId ? findModel(modelId) : undefined;
-    if (model && isZone(model)) {
+    if (model && isLightObject(model)) {
+      this.ghost = makeLightMarker(defaultLight(), 0);
+      this.ghost.visible = false;
+      game.scene.add(this.ghost);
+    } else if (model && isZone(model)) {
       this.ghost = makeZoneMesh(undefined, 0.12);
       this.ghost.visible = false;
       game.scene.add(this.ghost);
@@ -758,6 +770,9 @@ export class MapEditorService {
                 x: picked.building.size?.x ?? 2,
                 z: picked.building.size?.z ?? 2,
               }
+            : null,
+          light: isLightObject(picked.building)
+            ? (picked.building.light ?? defaultLight())
             : null,
           placeLabel: picked.building.label ?? "",
           dungeon: dungeonKindOf(picked.building.modelId)
@@ -1162,6 +1177,27 @@ export class MapEditorService {
       } else {
         delete building.dungeon;
       }
+      const chunk = this.chunkOf(game, building);
+      if (chunk) {
+        game.mapHelper?.refreshBuilding(chunk, building);
+        this.select(game, { chunk, building });
+      }
+    };
+    set(after);
+    this.record(game, { undo: () => set(before), redo: () => set(after) });
+  }
+
+  /** The selected « Lumière » object's light (undone as one change). */
+  setLight(game: Game, light: LightSpec) {
+    const picked = this.selected;
+    if (!picked || !isLightObject(picked.building)) {
+      return;
+    }
+    const building = picked.building;
+    const before = structuredClone(building.light ?? defaultLight());
+    const after = structuredClone(light);
+    const set = (value: LightSpec) => {
+      building.light = structuredClone(value);
       const chunk = this.chunkOf(game, building);
       if (chunk) {
         game.mapHelper?.refreshBuilding(chunk, building);

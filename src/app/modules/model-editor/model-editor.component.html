@@ -635,6 +635,7 @@
           <span class="note">0 = immobile</span>
         </div>
         <ng-container [ngTemplateOutlet]="zoneTpl" />
+        <ng-container [ngTemplateOutlet]="lightsTpl" />
       }
       <div class="pair">
         <button type="button" class="btn outline" (click)="create()">
@@ -1144,6 +1145,7 @@
       Vent : 0 = immobile, 1 = plie beaucoup (herbes, arbres).
     </p>
     <ng-container [ngTemplateOutlet]="zoneTpl" />
+    <ng-container [ngTemplateOutlet]="lightsTpl" />
     @if (isEditedGameModel()) {
       <button
         type="button"
@@ -1731,5 +1733,58 @@
       [grid]="zoneGrid()"
       (zoneChange)="setZone($event)"
     />
+  </section>
+</ng-template>
+
+<ng-template #lightsTpl>
+  <section class="lights-section" aria-label="Lumières">
+    <header>
+      <svg lucideLightbulb></svg>
+      <span class="lights-title">Lumières</span>
+      <button type="button" class="lights-add" (click)="addLight()">
+        <svg lucidePlus></svg> Point
+      </button>
+    </header>
+    <p class="lights-hint">
+      Un point de lumière (la vitre d'un lampadaire, une fenêtre) : tous les
+      objets de ce modèle posés sur la carte s'allument.
+    </p>
+    @for (l of model()?.lights ?? []; track $index; let i = $index) {
+      <div class="light" [class.on]="lightIndex() === i">
+        <button
+          type="button"
+          class="light-head"
+          [attr.aria-expanded]="lightIndex() === i"
+          (click)="
+            lightIndex.set(lightIndex() === i ? null : i);
+            placingLight.set(false)
+          "
+        >
+          <span class="dot" [style.background]="l.color"></span>
+          <b>{{ l.name ?? "Lumière " + (i + 1) }}</b>
+          <small>{{ lightSummary(l) }}</small>
+        </button>
+        @if (lightIndex() === i) {
+          <div class="light-place">
+            <span>Position {{ l.pos.x }} · {{ l.pos.y }} · {{ l.pos.z }}</span>
+            <button
+              type="button"
+              [class.active]="placingLight()"
+              (click)="placingLight.set(!placingLight())"
+            >
+              {{ placingLight() ? "Touche le modèle…" : "Placer" }}
+            </button>
+            <button
+              type="button"
+              aria-label="Supprimer ce point de lumière"
+              (click)="removeLight(i)"
+            >
+              <svg lucideTrash></svg>
+            </button>
+          </div>
+          <game-light-fields [light]="l" (changed)="setLight(i, $event)" />
+        }
+      </div>
+    }
   </section>
 </ng-template>

@@ -9,6 +9,7 @@ import { SceneModel } from "./SceneModel";
 import { SceneBuilding } from "./SceneBuilding";
 import { MODELS } from "../../../../../assets/models/models";
 import { isNpc, npcModel } from "./npc-sprite";
+import { LIGHT_ID, MD_LIGHT } from "./light";
 
 /**
  * An invisible zone: an object of the map editor (tab Événements) that only exists for its events (walking into
@@ -44,6 +45,9 @@ export function isZone(
 export function findModel(id: string): SceneModel | undefined {
   if (id === ZONE_ID) {
     return MD_ZONE;
+  }
+  if (id === LIGHT_ID) {
+    return MD_LIGHT;
   }
   if (isDungeonObject({ id })) {
     return dungeonModel(id);

@@ -290,6 +290,10 @@ export class Game {
     this.postEffects = postEffects;
     RENDER_DETAIL.particles = detail;
     RENDER_DETAIL.postEffects = postEffects;
+    RENDER_DETAIL.realLights = 0;
+    if (shadowMapSize >= 2048) {
+      RENDER_DETAIL.realLights = shadowMapSize >= 4096 ? 4 : 2;
+    }
     // Shadows on / off: the materials are compiled again once (three.js notices the light change)
     this.sun.castShadow = shadowMapSize > 0;
     if (

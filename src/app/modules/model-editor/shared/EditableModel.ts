@@ -1,3 +1,4 @@
+import { ModelLight } from "../../game/shared/model/light";
 import { ActionZone } from "../../game/shared/model/action-zone";
 import { ObjSide } from "../../game/shared/model/SceneMap";
 import { PartMotion } from "../../game/shared/model/model-motion";
@@ -46,6 +47,8 @@ export interface EditableModel {
   sway?: number;
   /** Where the player acts on the objects of this model (see action-zone.ts). Omitted: the whole object. */
   zone?: ActionZone;
+  /** Light points (a lamp's glass, a window; see light.ts). */
+  lights?: ModelLight[];
   bumpScale?: number;
   hitBox: VecBox3;
   parts: EditablePart[];

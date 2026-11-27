@@ -67,6 +67,7 @@ import { ShopComponent } from "./shop/shop.component";
 import { SeedPickerComponent } from "./farm/seed-picker.component";
 import { FarmToastComponent } from "./farm/farm-toast.component";
 import { FarmService } from "./shared/services/farm.service";
+import { LightSpec } from "./shared/model/light";
 import { currentVariableValues } from "../variables-editor/shared/variable-values";
 import { LinkGain } from "../database-editor/shared/links";
 import { VariablesTestComponent } from "./variables-test/variables-test.component";
@@ -565,6 +566,10 @@ export class GameComponent {
 
   protected setDungeonObject(settings: DungeonObject): void {
     this.gameService.setDungeonObject(settings);
+  }
+
+  protected setLight(light: LightSpec): void {
+    this.gameService.setLight(light);
   }
 
   protected setZoneSize(size: { x: number; z: number }): void {

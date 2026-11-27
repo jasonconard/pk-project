@@ -384,6 +384,47 @@
       </p>
     }
   }
+  @case ("light") {
+    <div class="row">
+      <select
+        aria-label="Quelle lumière"
+        (change)="set({ target: value($event) })"
+      >
+        <option value="lantern" [selected]="action.target === 'lantern'">
+          La lanterne du joueur
+        </option>
+        <option value="" [selected]="!action.target">Cet objet</option>
+        @for (o of lightObjects(); track o.id) {
+          <option [value]="o.id" [selected]="o.id === action.target">
+            {{ o.label }}
+          </option>
+        }
+      </select>
+    </div>
+    <div class="segmented" role="radiogroup" aria-label="Allumer ou éteindre">
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="action.on"
+        (click)="set({ on: true })"
+      >
+        Allumer
+      </button>
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="!action.on"
+        (click)="set({ on: false })"
+      >
+        Éteindre
+      </button>
+    </div>
+    <p class="help">
+      Une lumière de la carte (objet Lumière, ou lampe d'un modèle) ou la
+      lanterne du joueur. Éteinte, elle le reste jusqu'à « Allumer » (gardé avec
+      la partie).
+    </p>
+  }
   @case ("team") {
     <div class="segmented" role="radiogroup" aria-label="L'équipe">
       <button

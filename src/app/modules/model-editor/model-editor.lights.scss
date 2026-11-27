@@ -1,0 +1,122 @@
+// The model's light points (« Modèle » sheet and panel): design/model-editor-mobile.pen screen 12.
+.lights-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0;
+  padding: 10px;
+  border: 1px solid rgb(255 176 74 / 35%);
+  border-radius: 10px;
+  background: rgb(255 176 74 / 6%);
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    > svg {
+      width: 16px;
+      height: 16px;
+      color: #ffb04a;
+    }
+  }
+}
+
+.lights-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lights-add,
+.light-place button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 8%);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &.active {
+    background: #ffb04a;
+    color: #2a1a05;
+    font-weight: 700;
+  }
+}
+
+.lights-hint {
+  margin: 0;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.light {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 4%);
+
+  &.on {
+    padding-bottom: 10px;
+    box-shadow: inset 0 0 0 1px #ffb04a;
+
+    game-light-fields {
+      padding: 0 10px;
+    }
+  }
+}
+
+.light-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+
+  b {
+    flex: 1;
+  }
+
+  small {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.light-place {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 12px;
+
+  span {
+    flex: 1;
+    opacity: 0.75;
+  }
+}

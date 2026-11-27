@@ -188,6 +188,7 @@ export function importModel(
     id: model.id,
     sway: model.sway,
     zone: model.zone && structuredClone(model.zone),
+    lights: model.lights?.length ? structuredClone(model.lights) : undefined,
     bumpScale: model.tex.bumpScale,
     hitBox: structuredClone(model.hitBox),
     parts,

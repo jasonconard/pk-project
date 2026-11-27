@@ -308,6 +308,8 @@
         <span class="thumb">
           @if (selection.zoneSize) {
             <svg lucideSquareDashed class="zone-thumb"></svg>
+          } @else if (selection.light) {
+            <svg lucideLightbulb class="zone-thumb"></svg>
           } @else if (thumbs()[selection.modelId]; as thumb) {
             <img [src]="thumb" alt="" />
           } @else if (npcSelected()) {
@@ -335,7 +337,7 @@
         </button>
       </header>
       <div class="actions">
-        @if (!selection.zoneSize) {
+        @if (!(selection.zoneSize || selection.light)) {
           <button
             type="button"
             title="Tourner d'un quart de tour (R)"
@@ -359,7 +361,9 @@
           >
             <svg lucideSquareUser></svg> Fiche
           </button>
-        } @else if (!selection.zoneSize && !selection.dungeon) {
+        } @else if (
+          !(selection.zoneSize || selection.light) && !selection.dungeon
+        ) {
           <button
             type="button"
             title="Ouvrir ce modèle dans l'éditeur de modèles 3D"
@@ -675,30 +679,38 @@
           </div>
         }
       }
-      <div class="options">
-        <label class="switch-row">
-          <span>Bloque le passage</span>
-          <input
-            type="checkbox"
-            role="switch"
-            [checked]="!selection.passable"
-            (change)="send('togglePassable', $event)"
-          />
-        </label>
-        @if (!selection.zoneSize && !npcSelected() && !selection.dungeon) {
+      @if (!selection.light) {
+        <div class="options">
           <label class="switch-row">
-            <span>Transparent quand le joueur est derrière</span>
+            <span>Bloque le passage</span>
             <input
               type="checkbox"
               role="switch"
-              [checked]="selection.canHide"
-              (change)="send('toggleCanHide', $event)"
+              [checked]="!selection.passable"
+              (change)="send('togglePassable', $event)"
             />
           </label>
-        }
-      </div>
+          @if (
+            !(selection.zoneSize || selection.light) &&
+            !npcSelected() &&
+            !selection.dungeon
+          ) {
+            <label class="switch-row">
+              <span>Transparent quand le joueur est derrière</span>
+              <input
+                type="checkbox"
+                role="switch"
+                [checked]="selection.canHide"
+                (change)="send('toggleCanHide', $event)"
+              />
+            </label>
+          }
+        </div>
+      }
       @if (
-        !npcSelected() && (!selection.dungeon || dungeonKind()?.kind === "door")
+        !npcSelected() &&
+        !selection.light &&
+        (!selection.dungeon || dungeonKind()?.kind === "door")
       ) {
         <div class="passage">
           <h3><svg lucideDoorOpen></svg> Passage vers une carte</h3>
@@ -808,6 +820,19 @@
           }
         </div>
       }
+      @if (selection.light; as light) {
+        <div class="passage light">
+          <h3><svg lucideLightbulb></svg> Lumière</h3>
+          <small class="talk-hint"
+            >Invisible dans le jeu : elle éclaire le sol autour d'elle, surtout
+            la nuit.</small
+          >
+          <game-light-fields
+            [light]="light"
+            (changed)="lightChange.emit($event)"
+          />
+        </div>
+      }
       @if (selection.zoneSize; as size) {
         <div class="passage zone-size">
           <h3><svg lucideSquareDashed></svg> Zone invisible</h3>
@@ -844,7 +869,7 @@
           }
         </div>
       }
-      @if (!selection.zoneSize) {
+      @if (!(selection.zoneSize || selection.light)) {
         <div class="passage zone">
           <h3><svg lucideScan></svg> Zone d'action</h3>
           @if (selection.zoneEditing) {
@@ -1121,6 +1146,19 @@
               ><svg lucideSquareDashed></svg
             ></span>
             <span class="name">Zone invisible</span>
+          </button>
+          <button
+            type="button"
+            class="entry tile"
+            title="Lumière : une lumière invisible (un feu de camp, une lueur magique) qui éclaire le sol la nuit"
+            [class.selected]="modelId() === lightId"
+            [attr.aria-pressed]="modelId() === lightId"
+            (click)="pick(lightId, $event)"
+          >
+            <span class="pic" aria-hidden="true"
+              ><svg lucideLightbulb></svg
+            ></span>
+            <span class="name">Lumière</span>
           </button>
         } @else if (tab() === "chunks") {
           <button

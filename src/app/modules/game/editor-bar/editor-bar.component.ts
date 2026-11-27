@@ -35,6 +35,7 @@ import {
   LucideMinus,
   LucideSearch,
   LucideSquareDashed,
+  LucideLightbulb,
   LucideSquareUser,
   LucideArrowUp,
   LucideUserRound,
@@ -68,6 +69,8 @@ import { MapManagerComponent } from "../map-manager/map-manager.component";
 import { Passage } from "../shared/model/Passage";
 import { newObjectEvent, ObjectEvent } from "../shared/model/ObjectEvent";
 import { ZONE_ID, ZONE_MAX_CELLS } from "../shared/model/Zone";
+import { LIGHT_ID, LightSpec } from "../shared/model/light";
+import { LightFieldsComponent } from "../light-fields/light-fields.component";
 import {
   allNpcs,
   isNpc,
@@ -262,6 +265,8 @@ import { ActionZone, zoneSummary } from "../shared/model/action-zone";
     LucideZap,
     LucideMinus,
     LucideSquareDashed,
+    LucideLightbulb,
+    LightFieldsComponent,
     LucideSquareUser,
     LucideUserRound,
     LucideArrowUp,
@@ -301,6 +306,8 @@ export class EditorBarComponent {
   readonly eventsChange = output<ObjectEvent[]>();
   /** The selected zone's size in cells. */
   readonly zoneSizeChange = output<{ x: number; z: number }>();
+  /** The selected « Lumière » object's light changed. */
+  readonly lightChange = output<LightSpec>();
   /** The selected NPC's place name (its schedule picks it). */
   readonly placeLabelChange = output<string>();
   /** The selected dungeon object's settings (chest, trap, switch, locked door). */
@@ -319,6 +326,7 @@ export class EditorBarComponent {
         : null,
   });
   protected readonly zoneId = ZONE_ID;
+  protected readonly lightId = LIGHT_ID;
   /** The NPCs of the database (tab PNJ), read again when the tab opens. */
   protected readonly npcs = signal<PaletteEntry[]>([]);
   /** The selected object is an NPC: its sheet opens the database, no passage, never see-through. */

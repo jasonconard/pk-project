@@ -92,6 +92,8 @@ export class ModelEditorScene {
   private readonly resizeObserver: ResizeObserver;
   private model: EditableModel | null = null;
   private group = new THREE.Group();
+  /** The model's light points (see light.ts): a coloured ball each, the selected one bigger. */
+  private readonly lightMarks = new THREE.Group();
   /** Canvas textures of each face texture, one per layer (linked faces show the same ones). */
   private readonly textures = new Map<string, FaceTextures>();
   /** Inset showing the model as in the game while a grayscale layer is shown, by day or by night. */
@@ -127,7 +129,7 @@ export class ModelEditorScene {
     this.sun.position.set(60, 120, 90);
     this.scene.add(this.hemi, this.sun);
     const grid = new THREE.GridHelper(160, 160, 0x55_57_6a, 0x3a_3c_48);
-    this.scene.add(grid, this.group);
+    this.scene.add(grid, this.group, this.lightMarks);
 
     this.camera.position.set(80, 70, 110);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -234,6 +236,53 @@ export class ModelEditorScene {
     if (this.model) {
       this.refresh(this.model);
     }
+  }
+
+  /** The light points drawn over the model (the selected one bigger, with a ring). */
+  setLights(lights: { pos: Vec3; color: string }[], selected: number | null) {
+    for (const child of this.lightMarks.children) {
+      const mesh = child as THREE.Mesh;
+      mesh.geometry.dispose();
+      (mesh.material as THREE.Material).dispose();
+      this.lightMarks.remove(mesh);
+    }
+    lights.forEach((light, i) => {
+      const mark = new THREE.Mesh(
+        new THREE.SphereGeometry(i === selected ? 2.2 : 1.4, 14, 10),
+        new THREE.MeshBasicMaterial({
+          color: light.color,
+          depthTest: false,
+          transparent: true,
+          opacity: i === selected ? 1 : 0.75,
+        })
+      );
+      mark.renderOrder = 10;
+      mark.position.set(light.pos.x, light.pos.y, light.pos.z);
+      this.lightMarks.add(mark);
+    });
+  }
+
+  /** The point of the model under the pointer (its coordinates, like the parts'), null: nothing there. */
+  pickPoint(clientX: number, clientY: number): Vec3 | null {
+    const rect = this.canvas.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((clientX - rect.left) / rect.width) * 2 - 1,
+      (-(clientY - rect.top) / rect.height) * 2 + 1
+    );
+    this.raycaster.setFromCamera(ndc, this.camera);
+    const hit = this.raycaster.intersectObjects(this.group.children, false)[0];
+    if (!hit) {
+      return null;
+    }
+    const p = this.group.worldToLocal(hit.point.clone());
+    // (a little in front of the face, rounded to a pixel)
+    const n = hit.face?.normal
+      .clone()
+      .transformDirection(hit.object.matrixWorld);
+    if (n) {
+      p.addScaledVector(n, 1);
+    }
+    return { x: Math.round(p.x), y: Math.round(p.y), z: Math.round(p.z) };
   }
 
   /** Shows a model and frames the camera on it. */

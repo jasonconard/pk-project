@@ -10,6 +10,7 @@ export const MD_CAMPFIRE: SceneModel = {
     min: {x: -10, y: 0, z: -5},
     max: {x: 10, y: 10, z: 5}
   },
+  lights: [{name: 'Flammes', pos: {x: 0, y: 10, z: 1}, color: '#ff9a3c', range: 3, strength: 1.5, flicker: true}],
   planes: [{
     // (taller than the picture, like the player's sprite: the camera looks down at it)
     size: {x: 24, y: 26.6, z: 0},

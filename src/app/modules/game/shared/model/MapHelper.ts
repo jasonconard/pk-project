@@ -1,3 +1,9 @@
+import {
+  defaultLight,
+  isLightObject,
+  LIGHT_ID,
+  makeLightMarker,
+} from "./light";
 import * as THREE from "three";
 import {
   findModel,
@@ -5,6 +11,7 @@ import {
   makeZoneMesh,
   ZONE_DEFAULT_SIZE,
   ZONE_ID,
+  ZONE_LAYER,
 } from "./Zone";
 import { SceneChunk, SceneMap, StairsSide } from "./SceneMap";
 import { PlayerTex, ScenePlayer } from "./ScenePlayer";
@@ -511,6 +518,7 @@ export class MapHelper {
       },
       ...this.defaultOptions(modelId),
       ...(modelId === ZONE_ID ? { size: { ...ZONE_DEFAULT_SIZE } } : {}),
+      ...(modelId === LIGHT_ID ? { light: defaultLight() } : {}),
       originModel: model,
       events: [],
     };
@@ -556,6 +564,15 @@ export class MapHelper {
     }
     building.originModel = model;
     const world = convertVec3(chunk.pos).add(convertVec3(building.pos));
+    if (isLightObject(building)) {
+      const marker = makeLightMarker(
+        building.light ?? defaultLight(),
+        ZONE_LAYER
+      );
+      this.addMesh(chunk.id + "-" + building.id, marker, world);
+      chunk.group.add(marker);
+      return;
+    }
     if (isZone(building)) {
       const zone = makeZoneMesh(building.size);
       this.addMesh(chunk.id + "-" + building.id, zone, world);
@@ -926,7 +943,7 @@ export class MapHelper {
     passable: boolean;
     canHide: boolean;
   } {
-    if (modelId === ZONE_ID) {
+    if (modelId === ZONE_ID || modelId === LIGHT_ID) {
       return { passable: true, canHide: false };
     }
     if (isNpc({ modelId })) {

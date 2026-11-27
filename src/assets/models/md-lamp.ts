@@ -10,6 +10,7 @@ export const MD_LAMP: SceneModel = {
     min: {x: -3, y: 0, z: -3},
     max: {x: 3, y: 40, z: 3}
   },
+  lights: [{name: 'Vitre', pos: {x: 0, y: 44, z: 1}, color: '#ffd98a', range: 3, strength: 1, nightOnly: true}],
   planes: [{
     // (taller than the picture, like the player's sprite: the camera looks down at it)
     size: {x: 16, y: 53.2, z: 0},

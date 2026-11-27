@@ -1,3 +1,4 @@
+import { LightSpec } from "./light";
 import { Vec3 } from "./SceneUtils";
 import { SceneEvent } from "./SceneEvent";
 import { SceneModel } from "./SceneModel";
@@ -18,6 +19,8 @@ export interface SceneBuilding {
   /** An NPC's place name (« derrière le comptoir »): its schedule picks it (see npc-schedule.ts). */
   label?: string;
   /** A dungeon object's settings (chest, trap, switch, locked door: see dungeon-object.ts). */
+  /** A « Lumière » object: its light (see light.ts). */
+  light?: LightSpec;
   dungeon?: DungeonObject;
   /** Where the player acts on it, this object only (else its model's zone; see action-zone.ts). */
   zone?: ActionZone;

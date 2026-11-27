@@ -39,6 +39,8 @@ export enum InstructionType {
   PLANT,
   /** TEAM: the members behind the leader follow again or hide. */
   TEAM,
+  /** LIGHT: a light of the map (an object's) or the player's lantern switched on or off. */
+  LIGHT,
 }
 
 export interface SceneEventInstruction {
@@ -71,6 +73,8 @@ export interface SceneEventInstruction {
   shop?: { id: string };
   /** TEAM: they follow (true) or hide (false). */
   team?: { follow: boolean };
+  /** LIGHT: an object of the map (none: the event's object) or « lantern ». */
+  light?: { target?: string; on: boolean };
   subInstructions?: SceneEventSubInstruction[];
 }
 

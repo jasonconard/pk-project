@@ -235,6 +235,7 @@ export function exportModel(model: EditableModel): ExportedModel {
     },
     sway: model.sway,
     zone: model.zone && structuredClone(model.zone),
+    lights: model.lights?.length ? structuredClone(model.lights) : undefined,
     thumb: thumbSlot && {
       min: { x: thumbSlot.x, y: thumbSlot.y },
       max: {

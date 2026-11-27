@@ -31,6 +31,7 @@ import { DustPuff } from "../model/DustPuff";
 import { DungeonService } from "./dungeon.service";
 import { FarmService } from "./farm.service";
 import { TeamFollowers } from "../model/team-followers";
+import { LightsView } from "../model/lights-view";
 import { currentParty } from "../../../database-editor/shared/party";
 import { cachedDatabase } from "../../../database-editor/shared/database-storage";
 import { DbCharacter } from "../../../database-editor/shared/database";
@@ -61,6 +62,7 @@ export class GameMapService {
   private readonly dungeonService = inject(DungeonService);
   private readonly farmService = inject(FarmService);
   private readonly followers = new TeamFollowers();
+  private readonly lights = new LightsView();
 
   private pixelSize = 8;
   /** Ledge hop: time since it started (s, -1 = none) and the height currently added to the sprite. */
@@ -322,6 +324,7 @@ export class GameMapService {
     if (game.paused) {
       return;
     }
+    this.lights.update(mapHelper, sprite);
     // Map editor: the player is frozen, the camera moves instead
     if (game.editMode) {
       game.action = null;

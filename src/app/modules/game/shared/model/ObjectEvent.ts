@@ -125,6 +125,8 @@ export type EventAction =
   | { type: "shop"; shop: string }
   /** The members behind the leader follow again or hide (story scenes). */
   | { type: "team"; follow: boolean }
+  /** A light of the map (an object's; empty: this object) or the player's lantern, on or off. */
+  | { type: "light"; target: string; on: boolean }
   /** A fight against a group of the database, then the branch of how it ended. */
   | {
       type: "fight";
@@ -429,6 +431,14 @@ function toInstruction(
       };
     case "team":
       return { type: InstructionType.TEAM, team: { follow: action.follow } };
+    case "light":
+      return {
+        type: InstructionType.LIGHT,
+        light: {
+          ...(action.target ? { target: action.target } : {}),
+          on: action.on,
+        },
+      };
     case "timeFlow":
       return {
         type: InstructionType.TIME_FLOW,
@@ -594,6 +604,12 @@ function toAction(instruction: SceneEventInstruction): EventAction | null {
         : null;
     case InstructionType.TIME_FLOW:
       return { type: "timeFlow", stop: !!instruction.timeFlow?.stop };
+    case InstructionType.LIGHT:
+      return {
+        type: "light",
+        target: instruction.light?.target ?? "",
+        on: instruction.light?.on !== false,
+      };
     case InstructionType.TEAM:
       return { type: "team", follow: instruction.team?.follow !== false };
     case InstructionType.ANIMATE:
