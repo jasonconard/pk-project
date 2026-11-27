@@ -6,7 +6,7 @@ La base de données rassemble ce que le combat, les événements et les menus vo
 
 En mode Créer : **Éditeurs → Base de données** (ordinateur, téléphone en paysage) ou **⋮ → Base de données** (téléphone en portrait). L'éditeur s'ouvre par-dessus le jeu ; **Jeu** le ferme.
 
-- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, PNJ, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes, Calendrier), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
+- **Sur téléphone en portrait** : les tables en onglets en haut (Personnages, PNJ, Ennemis, Groupes, Compétences, Objets, États, Éléments, Armes, Calendrier, Réglages), puis la liste. Toucher une ligne ouvre sa fiche ; **‹ Éléments** (ou le bouton retour) revient à la liste.
 - **Plus large** (paysage, tablette) : la liste et la fiche côte à côte.
 - **Sur ordinateur** : les tables en colonne à gauche, avec leur nombre de lignes.
 - Sur les écrans larges, **Reprendre la version du jeu**, **Dupliquer** et **Supprimer** sont à droite du nom.
@@ -200,6 +200,10 @@ Pour essayer un combat sans écrire d'événement : **Menu → Simuler un combat
 - **Lancer** : le combat commence, avec la météo du moment. Les objets du sac sont utilisables.
 - **Rien n'est gardé** : à la fin (victoire, défaite ou fuite), l'équipe, ses niveaux, ses objets et l'argent redeviennent comme avant.
 - Les choix sont retenus pour la simulation suivante.
+
+## Réglages
+
+Une seule fiche, sans liste : les **transitions** jouées quand la carte change, à l'entrée et à la sortie d'un combat. Voir [Transitions](20-transitions.md).
 
 ## Calendrier
 

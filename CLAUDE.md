@@ -126,6 +126,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   real `PointLight`s per `RENDER_DETAIL.realLights`; strength follows `uWindowGlow`), `game/light-fields/` (settings,
   shared by the map editor sheet and the model editor's Lumières part). Props `lamp` / `campfire` are one upright
   picture each (`md-lamp.ts`, `md-campfire.ts`, sources in `design-resources/props/`).
+- Transitions (`docs/editeur/20-transitions.md`): `model/transition.ts` (`TRANSITIONS`, `drawTransition`: one picture on a
+  small canvas), `services/transition.service.ts` (`through`: cover, change, reveal; `kindFor` reads the database table
+  `settings`, one row, `sheets/settings-sheet/`), `game/transition/` the canvas; played by `teleport.component` (another
+  map; the arrival map's own `SceneMap.transition` first) and `BattleService.start` / `end` (the group's own
+  `DbGroup.transitionIn` / `transitionOut` first).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

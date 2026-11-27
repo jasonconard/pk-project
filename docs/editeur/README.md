@@ -23,6 +23,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 17. [Cultures](17-cultures.md) : la terre cultivable, labourer, planter, arroser, récolter des plantes fantastiques ; leurs saisons, la pluie, le gel ; la table Cultures.
 18. [L'équipe qui suit](18-equipe.md) : les membres de l'équipe marchent en file derrière le joueur ; les cacher par carte, par un événement ou dans le menu.
 19. [Lumières](19-lumieres.md) : des halos de couleur la nuit autour des lampes (points de lumière des modèles, objet Lumière, lanterne du joueur), de vraies lumières en qualité haute ; les allumer et les éteindre par un événement.
+20. [Transitions](20-transitions.md) : l'image qui se ferme et se rouvre quand la carte change ou qu'un combat commence ou finit ; six transitions, choisies dans la base de données.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 
