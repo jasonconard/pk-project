@@ -3232,25 +3232,21 @@ export const CODE_DATABASE: GameDatabase = {
             "gr-cave-slimes",
             "gr-cave-crawlers"
           ],
-          "enemiesMin": 2,
-          "enemiesMax": 3,
+          "enemiesMin": 0,
+          "enemiesMax": 0,
           "chestsMin": 0,
           "chestsMax": 0,
           "loot": [],
-          "save": true
+          "save": false
         },
         {
           "id": "fl-cave-galleries",
           "name": "Galeries",
-          "rooms": [
-            "grotte-cristal-salle-1",
-            "grotte-cristal-salle-2",
-            "grotte-cristal-salle-3",
-            "grotte-cristal-salle-4"
-          ],
-          "roomsMin": 3,
-          "roomsMax": 5,
-          "repeat": 2,
+          "map": "grotte-cristal-salle-1",
+          "rooms": [],
+          "roomsMin": 1,
+          "roomsMax": 1,
+          "repeat": 1,
           "groups": [
             "gr-cave-slimes",
             "gr-cave-crawlers",
@@ -3260,10 +3256,10 @@ export const CODE_DATABASE: GameDatabase = {
             "gr-cave-golem",
             "gr-cave-ghosts"
           ],
-          "enemiesMin": 3,
-          "enemiesMax": 5,
-          "chestsMin": 1,
-          "chestsMax": 2,
+          "enemiesMin": 0,
+          "enemiesMax": 0,
+          "chestsMin": 0,
+          "chestsMax": 0,
           "loot": [
             {
               "item": "it-potion",
@@ -3299,12 +3295,12 @@ export const CODE_DATABASE: GameDatabase = {
           "groups": [
             "gr-cave-boss"
           ],
-          "enemiesMin": 1,
-          "enemiesMax": 1,
+          "enemiesMin": 0,
+          "enemiesMax": 0,
           "chestsMin": 0,
           "chestsMax": 0,
           "loot": [],
-          "save": true
+          "save": false
         }
       ]
     }

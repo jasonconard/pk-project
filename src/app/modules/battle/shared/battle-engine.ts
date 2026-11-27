@@ -66,7 +66,15 @@ const ARROW_SPEED = 180;
  */
 const SHOWCASE_INTRO = 0.9;
 const SHOWCASE_HOLD = 0.9;
-/** After a stun, this long (s) when a new hit is only its « hit taken » animation (no stun locks a fighter for good). */
+/**
+ * After a hit, a fighter needs this long (s) to recover: its gauge waits, it blinks (and its token on the gauge).
+ * A stunned one (its sheet's « Étourdi après un coup ») waits longer if its stun is longer.
+ */
+const HIT_RECOVER = 2;
+/**
+ * Once recovered, this long (s) when a new hit is only its « hit taken » animation (nothing locks a fighter for
+ * good).
+ */
 const STUN_GUARD = 1.5;
 /** An enemy's plain attack is a heavy one this often. */
 const ENEMY_HEAVY_CHANCE = 0.2;
@@ -166,7 +174,10 @@ export class BattleEngine {
    * Fighters taking a hit (gauge waiting, flashing red) with the time since and how long it lasts at least (their
    * stun); the stunned ones' guard (time left); defeated enemies fading out (time since).
    */
-  private readonly hurt = new Map<Fighter, { time: number; stun: number }>();
+  private readonly hurt = new Map<
+    Fighter,
+    { time: number; stun: number; resting: boolean }
+  >();
   private readonly stunGuard = new Map<Fighter, number>();
   private readonly fading = new Map<Fighter, number>();
   /** What each team member used (element / weapon type id → uses): their levels grow after a victory. */
@@ -1205,19 +1216,28 @@ export class BattleEngine {
   /** A hit taken: its « hit taken » animation, flashing red, its gauge waiting (longer when it is stunned). */
   private takeHit(target: Fighter, from: Fighter): void {
     this.field.play(target.id, "hurt", facing(target.pos, from.pos), true);
-    const stun = this.stunGuard.has(target) ? 0 : target.stun;
-    if (stun > 0 && !this.hurt.has(target)) {
+    const guarded = this.stunGuard.has(target);
+    if (!guarded && target.stun > 0 && !this.hurt.has(target)) {
       this.popup(target, "Étourdi", "state", 2);
     }
-    this.setHurt(target, true, stun);
+    this.setHurt(
+      target,
+      true,
+      guarded ? 0 : Math.max(HIT_RECOVER, target.stun)
+    );
   }
 
   /** Taking a hit (its gauge waits at least `stun` s, it flashes red) or done with it. */
   private setHurt(f: Fighter, on: boolean, stun = 0): void {
     if (on) {
-      // (hit again while stunned: the longer stays)
-      const before = this.hurt.get(f)?.stun ?? 0;
-      this.hurt.set(f, { time: 0, stun: Math.max(stun, before) });
+      // (hit again while recovering: the time already waited counts, a rain of blows locks nobody)
+      const before = this.hurt.get(f);
+      this.hurt.set(f, {
+        time: before?.time ?? 0,
+        stun: Math.max(stun, before?.stun ?? 0),
+        resting: false,
+      });
+      this.field.recover(f.id, false);
     } else {
       const was = this.hurt.get(f);
       this.hurt.delete(f);
@@ -1226,6 +1246,14 @@ export class BattleEngine {
       }
     }
     this.field.hurtFlash(f.id, on);
+    if (!on) {
+      this.field.recover(f.id, false);
+    }
+  }
+
+  /** The fighters recovering from a hit (their gauge waits): their token blinks on the gauge. */
+  recovering(): string[] {
+    return [...this.hurt.keys()].filter((f) => f.hp > 0).map((f) => f.id);
   }
 
   /** Is the fighter in the middle of its own blow (its animation, its arrow flying)? */
@@ -1265,8 +1293,19 @@ export class BattleEngine {
     if (!this.showcase) {
       for (const [f, h] of this.hurt) {
         h.time += dt;
-        if (this.field.finished(f.id) && h.time >= h.stun) {
+        if (!this.field.finished(f.id) && !h.resting) {
+          continue;
+        }
+        if (h.time >= h.stun) {
           this.setHurt(f, false);
+          if (!h.resting) {
+            this.afterHurt(f);
+          }
+        } else if (!h.resting) {
+          // Its « hit taken » animation done: it stands again and blinks until it has recovered
+          h.resting = true;
+          this.field.hurtFlash(f.id, false);
+          this.field.recover(f.id, true);
           this.afterHurt(f);
         }
       }

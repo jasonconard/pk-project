@@ -28,6 +28,34 @@ export const PC_GROTTE_CRISTAL_COEUR_0_0: SceneChunk = {
       "events": []
     },
     {
+      "id": "foe-1",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": 8,
+        "y": 8,
+        "z": -56
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-boss",
+        "move": "still"
+      },
+      "events": []
+    },
+    {
+      "id": "save-1",
+      "modelId": "dg:save",
+      "pos": {
+        "x": 24,
+        "y": 0,
+        "z": 136
+      },
+      "passable": false,
+      "canHide": false,
+      "events": []
+    },
+    {
       "id": "crystal-spire-blue-1",
       "modelId": "crystal-spire-blue",
       "pos": {

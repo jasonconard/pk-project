@@ -18,6 +18,41 @@ export const SHEET_SCALE = 0.5;
 /** Fighters are drawn after the map, over it (the closest to the camera last). */
 export const SPRITE_ORDER = 1000;
 
+/** A spell being prepared: this many sparkles, each one lasting this long (s), this big (world units). */
+const SPARKLES = 6;
+const SPARKLE_TIME = 0.55;
+const SPARKLE_SIZE = 7;
+
+/** A sparkle's picture: a small four-pointed star, bright in the middle (shared by all). */
+let sparkleTexture: THREE.Texture | undefined;
+const sparkleGeometry = new THREE.PlaneGeometry(1, 1);
+
+function sparkleMaterial(): THREE.MeshBasicMaterial {
+  if (!sparkleTexture) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 7;
+    canvas.height = 7;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#c9a6ff";
+    ctx.fillRect(3, 0, 1, 7);
+    ctx.fillRect(0, 3, 7, 1);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(3, 2, 1, 3);
+    ctx.fillRect(2, 3, 3, 1);
+    sparkleTexture = new THREE.CanvasTexture(canvas);
+    sparkleTexture.magFilter = THREE.NearestFilter;
+    sparkleTexture.minFilter = THREE.NearestFilter;
+    sparkleTexture.colorSpace = THREE.SRGBColorSpace;
+  }
+  return new THREE.MeshBasicMaterial({
+    map: sparkleTexture,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthTest: false,
+    depthWrite: false,
+  });
+}
+
 /**
  * A fighter drawn from its sprite sheet: a flat picture standing on its feet and turned to face the camera every frame
  * (whatever the fight camera does, it is seen face on), drawn over the map (nothing hides it, no part sinks into the
@@ -43,6 +78,10 @@ export class SheetSprite {
   private blink = false;
   /** Flashing red (a hit taken, while its gauge waits): over the blink and the glow. */
   private hurtFlash = false;
+  /** Recovering from a hit (its gauge waits): the picture blinks. */
+  private recovering = false;
+  /** The sparkles of a spell being prepared: small stars twinkling over the picture, each at its own moment. */
+  private readonly sparkles: { mesh: THREE.Mesh; phase: number }[] = [];
   private effectTime = 0;
 
   constructor(private readonly sheet: SpriteSheet) {
@@ -89,6 +128,13 @@ export class SheetSprite {
     this.shadow.scale.set(w * SHEET_SCALE * 0.24, w * SHEET_SCALE * 0.1, 1);
     this.shadow.position.y = 0.3;
     this.group.add(this.shadow, this.pivot);
+    for (let i = 0; i < SPARKLES; i++) {
+      const mesh = new THREE.Mesh(sparkleGeometry, sparkleMaterial());
+      mesh.renderOrder = SPRITE_ORDER + 50;
+      mesh.visible = false;
+      this.pivot.add(mesh);
+      this.sparkles.push({ mesh, phase: i / SPARKLES });
+    }
     this.applyFrame();
   }
 
@@ -165,6 +211,34 @@ export class SheetSprite {
     } else {
       color.setRGB(1, 1, 1);
     }
+    this.plane.visible =
+      !this.recovering || Math.sin(this.effectTime * 22) > -0.2;
+    this.twinkle();
+  }
+
+  /** The sparkles of a spell being prepared: each one grows and fades, then twinkles somewhere else. */
+  private twinkle(): void {
+    const { w, h } = this.sheet.frame;
+    for (const sparkle of this.sparkles) {
+      const { mesh } = sparkle;
+      mesh.visible = this.glow && !this.hurtFlash;
+      if (!mesh.visible) {
+        continue;
+      }
+      const turn = this.effectTime / SPARKLE_TIME + sparkle.phase;
+      const life = turn - Math.floor(turn);
+      // (a new place each time it starts again, always the same for a given turn: no jumping about)
+      const seed = Math.floor(turn) * 12.9898 + sparkle.phase * 78.233;
+      const rx = Math.abs(Math.sin(seed) * 43_758.5453) % 1;
+      const ry = Math.abs(Math.sin(seed * 1.7) * 24_634.6345) % 1;
+      mesh.position.set(
+        (rx - 0.5) * w * SHEET_SCALE * 0.5,
+        this.plane.position.y + (ry - 0.5) * h * SHEET_SCALE * 0.55,
+        0.1
+      );
+      const size = Math.sin(life * Math.PI) * SPARKLE_SIZE;
+      mesh.scale.set(size, size, 1);
+    }
   }
 
   /** Glowing on / off (an enemy preparing a spell). */
@@ -175,6 +249,11 @@ export class SheetSprite {
   /** Blinking on / off (aimed at). */
   setBlink(on: boolean): void {
     this.blink = on;
+  }
+
+  /** Blinking on / off (recovering from a hit). */
+  setRecover(on: boolean): void {
+    this.recovering = on;
   }
 
   /** Flashing red on / off (a hit taken). */
@@ -191,6 +270,9 @@ export class SheetSprite {
     this.plane.geometry.dispose();
     this.shadow.geometry.dispose();
     (this.shadow.material as THREE.Material).dispose();
+    this.sparkles.forEach(({ mesh }) =>
+      (mesh.material as THREE.Material).dispose()
+    );
     UNLIT_MATERIALS.delete(this.material);
     this.material.dispose();
     this.texture.dispose();

@@ -1599,5 +1599,17 @@ function cleanDungeon(settings: DungeonObject): DungeonObject | undefined {
   if (settings.hidden) {
     clean.hidden = true;
   }
+  if (settings.to?.map && settings.to.door) {
+    clean.to = { map: settings.to.map, door: settings.to.door };
+  }
+  if (settings.group) {
+    clean.group = settings.group;
+  }
+  if (settings.move) {
+    clean.move = settings.move;
+  }
+  if (settings.distance && settings.distance > 0) {
+    clean.distance = Math.round(settings.distance);
+  }
   return Object.keys(clean).length > 0 ? clean : undefined;
 }

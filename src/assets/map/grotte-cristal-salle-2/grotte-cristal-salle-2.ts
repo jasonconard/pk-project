@@ -26,22 +26,16 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "passable": false,
       "canHide": false,
       "rot": 3,
+      "dungeon": {
+        "to": {
+          "map": "grotte-cristal-salle-1",
+          "door": "room-door-2"
+        }
+      },
       "events": []
     },
     {
       "id": "room-door-2",
-      "modelId": "dg:room-door",
-      "pos": {
-        "x": 120,
-        "y": 8,
-        "z": -140
-      },
-      "passable": false,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "room-door-3",
       "modelId": "dg:room-door",
       "pos": {
         "x": 172,
@@ -51,6 +45,63 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "passable": false,
       "canHide": false,
       "rot": 1,
+      "dungeon": {
+        "to": {
+          "map": "grotte-cristal-salle-3",
+          "door": "room-door-1"
+        }
+      },
+      "events": []
+    },
+    {
+      "id": "foe-1",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": -56,
+        "y": 0,
+        "z": 24
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-miners",
+        "move": "patrol-z",
+        "distance": 3
+      },
+      "events": []
+    },
+    {
+      "id": "foe-2",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": 56,
+        "y": 8,
+        "z": -88
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-crawlers",
+        "move": "patrol-x",
+        "distance": 3
+      },
+      "events": []
+    },
+    {
+      "id": "foe-3",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": 120,
+        "y": 8,
+        "z": -104
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-ghosts",
+        "move": "roam",
+        "distance": 2
+      },
       "events": []
     },
     {
@@ -162,10 +213,22 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "events": []
     },
     {
+      "id": "crystal-cluster-green-1",
+      "modelId": "crystal-cluster-green",
+      "pos": {
+        "x": -120,
+        "y": 0,
+        "z": 70
+      },
+      "passable": false,
+      "canHide": false,
+      "events": []
+    },
+    {
       "id": "crystal-wall-blue-1",
       "modelId": "crystal-wall-blue",
       "pos": {
-        "x": 40,
+        "x": -8,
         "y": 8,
         "z": -143
       },
@@ -177,19 +240,19 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "cave-rock-large-2",
       "modelId": "cave-rock-large",
       "pos": {
-        "x": -120,
+        "x": 88,
         "y": 0,
-        "z": 69
+        "z": -43
       },
       "passable": false,
       "canHide": false,
       "events": []
     },
     {
-      "id": "crystal-cluster-green-1",
+      "id": "crystal-cluster-green-2",
       "modelId": "crystal-cluster-green",
       "pos": {
-        "x": 8,
+        "x": -72,
         "y": 8,
         "z": -138
       },
@@ -201,9 +264,9 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "stalagmite-group-1",
       "modelId": "stalagmite-group",
       "pos": {
-        "x": -40,
-        "y": 8,
-        "z": -139
+        "x": 40,
+        "y": 0,
+        "z": -43
       },
       "passable": false,
       "canHide": false,
@@ -213,7 +276,7 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "crystal-wall-green-1",
       "modelId": "crystal-wall-green",
       "pos": {
-        "x": 168,
+        "x": 24,
         "y": 8,
         "z": -143
       },
@@ -225,9 +288,9 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "crystal-wall-green-2",
       "modelId": "crystal-wall-green",
       "pos": {
-        "x": 104,
-        "y": 0,
-        "z": -47
+        "x": -40,
+        "y": 8,
+        "z": -143
       },
       "passable": true,
       "canHide": false,
@@ -237,7 +300,7 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "crystal-wall-green-3",
       "modelId": "crystal-wall-green",
       "pos": {
-        "x": -72,
+        "x": 72,
         "y": 8,
         "z": -143
       },
@@ -249,7 +312,7 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "crystal-wall-green-4",
       "modelId": "crystal-wall-green",
       "pos": {
-        "x": 56,
+        "x": 120,
         "y": 0,
         "z": -47
       },
@@ -261,23 +324,23 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "crystal-wall-blue-2",
       "modelId": "crystal-wall-blue",
       "pos": {
-        "x": 152,
-        "y": 0,
-        "z": -47
+        "x": 168,
+        "y": 8,
+        "z": -143
       },
       "passable": true,
       "canHide": false,
       "events": []
     },
     {
-      "id": "crystal-spire-green-2",
-      "modelId": "crystal-spire-green",
+      "id": "cave-rock-small-1",
+      "modelId": "cave-rock-small",
       "pos": {
-        "x": 72,
+        "x": 171,
         "y": 8,
-        "z": -139
+        "z": -56
       },
-      "passable": false,
+      "passable": true,
       "canHide": false,
       "events": []
     },
@@ -285,9 +348,9 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "crystal-cluster-blue-1",
       "modelId": "crystal-cluster-blue",
       "pos": {
-        "x": 53,
-        "y": 0,
-        "z": -24
+        "x": -91,
+        "y": 8,
+        "z": -72
       },
       "passable": false,
       "canHide": false,
@@ -297,7 +360,7 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "id": "stalagmite-1",
       "modelId": "stalagmite",
       "pos": {
-        "x": -21,
+        "x": -123,
         "y": 0,
         "z": 136
       },
@@ -311,33 +374,21 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
       "pos": {
         "x": -21,
         "y": 0,
-        "z": 72
+        "z": 120
       },
       "passable": true,
       "canHide": false,
       "events": []
     },
     {
-      "id": "crystal-cluster-green-2",
+      "id": "crystal-cluster-green-3",
       "modelId": "crystal-cluster-green",
       "pos": {
-        "x": 171,
+        "x": -91,
         "y": 8,
-        "z": -56
+        "z": -104
       },
       "passable": false,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "crystal-shard-green-1",
-      "modelId": "crystal-shard-green",
-      "pos": {
-        "x": -90,
-        "y": 8,
-        "z": -107
-      },
-      "passable": true,
       "canHide": false,
       "events": []
     }
@@ -2530,7 +2581,7 @@ export const PC_GROTTE_CRISTAL_SALLE_2_0_0: SceneChunk = {
 export const GROTTE_CRISTAL_SALLE_2_MAP: SceneMap = {
   id: 'grotte-cristal-salle-2',
   name: 'Couloir éboulé',
-  kind: 'room',
+  kind: 'dungeon',
   spawn: { x: -56, y: 0, z: 8 },
   time: {"mode":"frozen","hour":23},
   walls: 'cave',

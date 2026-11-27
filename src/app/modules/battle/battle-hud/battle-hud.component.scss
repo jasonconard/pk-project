@@ -174,10 +174,21 @@
     animation: knocked 0.3s ease-in-out 2;
   }
 
+  /* Recovering from a hit: its gauge waits */
+  &.recovering {
+    animation: recovering 0.28s steps(1) infinite;
+  }
+
   img {
     width: 16px;
     height: 16px;
     image-rendering: pixelated;
+  }
+}
+
+@keyframes recovering {
+  50% {
+    opacity: 0.25;
   }
 }
 
@@ -424,7 +435,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .menu, .aim, .token.knocked {
+  .menu, .aim, .token.knocked, .token.recovering {
     animation: none;
   }
 }

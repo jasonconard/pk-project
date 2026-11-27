@@ -86,11 +86,14 @@ import {
   DUNGEON_KINDS,
   DungeonObject,
   DungeonTrap,
+  FOE_DISTANCE,
+  FOE_MOVES,
+  FoeMove,
   dungeonKindOf,
   dungeonModelId,
 } from "../shared/model/dungeon-object";
 import { EventEditorComponent } from "../event-editor/event-editor.component";
-import { listMaps } from "../shared/services/map-storage";
+import { listMaps, loadMap } from "../shared/services/map-storage";
 import {
   loadModelThumb,
   MODEL_CHOICES,
@@ -776,6 +779,47 @@ export class EditorBarComponent {
   }
 
   // --- The selected dungeon object's settings ---
+
+  protected readonly foeMoves = FOE_MOVES;
+  protected readonly foeDistance = FOE_DISTANCE;
+
+  /** The maps a room door can lead to: the dungeons' floors and rooms. */
+  protected readonly doorMaps = computed(() =>
+    this.maps().filter((m) => m.kind === "dungeon" || m.kind === "room")
+  );
+
+  /** The room doors of a map, for a door's destination: « Porte 2 · mur est ». */
+  protected doorsOf(
+    mapId: string | undefined
+  ): { id: string; label: string }[] {
+    const map = mapId ? loadMap(mapId) : undefined;
+    const walls = ["nord", "est", "sud", "ouest"];
+    return (map?.chunks ?? [])
+      .flatMap((c) => c.buildings)
+      .filter((b) => b.modelId === dungeonModelId("room-door"))
+      .map((b, i) => ({
+        id: b.id,
+        label: `Porte ${i + 1} · mur ${walls[(b.rot ?? 0) % 4]}`,
+      }));
+  }
+
+  /** A room door's destination: the map chosen (its first door), then the door. */
+  protected setDoorMap(dungeon: DungeonObject, map: string): void {
+    const door = this.doorsOf(map)[0]?.id;
+    this.setDungeon(dungeon, {
+      to: map && door ? { map, door } : undefined,
+    });
+  }
+
+  protected setDoorTarget(dungeon: DungeonObject, door: string): void {
+    if (dungeon.to) {
+      this.setDungeon(dungeon, { to: { map: dungeon.to.map, door } });
+    }
+  }
+
+  protected setFoeMove(dungeon: DungeonObject, move: string): void {
+    this.setDungeon(dungeon, { move: move as FoeMove });
+  }
 
   protected setDungeon(
     dungeon: DungeonObject,

@@ -19,7 +19,28 @@ import {
 export const DUNGEON_PREFIX = "dg:";
 
 export type DungeonKind =
-  "chest" | "trap" | "switch" | "door" | "stairs" | "room-door" | "save";
+  | "chest"
+  | "trap"
+  | "switch"
+  | "door"
+  | "stairs"
+  | "room-door"
+  | "save"
+  | "foe";
+
+/**
+ * How an enemy put by hand moves before it sees the team: standing still (it never runs after the team: a boss),
+ * walking about around its place, or going back and forth on a line (east-west, north-south).
+ */
+export type FoeMove = "still" | "roam" | "patrol-x" | "patrol-z";
+export const FOE_MOVES: { id: FoeMove; label: string }[] = [
+  { id: "roam", label: "Ronde autour de sa place" },
+  { id: "patrol-x", label: "Aller-retour gauche-droite" },
+  { id: "patrol-z", label: "Aller-retour haut-bas" },
+  { id: "still", label: "Immobile (ne poursuit pas)" },
+];
+/** How far an enemy goes from its place (cells), when its object doesn't say. */
+export const FOE_DISTANCE = 3;
 
 /** A trap: hurts the team (a part of their PV) or starts a fight. */
 export type DungeonTrap =
@@ -37,6 +58,12 @@ export interface DungeonObject {
   /** Trap: what it does; hidden until stepped on. */
   trap?: DungeonTrap;
   hidden?: boolean;
+  /** Room door: where it leads in a dungeon made by hand (a map and one of its room doors). */
+  to?: { map: string; door: string };
+  /** Enemy: its group, how it moves before it sees the team, how far from its place (cells). */
+  group?: string;
+  move?: FoeMove;
+  distance?: number;
 }
 
 export interface DungeonKindInfo {
@@ -144,7 +171,6 @@ export const DUNGEON_KINDS: DungeonKindInfo[] = [
     flat: false,
     body: { x: 28, y: 24, z: 8 },
     thumb: PICTURES + "room-door.png",
-    roomOnly: true,
   },
   {
     kind: "save",
@@ -154,6 +180,15 @@ export const DUNGEON_KINDS: DungeonKindInfo[] = [
     flat: false,
     body: { x: 12, y: 16, z: 8 },
     thumb: PICTURES + "save.png",
+  },
+  {
+    kind: "foe",
+    label: "Ennemi",
+    picture: PICTURES + "foe.png",
+    size: { x: 16, y: 16 },
+    flat: false,
+    body: { x: 14, y: 14, z: 10 },
+    thumb: PICTURES + "foe.png",
   },
 ];
 
@@ -319,17 +354,26 @@ const bodyMaterial = new THREE.MeshBasicMaterial({ visible: false });
  * A dungeon object's mesh: its picture (`on`: the chest opened, the switch turned on; `hidden`: a trap not found
  * yet, nothing drawn but its place) with its invisible body.
  * @param wall a room door: the leaning wall behind it, if any (the door is drawn on it)
+ * @param settings the object's settings (an enemy: its group gives its picture)
  */
 export function makeDungeonMesh(
   modelId: string,
   state: { on?: boolean; hidden?: boolean } = {},
   rot = 0,
-  wall?: DoorWall
+  wall?: DoorWall,
+  settings?: DungeonObject
 ): THREE.Group {
   const group = new THREE.Group();
   const info = dungeonKindOf(modelId);
   if (!info) {
     return group;
+  }
+  if (info.kind === "foe" && settings?.group) {
+    // An enemy put by hand, in the editor: its group's first enemy, as the game will draw it
+    const foe = foeModelId(settings.group);
+    if (foeWalk(foe) || foePicture(foe)) {
+      return makeFoeMesh(foePicture(foe), foeWalk(foe));
+    }
   }
   if (info.kind === "room-door" && wall) {
     // A room door in a leaning wall: an opening in the rock, turned towards the room, with the same body

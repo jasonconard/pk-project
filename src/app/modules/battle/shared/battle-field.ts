@@ -252,6 +252,11 @@ export class BattleField {
     this.sprites.get(id)?.setGlow(on);
   }
 
+  /** A fighter blinking (recovering from a hit, its gauge waiting) or not. */
+  recover(id: string, on: boolean): void {
+    this.sprites.get(id)?.setRecover(on);
+  }
+
   /** A fighter flashing red (a hit taken) or not. */
   hurtFlash(id: string, on: boolean): void {
     this.sprites.get(id)?.setHurtFlash(on);

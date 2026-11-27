@@ -23,6 +23,7 @@ import {
   dungeonKindOf,
   dungeonModelId,
   DungeonObject,
+  FoeMove,
   foeModelId,
   foePicture,
   setFoeFrame,
@@ -98,6 +99,10 @@ interface Foe {
   /** Its walking sprite: the direction it looks at (a row of MAP_WALK_DIRS) and how far it has walked. */
   dir: number;
   walked: number;
+  /** How it moves before it sees the team, how far from its place (world units); the end of its line it goes to. */
+  move: FoeMove;
+  reach: number;
+  patrolSide: 1 | -1;
 }
 
 /** A foe's walking sprite: the row (MAP_WALK_DIRS) of each eighth of a turn from the south towards the east. */
@@ -105,19 +110,47 @@ const WALK_ROWS = [0, 7, 6, 5, 4, 3, 2, 1];
 /** Map units walked per step of the walking sprite. */
 const WALK_STRIDE = 3;
 
+/**
+ * The enemies put by hand on a map (the editor's « Ennemi » objects), as the enemies the game makes walk: their
+ * group's model at their place, with how they move. Their id holds the map's: beaten on one map of a floor, the
+ * same object id on another is still there.
+ */
+function placedFoes(map: SceneMap): SceneBuilding[] {
+  return map.chunks.flatMap((chunk) =>
+    chunk.buildings
+      .filter((b) => b.modelId === dungeonModelId("foe") && !!b.dungeon?.group)
+      .map((b) => ({
+        id: `${map.id}:${b.id}`,
+        modelId: foeModelId(b.dungeon!.group!),
+        pos: {
+          x: chunk.pos.x + b.pos.x,
+          y: chunk.pos.y + b.pos.y,
+          z: chunk.pos.z + b.pos.z,
+        },
+        passable: true,
+        canHide: false,
+        generated: true,
+        dungeon: { move: b.dungeon!.move, distance: b.dungeon!.distance },
+        events: [],
+      }))
+  );
+}
+
 /** In steps of the input loop (120 per second). */
 const STEPS_PER_SECOND = 120;
 /** Foes think every this many steps. */
 const FOE_EVERY = 4;
 /** Units per step. */
 const FOE_WALK = 0.2;
-const FOE_CHASE = 0.45;
+const FOE_CHASE = 0.4;
 /** It sees the team this close, forgets it this far. */
 const FOE_SIGHT = 72;
 const FOE_FORGET = 150;
 const FOE_ROAM = 48;
 /** The team and a foe touch (centres this close): the fight starts. */
-const FOE_TOUCH = 14;
+const FOE_TOUCH = 10;
+/** A foe that just saw the team stands surprised this long (steps, its « ! » shown) before it runs after it. */
+const FOE_SURPRISE = Math.round(STEPS_PER_SECOND * 0.9);
 /** How far in front of the player its action reaches. */
 const REACH = 22;
 /** A room door's arrival point: this far in front of it. */
@@ -708,9 +741,13 @@ export class DungeonService {
       );
       const sameLevel =
         mapHelper.levelAtWorld(player.x, player.z) === foe.level;
+      if (foe.move === "still") {
+        // (it stands at its place and waits for the team: a boss)
+        continue;
+      }
       if (!foe.chasing && dist < FOE_SIGHT && sameLevel) {
         foe.chasing = true;
-        foe.markUntil = this.step + STEPS_PER_SECOND;
+        foe.markUntil = this.step + FOE_SURPRISE;
       } else if (foe.chasing && (dist > FOE_FORGET || !sameLevel)) {
         foe.chasing = false;
         foe.target = null;
@@ -719,6 +756,11 @@ export class DungeonService {
         mark.visible = this.step < foe.markUntil;
       }
       let speed = FOE_CHASE;
+      if (foe.chasing && this.step < foe.markUntil) {
+        // (surprised: it stands still, turned to the team, the time to get away or to strike first)
+        this.drawFoe(foe, 0, 0);
+        continue;
+      }
       if (foe.chasing) {
         foe.target = player.clone();
       } else {
@@ -735,14 +777,26 @@ export class DungeonService {
             foe.target.z - mesh.position.z
           ) < 2
         ) {
-          const angle = Math.random() * Math.PI * 2;
-          const far = Math.random() * FOE_ROAM;
-          foe.target = new THREE.Vector3(
-            foe.home.x + Math.cos(angle) * far,
-            0,
-            foe.home.z + Math.sin(angle) * far
-          );
-          foe.wait = randInt(STEPS_PER_SECOND, STEPS_PER_SECOND * 3);
+          if (foe.move === "roam") {
+            const angle = Math.random() * Math.PI * 2;
+            const far = Math.random() * foe.reach;
+            foe.target = new THREE.Vector3(
+              foe.home.x + Math.cos(angle) * far,
+              0,
+              foe.home.z + Math.sin(angle) * far
+            );
+            foe.wait = randInt(STEPS_PER_SECOND, STEPS_PER_SECOND * 3);
+          } else {
+            // Back and forth on its line: to one end, a short stop, to the other
+            const along = foe.reach * foe.patrolSide;
+            foe.target = new THREE.Vector3(
+              foe.home.x + (foe.move === "patrol-x" ? along : 0),
+              0,
+              foe.home.z + (foe.move === "patrol-z" ? along : 0)
+            );
+            foe.patrolSide = foe.patrolSide === 1 ? -1 : 1;
+            foe.wait = Math.round(STEPS_PER_SECOND * 0.8);
+          }
           continue;
         }
       }
@@ -1124,6 +1178,7 @@ export class DungeonService {
     delete run.rooms;
     delete run.room;
     delete run.placed;
+    delete run.map;
     if (floor.map) {
       const map = loadMap(floor.map);
       if (!map) {
@@ -1290,6 +1345,30 @@ export class DungeonService {
     const room = link && run?.rooms?.[link.room];
     const map = room && loadMap(room.map);
     const door = map && roomDoors(map).find((d) => d.id === link.door);
+    const to = building.dungeon?.to;
+    const toMap = run && to ? loadMap(to.map) : undefined;
+    const toDoor = toMap && roomDoors(toMap).find((d) => d.id === to?.door);
+    if (run && to && toMap && toDoor) {
+      // A door of a dungeon made by hand: to its destination, another map of the same floor
+      this.saveRun({ ...run, map: toMap.id });
+      const front = doorFront(toDoor.rot);
+      playSound("door");
+      this.launch([
+        {
+          type: InstructionType.TELEPORT,
+          teleport: {
+            map: toMap.id,
+            pos: {
+              x: toDoor.pos.x + front.x * DOOR_FRONT,
+              y: toDoor.pos.y,
+              z: toDoor.pos.z + front.z * DOOR_FRONT,
+            },
+            rebuild: true,
+          },
+        },
+      ]);
+      return;
+    }
     if (!run || !link || !room || !door) {
       this.launch([
         message(
@@ -1347,7 +1426,7 @@ export class DungeonService {
     if (run.rooms && run.room !== undefined) {
       return run.rooms[run.room]?.map;
     }
-    return floorAt(dungeon, run.floor)?.floor.map;
+    return run.map ?? floorAt(dungeon, run.floor)?.floor.map;
   }
 
   /** Another map was built: the dungeon's objects put on it (or the dungeon left, if the team is elsewhere). */
@@ -1367,10 +1446,15 @@ export class DungeonService {
       this.blocks = [];
       return;
     }
-    const list =
-      run.rooms && run.room !== undefined
-        ? (run.rooms[run.room]?.placed ?? [])
-        : (run.placed ?? []);
+    const first = floorAt(dungeon, run.floor)?.floor.map;
+    let drawn = run.placed ?? [];
+    if (run.rooms && run.room !== undefined) {
+      drawn = run.rooms[run.room]?.placed ?? [];
+    } else if (run.map && run.map !== first) {
+      // (what the game drew for a floor made by hand is on its first map)
+      drawn = [];
+    }
+    const list = [...drawn, ...placedFoes(map)];
     // (the foes beaten this visit stay away; the chests opened are drawn open)
     const shown = list.filter((b) => !run.done.includes(`foe/${b.id}`));
     // (the foes' pictures' sizes first: their mesh needs them)
@@ -1413,6 +1497,11 @@ export class DungeonService {
             level: mapHelper.levelAtWorld(data.pos.x, data.pos.z),
             dir: 0,
             walked: 0,
+            move: data.dungeon?.move ?? "roam",
+            reach: data.dungeon?.distance
+              ? data.dungeon.distance * TILE_SIZE
+              : FOE_ROAM,
+            patrolSide: 1,
           });
         }
       }

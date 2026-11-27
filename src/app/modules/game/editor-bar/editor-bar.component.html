@@ -665,9 +665,109 @@
                 >
               }
               @case ("room-door") {
+                <label class="passage-row">
+                  <span>Mène à</span>
+                  <select
+                    aria-label="Carte où mène la porte"
+                    (change)="setDoorMap(dungeon, $any($event.target).value)"
+                  >
+                    <option value="" [selected]="!dungeon.to">
+                      Au hasard (étage généré)
+                    </option>
+                    @for (m of doorMaps(); track m.id) {
+                      <option
+                        [value]="m.id"
+                        [selected]="m.id === dungeon.to?.map"
+                      >
+                        {{ m.name }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                @if (dungeon.to; as to) {
+                  <label class="passage-row">
+                    <span>Porte d'arrivée</span>
+                    <select
+                      aria-label="Porte d'arrivée"
+                      (change)="
+                        setDoorTarget(dungeon, $any($event.target).value)
+                      "
+                    >
+                      @for (d of doorsOf(to.map); track d.id) {
+                        <option [value]="d.id" [selected]="d.id === to.door">
+                          {{ d.label }}
+                        </option>
+                      }
+                    </select>
+                  </label>
+                }
                 <small class="talk-hint"
-                  >Reliée au hasard à une autre salle quand l'étage est généré
-                  (sur une carte Salle).</small
+                  >Avec une destination, la porte mène toujours là (donjon fait
+                  à la main) : penser à régler la porte d'arrivée dans l'autre
+                  sens. Sans destination, elle est reliée au hasard quand
+                  l'étage est généré.</small
+                >
+              }
+              @case ("foe") {
+                <label class="passage-row">
+                  <span>Groupe</span>
+                  <select
+                    aria-label="Groupe d'ennemis"
+                    (change)="
+                      setDungeon(dungeon, {
+                        group: $any($event.target).value || undefined,
+                      })
+                    "
+                  >
+                    <option value="" [selected]="!dungeon.group">Aucun</option>
+                    @for (group of dungeonData().groups; track group.id) {
+                      <option
+                        [value]="group.id"
+                        [selected]="group.id === dungeon.group"
+                      >
+                        {{ group.name }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                <label class="passage-row">
+                  <span>Déplacement</span>
+                  <select
+                    aria-label="Déplacement avant de voir l'équipe"
+                    (change)="setFoeMove(dungeon, $any($event.target).value)"
+                  >
+                    @for (move of foeMoves; track move.id) {
+                      <option
+                        [value]="move.id"
+                        [selected]="move.id === (dungeon.move ?? 'roam')"
+                      >
+                        {{ move.label }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                @if (dungeon.move !== "still") {
+                  <label class="passage-row">
+                    <span>Jusqu'à (cases)</span>
+                    <input
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      max="12"
+                      aria-label="Distance en cases"
+                      [value]="dungeon.distance ?? foeDistance"
+                      (change)="
+                        setDungeon(dungeon, {
+                          distance: +$any($event.target).value || undefined,
+                        })
+                      "
+                    />
+                  </label>
+                }
+                <small class="talk-hint"
+                  >Dans un donjon, l'ennemi marche ainsi tant qu'il n'a pas vu
+                  l'équipe, puis la poursuit. Immobile : il attend à sa place
+                  (un boss). Hors d'un donjon, il n'apparaît pas.</small
                 >
               }
               @case ("save") {
@@ -1118,11 +1218,7 @@
             <button
               type="button"
               class="entry"
-              [title]="
-                entry.roomOnly
-                  ? entry.label + ' : pour les cartes Salle (étages générés)'
-                  : entry.label
-              "
+              [title]="entry.label"
               [class.selected]="entry.id === modelId()"
               [attr.aria-pressed]="entry.id === modelId()"
               (click)="pick(entry.id, $event)"

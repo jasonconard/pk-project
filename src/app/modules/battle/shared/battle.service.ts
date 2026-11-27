@@ -677,6 +677,7 @@ export class BattleService {
           : null,
       showcase: shown?.name ?? null,
       knocked: [...engine.knocked.keys()],
+      recovering: engine.recovering(),
       outcome: this.outcome,
       stateLooks: Object.fromEntries(
         db.states.map((s) => [s.id, { name: s.name, color: s.color }])

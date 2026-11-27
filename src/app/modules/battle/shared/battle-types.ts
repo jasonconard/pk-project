@@ -152,6 +152,8 @@ export interface BattleView {
   showcase: string | null;
   /** Fighters just interrupted or pushed back on the gauge (their token flashes). */
   knocked: string[];
+  /** Fighters recovering from a hit, their gauge waiting (their token blinks). */
+  recovering: string[];
   /** The end of the fight (victory, defeat): what the team won (phase « result »). */
   outcome: BattleOutcome | null;
   /** State id → its name and color (the cards' small dots). */

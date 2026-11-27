@@ -729,7 +729,8 @@ export class MapHelper {
         building.modelId,
         look,
         building.rot,
-        this.doorWall(building, world)
+        this.doorWall(building, world),
+        building.dungeon
       );
       this.addMesh(chunk.id + "-" + building.id, mesh, world);
       chunk.group.add(mesh);

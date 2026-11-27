@@ -32,6 +32,8 @@ export interface DungeonRun {
   floor: number;
   /** Where the team came in from (the way out). */
   entrance: { map: string; pos: Vec3 };
+  /** A floor made by hand of several maps (room doors with a destination): the map the team is on. */
+  map?: string;
   /** The weather outside, given back on the way out. */
   weatherBefore?: string;
   /** A try with a team made for it (Menu → Essayer un donjon): the real team, given back on the way out. */
@@ -144,8 +146,13 @@ export function dungeonLook(
       // In a generated floor, the doors leading nowhere are not there (out of a dungeon: all shown)
       const run = currentDungeonState().run;
       const room = run?.rooms?.[run.room ?? -1];
-      return { gone: !!room && !room.doors[building.id] };
+      return {
+        gone: !!room && !room.doors[building.id] && !settings?.to,
+      };
     }
+    case "foe":
+      // (an enemy put by hand: the dungeon makes it walk, see DungeonService.mapBuilt)
+      return { gone: true };
     case "trap":
       return {
         hidden:

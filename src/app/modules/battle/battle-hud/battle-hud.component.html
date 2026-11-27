@@ -20,6 +20,7 @@
             [class.spell]="f.side === 'foe' && f.command?.kind === 'skill'"
             [class.turn]="f.id === v.actor"
             [class.knocked]="v.knocked.includes(f.id)"
+            [class.recovering]="v.recovering.includes(f.id)"
             [class.aimed]="v.phase === 'target' && f.id === v.aim"
             [style.left.%]="f.gauge * 100"
             [attr.title]="f.name"
