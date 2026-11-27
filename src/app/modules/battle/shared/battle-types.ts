@@ -58,6 +58,11 @@ export interface Fighter {
   weaponType?: string;
   /** Its weapon hits from afar (a bow): its attacks are shot from where it stands. */
   ranged?: boolean;
+  /** An enemy's sounds (its voice with its pitch, its steps) and whether it falls like a boss. */
+  voice?: string;
+  voicePitch?: number;
+  step?: string;
+  boss?: boolean;
   /** Stunned after a hit (s, 0: no): its gauge waits at least that long (its sheet's « Étourdi après un coup »). */
   stun: number;
   states: ActiveState[];

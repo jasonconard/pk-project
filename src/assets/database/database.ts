@@ -1363,6 +1363,9 @@ export const CODE_DATABASE: GameDatabase = {
           }
         ]
       },
+      "voice": "gurgle",
+      "voicePitch": 1.2,
+      "step": "squelch",
       "level": 3,
       "stats": {
         "hp": 60,
@@ -1504,6 +1507,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 23,
         "frames": 4
       },
+      "voice": "screech",
+      "voicePitch": 1.1,
+      "step": "flap",
       "level": 5,
       "stats": {
         "hp": 45,
@@ -1608,6 +1614,9 @@ export const CODE_DATABASE: GameDatabase = {
           }
         ]
       },
+      "voice": "gurgle",
+      "voicePitch": 1.4,
+      "step": "squelch",
       "level": 8,
       "stats": {
         "hp": 110,
@@ -1733,6 +1742,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "gurgle",
+      "voicePitch": 1.6,
+      "step": "squelch",
       "level": 9,
       "stats": {
         "hp": 120,
@@ -1849,6 +1861,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "chitter",
+      "voicePitch": 0.9,
+      "step": "scuttle",
       "level": 10,
       "stats": {
         "hp": 105,
@@ -1965,6 +1980,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "chitter",
+      "voicePitch": 0.6,
+      "step": "scuttle",
       "level": 10,
       "stats": {
         "hp": 150,
@@ -2077,6 +2095,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "squeak",
+      "voicePitch": 0.8,
+      "step": "squelch",
       "level": 11,
       "stats": {
         "hp": 110,
@@ -2193,6 +2214,8 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 18,
         "frames": 4
       },
+      "voice": "squeak",
+      "voicePitch": 0.6,
       "level": 11,
       "stats": {
         "hp": 140,
@@ -2313,6 +2336,8 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 29,
         "frames": 4
       },
+      "voice": "hiss",
+      "step": "scuttle",
       "level": 12,
       "stats": {
         "hp": 125,
@@ -2425,6 +2450,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 22,
         "frames": 4
       },
+      "voice": "chime",
+      "voicePitch": 1.2,
+      "step": "drift",
       "level": 12,
       "stats": {
         "hp": 85,
@@ -2546,6 +2574,8 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 39,
         "frames": 4
       },
+      "voice": "rumble",
+      "step": "stomp",
       "level": 13,
       "stats": {
         "hp": 230,
@@ -2663,6 +2693,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 29,
         "frames": 4
       },
+      "voice": "moan",
+      "voicePitch": 0.9,
+      "step": "drift",
       "level": 14,
       "stats": {
         "hp": 160,
@@ -2788,6 +2821,10 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 64,
         "frames": 4
       },
+      "voice": "roar",
+      "voicePitch": 0.7,
+      "step": "stomp",
+      "boss": true,
       "level": 16,
       "stats": {
         "hp": 620,

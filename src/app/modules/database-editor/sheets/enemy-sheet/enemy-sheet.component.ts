@@ -1,7 +1,9 @@
+import { playSound, soundsOf } from "../../../game/shared/services/sfx";
 import {
   LucideBox,
   LucideCoins,
   LucideGitBranch,
+  LucideVolume2,
   LucideImagePlus,
   LucidePencil,
   LucidePlus,
@@ -34,6 +36,7 @@ import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
     LucideBox,
     LucideCoins,
     LucideGitBranch,
+    LucideVolume2,
     LucideImagePlus,
     LucidePencil,
     LucidePlus,
@@ -50,7 +53,18 @@ export class EnemySheetComponent extends DbSheet {
   protected setEnemy(
     enemy: DbEnemy,
     change: Partial<
-      Pick<DbEnemy, "level" | "xp" | "money" | "model" | "stunMs">
+      Pick<
+        DbEnemy,
+        | "level"
+        | "xp"
+        | "money"
+        | "model"
+        | "stunMs"
+        | "voice"
+        | "voicePitch"
+        | "step"
+        | "boss"
+      >
     >
   ): void {
     this.edit(enemy.id, (e) => {
@@ -61,8 +75,38 @@ export class EnemySheetComponent extends DbSheet {
       if (!next.stunMs) {
         delete next.stunMs;
       }
+      if (!next.voice) {
+        delete next.voice;
+        delete next.voicePitch;
+      }
+      if (!next.voicePitch || next.voicePitch === 1) {
+        delete next.voicePitch;
+      }
+      if (!next.step) {
+        delete next.step;
+      }
+      if (!next.boss) {
+        delete next.boss;
+      }
       return next;
     });
+  }
+
+  protected readonly voices = soundsOf("voice");
+  protected readonly steps = soundsOf("step");
+
+  /** A voice's pitch as shown: 100 as it is, 50 an octave lower, 200 an octave higher. */
+  protected pitchOf(enemy: DbEnemy): number {
+    return Math.round((enemy.voicePitch ?? 1) * 100);
+  }
+
+  /** « Écouter »: the enemy's voice or steps, as the game plays them. */
+  protected hear(enemy: DbEnemy, what: "voice" | "step"): void {
+    if (what === "voice") {
+      playSound(enemy.voice ?? "", true, { pitch: enemy.voicePitch ?? 1 });
+    } else {
+      playSound(enemy.step ?? "step", true);
+    }
   }
 
   /** The walking sheet's settings changed (null: no sheet any more). */

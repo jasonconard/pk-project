@@ -598,6 +598,18 @@ function foeEnemy(modelId: string): DbEnemy | undefined {
   return db.enemies.find((e) => e.id === group?.members[0]?.enemy);
 }
 
+/** The sounds of a foe's group (its first enemy's voice, with its pitch, and steps). */
+export function foeSounds(
+  modelId: string
+): Pick<DbEnemy, "voice" | "voicePitch" | "step"> {
+  const enemy = foeEnemy(modelId);
+  return {
+    voice: enemy?.voice,
+    voicePitch: enemy?.voicePitch,
+    step: enemy?.step,
+  };
+}
+
 /** The walking sprite of a foe's group (its first enemy's), if it has one. */
 export function foeWalk(modelId: string): MapWalk | undefined {
   return foeEnemy(modelId)?.walk;

@@ -13,6 +13,8 @@ const TEAM_SPACING = FIGHT_AREA.teamSpacing;
 const TEAM_BACK = FIGHT_AREA.teamBack;
 /** The camera closer than on the map during a fight; closer still when aiming (towards the aimed one), its easing. */
 const FIGHT_ZOOM = 0.85;
+/** How far the screen shakes at most when a boss falls (world units). */
+const SHAKE_STRENGTH = 3.2;
 const FOCUS_ZOOM = 0.62;
 const FOCUS_SHIFT = 0.7;
 const CAMERA_EASE = 6;
@@ -76,6 +78,11 @@ export class BattleField {
   readonly skillAnims: SkillAnimPlayer;
   /** Aiming a skill with a zone: its circle on the ground, and the others caught in it (they blink too). */
   private zoneRing: THREE.Mesh | null = null;
+  /** The screen shaking (a boss falling): how long in all, how long left, the camera's offset this frame. */
+  private shakeTime = 1;
+  private shakeLeft = 0;
+  private shakeEnded = false;
+  private readonly shakeOffset = new THREE.Vector3();
   private zoned: string[] = [];
 
   constructor(
@@ -215,10 +222,27 @@ export class BattleField {
         .lerp(this.focus, FOCUS_SHIFT);
       dest = look.add(CAMERA_LOOK.clone().multiplyScalar(FOCUS_ZOOM));
     }
-    if (camera.position.distanceToSquared(dest) > 0.01) {
+    // (the shake is taken off before the camera eases to its place, then put back: it never drifts)
+    camera.position.sub(this.shakeOffset);
+    this.shakeOffset.set(0, 0, 0);
+    const moving = camera.position.distanceToSquared(dest) > 0.01;
+    if (moving) {
       camera.position.lerp(dest, 1 - Math.exp(-dt * CAMERA_EASE));
+    }
+    if (this.shakeLeft > 0) {
+      this.shakeLeft = Math.max(0, this.shakeLeft - dt);
+      const strength = SHAKE_STRENGTH * (this.shakeLeft / this.shakeTime);
+      this.shakeOffset.set(
+        (Math.random() - 0.5) * 2 * strength,
+        (Math.random() - 0.5) * strength,
+        0
+      );
+      camera.position.add(this.shakeOffset);
+    }
+    if (moving || this.shakeLeft > 0 || this.shakeEnded) {
       this.game.mapHelper?.updateCameraAim();
     }
+    this.shakeEnded = this.shakeLeft > 0;
     this.faceCamera();
   }
 
@@ -250,6 +274,17 @@ export class BattleField {
   /** A fighter glowing (an enemy preparing a spell) or not. */
   glow(id: string, on: boolean): void {
     this.sprites.get(id)?.setGlow(on);
+  }
+
+  /** A fighter's animations slower (a boss falling) or back to normal (1). */
+  slow(id: string, speed: number): void {
+    this.sprites.get(id)?.setSpeed(speed);
+  }
+
+  /** The screen shakes for a while (s), strongly at first then less and less. */
+  shake(time: number): void {
+    this.shakeTime = time;
+    this.shakeLeft = time;
   }
 
   /** A fighter blinking (recovering from a hit, its gauge waiting) or not. */
@@ -334,6 +369,7 @@ export class BattleField {
     this.sprites.forEach((s) => s.dispose());
     this.sprites.clear();
     const game = this.game;
+    this.shakeOffset.set(0, 0, 0);
     game.cameraZoom = this.savedZoom;
     game.camera.position.copy(this.savedCamera);
     const player = game.mapHelper?.meshes["player"];

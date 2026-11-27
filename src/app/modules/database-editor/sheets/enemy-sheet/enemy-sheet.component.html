@@ -165,6 +165,75 @@
 </div>
 
 <div class="block">
+  <h3>Sons et présence</h3>
+  <div class="sound-row">
+    <label class="field"
+      ><small>Sa voix</small>
+      <select
+        aria-label="Voix de l'ennemi"
+        (change)="setEnemy(en, { voice: $any($event.target).value })"
+      >
+        <option value="" [selected]="!en.voice">Aucune</option>
+        @for (v of voices; track v.id) {
+          <option [value]="v.id" [selected]="v.id === en.voice">
+            {{ v.label }}
+          </option>
+        }
+      </select>
+    </label>
+    @if (en.voice) {
+      <label class="field"
+        ><small>Hauteur (%)</small>
+        <db-stepper
+          [value]="pitchOf(en)"
+          [min]="40"
+          [max]="250"
+          [step]="10"
+          [label]="'Hauteur de la voix'"
+          (changed)="setEnemy(en, { voicePitch: $event / 100 })"
+        />
+      </label>
+      <button type="button" class="hear" (click)="hear(en, 'voice')">
+        <svg lucideVolume2></svg>Écouter
+      </button>
+    }
+  </div>
+  <div class="sound-row">
+    <label class="field"
+      ><small>Ses pas</small>
+      <select
+        aria-label="Pas de l'ennemi"
+        (change)="setEnemy(en, { step: $any($event.target).value })"
+      >
+        <option value="" [selected]="!en.step">Pas ordinaires</option>
+        @for (v of steps; track v.id) {
+          <option [value]="v.id" [selected]="v.id === en.step">
+            {{ v.label }}
+          </option>
+        }
+      </select>
+    </label>
+    <button type="button" class="hear" (click)="hear(en, 'step')">
+      <svg lucideVolume2></svg>Écouter
+    </button>
+  </div>
+  <label class="switch">
+    <input
+      type="checkbox"
+      [checked]="!!en.boss"
+      (change)="setEnemy(en, { boss: $any($event.target).checked })"
+    />
+    <span>C'est un boss : il tombe lentement, l'écran tremble</span>
+  </label>
+  <p class="note">
+    Sa voix s'entend de temps en temps près de lui sur la carte, quand il voit
+    l'équipe, et parfois en combat (jamais deux cris à la suite). La hauteur
+    change le même cri : bas pour un gros, haut pour un petit. Ses pas
+    s'entendent quand il marche.
+  </p>
+</div>
+
+<div class="block">
   <h3>Au combat</h3>
   <label class="field"
     ><small>Étourdi après un coup (ms)</small>

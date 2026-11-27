@@ -1,3 +1,4 @@
+import { playSound } from "../../game/shared/services/sfx";
 import { FIGHT_AREA } from "../../game/shared/model/arena";
 import {
   DbItem,
@@ -71,6 +72,33 @@ const SHOWCASE_HOLD = 0.9;
  * A stunned one (its sheet's « Étourdi après un coup ») waits longer if its stun is longer.
  */
 const HIT_RECOVER = 2;
+/** A fighter walking makes a step sound every this many units, this loud. */
+const STEP_LENGTH = 16;
+const STEP_GAIN = 0.4;
+/** An enemy's voice: how often it cries when it decides, when it strikes; no other cry for this long (s). */
+const VOICE_DECIDE = 0.3;
+const VOICE_STRIKE = 0.25;
+const VOICE_QUIET = 3.5;
+/**
+ * A boss falling: its death animation this many times slower, the screen shaking and the boss flashing red for
+ * this long (s), blasts every so often, then it fades out slowly; the fight ends after all that.
+ */
+const BOSS_SLOW = 0.3;
+const BOSS_SHAKE = 2.6;
+const BOSS_BLAST_EVERY = 0.55;
+const BOSS_FADE = 1.6;
+const BOSS_END = 5.4;
+/** The sound of a skill without one of its own, by the name of its element (found in the element's id). */
+const ELEMENT_SOUNDS: [string, string][] = [
+  ["fire", "fire"],
+  ["ice", "ice"],
+  ["thunder", "thunder"],
+  ["wind", "wind"],
+  ["earth", "earth"],
+  ["light", "light"],
+  ["dark", "dark"],
+  ["water", "ice"],
+];
 /**
  * Once recovered, this long (s) when a new hit is only its « hit taken » animation (nothing locks a fighter for
  * good).
@@ -184,6 +212,12 @@ export class BattleEngine {
   readonly uses = new Map<string, Record<string, number>>();
   /** Fighters just interrupted or pushed back (their token flashes), with the time since. */
   readonly knocked = new Map<string, number>();
+  /** How far each fighter walked since its last step sound; no enemy cries while this is above 0 (s). */
+  private readonly walked = new Map<Fighter, number>();
+  private voiceQuiet = 0;
+  /** A boss falling: how long ago it was beaten, the blasts already heard. */
+  private bossFall: { boss: Fighter; time: number; blasts: number } | null =
+    null;
   private readonly fastest: number;
   /** The middle of the field (the fighters stay around it). */
   private readonly middle: THREE.Vector3;
@@ -407,6 +441,7 @@ export class BattleEngine {
   /** An enemy at the decision mark chooses its next action; a spell makes it glow. */
   private decide(f: Fighter): void {
     f.command = this.enemyCommand(f);
+    this.cry(f, VOICE_DECIDE);
     const skill = f.command.kind === "skill" ? this.skill(f.command.id) : null;
     this.field.glow(f.id, !!skill && !isMelee(skill));
   }
@@ -633,6 +668,7 @@ export class BattleEngine {
     }
     action.step = "strike";
     action.struck = false;
+    this.cry(f, VOICE_STRIKE);
     this.field.play(f.id, anim, facing(f.pos, action.focus.pos), true);
     // A skill whose animation plays on its targets: the camera turns to them as the caster starts (it is there when
     // the effect plays); a projectile's follows it when it leaves
@@ -897,7 +933,58 @@ export class BattleEngine {
     f.pos.x += (dx / dist) * step;
     f.pos.z += (dz / dist) * step;
     this.field.place(f);
+    // Its steps: a sound every few units walked
+    const walked = (this.walked.get(f) ?? 0) + step;
+    if (walked >= STEP_LENGTH) {
+      playSound(f.step ?? "step", false, { gain: STEP_GAIN });
+    }
+    this.walked.set(f, walked % STEP_LENGTH);
     return false;
+  }
+
+  /**
+   * An enemy's voice, now and then (`chance`), never two cries close together: a fight with five enemies must not
+   * turn into a din.
+   */
+  private cry(f: Fighter, chance: number, tone = 1): void {
+    if (!f.voice || this.voiceQuiet > 0 || Math.random() > chance) {
+      return;
+    }
+    this.voiceQuiet = VOICE_QUIET;
+    playSound(f.voice, false, { pitch: (f.voicePitch ?? 1) * tone });
+  }
+
+  /** The sound of a blow landing: the weapon's, the skill's own (played with its animation) or its element's. */
+  private landSound(actor: Fighter, command: Command): void {
+    if (command.kind === "attack" || command.kind === "heavy") {
+      if (!this.weaponAnim(actor)?.sound) {
+        const blow = actor.ranged ? "arrow" : "slash";
+        playSound(command.kind === "heavy" ? "heavy" : blow);
+      }
+      return;
+    }
+    const skill = this.skill(command.id);
+    if (skill?.anim?.sound) {
+      return;
+    }
+    if (!skill) {
+      playSound("item");
+      return;
+    }
+    const element = skill.element ?? "";
+    const found = ELEMENT_SOUNDS.find(([name]) => element.includes(name));
+    const has = (kind: string) => skill.effects.some((e) => e.kind === kind);
+    let sound = isMelee(skill) ? "heavy" : "magic";
+    if (found && has("damage")) {
+      sound = found[1];
+    } else if (has("heal") || has("removeState")) {
+      sound = "heal";
+    } else if (has("stat")) {
+      sound = "boost";
+    } else if (has("addState") && !has("damage")) {
+      sound = "poison";
+    }
+    playSound(sound);
   }
 
   /** The hit frame: the command's effects on each of its targets. */
@@ -909,6 +996,7 @@ export class BattleEngine {
     if (this.showcase?.actor === actor) {
       this.showcase.landed = true;
     }
+    this.landSound(actor, command);
     for (const target of this.targetsOf(actor, command)) {
       if (command.kind === "attack" || command.kind === "heavy") {
         const amount =
@@ -1039,7 +1127,11 @@ export class BattleEngine {
     );
     if (damage === 0) {
       this.popup(target, "Sans effet", "info", line);
+      playSound("miss");
       return;
+    }
+    if (damage > 0 && target.defending) {
+      playSound("guard");
     }
     this.changeHp(target, -damage, line);
     if (damage < 0) {
@@ -1128,6 +1220,14 @@ export class BattleEngine {
       this.setHurt(f, false);
       if (f.side === "foe") {
         this.fading.set(f, 0);
+        if (f.boss) {
+          this.bossFalls(f);
+        } else {
+          playSound("defeat");
+          // (its last cry, lower)
+          this.voiceQuiet = 0;
+          this.cry(f, 1, 0.75);
+        }
       }
     }
   }
@@ -1145,9 +1245,23 @@ export class BattleEngine {
     }
   }
 
+  /**
+   * A boss beaten: it falls slowly, flashing red, the screen shakes, blasts go off on it, its last roar; one
+   * understands something big just went down.
+   */
+  private bossFalls(f: Fighter): void {
+    this.bossFall = { boss: f, time: 0, blasts: 0 };
+    this.field.slow(f.id, BOSS_SLOW);
+    this.field.hurtFlash(f.id, true);
+    this.field.shake(BOSS_SHAKE);
+    playSound("boss-fall");
+    this.voiceQuiet = 0;
+    this.cry(f, 1, 0.7);
+  }
+
   private checkEnd(): void {
     if (this.alive("foe").length === 0) {
-      this.over("win", END_DELAY);
+      this.over("win", this.bossFall ? BOSS_END : END_DELAY);
     } else if (this.alive("team").length === 0) {
       this.over("lose", END_DELAY);
     }
@@ -1317,13 +1431,36 @@ export class BattleEngine {
         }
       }
     }
+    this.voiceQuiet = Math.max(0, this.voiceQuiet - dt);
+    const fall = this.bossFall;
+    if (fall) {
+      fall.time += dt;
+      // Blasts while it shakes, then the red flashing stops and it fades
+      if (
+        fall.time < BOSS_SHAKE &&
+        fall.time >= (fall.blasts + 1) * BOSS_BLAST_EVERY
+      ) {
+        fall.blasts++;
+        playSound("explosion", false, {
+          gain: 0.6,
+          pitch: 0.8 + fall.blasts * 0.08,
+        });
+      }
+      if (fall.time >= BOSS_SHAKE) {
+        this.field.hurtFlash(fall.boss.id, false);
+      }
+    }
     for (const [f, t] of this.fading) {
-      if (!this.field.finished(f.id)) {
+      const falling = fall?.boss === f;
+      if (!this.field.finished(f.id) || (falling && fall.time < BOSS_SHAKE)) {
         continue;
       }
       const next = t + dt;
       this.fading.set(f, next);
-      this.field.fade(f.id, Math.max(0, 1 - next / FADE_TIME));
+      this.field.fade(
+        f.id,
+        Math.max(0, 1 - next / (falling ? BOSS_FADE : FADE_TIME))
+      );
     }
     for (const p of this.popups) {
       p.age += dt;

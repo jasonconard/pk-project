@@ -26,6 +26,7 @@ import {
   FoeMove,
   foeModelId,
   foePicture,
+  foeSounds,
   setFoeFrame,
   isFoe,
   loadPictureSize,
@@ -103,7 +104,15 @@ interface Foe {
   move: FoeMove;
   reach: number;
   patrolSide: 1 | -1;
+  /** Its sounds; the step it may cry again at; how far it walked since its last step sound. */
+  sounds: ReturnType<typeof foeSounds>;
+  nextCry: number;
+  stepWalked: number;
 }
+
+/** A foe is heard this close (world units; softer with the distance): its voice now and then, its steps. */
+const FOE_HEARD = 120;
+const FOE_STEP_LENGTH = 14;
 
 /** A foe's walking sprite: the row (MAP_WALK_DIRS) of each eighth of a turn from the south towards the east. */
 const WALK_ROWS = [0, 7, 6, 5, 4, 3, 2, 1];
@@ -748,12 +757,16 @@ export class DungeonService {
       if (!foe.chasing && dist < FOE_SIGHT && sameLevel) {
         foe.chasing = true;
         foe.markUntil = this.step + FOE_SURPRISE;
+        this.foeCry(foe, dist, 1.3);
       } else if (foe.chasing && (dist > FOE_FORGET || !sameLevel)) {
         foe.chasing = false;
         foe.target = null;
       }
       if (mark) {
         mark.visible = this.step < foe.markUntil;
+      }
+      if (this.step >= foe.nextCry) {
+        this.foeCry(foe, dist, 1);
       }
       let speed = FOE_CHASE;
       if (foe.chasing && this.step < foe.markUntil) {
@@ -825,6 +838,38 @@ export class DungeonService {
     }
   }
 
+  /** A foe's voice, heard when the team is near (softer with the distance); its next one comes a while later. */
+  private foeCry(foe: Foe, dist: number, loud: number): void {
+    foe.nextCry = this.step + randInt(6, 13) * STEPS_PER_SECOND;
+    if (foe.sounds.voice && dist < FOE_HEARD) {
+      playSound(foe.sounds.voice, false, {
+        pitch: foe.sounds.voicePitch ?? 1,
+        gain: loud * 0.7 * (1 - dist / FOE_HEARD) ** 1.5,
+      });
+    }
+  }
+
+  /** A foe's steps, heard when it walks near the team. */
+  private foeSteps(foe: Foe, moved: number): void {
+    foe.stepWalked += moved;
+    if (foe.stepWalked < FOE_STEP_LENGTH) {
+      return;
+    }
+    foe.stepWalked = 0;
+    const player = this.game?.mapHelper?.scenePlayer.mesh?.position;
+    const dist = player
+      ? Math.hypot(
+          player.x - foe.mesh.position.x,
+          player.z - foe.mesh.position.z
+        )
+      : FOE_HEARD;
+    if (dist < FOE_HEARD) {
+      playSound(foe.sounds.step ?? "step", false, {
+        gain: 0.35 * (1 - dist / FOE_HEARD),
+      });
+    }
+  }
+
   /** A foe's walking sprite after a move (0, 0: standing): turned the way it goes, a step of its walk. */
   private drawFoe(foe: Foe, mx: number, mz: number): void {
     const picture = foe.mesh.getObjectByName("picture");
@@ -832,6 +877,7 @@ export class DungeonService {
       return;
     }
     const moved = Math.hypot(mx, mz);
+    this.foeSteps(foe, moved);
     if (moved > 0.01) {
       const eighth = Math.round(Math.atan2(mx, mz) / (Math.PI / 4));
       foe.dir = WALK_ROWS[(eighth + 8) % 8];
@@ -1502,6 +1548,9 @@ export class DungeonService {
               ? data.dungeon.distance * TILE_SIZE
               : FOE_ROAM,
             patrolSide: 1,
+            sounds: foeSounds(building.modelId),
+            nextCry: this.step + randInt(1, 6) * STEPS_PER_SECOND,
+            stepWalked: 0,
           });
         }
       }

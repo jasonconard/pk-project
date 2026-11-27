@@ -514,6 +514,15 @@ export interface DbEnemy {
   model?: string;
   /** Its sprite walking on a dungeon's map (missing: its still picture, not animated). */
   walk?: MapWalk;
+  /**
+   * Its sounds (sound ids of sfx.ts): its voice, heard now and then near it on the map and in a fight, higher or
+   * lower (`voicePitch`, 1 as it is: a small creature high, a big one low), and its steps (missing: plain steps).
+   */
+  voice?: string;
+  voicePitch?: number;
+  step?: string;
+  /** A boss: it falls slowly, flashing red, the screen shaking. */
+  boss?: boolean;
   level: number;
   stats: Record<StatId, number>;
   /** Element id → how it takes it (missing: normal). */

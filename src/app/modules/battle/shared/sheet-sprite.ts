@@ -83,6 +83,8 @@ export class SheetSprite {
   /** The sparkles of a spell being prepared: small stars twinkling over the picture, each at its own moment. */
   private readonly sparkles: { mesh: THREE.Mesh; phase: number }[] = [];
   private effectTime = 0;
+  /** How fast its animations play (1: as drawn; a boss falls slowly). */
+  private speed = 1;
 
   constructor(private readonly sheet: SpriteSheet) {
     const { w, h } = sheet.frame;
@@ -190,8 +192,13 @@ export class SheetSprite {
 
   /** The animation goes on (stopped while a team member chooses: dt 0). */
   update(dt: number): void {
-    this.time += dt * 1000;
+    this.time += dt * 1000 * this.speed;
     this.applyFrame();
+  }
+
+  /** Its animations slower or faster from now on (1: as drawn). */
+  setSpeed(speed: number): void {
+    this.speed = speed;
   }
 
   /** The glow and the blink, on the real clock (they go on while the fight waits). */

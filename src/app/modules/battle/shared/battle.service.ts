@@ -167,6 +167,10 @@ function foeFighter(
     resists: { ...e.resists },
     attackElement: physicalId(db),
     stun: (e.stunMs ?? 0) / 1000,
+    voice: e.voice,
+    voicePitch: e.voicePitch,
+    step: e.step,
+    boss: e.boss,
     skills: [],
     actions: e.actions,
     stronger: e.weathers.some(
