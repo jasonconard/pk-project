@@ -84,6 +84,7 @@ Un lien avec chaque membre de l'équipe et chaque PNJ. Maquette : `design/databa
 ## Ennemis
 
 - **Apparence** : sa petite image dans la jauge d'action (l'icône à côté du nom), son **image fixe** (48 × 48, dans les menus et les groupes), sa **planche de combat** (ses animations, voir [Planches de combat](11-planches.md)) et son **modèle 3D** (vu sur la carte du donjon).
+- **Marche sur la carte** : sa planche de marche en 8 directions, avec laquelle il est dessiné et animé sur la carte d'un donjon (voir [Donjons](12-donjons.md#la-planche-de-marche-dun-ennemi)).
 - **Stats** : le niveau, puis PV, PM, Force, Magie, Endurance, Agilité, Chance.
 - **Au combat** : **Étourdi après un coup** (en ms, voir [Le combat](#le-combat)).
 - **Face aux éléments** : pour chaque élément, Faible (dégâts ×2), Normal, Résiste (×½), Annule (aucun dégât) ou Absorbe (le soigne).

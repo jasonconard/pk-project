@@ -41,12 +41,12 @@ Dans l'éditeur, les objets sont montrés tels qu'ils sont posés (coffres ferm�
 
 ## Les étages générés
 
-À chaque visite, le jeu tire le nombre de salles, les pioche parmi celles de l'étage (une salle peut revenir) et relie chaque nouvelle salle à une porte libre d'une salle déjà là : on peut toujours aller partout. Il place l'escalier dans la dernière salle, partage les ennemis et les coffres entre les salles (pas dans la première, quand il y en a d'autres) et met le cristal dans la première si l'étage en a un. Une porte de salle sans voisine dit « Le passage est bouché ». Les objets sont posés sur des cases libres au niveau de l'arrivée, loin des murs et des autres objets.
+À chaque visite, le jeu tire le nombre de salles, les pioche parmi celles de l'étage (une salle peut revenir) et relie chaque nouvelle salle à une porte libre d'une salle déjà là : on peut toujours aller partout. Il place l'escalier dans la dernière salle, partage les ennemis et les coffres entre les salles (pas dans la première, quand il y en a d'autres) et met le cristal dans la première si l'étage en a un. **Une porte de salle sans voisine n'est pas dessinée** dans l'étage : on ne voit que les portes qui mènent quelque part. Hors d'un donjon (salle ouverte depuis le gestionnaire de cartes), toutes les portes sont montrées et disent que le passage ne mène nulle part. Les objets sont posés sur des cases libres au niveau de l'arrivée, loin des murs et des autres objets.
 
 ## Dans le jeu
 
 - **Le bandeau** (sous l'horloge) : le donjon et l'étage, l'heure où il ferme, les ennemis qui restent.
-- **Les ennemis** se promènent autour de leur place. S'ils voient l'équipe, un « ! » s'affiche et ils la poursuivent.
+- **Les ennemis** se promènent autour de leur place. Chacun est dessiné avec la **planche de marche** du premier ennemi de son groupe (Base de données → Ennemis → **Marche sur la carte**) : tourné dans l'une des 8 directions où il va, animé quand il marche. Sans planche, c'est son image fixe, sans animation. S'ils voient l'équipe, un « ! » s'affiche et ils la poursuivent.
   - **Frapper** (touche d'action devant un ennemi) : « Attaque surprise ! », les jauges de l'équipe partent en avance.
   - Un ennemi qui touche l'équipe **par derrière** : « Embuscade ! », les jauges des ennemis partent en avance (si son groupe peut attaquer en premier).
   - Sinon, le combat commence à égalité.
@@ -65,6 +65,20 @@ Le jeu contient un donjon complet, à ouvrir dans les éditeurs pour voir commen
 - **Les décors** (palette Objets, familles Cristaux, Grotte, Mine) : cristaux de 5 formes en 3 couleurs qui brillent dans leur couleur, rochers, stalagmites, et les restes de la mine (rails, wagonnets, étais, lanternes, pioches, caisses).
 - **Les ennemis** (Base de données → Ennemis et Groupes) : dix ennemis de la grotte, du Gluant cristallin au Gardien de cristal, l'élément **Terre**, leurs compétences et leur butin.
 
+## La planche de marche d'un ennemi
+
+Une image PNG de **8 lignes**, une par direction dans cet ordre : bas, bas gauche, gauche, haut gauche, haut, haut droite, droite, bas droite ; et une **colonne par pas** (4 dans le jeu). La première colonne sert aussi à l'arrêt. Les cases ont la taille qu'on veut, la même pour toute la planche : un pixel de l'image est un pixel de la carte, et le héros fait 16×24. Un gluant tient dans 16×17, le Gardien de cristal dans 56×64. Les pieds sont en bas de la case ; une bande vide sous un ennemi volant le fait flotter.
+
+Dans la fiche de l'ennemi, **Choisir une planche** lit le PNG et devine la taille des cases (hauteur ÷ 8, largeur ÷ 4) ; les trois réglages se corrigent ensuite.
+
+Les planches de la Grotte de cristal viennent de PixelLab : un petit personnage par ennemi (8 directions, nommé « … (carte) »), une marche de 4 images par direction, assemblés par un script. Sources : `design-resources/cave/walk/`.
+
+## Essayer un donjon
+
+**Menu → Essayer un donjon** liste les donjons de la base et leurs étages ; **Lancer** fait entrer l'équipe tout de suite à cet étage, même si le donjon est fermé à cette heure. Le jeu relie les salles, place les ennemis, les coffres et l'escalier comme en vrai. La sortie (ou la défaite) ramène là où on était. **Équipe de test** remplace l'équipe de la partie le temps de l'essai : on coche les personnages (4 au plus), on règle leur niveau et leurs niveaux d'éléments, ou on met tout le monde au même niveau avec **Appliquer** (les éléments passent alors à la moitié du niveau). La fenêtre indique le niveau des ennemis du donjon. L'équipe de la partie revient à la sortie. Depuis un étage, on peut relancer un autre étage par le même menu.
+
+Ouvrir une salle depuis le gestionnaire de cartes sert à la dessiner, pas à la jouer : ses portes ne sont reliées à rien tant qu'on n'est pas entré dans le donjon.
+
 ## Les fichiers
 
 | Fichier | Rôle |
@@ -74,4 +88,6 @@ Le jeu contient un donjon complet, à ouvrir dans les éditeurs pour voir commen
 | `game/shared/model/dungeon-object.ts` | Les objets de l'onglet Donjon (`dg:<sorte>`) et les ennemis sur la carte (`foe:<groupe>`), leurs images |
 | `game/shared/model/dungeon-state.ts` | Ce qui est gardé (`pk-dungeon`) : coffres ouverts, donjon en cours |
 | `game/dungeon-chip/` | Le bandeau du donjon |
+| `game/dungeon-try/` | Menu → Essayer un donjon (étage, équipe de test) |
+| `battle/team-setup/` | Le choix d'une équipe d'essai (aussi dans Simuler un combat) |
 | `src/assets/dungeon/*.png` | Les images des objets (dessinées avec PixelLab et à la main) |
