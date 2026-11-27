@@ -1,0 +1,209 @@
+/* Map manager: a map's settings and the lists of choices (the variables are the host's, see the component's sheet). */
+
+// --- A map's settings (the fields of the design system: no native list or box) ---
+
+.kinds.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.kinds.acts .danger {
+  color: var(--danger);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  button {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 17px;
+    border: 1px solid var(--bg);
+    background: var(--bg);
+    font-size: 13px;
+
+    svg {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    &[aria-checked='true'] {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+
+      svg {
+        color: var(--highlight);
+      }
+    }
+
+    &.add {
+      background: none;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+  }
+}
+
+.chip-input {
+  width: 150px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 17px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  user-select: text;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.segments {
+  display: flex;
+  gap: 3px;
+  height: 40px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--bg);
+
+  button {
+    flex: 1;
+    min-width: 0;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--muted);
+
+    &[aria-checked='true'] {
+      background: var(--accent);
+      color: #eceef4;
+      font-weight: 600;
+    }
+  }
+}
+
+.line,
+.option {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--bg);
+  background: var(--bg);
+  text-align: left;
+
+  > svg {
+    flex: none;
+    font-size: 20px;
+  }
+
+  .texts {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  b {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  small {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .chevron {
+    font-size: 18px;
+    color: var(--muted);
+  }
+}
+
+div.line {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface);
+
+  button {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  b {
+    min-width: 44px;
+    text-align: center;
+  }
+}
+
+.switch {
+  flex: none;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--border);
+  transition: background 0.15s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.15s;
+  }
+
+  [aria-checked='true'] > & {
+    background: var(--accent);
+
+    &::after {
+      left: 21px;
+    }
+  }
+}
+
+// --- A list of choices, in place of a drop-down list ---
+
+.options {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 12px 24px;
+}
+
+.option {
+  flex: none;
+
+  &[aria-selected='true'] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  .picked {
+    color: var(--highlight);
+    font-size: 18px;
+  }
+}

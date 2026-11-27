@@ -138,6 +138,11 @@ h2 {
 }
 
 .card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px 10px 12px;
+  cursor: pointer;
   border-radius: 12px;
   background: var(--bg);
   border: 1px solid var(--bg);
@@ -152,20 +157,6 @@ h2 {
     }
   }
 }
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 8px 10px 12px;
-  cursor: pointer;
-  border-radius: 12px;
-
-  &:focus-visible {
-    outline: 2px solid #5aa8ff;
-  }
-}
-
 .kind {
   width: 40px;
   height: 40px;
@@ -192,19 +183,6 @@ h2 {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.rename-input {
-  font: inherit;
-  font-size: 15px;
-  color: inherit;
-  background: var(--panel);
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  padding: 2px 6px;
-  min-width: 0;
-  user-select: text;
-}
-
 .sub {
   display: flex;
   flex-wrap: wrap;
@@ -236,31 +214,6 @@ h2 {
     color: #eceef4;
   }
 }
-
-.actions {
-  display: flex;
-  gap: 6px;
-  padding: 0 8px 10px;
-
-  button {
-    flex: 1;
-    flex-direction: column;
-    gap: 4px;
-    padding: 8px 0;
-    border-radius: 10px;
-    background: var(--surface);
-    font-size: 11px;
-
-    svg {
-      font-size: 18px;
-    }
-
-    &.danger {
-      color: var(--danger);
-    }
-  }
-}
-
 .foot {
   padding: 10px 16px calc(16px + var(--safe-bottom, 0px));
   border-top: 1px solid var(--border);
@@ -477,63 +430,137 @@ h2 {
   }
 }
 
-// The time on the map (in the open map's actions): passes, stops, frozen at an hour
-.time-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px 0;
-  font-size: 13px;
-  color: var(--muted, #8a8d9c);
+// --- The list in sections ---
 
-  select {
-    height: 30px;
-  }
+.pill {
+  height: 34px;
+  padding: 0 12px 0 10px;
+  border-radius: 17px;
+  background: var(--surface);
+  font-size: 13px;
 }
 
-.team-row {
+.search,
+.new-section {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px 0;
-  font-size: 13px;
-  cursor: pointer;
+  height: 40px;
+  margin-top: 10px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--muted);
 
   input {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--accent, #3a6ea5);
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    color: #eceef4;
+    font: inherit;
+    user-select: text;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: var(--muted);
+    }
   }
 
-  span {
-    display: flex;
-    flex-direction: column;
-  }
-
-  small {
-    font-size: 11px;
-    color: var(--muted, #8a8d9c);
+  &:focus-within {
+    outline: 1.5px solid var(--accent);
   }
 }
 
-.time-modes {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 9px;
-  background: var(--bg, #2a2b33);
+.new-section {
+  margin: 0 0 4px;
+  color: var(--highlight);
+}
 
-  button {
-    padding: 5px 10px;
-    border-radius: 7px;
-    font-size: 12px;
-    color: inherit;
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
 
-    &[aria-checked="true"] {
-      background: var(--accent, #3a6ea5);
-      color: #fff;
-      font-weight: 600;
-    }
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fold {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 8px;
+  height: 32px;
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+
+  svg {
+    flex: none;
+    font-size: 16px;
   }
+
+  &.own svg + svg {
+    color: var(--highlight);
+  }
+}
+
+.group-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.section-name {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  background: var(--bg);
+  color: #eceef4;
+  font: inherit;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  user-select: text;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.count {
+  padding: 1px 7px;
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.round.small {
+  width: 28px;
+  height: 28px;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.empty {
+  margin: 2px 4px 6px;
+  font-size: 12px;
+  color: var(--muted);
 }

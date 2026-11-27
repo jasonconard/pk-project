@@ -970,6 +970,31 @@ export class GameService {
     }
   }
 
+  /** A map's kind (what it is used for; its section in the map manager follows, unless it has its own). */
+  setMapKind(id: string, kind: MapKind) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      map.kind = kind;
+      saveMap(map);
+      this.syncHud();
+    }
+  }
+
+  /** A map's own section in the map manager (nothing: the section of its kind). */
+  setMapSection(id: string, section: string | undefined) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      if (section) {
+        map.section = section;
+      } else {
+        delete map.section;
+      }
+      saveMap(map);
+    }
+  }
+
   /** The arena of the fights on a map (a map's id, "none": on the spot; nothing: the dungeon's, the settings'). */
   setMapArena(id: string, arena: string | undefined) {
     const current = this.game?.mapHelper?.sceneMap;

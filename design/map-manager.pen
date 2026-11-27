@@ -4329,6 +4329,3521 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "NPMBN",
+      "x": 0,
+      "y": 1430,
+      "name": "Portrait – Cartes par sections",
+      "clip": true,
+      "width": 390,
+      "height": 1120,
+      "fill": [
+        "#1f3a2a",
+        {
+          "type": "image",
+          "opacity": 0.55,
+          "enabled": true,
+          "url": "../src/assets/tex/ground2.png",
+          "mode": "cover"
+        }
+      ],
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "wUeP1",
+          "x": 0,
+          "y": 0,
+          "name": "Scrim",
+          "fill": "#00000080",
+          "width": 390,
+          "height": 1120
+        },
+        {
+          "type": "frame",
+          "id": "geJVt",
+          "x": 0,
+          "y": 60,
+          "name": "Sheet",
+          "clip": true,
+          "width": 390,
+          "height": 1060,
+          "fill": "$panel",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "JUfgI",
+              "name": "Sheet top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                8,
+                16,
+                10,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "CTHec",
+                  "name": "Grip",
+                  "fill": "$border",
+                  "width": 40,
+                  "height": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "p1z0I",
+                  "name": "Title row",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "EaATX",
+                      "name": "Cartes",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Cartes",
+                      "fontFamily": "Roboto",
+                      "fontSize": 18,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "n0OrK5",
+                      "name": "Nouvelle section",
+                      "height": 36,
+                      "fill": "$surface",
+                      "cornerRadius": 18,
+                      "gap": 6,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "pI5Ke",
+                          "name": "folder-plus",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "folder-plus",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Seh0d",
+                          "name": "Section",
+                          "fill": "$text",
+                          "content": "Section",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "O8lNL",
+                      "name": "Close",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "$surface",
+                      "cornerRadius": 18,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "zEOHK",
+                          "name": "x",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "x",
+                          "library": "lucide",
+                          "fill": "$text"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GsHD9",
+                  "name": "Recherche",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "M59GnU",
+                      "name": "search",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "iwCJa",
+                      "name": "Chercher une carte…",
+                      "fill": "$muted",
+                      "content": "Chercher une carte…",
+                      "fontFamily": "Roboto",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "g49Glt",
+              "name": "List",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": [
+                4,
+                12,
+                12,
+                12
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KDOel",
+                  "name": "Section Monde et villes",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "rSy8T",
+                      "name": "En-tête",
+                      "width": "fill_container",
+                      "height": 32,
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "LWIT2",
+                          "name": "chevron-down",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "XHyEx",
+                          "name": "globe",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "globe",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "text",
+                          "id": "LPu83",
+                          "name": "MONDE ET VILLES",
+                          "fill": "$muted",
+                          "content": "MONDE ET VILLES",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.6
+                        },
+                        {
+                          "type": "frame",
+                          "id": "M5G8q",
+                          "name": "Nombre",
+                          "fill": "$surface",
+                          "cornerRadius": 9,
+                          "padding": [
+                            1,
+                            7
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Bj9Ci",
+                              "name": "2",
+                              "fill": "$muted",
+                              "content": "2",
+                              "fontFamily": "Roboto",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Vz961",
+                          "name": "Espace",
+                          "width": "fill_container",
+                          "height": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ul7hf",
+                      "name": "Map Carte du monde",
+                      "width": "fill_container",
+                      "fill": "$accent-soft",
+                      "cornerRadius": 12,
+                      "stroke": "$accent",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "fC5m2",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "oEBtK",
+                              "name": "globe",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "globe",
+                              "library": "lucide",
+                              "fill": "$highlight"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kOM5q",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "H9d21",
+                              "name": "Carte du monde",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Carte du monde",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "r57fp",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "vNX87",
+                                  "name": "Monde · 3 × 3 morceaux",
+                                  "fill": "$muted",
+                                  "content": "Monde · 3 × 3 morceaux",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "mfz4b",
+                                  "name": "Badge Ouverte",
+                                  "fill": "$accent",
+                                  "cornerRadius": 6,
+                                  "padding": [
+                                    2,
+                                    6
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "jtUZP",
+                                      "name": "Ouverte",
+                                      "fill": "$text",
+                                      "content": "Ouverte",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "KDtQ8",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "ZFZLm",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ABl7W",
+                      "name": "Map Village des Saules",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 12,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "bMFp8",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "SlRXS",
+                              "name": "castle",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "castle",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "bu9da",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "PUQt5",
+                              "name": "Village des Saules",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Village des Saules",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "I1D7f",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "V4QKB",
+                                  "name": "Ville · 2 × 2 morceaux",
+                                  "fill": "$muted",
+                                  "content": "Ville · 2 × 2 morceaux",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "DwTP9",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "e2UsyB",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iEoRU",
+                  "name": "Section Intérieurs",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "d35EaN",
+                      "name": "En-tête",
+                      "width": "fill_container",
+                      "height": 32,
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "WdUMF",
+                          "name": "chevron-right",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "chevron-right",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "MJacd",
+                          "name": "door-open",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "door-open",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "text",
+                          "id": "hoyKq",
+                          "name": "INTÉRIEURS",
+                          "fill": "$muted",
+                          "content": "INTÉRIEURS",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.6
+                        },
+                        {
+                          "type": "frame",
+                          "id": "MbZWt",
+                          "name": "Nombre",
+                          "fill": "$surface",
+                          "cornerRadius": 9,
+                          "padding": [
+                            1,
+                            7
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "FGCuF",
+                              "name": "3",
+                              "fill": "$muted",
+                              "content": "3",
+                              "fontFamily": "Roboto",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pFnZf",
+                          "name": "Espace",
+                          "width": "fill_container",
+                          "height": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "zjhDH",
+                  "name": "Section Donjons",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DSdxS",
+                      "name": "En-tête",
+                      "width": "fill_container",
+                      "height": 32,
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "ZxKII",
+                          "name": "chevron-down",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "xIzOr",
+                          "name": "skull",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "skull",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "text",
+                          "id": "EWiBb",
+                          "name": "DONJONS",
+                          "fill": "$muted",
+                          "content": "DONJONS",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.6
+                        },
+                        {
+                          "type": "frame",
+                          "id": "UAgiK",
+                          "name": "Nombre",
+                          "fill": "$surface",
+                          "cornerRadius": 9,
+                          "padding": [
+                            1,
+                            7
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JyDBo",
+                              "name": "6",
+                              "fill": "$muted",
+                              "content": "6",
+                              "fontFamily": "Roboto",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Q1Two",
+                          "name": "Espace",
+                          "width": "fill_container",
+                          "height": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Hsvzq",
+                      "name": "Map Grotte de cristal",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 12,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "FfUTe",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Zxnbn",
+                              "name": "skull",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "skull",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "V1Obqo",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "lIocM",
+                              "name": "Grotte de cristal",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Grotte de cristal",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "N2PjuL",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "d32nIx",
+                                  "name": "Donjon · 1 × 1 morceau",
+                                  "fill": "$muted",
+                                  "content": "Donjon · 1 × 1 morceau",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "VV1E3",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "xI2HU",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NZlQQ",
+                      "name": "Map Salle des géodes",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 12,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "f1aAn",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "yY3Rj",
+                              "name": "skull",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "skull",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "EX0aB",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "umVia",
+                              "name": "Salle des géodes",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Salle des géodes",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "oiWH8",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "g9GQsR",
+                                  "name": "Donjon · 1 × 1 morceau",
+                                  "fill": "$muted",
+                                  "content": "Donjon · 1 × 1 morceau",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "HUnf6",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "xTfPS",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lh7Jo",
+                      "name": "Map Lac souterrain",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 12,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "eg6IN",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "CK1Cz",
+                              "name": "skull",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "skull",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "mPmvU",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "kAqJg",
+                              "name": "Lac souterrain",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Lac souterrain",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "jycfw",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "h6z5sp",
+                                  "name": "Donjon · 1 × 1 morceau",
+                                  "fill": "$muted",
+                                  "content": "Donjon · 1 × 1 morceau",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "UMk8H",
+                                  "name": "Badge Modifiée",
+                                  "fill": "$surface",
+                                  "cornerRadius": 6,
+                                  "padding": [
+                                    2,
+                                    6
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "nqwDS",
+                                      "name": "Modifiée",
+                                      "fill": "$text",
+                                      "content": "Modifiée",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GZIxI",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "m4jNd",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "sLkOj",
+                      "name": "Suite",
+                      "width": "fill_container",
+                      "padding": [
+                        4,
+                        0
+                      ],
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "WYQBU",
+                          "name": "3 autres cartes…",
+                          "fill": "$muted",
+                          "content": "3 autres cartes…",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "x3kJj",
+                  "name": "Section Arènes",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dUVVz",
+                      "name": "En-tête",
+                      "width": "fill_container",
+                      "height": 32,
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "RJ5Yh",
+                          "name": "chevron-down",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "fxJFg",
+                          "name": "swords",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "swords",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "text",
+                          "id": "kwgTv",
+                          "name": "ARÈNES",
+                          "fill": "$muted",
+                          "content": "ARÈNES",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.6
+                        },
+                        {
+                          "type": "frame",
+                          "id": "icdhs",
+                          "name": "Nombre",
+                          "fill": "$surface",
+                          "cornerRadius": 9,
+                          "padding": [
+                            1,
+                            7
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "F0ypL",
+                              "name": "2",
+                              "fill": "$muted",
+                              "content": "2",
+                              "fontFamily": "Roboto",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Q7jQH",
+                          "name": "Espace",
+                          "width": "fill_container",
+                          "height": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "G30BR",
+                      "name": "Map Arène de la grotte",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 12,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "QBbpf",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "qrpmc",
+                              "name": "swords",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "swords",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "njKUv",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "i8LK3l",
+                              "name": "Arène de la grotte",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Arène de la grotte",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Sx6H1",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "vzE9i",
+                                  "name": "Arène · 1 × 1 morceau",
+                                  "fill": "$muted",
+                                  "content": "Arène · 1 × 1 morceau",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Zujbk",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "u10yE",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hc5xx",
+                      "name": "Map Arène de la prairie",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 12,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "HZ9Rs",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "SZMpn",
+                              "name": "swords",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "swords",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vEKc7",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "OITOQ",
+                              "name": "Arène de la prairie",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Arène de la prairie",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "AMHVu",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "V5EA3",
+                                  "name": "Arène · 1 × 1 morceau",
+                                  "fill": "$muted",
+                                  "content": "Arène · 1 × 1 morceau",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yFn50",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "u6eoeh",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "taQwL",
+                  "name": "Section Mes essais",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "JI00m",
+                      "name": "En-tête",
+                      "width": "fill_container",
+                      "height": 32,
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "icNt0",
+                          "name": "chevron-down",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "JR97L",
+                          "name": "folder",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "folder",
+                          "library": "lucide",
+                          "fill": "$highlight"
+                        },
+                        {
+                          "type": "text",
+                          "id": "hsm2D",
+                          "name": "MES ESSAIS",
+                          "fill": "$muted",
+                          "content": "MES ESSAIS",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.6
+                        },
+                        {
+                          "type": "frame",
+                          "id": "z4tPFq",
+                          "name": "Nombre",
+                          "fill": "$surface",
+                          "cornerRadius": 9,
+                          "padding": [
+                            1,
+                            7
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "fLkFN",
+                              "name": "1",
+                              "fill": "$muted",
+                              "content": "1",
+                              "fontFamily": "Roboto",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "btlKV",
+                          "name": "Espace",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "u4qBH",
+                          "name": "Renommer",
+                          "width": 28,
+                          "height": 28,
+                          "cornerRadius": 14,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "VRFwp",
+                              "name": "pencil",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "pencil",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IzuvV",
+                      "name": "Map Brouillon de port",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 12,
+                      "stroke": "$bg",
+                      "strokeWidth": 1,
+                      "gap": 12,
+                      "padding": [
+                        10,
+                        8,
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Q7g4K",
+                          "name": "Kind",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "$surface",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "F76n4W",
+                              "name": "castle",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "castle",
+                              "library": "lucide",
+                              "fill": "$text"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "nWbLo",
+                          "name": "Texts",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 3,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Vjijo",
+                              "name": "Brouillon de port",
+                              "fill": "$text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Brouillon de port",
+                              "fontFamily": "Roboto",
+                              "fontSize": 15,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "f0BEZx",
+                              "name": "Sub",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "oWem3",
+                                  "name": "Ville · 2 × 1 morceaux",
+                                  "fill": "$muted",
+                                  "content": "Ville · 2 × 1 morceaux",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "BKQiB",
+                                  "name": "Badge Navigateur",
+                                  "fill": "$surface",
+                                  "cornerRadius": 6,
+                                  "padding": [
+                                    2,
+                                    6
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "yveYP",
+                                      "name": "Navigateur",
+                                      "fill": "$text",
+                                      "content": "Navigateur",
+                                      "fontFamily": "Roboto",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "v3Mwo",
+                          "name": "More",
+                          "width": 36,
+                          "height": 36,
+                          "cornerRadius": 18,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "EiHUT",
+                              "name": "sliders-horizontal",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "sliders-horizontal",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Ho17o",
+              "name": "Footer",
+              "width": "fill_container",
+              "padding": [
+                10,
+                16,
+                24,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ZqLpe",
+                  "name": "New map",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "$accent",
+                  "cornerRadius": 12,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "BOibI",
+                      "name": "plus",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$text"
+                    },
+                    {
+                      "type": "text",
+                      "id": "B18W2",
+                      "name": "Nouvelle carte",
+                      "fill": "$text",
+                      "content": "Nouvelle carte",
+                      "fontFamily": "Roboto",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "g9oA1q",
+      "x": 450,
+      "y": 1430,
+      "name": "Portrait – Réglages de la carte (nouveau)",
+      "clip": true,
+      "width": 390,
+      "height": 1013,
+      "fill": [
+        "#1f3a2a",
+        {
+          "type": "image",
+          "opacity": 0.55,
+          "enabled": true,
+          "url": "../src/assets/tex/ground2.png",
+          "mode": "cover"
+        }
+      ],
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "r7IrF",
+          "x": 0,
+          "y": 0,
+          "name": "Scrim",
+          "fill": "#00000080",
+          "width": 390,
+          "height": 1013
+        },
+        {
+          "type": "frame",
+          "id": "W5rOG",
+          "x": 0,
+          "y": 50,
+          "name": "Sheet",
+          "clip": true,
+          "width": 390,
+          "height": 963,
+          "fill": "$panel",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "wferB",
+              "name": "Sheet top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                8,
+                16,
+                10,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "a8kKBc",
+                  "name": "Grip",
+                  "fill": "$border",
+                  "width": 40,
+                  "height": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "VKGvA",
+                  "name": "Title row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "oD7g7",
+                      "name": "Back",
+                      "height": 36,
+                      "fill": "$surface",
+                      "cornerRadius": 18,
+                      "gap": 4,
+                      "padding": [
+                        0,
+                        12,
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "w0VVu",
+                          "name": "chevron-left",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "chevron-left",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "text",
+                          "id": "eWSFD",
+                          "name": "Cartes",
+                          "fill": "$text",
+                          "content": "Cartes",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Ff1xG",
+                      "name": "Réglages de la carte",
+                      "fill": "$text",
+                      "content": "Réglages de la carte",
+                      "fontFamily": "Roboto",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "i9peMX",
+              "name": "Form",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                8,
+                16,
+                24,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "c1ORP",
+                  "name": "Champ Nom",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "IpHQo",
+                      "name": "NOM",
+                      "fill": "$muted",
+                      "content": "NOM",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "H0oJNb",
+                      "name": "Input",
+                      "width": "fill_container",
+                      "height": 44,
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "PsakM",
+                          "name": "Lac souterrain",
+                          "fill": "$text",
+                          "content": "Lac souterrain",
+                          "fontFamily": "Roboto",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "G7KHHN",
+                  "name": "Champ Sorte",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PyHb3",
+                      "name": "SORTE",
+                      "fill": "$muted",
+                      "content": "SORTE",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "N7y0c",
+                      "name": "Choix",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "R0nSu",
+                          "name": "Choix Monde",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "THMzm",
+                              "name": "globe",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "globe",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "a12W3",
+                              "name": "Monde",
+                              "fill": "$text",
+                              "content": "Monde",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZPxDZ",
+                          "name": "Choix Ville",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "GjrLG",
+                              "name": "castle",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "castle",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "rQVoH",
+                              "name": "Ville",
+                              "fill": "$text",
+                              "content": "Ville",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "MQm4R",
+                          "name": "Choix Intérieur",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "ee35h",
+                              "name": "door-open",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "door-open",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "WFSqF",
+                              "name": "Intérieur",
+                              "fill": "$text",
+                              "content": "Intérieur",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "g5Cpl",
+                      "name": "Choix",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "jT5QK",
+                          "name": "Choix Donjon",
+                          "width": "fill_container",
+                          "fill": "$accent-soft",
+                          "cornerRadius": 10,
+                          "stroke": "$accent",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "c7JAuJ",
+                              "name": "skull",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "skull",
+                              "library": "lucide",
+                              "fill": "$highlight"
+                            },
+                            {
+                              "type": "text",
+                              "id": "fq2s7",
+                              "name": "Donjon",
+                              "fill": "$text",
+                              "content": "Donjon",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "tSHGw",
+                          "name": "Choix Salle",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "iVc6t",
+                              "name": "layout-dashboard",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "layout-dashboard",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "g4lCaj",
+                              "name": "Salle",
+                              "fill": "$text",
+                              "content": "Salle",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "u7Ja2",
+                          "name": "Choix Arène",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "b0xXC",
+                              "name": "swords",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "swords",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "jZvtz",
+                              "name": "Arène",
+                              "fill": "$text",
+                              "content": "Arène",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "L0GWB",
+                  "name": "Champ Section",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "f4tVNN",
+                      "name": "SECTION",
+                      "fill": "$muted",
+                      "content": "SECTION",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BiX7e",
+                      "name": "Sections",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "lXnXr",
+                          "name": "Section Donjons (sa sorte)",
+                          "height": 34,
+                          "fill": "$accent-soft",
+                          "cornerRadius": 17,
+                          "stroke": "$accent",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "nSur2",
+                              "name": "skull",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "skull",
+                              "library": "lucide",
+                              "fill": "$highlight"
+                            },
+                            {
+                              "type": "text",
+                              "id": "mhPGD",
+                              "name": "Donjons (sa sorte)",
+                              "fill": "$text",
+                              "content": "Donjons (sa sorte)",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pxMec",
+                          "name": "Section Mes essais",
+                          "height": 34,
+                          "fill": "$bg",
+                          "cornerRadius": 17,
+                          "stroke": "$bg",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Up1ed",
+                              "name": "folder",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "folder",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "i53hQQ",
+                              "name": "Mes essais",
+                              "fill": "$text",
+                              "content": "Mes essais",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hnATm",
+                          "name": "Nouvelle section",
+                          "height": 34,
+                          "cornerRadius": 17,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "gap": 4,
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "M6BBVv",
+                              "name": "plus",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "O7z2I",
+                              "name": "Nouvelle",
+                              "fill": "$muted",
+                              "content": "Nouvelle",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hYny5",
+                  "name": "Champ Le temps sur cette carte",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "X8wpWO",
+                      "name": "LE TEMPS SUR CETTE CARTE",
+                      "fill": "$muted",
+                      "content": "LE TEMPS SUR CETTE CARTE",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZQq5E",
+                      "name": "Segments",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "gap": 3,
+                      "padding": 3,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "laeRX",
+                          "name": "Segment Il passe",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#00000000",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ETLi3",
+                              "name": "Il passe",
+                              "fill": "$muted",
+                              "content": "Il passe",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wAfhu",
+                          "name": "Segment Il s'arrête",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#00000000",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "wKxrz",
+                              "name": "Il s'arrête",
+                              "fill": "$muted",
+                              "content": "Il s'arrête",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zePW0",
+                          "name": "Segment Figé",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "$accent",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "G8j5zB",
+                              "name": "Figé",
+                              "fill": "$text",
+                              "content": "Figé",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bchHg",
+                      "name": "Heure figée",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "gap": 10,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "ko5wQ",
+                          "name": "moon",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "moon",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "text",
+                          "id": "wnRCA",
+                          "name": "Toujours à cette heure",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Toujours à cette heure",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "AsKRx",
+                          "name": "Compteur",
+                          "height": 32,
+                          "fill": "$surface",
+                          "cornerRadius": 9,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "lOHbU",
+                              "name": "Compteur minus",
+                              "width": 32,
+                              "height": 32,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "h9FO9Z",
+                                  "name": "minus",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "minus",
+                                  "library": "lucide",
+                                  "fill": "$text"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "vO3ye",
+                              "name": "Compteur 23 h",
+                              "width": 48,
+                              "height": 32,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "G7LCk",
+                                  "name": "23 h",
+                                  "fill": "$text",
+                                  "content": "23 h",
+                                  "fontFamily": "Roboto",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "w5Z7bE",
+                              "name": "Compteur plus",
+                              "width": 32,
+                              "height": 32,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "vFwtt",
+                                  "name": "plus",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "plus",
+                                  "library": "lucide",
+                                  "fill": "$text"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Vaxn4",
+                  "name": "Champ L'équipe",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DtpMq",
+                      "name": "L'ÉQUIPE",
+                      "fill": "$muted",
+                      "content": "L'ÉQUIPE",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L2o3Di",
+                      "name": "L'équipe suit",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "PlGs5",
+                          "name": "users",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "users",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "fzVfv",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "SMsaO",
+                              "name": "L'équipe suit le joueur",
+                              "fill": "$text",
+                              "content": "L'équipe suit le joueur",
+                              "fontFamily": "Roboto",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "mR4Pc",
+                              "name": "Décochée : seul le chef ",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Décochée : seul le chef d'équipe est dessiné.",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "L44oB0",
+                          "name": "Interrupteur",
+                          "width": 44,
+                          "height": 26,
+                          "fill": "$accent",
+                          "cornerRadius": 13,
+                          "padding": 3,
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "ellipse",
+                              "id": "QABgR",
+                              "name": "Pastille",
+                              "fill": "#ffffff",
+                              "width": 20,
+                              "height": 20
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hhCIa",
+                  "name": "Champ Murs des reliefs",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "U3usI",
+                      "name": "MURS DES RELIEFS",
+                      "fill": "$muted",
+                      "content": "MURS DES RELIEFS",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "K8IJh",
+                      "name": "Segments",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "gap": 3,
+                      "padding": 3,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "qKQbd",
+                          "name": "Segment Falaise droite",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#00000000",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "OLCNp",
+                              "name": "Falaise droite",
+                              "fill": "$muted",
+                              "content": "Falaise droite",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "f3CsP",
+                          "name": "Segment Roche inclinée",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#00000000",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sZ7hK",
+                              "name": "Roche inclinée",
+                              "fill": "$muted",
+                              "content": "Roche inclinée",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "TM74Q",
+                          "name": "Segment Grotte",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "$accent",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "PViPB",
+                              "name": "Grotte",
+                              "fill": "$text",
+                              "content": "Grotte",
+                              "fontFamily": "Roboto",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gRxLJ",
+                  "name": "Champ Transition à l'arrivée",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PQrVx",
+                      "name": "TRANSITION À L'ARRIVÉE",
+                      "fill": "$muted",
+                      "content": "TRANSITION À L'ARRIVÉE",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "raKe0",
+                      "name": "Ligne Celle des réglages",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "UIB4L",
+                          "name": "sparkles",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "sparkles",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "WWvup",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JqEP5",
+                              "name": "Celle des réglages",
+                              "fill": "$text",
+                              "content": "Celle des réglages",
+                              "fontFamily": "Roboto",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "i0BdJ",
+                              "name": "Fondu au noir",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Fondu au noir",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "icon",
+                          "id": "R4dBgE",
+                          "name": "chevron-right",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "chevron-right",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "XPXg1",
+                  "name": "Champ Arène de combat",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "S8Btj",
+                      "name": "ARÈNE DE COMBAT",
+                      "fill": "$muted",
+                      "content": "ARÈNE DE COMBAT",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ph7iz",
+                      "name": "Ligne Celle du donjon ou des réglages",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "t7RnHP",
+                          "name": "swords",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "swords",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Phtdj",
+                          "name": "Textes",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "PwqMN",
+                              "name": "Celle du donjon ou des r",
+                              "fill": "$text",
+                              "content": "Celle du donjon ou des réglages",
+                              "fontFamily": "Roboto",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "AmR8k",
+                              "name": "Arène de la grotte",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Arène de la grotte",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "icon",
+                          "id": "ScB1o",
+                          "name": "chevron-right",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "chevron-right",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "V0pekE",
+                  "name": "Champ Actions",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "usqAL",
+                      "name": "ACTIONS",
+                      "fill": "$muted",
+                      "content": "ACTIONS",
+                      "fontFamily": "Roboto",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "G2wime",
+                      "name": "Actions",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "sS5vV",
+                          "name": "Action Dupliquer",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "u3VEw",
+                              "name": "copy",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "copy",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "UJrqc",
+                              "name": "Dupliquer",
+                              "fill": "$text",
+                              "content": "Dupliquer",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hRZho",
+                          "name": "Action Exporter",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "U7YJYC",
+                              "name": "download",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "download",
+                              "library": "lucide",
+                              "fill": "$text"
+                            },
+                            {
+                              "type": "text",
+                              "id": "k2EGZo",
+                              "name": "Exporter",
+                              "fill": "$text",
+                              "content": "Exporter",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "p9nruv",
+                          "name": "Action Réinitialiser",
+                          "width": "fill_container",
+                          "fill": "$bg",
+                          "cornerRadius": 10,
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "pzSZq",
+                              "name": "rotate-ccw",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "rotate-ccw",
+                              "library": "lucide",
+                              "fill": "$danger"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Wh9Qi",
+                              "name": "Réinitialiser",
+                              "fill": "$danger",
+                              "content": "Réinitialiser",
+                              "fontFamily": "Roboto",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "N6agt7",
+      "x": 900,
+      "y": 1430,
+      "name": "Portrait – Choisir dans une liste",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": [
+        "#1f3a2a",
+        {
+          "type": "image",
+          "opacity": 0.55,
+          "enabled": true,
+          "url": "../src/assets/tex/ground2.png",
+          "mode": "cover"
+        }
+      ],
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "X0ga2S",
+          "x": 0,
+          "y": 0,
+          "name": "Scrim",
+          "fill": "#00000080",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "Z5TWX",
+          "x": 0,
+          "y": 300,
+          "name": "Sheet",
+          "clip": true,
+          "width": 390,
+          "height": 544,
+          "fill": "$panel",
+          "cornerRadius": [
+            18,
+            18,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "WF7AU",
+              "name": "Sheet top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                8,
+                16,
+                10,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "n85Ze1",
+                  "name": "Grip",
+                  "fill": "$border",
+                  "width": 40,
+                  "height": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "L1lQ5",
+                  "name": "Title row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "OjCkF",
+                      "name": "Back",
+                      "height": 36,
+                      "fill": "$surface",
+                      "cornerRadius": 18,
+                      "gap": 4,
+                      "padding": [
+                        0,
+                        12,
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "c0b9wC",
+                          "name": "chevron-left",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "chevron-left",
+                          "library": "lucide",
+                          "fill": "$text"
+                        },
+                        {
+                          "type": "text",
+                          "id": "jqYkH",
+                          "name": "Réglages",
+                          "fill": "$text",
+                          "content": "Réglages",
+                          "fontFamily": "Roboto",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "paphL",
+                      "name": "Transition à l'arrivée",
+                      "fill": "$text",
+                      "content": "Transition à l'arrivée",
+                      "fontFamily": "Roboto",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "s06po",
+              "name": "Liste",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                4,
+                12,
+                24,
+                12
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "FQy0o",
+                  "name": "Option Celle des réglages",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$bg",
+                  "strokeWidth": 1,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "z7R2Q",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "e0XOjB",
+                          "name": "Celle des réglages",
+                          "fill": "$text",
+                          "content": "Celle des réglages",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "oe3hH",
+                          "name": "Fondu au noir",
+                          "fill": "$muted",
+                          "content": "Fondu au noir",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DL7uW",
+                  "name": "Option Aucune",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$bg",
+                  "strokeWidth": 1,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "c1mbI",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "E6d7Y",
+                          "name": "Aucune",
+                          "fill": "$text",
+                          "content": "Aucune",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ldem8",
+                          "name": "Changement direct",
+                          "fill": "$muted",
+                          "content": "Changement direct",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "H0ZqS",
+                  "name": "Option Fondu au noir",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$bg",
+                  "strokeWidth": 1,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "m3pczQ",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "TcXHK",
+                          "name": "Fondu au noir",
+                          "fill": "$text",
+                          "content": "Fondu au noir",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "BMhos",
+                          "name": "Simple",
+                          "fill": "$muted",
+                          "content": "Simple",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "V3n5AX",
+                  "name": "Option Cercle",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$accent-soft",
+                  "cornerRadius": 10,
+                  "stroke": "$accent",
+                  "strokeWidth": 1,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "y04VP",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "K6NYj",
+                          "name": "Cercle",
+                          "fill": "$text",
+                          "content": "Cercle",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "D4kZY",
+                          "name": "Simple",
+                          "fill": "$muted",
+                          "content": "Simple",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "ydsD8",
+                      "name": "check",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$highlight"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "W6VQz",
+                  "name": "Option Volet",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$bg",
+                  "strokeWidth": 1,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "o3evy",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "egGSD",
+                          "name": "Volet",
+                          "fill": "$text",
+                          "content": "Volet",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "s20aVI",
+                          "name": "Simple",
+                          "fill": "$muted",
+                          "content": "Simple",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AiX3y",
+                  "name": "Option Mosaïque",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$bg",
+                  "strokeWidth": 1,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "h2K8E",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "n5yEuD",
+                          "name": "Mosaïque",
+                          "fill": "$text",
+                          "content": "Mosaïque",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "VUmW3",
+                          "name": "Stylée",
+                          "fill": "$muted",
+                          "content": "Stylée",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JVsDK",
+                  "name": "Option Éclair et bandes",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$bg",
+                  "strokeWidth": 1,
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "CJao1",
+                      "name": "Textes",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yThCU",
+                          "name": "Éclair et bandes",
+                          "fill": "$text",
+                          "content": "Éclair et bandes",
+                          "fontFamily": "Roboto",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "IZZvq",
+                          "name": "Stylée",
+                          "fill": "$muted",
+                          "content": "Stylée",
+                          "fontFamily": "Roboto",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {

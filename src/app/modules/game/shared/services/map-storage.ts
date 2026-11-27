@@ -59,6 +59,7 @@ interface StoredMap {
   walls?: WallStyle;
   transition?: TransitionKind;
   arena?: string;
+  section?: string;
   cutscenes?: Cutscene[];
   /** Every chunk of the map, in order. */
   chunks: StoredChunk[];
@@ -90,6 +91,8 @@ export interface MapSummary {
   transition?: TransitionKind;
   /** Its fights' arena (a map's id, "none": on the spot; missing: the dungeon's, the settings'). */
   arena?: string;
+  /** Its section in the map manager (missing: the section of its kind). */
+  section?: string;
   /** Size in chunks (columns × rows of the area its chunks cover). */
   cols: number;
   rows: number;
@@ -242,6 +245,7 @@ export function listMaps(): MapSummary[] {
     walls: stored[map.id] ? stored[map.id].walls : map.walls,
     transition: stored[map.id] ? stored[map.id].transition : map.transition,
     arena: stored[map.id] ? stored[map.id].arena : map.arena,
+    section: stored[map.id] ? stored[map.id].section : map.section,
     inCode: true,
     edited: !!stored[map.id],
     ...gridSize(stored[map.id]?.chunks ?? map.chunks),
@@ -257,6 +261,7 @@ export function listMaps(): MapSummary[] {
       walls: map.walls,
       transition: map.transition,
       arena: map.arena,
+      section: map.section,
       inCode: false,
       edited: true,
       ...gridSize(map.chunks),
@@ -406,6 +411,9 @@ export function loadMap(id: string): SceneMap | null {
     ...((saved ? saved.arena : code!.arena)
       ? { arena: saved ? saved.arena : code!.arena }
       : {}),
+    ...((saved ? saved.section : code!.section)
+      ? { section: saved ? saved.section : code!.section }
+      : {}),
     ...((saved ? saved.cutscenes : code!.cutscenes)?.length
       ? {
           cutscenes: structuredClone(
@@ -429,6 +437,7 @@ export function saveMap(map: SceneMap) {
     ...(map.walls ? { walls: map.walls } : {}),
     ...(map.transition ? { transition: map.transition } : {}),
     ...(map.arena ? { arena: map.arena } : {}),
+    ...(map.section ? { section: map.section } : {}),
     ...(map.cutscenes?.length ? { cutscenes: map.cutscenes } : {}),
     chunks: map.chunks.map(chunkData),
   };
@@ -498,6 +507,7 @@ export function exportMapFile(map: SceneMap): string {
     ...(map.walls ? [`  walls: '${map.walls}',`] : []),
     ...(map.transition ? [`  transition: '${map.transition}',`] : []),
     ...(map.arena ? [`  arena: '${map.arena}',`] : []),
+    ...(map.section ? [`  section: ${JSON.stringify(map.section)},`] : []),
     ...(map.cutscenes?.length
       ? [`  cutscenes: ${JSON.stringify(map.cutscenes)},`]
       : []),

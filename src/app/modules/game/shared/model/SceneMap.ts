@@ -37,6 +37,8 @@ export interface SceneMap {
   walls?: WallStyle;
   /** The screen transition played when the team comes to this map (missing: the settings' one). */
   transition?: TransitionKind;
+  /** The section it is put in, in the map manager (missing: the section of its kind). */
+  section?: string;
   /** The arena the fights on this map are played in: a map's id, "none" on the spot (missing: see arenaFor). */
   arena?: string;
   /** Its cutscenes (see cutscene.ts), played by the event action « Jouer la cinématique ». */
