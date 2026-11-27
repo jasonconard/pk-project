@@ -27,6 +27,8 @@ export interface SceneModelTex {
   specular?: string;
   /** Grayscale map, same layout: what lights up at night. Omitted = the window glass is found in the colors. */
   night?: string;
+  /** Color of what lights up at night (hex, e.g. a crystal's blue). Omitted = the warm light of windows. */
+  glow?: string;
   /** Grayscale map, same layout: relief (white = raised). */
   bump?: string;
   /** Strength of the relief (default 1). */

@@ -54,6 +54,10 @@ export interface DungeonKindInfo {
 
 const PICTURES = "assets/dungeon/";
 
+/** A room door on a side wall (turned a quarter): the dark ground of its opening, one cell. */
+const SIDE_DOOR_PICTURE = PICTURES + "room-door-side.png";
+const SIDE_DOOR = { x: 16, y: 16 };
+
 export const DUNGEON_KINDS: DungeonKindInfo[] = [
   {
     kind: "chest",
@@ -229,11 +233,24 @@ const bodyMaterial = new THREE.MeshBasicMaterial({ visible: false });
  */
 export function makeDungeonMesh(
   modelId: string,
-  state: { on?: boolean; hidden?: boolean } = {}
+  state: { on?: boolean; hidden?: boolean } = {},
+  rot = 0
 ): THREE.Group {
   const group = new THREE.Group();
   const info = dungeonKindOf(modelId);
   if (!info) {
+    return group;
+  }
+  if (info.kind === "room-door" && rot % 2 === 1) {
+    // A room door on a side wall: no arch seen from the front, but a dark opening on the ground of the cell cut
+    // into the rock (the walls around it frame it), with its body filling the cell
+    group.add(flatPicture(SIDE_DOOR_PICTURE, SIDE_DOOR));
+    group.add(
+      new THREE.Mesh(
+        new THREE.BoxGeometry(SIDE_DOOR.x, 16, SIDE_DOOR.y).translate(0, 8, 0),
+        bodyMaterial
+      )
+    );
     return group;
   }
   const link = state.on && info.pictureOn ? info.pictureOn : info.picture;

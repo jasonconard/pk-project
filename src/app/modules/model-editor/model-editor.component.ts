@@ -641,6 +641,11 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
     );
   }
 
+  /** The color of what lights up at night (null: the warm light of windows). */
+  protected setGlow(color: string | null) {
+    this.edit((model) => (model.glow = color ?? undefined), true);
+  }
+
   // --- Light points (design/model-editor-mobile.pen screen 12) ---
 
   /** The light point shown in the sheet (its index), and whether the next tap on the model places it. */
@@ -748,7 +753,7 @@ export class ModelEditorComponent implements AfterViewInit, OnDestroy {
       `Exporté : md-${model.id}.ts (→ src/assets/models/) et ${pngs} (→ src/assets/tex/), atlas ${result.atlas.width} × ${result.atlas.height}.` +
         (isNew
           ? ` Nouveau modèle : ajoute ${result.constName} dans src/assets/models/models.ts, { model: ${result.constName} } dans` +
-            ` MODEL_CHOICES (ModelChoice.ts) pour la palette de la carte, et son nom dans MODEL_LABELS (editor-bar.component.ts).`
+            ` MODEL_CHOICES (ModelChoice.ts) pour la palette de la carte, et son nom dans MODEL_LABELS (ModelChoice.ts).`
           : "")
     );
   }

@@ -50,6 +50,8 @@ export interface EditableModel {
   /** Light points (a lamp's glass, a window; see light.ts). */
   lights?: ModelLight[];
   bumpScale?: number;
+  /** Color of what the night layer lights up (hex). Omitted = the warm light of windows. */
+  glow?: string;
   hitBox: VecBox3;
   parts: EditablePart[];
   textures: Record<string, FaceTexture>;

@@ -12,6 +12,7 @@ import { MD_ROCK } from "../../../../../assets/models/md-rock";
 import { MD_WINDMILL } from "../../../../../assets/models/md-windmill";
 import { MD_LAMP } from "../../../../../assets/models/md-lamp";
 import { MD_CAMPFIRE } from "../../../../../assets/models/md-campfire";
+import { MODELS } from "../../../../../assets/models/models";
 import { isNpc, npcOf } from "./npc-sprite";
 import { dungeonKindOf } from "./dungeon-object";
 
@@ -21,6 +22,42 @@ export interface ModelChoice {
   model: SceneModel;
   croppedPic?: string;
 }
+
+/** The models of the cave decor, taken from the models list (no crop to give: they have a `thumb`). */
+const CAVE_MODEL_IDS = new Set([
+  "crystal-shard-blue",
+  "crystal-shard-violet",
+  "crystal-shard-green",
+  "crystal-cluster-blue",
+  "crystal-cluster-violet",
+  "crystal-cluster-green",
+  "crystal-spire-blue",
+  "crystal-spire-violet",
+  "crystal-spire-green",
+  "crystal-geode-blue",
+  "crystal-geode-violet",
+  "crystal-geode-green",
+  "crystal-wall-blue",
+  "crystal-wall-violet",
+  "crystal-wall-green",
+  "cave-rock-small",
+  "cave-rock-large",
+  "cave-boulder",
+  "stalagmite",
+  "stalagmite-group",
+  "rubble",
+  "cave-entrance",
+  "pickaxe",
+  "mine-cart",
+  "mine-lantern",
+  "mine-support",
+  "crate",
+  "barrel",
+  "mine-sign",
+  "ore-pile",
+  "rope-coil",
+  "mine-rail-end",
+]);
 
 export const MODEL_CHOICES: ModelChoice[] = [
   {
@@ -89,6 +126,10 @@ export const MODEL_CHOICES: ModelChoice[] = [
   { model: MD_WINDMILL },
   { model: MD_LAMP },
   { model: MD_CAMPFIRE },
+  // The cave decor (crystals, rocks, the old mine): every one has its thumbnail
+  ...MODELS.filter((model) => CAVE_MODEL_IDS.has(model.id)).map((model) => ({
+    model,
+  })),
 ];
 
 /**
@@ -149,6 +190,38 @@ const MODEL_LABELS: Record<string, string> = {
   windmill: "Moulin",
   lamp: "Lampadaire",
   campfire: "Feu de camp",
+  "crystal-shard-blue": "Éclat de cristal bleu",
+  "crystal-shard-violet": "Éclat de cristal violet",
+  "crystal-shard-green": "Éclat de cristal vert",
+  "crystal-cluster-blue": "Amas de cristaux bleus",
+  "crystal-cluster-violet": "Amas de cristaux violets",
+  "crystal-cluster-green": "Amas de cristaux verts",
+  "crystal-spire-blue": "Aiguille de cristal bleue",
+  "crystal-spire-violet": "Aiguille de cristal violette",
+  "crystal-spire-green": "Aiguille de cristal verte",
+  "crystal-geode-blue": "Géode bleue",
+  "crystal-geode-violet": "Géode violette",
+  "crystal-geode-green": "Géode verte",
+  "crystal-wall-blue": "Veine de cristal bleue",
+  "crystal-wall-violet": "Veine de cristal violette",
+  "crystal-wall-green": "Veine de cristal verte",
+  "cave-rock-small": "Petit rocher de grotte",
+  "cave-rock-large": "Grand rocher de grotte",
+  "cave-boulder": "Gros rocher rond",
+  stalagmite: "Stalagmite",
+  "stalagmite-group": "Groupe de stalagmites",
+  rubble: "Éboulis",
+  "cave-entrance": "Entrée de grotte",
+  pickaxe: "Pioche",
+  "mine-cart": "Wagonnet",
+  "mine-lantern": "Lanterne de mineur",
+  "mine-support": "Étai de mine",
+  crate: "Caisse",
+  barrel: "Tonneau",
+  "mine-sign": "Panneau de danger",
+  "ore-pile": "Tas de minerai",
+  "rope-coil": "Rouleau de corde",
+  "mine-rail-end": "Butoir de rail",
   zone: "Zone invisible",
   light: "Lumière",
 };

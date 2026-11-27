@@ -12,6 +12,34 @@ export const PC_PALLET_TOWN: SceneChunk = {
   size: { x: 512, y: 512 },
   buildings: [
     {
+      id: 'cave-entrance-1',
+      modelId: 'cave-entrance',
+      pos: { x: -128, y: 0, z: 112 },
+      passable: false,
+      canHide: false,
+      events: [
+        {
+          conditions: {
+            direction: PlayerDirection.UP,
+            pressedKeys: [KeyCode.confirm, KeyCode.up],
+            held: true,
+            bounds: {
+              min: { x: 0, y: 4, z: 0 },
+              max: { x: 0, y: 0, z: 24 }
+            }
+          },
+          instructions: [
+            {
+              type: InstructionType.TELEPORT,
+              teleport: {
+                map: 'dungeon:dg-crystal-cave'
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       id: 'letter-box-1',
       modelId: 'letter-box',
       pos: { x: -120, y: 0, z: -62 },

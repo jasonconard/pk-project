@@ -78,7 +78,7 @@ import {
   momentAt,
   startDayNumber,
 } from "../model/game-calendar";
-import { MapTime } from "../model/SceneMap";
+import { MapTime, WallStyle } from "../model/SceneMap";
 import {
   InstructionTime,
   InstructionType,
@@ -938,7 +938,23 @@ export class GameService {
     this.calendarVersion.update((v) => v + 1);
   }
 
-  /** The time on a map (null: it passes as outside). */
+  /** The look of a map's relief walls (the map shown is drawn again with it). */
+  setMapWalls(id: string, walls: WallStyle) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      if (walls === "rock") {
+        delete map.walls;
+      } else {
+        map.walls = walls;
+      }
+      saveMap(map);
+      if (current?.id === id) {
+        this.openMap(id);
+      }
+    }
+  }
+
   /** The team walks behind the player on a map (false: only the leader). */
   setMapFollowers(id: string, followers: boolean) {
     const current = this.game?.mapHelper?.sceneMap;
@@ -953,6 +969,7 @@ export class GameService {
     }
   }
 
+  /** The time on a map (null: it passes as outside). */
   setMapTime(id: string, time: MapTime | null) {
     const current = this.game?.mapHelper?.sceneMap;
     const map = current?.id === id ? current : loadMap(id);

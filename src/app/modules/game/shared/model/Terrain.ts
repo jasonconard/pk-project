@@ -2,7 +2,7 @@
 export const TILE_SIZE = 16;
 /** The tileset picture: 16 px tiles on a 17 px grid (1 px white separators), tile (col, row) at 1 + 17 × index. */
 export const TILESET_LINK = "assets/tex/tileset.png";
-export const TILESET_SIZE = { x: 477, y: 800 };
+export const TILESET_SIZE = { x: 477, y: 817 };
 
 /** Top left pixel of a tileset cell. */
 export function tilesetPos(col: number, row: number): { x: number; y: number } {
@@ -248,6 +248,41 @@ export const TERRAINS: Terrain[] = [
     id: "planks",
     label: "Planches",
     center: [0, 18],
+    blocking: false,
+    variants: [],
+  },
+  {
+    id: "cave-floor",
+    label: "Sol de grotte",
+    center: [0, 47],
+    blocking: false,
+    variants: [],
+  },
+  {
+    id: "cave-crystal",
+    label: "Sol cristallin",
+    center: [1, 47],
+    blocking: false,
+    variants: [],
+  },
+  {
+    id: "cave-rail",
+    label: "Rails (largeur)",
+    center: [2, 47],
+    blocking: false,
+    variants: [],
+  },
+  {
+    id: "cave-rail-v",
+    label: "Rails (longueur)",
+    center: [3, 47],
+    blocking: false,
+    variants: [],
+  },
+  {
+    id: "cave-roof",
+    label: "Dessus de grotte",
+    center: [4, 47],
     blocking: false,
     variants: [],
   },

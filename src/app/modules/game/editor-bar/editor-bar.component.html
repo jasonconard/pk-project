@@ -1249,6 +1249,23 @@
             <span class="pic" aria-hidden="true"><svg lucideEraser></svg></span>
             <span class="name">Sans escalier</span>
           </button>
+          @for (wall of wallTools; track wall.id) {
+            <button
+              type="button"
+              class="entry tile"
+              [title]="wall.help"
+              [class.selected]="tileId() === wall.id"
+              [attr.aria-pressed]="tileId() === wall.id"
+              (click)="pickTile(wall.id, $event)"
+            >
+              <span class="pic" aria-hidden="true">
+                <svg viewBox="0 0 16 16" class="wall-profile">
+                  <path [attr.d]="wall.profile" />
+                </svg>
+              </span>
+              <span class="name">{{ wall.label }}</span>
+            </button>
+          }
         }
       </div>
     </div>

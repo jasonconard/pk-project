@@ -232,6 +232,7 @@ export function exportModel(model: EditableModel): ExportedModel {
         painted.map((layer) => [layer, `assets/tex/${model.id}-${layer}.png`])
       ),
       bumpScale: painted.includes("bump") ? (model.bumpScale ?? 1) : undefined,
+      glow: painted.includes("night") ? model.glow : undefined,
     },
     sway: model.sway,
     zone: model.zone && structuredClone(model.zone),

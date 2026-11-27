@@ -331,7 +331,7 @@ export class ModelEditorScene {
           specular: 0xff_ff_ff,
           specularMap: textures?.specular ?? null,
           shininess: 20,
-          emissive: NIGHT_LIGHT_COLOR,
+          emissive: model.glow ?? NIGHT_LIGHT_COLOR,
           emissiveMap: textures?.night ?? null,
           emissiveIntensity: night ? 1 : 0,
           bumpMap: textures?.bump ?? null,

@@ -15,6 +15,12 @@ export enum ObjSide {
  */
 export type MapKind = "world" | "town" | "interior" | "dungeon" | "room";
 
+/**
+ * The look of a map's relief walls: the outside brown rock as straight cliffs or as leaning slopes, or the dark
+ * leaning rock of a cave.
+ */
+export type WallStyle = "rock" | "rock-slope" | "cave";
+
 export interface SceneMap {
   id: string;
   name: string;
@@ -25,6 +31,8 @@ export interface SceneMap {
   time?: MapTime;
   /** The team walks behind the player on this map (missing: yes; false: only the leader is drawn). */
   followers?: boolean;
+  /** The look of its relief walls and stairs (missing: the outside rock). */
+  walls?: WallStyle;
   /** Its cutscenes (see cutscene.ts), played by the event action « Jouer la cinématique ». */
   cutscenes?: Cutscene[];
   chunks: SceneChunk[];
@@ -44,6 +52,11 @@ export interface SceneChunk {
   heights?: Record<string, number>;
   /** Stairs set in the editor: 'column,row' → side the ramp rises towards (n, e, s, w; true = n, first version). */
   stairs?: Record<string, StairsSide | boolean>;
+  /**
+   * How the walls of a raised cell lean, painted in the editor: 'column,row' → world units of lean per level of
+   * height (0: a straight cliff). Missing: the map's wall style decides.
+   */
+  slopes?: Record<string, number>;
 }
 
 /** Side a stairs cell rises towards (one level). */

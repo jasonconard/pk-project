@@ -6,6 +6,7 @@ import {
   SceneChunk,
   SceneMap,
   StairsSide,
+  WallStyle,
 } from "../model/SceneMap";
 import { SceneBuilding } from "../model/SceneBuilding";
 import { Vec2, Vec3 } from "../model/SceneUtils";
@@ -44,6 +45,8 @@ interface StoredChunk {
   heights?: Record<string, number>;
   /** Stairs cells. */
   stairs?: Record<string, StairsSide | boolean>;
+  /** Leans painted on the walls. */
+  slopes?: Record<string, number>;
 }
 
 interface StoredMap {
@@ -52,6 +55,7 @@ interface StoredMap {
   spawn?: Vec3;
   time?: MapTime;
   followers?: boolean;
+  walls?: WallStyle;
   cutscenes?: Cutscene[];
   /** Every chunk of the map, in order. */
   chunks: StoredChunk[];
@@ -77,6 +81,8 @@ export interface MapSummary {
   time?: MapTime;
   /** false: the team doesn't walk behind the player there. */
   followers?: boolean;
+  /** The look of its relief walls (missing: the outside rock). */
+  walls?: WallStyle;
   /** Size in chunks (columns × rows of the area its chunks cover). */
   cols: number;
   rows: number;
@@ -111,6 +117,9 @@ function chunkData(chunk: SceneChunk): StoredChunk {
   }
   if (chunk.stairs && Object.keys(chunk.stairs).length > 0) {
     data.stairs = chunk.stairs;
+  }
+  if (chunk.slopes && Object.keys(chunk.slopes).length > 0) {
+    data.slopes = chunk.slopes;
   }
   return data;
 }
@@ -223,6 +232,7 @@ export function listMaps(): MapSummary[] {
     kind: stored[map.id]?.kind ?? map.kind,
     time: stored[map.id] ? stored[map.id].time : map.time,
     followers: stored[map.id] ? stored[map.id].followers : map.followers,
+    walls: stored[map.id] ? stored[map.id].walls : map.walls,
     inCode: true,
     edited: !!stored[map.id],
     ...gridSize(stored[map.id]?.chunks ?? map.chunks),
@@ -235,6 +245,7 @@ export function listMaps(): MapSummary[] {
       kind: map.kind,
       time: map.time,
       followers: map.followers,
+      walls: map.walls,
       inCode: false,
       edited: true,
       ...gridSize(map.chunks),
@@ -375,6 +386,9 @@ export function loadMap(id: string): SceneMap | null {
     ...((saved ? saved.followers : code!.followers) === false
       ? { followers: false }
       : {}),
+    ...((saved ? saved.walls : code!.walls)
+      ? { walls: saved ? saved.walls : code!.walls }
+      : {}),
     ...((saved ? saved.cutscenes : code!.cutscenes)?.length
       ? {
           cutscenes: structuredClone(
@@ -395,6 +409,7 @@ export function saveMap(map: SceneMap) {
     spawn: map.spawn,
     ...(map.time ? { time: map.time } : {}),
     ...(map.followers === false ? { followers: false } : {}),
+    ...(map.walls ? { walls: map.walls } : {}),
     ...(map.cutscenes?.length ? { cutscenes: map.cutscenes } : {}),
     chunks: map.chunks.map(chunkData),
   };
@@ -461,6 +476,7 @@ export function exportMapFile(map: SceneMap): string {
       : []),
     ...(map.time ? [`  time: ${JSON.stringify(map.time)},`] : []),
     ...(map.followers === false ? ["  followers: false,"] : []),
+    ...(map.walls ? [`  walls: '${map.walls}',`] : []),
     ...(map.cutscenes?.length
       ? [`  cutscenes: ${JSON.stringify(map.cutscenes)},`]
       : []),

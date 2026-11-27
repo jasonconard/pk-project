@@ -32,7 +32,8 @@ import {
 } from "@lucide/angular";
 import { GameService } from "../shared/services/game.service";
 import { listMaps, MapSummary } from "../shared/services/map-storage";
-import { MapKind, MapTime } from "../shared/model/SceneMap";
+import { MapKind, MapTime, WallStyle } from "../shared/model/SceneMap";
+import { WALL_STYLES } from "../shared/model/GroundMesh";
 
 /** Time to confirm a reset / delete (ms). */
 const CONFIRM_TIME = 3000;
@@ -171,6 +172,15 @@ export class MapManagerComponent implements OnInit {
       time = { mode, hour: map.time?.mode === "frozen" ? map.time.hour : 0 };
     }
     this.gameService.setMapTime(map.id, time);
+    this.maps.set(listMaps());
+  }
+
+  protected readonly wallStyles = (Object.keys(WALL_STYLES) as WallStyle[]).map(
+    (id) => ({ id, label: WALL_STYLES[id].label })
+  );
+
+  protected setWalls(map: MapSummary, walls: WallStyle): void {
+    this.gameService.setMapWalls(map.id, walls);
     this.maps.set(listMaps());
   }
 

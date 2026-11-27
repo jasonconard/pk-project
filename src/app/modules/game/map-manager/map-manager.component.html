@@ -133,6 +133,22 @@
                 <small>Décochée : seul le chef d'équipe est dessiné</small>
               </span>
             </label>
+            <label class="team-row" animate.enter="anim-fade-in">
+              <span>Murs des reliefs</span>
+              <select
+                aria-label="Murs des reliefs"
+                (change)="setWalls(map, $any($event.target).value)"
+              >
+                @for (style of wallStyles; track style.id) {
+                  <option
+                    [value]="style.id"
+                    [selected]="(map.walls ?? 'rock') === style.id"
+                  >
+                    {{ style.label }}
+                  </option>
+                }
+              </select>
+            </label>
             <div class="actions" animate.enter="anim-fade-in">
               <button type="button" (click)="startRename(map)">
                 <svg lucidePencil></svg> Renommer

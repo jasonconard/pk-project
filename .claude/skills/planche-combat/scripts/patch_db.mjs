@@ -8,7 +8,9 @@ const [file, id, sheetPng, stillPng, descJson] = process.argv.slice(2);
 let src = fs.readFileSync(file, "utf8");
 const start = src.indexOf(`"id": "${id}"`);
 if (start < 0) throw new Error(`no entry ${id}`);
-const end = src.indexOf('"levelStart"', start);
+// The row ends at its closing brace (rows are indented by 4 spaces): the next rows are never touched
+const end = src.indexOf("\n    }", start);
+if (end < 0) throw new Error(`no end of entry ${id}`);
 let block = src.slice(start, end);
 const b64 = (p) =>
   "data:image/png;base64," + fs.readFileSync(p).toString("base64");
@@ -19,6 +21,9 @@ if (/"sheet": \{/.test(block)) {
   block = block.replace(/"sheet": \{[\s\S]*?\n      \},\n/, `"sheet": ${json},\n`);
 } else {
   block = block.replace(/("sprite": "[^"]*",\n)/, `$1      "sheet": ${json},\n`);
+}
+if (!block.includes('"sheet": {')) {
+  throw new Error(`${id} has no "sprite" to put the sheet after: add one first`);
 }
 src = src.slice(0, start) + block + src.slice(end);
 fs.writeFileSync(file, src);

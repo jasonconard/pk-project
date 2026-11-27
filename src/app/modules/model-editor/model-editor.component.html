@@ -634,6 +634,22 @@
           </div>
           <span class="note">0 = immobile</span>
         </div>
+        <div
+          class="prop"
+          title="Couleur de ce que le calque Nuit allume (cristaux, néons…)"
+        >
+          <span class="label">Lueur</span>
+          <input
+            type="color"
+            aria-label="Couleur de la lueur de nuit"
+            [value]="model.glow ?? '#ffc56b'"
+            (change)="setGlow($any($event.target).value)"
+          />
+          @if (model.glow) {
+            <button type="button" (click)="setGlow(null)">Fenêtre</button>
+          }
+          <span class="note">la nuit</span>
+        </div>
         <ng-container [ngTemplateOutlet]="zoneTpl" />
         <ng-container [ngTemplateOutlet]="lightsTpl" />
       }
@@ -1140,6 +1156,15 @@
           </button>
         </div>
       </div>
+      <label class="field" title="Couleur de ce que le calque Nuit allume">
+        <span>Lueur de nuit</span>
+        <input
+          type="color"
+          aria-label="Couleur de la lueur de nuit"
+          [value]="model.glow ?? '#ffc56b'"
+          (change)="setGlow($any($event.target).value)"
+        />
+      </label>
     </div>
     <p class="hint small">
       Vent : 0 = immobile, 1 = plie beaucoup (herbes, arbres).

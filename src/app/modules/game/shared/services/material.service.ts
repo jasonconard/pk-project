@@ -204,7 +204,7 @@ export class MaterialService {
     }
     if (tex.night) {
       mat.emissiveMap = MaterialService.loadTexture(tex.night);
-      mat.emissive = WINDOW_LIGHT_COLOR;
+      mat.emissive = tex.glow ? new THREE.Color(tex.glow) : WINDOW_LIGHT_COLOR;
     } else {
       MaterialService.addWindowLights(mat, tex.link);
     }

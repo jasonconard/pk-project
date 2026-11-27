@@ -42,9 +42,23 @@ interface Stroke {
       after: StairsSide | null;
     }
   >;
+  /** Wall lean tool: each cell's lean before / after (null: the map's style). */
+  slopes: Map<
+    string,
+    {
+      chunk: SceneChunk;
+      col: number;
+      row: number;
+      before: number | null;
+      after: number | null;
+    }
+  >;
   /** Chunk tools: done once per stroke. */
   chunkDone?: boolean;
 }
+
+/** Prefix of the wall lean tools: `slope:<lean>` (see SLOPE_CHOICES), `slope:auto`. */
+export const SLOPE_TOOL = "slope:";
 
 type Cell = { chunk: SceneChunk; col: number; row: number };
 
@@ -106,7 +120,12 @@ export class GroundPainter {
   }
 
   begin() {
-    this.stroke = { cells: new Map(), levels: new Map(), stairs: new Map() };
+    this.stroke = {
+      cells: new Map(),
+      levels: new Map(),
+      stairs: new Map(),
+      slopes: new Map(),
+    };
   }
 
   /** Drops the stroke (leaving the editor) without keeping it as a step. */
@@ -132,9 +151,10 @@ export class GroundPainter {
     if (!this.stroke || !mapHelper) {
       return;
     }
-    const terrainTool = !["raise", "lower", "stairs", "unstairs"].includes(
-      game.editTileId ?? ""
-    );
+    const terrainTool =
+      !["raise", "lower", "stairs", "unstairs"].includes(
+        game.editTileId ?? ""
+      ) && !game.editTileId?.startsWith(SLOPE_TOOL);
     if (game.editBrush === "fill" && terrainTool) {
       if (this.stroke.cells.size === 0) {
         fillCells(game, ground.x, ground.z).forEach((cell) =>
@@ -175,6 +195,18 @@ export class GroundPainter {
           after: game.mapHelper.levelAt(cell.chunk, cell.col, cell.row),
         });
         this.grid.refresh(game, [cell.chunk]);
+      }
+      return;
+    }
+    if (game.editTileId?.startsWith(SLOPE_TOOL)) {
+      // Wall lean tool: 'slope:<lean>' paints it, 'slope:auto' gives the cell back to the map's style
+      const value = game.editTileId.slice(SLOPE_TOOL.length);
+      const after = value === "auto" ? null : Number(value);
+      const before =
+        game.mapHelper.slopeAt(cell.chunk, cell.col, cell.row) ?? null;
+      if (!this.stroke.slopes.has(key) && before !== after) {
+        game.mapHelper.setSlope(cell.chunk, cell.col, cell.row, after);
+        this.stroke.slopes.set(key, { ...cell, before, after });
       }
       return;
     }
@@ -223,9 +255,13 @@ export class GroundPainter {
       (l) => l.before !== l.after
     );
     const stairs = [...(this.stroke?.stairs.values() ?? [])];
+    const slopes = [...(this.stroke?.slopes.values() ?? [])];
     this.stroke = null;
     if (
-      (cells.length === 0 && levels.length === 0 && stairs.length === 0) ||
+      (cells.length === 0 &&
+        levels.length === 0 &&
+        stairs.length === 0 &&
+        slopes.length === 0) ||
       !game.mapHelper
     ) {
       return;
@@ -243,6 +279,9 @@ export class GroundPainter {
         stairs.forEach((s) =>
           mapHelper.setStairs(s.chunk, s.col, s.row, s.before)
         );
+        slopes.forEach((s) =>
+          mapHelper.setSlope(s.chunk, s.col, s.row, s.before)
+        );
         this.grid.refresh(game, reliefChunks);
       },
       redo: () => {
@@ -254,6 +293,9 @@ export class GroundPainter {
         );
         stairs.forEach((s) =>
           mapHelper.setStairs(s.chunk, s.col, s.row, s.after)
+        );
+        slopes.forEach((s) =>
+          mapHelper.setSlope(s.chunk, s.col, s.row, s.after)
         );
         this.grid.refresh(game, reliefChunks);
       },

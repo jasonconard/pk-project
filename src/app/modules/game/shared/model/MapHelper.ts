@@ -390,7 +390,8 @@ export class MapHelper {
   /** The chunks' ground: painted tiles, reliefs, stairs. */
   private readonly ground = new ChunkGround(
     () => this.sceneMap.chunks,
-    (x, z) => this.cellAt(x, z)
+    (x, z) => this.cellAt(x, z),
+    () => this.sceneMap.walls ?? "rock"
   );
 
   /** The ground cell (column, row from the chunk corner) under a world point, if any. */
@@ -447,6 +448,47 @@ export class MapHelper {
     this.ground.setStairs(chunk, col, row, side);
   }
 
+  /** The lean painted on a cell's walls (undefined: none, the map's style decides). */
+  public slopeAt(
+    chunk: SceneChunk,
+    col: number,
+    row: number
+  ): number | undefined {
+    return chunk.slopes?.[col + "," + row];
+  }
+
+  /** Paints the lean of a cell's walls (null: back to the map's style) and rebuilds the ground around. */
+  public setSlope(
+    chunk: SceneChunk,
+    col: number,
+    row: number,
+    slope: number | null
+  ) {
+    const key = col + "," + row;
+    chunk.slopes ??= {};
+    if (slope === null) {
+      delete chunk.slopes[key];
+    } else {
+      chunk.slopes[key] = slope;
+    }
+    this.ground.rebuildGround(chunk);
+    this.rebuildAround(chunk, col, row);
+  }
+
+  /** A cell on a chunk's border changed: the next chunks' walls and slopes follow. */
+  private rebuildAround(chunk: SceneChunk, col: number, row: number) {
+    const cols = chunk.size.x / TILE_SIZE;
+    const rows = chunk.size.y / TILE_SIZE;
+    if (col === 0 || row === 0 || col === cols - 1 || row === rows - 1) {
+      for (const [dc, dr] of NEIGHBORS) {
+        const n = this.ground.neighborCell(chunk, col + dc, row + dr);
+        if (n && n.chunk !== chunk) {
+          this.ground.rebuildGround(n.chunk);
+        }
+      }
+    }
+  }
+
   /** Sets the ground level of a cell and rebuilds the ground (and the next chunk's on a border: its walls). */
   public setLevel(chunk: SceneChunk, col: number, row: number, level: number) {
     const key = col + "," + row;
@@ -474,16 +516,7 @@ export class MapHelper {
         }
       }
     });
-    const cols = chunk.size.x / TILE_SIZE;
-    const rows = chunk.size.y / TILE_SIZE;
-    if (col === 0 || row === 0 || col === cols - 1 || row === rows - 1) {
-      for (const [dc, dr] of NEIGHBORS) {
-        const n = this.ground.neighborCell(chunk, col + dc, row + dr);
-        if (n && n.chunk !== chunk) {
-          this.ground.rebuildGround(n.chunk);
-        }
-      }
-    }
+    this.rebuildAround(chunk, col, row);
   }
 
   /** Chunk containing a world point (x, z), if any. */
@@ -594,7 +627,7 @@ export class MapHelper {
       if (look.gone) {
         return;
       }
-      const mesh = makeDungeonMesh(building.modelId, look);
+      const mesh = makeDungeonMesh(building.modelId, look, building.rot);
       this.addMesh(chunk.id + "-" + building.id, mesh, world);
       chunk.group.add(mesh);
       return;

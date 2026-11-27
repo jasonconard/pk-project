@@ -119,11 +119,85 @@ type PaletteTab =
 /** Prefix of a passage's target that is a dungeon of the database (`dungeon:<id>`), not a map. */
 const DUNGEON_TARGET = "dungeon:";
 
+/**
+ * The wall lean tools of the Reliefs tab: painted on raised cells, they lean their walls (a straight cliff, steeper
+ * or gentler rock slopes); « Auto » gives the cell back to the map's wall style. `profile`: the wall seen from the
+ * side, drawn on the button.
+ */
+const WALL_TOOLS = [
+  { lean: 0, label: "Paroi droite", help: "Falaise droite : un mur vertical" },
+  { lean: 2, label: "Paroi raide", help: "Roche un peu inclinée" },
+  { lean: 4, label: "Paroi moyenne", help: "Roche inclinée" },
+  {
+    lean: 8,
+    label: "Paroi douce",
+    help: "Pente douce : une case entière pour deux niveaux, comme les grottes de Pokémon",
+  },
+].map((tool) => ({
+  id: "slope:" + tool.lean,
+  label: tool.label,
+  help: tool.help + " (à peindre sur les cases en hauteur)",
+  profile: `M2 14 L${2 + tool.lean} 3 L14 3 L14 14 Z`,
+}));
+WALL_TOOLS.push({
+  id: "slope:auto",
+  label: "Paroi auto",
+  help: "Rend la case au style de murs de la carte",
+  profile: "M2 14 L5 3 L14 3 L14 14 Z M7 8 h4",
+});
+
 /** Families of the palette (computer: the objects are grouped, with a search). */
 const MODEL_FAMILIES: { label: string; ids: string[] }[] = [
   { label: "Nature", ids: ["tree", "flowers", "rock"] },
   { label: "Bâtiments", ids: ["house", "labo", "letter-box"] },
   { label: "Décor", ids: ["barrier", "pannel", "wood-pannel"] },
+  {
+    label: "Cristaux",
+    ids: [
+      "crystal-shard-blue",
+      "crystal-shard-violet",
+      "crystal-shard-green",
+      "crystal-cluster-blue",
+      "crystal-cluster-violet",
+      "crystal-cluster-green",
+      "crystal-spire-blue",
+      "crystal-spire-violet",
+      "crystal-spire-green",
+      "crystal-geode-blue",
+      "crystal-geode-violet",
+      "crystal-geode-green",
+      "crystal-wall-blue",
+      "crystal-wall-violet",
+      "crystal-wall-green",
+    ],
+  },
+  {
+    label: "Grotte",
+    ids: [
+      "cave-rock-small",
+      "cave-rock-large",
+      "cave-boulder",
+      "stalagmite",
+      "stalagmite-group",
+      "rubble",
+      "cave-entrance",
+    ],
+  },
+  {
+    label: "Mine",
+    ids: [
+      "pickaxe",
+      "mine-cart",
+      "mine-lantern",
+      "mine-support",
+      "crate",
+      "barrel",
+      "mine-sign",
+      "ore-pile",
+      "rope-coil",
+      "mine-rail-end",
+    ],
+  },
 ];
 
 /** The game's editors (the launcher); the ones to come (docs/idees.md) greyed. */
@@ -450,6 +524,7 @@ export class EditorBarComponent {
     }));
   });
   /** The objects by family, the search applied (computer only: elsewhere the palette scrolls without titles). */
+  protected readonly wallTools = WALL_TOOLS;
   protected readonly families = computed(() => {
     const query =
       this.layout() === "desktop" ? normalize(this.query().trim()) : "";

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { SceneChunk, StairsSide, stairsSide } from "./SceneMap";
+import { SceneChunk, StairsSide, stairsSide, WallStyle } from "./SceneMap";
 import {
   autotile,
   NEIGHBORS,
@@ -11,7 +11,7 @@ import {
   waterFramePos,
 } from "./Terrain";
 import { applyWeatherShader } from "../weather/weather-shader";
-import { buildGroundGeometry, STAIRS_TILE } from "./GroundMesh";
+import { buildGroundGeometry, WALL_STYLES } from "./GroundMesh";
 import { isGameAsleep } from "../../../../core/shared/app-visibility";
 
 // The chunks' ground: the painted tiles (a canvas texture per chunk, autotiled borders, animated water), the
@@ -53,10 +53,12 @@ export class ChunkGround {
   /**
    * @param chunks the current map's chunks
    * @param cellAt the ground cell under a world point
+   * @param wallStyle the look of the current map's relief walls and stairs
    */
   constructor(
     private readonly chunks: () => SceneChunk[],
-    private readonly cellAt: (x: number, z: number) => GroundCell | null
+    private readonly cellAt: (x: number, z: number) => GroundCell | null,
+    private readonly wallStyle: () => WallStyle = () => "rock"
   ) {}
 
   private readonly paintedGrounds = new Map<string, PaintedGround>();
@@ -99,6 +101,16 @@ export class ChunkGround {
   public levelAt(chunk: SceneChunk, col: number, row: number): number {
     const cell = this.neighborCell(chunk, col, row);
     return cell?.chunk.heights?.[cell.col + "," + cell.row] ?? 0;
+  }
+
+  /** The lean painted on a cell's walls (possibly in the next chunk; undefined: the map's style decides). */
+  public slopeAt(
+    chunk: SceneChunk,
+    col: number,
+    row: number
+  ): number | undefined {
+    const cell = this.neighborCell(chunk, col, row);
+    return cell?.chunk.slopes?.[cell.col + "," + cell.row];
   }
 
   /** Ground level under a world point (0 outside the map or on flat ground). */
@@ -200,7 +212,9 @@ export class ChunkGround {
     mesh.geometry = buildGroundGeometry(
       chunk,
       (col, row) => this.levelAt(chunk, col, row),
-      (col, row) => stairsSide(chunk.stairs?.[col + "," + row])
+      (col, row) => stairsSide(chunk.stairs?.[col + "," + row]),
+      this.wallStyle(),
+      (col, row) => this.slopeAt(chunk, col, row)
     );
     old?.dispose(); // (the flat ground is kept)
     if (!this.wallMaterial) {
@@ -358,7 +372,7 @@ export class ChunkGround {
       loadImage(TILESET_LINK).then((img) => {
         if (stairsSide(chunk.stairs?.[col + "," + row]) === stairs) {
           // The steps are drawn for a ramp rising north: turned for the other sides
-          const src = tilesetPos(...STAIRS_TILE);
+          const src = tilesetPos(...WALL_STYLES[this.wallStyle()].stairs);
           const ctx = painted.ctx;
           ctx.save();
           ctx.translate(x + TILE_SIZE / 2, y + TILE_SIZE / 2);
