@@ -137,6 +137,10 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   which stays loaded (`MapHelper.showArena` / `hideArena`: the arena's chunks built far east, the map's hidden;
   `shownChunks`); `model/arena.ts` (`arenaFor`: the group's, the map's, the dungeon's, the settings'; `FIGHT_AREA`),
   `BattleService.enterArena` / `leaveArena`; the editor's fight guide in `editor-markers.ts`. Maps `arene-*`.
+- Skill flows (`docs/editeur/22-deroule.md`): a skill or a weapon's attack plays in time, blocks on five tracks
+  (`database-editor/shared/skill-flow.ts`: `SkillFlow`, defaults `skillFlow` / `attackFlow`); the engine's action has
+  a clock from its strike (`strike`, `playFlow`, `land(action, percent, states)` in `battle-engine.ts`); several
+  hits share the sheet's power. The editor and its preview are still to do (mockup: `design/database.pen` 21, 22).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

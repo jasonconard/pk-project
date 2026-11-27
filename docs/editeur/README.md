@@ -25,6 +25,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 19. [Lumières](19-lumieres.md) : des halos de couleur la nuit autour des lampes (points de lumière des modèles, objet Lumière, lanterne du joueur), de vraies lumières en qualité haute ; les allumer et les éteindre par un événement.
 20. [Transitions](20-transitions.md) : l'image qui se ferme et se rouvre quand la carte change ou qu'un combat commence ou finit ; six transitions, choisies dans la base de données.
 21. [Arènes de combat](21-arenes.md) : un lieu ouvert montré à la place du décor pendant un combat ; une arène par groupe d'ennemis, par lieu, par donjon ou pour tout le jeu.
+22. [Le déroulé d'une compétence](22-deroule.md) : animations du lanceur, effets, sons et coups placés dans le temps ; plusieurs coups qui se partagent la puissance.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 
