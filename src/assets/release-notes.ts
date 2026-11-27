@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.48',
+    date: '2026-11-27',
+    notes: [
+      'Les combats se jouent dans une arène dégagée, puis l\'équipe revient où elle était.',
+      'Les combats ont plus d\'impact : des sons pour les coups et les magies, un vrai tonnerre pour la foudre, et un boss vaincu tombe lentement pendant que l\'écran tremble.',
+      'Chaque ennemi a sa voix et ses bruits de pas. Un combattant touché clignote avant de repartir, et un ennemi qui prépare une magie scintille.',
+      'La Grotte de cristal est maintenant un donjon fixe : salles reliées à la main, ennemis à leur place, le Gardien attend au fond sans bouger.',
+      'Éditeur : arènes de combat, donjons faits à la main, cartes rangées en sections, et un déroulé pour chaque compétence (animations, sons et coups placés dans le temps, avec un aperçu).',
+    ],
+  },
+  {
     version: '0.0.47',
     date: '2026-11-27',
     notes: [
