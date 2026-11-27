@@ -35,6 +35,8 @@ La nuit, l'équipe explore des donjons : des étages faits à la main ou tirés 
 
 Dans l'éditeur, les objets sont montrés tels qu'ils sont posés (coffres fermés, pièges cachés visibles, portes fermées).
 
+**Porte de salle sur un mur de côté** : tournée d'un quart de tour (**Tourner**), la porte n'est plus une arche vue de face mais une **ouverture sombre au sol**, d'une case. La poser dans une case creusée dans le mur (une encoche d'une case) : les murs autour dessinent l'ouverture dans la roche. On arrive devant elle, côté salle.
+
 ## Les étages générés
 
 À chaque visite, le jeu tire le nombre de salles, les pioche parmi celles de l'étage (une salle peut revenir) et relie chaque nouvelle salle à une porte libre d'une salle déjà là : on peut toujours aller partout. Il place l'escalier dans la dernière salle, partage les ennemis et les coffres entre les salles (pas dans la première, quand il y en a d'autres) et met le cristal dans la première si l'étage en a un. Une porte de salle sans voisine dit « Le passage est bouché ». Les objets sont posés sur des cases libres au niveau de l'arrivée, loin des murs et des autres objets.
@@ -50,6 +52,16 @@ Dans l'éditeur, les objets sont montrés tels qu'ils sont posés (coffres ferm�
 - **Fermé** : hors de ses heures, l'entrée dit qu'elle est scellée et quand elle s'ouvre. À l'heure de fermeture, l'équipe est ramenée dehors.
 - **Sortir** : le cristal de sauvegarde, l'escalier du dernier étage, ou une défaite ramènent l'équipe là où elle est entrée, avec la météo du dehors.
 - **Les sauvegardes de partie** gardent le donjon : l'étage, les salles tirées, les coffres ouverts. Les coffres des étages faits à la main restent ouverts pour toujours ; ceux des étages générés, le temps de la visite.
+
+## Un exemple : la Grotte de cristal
+
+Le jeu contient un donjon complet, à ouvrir dans les éditeurs pour voir comment tout s'assemble :
+
+- **L'accès** : l'entrée de grotte au sud-ouest de la ville (carte du monde), un objet avec un passage vers « Donjon : Grotte de cristal ».
+- **La fiche** (Base de données → Donjons) : toujours ouvert, météo **Brume de cristal**, 3 étages. « Ancienne mine » est une carte faite à la main (`grotte-de-cristal`), « Galeries » est généré deux fois de suite à partir de 4 salles (Salle des géodes, Couloir éboulé, Lac souterrain, Galerie des mineurs), « Cœur de cristal » est fait à la main, avec le Gardien de cristal.
+- **Les cartes** : murs en style **Grotte** (voir [04](04-reliefs.md#le-style-des-murs--roche-ou-grotte)), heure **figée à 23 h** pour que les cristaux et les lanternes brillent toujours.
+- **Les décors** (palette Objets, familles Cristaux, Grotte, Mine) : cristaux de 5 formes en 3 couleurs qui brillent dans leur couleur, rochers, stalagmites, et les restes de la mine (rails, wagonnets, étais, lanternes, pioches, caisses).
+- **Les ennemis** (Base de données → Ennemis et Groupes) : dix ennemis de la grotte, du Gluant cristallin au Gardien de cristal, l'élément **Terre**, leurs compétences et leur butin.
 
 ## Les fichiers
 

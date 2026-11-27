@@ -104,10 +104,12 @@ Chaque face a 4 calques, choisis par les onglets **Couleur | Brillance | Nuit | 
 | Calque | Gris | Dans le jeu |
 |---|---|---|
 | Brillance | blanc = reflets du soleil, noir = mat | carte `xxx-specular.png` |
-| Nuit | ce qui s'allume la nuit (lumière chaude) | carte `xxx-night.png`, suit la météo comme les fenêtres |
+| Nuit | ce qui s'allume la nuit (lumière chaude, ou la couleur choisie dans **Lueur**) | carte `xxx-night.png`, suit la météo comme les fenêtres |
 | Relief | blanc = en relief, noir = en creux (seules les différences comptent) ; réglage **Force** | carte `xxx-bump.png` |
 
 Sur un calque gris, la palette devient 9 nuances et un curseur, et un **aperçu** en bas à droite de la vue 3D montre le modèle comme en jeu, avec la même caméra (de nuit sur le calque Nuit, de jour sinon ; bouton ☀/🌙). Sur Couleur, la case **Vue de nuit** montre le modèle la nuit.
+
+**Lueur** (réglages du modèle) : la couleur de ce que le calque Nuit allume. Sans elle, c'est la lumière chaude des fenêtres ; un cristal bleu, un néon, un champignon y mettent leur couleur (`tex.glow` dans le fichier du modèle). **Fenêtre** revient à la lumière chaude.
 
 À l'ouverture d'un modèle du jeu, la `shininess` de ses formes devient son calque Brillance, et les vitres que le jeu allume la nuit (bleu clair) deviennent son calque Nuit : le rendu reste le même.
 
@@ -130,7 +132,9 @@ L'éditeur de modèles part toujours des modèles **du code** (`CODE_MODELS`) po
 
 Le fichier `.ts` contient aussi `thumb` : la plus grande face avant, utilisée comme vignette dans la palette de l'éditeur de carte (sans elle, `texPos` dans `ModelChoice.ts`).
 
-**Nouveau modèle** : ajouter sa constante dans `src/assets/models/models.ts`, `{ model: MD_XXX }` dans `MODEL_CHOICES` (`ModelChoice.ts`) pour la palette de la carte, et son nom français dans `MODEL_LABELS` (`editor-bar.component.ts`).
+**Nouveau modèle** : ajouter sa constante dans `src/assets/models/models.ts`, `{ model: MD_XXX }` dans `MODEL_CHOICES` (`ModelChoice.ts`) pour la palette de la carte, et son nom français dans `MODEL_LABELS` (`ModelChoice.ts`). Pour le ranger dans une famille de la palette sur ordinateur (Nature, Bâtiments, Décor, Cristaux, Grotte, Mine) : `MODEL_FAMILIES` dans `editor-bar.component.ts` ; sinon il va dans « Autres ».
+
+**Un décor fait d'une seule image** (fleurs, lampadaire, cristaux, outils de mineur) est un modèle avec un seul **plan** debout : l'image entière sur sa face, une hauteur de 1,33 × celle de l'image (la caméra regarde d'en haut). Sa `hitBox` donne des marges sur les bords de l'image : `x` rentre de chaque côté, `z` donne l'épaisseur qui bloque devant et derrière (0 partout : on passe à travers).
 
 Le fichier du code générait parfois des formes en boucle (l'arbre) : l'export les écrit une par une, c'est équivalent. Une face dont le dessin était plus petit que la face (étiré) devient une grille à la vraie taille de la face.
 
