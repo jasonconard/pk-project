@@ -86,6 +86,7 @@ import { TestModeService } from "./shared/services/test-mode.service";
 import { TestSheetComponent } from "./test-mode/test-sheet/test-sheet.component";
 import { TestListComponent } from "./test-mode/test-list/test-list.component";
 import { DungeonTryComponent } from "./dungeon-try/dungeon-try.component";
+import { TransitionComponent } from "./transition/transition.component";
 import { TestSettingsComponent } from "./test-mode/test-settings/test-settings.component";
 import { TestBannerComponent } from "./test-mode/test-banner/test-banner.component";
 import { ActionZone } from "./shared/model/action-zone";
@@ -123,6 +124,7 @@ import { ActionZone } from "./shared/model/action-zone";
     TestSheetComponent,
     TestListComponent,
     DungeonTryComponent,
+    TransitionComponent,
     TestSettingsComponent,
     TestBannerComponent,
     GameCutsceneEditorComponent,

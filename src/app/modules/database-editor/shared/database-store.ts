@@ -1,6 +1,7 @@
 import { computed, Injectable, signal } from "@angular/core";
 import {
   DbCalendar,
+  DbSettings,
   DbCharacter,
   DbNpc,
   DbElement,
@@ -34,6 +35,7 @@ export type Row =
   | DbItem
   | DbCharacter
   | DbCalendar
+  | DbSettings
   | DbNpc
   | DbEnemy
   | DbGroup

@@ -1,4 +1,6 @@
-import { Service, signal } from "@angular/core";
+import { inject, Service, signal } from "@angular/core";
+import { TransitionService } from "../../game/shared/services/transition.service";
+import { TransitionKind } from "../../game/shared/model/transition";
 import * as THREE from "three";
 import { Game } from "../../game/shared/model/Game";
 import { loadDatabase } from "../../database-editor/shared/database-storage";
@@ -204,6 +206,12 @@ export class BattleService {
   private simTeam: SimMember[] | null = null;
   /** A simulation is played: the team as it was before, put back at the end. */
   private savedParty: PartyState | null = null;
+  /** The transition into the fight is played (the fight is set up behind it), the one out of it. */
+  private starting = false;
+  private ending = false;
+  /** The transition out of the fight being played, when its group has its own. */
+  private outKind?: TransitionKind;
+  private readonly transitions = inject(TransitionService);
   private readonly viewState = signal<BattleView | null>(null);
   /** The fight shown (null: no fight). */
   readonly view = this.viewState.asReadonly();
@@ -214,7 +222,7 @@ export class BattleService {
   }
 
   get running(): boolean {
-    return this.field !== null;
+    return this.field !== null || this.starting;
   }
 
   /**
@@ -225,8 +233,31 @@ export class BattleService {
     this.simTeam = team;
   }
 
-  /** Starts a fight against a group; `onEnd` is called with how it ended. */
+  /**
+   * Starts a fight against a group, behind the transition chosen in the database (Réglages → Entrée en combat);
+   * `onEnd` is called with how it ended.
+   */
   start(
+    groupId: string,
+    onEnd: (result: BattleResult) => void,
+    opening?: BattleOpening
+  ): void {
+    if (this.running) {
+      onEnd("win");
+      return;
+    }
+    this.starting = true;
+    // (the group's own transitions, else the settings' ones)
+    const group = loadDatabase().groups.find((g) => g.id === groupId);
+    this.outKind = group?.transitionOut;
+    const kind = group?.transitionIn ?? this.transitions.kindFor("fightIn");
+    this.transitions.through(kind, () => {
+      this.starting = false;
+      this.begin(groupId, onEnd, opening);
+    });
+  }
+
+  private begin(
     groupId: string,
     onEnd: (result: BattleResult) => void,
     opening?: BattleOpening
@@ -347,8 +378,27 @@ export class BattleService {
     }
   }
 
-  /** The fight ends: the field is taken down, the map comes back, the event goes on with the result. */
+  /**
+   * The fight ends, behind the transition chosen in the database (Réglages → Sortie de combat): the field is taken
+   * down, the map comes back, the event goes on with the result.
+   */
   end(result: BattleResult): void {
+    if (this.ending) {
+      return;
+    }
+    if (!this.field) {
+      this.close(result);
+      return;
+    }
+    this.ending = true;
+    const kind = this.outKind ?? this.transitions.kindFor("fightOut");
+    this.transitions.through(kind, () => {
+      this.ending = false;
+      this.close(result);
+    });
+  }
+
+  private close(result: BattleResult): void {
     const onEnd = this.onEnd;
     this.field?.dispose();
     this.field = null;
@@ -366,7 +416,8 @@ export class BattleService {
   /** Takes the fight down without going on with the event (the event was stopped). */
   cancel(): void {
     this.onEnd = null;
-    this.end("lose");
+    this.ending = false;
+    this.close("lose");
   }
 
   /** Every frame (the game's render loop): the fight goes on, the sprites animate. */

@@ -34,7 +34,7 @@
       >
         <svg [lucideIcon]="t.icon"></svg>
         <span class="label">{{ t.label }}</span>
-        @if (t.id !== "calendar") {
+        @if (!singleTables.has(t.id)) {
           <small>{{ db()[t.id].length }}</small>
         }
       </button>
@@ -131,6 +131,10 @@
             }}
           </button>
         }
+      </div>
+    } @else if (settings(); as st) {
+      <div class="sheet">
+        <db-settings-sheet [settings]="st" />
       </div>
     } @else if (current(); as row) {
       <ng-template #actions>

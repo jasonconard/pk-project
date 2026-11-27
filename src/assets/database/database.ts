@@ -3116,7 +3116,8 @@ export const CODE_DATABASE: GameDatabase = {
         }
       ],
       "canFlee": false,
-      "surprise": false
+      "surprise": false,
+      "transitionIn": "shards"
     }
   ],
   "calendar": [
@@ -3478,6 +3479,17 @@ export const CODE_DATABASE: GameDatabase = {
           "days": 1
         }
       ]
+    }
+  ],
+  "settings": [
+    {
+      "id": "settings",
+      "name": "Réglages du jeu",
+      "transitions": {
+        "map": "fade",
+        "fightIn": "stripes",
+        "fightOut": "fade"
+      }
     }
   ]
 };

@@ -1,4 +1,9 @@
 import {
+  transitionInfo,
+  TransitionKind,
+  TRANSITIONS,
+} from "../../../game/shared/model/transition";
+import {
   LucideCopy,
   LucideEighthNotes,
   LucidePlus,
@@ -74,14 +79,46 @@ export class GroupSheetComponent extends DbSheet {
     }));
   });
 
+  protected readonly transitions = TRANSITIONS;
+  /** Its two transitions: the group's field and the settings' case it stands for. */
+  protected readonly transitionFields = [
+    { field: "transitionIn", label: "Transition d'entrée", when: "fightIn" },
+    { field: "transitionOut", label: "Transition de sortie", when: "fightOut" },
+  ] as const;
+
+  /** « Celle des réglages (Fondu au noir) ». */
+  protected settingsTransition(when: "fightIn" | "fightOut"): string {
+    const kind = this.db().settings[0]?.transitions?.[when];
+    return `Celle des réglages (${transitionInfo(kind).label})`;
+  }
+
+  protected setTransition(
+    group: DbGroup,
+    field: "transitionIn" | "transitionOut",
+    kind: string
+  ): void {
+    this.setGroup(group, { [field]: kind as TransitionKind });
+  }
+
   protected setGroup(
     group: DbGroup,
-    change: Partial<Pick<DbGroup, "music" | "canFlee" | "surprise">>
+    change: Partial<
+      Pick<
+        DbGroup,
+        "music" | "canFlee" | "surprise" | "transitionIn" | "transitionOut"
+      >
+    >
   ): void {
     this.edit(group.id, (g) => {
       const next = { ...g, ...change } as DbGroup;
       if (!next.music) {
         delete next.music;
+      }
+      if (!next.transitionIn) {
+        delete next.transitionIn;
+      }
+      if (!next.transitionOut) {
+        delete next.transitionOut;
       }
       return next;
     });

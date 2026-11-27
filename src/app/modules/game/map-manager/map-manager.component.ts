@@ -1,3 +1,4 @@
+import { TransitionKind, TRANSITIONS } from "../shared/model/transition";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -178,6 +179,16 @@ export class MapManagerComponent implements OnInit {
   protected readonly wallStyles = (Object.keys(WALL_STYLES) as WallStyle[]).map(
     (id) => ({ id, label: WALL_STYLES[id].label })
   );
+
+  protected readonly transitions = TRANSITIONS;
+
+  protected setTransition(map: MapSummary, transition: string): void {
+    this.gameService.setMapTransition(
+      map.id,
+      (transition || undefined) as TransitionKind | undefined
+    );
+    this.maps.set(listMaps());
+  }
 
   protected setWalls(map: MapSummary, walls: WallStyle): void {
     this.gameService.setMapWalls(map.id, walls);

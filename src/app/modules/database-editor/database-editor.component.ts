@@ -1,6 +1,7 @@
 import {
   LucideActivity,
   LucideCalendarDays,
+  LucideSettings,
   LucideCastle,
   LucideStore,
   LucideSprout,
@@ -39,6 +40,7 @@ import {
 } from "@angular/core";
 import {
   DbCalendar,
+  DbSettings,
   DbCharacter,
   DbDungeon,
   DbShop,
@@ -62,6 +64,7 @@ import {
   floorCount,
   groupLabel,
   newCalendar,
+  newSettings,
   newCharacter,
   newDungeon,
   newShop,
@@ -95,6 +98,7 @@ import { ItemSheetComponent } from "./sheets/item-sheet/item-sheet.component";
 import { CharacterSheetComponent } from "./sheets/character-sheet/character-sheet.component";
 import { NpcSheetComponent } from "./sheets/npc-sheet/npc-sheet.component";
 import { CalendarSheetComponent } from "./sheets/calendar-sheet/calendar-sheet.component";
+import { SettingsSheetComponent } from "./sheets/settings-sheet/settings-sheet.component";
 import { EnemySheetComponent } from "./sheets/enemy-sheet/enemy-sheet.component";
 import { GroupSheetComponent } from "./sheets/group-sheet/group-sheet.component";
 import { DungeonSheetComponent } from "./sheets/dungeon-sheet/dungeon-sheet.component";
@@ -133,7 +137,16 @@ const TABLES: { id: DbTable; label: string; one: string; icon: LucideIcon }[] =
       one: "Calendrier",
       icon: LucideCalendarDays,
     },
+    {
+      id: "settings",
+      label: "Réglages",
+      one: "Réglages",
+      icon: LucideSettings,
+    },
   ];
+
+/** The tables of one row: their sheet only (no list, no adding). */
+const SINGLE_TABLES = new Set<DbTable>(["calendar", "settings"]);
 
 /** Wide enough for the list and the sheet side by side. */
 const SIDE_BY_SIDE = "(min-width: 760px)";
@@ -169,6 +182,7 @@ const SIDE_BY_SIDE = "(min-width: 760px)";
     CharacterSheetComponent,
     NpcSheetComponent,
     CalendarSheetComponent,
+    SettingsSheetComponent,
     EnemySheetComponent,
     GroupSheetComponent,
     DungeonSheetComponent,
@@ -293,8 +307,9 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
     );
   });
 
-  /** A table of one row (the calendar): its sheet only, on the list's place too (no list, no adding). */
-  protected readonly single = computed(() => this.table() === "calendar");
+  /** A table of one row (the calendar, the settings): its sheet only, on the list's place too (no list, no adding). */
+  protected readonly single = computed(() => SINGLE_TABLES.has(this.table()));
+  protected readonly singleTables = SINGLE_TABLES;
 
   /** The open sheet: the chosen row; side by side, the first one when none is chosen. */
   protected readonly current = computed<Row | null>(() => {
@@ -342,6 +357,10 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
 
   protected readonly calendar = computed(() =>
     this.table() === "calendar" ? (this.current() as DbCalendar | null) : null
+  );
+
+  protected readonly settings = computed(() =>
+    this.table() === "settings" ? (this.current() as DbSettings | null) : null
   );
 
   protected readonly dungeon = computed(() =>
@@ -447,6 +466,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       enemies: "Nouvel ennemi",
       groups: "Nouveau groupe",
       calendar: "Calendrier du jeu",
+      settings: "Réglages du jeu",
       dungeons: "Nouveau donjon",
       shops: "Nouvelle boutique",
       crops: "Nouvelle culture",
@@ -468,6 +488,7 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
       enemies: () => newEnemy(name),
       groups: () => newGroup(name, this.db()),
       calendar: () => newCalendar(),
+      settings: () => newSettings(),
       dungeons: () => newDungeon(name),
       shops: () => newShop(name),
       crops: () => newCrop(name),
@@ -707,6 +728,8 @@ export class DatabaseEditorComponent extends DbSheet implements OnInit {
             : `${count} objet${count > 1 ? "s" : ""}`,
         ].join(" · ");
       }
+      case "settings":
+        return "Transitions";
       case "calendar": {
         const cal = row as DbCalendar;
         return `${cal.months.length} mois · semaine de ${cal.week.length} jours`;

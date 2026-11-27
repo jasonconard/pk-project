@@ -3,6 +3,10 @@ import { omit } from "../../../core/shared/omit";
 import { SkillAnim } from "./skill-anim";
 import { SpriteSheet } from "./sprite-sheet";
 import type { EventConditions } from "../../game/shared/model/ObjectEvent";
+import type {
+  TransitionCase,
+  TransitionKind,
+} from "../../game/shared/model/transition";
 
 /**
  * The game's database (docs/idees.md, point 5): what the combat, the events and the menus read. Built table by
@@ -540,6 +544,9 @@ export interface DbGroup {
   canFlee: boolean;
   /** The enemies may attack first (the team caught from behind). */
   surprise: boolean;
+  /** Its own screen transitions into and out of the fight (missing: the settings' ones). */
+  transitionIn?: TransitionKind;
+  transitionOut?: TransitionKind;
 }
 
 /**
@@ -978,6 +985,25 @@ export function specialDayLabel(
   return times ? `${when} · ${times}` : `${when} · toute la journée`;
 }
 
+/**
+ * The game's settings (the table holds this one row): the screen transition played in each case (see transition.ts).
+ */
+export interface DbSettings {
+  id: string;
+  name: string;
+  /** (never set: every row of the editor may have a picture) */
+  icon?: string;
+  transitions: Record<TransitionCase, TransitionKind>;
+}
+
+export function newSettings(): DbSettings {
+  return {
+    id: "settings",
+    name: "Réglages du jeu",
+    transitions: { map: "fade", fightIn: "stripes", fightOut: "fade" },
+  };
+}
+
 export interface GameDatabase {
   elements: DbElement[];
   weapons: DbWeapon[];
@@ -992,6 +1018,7 @@ export interface GameDatabase {
   dungeons: DbDungeon[];
   shops: DbShop[];
   crops: DbCrop[];
+  settings: DbSettings[];
 }
 
 export type DbTable = keyof GameDatabase;

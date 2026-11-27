@@ -1,3 +1,4 @@
+import { TransitionKind } from "./transition";
 import { Cutscene } from "./cutscene";
 import { Square3, Vec2, Vec3 } from "./SceneUtils";
 import { SceneBuilding } from "./SceneBuilding";
@@ -33,6 +34,8 @@ export interface SceneMap {
   followers?: boolean;
   /** The look of its relief walls and stairs (missing: the outside rock). */
   walls?: WallStyle;
+  /** The screen transition played when the team comes to this map (missing: the settings' one). */
+  transition?: TransitionKind;
   /** Its cutscenes (see cutscene.ts), played by the event action « Jouer la cinématique ». */
   cutscenes?: Cutscene[];
   chunks: SceneChunk[];

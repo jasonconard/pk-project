@@ -340,6 +340,7 @@
 @if (hud()?.mapHelper; as mapHelper) {
   <core-teleport [mapHelper]="mapHelper" />
 }
+<game-transition />
 
 @if (hud()?.mode === GameMode.FIGHT) {
   <fight-ui />

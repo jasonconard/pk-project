@@ -1,0 +1,32 @@
+<div class="block">
+  <h3>Transitions</h3>
+  @for (c of cases; track c.id) {
+    <div class="case">
+      <label>
+        <span class="slot-label">{{ c.label }}</span>
+        <select
+          [attr.aria-label]="c.label"
+          (change)="setKind(c.id, $any($event.target).value)"
+        >
+          @for (k of kinds; track k.id) {
+            <option [value]="k.id" [selected]="k.id === kindOf(c.id)">
+              {{ k.label }} · {{ k.note }}
+            </option>
+          }
+        </select>
+      </label>
+      <button
+        type="button"
+        class="see"
+        [disabled]="kindOf(c.id) === 'none'"
+        (click)="play(c.id)"
+      >
+        <svg lucidePlay></svg>Voir
+      </button>
+    </div>
+  }
+  <p class="note">
+    L'image est couverte, la carte ou le combat change derrière, puis l'image
+    revient. « Voir » joue la transition ici, par-dessus l'éditeur.
+  </p>
+</div>

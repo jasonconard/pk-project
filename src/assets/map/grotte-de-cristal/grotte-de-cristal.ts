@@ -2627,6 +2627,7 @@ export const GROTTE_DE_CRISTAL_MAP: SceneMap = {
   spawn: { x: 8, y: 0, z: 120 },
   time: {"mode":"frozen","hour":23},
   walls: 'cave',
+  transition: 'iris',
   chunks: [
     PC_GROTTE_DE_CRISTAL_0_0,
   ],

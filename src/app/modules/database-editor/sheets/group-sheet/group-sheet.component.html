@@ -134,6 +134,24 @@
       }
     </select>
   </label>
+  @for (t of transitionFields; track t.field) {
+    <label class="learn">
+      <span class="slot-label">{{ t.label }}</span>
+      <select
+        [attr.aria-label]="t.label"
+        (change)="setTransition(gr, t.field, $any($event.target).value)"
+      >
+        <option value="" [selected]="!gr[t.field]">
+          {{ settingsTransition(t.when) }}
+        </option>
+        @for (k of transitions; track k.id) {
+          <option [value]="k.id" [selected]="k.id === gr[t.field]">
+            {{ k.label }}
+          </option>
+        }
+      </select>
+    </label>
+  }
   <label class="switch">
     <input
       type="checkbox"

@@ -1,3 +1,4 @@
+import { TransitionKind } from "../model/transition";
 import { Cutscene } from "../model/cutscene";
 import {
   ChunkGround,
@@ -56,6 +57,7 @@ interface StoredMap {
   time?: MapTime;
   followers?: boolean;
   walls?: WallStyle;
+  transition?: TransitionKind;
   cutscenes?: Cutscene[];
   /** Every chunk of the map, in order. */
   chunks: StoredChunk[];
@@ -83,6 +85,8 @@ export interface MapSummary {
   followers?: boolean;
   /** The look of its relief walls (missing: the outside rock). */
   walls?: WallStyle;
+  /** Its own transition when the team comes to it (missing: the settings' one). */
+  transition?: TransitionKind;
   /** Size in chunks (columns × rows of the area its chunks cover). */
   cols: number;
   rows: number;
@@ -233,6 +237,7 @@ export function listMaps(): MapSummary[] {
     time: stored[map.id] ? stored[map.id].time : map.time,
     followers: stored[map.id] ? stored[map.id].followers : map.followers,
     walls: stored[map.id] ? stored[map.id].walls : map.walls,
+    transition: stored[map.id] ? stored[map.id].transition : map.transition,
     inCode: true,
     edited: !!stored[map.id],
     ...gridSize(stored[map.id]?.chunks ?? map.chunks),
@@ -246,6 +251,7 @@ export function listMaps(): MapSummary[] {
       time: map.time,
       followers: map.followers,
       walls: map.walls,
+      transition: map.transition,
       inCode: false,
       edited: true,
       ...gridSize(map.chunks),
@@ -389,6 +395,9 @@ export function loadMap(id: string): SceneMap | null {
     ...((saved ? saved.walls : code!.walls)
       ? { walls: saved ? saved.walls : code!.walls }
       : {}),
+    ...((saved ? saved.transition : code!.transition)
+      ? { transition: saved ? saved.transition : code!.transition }
+      : {}),
     ...((saved ? saved.cutscenes : code!.cutscenes)?.length
       ? {
           cutscenes: structuredClone(
@@ -410,6 +419,7 @@ export function saveMap(map: SceneMap) {
     ...(map.time ? { time: map.time } : {}),
     ...(map.followers === false ? { followers: false } : {}),
     ...(map.walls ? { walls: map.walls } : {}),
+    ...(map.transition ? { transition: map.transition } : {}),
     ...(map.cutscenes?.length ? { cutscenes: map.cutscenes } : {}),
     chunks: map.chunks.map(chunkData),
   };
@@ -477,6 +487,7 @@ export function exportMapFile(map: SceneMap): string {
     ...(map.time ? [`  time: ${JSON.stringify(map.time)},`] : []),
     ...(map.followers === false ? ["  followers: false,"] : []),
     ...(map.walls ? [`  walls: '${map.walls}',`] : []),
+    ...(map.transition ? [`  transition: '${map.transition}',`] : []),
     ...(map.cutscenes?.length
       ? [`  cutscenes: ${JSON.stringify(map.cutscenes)},`]
       : []),

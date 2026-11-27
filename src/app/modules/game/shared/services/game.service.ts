@@ -1,3 +1,4 @@
+import { TransitionKind } from "../model/transition";
 import { LightSpec } from "../model/light";
 import { DungeonService } from "./dungeon.service";
 import { animationKey, currentAnimations } from "../model/model-animations";
@@ -952,6 +953,20 @@ export class GameService {
       if (current?.id === id) {
         this.openMap(id);
       }
+    }
+  }
+
+  /** A map's own screen transition, played when the team comes to it (none: the settings' one). */
+  setMapTransition(id: string, transition: TransitionKind | undefined) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      if (transition) {
+        map.transition = transition;
+      } else {
+        delete map.transition;
+      }
+      saveMap(map);
     }
   }
 

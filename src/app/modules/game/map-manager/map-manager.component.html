@@ -149,6 +149,22 @@
                 }
               </select>
             </label>
+            <label class="team-row" animate.enter="anim-fade-in">
+              <span>Transition à l'arrivée</span>
+              <select
+                aria-label="Transition à l'arrivée"
+                (change)="setTransition(map, $any($event.target).value)"
+              >
+                <option value="" [selected]="!map.transition">
+                  Celle des réglages
+                </option>
+                @for (t of transitions; track t.id) {
+                  <option [value]="t.id" [selected]="map.transition === t.id">
+                    {{ t.label }}
+                  </option>
+                }
+              </select>
+            </label>
             <div class="actions" animate.enter="anim-fade-in">
               <button type="button" (click)="startRename(map)">
                 <svg lucidePencil></svg> Renommer
