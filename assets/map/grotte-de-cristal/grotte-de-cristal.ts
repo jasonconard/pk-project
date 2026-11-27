@@ -28,6 +28,86 @@ export const PC_GROTTE_DE_CRISTAL_0_0: SceneChunk = {
       "events": []
     },
     {
+      "id": "foe-1",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": -88,
+        "y": 0,
+        "z": 72
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-slimes",
+        "move": "roam",
+        "distance": 2
+      },
+      "events": []
+    },
+    {
+      "id": "foe-2",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": 88,
+        "y": 0,
+        "z": 72
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-crawlers",
+        "move": "patrol-x",
+        "distance": 2
+      },
+      "events": []
+    },
+    {
+      "id": "foe-3",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": -56,
+        "y": 8,
+        "z": -104
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-slimes",
+        "move": "patrol-x",
+        "distance": 3
+      },
+      "events": []
+    },
+    {
+      "id": "foe-4",
+      "modelId": "dg:foe",
+      "pos": {
+        "x": 72,
+        "y": 8,
+        "z": -120
+      },
+      "passable": true,
+      "canHide": false,
+      "dungeon": {
+        "group": "gr-cave-crawlers",
+        "move": "roam",
+        "distance": 3
+      },
+      "events": []
+    },
+    {
+      "id": "save-1",
+      "modelId": "dg:save",
+      "pos": {
+        "x": 24,
+        "y": 0,
+        "z": 104
+      },
+      "passable": false,
+      "canHide": false,
+      "events": []
+    },
+    {
       "id": "mine-rail-end-1",
       "modelId": "mine-rail-end",
       "pos": {
@@ -292,9 +372,9 @@ export const PC_GROTTE_DE_CRISTAL_0_0: SceneChunk = {
       "id": "crystal-wall-blue-1",
       "modelId": "crystal-wall-blue",
       "pos": {
-        "x": -136,
-        "y": 8,
-        "z": -111
+        "x": -56,
+        "y": 0,
+        "z": -31
       },
       "passable": true,
       "canHide": false,
@@ -302,66 +382,6 @@ export const PC_GROTTE_DE_CRISTAL_0_0: SceneChunk = {
     },
     {
       "id": "crystal-wall-blue-2",
-      "modelId": "crystal-wall-blue",
-      "pos": {
-        "x": 120,
-        "y": 0,
-        "z": 33
-      },
-      "passable": true,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "crystal-cluster-blue-3",
-      "modelId": "crystal-cluster-blue",
-      "pos": {
-        "x": 56,
-        "y": 8,
-        "z": -170
-      },
-      "passable": false,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "stalagmite-group-1",
-      "modelId": "stalagmite-group",
-      "pos": {
-        "x": -120,
-        "y": 0,
-        "z": 21
-      },
-      "passable": false,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "cave-rock-large-1",
-      "modelId": "cave-rock-large",
-      "pos": {
-        "x": -72,
-        "y": 8,
-        "z": -155
-      },
-      "passable": false,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "cave-rock-small-1",
-      "modelId": "cave-rock-small",
-      "pos": {
-        "x": -56,
-        "y": 8,
-        "z": -171
-      },
-      "passable": false,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "crystal-wall-blue-3",
       "modelId": "crystal-wall-blue",
       "pos": {
         "x": 72,
@@ -373,8 +393,20 @@ export const PC_GROTTE_DE_CRISTAL_0_0: SceneChunk = {
       "events": []
     },
     {
-      "id": "stalagmite-group-2",
-      "modelId": "stalagmite-group",
+      "id": "crystal-wall-blue-3",
+      "modelId": "crystal-wall-blue",
+      "pos": {
+        "x": -56,
+        "y": 8,
+        "z": -175
+      },
+      "passable": true,
+      "canHide": false,
+      "events": []
+    },
+    {
+      "id": "cave-rock-large-1",
+      "modelId": "cave-rock-large",
       "pos": {
         "x": -56,
         "y": 0,
@@ -388,7 +420,19 @@ export const PC_GROTTE_DE_CRISTAL_0_0: SceneChunk = {
       "id": "cave-rock-large-2",
       "modelId": "cave-rock-large",
       "pos": {
-        "x": 72,
+        "x": 136,
+        "y": 8,
+        "z": -107
+      },
+      "passable": false,
+      "canHide": false,
+      "events": []
+    },
+    {
+      "id": "crystal-spire-blue-3",
+      "modelId": "crystal-spire-blue",
+      "pos": {
+        "x": -88,
         "y": 8,
         "z": -155
       },
@@ -397,48 +441,72 @@ export const PC_GROTTE_DE_CRISTAL_0_0: SceneChunk = {
       "events": []
     },
     {
+      "id": "crystal-wall-blue-4",
+      "modelId": "crystal-wall-blue",
+      "pos": {
+        "x": -136,
+        "y": 0,
+        "z": 17
+      },
+      "passable": true,
+      "canHide": false,
+      "events": []
+    },
+    {
+      "id": "crystal-wall-blue-5",
+      "modelId": "crystal-wall-blue",
+      "pos": {
+        "x": 56,
+        "y": 8,
+        "z": -175
+      },
+      "passable": true,
+      "canHide": false,
+      "events": []
+    },
+    {
       "id": "crystal-shard-blue-1",
       "modelId": "crystal-shard-blue",
       "pos": {
-        "x": 105,
+        "x": 122,
         "y": 8,
-        "z": -58
+        "z": -73
       },
       "passable": true,
       "canHide": false,
       "events": []
     },
     {
-      "id": "crystal-shard-blue-2",
-      "modelId": "crystal-shard-blue",
+      "id": "cave-boulder-1",
+      "modelId": "cave-boulder",
       "pos": {
-        "x": -108,
+        "x": -123,
         "y": 8,
-        "z": -39
-      },
-      "passable": true,
-      "canHide": false,
-      "events": []
-    },
-    {
-      "id": "crystal-cluster-blue-4",
-      "modelId": "crystal-cluster-blue",
-      "pos": {
-        "x": 91,
-        "y": 8,
-        "z": -40
+        "z": -72
       },
       "passable": false,
       "canHide": false,
       "events": []
     },
     {
-      "id": "stalagmite-1",
-      "modelId": "stalagmite",
+      "id": "cave-rock-small-1",
+      "modelId": "cave-rock-small",
       "pos": {
-        "x": 139,
+        "x": -139,
         "y": 8,
         "z": -88
+      },
+      "passable": true,
+      "canHide": false,
+      "events": []
+    },
+    {
+      "id": "crystal-cluster-blue-3",
+      "modelId": "crystal-cluster-blue",
+      "pos": {
+        "x": -123,
+        "y": 8,
+        "z": -120
       },
       "passable": false,
       "canHide": false,

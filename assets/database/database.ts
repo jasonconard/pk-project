@@ -505,17 +505,78 @@ export const CODE_DATABASE: GameDatabase = {
         "ms": 63,
         "hit": 4
       },
+      "flow": {
+        "blocks": [
+          {
+            "id": "d1",
+            "track": "caster",
+            "start": 0,
+            "duration": 0.54,
+            "anim": "attack"
+          },
+          {
+            "id": "d2",
+            "track": "effect",
+            "start": 0.05,
+            "duration": 0
+          },
+          {
+            "id": "d3",
+            "track": "sound",
+            "start": 0.3,
+            "duration": 0,
+            "sound": "slash"
+          },
+          {
+            "id": "d4",
+            "track": "hit",
+            "start": 0.3,
+            "duration": 0,
+            "percent": 40,
+            "states": false
+          },
+          {
+            "id": "d5",
+            "track": "caster",
+            "start": 0.55,
+            "duration": 0.8,
+            "anim": "heavy"
+          },
+          {
+            "id": "d6",
+            "track": "effect",
+            "start": 0.9,
+            "duration": 0
+          },
+          {
+            "id": "d7",
+            "track": "sound",
+            "start": 1.15,
+            "duration": 0,
+            "sound": "heavy"
+          },
+          {
+            "id": "d8",
+            "track": "hit",
+            "start": 1.15,
+            "duration": 0,
+            "percent": 60,
+            "states": true
+          },
+          {
+            "id": "d9",
+            "track": "screen",
+            "start": 1.15,
+            "duration": 0.25
+          }
+        ]
+      },
       "use": "fight",
       "effects": [
         {
           "kind": "damage",
           "stat": "str",
-          "power": 30
-        },
-        {
-          "kind": "damage",
-          "stat": "str",
-          "power": 30
+          "power": 60
         }
       ],
       "learn": [
@@ -1363,6 +1424,9 @@ export const CODE_DATABASE: GameDatabase = {
           }
         ]
       },
+      "voice": "gurgle",
+      "voicePitch": 1.2,
+      "step": "squelch",
       "level": 3,
       "stats": {
         "hp": 60,
@@ -1504,6 +1568,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 23,
         "frames": 4
       },
+      "voice": "screech",
+      "voicePitch": 1.1,
+      "step": "flap",
       "level": 5,
       "stats": {
         "hp": 45,
@@ -1608,6 +1675,9 @@ export const CODE_DATABASE: GameDatabase = {
           }
         ]
       },
+      "voice": "gurgle",
+      "voicePitch": 1.4,
+      "step": "squelch",
       "level": 8,
       "stats": {
         "hp": 110,
@@ -1733,6 +1803,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "gurgle",
+      "voicePitch": 1.6,
+      "step": "squelch",
       "level": 9,
       "stats": {
         "hp": 120,
@@ -1849,6 +1922,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "chitter",
+      "voicePitch": 0.9,
+      "step": "scuttle",
       "level": 10,
       "stats": {
         "hp": 105,
@@ -1965,6 +2041,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "chitter",
+      "voicePitch": 0.6,
+      "step": "scuttle",
       "level": 10,
       "stats": {
         "hp": 150,
@@ -2077,6 +2156,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 17,
         "frames": 4
       },
+      "voice": "squeak",
+      "voicePitch": 0.8,
+      "step": "squelch",
       "level": 11,
       "stats": {
         "hp": 110,
@@ -2193,6 +2275,8 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 18,
         "frames": 4
       },
+      "voice": "squeak",
+      "voicePitch": 0.6,
       "level": 11,
       "stats": {
         "hp": 140,
@@ -2313,6 +2397,8 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 29,
         "frames": 4
       },
+      "voice": "hiss",
+      "step": "scuttle",
       "level": 12,
       "stats": {
         "hp": 125,
@@ -2425,6 +2511,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 22,
         "frames": 4
       },
+      "voice": "chime",
+      "voicePitch": 1.2,
+      "step": "drift",
       "level": 12,
       "stats": {
         "hp": 85,
@@ -2546,6 +2635,8 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 39,
         "frames": 4
       },
+      "voice": "rumble",
+      "step": "stomp",
       "level": 13,
       "stats": {
         "hp": 230,
@@ -2663,6 +2754,9 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 29,
         "frames": 4
       },
+      "voice": "moan",
+      "voicePitch": 0.9,
+      "step": "drift",
       "level": 14,
       "stats": {
         "hp": 160,
@@ -2788,6 +2882,10 @@ export const CODE_DATABASE: GameDatabase = {
         "h": 64,
         "frames": 4
       },
+      "voice": "roar",
+      "voicePitch": 0.7,
+      "step": "stomp",
+      "boss": true,
       "level": 16,
       "stats": {
         "hp": 620,
@@ -3218,6 +3316,7 @@ export const CODE_DATABASE: GameDatabase = {
       "moments": [],
       "specials": [],
       "weather": "crystal-mist",
+      "arena": "arene-grotte",
       "floors": [
         {
           "id": "fl-cave-entrance",
@@ -3231,25 +3330,21 @@ export const CODE_DATABASE: GameDatabase = {
             "gr-cave-slimes",
             "gr-cave-crawlers"
           ],
-          "enemiesMin": 2,
-          "enemiesMax": 3,
+          "enemiesMin": 0,
+          "enemiesMax": 0,
           "chestsMin": 0,
           "chestsMax": 0,
           "loot": [],
-          "save": true
+          "save": false
         },
         {
           "id": "fl-cave-galleries",
           "name": "Galeries",
-          "rooms": [
-            "grotte-cristal-salle-1",
-            "grotte-cristal-salle-2",
-            "grotte-cristal-salle-3",
-            "grotte-cristal-salle-4"
-          ],
-          "roomsMin": 3,
-          "roomsMax": 5,
-          "repeat": 2,
+          "map": "grotte-cristal-salle-1",
+          "rooms": [],
+          "roomsMin": 1,
+          "roomsMax": 1,
+          "repeat": 1,
           "groups": [
             "gr-cave-slimes",
             "gr-cave-crawlers",
@@ -3259,10 +3354,10 @@ export const CODE_DATABASE: GameDatabase = {
             "gr-cave-golem",
             "gr-cave-ghosts"
           ],
-          "enemiesMin": 3,
-          "enemiesMax": 5,
-          "chestsMin": 1,
-          "chestsMax": 2,
+          "enemiesMin": 0,
+          "enemiesMax": 0,
+          "chestsMin": 0,
+          "chestsMax": 0,
           "loot": [
             {
               "item": "it-potion",
@@ -3298,12 +3393,12 @@ export const CODE_DATABASE: GameDatabase = {
           "groups": [
             "gr-cave-boss"
           ],
-          "enemiesMin": 1,
-          "enemiesMax": 1,
+          "enemiesMin": 0,
+          "enemiesMax": 0,
           "chestsMin": 0,
           "chestsMax": 0,
           "loot": [],
-          "save": true
+          "save": false
         }
       ]
     }
@@ -3485,6 +3580,7 @@ export const CODE_DATABASE: GameDatabase = {
     {
       "id": "settings",
       "name": "Réglages du jeu",
+      "arena": "arene-prairie",
       "transitions": {
         "map": "fade",
         "fightIn": "stripes",

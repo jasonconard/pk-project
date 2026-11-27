@@ -6,6 +6,8 @@ import { GROTTE_CRISTAL_SALLE_2_MAP } from './grotte-cristal-salle-2/grotte-cris
 import { GROTTE_CRISTAL_SALLE_3_MAP } from './grotte-cristal-salle-3/grotte-cristal-salle-3';
 import { GROTTE_CRISTAL_SALLE_4_MAP } from './grotte-cristal-salle-4/grotte-cristal-salle-4';
 import { GROTTE_CRISTAL_COEUR_MAP } from './grotte-cristal-coeur/grotte-cristal-coeur';
+import { ARENE_GROTTE_MAP } from './arene-grotte/arene-grotte';
+import { ARENE_PRAIRIE_MAP } from './arene-prairie/arene-prairie';
 
 
 /**
@@ -20,6 +22,8 @@ export const CODE_MAPS: SceneMap[] = [
   GROTTE_CRISTAL_SALLE_3_MAP,
   GROTTE_CRISTAL_SALLE_4_MAP,
   GROTTE_CRISTAL_COEUR_MAP,
+  ARENE_GROTTE_MAP,
+  ARENE_PRAIRIE_MAP,
 ];
 
 /** The map the game starts on. */
