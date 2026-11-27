@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.47',
+    date: '2026-11-27',
+    notes: [
+      'Premier donjon complet : la Grotte de cristal, près de la ville. Une ancienne mine, des galeries qui changent à chaque visite, un lac souterrain et un gardien tout au fond.',
+      'Dix nouveaux ennemis et l\'élément Terre. Sur la carte, les ennemis marchent et se tournent vers là où ils vont.',
+      'L\'image se ferme et se rouvre quand on change de lieu et quand un combat commence ou finit.',
+      'Éditeur : parois de roche inclinées à peindre case par case, six transitions à choisir pour tout le jeu, un lieu ou un groupe d\'ennemis, et une lueur de couleur pour chaque modèle.',
+      'Menu : « Essayer un donjon » fait entrer tout de suite à l\'étage choisi, avec une équipe de test.',
+    ],
+  },
+  {
     version: '0.0.46',
     date: '2026-11-27',
     notes: [
