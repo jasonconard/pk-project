@@ -117,6 +117,8 @@ Ce que le combat lit dans la base :
 - **Sur la carte d'un donjon** : près d'un ennemi (moins de 7 à 8 cases), on entend sa voix de temps en temps, plus fort quand il voit l'équipe, et ses pas quand il marche ; plus on est loin, plus c'est faible.
 - **Un boss vaincu** (case « C'est un boss ») : son animation de mort passe au ralenti, il clignote en rouge, l'écran tremble pendant 2,6 secondes avec des explosions et son dernier rugissement, puis il s'efface lentement avant la fenêtre de victoire.
 
+Le son **Foudre** est fabriqué à part, comme le tonnerre de la météo : un claquement sec avec un ou deux échos, puis un grondement qui roule pendant une seconde et demie, jamais deux fois pareil.
+
 Tous ces sons sont fabriqués par le jeu (pas de fichier), comme ceux de l'action « Jouer un son », où ils sont aussi proposés.
 - **Interrompre** : une **attaque forte** qui touche un combattant pendant qu'il charge sa compétence ou qu'il marche vers sa cible **annule** son action et le renvoie à 2/5 (« Interruption : Venin ») ; plus tôt sur la jauge, elle le **retarde** un peu. Celui qui se défend n'est pas interrompu. Les ennemis peuvent le faire aussi. Un point violet marque, dans la liste des cibles, ceux qu'on peut interrompre.
 - **Viser** : la cible visée clignote sur le terrain et sur la jauge, la caméra s'approche d'elle, et sa fenêtre montre ses PV, ses états, sa prochaine action quand elle est décidée (« interruptible » pendant qu'elle se charge ou qu'elle marche) et, pour un ennemi, ses faiblesses et résistances. ◀ ▶ (ou les flèches) changent de cible, Viser (ou Entrée) confirme, Retour (ou Échap) revient aux commandes ; toucher un combattant le vise, le toucher encore confirme.
