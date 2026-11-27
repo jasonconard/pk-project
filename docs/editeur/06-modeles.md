@@ -73,6 +73,10 @@ Une forme peut bouger : dans les réglages de la forme sélectionnée, la partie
 
 Fiche **Modèle**, partie **Zone d'action** : où le joueur agit sur tous les objets de ce modèle (la porte d'une maison). Les cases du modèle vu de dessus et le côté d'où il agit ; voir [Zones d'action](15-zones-action.md). Sans zone, tout l'objet compte.
 
+## Les lumières
+
+Fiche **Modèle**, partie **Lumières** : **+ Point** ajoute un point de lumière, **Placer** puis toucher le modèle le pose (la vitre d'un lampadaire, une fenêtre). Chaque point a sa couleur, sa portée, sa force, peut vaciller ou ne s'allumer que la nuit. Tous les objets de ce modèle posés sur la carte éclairent le sol autour d'eux. Voir [Lumières](19-lumieres.md).
+
 ## Dessiner
 
 Outils : **crayon** (P), **gomme** (E, rend transparent), **pipette** (I, puis retour au crayon), **pot de peinture** (F), **ligne** (L), **rectangle** (R, plein ou contour). On dessine :

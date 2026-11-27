@@ -110,6 +110,12 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   members in single file, regrouped after a jump), updated by `GameMapService.updateFollowers`; hidden by
   `SceneMap.followers === false`, `PartyState.teamHidden` (the `TEAM` instruction / `team` action) or `Game.teamFollows`
   (Menu → L'équipe me suit).
+- Lights (`docs/editeur/19-lumieres.md`): `model/light.ts` (`LightSpec`, `ModelLight` on `SceneModel.lights`, the
+  invisible `light` object with `SceneBuilding.light`, the lantern, `isLightOn` / `PartyState.lights` switched by the
+  `LIGHT` instruction), `model/lights-view.ts` (`LightsView`: additive ground pools for every light, the nearest ones as
+  real `PointLight`s per `RENDER_DETAIL.realLights`; strength follows `uWindowGlow`), `game/light-fields/` (settings,
+  shared by the map editor sheet and the model editor's Lumières part). Props `lamp` / `campfire` are one upright
+  picture each (`md-lamp.ts`, `md-campfire.ts`, sources in `design-resources/props/`).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).

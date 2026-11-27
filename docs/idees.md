@@ -21,7 +21,7 @@ Faire de l'appli un **moteur de jeu** : les éditeurs (carte, modèles, et ceux 
 
 ## Les outils à construire
 
-Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Les outils 0 à 18 sont faits ; chacun garde ses « À suivre ».
+Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi chaque outil s'appuie ; on avance une étape à la fois, validée avant la suivante. Les outils 0 à 19 sont faits ; chacun garde ses « À suivre ».
 
 | # | Outil | Ce qu'il permet | Sert à |
 |---|---|---|---|
@@ -44,6 +44,7 @@ Tout ce qu'il faut pour fabriquer ce jeu sans coder. L'ordre indique sur quoi ch
 | 16 | **Boutiques** (fait : maquette `design/database.pen` écrans 18-19 et `design/main-view.pen` (Boutiques) ; la table Boutiques (vendeur, rachat, réduction par niveau de lien, objets avec prix propre, stock du jour, conditions, niveau de lien) ; l'action « Ouvrir la boutique » ; en jeu Acheter / Vendre avec la quantité, voir [16](editeur/16-boutiques.md). À suivre : des prix qui changent selon la saison ou la météo, vendre ses récoltes) | Acheter, vendre, une petite économie ; le lien avec le vendeur baisse les prix | Jour |
 | 17 | **Cultures** (fait : maquette `design/database.pen` écran 20 et `design/main-view.pen` (Cultures) ; le sol Terre cultivable ; la table Cultures (graine, 4 images de pousse, jours arrosés, récolte, repousse, saisons, gel, météos qui aident) ; la houe et l'arrosoir ; en jeu labourer, planter, arroser, récolter, arracher ; la pluie arrose, le gel abîme ; 4 plantes fantastiques dessinées avec PixelLab, voir [17](editeur/17-cultures.md). À suivre : des graines dans les boutiques, des métiers avec des niveaux) | Labourer, planter, arroser, récolter ; la météo et les saisons comptent | Jour |
 | 18 | **L'équipe qui suit** (fait : maquette `design/main-view.pen` (Équipe) et `design/map-manager.pen` ; les membres en file derrière le chef (jusqu'à 3, leur planche de marche, on les traverse, ils se regroupent après une porte) ; cachés par carte, par l'action « L'équipe suit / se cache » ou par Menu → L'équipe me suit, voir [18](editeur/18-equipe.md). À suivre : leur parler sur la carte, leur ombre) | Voir l'équipe marcher avec le joueur | Jour et nuit |
+| 19 | **Lumières** (fait : maquette `design/main-view.pen` (Lumières) et `model-editor-mobile.pen` écran 12 ; un lampadaire et un feu de camp dessinés d'après PixelLab, posés dans la ville ; les points de lumière des modèles, l'objet Lumière, la lanterne du joueur ; couleur, portée, force, vacille, la nuit seulement, allumée au départ ; des halos au sol, de vraies lumières proches en qualité haute ; l'action « Lumière », voir [19](editeur/19-lumieres.md). À suivre : des ombres portées par les lumières, une lanterne comme objet du sac) | Torches, lampadaires, fenêtres qui éclairent le sol la nuit | Jour et nuit |
 
 ## Retenues
 
@@ -105,7 +106,7 @@ Aujourd'hui, une porte (passage) ou un événement occupe toute la largeur de l'
 - **PNJ avec un emploi du temps** : où ils sont selon l'heure et la météo (à l'abri quand il pleut, chez eux la nuit).
 - **Plusieurs cartes et des intérieurs** (fait, point 0) : portes qui mènent dans les maisons, transitions.
 - **Cinématiques** : la caméra bouge, les personnages marchent, des dialogues s'enchaînent.
-- **Lumières** : torches, lampadaires, fenêtres qui éclairent vraiment le sol la nuit.
+- **Lumières** (fait, point 19, voir [19](editeur/19-lumieres.md)) : torches, lampadaires, fenêtres qui éclairent vraiment le sol la nuit.
 - **Synchroniser les créations entre appareils** : export / import d'un fichier `.pk` par la fenêtre de partage (fait, point 1), puis un bouton « Publier » vers le dépôt GitHub (reste à faire).
 
 ### Pour la vie quotidienne (le jour)

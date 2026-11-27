@@ -63,4 +63,4 @@ L'onglet **Donjon** de la palette pose les objets des donjons : coffre, piège, 
 
 ## Événements
 
-Un objet sélectionné peut recevoir des événements (parler, entrer dessus, automatique) : voir [Événements](09-evenements.md). L'onglet **Événements** de la palette pose les zones invisibles.
+Un objet sélectionné peut recevoir des événements (parler, entrer dessus, automatique) : voir [Événements](09-evenements.md). L'onglet **Événements** de la palette pose les zones invisibles et les **Lumières** (une lumière invisible : couleur, portée, force, vacille, la nuit seulement ; voir [Lumières](19-lumieres.md)).
