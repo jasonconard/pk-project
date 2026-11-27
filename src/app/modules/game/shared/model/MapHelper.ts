@@ -18,7 +18,10 @@ import { PlayerTex, ScenePlayer } from "./ScenePlayer";
 import { playerLook } from "./player-look";
 import { isNpc, makeNpcMesh, npcOf } from "./npc-sprite";
 import {
+  doorFront,
+  DoorWall,
   dungeonKindOf,
+  dungeonModelId,
   foePicture,
   isDungeonObject,
   isFoe,
@@ -49,7 +52,7 @@ import { convertVec2, convertVec3 } from "./SceneUtils";
 import { MODELS } from "../../../../../assets/models/models";
 import { SceneBuilding } from "./SceneBuilding";
 import { NEIGHBORS, TILE_SIZE } from "./Terrain";
-import { LEVEL_HEIGHT, MAX_LEVEL } from "./GroundMesh";
+import { LEVEL_HEIGHT, MAX_LEVEL, wallLean } from "./GroundMesh";
 import { ChunkGround } from "./ChunkGround";
 import { applyMeshOpacity, meshOpacity } from "./mesh-fading";
 import { canInstance, forgetTemplate, ModelInstances } from "./ModelInstances";
@@ -573,6 +576,41 @@ export class MapHelper {
   /** Instanced copies per chunk and per model (see ModelInstances). */
   private readonly instances = new Map<string, Map<string, ModelInstances>>();
 
+  /** The leaning wall behind a room door (nothing: no wall there, or a straight one). */
+  private doorWall(
+    building: SceneBuilding,
+    world: THREE.Vector3
+  ): DoorWall | undefined {
+    const cell = this.cellAt(world.x, world.z);
+    if (!cell || building.modelId !== dungeonModelId("room-door")) {
+      return undefined;
+    }
+    const front = doorFront(building.rot);
+    const col = cell.col - front.x;
+    const row = cell.row - front.z;
+    const levels =
+      this.levelAt(cell.chunk, col, row) -
+      this.levelAt(cell.chunk, cell.col, cell.row);
+    const lean =
+      levels > 0
+        ? wallLean(
+            this.sceneMap.walls ?? "rock",
+            levels,
+            this.ground.slopeAt(cell.chunk, col, row)
+          )
+        : 0;
+    if (!lean) {
+      return undefined;
+    }
+    // From the door to the border of its cell on the wall's side
+    const along = front.x
+      ? world.x - cell.chunk.pos.x + cell.chunk.size.x / 2
+      : world.z - cell.chunk.pos.z + cell.chunk.size.y / 2;
+    const place = along - (front.x ? cell.col : cell.row) * TILE_SIZE;
+    const foot = front.x + front.z > 0 ? place : TILE_SIZE - place;
+    return { foot, lean, rise: levels * LEVEL_HEIGHT };
+  }
+
   /** The copies of a building's model in a chunk, if the building is drawn as one of them. */
   private instancesOf(
     chunk: SceneChunk,
@@ -627,7 +665,12 @@ export class MapHelper {
       if (look.gone) {
         return;
       }
-      const mesh = makeDungeonMesh(building.modelId, look, building.rot);
+      const mesh = makeDungeonMesh(
+        building.modelId,
+        look,
+        building.rot,
+        this.doorWall(building, world)
+      );
       this.addMesh(chunk.id + "-" + building.id, mesh, world);
       chunk.group.add(mesh);
       return;

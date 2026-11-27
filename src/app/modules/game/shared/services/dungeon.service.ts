@@ -19,6 +19,7 @@ import { findModel } from "../model/Zone";
 import { loadMap } from "./map-storage";
 import { playSound } from "./sfx";
 import {
+  doorFront,
   dungeonKindOf,
   dungeonModelId,
   DungeonObject,
@@ -146,15 +147,6 @@ function facing(dir: PlayerDirection): { x: number; z: number } {
 }
 
 /** The front of an object turned `rot` quarter turns (rot 0 faces +z). */
-function frontOf(rot = 0): { x: number; z: number } {
-  return [
-    { x: 0, z: 1 },
-    { x: -1, z: 0 },
-    { x: 0, z: -1 },
-    { x: 1, z: 0 },
-  ][rot % 4];
-}
-
 function message(text: string, name?: string): SceneEventInstruction {
   return {
     type: InstructionType.MESSAGE,
@@ -1225,7 +1217,7 @@ export class DungeonService {
       return;
     }
     this.saveRun({ ...run, room: link.room });
-    const front = frontOf(door.rot);
+    const front = doorFront(door.rot);
     playSound("door");
     this.launch([
       {

@@ -54,6 +54,33 @@ export interface DungeonKindInfo {
 
 const PICTURES = "assets/dungeon/";
 
+/**
+ * The side a room door looks at, away from its wall (`rot`: 0 south, then a quarter turn each: west, north, east).
+ */
+export function doorFront(rot = 0): { x: number; z: number } {
+  return [
+    { x: 0, z: 1 },
+    { x: -1, z: 0 },
+    { x: 0, z: -1 },
+    { x: 1, z: 0 },
+  ][rot % 4];
+}
+
+/**
+ * The leaning rock wall behind a room door: how far its foot is from the door, how far it leans back and how high
+ * it rises (world units). The door is then an opening drawn on the slope itself.
+ */
+export interface DoorWall {
+  foot: number;
+  lean: number;
+  rise: number;
+}
+
+/** A room door in a leaning wall: the dark mouth lying on the slope, and its shade on the ground in front. */
+const WALL_DOOR_PICTURE = PICTURES + "room-door-cave.png";
+const WALL_DOOR_SHADE = PICTURES + "room-door-shade.png";
+const WALL_DOOR = { width: 32, shade: 12 };
+
 /** A room door on a side wall (turned a quarter): the dark ground of its opening, one cell. */
 const SIDE_DOOR_PICTURE = PICTURES + "room-door-side.png";
 const SIDE_DOOR = { x: 16, y: 16 };
@@ -224,21 +251,94 @@ export function uprightPicture(
   return plane;
 }
 
+/** A picture on 4 points (bottom left, bottom right, top right, top left), blended over what is behind. */
+function pictureOn(link: string, points: number[][]): THREE.Mesh {
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(points.flat(), 3)
+  );
+  geometry.setAttribute(
+    "uv",
+    new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2)
+  );
+  geometry.setIndex([0, 1, 2, 0, 2, 3]);
+  return new THREE.Mesh(
+    geometry,
+    new THREE.MeshBasicMaterial({
+      map: texture(link),
+      transparent: true,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
+    })
+  );
+}
+
+/**
+ * A room door in a leaning wall, the wall to the north: the mouth on the slope (a little over it: no flicker with
+ * the rock) and its shade on the ground.
+ */
+function wallOpening(wall: DoorWall): THREE.Group {
+  const half = WALL_DOOR.width / 2;
+  const length = Math.hypot(wall.lean, wall.rise);
+  const up = (0.4 * wall.lean) / length;
+  const out = (0.4 * wall.rise) / length;
+  const group = new THREE.Group();
+  group.add(
+    pictureOn(WALL_DOOR_PICTURE, [
+      [-half, up, out - wall.foot],
+      [half, up, out - wall.foot],
+      [half, wall.rise + up, out - wall.foot - wall.lean],
+      [-half, wall.rise + up, out - wall.foot - wall.lean],
+    ]),
+    pictureOn(WALL_DOOR_SHADE, [
+      [-half, 0.3, WALL_DOOR.shade - wall.foot],
+      [half, 0.3, WALL_DOOR.shade - wall.foot],
+      [half, 0.3, -wall.foot],
+      [-half, 0.3, -wall.foot],
+    ])
+  );
+  return group;
+}
+
 // (never drawn: the fading of objects near the camera sets mesh.visible, not the material's)
 const bodyMaterial = new THREE.MeshBasicMaterial({ visible: false });
 
 /**
  * A dungeon object's mesh: its picture (`on`: the chest opened, the switch turned on; `hidden`: a trap not found
  * yet, nothing drawn but its place) with its invisible body.
+ * @param wall a room door: the leaning wall behind it, if any (the door is drawn on it)
  */
 export function makeDungeonMesh(
   modelId: string,
   state: { on?: boolean; hidden?: boolean } = {},
-  rot = 0
+  rot = 0,
+  wall?: DoorWall
 ): THREE.Group {
   const group = new THREE.Group();
   const info = dungeonKindOf(modelId);
   if (!info) {
+    return group;
+  }
+  if (info.kind === "room-door" && wall) {
+    // A room door in a leaning wall: an opening in the rock, turned towards the room, with the same body
+    const opening = wallOpening(wall);
+    opening.rotation.y = (-rot * Math.PI) / 2;
+    const body = info.body!;
+    const side = rot % 2 === 1;
+    group.add(
+      opening,
+      new THREE.Mesh(
+        new THREE.BoxGeometry(
+          side ? body.z : body.x,
+          body.y,
+          side ? body.x : body.z
+        ).translate(0, body.y / 2, 0),
+        bodyMaterial
+      )
+    );
     return group;
   }
   if (info.kind === "room-door" && rot % 2 === 1) {

@@ -55,6 +55,21 @@ export const WALL_STYLES: Record<
 
 /** The leans the editor's wall tool paints (world units per level of height): straight, steep, medium, gentle. */
 export const SLOPE_CHOICES = [0, 2, 4, 8];
+/** How much the outline of leaning walls is rounded (world units, a quarter of a cell: staircases become diagonals). */
+const ROUNDING = TILE_SIZE / 4;
+
+/** How far a straight wall of a style leans back over `levels` of height (`painted`: the lean painted on its cells). */
+export function wallLean(
+  style: WallStyle,
+  levels: number,
+  painted?: number
+): number {
+  const { slope, slopeMax } = WALL_STYLES[style];
+  return Math.min(
+    painted === undefined ? slopeMax : TILE_SIZE,
+    (painted ?? slope) * levels
+  );
+}
 
 /**
  * Ground of a chunk with reliefs: one square per cell at its level (UVs into the chunk ground texture / painted
@@ -65,7 +80,8 @@ export const SLOPE_CHOICES = [0, 2, 4, 8];
  * Geometry groups: 0 = the ground (its texture), 1 = the walls (tileset).
  * A style with a slope leans the walls back: the top of a raised cell is drawn in from its low sides, and the wall
  * goes from that edge down to the foot of the cell (the rock slopes of a cave or a mountain). Around a corner of the
- * grid, every cell at the same level uses the same point, so the tops and the walls stay joined.
+ * grid, every cell at the same level uses the same point, so the tops and the walls stay joined. The outlines of
+ * these walls are rounded (diagonals instead of staircases of cells), at their top and at their foot.
  * @param levelAt level of any cell around the chunk (columns / rows out of it are in the next chunks)
  */
 export function buildGroundGeometry(
@@ -128,11 +144,38 @@ export function buildGroundGeometry(
     [0, 0, -1, -1],
   ];
   const points = new Map<string, [number, number]>();
-  /** Where the ground at `level` ends around the grid corner (i, j): pushed away from the lower cells (slopes). */
+  /**
+   * How far the corner (i, j) of the outline of the cells lower than `level` is moved to round that outline: a
+   * corner goes half way towards the middle of its two neighbors on the outline, so a staircase of cells becomes a
+   * diagonal and a right angle is cut. Nothing along a straight edge.
+   */
+  const rounded = (i: number, j: number, level: number): [number, number] => {
+    const low = (col: number, row: number) => levelAt(col, row) < level;
+    let edges = 0;
+    let sx = 0;
+    let sz = 0;
+    // The 4 grid edges leaving the corner, with the two cells each one separates
+    const edge = (on: boolean, dx: number, dz: number) => {
+      if (on) {
+        edges++;
+        sx += dx;
+        sz += dz;
+      }
+    };
+    edge(low(i, j - 1) !== low(i, j), 1, 0);
+    edge(low(i - 1, j - 1) !== low(i - 1, j), -1, 0);
+    edge(low(i - 1, j) !== low(i, j), 0, 1);
+    edge(low(i - 1, j - 1) !== low(i, j - 1), 0, -1);
+    return edges === 2 ? [sx * ROUNDING, sz * ROUNDING] : [0, 0];
+  };
+  /**
+   * Where the ground at `level` ends around the grid corner (i, j): on the rounded outline of the lower cells and
+   * pushed away from them (the top of a slope), or on the rounded outline of the higher cells (the foot of a slope).
+   */
   const point = (i: number, j: number, level: number): [number, number] => {
     const x = i * TILE_SIZE - halfX;
     const z = j * TILE_SIZE - halfZ;
-    if (!slope || !level) {
+    if (!slope) {
       return [x, z];
     }
     const key = i + "," + j + "," + level;
@@ -141,6 +184,7 @@ export function buildGroundGeometry(
       let sx = 0;
       let sz = 0;
       let lowest = level;
+      let above = Infinity;
       let straight = false;
       // The lean painted on the cells at this level around the corner (the steepest wins); else the style's
       let painted: number | undefined;
@@ -157,12 +201,25 @@ export function buildGroundGeometry(
           if (own !== undefined) {
             painted = Math.min(painted ?? own, own);
           }
+        } else {
+          above = Math.min(above, l);
         }
       }
-      const lean = painted ?? styleSlope;
-      const most = painted === undefined ? slopeMax : TILE_SIZE;
-      const inset = straight ? 0 : Math.min(most, lean * (level - lowest));
-      found = [x + Math.sign(sx) * inset, z + Math.sign(sz) * inset];
+      if (straight || (lowest === level && above === Infinity)) {
+        found = [x, z];
+      } else if (lowest === level) {
+        const [rx, rz] = rounded(i, j, above);
+        found = [x + rx, z + rz];
+      } else {
+        const lean = painted ?? styleSlope;
+        const most = painted === undefined ? slopeMax : TILE_SIZE;
+        const inset = Math.min(most, lean * (level - lowest));
+        const [rx, rz] = rounded(i, j, level);
+        found = [
+          x + rx + Math.sign(sx) * inset,
+          z + rz + Math.sign(sz) * inset,
+        ];
+      }
       points.set(key, found);
     }
     return found;
