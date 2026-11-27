@@ -4,6 +4,7 @@ import {
   writeJson,
 } from "../../../../core/shared/local-store";
 import { currentVariableValues } from "../../../variables-editor/shared/variable-values";
+import { PartyState } from "../../../database-editor/shared/party";
 import { SceneBuilding } from "./SceneBuilding";
 import { Vec3 } from "./SceneUtils";
 import { dungeonKindOf } from "./dungeon-object";
@@ -33,6 +34,8 @@ export interface DungeonRun {
   entrance: { map: string; pos: Vec3 };
   /** The weather outside, given back on the way out. */
   weatherBefore?: string;
+  /** A try with a team made for it (Menu → Essayer un donjon): the real team, given back on the way out. */
+  partyBefore?: PartyState;
   /** A generated floor: its rooms and the room the team is in. */
   rooms?: RunRoom[];
   room?: number;
@@ -137,6 +140,12 @@ export function dungeonLook(
           isOpened(mapId, building) ||
           !!(settings?.variable && values[settings.variable]),
       };
+    case "room-door": {
+      // In a generated floor, the doors leading nowhere are not there (out of a dungeon: all shown)
+      const run = currentDungeonState().run;
+      const room = run?.rooms?.[run.room ?? -1];
+      return { gone: !!room && !room.doors[building.id] };
+    }
     case "trap":
       return {
         hidden:

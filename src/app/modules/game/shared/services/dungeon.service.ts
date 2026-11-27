@@ -25,6 +25,7 @@ import {
   DungeonObject,
   foeModelId,
   foePicture,
+  setFoeFrame,
   isFoe,
   loadPictureSize,
 } from "../model/dungeon-object";
@@ -61,7 +62,10 @@ import {
   giveMoney,
   healTeam,
   hurtTeam,
+  MemberProgress,
+  restoreParty,
 } from "../../../database-editor/shared/party";
+import { SimMember, simProgress } from "../../../battle/shared/battle.service";
 import {
   currentVariableValues,
   setVariableValue,
@@ -91,7 +95,15 @@ interface Foe {
   /** After the team fled: it can't start a fight before this step. */
   stunnedUntil: number;
   level: number;
+  /** Its walking sprite: the direction it looks at (a row of MAP_WALK_DIRS) and how far it has walked. */
+  dir: number;
+  walked: number;
 }
+
+/** A foe's walking sprite: the row (MAP_WALK_DIRS) of each eighth of a turn from the south towards the east. */
+const WALK_ROWS = [0, 7, 6, 5, 4, 3, 2, 1];
+/** Map units walked per step of the walking sprite. */
+const WALK_STRIDE = 3;
 
 /** In steps of the input loop (120 per second). */
 const STEPS_PER_SECOND = 120;
@@ -713,6 +725,7 @@ export class DungeonService {
         speed = FOE_WALK;
         if (foe.wait > 0) {
           foe.wait -= FOE_EVERY;
+          this.drawFoe(foe, 0, 0);
           continue;
         }
         if (
@@ -737,9 +750,11 @@ export class DungeonService {
       const dz = foe.target.z - mesh.position.z;
       const len = Math.hypot(dx, dz);
       if (len < 0.5) {
+        this.drawFoe(foe, 0, 0);
         continue;
       }
       const move = Math.min(len, speed * FOE_EVERY);
+      const from = { x: mesh.position.x, z: mesh.position.z };
       const nx = mesh.position.x + (dx / len) * move;
       const nz = mesh.position.z + (dz / len) * move;
       if (this.foeCanStand(mapHelper, foe, nx, nz)) {
@@ -752,7 +767,25 @@ export class DungeonService {
       } else if (!foe.chasing) {
         foe.target = null;
       }
+      this.drawFoe(foe, mesh.position.x - from.x, mesh.position.z - from.z);
     }
+  }
+
+  /** A foe's walking sprite after a move (0, 0: standing): turned the way it goes, a step of its walk. */
+  private drawFoe(foe: Foe, mx: number, mz: number): void {
+    const picture = foe.mesh.getObjectByName("picture");
+    if (!picture) {
+      return;
+    }
+    const moved = Math.hypot(mx, mz);
+    if (moved > 0.01) {
+      const eighth = Math.round(Math.atan2(mx, mz) / (Math.PI / 4));
+      foe.dir = WALK_ROWS[(eighth + 8) % 8];
+      foe.walked += moved;
+    } else {
+      foe.walked = 0;
+    }
+    setFoeFrame(picture, foe.dir, Math.floor(foe.walked / WALK_STRIDE));
   }
 
   private foeCanStand(
@@ -919,14 +952,51 @@ export class DungeonService {
     }
   }
 
-  private enter(id: string): SceneEventInstruction[] {
+  /** Menu → Essayer un donjon: straight into a floor (0 first), whatever the opening hours. */
+  public tryOut(id: string, floor = 0, team?: SimMember[]): void {
+    const before = currentRun()?.partyBefore;
+    const partyBefore = team
+      ? (before ?? structuredClone(currentParty()))
+      : before;
+    if (team) {
+      // The team made for the try replaces the real one until the way out
+      const db = cachedDatabase();
+      const members: Record<string, MemberProgress> = {};
+      for (const m of team) {
+        const c = db.characters.find((x) => x.id === m.id);
+        if (c) {
+          members[c.id] = simProgress(c, m, db);
+        }
+      }
+      restoreParty({
+        ...(partyBefore ?? currentParty()),
+        team: Object.keys(members),
+        members,
+      });
+    }
+    const instructions = this.enter(id, floor, true);
+    const run = currentRun();
+    if (run && partyBefore) {
+      this.saveRun({ ...run, partyBefore });
+    } else if (partyBefore) {
+      // (no floor to enter: nothing to try)
+      restoreParty(partyBefore);
+    }
+    this.launch(instructions);
+  }
+
+  private enter(
+    id: string,
+    floor = 0,
+    forced = false
+  ): SceneEventInstruction[] {
     const game = this.game;
     const dungeon = cachedDatabase().dungeons.find((d) => d.id === id);
     const sprite = game?.mapHelper?.scenePlayer.mesh;
     if (!game || !sprite || !dungeon || floorCount(dungeon) === 0) {
       return [message("Ce donjon n'a pas encore d'étage.")];
     }
-    if (!dungeonOpen(dungeon, game.weather.hourOfDay, game.day)) {
+    if (!forced && !dungeonOpen(dungeon, game.weather.hourOfDay, game.day)) {
       playSound("error");
       return [
         message(
@@ -935,10 +1005,14 @@ export class DungeonService {
         ),
       ];
     }
+    // (already in a dungeon, trying another floor: the way out stays the first one)
+    const before = currentRun();
+    const weatherBefore = before ? before.weatherBefore : game.weather.type;
+    const partyBefore = before?.partyBefore;
     const run: DungeonRun = {
       dungeon: dungeon.id,
-      floor: 0,
-      entrance: {
+      floor,
+      entrance: before?.entrance ?? {
         map: game.mapHelper!.sceneMap.id,
         pos: {
           x: sprite.position.x,
@@ -946,7 +1020,8 @@ export class DungeonService {
           z: sprite.position.z,
         },
       },
-      ...(dungeon.weather ? { weatherBefore: game.weather.type } : {}),
+      ...(dungeon.weather && weatherBefore ? { weatherBefore } : {}),
+      ...(partyBefore ? { partyBefore } : {}),
       done: [],
     };
     const arrival = this.prepareFloor(run, dungeon);
@@ -1003,6 +1078,9 @@ export class DungeonService {
       return [];
     }
     this.saveRun(undefined);
+    if (run.partyBefore) {
+      restoreParty(run.partyBefore);
+    }
     return [
       {
         type: InstructionType.TELEPORT,
@@ -1213,7 +1291,13 @@ export class DungeonService {
     const map = room && loadMap(room.map);
     const door = map && roomDoors(map).find((d) => d.id === link.door);
     if (!run || !link || !room || !door) {
-      this.launch([message("Le passage est bouché.")]);
+      this.launch([
+        message(
+          run?.rooms
+            ? "Le passage est bouché."
+            : "Ce passage ne mène nulle part : les salles sont reliées quand on entre dans le donjon (Menu → Essayer un donjon)."
+        ),
+      ]);
       return;
     }
     this.saveRun({ ...run, room: link.room });
@@ -1327,6 +1411,8 @@ export class DungeonService {
             markUntil: 0,
             stunnedUntil: 0,
             level: mapHelper.levelAtWorld(data.pos.x, data.pos.z),
+            dir: 0,
+            walked: 0,
           });
         }
       }

@@ -1,0 +1,132 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section class="sheet" role="dialog" aria-label="Essayer un donjon">
+  <div class="grip"></div>
+  <button type="button" class="back" (click)="back.emit()">
+    <svg lucideChevronLeft></svg>Menu
+  </button>
+  <div class="head">
+    <svg lucideDoorOpen></svg>
+    <div class="title">
+      <h2>Essayer un donjon</h2>
+      <small>Entrer tout de suite à l'étage choisi</small>
+    </div>
+    <button
+      type="button"
+      class="square"
+      aria-label="Fermer"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
+  </div>
+
+  <div class="card">
+    <button
+      type="button"
+      class="row"
+      [attr.aria-pressed]="own()"
+      (click)="own.set(!own())"
+    >
+      <svg lucideUsers></svg>
+      <span class="text"
+        ><span>Équipe de test</span
+        ><small>{{
+          own()
+            ? "Une équipe faite pour cet essai"
+            : "L'équipe de la partie, telle qu'elle est"
+        }}</small></span
+      >
+      <span class="switch" [class.on]="own()" aria-hidden="true"></span>
+    </button>
+    @if (own()) {
+      <div class="team">
+        <div class="all">
+          <span>Tous au niveau</span>
+          <div class="stepper">
+            <button
+              type="button"
+              aria-label="Niveau moins"
+              (click)="setLevel(level() - 1)"
+            >
+              <svg lucideMinus></svg>
+            </button>
+            <input
+              type="number"
+              inputmode="numeric"
+              aria-label="Niveau de toute l'équipe"
+              [value]="level()"
+              (change)="
+                setLevel(+$any($event.target).value);
+                $any($event.target).value = level()
+              "
+            />
+            <button
+              type="button"
+              aria-label="Niveau plus"
+              (click)="setLevel(level() + 1)"
+            >
+              <svg lucidePlus></svg>
+            </button>
+          </div>
+          <button
+            type="button"
+            class="apply"
+            [disabled]="!team().length"
+            (click)="levelAll()"
+          >
+            Appliquer
+          </button>
+        </div>
+        <small
+          >Appliquer met aussi les éléments à la moitié du niveau. L'équipe de
+          la partie revient à la sortie du donjon.</small
+        >
+        <battle-team-setup [(team)]="team" />
+      </div>
+    }
+  </div>
+
+  @for (dungeon of dungeons; track dungeon.id) {
+    <h3>
+      {{ dungeon.name }}
+      @if (dungeon.levels; as levels) {
+        <small
+          >Ennemis de niveau {{ levels.min
+          }}{{ levels.max > levels.min ? " à " + levels.max : "" }}</small
+        >
+      }
+    </h3>
+    <div class="card">
+      @for (floor of dungeon.floors; track floor.floor) {
+        <div class="row">
+          <svg lucideDoorOpen></svg>
+          <span class="text"
+            ><span>{{ floor.label }}</span
+            ><small>{{ floor.detail }}</small></span
+          >
+          <button
+            type="button"
+            class="square go"
+            aria-label="Lancer"
+            (click)="launch(dungeon.id, floor.floor)"
+          >
+            <svg lucidePlay></svg>
+          </button>
+        </div>
+      } @empty {
+        <p class="empty">Ce donjon n'a pas encore d'étage.</p>
+      }
+    </div>
+  } @empty {
+    <p class="empty">
+      Aucun donjon dans la base de données : créez-en dans Éditeurs → Base de
+      données → Donjons.
+    </p>
+  }
+  <p class="info">
+    <svg lucideInfo></svg>
+    Les salles sont reliées et les ennemis placés comme en jeu. Ouvrir une salle
+    depuis le gestionnaire de cartes ne relie pas ses portes. La sortie ramène
+    là où tu es.
+  </p>
+</section>

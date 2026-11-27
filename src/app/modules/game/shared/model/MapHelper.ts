@@ -23,6 +23,7 @@ import {
   dungeonKindOf,
   dungeonModelId,
   foePicture,
+  foeWalk,
   isDungeonObject,
   isFoe,
   makeDungeonMesh,
@@ -651,7 +652,10 @@ export class MapHelper {
       return;
     }
     if (isFoe(building)) {
-      const mesh = makeFoeMesh(foePicture(building.modelId));
+      const mesh = makeFoeMesh(
+        foePicture(building.modelId),
+        foeWalk(building.modelId)
+      );
       this.addMesh(chunk.id + "-" + building.id, mesh, world);
       chunk.group.add(mesh);
       return;

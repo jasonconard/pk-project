@@ -7,16 +7,10 @@ import {
   output,
   signal,
 } from "@angular/core";
-import {
-  LucideMinus,
-  LucidePlus,
-  LucideSwords,
-  LucideX,
-} from "@lucide/angular";
+import { LucideSwords, LucideX } from "@lucide/angular";
 import { EscapeService } from "../../../core/shared/service/escape.service";
 import { readJson, writeJson } from "../../../core/shared/local-store";
 import { loadDatabase } from "../../database-editor/shared/database-storage";
-import { DbCharacter } from "../../database-editor/shared/database";
 import {
   currentMapId,
   listMaps,
@@ -29,13 +23,15 @@ import {
   SceneEventInstruction,
 } from "../../game/shared/model/SceneEventInstruction";
 import { BattleService, SimMember } from "../shared/battle.service";
-import { GROWTH_LEVEL_MAX } from "../shared/progress";
+import {
+  savedTeam,
+  TeamSetupComponent,
+} from "../team-setup/team-setup.component";
 
 /** The last simulation's choices (kept for the next one). */
 const STORAGE_KEY = "pk-battle-sim";
 /** « Ici » in the places: where the player stands. */
 const HERE = "";
-const TEAM_MAX = 4;
 
 interface SimSetup {
   group: string;
@@ -50,7 +46,7 @@ interface SimSetup {
  */
 @Component({
   selector: "battle-sim",
-  imports: [LucideMinus, LucidePlus, LucideSwords, LucideX],
+  imports: [LucideSwords, LucideX, TeamSetupComponent],
   templateUrl: "./battle-sim.component.html",
   styleUrl: "./battle-sim.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,13 +61,6 @@ export class BattleSimComponent {
   private readonly db = loadDatabase();
   protected readonly groups = this.db.groups;
   protected readonly maps = listMaps();
-  protected readonly characters = this.db.characters;
-  /** The elements a character grows in (simple, not the physical one). */
-  private readonly elements = this.db.elements.filter(
-    (e) => !e.physical && !e.parts
-  );
-  protected readonly levelMax = GROWTH_LEVEL_MAX;
-  protected readonly teamMax = TEAM_MAX;
 
   protected readonly group = signal("");
   protected readonly place = signal(HERE);
@@ -103,52 +92,8 @@ export class BattleSimComponent {
         ""
     );
     this.place.set(this.maps.find((m) => m.id === saved?.place)?.id ?? HERE);
-    const team = (saved?.team ?? [])
-      .filter((m) => this.characters.some((c) => c.id === m.id))
-      .slice(0, TEAM_MAX);
     // (first time: the characters starting in the team, at their starting levels)
-    this.team.set(
-      Array.isArray(saved?.team)
-        ? team
-        : this.characters
-            .filter((c) => c.startsInTeam)
-            .slice(0, TEAM_MAX)
-            .map((c) => this.startMember(c))
-    );
-  }
-
-  protected member(id: string): SimMember | undefined {
-    return this.team().find((m) => m.id === id);
-  }
-
-  /** The elements this character can grow in (affinity « jamais »: not shown). */
-  protected elementsOf(c: DbCharacter) {
-    return this.elements.filter((e) => c.growth[e.id]?.affinity !== "never");
-  }
-
-  protected toggle(c: DbCharacter): void {
-    this.team.update((team) => {
-      if (team.some((m) => m.id === c.id)) {
-        return team.filter((m) => m.id !== c.id);
-      }
-      return team.length < TEAM_MAX ? [...team, this.startMember(c)] : team;
-    });
-  }
-
-  protected setLevel(c: DbCharacter, level: number): void {
-    const value = Math.min(c.levelMax, Math.max(1, Math.round(level) || 1));
-    this.change(c.id, (m) => ({ ...m, level: value }));
-  }
-
-  protected setGrowth(id: string, element: string, level: number): void {
-    const value = Math.min(
-      GROWTH_LEVEL_MAX,
-      Math.max(0, Math.round(level) || 0)
-    );
-    this.change(id, (m) => ({
-      ...m,
-      growth: { ...m.growth, [element]: value },
-    }));
+    this.team.set(savedTeam(saved?.team, this.db));
   }
 
   /** Plays the fight: to the map chosen (its arrival point), the fight, then back where the player was. */
@@ -185,19 +130,5 @@ export class BattleSimComponent {
     this.battle.simulateNext(setup.team);
     this.closed.emit();
     this.sequence.launchSequence({ conditions: {}, instructions });
-  }
-
-  private startMember(c: DbCharacter): SimMember {
-    return {
-      id: c.id,
-      level: c.levelStart,
-      growth: Object.fromEntries(
-        this.elementsOf(c).map((e) => [e.id, c.growth[e.id]?.level ?? 0])
-      ),
-    };
-  }
-
-  private change(id: string, edit: (m: SimMember) => SimMember): void {
-    this.team.update((team) => team.map((m) => (m.id === id ? edit(m) : m)));
   }
 }

@@ -71,6 +71,27 @@ export function wallLean(
   );
 }
 
+/** The triangles (9 numbers each, with their 6 texture coordinates) that have a surface. */
+function withoutFlat(points: number[], uvs: number[]): [number[], number[]] {
+  const kept: number[] = [];
+  const keptUv: number[] = [];
+  for (let i = 0; i < points.length; i += 9) {
+    const [ax, ay, az, bx, by, bz, cx, cy, cz] = points.slice(i, i + 9);
+    const [ux, uy, uz] = [bx - ax, by - ay, bz - az];
+    const [vx, vy, vz] = [cx - ax, cy - ay, cz - az];
+    const area = Math.hypot(
+      uy * vz - uz * vy,
+      uz * vx - ux * vz,
+      ux * vy - uy * vx
+    );
+    if (area > 1e-4) {
+      kept.push(...points.slice(i, i + 9));
+      keptUv.push(...uvs.slice((i / 9) * 6, (i / 9) * 6 + 6));
+    }
+  }
+  return [kept, keptUv];
+}
+
 /**
  * Ground of a chunk with reliefs: one square per cell at its level (UVs into the chunk ground texture / painted
  * canvas, like the flat ground quad), and vertical rock walls where a cell is higher than its neighbor.
@@ -282,7 +303,14 @@ export function buildGroundGeometry(
           top,
           topUv,
           corners.map(([px, pz]) => [px, y, pz]),
-          corners.map(([px, pz]) => groundUv(px, pz))
+          // (its own picture only: a corner pushed into the next cell must not show that cell's ground, e.g.
+          // the rock of the bank at the level of the water)
+          corners.map(([px, pz]) =>
+            groundUv(
+              Math.min(x1 - 0.25, Math.max(x0 + 0.25, px)),
+              Math.min(z1 - 0.25, Math.max(z0 + 0.25, pz))
+            )
+          )
         );
       } else if (!(
         col > 0 &&
@@ -419,17 +447,21 @@ export function buildGroundGeometry(
     }
   }
 
+  // Triangles without a surface (a wall whose top meets its foot, a top squeezed to a line) are left out: they
+  // have no normal, and their lighting would be an invalid number (black squares once blurred by the bloom)
+  const [topKept, topUvKept] = withoutFlat(top, topUv);
+  const [wallKept, wallUvKept] = withoutFlat(wall, wallUv);
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
     "position",
-    new THREE.Float32BufferAttribute([...top, ...wall], 3)
+    new THREE.Float32BufferAttribute([...topKept, ...wallKept], 3)
   );
   geometry.setAttribute(
     "uv",
-    new THREE.Float32BufferAttribute([...topUv, ...wallUv], 2)
+    new THREE.Float32BufferAttribute([...topUvKept, ...wallUvKept], 2)
   );
-  geometry.addGroup(0, top.length / 3, 0);
-  geometry.addGroup(top.length / 3, wall.length / 3, 1);
+  geometry.addGroup(0, topKept.length / 3, 0);
+  geometry.addGroup(topKept.length / 3, wallKept.length / 3, 1);
   geometry.computeVertexNormals();
   return geometry;
 }

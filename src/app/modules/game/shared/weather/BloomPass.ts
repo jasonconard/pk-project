@@ -33,6 +33,11 @@ varying vec2 vUv;
 void main() {
   vec3 c = texture2D(tScene, vUv).rgb;
   float brightest = max(c.r, max(c.g, c.b));
+  // (an invalid or endless value in the picture would be spread by the blur into a black square)
+  if (!(brightest >= 0.0 && brightest < 64.0)) {
+    c = vec3(0.0);
+    brightest = 0.0;
+  }
   gl_FragColor = vec4(c * smoothstep(uThreshold, uThreshold + uKnee, brightest), 1.0);
 }
 `;

@@ -45,7 +45,7 @@ export interface SimMember {
 }
 
 /** A simulated member's progress: at the level chosen, PV / PM full, no state. */
-function simProgress(
+export function simProgress(
   c: DbCharacter,
   m: SimMember,
   db: GameDatabase

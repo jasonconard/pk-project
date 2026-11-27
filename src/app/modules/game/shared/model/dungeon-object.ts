@@ -4,6 +4,11 @@ import { SceneBuilding } from "./SceneBuilding";
 import { CAMERA_LOOK } from "./Game";
 import { facingSprite } from "./pixel-scale";
 import { cachedDatabase } from "../../../database-editor/shared/database-storage";
+import {
+  DbEnemy,
+  MAP_WALK_DIRS,
+  MapWalk,
+} from "../../../database-editor/shared/database";
 
 /**
  * The objects of the editor's Donjon tab (design/main-view.pen, Donjons · Éditeur): chests, traps, switches, locked
@@ -229,13 +234,17 @@ function flatPicture(link: string, size: { x: number; y: number }) {
   return plane;
 }
 
-/** A picture standing up and facing the camera from its feet, stretched like the player's (its own material). */
+/**
+ * A picture standing up and facing the camera from its feet, stretched like the player's (its own material).
+ * @param map its own texture (a sheet showing one cell at a time), else the shared one of the link
+ */
 export function uprightPicture(
   link: string,
-  size: { x: number; y: number }
+  size: { x: number; y: number },
+  map: THREE.Texture = texture(link)
 ): THREE.Mesh {
   const material = new THREE.MeshBasicMaterial({
-    map: texture(link),
+    map,
     transparent: true,
     alphaTest: 0.5,
     side: THREE.DoubleSide,
@@ -470,17 +479,35 @@ function spottedMark(): THREE.Mesh {
   return mark;
 }
 
-/** A foe's mesh: its picture (`link`, a data URL of the database), its body, its hidden « ! ». */
-export function makeFoeMesh(link: string | undefined): THREE.Group {
+/**
+ * A foe's mesh: its walking sprite (`walk`: one cell of the sheet shown, see setFoeFrame) or else its still picture
+ * (`link`, a data URL of the database), its body, its hidden « ! ».
+ */
+export function makeFoeMesh(
+  link: string | undefined,
+  walk?: MapWalk
+): THREE.Group {
   const group = new THREE.Group();
-  if (link) {
+  let picture: THREE.Mesh | undefined;
+  if (walk) {
+    // (its own texture: each foe shows its own cell)
+    const sheet = new THREE.TextureLoader().load(walk.image);
+    sheet.magFilter = THREE.NearestFilter;
+    sheet.minFilter = THREE.NearestFilter;
+    sheet.colorSpace = THREE.SRGBColorSpace;
+    sheet.repeat.set(1 / walk.frames, 1 / MAP_WALK_DIRS.length);
+    picture = uprightPicture(walk.image, { x: walk.w, y: walk.h }, sheet);
+    picture.userData["walk"] = walk;
+    setFoeFrame(picture, 0, 0);
+  } else if (link) {
     const size = pictureSizes.get(link) ?? { x: 24, y: 24 };
     const scale = size.y > 32 ? 2 : 1;
-    const shown = {
+    picture = uprightPicture(link, {
       x: Math.round(size.x / scale),
       y: Math.round(size.y / scale),
-    };
-    const picture = uprightPicture(link, shown);
+    });
+  }
+  if (picture) {
     picture.name = "picture";
     group.add(picture);
     const mark = spottedMark();
@@ -500,12 +527,40 @@ export function makeFoeMesh(link: string | undefined): THREE.Group {
   return group;
 }
 
-/** The picture of a foe's group (its first enemy's still picture). */
-export function foePicture(modelId: string): string | undefined {
+/**
+ * The cell a foe's walking sprite shows: its direction (a row of MAP_WALK_DIRS) and the step of its walk (0:
+ * standing). Nothing for a foe drawn from a still picture.
+ */
+export function setFoeFrame(
+  picture: THREE.Object3D,
+  dir: number,
+  frame: number
+): void {
+  const walk = picture.userData["walk"] as MapWalk | undefined;
+  const map = ((picture as THREE.Mesh).material as THREE.MeshBasicMaterial)
+    ?.map;
+  if (walk && map) {
+    const rows = MAP_WALK_DIRS.length;
+    map.offset.set((frame % walk.frames) / walk.frames, 1 - (dir + 1) / rows);
+  }
+}
+
+/** A foe's group's first enemy: the one seen on the map. */
+function foeEnemy(modelId: string): DbEnemy | undefined {
   const db = cachedDatabase();
   const group = db.groups.find(
     (g) => g.id === modelId.slice(FOE_PREFIX.length)
   );
-  const enemy = db.enemies.find((e) => e.id === group?.members[0]?.enemy);
+  return db.enemies.find((e) => e.id === group?.members[0]?.enemy);
+}
+
+/** The walking sprite of a foe's group (its first enemy's), if it has one. */
+export function foeWalk(modelId: string): MapWalk | undefined {
+  return foeEnemy(modelId)?.walk;
+}
+
+/** The picture of a foe's group (its first enemy's still picture). */
+export function foePicture(modelId: string): string | undefined {
+  const enemy = foeEnemy(modelId);
   return enemy?.sprite ?? enemy?.icon;
 }

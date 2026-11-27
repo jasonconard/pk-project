@@ -2,6 +2,7 @@ import {
   LucideBox,
   LucideCoins,
   LucideGitBranch,
+  LucideImagePlus,
   LucidePencil,
   LucidePlus,
   LucideStar,
@@ -13,6 +14,8 @@ import {
   DAY_TIMES,
   DayTime,
   DbEnemy,
+  MAP_WALK_DIRS,
+  MapWalk,
   ResistLevel,
   StatId,
   clampInt,
@@ -31,6 +34,7 @@ import { SheetTileComponent } from "../../sheet-editor/sheet-tile.component";
     LucideBox,
     LucideCoins,
     LucideGitBranch,
+    LucideImagePlus,
     LucidePencil,
     LucidePlus,
     LucideStar,
@@ -59,6 +63,41 @@ export class EnemySheetComponent extends DbSheet {
       }
       return next;
     });
+  }
+
+  /** The walking sheet's settings changed (null: no sheet any more). */
+  protected setWalk(enemy: DbEnemy, change: Partial<MapWalk> | null): void {
+    this.edit(enemy.id, (e) => {
+      const next = { ...(e as DbEnemy) };
+      if (change && next.walk) {
+        next.walk = { ...next.walk, ...change };
+      } else {
+        delete next.walk;
+      }
+      return next;
+    });
+  }
+
+  /** A walking sheet chosen from a file: its cells guessed from its size (8 rows, 4 steps or square cells). */
+  protected pickWalk(enemy: DbEnemy, input: HTMLInputElement): void {
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const image = String(reader.result);
+      const img = new Image();
+      img.addEventListener("load", () => {
+        const h = Math.max(1, Math.round(img.height / MAP_WALK_DIRS.length));
+        const frames = enemy.walk?.frames ?? 4;
+        const w = Math.max(1, Math.round(img.width / frames));
+        this.edit(enemy.id, (e) => ({ ...e, walk: { image, w, h, frames } }));
+      });
+      img.src = image;
+    });
+    reader.readAsDataURL(file);
   }
 
   protected setEnemyStat(enemy: DbEnemy, stat: StatId, value: number): void {

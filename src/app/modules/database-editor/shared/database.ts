@@ -436,6 +436,28 @@ export const WALK_DIRS = [
 /** The column of the standing picture. */
 export const WALK_STAND = 1;
 
+/**
+ * An enemy's sprite walking on the map, in 8 directions: one picture of `frames` columns (the steps of the walk, the
+ * first one also shown standing) and one row per direction (MAP_WALK_DIRS, in that order). Cells of any size
+ * (`w` × `h`: a small slime, a big golem), a sprite pixel being a map pixel; the feet at the bottom of the cell.
+ */
+export interface MapWalk {
+  image: string;
+  w: number;
+  h: number;
+  frames: number;
+}
+export const MAP_WALK_DIRS = [
+  { id: "south", label: "Bas" },
+  { id: "south-west", label: "Bas gauche" },
+  { id: "west", label: "Gauche" },
+  { id: "north-west", label: "Haut gauche" },
+  { id: "north", label: "Haut" },
+  { id: "north-east", label: "Haut droite" },
+  { id: "east", label: "Droite" },
+  { id: "south-east", label: "Bas droite" },
+] as const;
+
 /** Pixel sizes of a character's pictures. */
 export const PICTURE_SIZES = {
   icon: { w: 16, h: 16 },
@@ -486,6 +508,8 @@ export interface DbEnemy {
   sheet?: SpriteSheet;
   /** Seen on the dungeon map before the fight. */
   model?: string;
+  /** Its sprite walking on a dungeon's map (missing: its still picture, not animated). */
+  walk?: MapWalk;
   level: number;
   stats: Record<StatId, number>;
   /** Element id → how it takes it (missing: normal). */

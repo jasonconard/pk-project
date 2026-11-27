@@ -202,6 +202,14 @@
     (variablesTest)="openVariablesTest()"
     (battleSim)="openBattleSim()"
     (testMode)="openTestList()"
+    (dungeonTry)="openDungeonTry()"
+  />
+}
+
+@if (dungeonTryOpen()) {
+  <game-dungeon-try
+    (closed)="dungeonTryOpen.set(false)"
+    (back)="backToMenu()"
   />
 }
 

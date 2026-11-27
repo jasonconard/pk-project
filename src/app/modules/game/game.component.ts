@@ -85,6 +85,7 @@ import { DungeonObject } from "./shared/model/dungeon-object";
 import { TestModeService } from "./shared/services/test-mode.service";
 import { TestSheetComponent } from "./test-mode/test-sheet/test-sheet.component";
 import { TestListComponent } from "./test-mode/test-list/test-list.component";
+import { DungeonTryComponent } from "./dungeon-try/dungeon-try.component";
 import { TestSettingsComponent } from "./test-mode/test-settings/test-settings.component";
 import { TestBannerComponent } from "./test-mode/test-banner/test-banner.component";
 import { ActionZone } from "./shared/model/action-zone";
@@ -121,6 +122,7 @@ import { ActionZone } from "./shared/model/action-zone";
     CutsceneOverlayComponent,
     TestSheetComponent,
     TestListComponent,
+    DungeonTryComponent,
     TestSettingsComponent,
     TestBannerComponent,
     GameCutsceneEditorComponent,
@@ -207,6 +209,7 @@ export class GameComponent {
   protected readonly battleSimOpen = signal(false);
   /** Menu → Mode test: the named tests. */
   protected readonly testListOpen = signal(false);
+  protected readonly dungeonTryOpen = signal(false);
   protected readonly testMode = inject(TestModeService);
   /** This start is the first one of a new version (update): the dialog opens once the game is loaded. */
   protected readonly justUpdated = signal(isFirstStartOfNewVersion(version));
@@ -305,6 +308,7 @@ export class GameComponent {
         !this.variablesTestOpen() &&
         !this.battleSimOpen() &&
         !this.testListOpen() &&
+        !this.dungeonTryOpen() &&
         !this.sequenceService.message() &&
         !isTyping(ev)
       ) {
@@ -422,8 +426,14 @@ export class GameComponent {
     this.testListOpen.set(true);
   }
 
+  protected openDungeonTry(): void {
+    this.menuOpen.set(false);
+    this.dungeonTryOpen.set(true);
+  }
+
   protected backToMenu(): void {
     this.testListOpen.set(false);
+    this.dungeonTryOpen.set(false);
     this.menuOpen.set(true);
   }
 

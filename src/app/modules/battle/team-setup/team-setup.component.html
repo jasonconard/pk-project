@@ -1,0 +1,77 @@
+<span class="title">Équipe ({{ team().length }} / {{ teamMax }})</span>
+@for (c of characters; track c.id) {
+  @let m = member(c.id);
+  <article [class.on]="m">
+    <div class="head">
+      <button
+        type="button"
+        class="pick"
+        [attr.aria-pressed]="!!m"
+        [disabled]="!m && team().length >= teamMax"
+        (click)="toggle(c)"
+      >
+        <span class="check" aria-hidden="true"></span>
+        @if (c.icon) {
+          <img [src]="c.icon" alt="" />
+        }
+        <b>{{ c.name }}</b>
+      </button>
+      @if (m) {
+        <div class="stepper">
+          <button
+            type="button"
+            aria-label="Niveau moins"
+            (click)="setLevel(c, m.level - 1)"
+          >
+            <svg lucideMinus></svg>
+          </button>
+          <input
+            type="number"
+            inputmode="numeric"
+            [attr.aria-label]="'Niveau de ' + c.name"
+            [value]="m.level"
+            (change)="
+              setLevel(c, +$any($event.target).value);
+              $any($event.target).value = member(c.id)?.level
+            "
+          />
+          <button
+            type="button"
+            aria-label="Niveau plus"
+            (click)="setLevel(c, m.level + 1)"
+          >
+            <svg lucidePlus></svg>
+          </button>
+        </div>
+      }
+    </div>
+    @if (m) {
+      <div class="elements">
+        @for (e of elementsOf(c); track e.id) {
+          <label class="element" [style.--color]="e.color" [title]="e.name">
+            @if (e.icon) {
+              <img [src]="e.icon" alt="" />
+            } @else {
+              <span class="dot" aria-hidden="true"></span>
+            }
+            <span class="name">{{ e.name }}</span>
+            <input
+              type="number"
+              inputmode="numeric"
+              min="0"
+              [max]="levelMax"
+              [attr.aria-label]="e.name + ' de ' + c.name"
+              [value]="m.growth[e.id] ?? 0"
+              (change)="
+                setGrowth(c.id, e.id, +$any($event.target).value);
+                $any($event.target).value = member(c.id)?.growth?.[e.id]
+              "
+            />
+          </label>
+        }
+      </div>
+    }
+  </article>
+} @empty {
+  <small>Aucun personnage d'équipe dans la base de données.</small>
+}

@@ -45,6 +45,80 @@
 </div>
 
 <div class="block">
+  <h3>Marche sur la carte</h3>
+  <div class="walk">
+    @if (en.walk; as walk) {
+      <span
+        class="walk-view"
+        role="img"
+        aria-label="Première image de la planche de marche"
+        [style.width.px]="walk.w * 2"
+        [style.height.px]="walk.h * 2"
+        [style.background-image]="'url(' + walk.image + ')'"
+        [style.background-size]="
+          walk.w * walk.frames * 2 + 'px ' + walk.h * 16 + 'px'
+        "
+      ></span>
+      <div class="walk-fields">
+        <label class="inline-field"
+          ><small>Largeur d'une case</small>
+          <db-stepper
+            [value]="walk.w"
+            [min]="8"
+            [max]="128"
+            [label]="'Largeur d\'une case'"
+            (changed)="setWalk(en, { w: $event })"
+          />
+        </label>
+        <label class="inline-field"
+          ><small>Hauteur d'une case</small>
+          <db-stepper
+            [value]="walk.h"
+            [min]="8"
+            [max]="128"
+            [label]="'Hauteur d\'une case'"
+            (changed)="setWalk(en, { h: $event })"
+          />
+        </label>
+        <label class="inline-field"
+          ><small>Images par direction</small>
+          <db-stepper
+            [value]="walk.frames"
+            [min]="1"
+            [max]="12"
+            [label]="'Images par direction'"
+            (changed)="setWalk(en, { frames: $event })"
+          />
+        </label>
+      </div>
+    }
+    <div class="walk-actions">
+      <label class="walk-file">
+        <svg lucideImagePlus></svg>
+        {{ en.walk ? "Changer la planche" : "Choisir une planche (PNG)" }}
+        <input
+          type="file"
+          accept="image/png"
+          (change)="pickWalk(en, $any($event.target))"
+        />
+      </label>
+      @if (en.walk) {
+        <button type="button" class="walk-remove" (click)="setWalk(en, null)">
+          <svg lucideX></svg>Retirer
+        </button>
+      }
+    </div>
+  </div>
+  <p class="note">
+    L'ennemi vu sur la carte d'un donjon, animé quand il marche. Une image de 8
+    lignes, une par direction (bas, bas gauche, gauche, haut gauche, haut, haut
+    droite, droite, bas droite), et une colonne par pas ; la première colonne
+    sert aussi à l'arrêt. Un pixel de l'image est un pixel de la carte : le
+    héros fait 16×24. Sans planche, l'image fixe est montrée, sans animation.
+  </p>
+</div>
+
+<div class="block">
   <h3>Description</h3>
   <input
     type="text"
