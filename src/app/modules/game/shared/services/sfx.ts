@@ -358,6 +358,89 @@ export function isSoundId(id: string): id is SoundId {
   return id in SOUNDS;
 }
 
+const rand = (min: number, max: number) => min + Math.random() * (max - min);
+
+/** 3 s of noise, made once: white (a clap), or brown (a deep rumble: each sample a small step from the last). */
+const noises: { white?: AudioBuffer; brown?: AudioBuffer } = {};
+
+function noise(ctx: AudioContext, kind: "white" | "brown"): AudioBuffer {
+  let buffer = noises[kind];
+  if (!buffer || buffer.sampleRate !== ctx.sampleRate) {
+    buffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < data.length; i++) {
+      const white = Math.random() * 2 - 1;
+      if (kind === "white") {
+        data[i] = white;
+      } else {
+        last = (last + 0.02 * white) / 1.02;
+        data[i] = last * 3.5;
+      }
+    }
+    noises[kind] = buffer;
+  }
+  return buffer;
+}
+
+/**
+ * A lightning strike close by, like the weather's thunder (weather/audio/thunder.ts) but short, for a fight: a
+ * loud sharp clap with one or two smaller echoes, then a boom rolling away in a second and a half. Never twice the
+ * same. Returns its length (s).
+ */
+function thunderStrike(
+  ctx: AudioContext,
+  out: AudioNode,
+  pitch: number
+): number {
+  const start = ctx.currentTime + 0.01;
+  const clap = (at: number, level: number, length: number) => {
+    const source = ctx.createBufferSource();
+    source.buffer = noise(ctx, "white");
+    const lowpass = ctx.createBiquadFilter();
+    lowpass.type = "lowpass";
+    lowpass.frequency.value = rand(2400, 3600) * pitch;
+    const highpass = ctx.createBiquadFilter();
+    highpass.type = "highpass";
+    highpass.frequency.value = 120;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, at);
+    gain.gain.linearRampToValueAtTime(level, at + 0.006);
+    gain.gain.exponentialRampToValueAtTime(level * 0.25, at + length * 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, at + length);
+    source.connect(highpass).connect(lowpass).connect(gain).connect(out);
+    source.start(at, Math.random() * 2, length + 0.05);
+  };
+  clap(start, 1.5, rand(0.35, 0.55));
+  let at = start;
+  for (let i = Math.floor(rand(1, 3)); i > 0; i--) {
+    at += rand(0.08, 0.22);
+    clap(at, rand(0.45, 0.85), rand(0.25, 0.4));
+  }
+  // The boom: deep noise whose filter closes, its loudness rolling in weaker and weaker swells
+  const length = rand(1.5, 2);
+  const rumble = ctx.createBufferSource();
+  rumble.buffer = noise(ctx, "brown");
+  rumble.playbackRate.value = rand(0.75, 1) * pitch;
+  const lowpass = ctx.createBiquadFilter();
+  lowpass.type = "lowpass";
+  lowpass.frequency.setValueAtTime(rand(1900, 2400), start);
+  lowpass.frequency.exponentialRampToValueAtTime(170, start + length);
+  const gain = ctx.createGain();
+  const peak = 2.4;
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(peak, start + rand(0.03, 0.07));
+  let swell = 1;
+  for (let t = start + 0.25; t < start + length - 0.3; t += rand(0.18, 0.4)) {
+    swell *= rand(0.7, 0.92);
+    gain.gain.linearRampToValueAtTime(peak * swell * rand(0.5, 0.95), t);
+  }
+  gain.gain.linearRampToValueAtTime(0, start + length);
+  rumble.connect(lowpass).connect(gain).connect(out);
+  rumble.start(start, Math.random(), length + 0.1);
+  return length;
+}
+
 /** How a sound is played: higher or lower (1: as it is), louder or softer (1: as it is). */
 export interface SoundTone {
   pitch?: number;
@@ -389,6 +472,13 @@ export function playSound(
   const pitch = Math.min(4, Math.max(0.25, tone.pitch ?? 1));
   master.gain.value =
     0.25 * volume * (LOUDER[id] ?? 1) * Math.max(0, tone.gain ?? 1);
+  if (id === "thunder") {
+    // (made apart: a real clap and its rumble, not a few notes)
+    master.connect(ctx.destination);
+    const length = thunderStrike(ctx, master, pitch);
+    setTimeout(() => master.disconnect(), (length + 0.3) * 1000);
+    return;
+  }
   // A soft low-pass: the lo-fi colour of the music
   const filter = ctx.createBiquadFilter();
   filter.type = "lowpass";
