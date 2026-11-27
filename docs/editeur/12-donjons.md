@@ -35,7 +35,9 @@ La nuit, l'équipe explore des donjons : des étages faits à la main ou tirés 
 
 Dans l'éditeur, les objets sont montrés tels qu'ils sont posés (coffres fermés, pièges cachés visibles, portes fermées).
 
-**Porte de salle sur un mur de côté** : tournée d'un quart de tour (**Tourner**), la porte n'est plus une arche vue de face mais une **ouverture sombre au sol**, d'une case. La poser dans une case creusée dans le mur (une encoche d'une case) : les murs autour dessinent l'ouverture dans la roche. On arrive devant elle, côté salle.
+**Porte de salle dans une paroi inclinée** : posée sur une case au pied d'une paroi qui penche (carte au style **Roche inclinée** ou **Grotte**, ou paroi peinte avec un pinceau **Paroi**), la porte n'est plus une arche debout : c'est une **bouche de grotte dessinée sur la pente de la roche**, avec une ombre au sol devant elle. **Tourner** choisit le mur : nord (sans tourner), est, sud ou ouest. Le jeu lit la hauteur et la pente de la paroi derrière la porte ; garder la paroi droite sur trois cases pour que la bouche repose bien à plat. On arrive devant elle, côté salle.
+
+**Porte de salle sur un mur droit de côté** : tournée d'un quart de tour, la porte est une **ouverture sombre au sol**, d'une case. La poser dans une case creusée dans le mur (une encoche d'une case).
 
 ## Les étages générés
 

@@ -79,7 +79,9 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   (design/combat.pen). The team's progress is kept in `party.ts` (`members`, `memberProgress`, `saveProgress`). Steps in docs/idees.md (point 9).
 - Crystal cave (the first dungeon, `dg-crystal-cave`): maps `src/assets/map/grotte-*/` (walls style `SceneMap.walls`
   → `WALL_STYLES` in `GroundMesh.ts`; leaning walls painted per cell with the Reliefs tab's Paroi brushes,
-  `SceneChunk.slopes`; cave terrains at the tileset's last row), decor models `md-crystal-*`, `md-cave-*`,
+  `SceneChunk.slopes`; their outlines are rounded by `rounded` in `buildGroundGeometry`; a room door at the foot of a
+  leaning wall is a cave mouth drawn on the slope, `DoorWall` in `dungeon-object.ts`; cave terrains at the tileset's
+  last row), decor models `md-crystal-*`, `md-cave-*`,
   `md-mine-*`… (one upright plane each, `tex.glow` = the night glow's colour; sources in `design-resources/cave/`), enemies
   `en-*` / groups `gr-cave-*` in the database.
 - Dungeons (`docs/editeur/12-donjons.md`): `game/shared/services/dungeon.service.ts` (entering, floors, generated rooms
