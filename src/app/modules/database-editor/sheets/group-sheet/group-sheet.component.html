@@ -134,6 +134,23 @@
       }
     </select>
   </label>
+  <label class="learn">
+    <span class="slot-label">Arène</span>
+    <select
+      aria-label="Arène de combat"
+      (change)="setGroup(gr, { arena: $any($event.target).value })"
+    >
+      <option value="" [selected]="!gr.arena">Celle du lieu</option>
+      <option [value]="arenaHere" [selected]="gr.arena === arenaHere">
+        Sur place, sans arène
+      </option>
+      @for (a of arenas; track a.id) {
+        <option [value]="a.id" [selected]="a.id === gr.arena">
+          {{ a.name }}
+        </option>
+      }
+    </select>
+  </label>
   @for (t of transitionFields; track t.field) {
     <label class="learn">
       <span class="slot-label">{{ t.label }}</span>

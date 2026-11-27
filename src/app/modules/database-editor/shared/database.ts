@@ -547,6 +547,8 @@ export interface DbGroup {
   /** Its own screen transitions into and out of the fight (missing: the settings' ones). */
   transitionIn?: TransitionKind;
   transitionOut?: TransitionKind;
+  /** The arena its fights are played in: a map's id, "none" on the spot (missing: the place's, see arenaFor). */
+  arena?: string;
 }
 
 /**
@@ -568,6 +570,8 @@ export interface DbDungeon {
   weather?: `${WeatherType}`;
   /** Its own song (a song of the music editor; none: the music settings' Donjon moment). */
   music?: string;
+  /** The arena of the fights in it: a map's id, "none" on the spot (missing: the settings' one). */
+  arena?: string;
   floors: DbFloor[];
 }
 
@@ -994,6 +998,8 @@ export interface DbSettings {
   /** (never set: every row of the editor may have a picture) */
   icon?: string;
   transitions: Record<TransitionCase, TransitionKind>;
+  /** The arena of the fights without one of their own: a map's id (missing or "none": on the spot). */
+  arena?: string;
 }
 
 export function newSettings(): DbSettings {

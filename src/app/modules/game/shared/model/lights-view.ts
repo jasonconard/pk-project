@@ -208,7 +208,7 @@ export class LightsView {
     const map = mapHelper.sceneMap;
     const sources: Source[] = [];
     let seed = 0;
-    for (const chunk of map.chunks) {
+    for (const chunk of mapHelper.shownChunks()) {
       if (!chunk.visible) {
         continue;
       }

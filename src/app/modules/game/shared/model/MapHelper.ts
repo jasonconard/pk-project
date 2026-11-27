@@ -73,6 +73,10 @@ const TURN_SHIFT = "turnShift";
 /** userData key: the quarter turns an object is drawn with when it turned towards the player (faceTowards). */
 const FACING = "facing";
 
+/** A fight's arena is built this far east of the map (world units), its chunks' ids start with this. */
+const ARENA_SHIFT = 20_000;
+const ARENA_PREFIX = "arena:";
+
 export class MapHelper {
   originGame: Game;
   meshes: Record<string, THREE.Object3D> = {};
@@ -172,6 +176,9 @@ export class MapHelper {
     return spritePlane;
   }
 
+  /** The arena of the fight being played, shown in place of the map (see showArena). */
+  private arena: { map: SceneMap; chunks: SceneChunk[] } | null = null;
+
   /**
    * Chunks around the view: those that can be seen are shown (built first if needed), those a bit further are
    * built ahead (one per call, so walking doesn't stutter), those far away are taken down (big maps stay light).
@@ -179,7 +186,8 @@ export class MapHelper {
    * @param extra chunk sizes seen around (the editor zoomed out)
    */
   public updateVisibleChunks(focus?: THREE.Vector3, extra = 0) {
-    const chunks = this.sceneMap.chunks;
+    // A fight's arena shown: the map's chunks stay as they are, built and hidden
+    const chunks = this.arena ? this.arena.chunks : this.sceneMap.chunks;
     const center = focus ?? this.scenePlayer.mesh?.position;
     if (!center) {
       return;
@@ -361,8 +369,56 @@ export class MapHelper {
     this.originGame.scene.add(group);
   }
 
+  /**
+   * A fight's arena (a map of the « Arène » kind) shown in place of the map, which stays loaded: its chunks are
+   * hidden, the arena's ones are built far from them in the same scene. Nothing of the map changes (its objects, the
+   * dungeon's enemies, its events): `hideArena` gives it back as it was. The arena's chunks are not the map's: no
+   * events, nothing saved.
+   * @returns the middle of the fight: the arena's arrival point
+   */
+  public showArena(map: SceneMap): THREE.Vector3 {
+    this.hideArena();
+    const shift = new THREE.Vector3(ARENA_SHIFT, 0, 0);
+    const chunks = structuredClone(
+      map.chunks.map((chunk) => ({ ...chunk, group: undefined }))
+    ).map((chunk) => ({
+      ...chunk,
+      id: ARENA_PREFIX + chunk.id,
+      pos: { ...chunk.pos, x: chunk.pos.x + shift.x },
+    }));
+    this.sceneMap.chunks.forEach((chunk) => {
+      chunk.visible = false;
+      if (chunk.group) {
+        chunk.group.visible = false;
+      }
+    });
+    this.arena = { map, chunks };
+    const spawn = map.spawn ? convertVec3(map.spawn) : new THREE.Vector3();
+    const center = spawn.add(shift);
+    chunks.forEach((chunk) => this.buildChunk(chunk));
+    return center;
+  }
+
+  /** The fight's arena taken down: the map is seen again. */
+  public hideArena() {
+    if (!this.arena) {
+      return;
+    }
+    this.arena.chunks.forEach((chunk) => this.unbuildChunk(chunk));
+    this.arena = null;
+    this.updateVisibleChunks();
+  }
+
+  /** The chunks drawn now: the map's, and the arena's during a fight in an arena. */
+  public shownChunks(): SceneChunk[] {
+    return this.arena
+      ? [...this.sceneMap.chunks, ...this.arena.chunks]
+      : this.sceneMap.chunks;
+  }
+
   /** Another map takes the place of the current one: its chunks are built, the old ones taken down. */
   public setMap(map: SceneMap) {
+    this.hideArena();
     this.sceneMap.chunks.forEach((chunk) => this.unbuildChunk(chunk));
     this.sceneMap = map;
     this.buildChunks();
@@ -393,9 +449,9 @@ export class MapHelper {
 
   /** The chunks' ground: painted tiles, reliefs, stairs. */
   private readonly ground = new ChunkGround(
-    () => this.sceneMap.chunks,
+    () => this.shownChunks(),
     (x, z) => this.cellAt(x, z),
-    () => this.sceneMap.walls ?? "rock"
+    () => (this.arena?.map ?? this.sceneMap).walls ?? "rock"
   );
 
   /** The ground cell (column, row from the chunk corner) under a world point, if any. */
@@ -525,7 +581,7 @@ export class MapHelper {
 
   /** Chunk containing a world point (x, z), if any. */
   public chunkAt(x: number, z: number): SceneChunk | undefined {
-    return this.sceneMap.chunks.find(
+    return this.shownChunks().find(
       (c) =>
         Math.abs(x - c.pos.x) <= c.size.x / 2 &&
         Math.abs(z - c.pos.z) <= c.size.y / 2

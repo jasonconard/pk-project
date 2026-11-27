@@ -970,6 +970,20 @@ export class GameService {
     }
   }
 
+  /** The arena of the fights on a map (a map's id, "none": on the spot; nothing: the dungeon's, the settings'). */
+  setMapArena(id: string, arena: string | undefined) {
+    const current = this.game?.mapHelper?.sceneMap;
+    const map = current?.id === id ? current : loadMap(id);
+    if (map) {
+      if (arena) {
+        map.arena = arena;
+      } else {
+        delete map.arena;
+      }
+      saveMap(map);
+    }
+  }
+
   /** The team walks behind the player on a map (false: only the leader). */
   setMapFollowers(id: string, followers: boolean) {
     const current = this.game?.mapHelper?.sceneMap;

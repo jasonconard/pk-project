@@ -1,3 +1,4 @@
+import { ARENA_HERE } from "../shared/model/arena";
 import { TransitionKind, TRANSITIONS } from "../shared/model/transition";
 import {
   ChangeDetectionStrategy,
@@ -28,6 +29,7 @@ import {
   LucidePlus,
   LucideRotateCcw,
   LucideSkull,
+  LucideSwords,
   LucideTrash,
   LucideX,
 } from "@lucide/angular";
@@ -48,6 +50,7 @@ const KINDS: { id: MapKind; label: string; icon: LucideIcon }[] = [
   { id: "interior", label: "Intérieur", icon: LucideDoorOpen },
   { id: "dungeon", label: "Donjon", icon: LucideSkull },
   { id: "room", label: "Salle", icon: LucideLayoutDashboard },
+  { id: "arena", label: "Arène", icon: LucideSwords },
 ];
 
 /**
@@ -181,6 +184,17 @@ export class MapManagerComponent implements OnInit {
   );
 
   protected readonly transitions = TRANSITIONS;
+  protected readonly arenaHere = ARENA_HERE;
+
+  /** The arena maps (read again each time: one may have been made here). */
+  protected arenas() {
+    return this.maps().filter((m) => m.kind === "arena");
+  }
+
+  protected setArena(map: MapSummary, arena: string): void {
+    this.gameService.setMapArena(map.id, arena || undefined);
+    this.maps.set(listMaps());
+  }
 
   protected setTransition(map: MapSummary, transition: string): void {
     this.gameService.setMapTransition(

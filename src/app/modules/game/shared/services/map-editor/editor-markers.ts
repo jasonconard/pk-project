@@ -1,3 +1,4 @@
+import { FIGHT_AREA } from "../../model/arena";
 import * as THREE from "three";
 import type { Game } from "../../model/Game";
 import { LEVEL_HEIGHT } from "../../model/GroundMesh";
@@ -14,10 +15,14 @@ export function slotKey(x: number, z: number): string {
   return Math.round(x / CHUNK_SIZE) + "," + Math.round(z / CHUNK_SIZE);
 }
 
+/** The colours of an arena's fight guide: the circle walked in, the enemies' place, the team's. */
+const FIGHT_COLORS = { field: 0xff_ff_ff, foes: 0xff_6a_5a, team: 0x5a_a8_ff };
+
 /** What the map editor draws over the map: the chunks' outlines (chunk tools), the arrival point. */
 export class EditorMarkers {
   private chunkOutlines?: THREE.Group;
   private spawnMarker?: THREE.Group;
+  private fightGuide?: THREE.Group;
 
   /** With a chunk tool: the chunks' outlines, and the free places around them where one can be added. */
   refreshChunkOutlines(game: Game) {
@@ -141,5 +146,56 @@ export class EditorMarkers {
     const level = game.mapHelper?.levelAtWorld(spawn.x, spawn.z) ?? 0;
     this.spawnMarker.position.set(spawn.x, level * LEVEL_HEIGHT + 0.5, spawn.z);
     this.spawnMarker.visible = game.editMode;
+    this.refreshFightGuide(game, this.spawnMarker.position);
+  }
+
+  /**
+   * An arena map while editing: the fight drawn on the ground around its arrival point (the circle the fighters
+   * walk in, the enemies' rectangle, the team's line), to know where the ground must stay flat and free.
+   */
+  private refreshFightGuide(game: Game, at: THREE.Vector3) {
+    if (!this.fightGuide) {
+      const line = (color: number, points: number[][]) =>
+        new THREE.LineLoop(
+          new THREE.BufferGeometry().setFromPoints(
+            points.map(([x, z]) => new THREE.Vector3(x, 0, z))
+          ),
+          new THREE.LineBasicMaterial({
+            color,
+            depthTest: false,
+            transparent: true,
+            opacity: 0.9,
+          })
+        );
+      const { foes, teamBack, teamSpacing, radius } = FIGHT_AREA;
+      // (the fighters' middle is between the team and the enemies)
+      const middle = (teamBack - foes.ahead) / 2;
+      const circle = Array.from({ length: 48 }, (_, i) => {
+        const angle = (i / 48) * Math.PI * 2;
+        return [Math.cos(angle) * radius, middle + Math.sin(angle) * radius];
+      });
+      const team = teamSpacing * 1.5 + 8;
+      this.fightGuide = new THREE.Group();
+      this.fightGuide.add(
+        line(FIGHT_COLORS.field, circle),
+        line(FIGHT_COLORS.foes, [
+          [-foes.width / 2, -foes.ahead - foes.depth / 2],
+          [foes.width / 2, -foes.ahead - foes.depth / 2],
+          [foes.width / 2, -foes.ahead + foes.depth / 2],
+          [-foes.width / 2, -foes.ahead + foes.depth / 2],
+        ]),
+        line(FIGHT_COLORS.team, [
+          [-team, teamBack - 6],
+          [team, teamBack - 6],
+          [team, teamBack + 12],
+          [-team, teamBack + 12],
+        ])
+      );
+      this.fightGuide.children.forEach((part) => (part.renderOrder = 20));
+      game.scene.add(this.fightGuide);
+    }
+    this.fightGuide.position.copy(at);
+    this.fightGuide.visible =
+      game.editMode && game.mapHelper?.sceneMap.kind === "arena";
   }
 }

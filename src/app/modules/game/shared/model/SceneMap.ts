@@ -12,9 +12,10 @@ export enum ObjSide {
 
 /**
  * What a map is used for: the world (the default map, big), a town, an interior, a dungeon floor, a room (a piece of
- * a generated dungeon floor, linked to others by its room doors).
+ * a generated dungeon floor, linked to others by its room doors), an arena (where fights are played, see arena.ts).
  */
-export type MapKind = "world" | "town" | "interior" | "dungeon" | "room";
+export type MapKind =
+  "world" | "town" | "interior" | "dungeon" | "room" | "arena";
 
 /**
  * The look of a map's relief walls: the outside brown rock as straight cliffs or as leaning slopes, or the dark
@@ -36,6 +37,8 @@ export interface SceneMap {
   walls?: WallStyle;
   /** The screen transition played when the team comes to this map (missing: the settings' one). */
   transition?: TransitionKind;
+  /** The arena the fights on this map are played in: a map's id, "none" on the spot (missing: see arenaFor). */
+  arena?: string;
   /** Its cutscenes (see cutscene.ts), played by the event action « Jouer la cinématique ». */
   cutscenes?: Cutscene[];
   chunks: SceneChunk[];

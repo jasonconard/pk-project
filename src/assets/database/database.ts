@@ -3218,6 +3218,7 @@ export const CODE_DATABASE: GameDatabase = {
       "moments": [],
       "specials": [],
       "weather": "crystal-mist",
+      "arena": "arene-grotte",
       "floors": [
         {
           "id": "fl-cave-entrance",
@@ -3485,6 +3486,7 @@ export const CODE_DATABASE: GameDatabase = {
     {
       "id": "settings",
       "name": "Réglages du jeu",
+      "arena": "arene-prairie",
       "transitions": {
         "map": "fade",
         "fightIn": "stripes",

@@ -1,3 +1,4 @@
+import { ARENA_HERE, arenaMaps } from "../../../game/shared/model/arena";
 import { loadSongs } from "../../../music-editor/shared/song-storage";
 import {
   LucideArrowDown,
@@ -67,7 +68,9 @@ export class DungeonSheetComponent extends DbSheet {
   })();
   protected readonly handMaps = [
     ...this.maps.filter((m) => m.kind === "dungeon"),
-    ...this.maps.filter((m) => m.kind !== "dungeon" && m.kind !== "room"),
+    ...this.maps.filter(
+      (m) => m.kind !== "dungeon" && m.kind !== "room" && m.kind !== "arena"
+    ),
   ];
   protected readonly roomMaps = this.maps.filter((m) => m.kind === "room");
 
@@ -128,6 +131,21 @@ export class DungeonSheetComponent extends DbSheet {
   }));
 
   /** Its own song (empty: the music settings' Donjon moment). */
+  protected readonly arenas = arenaMaps();
+  protected readonly arenaHere = ARENA_HERE;
+
+  protected setArena(id: string): void {
+    this.change((d) => {
+      const next = { ...d };
+      if (id) {
+        next.arena = id;
+      } else {
+        delete next.arena;
+      }
+      return next;
+    });
+  }
+
   protected setMusic(id: string): void {
     this.change((d) => {
       const next = { ...d };

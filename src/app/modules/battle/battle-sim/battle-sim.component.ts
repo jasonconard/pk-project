@@ -1,3 +1,4 @@
+import { ARENA_HERE, arenaMaps } from "../../game/shared/model/arena";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -33,9 +34,14 @@ const STORAGE_KEY = "pk-battle-sim";
 /** « Ici » in the places: where the player stands. */
 const HERE = "";
 
+/** « Celle du groupe ou du lieu » in the arenas: the game chooses, as in a real fight. */
+const ARENA_AUTO = "";
+
 interface SimSetup {
   group: string;
   place: string;
+  /** "": the group's or the place's, "none": on the spot, else an arena map's id. */
+  arena?: string;
   team: SimMember[];
 }
 
@@ -64,6 +70,9 @@ export class BattleSimComponent {
 
   protected readonly group = signal("");
   protected readonly place = signal(HERE);
+  protected readonly arenas = arenaMaps();
+  protected readonly arenaHere = ARENA_HERE;
+  protected readonly arena = signal(ARENA_AUTO);
   protected readonly team = signal<SimMember[]>([]);
 
   protected readonly groupMembers = computed(() => {
@@ -92,6 +101,11 @@ export class BattleSimComponent {
         ""
     );
     this.place.set(this.maps.find((m) => m.id === saved?.place)?.id ?? HERE);
+    this.arena.set(
+      saved?.arena === ARENA_HERE
+        ? ARENA_HERE
+        : (this.arenas.find((a) => a.id === saved?.arena)?.id ?? ARENA_AUTO)
+    );
     // (first time: the characters starting in the team, at their starting levels)
     this.team.set(savedTeam(saved?.team, this.db));
   }
@@ -105,6 +119,7 @@ export class BattleSimComponent {
     const setup: SimSetup = {
       group: this.group(),
       place: this.place(),
+      arena: this.arena(),
       team: this.team(),
     };
     writeJson(STORAGE_KEY, setup);
@@ -127,7 +142,7 @@ export class BattleSimComponent {
         fight: { group: setup.group },
       });
     }
-    this.battle.simulateNext(setup.team);
+    this.battle.simulateNext(setup.team, setup.arena || undefined);
     this.closed.emit();
     this.sequence.launchSequence({ conditions: {}, instructions });
   }

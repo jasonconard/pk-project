@@ -52,6 +52,22 @@
         <small>Au point d'arrivée de la carte, puis retour ici</small>
       }
     </label>
+    <label class="field">
+      <span>Arène</span>
+      <select [value]="arena()" (change)="arena.set($any($event.target).value)">
+        <option value="" [selected]="arena() === ''">
+          Celle du groupe ou du lieu
+        </option>
+        <option [value]="arenaHere" [selected]="arena() === arenaHere">
+          Sur place, sans arène
+        </option>
+        @for (a of arenas; track a.id) {
+          <option [value]="a.id" [selected]="a.id === arena()">
+            {{ a.name }}
+          </option>
+        }
+      </select>
+    </label>
     <battle-team-setup [(team)]="team" />
   </div>
   <footer>

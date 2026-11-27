@@ -30,3 +30,30 @@
     revient. « Voir » joue la transition ici, par-dessus l'éditeur.
   </p>
 </div>
+
+<div class="block">
+  <h3>Arène de combat</h3>
+  <div class="case">
+    <label>
+      <span class="slot-label">Arène par défaut</span>
+      <select
+        aria-label="Arène par défaut"
+        (change)="setArena($any($event.target).value)"
+      >
+        <option value="" [selected]="!settings().arena">
+          Sur place, sans arène
+        </option>
+        @for (a of arenas; track a.id) {
+          <option [value]="a.id" [selected]="a.id === settings().arena">
+            {{ a.name }}
+          </option>
+        }
+      </select>
+    </label>
+  </div>
+  <p class="note">
+    Où se jouent les combats qui n'ont pas leur propre arène. Un groupe
+    d'ennemis, une carte ou un donjon peut avoir la sienne. Une arène est une
+    carte de sorte « Arène », faite dans l'éditeur de cartes.
+  </p>
+</div>

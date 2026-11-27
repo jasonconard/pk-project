@@ -1,3 +1,4 @@
+import { ARENA_HERE, arenaMaps } from "../../../game/shared/model/arena";
 import {
   transitionInfo,
   TransitionKind,
@@ -79,6 +80,8 @@ export class GroupSheetComponent extends DbSheet {
     }));
   });
 
+  protected readonly arenas = arenaMaps();
+  protected readonly arenaHere = ARENA_HERE;
   protected readonly transitions = TRANSITIONS;
   /** Its two transitions: the group's field and the settings' case it stands for. */
   protected readonly transitionFields = [
@@ -105,7 +108,12 @@ export class GroupSheetComponent extends DbSheet {
     change: Partial<
       Pick<
         DbGroup,
-        "music" | "canFlee" | "surprise" | "transitionIn" | "transitionOut"
+        | "music"
+        | "canFlee"
+        | "surprise"
+        | "transitionIn"
+        | "transitionOut"
+        | "arena"
       >
     >
   ): void {
@@ -119,6 +127,9 @@ export class GroupSheetComponent extends DbSheet {
       }
       if (!next.transitionOut) {
         delete next.transitionOut;
+      }
+      if (!next.arena) {
+        delete next.arena;
       }
       return next;
     });

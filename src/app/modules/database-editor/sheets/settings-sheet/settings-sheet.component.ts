@@ -1,3 +1,4 @@
+import { arenaMaps } from "../../../game/shared/model/arena";
 import { LucidePlay } from "@lucide/angular";
 import {
   ChangeDetectionStrategy,
@@ -32,6 +33,20 @@ export class SettingsSheetComponent extends DbSheet {
   private readonly transitionService = inject(TransitionService);
   protected readonly cases = TRANSITION_CASES;
   protected readonly kinds = TRANSITIONS;
+  protected readonly arenas = arenaMaps();
+
+  /** The arena of the fights without one of their own ("": on the spot). */
+  protected setArena(id: string): void {
+    this.edit(this.settings().id, (row) => {
+      const next = { ...(row as DbSettings) };
+      if (id) {
+        next.arena = id;
+      } else {
+        delete next.arena;
+      }
+      return next;
+    });
+  }
 
   protected kindOf(when: TransitionCase): TransitionKind {
     return this.settings().transitions?.[when] ?? "none";

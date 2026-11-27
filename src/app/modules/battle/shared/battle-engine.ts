@@ -1,3 +1,4 @@
+import { FIGHT_AREA } from "../../game/shared/model/arena";
 import {
   DbItem,
   DbSkill,
@@ -76,7 +77,7 @@ const ENEMY_HEAVY_CHANCE = 0.2;
  */
 const SPOT_NEAR = { min: 10, max: 26 };
 const SPOT_ROOM = 16;
-const FIELD_RADIUS = 75;
+const FIELD_RADIUS = FIGHT_AREA.radius;
 
 interface Action {
   actor: Fighter;

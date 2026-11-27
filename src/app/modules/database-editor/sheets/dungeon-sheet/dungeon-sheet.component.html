@@ -99,6 +99,25 @@
       }
     </select>
   </label>
+
+  <h3>Combats</h3>
+  <label class="learn">
+    <span class="slot-label">Arène</span>
+    <select
+      aria-label="Arène de combat"
+      (change)="setArena($any($event.target).value)"
+    >
+      <option value="" [selected]="!dg.arena">Celle des réglages</option>
+      <option [value]="arenaHere" [selected]="dg.arena === arenaHere">
+        Sur place, sans arène
+      </option>
+      @for (a of arenas; track a.id) {
+        <option [value]="a.id" [selected]="a.id === dg.arena">
+          {{ a.name }}
+        </option>
+      }
+    </select>
+  </label>
 </div>
 
 <div class="block">

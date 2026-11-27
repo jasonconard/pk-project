@@ -1,11 +1,14 @@
 import { inject, Service, signal } from "@angular/core";
 import { TransitionService } from "../../game/shared/services/transition.service";
 import { TransitionKind } from "../../game/shared/model/transition";
+import { ARENA_HERE, arenaFor } from "../../game/shared/model/arena";
+import { loadMap } from "../../game/shared/services/map-storage";
 import * as THREE from "three";
 import { Game } from "../../game/shared/model/Game";
 import { loadDatabase } from "../../database-editor/shared/database-storage";
 import {
   DbCharacter,
+  DbGroup,
   DbEnemy,
   GameDatabase,
   characterStats,
@@ -209,6 +212,10 @@ export class BattleService {
   /** The transition into the fight is played (the fight is set up behind it), the one out of it. */
   private starting = false;
   private ending = false;
+  /** The fight is played in an arena: where the player stood on the map, to put it back there. */
+  private arenaBack: THREE.Vector3 | null = null;
+  /** The next fight's arena, chosen by « Simuler un combat » (a map's id, "none": on the spot). */
+  private simArena?: string;
   /** The transition out of the fight being played, when its group has its own. */
   private outKind?: TransitionKind;
   private readonly transitions = inject(TransitionService);
@@ -229,8 +236,9 @@ export class BattleService {
    * The next fight is a simulation (menu → Simuler un combat) played by this team: nothing it changes is kept (the
    * team's progress, its items and money are put back as they were when it ends).
    */
-  simulateNext(team: SimMember[]): void {
+  simulateNext(team: SimMember[], arena?: string): void {
     this.simTeam = team;
+    this.simArena = arena;
   }
 
   /**
@@ -266,7 +274,9 @@ export class BattleService {
     const db = loadDatabase();
     const group = db.groups.find((g) => g.id === groupId);
     const sim = this.simTeam;
+    const simArena = this.simArena;
     this.simTeam = null;
+    this.simArena = undefined;
     if (!game || !group || this.field) {
       onEnd("win");
       return;
@@ -324,6 +334,7 @@ export class BattleService {
     this.outcome = null;
     this.groupName = group.name;
     this.canFlee = group.canFlee;
+    this.enterArena(game, group, simArena);
     this.field = new BattleField(game, fighters);
     this.engine = new BattleEngine(
       fighters,
@@ -398,9 +409,43 @@ export class BattleService {
     });
   }
 
+  /**
+   * The fight's arena, if it has one (the group's, the map's, the dungeon's, the settings': arenaFor), shown in
+   * place of the map; the player's sprite, which is the middle of the fight, is put on its arrival point.
+   */
+  private enterArena(game: Game, group: DbGroup, chosen?: string): void {
+    const mapHelper = game.mapHelper;
+    const player = mapHelper?.meshes["player"];
+    const id =
+      chosen === undefined
+        ? arenaFor(group, mapHelper!.sceneMap, loadDatabase())
+        : chosen;
+    const arena = id && id !== ARENA_HERE ? loadMap(id) : null;
+    if (!mapHelper || !player || !arena) {
+      return;
+    }
+    this.arenaBack = player.position.clone();
+    player.position.copy(mapHelper.showArena(arena));
+    // (its shaders and pictures made ready behind the transition: no stutter when it is uncovered)
+    game.warmUp();
+  }
+
+  /** Back from the arena: the map is seen again, the player where it stood. */
+  private leaveArena(): void {
+    const mapHelper = this.game?.mapHelper;
+    if (!this.arenaBack || !mapHelper) {
+      return;
+    }
+    mapHelper.hideArena();
+    mapHelper.meshes["player"]?.position.copy(this.arenaBack);
+    this.arenaBack = null;
+    mapHelper.updateCameraAim();
+  }
+
   private close(result: BattleResult): void {
     const onEnd = this.onEnd;
     this.field?.dispose();
+    this.leaveArena();
     this.field = null;
     this.engine = null;
     this.outcome = null;

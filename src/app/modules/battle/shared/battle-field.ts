@@ -1,3 +1,4 @@
+import { FIGHT_AREA } from "../../game/shared/model/arena";
 import * as THREE from "three";
 import { CAMERA_LOOK, Game } from "../../game/shared/model/Game";
 import { SheetDirection } from "../../database-editor/shared/sprite-sheet";
@@ -7,9 +8,9 @@ import { SkillAnimPlayer } from "./skill-anim-player";
 import { Fighter } from "./battle-types";
 
 /** The enemies' area (its centre ahead of the team) and the team's line, in world units. */
-const FOE_AREA = { width: 90, depth: 40, ahead: 52 };
-const TEAM_SPACING = 26;
-const TEAM_BACK = 14;
+const FOE_AREA = FIGHT_AREA.foes;
+const TEAM_SPACING = FIGHT_AREA.teamSpacing;
+const TEAM_BACK = FIGHT_AREA.teamBack;
 /** The camera closer than on the map during a fight; closer still when aiming (towards the aimed one), its easing. */
 const FIGHT_ZOOM = 0.85;
 const FOCUS_ZOOM = 0.62;

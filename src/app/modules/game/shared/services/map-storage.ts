@@ -58,6 +58,7 @@ interface StoredMap {
   followers?: boolean;
   walls?: WallStyle;
   transition?: TransitionKind;
+  arena?: string;
   cutscenes?: Cutscene[];
   /** Every chunk of the map, in order. */
   chunks: StoredChunk[];
@@ -87,6 +88,8 @@ export interface MapSummary {
   walls?: WallStyle;
   /** Its own transition when the team comes to it (missing: the settings' one). */
   transition?: TransitionKind;
+  /** Its fights' arena (a map's id, "none": on the spot; missing: the dungeon's, the settings'). */
+  arena?: string;
   /** Size in chunks (columns × rows of the area its chunks cover). */
   cols: number;
   rows: number;
@@ -238,6 +241,7 @@ export function listMaps(): MapSummary[] {
     followers: stored[map.id] ? stored[map.id].followers : map.followers,
     walls: stored[map.id] ? stored[map.id].walls : map.walls,
     transition: stored[map.id] ? stored[map.id].transition : map.transition,
+    arena: stored[map.id] ? stored[map.id].arena : map.arena,
     inCode: true,
     edited: !!stored[map.id],
     ...gridSize(stored[map.id]?.chunks ?? map.chunks),
@@ -252,6 +256,7 @@ export function listMaps(): MapSummary[] {
       followers: map.followers,
       walls: map.walls,
       transition: map.transition,
+      arena: map.arena,
       inCode: false,
       edited: true,
       ...gridSize(map.chunks),
@@ -398,6 +403,9 @@ export function loadMap(id: string): SceneMap | null {
     ...((saved ? saved.transition : code!.transition)
       ? { transition: saved ? saved.transition : code!.transition }
       : {}),
+    ...((saved ? saved.arena : code!.arena)
+      ? { arena: saved ? saved.arena : code!.arena }
+      : {}),
     ...((saved ? saved.cutscenes : code!.cutscenes)?.length
       ? {
           cutscenes: structuredClone(
@@ -420,6 +428,7 @@ export function saveMap(map: SceneMap) {
     ...(map.followers === false ? { followers: false } : {}),
     ...(map.walls ? { walls: map.walls } : {}),
     ...(map.transition ? { transition: map.transition } : {}),
+    ...(map.arena ? { arena: map.arena } : {}),
     ...(map.cutscenes?.length ? { cutscenes: map.cutscenes } : {}),
     chunks: map.chunks.map(chunkData),
   };
@@ -488,6 +497,7 @@ export function exportMapFile(map: SceneMap): string {
     ...(map.followers === false ? ["  followers: false,"] : []),
     ...(map.walls ? [`  walls: '${map.walls}',`] : []),
     ...(map.transition ? [`  transition: '${map.transition}',`] : []),
+    ...(map.arena ? [`  arena: '${map.arena}',`] : []),
     ...(map.cutscenes?.length
       ? [`  cutscenes: ${JSON.stringify(map.cutscenes)},`]
       : []),
