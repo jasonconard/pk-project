@@ -30,7 +30,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   input listeners must respect it). `stick`, `touch-pad`, `message`, `update-prompt` (GitHub release check, live update).
 - `modules/game/`: `game.component` (main view, game mode / edit mode, editor panels opened over the game via
   `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
-  landscape/desktop, `editor-bar.selection.scss` the selected object's sheet), `game-menu`, `map-controls`, `map-manager`, `weather-panel`, `weather-catalog`,
+  landscape/desktop, `editor-bar.selection.scss` the selected object's sheet), `game-menu`, `map-controls`, `map-manager` (the maps in sections by kind or made by hand, `SceneMap.section`; a map's settings; `map-manager.settings.scss`), `weather-panel`, `weather-catalog`,
   `release-notes`, `game-saves` (saved games dialog), `agenda` (Menu → Agenda), `time-banner` (« Le soir tombe »), `links` (Menu → Liens), `link-toast` (« Le lien monte »), `gift-picker` (the Offrir action), `variables-test` (change the variables' values while playing),
   `teleport`, `event-editor` (an object's event window: trigger, conditions, the tree of actions and branches;
   `event-conditions/` and `event-action/` (one action's fields) components, `event-editor-data.ts` (`EventEditorData`,
