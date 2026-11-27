@@ -30,14 +30,24 @@ La nuit, l'équipe explore des donjons : des étages faits à la main ou tirés 
 | **Interrupteur** | Touche d'action : allume ou éteint un drapeau | Le drapeau ([Variables](08-variables.md)) |
 | **Porte fermée** | Bloque le passage ; s'ouvre avec la clé, ou disparaît quand le drapeau est vrai | La clé, le drapeau |
 | **Escalier** | Marcher dessus : l'étage suivant (après le dernier : la sortie) | — |
-| **Porte de salle** | Touche d'action : la salle voisine | — (reliée au hasard) |
+| **Porte de salle** | Touche d'action : la salle voisine | **Mène à** : une carte et sa porte d'arrivée (donjon fait à la main), ou au hasard (étage généré) |
 | **Cristal de sauvegarde** | Touche d'action : sauver la partie, sortir du donjon | — |
+| **Ennemi** | Marche sur la carte ; le combat commence quand il touche l'équipe | Son **groupe**, son **déplacement** avant de voir l'équipe (ronde autour de sa place, aller-retour gauche-droite ou haut-bas, immobile), jusqu'à combien de cases |
 
 Dans l'éditeur, les objets sont montrés tels qu'ils sont posés (coffres fermés, pièges cachés visibles, portes fermées).
 
 **Porte de salle dans une paroi inclinée** : posée sur une case au pied d'une paroi qui penche (carte au style **Roche inclinée** ou **Grotte**, ou paroi peinte avec un pinceau **Paroi**), la porte n'est plus une arche debout : c'est une **bouche de grotte dessinée sur la pente de la roche**, avec une ombre au sol devant elle. **Tourner** choisit le mur : nord (sans tourner), est, sud ou ouest. Le jeu lit la hauteur et la pente de la paroi derrière la porte ; garder la paroi droite sur trois cases pour que la bouche repose bien à plat. On arrive devant elle, côté salle.
 
 **Porte de salle sur un mur droit de côté** : tournée d'un quart de tour, la porte est une **ouverture sombre au sol**, d'une case. La poser dans une case creusée dans le mur (une encoche d'une case).
+
+## Un donjon fait à la main
+
+Pour maîtriser le parcours, tout se pose dans l'éditeur de cartes, rien n'est tiré au hasard :
+
+- **Un étage** est une carte faite à la main (fiche Donjon → étage → **Carte**). Mettre **0 ennemi** et **0 coffre** au hasard dans la fiche.
+- **Plusieurs cartes dans un étage** : poser des **Portes de salle** et régler leur **Mène à** (la carte, puis la porte d'arrivée). Régler aussi la porte de l'autre côté pour le retour. On arrive devant la porte d'arrivée.
+- **Les ennemis** : l'objet **Ennemi** de l'onglet Donjon. Dans l'éditeur il montre le premier ennemi de son groupe. En jeu, il marche selon son déplacement tant qu'il n'a pas vu l'équipe, puis la poursuit ; **Immobile** ne bouge jamais et ne poursuit pas (un boss). Un ennemi battu ne revient pas tant qu'on reste à cet étage. Hors d'un donjon, les objets Ennemi n'apparaissent pas.
+- **Coffres, escalier, cristal de sauvegarde** : posés à la main aussi.
 
 ## Les étages générés
 
@@ -46,7 +56,7 @@ Dans l'éditeur, les objets sont montrés tels qu'ils sont posés (coffres ferm�
 ## Dans le jeu
 
 - **Le bandeau** (sous l'horloge) : le donjon et l'étage, l'heure où il ferme, les ennemis qui restent.
-- **Les ennemis** se promènent autour de leur place. Chacun est dessiné avec la **planche de marche** du premier ennemi de son groupe (Base de données → Ennemis → **Marche sur la carte**) : tourné dans l'une des 8 directions où il va, animé quand il marche. Sans planche, c'est son image fixe, sans animation. S'ils voient l'équipe, un « ! » s'affiche et ils la poursuivent.
+- **Les ennemis** se promènent autour de leur place. Chacun est dessiné avec la **planche de marche** du premier ennemi de son groupe (Base de données → Ennemis → **Marche sur la carte**) : tourné dans l'une des 8 directions où il va, animé quand il marche. Sans planche, c'est son image fixe, sans animation. S'ils voient l'équipe, un « ! » s'affiche : ils restent surpris un peu moins d'une seconde, sans bouger, puis la poursuivent. Le combat commence quand ils la touchent.
   - **Frapper** (touche d'action devant un ennemi) : « Attaque surprise ! », les jauges de l'équipe partent en avance.
   - Un ennemi qui touche l'équipe **par derrière** : « Embuscade ! », les jauges des ennemis partent en avance (si son groupe peut attaquer en premier).
   - Sinon, le combat commence à égalité.
@@ -60,7 +70,7 @@ Dans l'éditeur, les objets sont montrés tels qu'ils sont posés (coffres ferm�
 Le jeu contient un donjon complet, à ouvrir dans les éditeurs pour voir comment tout s'assemble :
 
 - **L'accès** : l'entrée de grotte au sud-ouest de la ville (carte du monde), un objet avec un passage vers « Donjon : Grotte de cristal ».
-- **La fiche** (Base de données → Donjons) : toujours ouvert, météo **Brume de cristal**, 3 étages. « Ancienne mine » est une carte faite à la main (`grotte-de-cristal`), « Galeries » est généré deux fois de suite à partir de 4 salles (Salle des géodes, Couloir éboulé, Lac souterrain, Galerie des mineurs), « Cœur de cristal » est fait à la main, avec le Gardien de cristal.
+- **La fiche** (Base de données → Donjons) : toujours ouvert, météo **Brume de cristal**, arène de la grotte, 3 étages, tous faits à la main. « Ancienne mine » (`grotte-de-cristal`), puis « Galeries » : quatre cartes reliées par leurs portes (Salle des géodes, d'où l'on part ; à l'ouest la Galerie des mineurs, un cul-de-sac avec un coffre gardé par un golem immobile ; à l'est le Couloir éboulé, puis le Lac souterrain et son escalier), enfin « Cœur de cristal », où le Gardien attend, immobile. Les ennemis, les coffres et les cristaux de sauvegarde sont posés à la main ; rien n'est tiré au hasard.
 - **Les cartes** : murs en style **Grotte** (voir [04](04-reliefs.md#le-style-des-murs--roche-ou-grotte)), heure **figée à 23 h** pour que les cristaux et les lanternes brillent toujours.
 - **Les décors** (palette Objets, familles Cristaux, Grotte, Mine) : cristaux de 5 formes en 3 couleurs qui brillent dans leur couleur, rochers, stalagmites, et les restes de la mine (rails, wagonnets, étais, lanternes, pioches, caisses).
 - **Les ennemis** (Base de données → Ennemis et Groupes) : dix ennemis de la grotte, du Gluant cristallin au Gardien de cristal, l'élément **Terre**, leurs compétences et leur butin.

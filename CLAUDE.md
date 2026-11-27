@@ -85,7 +85,9 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `md-mine-*`… (one upright plane each, `tex.glow` = the night glow's colour; sources in `design-resources/cave/`), enemies
   `en-*` / groups `gr-cave-*` in the database.
 - Dungeons (`docs/editeur/12-donjons.md`): `game/shared/services/dungeon.service.ts` (entering, floors, generated rooms
-  linked by their doors, visible enemies, chests, traps, switches, locked doors, save point), `model/dungeon-object.ts`
+  linked by their doors, hand-made floors of several maps (room doors with a destination, `DungeonObject.to`, the
+  run's `map`), visible enemies (drawn at random or put by hand: the `dg:foe` object with its group and `FoeMove`,
+  `placedFoes`), chests, traps, switches, locked doors, save point), `model/dungeon-object.ts`
   (`dg:<kind>` objects of the editor's Donjon tab, `foe:<group>` enemies, pictures in `src/assets/dungeon/`),
   `model/dungeon-state.ts` (`pk-dungeon`: chests opened, the run), `game/dungeon-chip/`, `game/dungeon-try/` (Menu →
   Essayer un donjon: straight into a floor, with a team made for the try (`battle/team-setup/`), `DungeonService.tryOut`);
