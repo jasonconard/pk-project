@@ -41,7 +41,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
     (terrain, height, stairs, bucket strokes)),
     `map-storage` (maps in the browser), `game-map`, `scene`, `basic-mesh` (`makeModel`), `material`, `player`,
     `event` (`actionAt`, `armed`: enter / automatic events), `sequence` (plays the actions), `sfx` (synthesized sound
-    effects), `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
+    effects: games', fights', steps, creatures' voices; `playSound(id, preview, {pitch, gain})`), `game-music`, `game-saves` (saved game slots), `project-file` (`.pk`).
   - `shared/model/`: `MapHelper` (chunks, bounds, `refreshModels`; `ChunkGround` the painted ground, water, reliefs and stairs;
     `mesh-fading` objects fading near the camera / see-through), `Terrain`, `GroundMesh`, `SceneMap`,
     `SceneBuilding`, `SceneModel`, `ModelChoice` (`MODEL_CHOICES`, palette thumbnails), `ModelInstances`,
