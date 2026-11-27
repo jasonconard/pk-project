@@ -140,7 +140,8 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - Skill flows (`docs/editeur/22-deroule.md`): a skill or a weapon's attack plays in time, blocks on five tracks
   (`database-editor/shared/skill-flow.ts`: `SkillFlow`, defaults `skillFlow` / `attackFlow`); the engine's action has
   a clock from its strike (`strike`, `playFlow`, `land(action, percent, states)` in `battle-engine.ts`); several
-  hits share the sheet's power. The editor and its preview are still to do (mockup: `design/database.pen` 21, 22).
+  hits share the sheet's power. Edited in `database-editor/flow-editor/` (timeline, block settings, undo), opened by
+  `DatabaseStore.flowEdit`; its preview is a flat 2D scene drawn at a moment (`shared/flow-scene.ts`, pure).
 - `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
