@@ -14,6 +14,17 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.46',
+    date: '2026-11-27',
+    notes: [
+      'Le jeu a un calendrier (la date, les moments de la journée, les jours spéciaux, l\'Agenda) et des liens avec l\'équipe et les habitants, qui donnent des scènes et des bonus en combat.',
+      'La nuit, les donjons s\'ouvrent : des étages avec des ennemis visibles, des coffres, des pièges et leur propre musique.',
+      'Le jour, on peut acheter et vendre dans les boutiques, cultiver des plantes fantastiques, et l\'équipe marche derrière le joueur.',
+      'La nuit, les lampadaires, le feu de camp et la lanterne éclairent vraiment le sol.',
+      'Éditeur : cinématiques, mode test, modèles animés, zones d\'action et import de fichiers MIDI.',
+    ],
+  },
+  {
     version: '0.0.45',
     date: '2026-11-25',
     notes: [

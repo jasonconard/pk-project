@@ -577,6 +577,38 @@ export const PC_PALLET_TOWN: SceneChunk = {
       events: []
     },
     {
+      id: 'lamp-1',
+      modelId: 'lamp',
+      pos: { x: -24, y: 0, z: -36 },
+      passable: false,
+      canHide: false,
+      events: []
+    },
+    {
+      id: 'lamp-2',
+      modelId: 'lamp',
+      pos: { x: 24, y: 0, z: 88 },
+      passable: false,
+      canHide: false,
+      events: []
+    },
+    {
+      id: 'lamp-3',
+      modelId: 'lamp',
+      pos: { x: -24, y: 0, z: 88 },
+      passable: false,
+      canHide: false,
+      events: []
+    },
+    {
+      id: 'campfire-1',
+      modelId: 'campfire',
+      pos: { x: -72, y: 0, z: 64 },
+      passable: false,
+      canHide: false,
+      events: []
+    },
+    {
       id: 'flowers-1',
       modelId: 'flowers',
       pos: { x: -105, y: 0, z: 20 },
@@ -638,6 +670,14 @@ export const PC_PALLET_TOWN: SceneChunk = {
       pos: { x: -51, y: 0, z: 36 },
       passable: true,
       canHide: false,
+      events: []
+    },
+    {
+      id: 'windmill-1',
+      modelId: 'windmill',
+      pos: { x: 40, y: 0, z: 135 },
+      passable: false,
+      canHide: true,
       events: []
     }
   ],
