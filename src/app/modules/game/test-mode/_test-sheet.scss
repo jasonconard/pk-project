@@ -43,6 +43,12 @@
   font-size: 14px;
 }
 
+/* (on a low screen the sheet scrolls: its parts keep their height instead of being squashed, the cards above all,
+   whose hidden overflow would let them shrink to nothing) */
+.sheet > * {
+  flex-shrink: 0;
+}
+
 button {
   border: none;
   font: inherit;
