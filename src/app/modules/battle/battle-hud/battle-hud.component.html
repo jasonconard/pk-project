@@ -95,6 +95,7 @@
   @if (v.phase === "command" && menu() === "main" && ringPos(); as at) {
     <div
       class="ring"
+      [class.small]="small()"
       role="menu"
       aria-label="Commandes"
       [style.left.px]="at.x"

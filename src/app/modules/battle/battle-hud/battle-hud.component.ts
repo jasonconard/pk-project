@@ -39,7 +39,25 @@ const RING = {
   away: 170,
   dim: 0.55,
   below: 122,
+  edge: 170,
+  foot: 150,
 };
+/**
+ * The ring on a phone: icons at their drawn size (32 px, the chosen one twice that), closer together. Whole
+ * numbers only, the pixels stay sharp.
+ */
+const RING_SMALL: typeof RING = {
+  front: 2,
+  beside: 62,
+  rise: 4,
+  away: 104,
+  dim: 0.55,
+  below: 84,
+  edge: 100,
+  foot: 104,
+};
+/** A phone's screen, upright or lying. */
+const SMALL_SCREEN = "(max-width: 760px), (max-height: 520px)";
 
 interface CommandItem {
   kind: CommandKind | "magic" | "items";
@@ -116,12 +134,18 @@ export class BattleHudComponent {
       soon: !this.view()?.canFlee,
     },
   ]);
+  /** A phone's screen: the ring is drawn smaller. */
+  protected readonly small = signal(matchMedia(SMALL_SCREEN).matches);
+  private readonly ringSize = computed(() =>
+    this.small() ? RING_SMALL : RING
+  );
   /**
    * The commands on their ring around the fighter (design/combat.pen, « menu rotatif »): the chosen one in front,
    * big; its two neighbours beside it, smaller and half see-through; the others unseen, further on the ring. Turning
    * moves them all one place, each fading in or out on its way.
    */
   protected readonly ring = computed(() => {
+    const r = this.ringSize();
     const list = this.commands();
     const count = list.length;
     const chosen = this.selected() % count;
@@ -133,14 +157,14 @@ export class BattleHudComponent {
       const side = Math.sign(offset);
       let x = 0;
       let y = 0;
-      let scale = RING.front;
+      let scale = r.front;
       if (far === 1) {
-        x = side * RING.beside;
-        y = -RING.rise;
+        x = side * r.beside;
+        y = -r.rise;
         scale = 1;
       } else if (far > 1) {
-        x = side * RING.away || RING.away;
-        y = -RING.rise * 4;
+        x = side * r.away || r.away;
+        y = -r.rise * 4;
         scale = 0.7;
       }
       return {
@@ -148,7 +172,7 @@ export class BattleHudComponent {
         index,
         offset,
         seen: far <= 1,
-        opacity: [1, RING.dim, 0][Math.min(2, far)],
+        opacity: [1, r.dim, 0][Math.min(2, far)],
         transform: `translate(${x}px, ${y}px) scale(${scale})`,
       };
     });
@@ -159,13 +183,14 @@ export class BattleHudComponent {
   );
   /** Where the ring's front command is on the screen: under the fighter, kept inside the screen. */
   protected readonly ringPos = computed(() => {
+    const r = this.ringSize();
     const at = this.view()?.actorScreen;
     if (!at) {
       return null;
     }
     return {
-      x: Math.min(window.innerWidth - 170, Math.max(170, at.x)),
-      y: Math.min(window.innerHeight - 150, at.y + RING.below),
+      x: Math.min(window.innerWidth - r.edge, Math.max(r.edge, at.x)),
+      y: Math.min(window.innerHeight - r.foot, at.y + r.below),
     };
   });
 
@@ -214,6 +239,12 @@ export class BattleHudComponent {
   );
 
   constructor() {
+    const screen = matchMedia(SMALL_SCREEN);
+    const onScreen = () => this.small.set(screen.matches);
+    screen.addEventListener("change", onScreen);
+    inject(DestroyRef).onDestroy(() =>
+      screen.removeEventListener("change", onScreen)
+    );
     // A new turn (or none): back to the commands
     effect(() => {
       if (this.view()?.phase !== "command") {

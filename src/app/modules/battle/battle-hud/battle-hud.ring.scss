@@ -6,6 +6,8 @@
   position: absolute;
   width: 0;
   height: 0;
+  /* (over the team's cards: on a low screen the title comes down to them) */
+  z-index: 5;
   pointer-events: none;
   animation: menu-in 160ms ease-out;
 }
@@ -83,6 +85,33 @@
 
   &.soon b {
     color: #8a8d9c;
+  }
+}
+
+/* Phones: the icons at their drawn size (the chosen one twice that), the title smaller */
+.ring.small {
+  .slot {
+    left: -20px;
+    top: -20px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .icon {
+    left: 4px;
+    top: 4px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .ring-title {
+    top: 48px;
+    min-width: 110px;
+    padding: 3px 10px 5px;
+
+    b {
+      font-size: 16px;
+    }
   }
 }
 

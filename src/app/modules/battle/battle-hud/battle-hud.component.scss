@@ -413,13 +413,61 @@
   }
 }
 
-/* Phones: the weather under the gauge (which takes the width) */
-@media (max-width: 760px) {
+/* Phones and narrow screens: the weather under the gauge (which takes the width) */
+@media (max-width: 1100px), (max-height: 520px) {
   .weather {
     top: calc(72px + var(--safe-top));
     right: auto;
     left: calc(12px + var(--safe-left));
     height: 30px;
     font-size: 13px;
+  }
+}
+
+/* A phone lying: little height, so a thinner gauge with smaller medallions, the weather closer under it */
+@media (max-height: 520px) {
+  .gauge {
+    top: calc(8px + var(--safe-top));
+    height: 30px;
+  }
+
+  .track {
+    top: 7px;
+
+    .mark {
+      top: -3px;
+      height: 16px;
+    }
+
+    .label {
+      top: 18px;
+      font-size: 12px;
+    }
+  }
+
+  .token {
+    width: 28px;
+    height: 28px;
+
+    &.turn {
+      width: 34px;
+      height: 34px;
+    }
+
+    img {
+      scale: 1;
+    }
+  }
+
+  .weather {
+    top: calc(46px + var(--safe-top));
+    height: 26px;
+    padding: 0 8px;
+  }
+
+  .showcase {
+    top: calc(50px + var(--safe-top));
+    padding: 3px 20px 5px;
+    font-size: 22px;
   }
 }
