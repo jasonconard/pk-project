@@ -567,6 +567,7 @@ export class GameService {
       if (
         this.timeFlowState() &&
         !game.paused &&
+        !game.held &&
         !game.loading &&
         !isGameAsleep() &&
         !this.timeHeld(game)
@@ -753,6 +754,13 @@ export class GameService {
   /** Back from the music editor: the game plays the songs as they are now. */
   reloadMusic() {
     this.music.reload();
+  }
+
+  /** A window of the game menu opens (true) or the last one closes: the game waits meanwhile (see Game.held). */
+  setHeld(held: boolean) {
+    if (this.game) {
+      this.game.held = held;
+    }
   }
 
   togglePaused() {

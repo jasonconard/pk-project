@@ -61,6 +61,11 @@ export class Game {
   frame = 0;
   framePerSec = 0;
   paused = false;
+  /**
+   * A window of the game menu is open (the menu, the bag, the team, the plan…): the player, the enemies, the events
+   * and the clock wait, without the pause screen; the scene is still drawn (weather, moving parts).
+   */
+  held = false;
   /** The game's date: a day number (see game-calendar.ts), kept by GameService. */
   day = 0;
 

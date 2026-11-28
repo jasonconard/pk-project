@@ -60,6 +60,7 @@ import { AgendaComponent } from "./agenda/agenda.component";
 import { LinksComponent } from "./links/links.component";
 import { BagComponent } from "./bag/bag.component";
 import { TeamComponent } from "./team/team.component";
+import { MapPlanComponent } from "./map-plan/map-plan.component";
 import { LinkToastComponent } from "./link-toast/link-toast.component";
 import { GiftPickerComponent } from "./gift-picker/gift-picker.component";
 import { ShopComponent } from "./shop/shop.component";
@@ -98,6 +99,7 @@ import { ActionZone } from "./shared/model/action-zone";
     LinksComponent,
     BagComponent,
     TeamComponent,
+    MapPlanComponent,
     LinkToastComponent,
     GiftPickerComponent,
     ShopComponent,
@@ -195,6 +197,7 @@ export class GameComponent {
   protected readonly linksOpen = signal(false);
   protected readonly bagOpen = signal(false);
   protected readonly teamOpen = signal(false);
+  protected readonly planOpen = signal(false);
   /** The Offrir action of an event: the NPC to give a gift to (null: none asked). */
   protected readonly giftFor = signal<string | null>(null);
   /** The crops: the seeds window, the harvest's message. */
@@ -256,6 +259,18 @@ export class GameComponent {
     );
     // An editor over the game: the game sleeps (no frames, moves, time, sounds, music, keys) until it is closed
     effect(() => setGameCovered(!!this.editorPanel()));
+    // The game menu or one of its windows open: the game waits (no enemy comes while reading the plan)
+    effect(() =>
+      this.gameService.setHeld(
+        this.menuOpen() ||
+          this.savesOpen() ||
+          this.agendaOpen() ||
+          this.linksOpen() ||
+          this.bagOpen() ||
+          this.teamOpen() ||
+          this.planOpen()
+      )
+    );
     // The map editor closed (B) or another map: the cutscene editor closes too (not while one of its cutscenes plays)
     effect(() => {
       const host = this.cutsceneHost();
@@ -306,6 +321,7 @@ export class GameComponent {
         !this.linksOpen() &&
         !this.bagOpen() &&
         !this.teamOpen() &&
+        !this.planOpen() &&
         !this.variablesTestOpen() &&
         !this.battleSimOpen() &&
         !this.testListOpen() &&
@@ -465,6 +481,11 @@ export class GameComponent {
   protected openTeam(): void {
     this.menuOpen.set(false);
     this.teamOpen.set(true);
+  }
+
+  protected openPlan(): void {
+    this.menuOpen.set(false);
+    this.planOpen.set(true);
   }
 
   protected shopDone(): void {

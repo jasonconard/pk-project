@@ -72,7 +72,7 @@ interface MenuEntry {
   /** What the tool brings, shown in the tooltip. */
   soon: string;
   /** What it opens; none yet: greyed. */
-  action?: "saves" | "agenda" | "links" | "bag" | "team";
+  action?: "saves" | "agenda" | "links" | "bag" | "team" | "plan";
 }
 
 const ENTRIES: MenuEntry[] = [
@@ -100,7 +100,12 @@ const ENTRIES: MenuEntry[] = [
     soon: "Les jours, les activités, les donjons ouverts",
     action: "agenda",
   },
-  { icon: LucideMap, label: "Carte", soon: "La carte du monde" },
+  {
+    icon: LucideMap,
+    label: "Carte",
+    soon: "Le plan du lieu",
+    action: "plan",
+  },
   {
     icon: LucideSave,
     label: "Sauver",
@@ -165,6 +170,8 @@ export class GameMenuComponent {
   readonly bag = output<void>();
   /** The team: each member's sheet and equipment. */
   readonly team = output<void>();
+  /** The plan of the map the player is on. */
+  readonly plan = output<void>();
   /** The variables test panel: the menu closes, the panel opens. */
   readonly variablesTest = output<void>();
   readonly battleSim = output<void>();
@@ -308,6 +315,11 @@ export class GameMenuComponent {
       }
       case "team": {
         this.team.emit();
+
+        break;
+      }
+      case "plan": {
+        this.plan.emit();
 
         break;
       }

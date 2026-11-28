@@ -313,7 +313,7 @@ export class GameMapService {
       time: game.steps.time - game.steps.length,
       pos: (kept?.pos ?? new THREE.Vector3()).copy(sprite.position),
     });
-    if (game.paused) {
+    if (game.paused || game.held) {
       return;
     }
     this.lights.update(mapHelper, sprite);

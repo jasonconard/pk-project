@@ -1,0 +1,102 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="dialog sheet"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="plan-title"
+>
+  <div class="grip"></div>
+  <header>
+    <span class="badge"><svg lucideMap></svg></span>
+    <span class="titles">
+      <h2 id="plan-title">{{ title() }}</h2>
+      <small>{{ kind() }}</small>
+    </span>
+    <button
+      type="button"
+      class="close"
+      aria-label="Fermer la carte"
+      (click)="closed.emit()"
+    >
+      <svg lucideX></svg>
+    </button>
+  </header>
+
+  <div class="plan">
+    <canvas
+      #view
+      aria-label="Plan du lieu"
+      (pointerdown)="dragStart($event)"
+      (pointermove)="dragMove($event)"
+      (pointerup)="dragEnd($event)"
+      (pointercancel)="dragEnd($event)"
+      (wheel)="wheel($event)"
+    ></canvas>
+    @if (ready()) {
+      @let m = marks();
+      @for (p of m.passages; track p.n) {
+        @if (p.seen) {
+          <span class="mark" [style.left.px]="p.x" [style.top.px]="p.y">{{
+            p.n
+          }}</span>
+        }
+      }
+      @if (m.player.seen) {
+        <span
+          class="me"
+          [style.left.px]="m.player.x"
+          [style.top.px]="m.player.y"
+        ></span>
+      }
+    } @else {
+      <p class="wait">Dessin du plan…</p>
+    }
+    <div class="zoom">
+      <button
+        type="button"
+        aria-label="Zoomer"
+        [disabled]="!canZoomIn()"
+        (click)="zoomBy(1)"
+      >
+        <svg lucidePlus></svg>
+      </button>
+      <button
+        type="button"
+        aria-label="Dézoomer"
+        [disabled]="!canZoomOut()"
+        (click)="zoomBy(-1)"
+      >
+        <svg lucideMinus></svg>
+      </button>
+      <button type="button" aria-label="Revenir au joueur" (click)="recenter()">
+        <svg lucideLocateFixed></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="list">
+    <p class="here"><span class="me still"></span> Vous êtes ici</p>
+    @if (passages().length) {
+      <h3>Passages</h3>
+      @for (p of passages(); track p.n) {
+        <button type="button" class="passage" (click)="show(p)">
+          <span class="mark still">{{ p.n }}</span>
+          <span class="texts">
+            <b>{{ p.name }}</b>
+            @if (p.kind) {
+              <small>{{ p.kind }}</small>
+            }
+          </span>
+          <svg lucideDoorOpen></svg>
+        </button>
+      }
+    }
+  </div>
+
+  <p class="foot">
+    Glisser pour déplacer le plan.
+    @if (passages().length) {
+      Toucher un passage de la liste le montre.
+    }
+  </p>
+</section>

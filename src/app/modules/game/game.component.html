@@ -200,6 +200,7 @@
     (links)="openLinks()"
     (bag)="openBag()"
     (team)="openTeam()"
+    (plan)="openPlan()"
     (variablesTest)="openVariablesTest()"
     (battleSim)="openBattleSim()"
     (testMode)="openTestList()"
@@ -242,6 +243,10 @@
 
 @if (teamOpen()) {
   <game-team (closed)="teamOpen.set(false)" />
+}
+
+@if (planOpen() && hud()?.mapHelper; as mapHelper) {
+  <game-map-plan [mapHelper]="mapHelper" (closed)="planOpen.set(false)" />
 }
 
 @if (farm.plantAsk()) {
