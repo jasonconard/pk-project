@@ -2,6 +2,7 @@
 <div class="outcome-veil" (click)="closed.emit()"></div>
 <section
   class="outcome"
+  [class.lose]="o.result !== 'win'"
   role="dialog"
   [attr.aria-label]="o.result === 'win' ? 'Victoire' : 'Défaite'"
   (click)="closed.emit()"

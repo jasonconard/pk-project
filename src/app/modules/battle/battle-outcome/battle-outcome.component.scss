@@ -1,18 +1,19 @@
-/* The end window (design/combat.pen, « Victoire »), over the fight; its colors are the fight interface's
-   (battle-hud). */
+@use '../pixel';
+
+/* The end window, over the fight: in pixel art like the rest of the fight's interface (design/combat.pen,
+   « interface pixel art »): a slate panel with a gold trim, the title as a gold label on its top edge. */
 
 :host {
-  /* (its own colours until it is redrawn in pixel art like the rest of the fight's interface) */
-  --box: #fff;
-  --box-border: #eee;
-  --ink: #1b1b1f;
-  --ink-soft: #6b6e7a;
-  --pick: #1e90ff;
-  --shadow: 1px 2px 3px #00000026;
+  --soft: #b9c0d8;
+  --good: #5fd68a;
+  --bad: #ff9a8a;
+  --line: #2f3a5c;
+  --inset: #141a2c;
+
+  @include pixel.font;
 
   display: contents;
-  font-family: Roboto, sans-serif;
-  color: var(--ink);
+  color: pixel.$text;
 }
 
 @keyframes veil-in {
@@ -21,12 +22,17 @@
   }
 }
 
-/* ---------- The end window (design/combat.pen, « Victoire ») ---------- */
+@keyframes outcome-in {
+  from {
+    opacity: 0;
+    translate: -50% calc(-50% + 12px);
+  }
+}
 
 .outcome-veil {
   position: absolute;
   inset: 0;
-  background: #0a0c1866;
+  background: #0a0c1899;
   pointer-events: auto;
   animation: veil-in 200ms ease-out;
 }
@@ -36,47 +42,57 @@
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  width: min(480px, calc(100% - 32px));
+  width: min(500px, calc(100% - 32px));
   max-height: calc(100% - 32px);
   overflow-y: auto;
-  padding-top: 16px;
+  padding-top: 18px;
   pointer-events: auto;
   cursor: pointer;
+  animation: outcome-in 240ms steps(4);
 
   .outcome-title {
     position: absolute;
     top: 0;
-    left: 20px;
+    left: 50%;
+    translate: -50% 0;
     z-index: 1;
-    height: 32px;
+    height: 36px;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 0 12px;
-    border-radius: 8px;
-    border: 1.5px solid #fafafa;
-    background: var(--box);
-    box-shadow: var(--shadow);
-    font-size: 14px;
+    gap: 8px;
+    padding: 0 18px 2px;
+    border: 3px solid pixel.$ink;
+    background: pixel.$gold;
+    box-shadow: inset 0 0 0 2px pixel.$text-gold, 0 3px 0 #0e122099;
+    color: pixel.$ink;
+    font-size: 20px;
+    font-weight: 700;
+    white-space: nowrap;
 
     svg {
-      font-size: 14px;
-      color: #c9a227;
+      font-size: 16px;
     }
+  }
+
+  /* Defeat: the label turns red */
+  &.lose .outcome-title {
+    background: #b0413e;
+    box-shadow: inset 0 0 0 2px #e0554a, 0 3px 0 #0e122099;
+    color: pixel.$text;
   }
 }
 
 .outcome-box {
+  @include pixel.panel;
+
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 22px 16px 12px;
-  border-radius: 12px;
-  border: 2px solid var(--box-border);
-  background: var(--box);
-  box-shadow: var(--shadow);
+  padding: 30px 14px 12px;
 }
 
+/* What the team won: one inset box each */
 .loot {
   display: flex;
   flex-wrap: wrap;
@@ -85,40 +101,44 @@
 
 .loot-chip {
   flex: 1;
-  min-width: 110px;
+  min-width: 120px;
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 8px;
-  border-radius: 7px;
-  background: #f5f6f9;
-  font-size: 13px;
+  gap: 6px;
+  padding: 5px 9px 7px;
+  border: 2px solid var(--line);
+  background: var(--inset);
+  font-size: 15px;
 
   svg {
-    font-size: 12px;
-    color: var(--ink-soft);
+    font-size: 13px;
+    color: pixel.$gold;
   }
 
   img {
-    width: 13px;
-    height: 13px;
+    width: 16px;
+    height: 16px;
     image-rendering: pixelated;
   }
 
   .loot-label {
-    font-size: 10px;
-    color: var(--ink-soft);
+    font-size: 13px;
+    color: var(--soft);
   }
 
+  /* (numbers are never bold: the pixel font's bold 2 and 3 read as 8) */
   b {
     margin-left: auto;
+    font-weight: 500;
+    color: pixel.$text-gold;
   }
 }
 
 .lost {
   margin: 0;
-  font-size: 13px;
-  color: var(--ink-soft);
+  font-size: 15px;
+  color: var(--soft);
+  text-align: center;
 }
 
 .members {
@@ -133,30 +153,30 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 7px 9px;
-  border-radius: 8px;
-  background: #f5f6f9;
+  padding: 6px 8px 8px;
+  border: 2px solid var(--line);
+  background: var(--inset);
 
   &.free {
     align-items: center;
     justify-content: center;
-    border: 1.5px solid #e3e5eb;
+    border-style: dashed;
     background: none;
-    color: #b4b7c2;
-    font-size: 10px;
+    color: #6a7396;
+    font-size: 13px;
   }
 }
 
 .member-top {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 
   img {
-    width: 30px;
-    height: 30px;
-    border-radius: 5px;
-    // (a 96 px portrait shrunk: smooth, not pixelated)
+    width: 32px;
+    height: 32px;
+    border: 2px solid pixel.$gold-dark;
+    image-rendering: pixelated;
   }
 
   .member-names {
@@ -166,68 +186,87 @@
     flex-direction: column;
 
     strong {
-      font-size: 12px;
+      font-size: 15px;
     }
 
     small {
-      font-size: 9.5px;
-      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--soft);
     }
   }
 
   .level-up, .fallen {
-    padding: 2px 5px;
-    border-radius: 5px;
-    font-size: 9.5px;
-    font-weight: 700;
+    padding: 1px 6px 3px;
+    border: 2px solid currentcolor;
+    font-size: 13px;
+    font-weight: 500;
   }
 
   .level-up {
-    background: #4cc06a26;
-    color: #2f9a4c;
+    color: var(--good);
+    animation: level-up 0.5s steps(2, jump-none) 4;
   }
 
   .fallen {
-    background: #e0554a1f;
-    color: var(--foe);
+    color: var(--bad);
+  }
+}
+
+@keyframes level-up {
+  50% {
+    color: #fff;
   }
 }
 
 .gains {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 8px;
+  gap: 3px 10px;
 }
 
 .gain {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ink-soft);
+  gap: 4px;
+  font-size: 13px;
+  color: var(--soft);
 
   img {
-    width: 11px;
-    height: 11px;
+    width: 12px;
+    height: 12px;
     image-rendering: pixelated;
   }
 
   b {
-    color: #2f9a4c;
+    font-weight: 500;
+    color: var(--good);
   }
 }
 
 .learned {
-  font-size: 10.5px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--pick);
+  color: pixel.$text-gold;
 }
 
 .continue {
   align-self: flex-end;
-  font-size: 10px;
-  color: var(--ink-soft);
+  font-size: 13px;
+  color: var(--soft);
+  animation: continue-blink 1s steps(2, jump-none) infinite;
+}
+
+@keyframes continue-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outcome, .level-up, .continue {
+    animation: none;
+  }
 }
 
 /* Phones: the members in a column, smaller */

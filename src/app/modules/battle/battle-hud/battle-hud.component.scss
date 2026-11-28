@@ -300,6 +300,7 @@
 
   .detail {
     font-size: 13px;
+    font-weight: 500;
     color: var(--soft);
   }
 
@@ -356,7 +357,8 @@
   translate: -50% -50%;
   color: #fff;
   font-size: 28px;
-  font-weight: 700;
+  /* (not bold: the pixel font's bold 2 and 3 read as 8) */
+  font-weight: 500;
   text-shadow: 2px 0 0 pixel.$ink, -2px 0 0 pixel.$ink, 0 2px 0 pixel.$ink, 0 -2px 0 pixel.$ink, 2px 3px 0 pixel.$ink;
   white-space: nowrap;
   animation: popup-rise 1s ease-out forwards;
