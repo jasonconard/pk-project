@@ -23,7 +23,7 @@ import { WEATHER_CHOICES } from "../../game/shared/weather/Weather";
 /** Team cards at the bottom: always 4 places. */
 const TEAM_PLACES = 4;
 /** The commands' column: its width, and the gap from the fighter (css px). */
-const MENU_WIDTH = 160;
+const MENU_WIDTH = 200;
 const MENU_GAP = 34;
 /** A touch this close to a fighter on the screen (css px) aims at it. */
 const PICK_RADIUS = 70;
@@ -66,7 +66,11 @@ interface CommandItem {
     LucideSun,
   ],
   templateUrl: "./battle-hud.component.html",
-  styleUrls: ["./battle-hud.component.scss", "./battle-hud.ring.scss"],
+  styleUrls: [
+    "./battle-hud.component.scss",
+    "./battle-hud.ring.scss",
+    "./battle-hud.team.scss",
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BattleHudComponent {

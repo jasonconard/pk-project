@@ -2,7 +2,17 @@
    (battle-hud). */
 
 :host {
+  /* (its own colours until it is redrawn in pixel art like the rest of the fight's interface) */
+  --box: #fff;
+  --box-border: #eee;
+  --ink: #1b1b1f;
+  --ink-soft: #6b6e7a;
+  --pick: #1e90ff;
+  --shadow: 1px 2px 3px #00000026;
+
   display: contents;
+  font-family: Roboto, sans-serif;
+  color: var(--ink);
 }
 
 @keyframes veil-in {
