@@ -147,7 +147,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `DatabaseStore.flowEdit`; its preview is a flat 2D scene drawn at a moment (`shared/flow-scene.ts`, pure).
 - Bag (`docs/editeur/23-sac.md`): Menu → Sac, `game/bag/` the window, `model/bag.ts` (items carried by kind, `previewUse` /
   `useItem` outside a fight: heal, cure, `MemberProgress.statUps` raised for good, element experience; `dropItem`);
-  `game/shared/_item-sheet.scss` the look shared with the shop (`--accent`). Équipe and Carte menus still to come.
+  `game/shared/_item-sheet.scss` the look shared with the shop and the team menu (`--accent`).
+- Team menu (`docs/editeur/24-menu-equipe.md`): Menu → Équipe, `game/team/` the window, `model/team.ts` (`memberCard`,
+  `memberSheet`, `equipChoices`); the equipment worn in the game is `MemberProgress.equipment` (`party.ts`: `asWorn`
+  gives the character wearing it — use it before `characterStats` / `wornItems` for a team member; `equip` swaps
+  with the bag). The Carte menu is still to come.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
 

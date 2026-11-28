@@ -33,7 +33,7 @@ Ce que font les effets hors combat :
 
 Les autres effets (dégâts, donner un état, bonus de quelques tours) ne servent qu'en combat.
 
-Un objet sans bouton Utiliser dit pourquoi : il ne s'utilise qu'en combat, il s'utilise sur la carte (les graines), il s'équipe depuis le menu Équipe, ou il s'offre à un habitant.
+Un objet sans bouton Utiliser dit pourquoi : il ne s'utilise qu'en combat, il s'utilise sur la carte (les graines), il s'équipe depuis le [menu Équipe](24-menu-equipe.md), ou il s'offre à un habitant.
 
 ## Jeter un objet
 

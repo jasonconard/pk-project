@@ -27,6 +27,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 21. [Arènes de combat](21-arenes.md) : un lieu ouvert montré à la place du décor pendant un combat ; une arène par groupe d'ennemis, par lieu, par donjon ou pour tout le jeu.
 22. [Le déroulé d'une compétence](22-deroule.md) : animations du lanceur, effets, sons et coups placés dans le temps ; plusieurs coups qui se partagent la puissance.
 23. [Le sac](23-sac.md) : Menu → Sac, les objets portés par sorte, les utiliser hors combat sur un membre de l'équipe, les jeter.
+24. [Le menu Équipe](24-menu-equipe.md) : Menu → Équipe, la fiche de chaque membre (stats, éléments, compétences) et son équipement, changé avec les objets du sac.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 
