@@ -1,5 +1,5 @@
 import { loadDatabase } from "./database-storage";
-import { characterStats, DbCharacter, statAt } from "./database";
+import { characterStats, DbCharacter, statAt, StatId } from "./database";
 import {
   cachedFromStorage,
   readJson,
@@ -28,6 +28,8 @@ export interface MemberProgress {
   mp: number;
   states: string[];
   growth: Record<string, { level: number; points: number }>;
+  /** Stats raised for good by items (a seed of strength). */
+  statUps?: Partial<Record<StatId, number>>;
 }
 
 export interface PartyState {
@@ -234,7 +236,7 @@ export function healTeam(): void {
       continue;
     }
     const p = memberProgress(c);
-    const stats = characterStats(c, p.level, db);
+    const stats = characterStats(c, p.level, db, p.statUps);
     healed[id] = { ...p, hp: stats.hp, mp: stats.mp, states: [] };
   }
   saveProgress(healed);
@@ -250,7 +252,7 @@ export function hurtTeam(percent: number): void {
       continue;
     }
     const p = memberProgress(c);
-    const max = characterStats(c, p.level, db).hp;
+    const max = characterStats(c, p.level, db, p.statUps).hp;
     const loss = Math.ceil((max * percent) / 100);
     hurt[id] = { ...p, hp: Math.max(1, p.hp - loss) };
   }

@@ -1200,10 +1200,11 @@ export function wornItems(c: DbCharacter, db: GameDatabase): DbItem[] {
 export function characterStats(
   c: DbCharacter,
   level: number,
-  db: GameDatabase
+  db: GameDatabase,
+  ups?: Partial<Record<StatId, number>>
 ): Record<StatId, number> {
   const stats = Object.fromEntries(
-    STATS.map((s) => [s.id, statAt(c, s.id, level)])
+    STATS.map((s) => [s.id, statAt(c, s.id, level) + (ups?.[s.id] ?? 0)])
   ) as Record<StatId, number>;
   for (const item of wornItems(c, db)) {
     item.bonuses?.forEach((b) => (stats[b.stat] += b.amount));

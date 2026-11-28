@@ -91,7 +91,7 @@ function teamFighter(
   p: MemberProgress,
   db: GameDatabase
 ): Fighter {
-  const stats = characterStats(c, p.level, db);
+  const stats = characterStats(c, p.level, db, p.statUps);
   // The social link's bonuses reached: stats in %, skills learned (the element / weapon experience is given once)
   const bonuses = memberLinkBonuses(c, linkState(c.id, db).level);
   const percent: Partial<Record<StatId, number>> = {};
@@ -559,9 +559,9 @@ export class BattleService {
       .map((s) => s.id);
     const gains: MemberOutcome["gains"] = [];
     if (xp > 0 && !fallen) {
-      const maxBefore = characterStats(c, p.level, db);
+      const maxBefore = characterStats(c, p.level, db, p.statUps);
       gainXp(c, p, xp);
-      const maxAfter = characterStats(c, p.level, db);
+      const maxAfter = characterStats(c, p.level, db, p.statUps);
       // A level up adds its new PV / PM
       p.hp = Math.min(maxAfter.hp, p.hp + maxAfter.hp - maxBefore.hp);
       p.mp = Math.min(maxAfter.mp, p.mp + maxAfter.mp - maxBefore.mp);

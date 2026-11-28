@@ -1,0 +1,273 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="dialog sheet"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="bag-title"
+>
+  <div class="grip"></div>
+  @if (using(); as item) {
+    <header>
+      <button
+        type="button"
+        class="badge"
+        aria-label="Retour au sac"
+        (click)="leaveUse()"
+      >
+        <svg lucideArrowLeft></svg>
+      </button>
+      <span class="titles">
+        <h2 id="bag-title">Utiliser {{ item.name }}</h2>
+        <small>{{ item.note }} Il en reste {{ left() }}.</small>
+      </span>
+      <button
+        type="button"
+        class="close"
+        aria-label="Fermer le sac"
+        (click)="closed.emit()"
+      >
+        <svg lucideX></svg>
+      </button>
+    </header>
+
+    <div class="list">
+      @for (m of members(); track m.c.id) {
+        <button
+          type="button"
+          class="member"
+          [class.selected]="
+            m.preview.useful && (whole() || target() === m.c.id)
+          "
+          [class.off]="!m.preview.useful"
+          [disabled]="!m.preview.useful || whole()"
+          (click)="target.set(m.c.id)"
+        >
+          @if (m.c.portrait ?? m.c.icon; as pic) {
+            <img class="portrait" [src]="pic" alt="" />
+          }
+          <span class="who">
+            <span class="name">
+              <b>{{ m.c.name }}</b>
+              <small>Niv. {{ m.level }}</small>
+            </span>
+            @for (
+              bar of [
+                { name: "PV", kind: "hp", b: m.preview.hp },
+                { name: "PM", kind: "mp", b: m.preview.mp },
+              ];
+              track bar.kind
+            ) {
+              <span class="bar" [class]="'bar ' + bar.kind">
+                <b>{{ bar.name }}</b>
+                <span class="track">
+                  <i
+                    class="gain"
+                    [style.width.%]="percent(bar.b.to, bar.b.max)"
+                  ></i>
+                  <i [style.width.%]="percent(bar.b.from, bar.b.max)"></i>
+                </span>
+                @if (bar.b.to > bar.b.from) {
+                  <span class="value up"
+                    >{{ bar.b.from }} → {{ bar.b.to }}</span
+                  >
+                } @else {
+                  <span class="value">{{ bar.b.from }} / {{ bar.b.max }}</span>
+                }
+              </span>
+            }
+            @if (m.preview.gains.length) {
+              <small class="gains">{{ m.preview.gains.join(" · ") }}</small>
+            } @else if (m.preview.why) {
+              <small>{{ m.preview.why }}</small>
+            }
+          </span>
+        </button>
+      } @empty {
+        <p class="empty">Personne dans l'équipe.</p>
+      }
+    </div>
+
+    <div class="acts">
+      <button
+        type="button"
+        class="go"
+        [disabled]="aimed().length === 0"
+        (click)="use()"
+      >
+        <svg lucideHandHeart></svg>
+        @if (aimed().length === 0) {
+          Personne n'en a besoin
+        } @else if (whole()) {
+          Utiliser sur toute l'équipe
+        } @else {
+          Utiliser sur {{ aimed()[0].c.name }}
+        }
+      </button>
+    </div>
+
+    <p class="foot">
+      @if (notice()) {
+        <b>{{ notice() }}</b>
+      } @else {
+        La partie claire d'une barre est ce que l'objet rend. Un membre qui n'en
+        a pas besoin est grisé.
+      }
+    </p>
+  } @else {
+    <header>
+      <span class="badge"><svg lucideBackpack></svg></span>
+      <span class="titles">
+        <h2 id="bag-title">Sac</h2>
+        <small>{{ total() }} objet{{ total() > 1 ? "s" : "" }}</small>
+      </span>
+      <span class="money" title="Votre argent">
+        <svg lucideCoins></svg>
+        {{ money().toLocaleString("fr-FR") }}
+      </span>
+      <button
+        type="button"
+        class="close"
+        aria-label="Fermer le sac"
+        (click)="closed.emit()"
+      >
+        <svg lucideX></svg>
+      </button>
+    </header>
+
+    <div class="tabs" role="tablist">
+      @for (t of tabs; track t.id) {
+        <button
+          type="button"
+          role="tab"
+          [class.on]="tab() === t.id"
+          [attr.aria-selected]="tab() === t.id"
+          (click)="setTab(t.id)"
+        >
+          @switch (t.id) {
+            @case ("consumable") {
+              <svg lucideFlaskConical></svg>
+            }
+            @case ("equipment") {
+              <svg lucideShield></svg>
+            }
+            @case ("key") {
+              <svg lucideKeyRound></svg>
+            }
+            @default {
+              <svg lucideGift></svg>
+            }
+          }
+          {{ t.label }}
+        </button>
+      }
+    </div>
+
+    <div class="list">
+      @for (line of lines(); track line.item.id) {
+        @let open = selected() === line.item.id;
+        <div
+          class="line"
+          [class.selected]="open"
+          [class.danger]="open && dropping()"
+        >
+          <button
+            type="button"
+            class="pick"
+            [attr.aria-expanded]="open"
+            (click)="select(line.item.id)"
+          >
+            <span class="icon">
+              @if (line.item.icon) {
+                <img [src]="line.item.icon" alt="" />
+              } @else {
+                <svg lucidePackage></svg>
+              }
+            </span>
+            <span class="texts">
+              <b>{{ line.item.name }}</b>
+              <small>{{ line.item.note }}</small>
+            </span>
+            <b class="have">×{{ line.count }}</b>
+          </button>
+          @if (open && dropping()) {
+            <div class="buy">
+              <button
+                type="button"
+                class="step"
+                aria-label="Un de moins"
+                [disabled]="count() <= 1"
+                (click)="step(-1, line.count)"
+              >
+                <svg lucideMinus></svg>
+              </button>
+              <b class="count">{{ count() }}</b>
+              <button
+                type="button"
+                class="step"
+                aria-label="Un de plus"
+                [disabled]="count() >= line.count"
+                (click)="step(1, line.count)"
+              >
+                <svg lucidePlus></svg>
+              </button>
+              <button
+                type="button"
+                class="go red"
+                (click)="drop(line.item, line.count)"
+              >
+                <svg lucideTrash></svg> Jeter {{ count() }}
+              </button>
+            </div>
+            <div class="buy">
+              <button
+                type="button"
+                class="go soft"
+                (click)="dropping.set(false)"
+              >
+                <svg lucideX></svg> Annuler
+              </button>
+            </div>
+          } @else if (open) {
+            @if (line.usable || line.droppable) {
+              <div class="buy">
+                @if (line.usable) {
+                  <button
+                    type="button"
+                    class="go"
+                    (click)="startUse(line.item)"
+                  >
+                    <svg lucideHandHeart></svg> Utiliser
+                  </button>
+                }
+                @if (line.droppable) {
+                  <button
+                    type="button"
+                    class="go red-soft"
+                    (click)="dropping.set(true); count.set(1)"
+                  >
+                    <svg lucideTrash></svg> Jeter
+                  </button>
+                }
+              </div>
+            }
+            @if (line.hint) {
+              <small class="hint">{{ line.hint }}</small>
+            }
+          }
+        </div>
+      } @empty {
+        <p class="empty">Rien de cette sorte dans le sac.</p>
+      }
+    </div>
+
+    <p class="foot">
+      @if (notice()) {
+        <b>{{ notice() }}</b>
+      } @else if (tab() === "key") {
+        Les objets clés servent à l'histoire : ils ne se jettent pas.
+      } @else {
+        Toucher un objet pour l'utiliser ou le jeter. Un objet jeté est perdu.
+      }
+    </p>
+  }
+</section>

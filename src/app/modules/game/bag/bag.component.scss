@@ -1,0 +1,176 @@
+@use '../shared/item-sheet';
+
+// The bag (design/main-view.pen, Sac): the shared sheet of items, in light blue; throwing away is red
+:host {
+  --accent: #8fd0ff;
+  --on-accent: #06202f;
+  --red: #ff6b6b;
+  --hp: #5fd68a;
+  --mp: #5aa8ff;
+}
+
+.badge {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(143, 208, 255, 0.15);
+  color: var(--accent);
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.tabs button {
+  gap: 5px;
+  font-size: 13px;
+}
+
+.have {
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.line.danger {
+  box-shadow: inset 0 0 0 1.5px var(--red);
+}
+
+.buy + .buy {
+  margin-top: -4px;
+}
+
+.go {
+  &.red {
+    background: var(--red);
+    color: #2b0707;
+  }
+
+  &.red-soft {
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff9a9a;
+  }
+
+  &.soft {
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+  }
+}
+
+.hint {
+  padding: 0 12px 12px;
+  font-size: 11px;
+  color: var(--dim);
+}
+
+// Using an item: the team, each member's bars before and after
+.member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--chip);
+  box-shadow: inset 0 0 0 1.5px transparent;
+  text-align: left;
+
+  &.selected {
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+  }
+
+  &.off {
+    opacity: 0.5;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  small {
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  .gains {
+    color: var(--accent);
+    font-weight: 600;
+  }
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+
+  b {
+    font-size: 15px;
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+
+  > b {
+    width: 20px;
+  }
+
+  .track {
+    position: relative;
+    flex: 1;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.35);
+
+    i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 3px;
+    }
+
+    .gain {
+      background: #fff;
+    }
+  }
+
+  .value {
+    min-width: 62px;
+    text-align: right;
+    color: var(--dim);
+
+    &.up {
+      color: #fff;
+      font-weight: 700;
+    }
+  }
+
+  &.hp {
+    > b { color: var(--hp); }
+    .track i:not(.gain) { background: var(--hp); }
+  }
+
+  &.mp {
+    > b { color: var(--mp); }
+    .track i:not(.gain) { background: var(--mp); }
+  }
+}
+
+.acts {
+  display: flex;
+  padding: 0 16px;
+}

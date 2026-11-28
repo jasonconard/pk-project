@@ -72,12 +72,17 @@ interface MenuEntry {
   /** What the tool brings, shown in the tooltip. */
   soon: string;
   /** What it opens; none yet: greyed. */
-  action?: "saves" | "agenda" | "links";
+  action?: "saves" | "agenda" | "links" | "bag";
 }
 
 const ENTRIES: MenuEntry[] = [
   { icon: LucideUsers, label: "Équipe", soon: "L'équipe et ses compétences" },
-  { icon: LucideBackpack, label: "Sac", soon: "Les objets trouvés et achetés" },
+  {
+    icon: LucideBackpack,
+    label: "Sac",
+    soon: "Les objets trouvés et achetés",
+    action: "bag",
+  },
   {
     icon: LucideHeartHandshake,
     label: "Liens",
@@ -151,6 +156,8 @@ export class GameMenuComponent {
   readonly agenda = output<void>();
   /** The social links: their levels and what they bring. */
   readonly links = output<void>();
+  /** The bag: the items carried, used or thrown away. */
+  readonly bag = output<void>();
   /** The variables test panel: the menu closes, the panel opens. */
   readonly variablesTest = output<void>();
   readonly battleSim = output<void>();
@@ -284,6 +291,11 @@ export class GameMenuComponent {
       }
       case "links": {
         this.links.emit();
+
+        break;
+      }
+      case "bag": {
+        this.bag.emit();
 
         break;
       }

@@ -22,7 +22,7 @@ const AFFINITY_GAIN: Record<Affinity, number> = {
   never: 0,
 };
 /** Points one use gives (before the affinity and the equipment). */
-const POINTS_PER_USE = 2;
+export const POINTS_PER_USE = 2;
 export const GROWTH_LEVEL_MAX = 99;
 
 export function xpToNext(curve: XpCurve, level: number): number {
