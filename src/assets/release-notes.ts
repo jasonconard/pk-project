@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.51',
+    date: '2026-11-28',
+    notes: [
+      'Le jeu s\'appelle maintenant Tesselle, et il a sa propre icône : un petit bout de carte avec une maison au toit rouge.',
+      'Sur téléphone, l\'interface des combats est plus petite : l\'anneau des commandes, la jauge d\'action et les cartes de l\'équipe tiennent à l\'écran, même à quatre.',
+      'Sur téléphone, la fenêtre « Essayer un donjon » défile correctement.',
+      'Application Android : le nouveau nom et la nouvelle icône arrivent avec une nouvelle version à installer.',
+    ],
+  },
+  {
     version: '0.0.50',
     date: '2026-11-28',
     notes: [
