@@ -145,6 +145,9 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   a clock from its strike (`strike`, `playFlow`, `land(action, percent, states)` in `battle-engine.ts`); several
   hits share the sheet's power. Edited in `database-editor/flow-editor/` (timeline, block settings, undo), opened by
   `DatabaseStore.flowEdit`; its preview is a flat 2D scene drawn at a moment (`shared/flow-scene.ts`, pure).
+- Bag (`docs/editeur/23-sac.md`): Menu → Sac, `game/bag/` the window, `model/bag.ts` (items carried by kind, `previewUse` /
+  `useItem` outside a fight: heal, cure, `MemberProgress.statUps` raised for good, element experience; `dropItem`);
+  `game/shared/_item-sheet.scss` the look shared with the shop (`--accent`). Équipe and Carte menus still to come.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
