@@ -29,6 +29,16 @@ export function removeKey(key: string): void {
   }
 }
 
+/** Empties the whole storage (« Tout remettre à zéro »). Returns false if it failed. */
+export function clearStore(): boolean {
+  try {
+    localStorage.clear();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** The JSON value saved under the key, null if there is none or it can't be read. */
 export function readJson<T>(key: string): T | null {
   const raw = readText(key);

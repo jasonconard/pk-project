@@ -27,6 +27,7 @@ import {
   LucideMap,
   LucideMaximize,
   LucideMinimize,
+  LucideRotateCcw,
   LucideSave,
   LucideShare2,
   LucideSparkles,
@@ -51,6 +52,7 @@ import {
   projectFileBlob,
   ProjectFile,
   readProjectFile,
+  resetEverything,
   SHARES_PROJECT,
   shareProjectFile,
   summarize,
@@ -124,6 +126,7 @@ const ENTRIES: MenuEntry[] = [
     LucideDownload,
     LucideShare2,
     LucideUpload,
+    LucideRotateCcw,
     LucideSwords,
     LucideVariable,
     LucideUsers,
@@ -187,6 +190,8 @@ export class GameMenuComponent {
     project: ProjectFile;
     label: string;
   } | null>(null);
+  /** « Tout remettre à zéro » asked: waiting for the player to confirm. */
+  protected readonly pendingReset = signal(false);
   /** What this device holds (« 3 cartes · 12 modèles · 4 musiques · 85 ko »), read when the project unfolds. */
   protected readonly deviceSummary = signal("");
   protected readonly hapticsSupported = hapticsSupported;
@@ -368,6 +373,20 @@ export class GameMenuComponent {
     } catch (e) {
       this.projectMessage.set((e as Error).message);
       this.pendingImport.set(null);
+      this.projectBusy.set(false);
+    }
+  }
+
+  /** Forgets everything kept on this device, then restarts as on a first visit. */
+  protected async confirmReset(): Promise<void> {
+    this.projectBusy.set(true);
+    try {
+      await resetEverything();
+      this.projectMessage.set("Tout est effacé, le jeu redémarre…");
+      location.reload();
+    } catch (e) {
+      this.projectMessage.set((e as Error).message);
+      this.pendingReset.set(false);
       this.projectBusy.set(false);
     }
   }

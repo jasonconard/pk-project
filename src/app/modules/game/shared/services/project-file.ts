@@ -1,3 +1,4 @@
+import { clearStore } from "../../../../core/shared/local-store";
 import { replaceStoredMaps, StoredMaps, storedMapsData } from "./map-storage";
 import {
   fromBase64,
@@ -232,5 +233,17 @@ export async function applyProject(project: ProjectFile): Promise<void> {
   replaceStoredDatabase(project.database);
   if (project.tests) {
     saveTests(project.tests);
+  }
+}
+
+/**
+ * Forgets everything this device keeps: the creations (maps, models, music, variables, database, tests), the saved
+ * games and the settings. The game must be reloaded afterwards: it starts again as on a first visit. Throws an
+ * Error with a message for the player if it failed.
+ */
+export async function resetEverything(): Promise<void> {
+  const models = await replaceStoredModels([]);
+  if (!clearStore() || !models) {
+    throw new Error("Les données n'ont pas pu être effacées.");
   }
 }

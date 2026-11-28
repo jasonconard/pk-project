@@ -213,6 +213,30 @@
               Annuler
             </button>
           </div>
+        } @else if (pendingReset()) {
+          <p>Tout effacer sur cet appareil ?</p>
+          <p class="current">
+            Vos cartes, modèles, musiques, variables, base de données, parties
+            sauvegardées et réglages seront perdus. Le jeu redémarre comme à la
+            première visite. Exportez d'abord votre projet pour le garder.
+          </p>
+          <div class="actions">
+            <button
+              type="button"
+              class="danger"
+              [disabled]="projectBusy()"
+              (click)="confirmReset()"
+            >
+              Tout effacer
+            </button>
+            <button
+              type="button"
+              [disabled]="projectBusy()"
+              (click)="pendingReset.set(false)"
+            >
+              Annuler
+            </button>
+          </div>
         } @else {
           <p class="current">
             Toutes vos créations dans un fichier, pour les passer du téléphone à
@@ -248,6 +272,16 @@
               hidden
               (change)="pickProject($event)"
             />
+          </div>
+          <div class="actions">
+            <button
+              type="button"
+              class="danger"
+              [disabled]="projectBusy()"
+              (click)="pendingReset.set(true)"
+            >
+              <svg lucideRotateCcw></svg> Tout remettre à zéro
+            </button>
           </div>
         }
         @if (projectMessage(); as message) {
