@@ -16,7 +16,7 @@ import { GameAction } from "../model/GameAction";
 import { MapHelper } from "../model/MapHelper";
 import * as THREE from "three";
 import { BattleService } from "../../../battle/shared/battle.service";
-import { GameMode, Game } from "../model/Game";
+import { Game } from "../model/Game";
 import { auditTime, fromEvent } from "rxjs";
 import { QUALITY_CHOICES, QualityMode } from "../model/Quality";
 import { DiagnosticsReport } from "../model/Diagnostics";
@@ -48,7 +48,6 @@ import { Vec3 } from "../model/SceneUtils";
 import { DEFAULT_MAP_ID } from "../../../../../assets/map/maps";
 import { KeyService } from "../../../../core/shared/service/key.service";
 import { KeyCode } from "../../../../core/shared/model/PressedKey";
-import { FightService } from "../../../fight/shared/services/fight.service";
 import {
   isGameAsleep,
   onGameAsleep,
@@ -112,7 +111,6 @@ export interface GameHud {
   framePerSec: number;
   /** Air temperature (°C, rounded to 0.1). */
   temperature: number;
-  mode: GameMode;
   /** Map editor: model being placed (null = none). */
   editModelId: string | null;
   /** Map editor: ground tile being painted. */
@@ -251,7 +249,6 @@ const TIME_STEP = 250;
 @Service()
 export class GameService {
   private readonly keyService = inject(KeyService);
-  private readonly fightService = inject(FightService);
   private readonly gameMapService = inject(GameMapService);
   private readonly mapEditorService = inject(MapEditorService);
   private readonly battleService = inject(BattleService);
@@ -413,12 +410,11 @@ export class GameService {
       this.music.setVolume(this.soundMutedState() ? 0 : this.musicVolumeState())
     );
     effect(() => {
-      const fight = this.hudState()?.mode === GameMode.FIGHT;
       const rain = WEATHER_INFO[this.weatherState()]?.category === "rain";
       const night = this.night();
       let slot: MusicSlot = night ? "night" : "day";
       const dungeon = this.dungeonService.chip();
-      if (fight || this.inBattle()) {
+      if (this.inBattle()) {
         slot = "fight";
       } else if (dungeon) {
         slot = "dungeon";
@@ -459,7 +455,7 @@ export class GameService {
     );
   }
 
-  init(canvas: HTMLElement, gameMode: GameMode = GameMode.MAP): Game {
+  init(canvas: HTMLElement): Game {
     this.keyService.initTouch(canvas);
 
     const rect = canvas.getBoundingClientRect();
@@ -479,7 +475,6 @@ export class GameService {
       raycaster,
       renderer,
       canvas,
-      mode: gameMode,
     });
     this.game = game;
     this.mapEditorService.attach(game);
@@ -500,7 +495,7 @@ export class GameService {
     // Restored settings: start directly in them (no fade from the default weather)
     game.weather.snapToTarget();
 
-    this.switchGameMode(gameMode, true);
+    this.startMap();
 
     game.setQuality(this.qualityState());
     game.setRetro(this.retroState());
@@ -598,37 +593,25 @@ export class GameService {
     return game;
   }
 
-  switchGameMode(gameMode: GameMode, firstInit?: boolean) {
+  /** Builds the map (the game shows its loading until the textures are sent). */
+  private startMap() {
     const game = this.game;
     if (!game || game.loading) {
       return;
     }
 
     game.loading = true;
-    game.mode = gameMode;
 
-    setTimeout(
-      () => {
-        switch (gameMode) {
-          case GameMode.FIGHT:
-            this.gameMapService.clear(game);
-            this.fightService.init(game);
-            break;
-          case GameMode.MAP:
-            this.fightService.clear(game);
-            this.gameMapService.init(game);
-            break;
-        }
-        game.refreshRenderer();
+    setTimeout(() => {
+      this.gameMapService.init(game);
+      game.refreshRenderer();
 
-        setTimeout(() => {
-          // (a little later: the textures loaded meanwhile are sent too)
-          game.warmUp();
-          game.loading = false;
-        }, 300);
-      },
-      firstInit ? 0 : 300
-    );
+      setTimeout(() => {
+        // (a little later: the textures loaded meanwhile are sent too)
+        game.warmUp();
+        game.loading = false;
+      }, 300);
+    }, 0);
   }
 
   private lastFrameTime = performance.now();
@@ -688,7 +671,6 @@ export class GameService {
             paused: game.paused,
             framePerSec: game.framePerSec,
             temperature: Math.round(game.weather.temperature * 10) / 10,
-            mode: game.mode,
             editModelId: game.editModelId,
             editTileId: game.editTileId,
             editBrush: game.editBrush,
@@ -696,7 +678,7 @@ export class GameService {
             editSelection: game.editSelection,
             editCanUndo: game.editCanUndo,
             editCanRedo: game.editCanRedo,
-            action: game.mode === GameMode.MAP ? game.action : null,
+            action: game.action,
             mapId: game.mapHelper?.sceneMap.id ?? "",
             mapName: game.mapHelper?.sceneMap.name ?? "",
             editPick: this.arrivalPick
@@ -715,14 +697,7 @@ export class GameService {
 
   private inputLoop(game: Game) {
     game.diagnostics.measure("input", () => {
-      switch (game.mode) {
-        case GameMode.MAP:
-          this.gameMapService.inputLoop(game);
-          break;
-        case GameMode.FIGHT:
-          this.fightService.inputLoop();
-          break;
-      }
+      this.gameMapService.inputLoop(game);
     });
   }
 
@@ -866,7 +841,6 @@ export class GameService {
    */
   private timeHeld(game: Game): boolean {
     return (
-      game.mode !== GameMode.MAP ||
       game.editMode ||
       game.cutscene ||
       this.sequenceService.isRunning ||
@@ -1048,7 +1022,7 @@ export class GameService {
   /** Opens / closes the map editor (on the map only, not during a fight or a loading). */
   toggleEditMode() {
     const game = this.game;
-    if (!game || game.loading || game.mode !== GameMode.MAP) {
+    if (!game || game.loading) {
       return;
     }
     if (game.editMode) {

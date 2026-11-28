@@ -24,13 +24,10 @@ import { Passage } from "./shared/model/Passage";
 import { EventContext, ObjectEvent } from "./shared/model/ObjectEvent";
 import { DecimalPipe } from "@angular/common";
 import { isFirstStartOfNewVersion } from "./release-notes/whats-new";
-import { GameMode } from "./shared/model/Game";
 import { GameService } from "./shared/services/game.service";
 import { StickComponent } from "../../core/stick/stick.component";
-import { TouchPadComponent } from "../../core/touch-pad/touch-pad.component";
 import { MessageComponent } from "../../core/message/message.component";
 import { TeleportComponent } from "./teleport/teleport.component";
-import { FightUiComponent } from "../fight/fight-ui/fight-ui.component";
 import { BattleHudComponent } from "../battle/battle-hud/battle-hud.component";
 import { BattleService } from "../battle/shared/battle.service";
 import {
@@ -94,7 +91,6 @@ import { ActionZone } from "./shared/model/action-zone";
   selector: "game-main",
   imports: [
     StickComponent,
-    TouchPadComponent,
     MessageComponent,
     AgendaComponent,
     LinksComponent,
@@ -106,7 +102,6 @@ import { ActionZone } from "./shared/model/action-zone";
     TimeBannerComponent,
     DungeonChipComponent,
     TeleportComponent,
-    FightUiComponent,
     BattleHudComponent,
     WeatherPanelComponent,
     EditorBarComponent,
@@ -167,7 +162,6 @@ export class GameComponent {
   protected readonly soundVolume = this.gameService.soundVolume;
   protected readonly soundMuted = this.gameService.soundMuted;
   protected readonly musicVolume = this.gameService.musicVolume;
-  protected readonly GameMode = GameMode;
   private readonly battle = inject(BattleService);
   private readonly cutscene = inject(CutsceneService);
   /** Goes up when the models change (back from the model editor). */
@@ -177,7 +171,6 @@ export class GameComponent {
     const hud = this.hud();
     return (
       !!hud &&
-      hud.mode === GameMode.MAP &&
       !hud.editMode &&
       !hud.loading &&
       !this.battle.view() &&
@@ -287,9 +280,7 @@ export class GameComponent {
     // On the map, the floating full screen button gives way to the menu (the game's Menu, the editor's Réglages)
     effect(() => {
       const hud = this.hud();
-      this.coreService.fullScreenButtonHidden.set(
-        !!hud && hud.mode === GameMode.MAP && !hud.loading
-      );
+      this.coreService.fullScreenButtonHidden.set(!!hud && !hud.loading);
     });
     inject(DestroyRef).onDestroy(() =>
       this.coreService.fullScreenButtonHidden.set(false)

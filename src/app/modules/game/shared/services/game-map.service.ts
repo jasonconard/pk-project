@@ -222,14 +222,6 @@ export class GameMapService {
     game.mapHelper?.updateCameraAim();
   }
 
-  clear(game: Game) {
-    if (game.mapHelper) {
-      Object.values(game.mapHelper.meshes).forEach(
-        (mesh) => (mesh.visible = false)
-      );
-    }
-  }
-
   /** The team walking behind the player (hidden by the setting, the map, an event, or while a fight hides the player). */
   private updateFollowers(
     game: Game,

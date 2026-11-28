@@ -3,7 +3,6 @@ import * as THREE from "three";
 import { CameraFollow, retroScale } from "./pixel-scale";
 import { MaterialService } from "../services/material.service";
 import { MapHelper } from "./MapHelper";
-import { FightHelper } from "../../../fight/shared/models/FightHelper";
 import { WeatherHelper } from "../weather/WeatherHelper";
 import { Diagnostics } from "./Diagnostics";
 import {
@@ -19,11 +18,6 @@ import {
   RENDER_DETAIL,
 } from "./Quality";
 import type { EditBrush, EditSelection } from "../services/map-editor.service";
-
-export enum GameMode {
-  MAP,
-  FIGHT,
-}
 
 // export const CAMERA_LOOK = new THREE.Vector3(0, 30, 160);
 export const CAMERA_LOOK = new THREE.Vector3(0, 140, 160);
@@ -50,7 +44,6 @@ export interface GameInit {
   raycaster: THREE.Raycaster;
   renderer: THREE.WebGLRenderer;
   canvas: HTMLElement;
-  mode: GameMode;
 }
 
 export class Game {
@@ -64,8 +57,6 @@ export class Game {
   weather: WeatherHelper;
   renderer: THREE.WebGLRenderer;
   mapHelper?: MapHelper;
-  fightHelper?: FightHelper;
-  mode: GameMode;
   loading = false;
   frame = 0;
   framePerSec = 0;
@@ -101,7 +92,6 @@ export class Game {
     this.raycaster = o.raycaster;
     this.canvas = o.canvas;
     this.renderer = o.renderer;
-    this.mode = o.mode;
 
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;

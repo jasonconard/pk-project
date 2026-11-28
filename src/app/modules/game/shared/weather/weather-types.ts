@@ -81,7 +81,7 @@ export interface WeatherParams {
   ambientColor: THREE.Color;
   /** Color of the sun (the moon at night). */
   sunColor: THREE.Color;
-  /** Tint applied to unlit sprites (player, pokemons...) so they match the scene light. */
+  /** Tint applied to unlit sprites (player, NPCs, enemies...) so they match the scene light. */
   unlitTint: THREE.Color;
   /** Strength of the sun reflections on shiny surfaces (see SceneModelObj.shininess). */
   specular: number;

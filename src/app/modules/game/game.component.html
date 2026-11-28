@@ -63,7 +63,7 @@
 }
 
 @if (hud(); as hud) {
-  @if (hud.mode === GameMode.MAP && !cutsceneHost()) {
+  @if (!cutsceneHost()) {
     <game-editor-bar
       [editMode]="hud.editMode"
       [modelId]="hud.editModelId"
@@ -164,8 +164,7 @@
 />
 
 <core-stick />
-<!-- On the map: Courir and the action button (the A B X Y buttons are for the fights) -->
-<core-touch-pad [visible]="hud()?.mode !== GameMode.MAP" />
+<!-- On the map: Courir and the action button -->
 @if (playing()) {
   <game-map-controls [action]="hud()?.action ?? null" />
 }
@@ -190,7 +189,7 @@
   </div>
 }
 
-@if (menuOpen() && hud()?.mode === GameMode.MAP) {
+@if (menuOpen() && hud()) {
   <game-menu
     [version]="appVersion"
     (closed)="menuOpen.set(false)"
@@ -341,10 +340,6 @@
   <core-teleport [mapHelper]="mapHelper" />
 }
 <game-transition />
-
-@if (hud()?.mode === GameMode.FIGHT) {
-  <fight-ui />
-}
 
 <!-- The cutscene editor, over the map editor (hidden while one of its cutscenes plays: Voir) -->
 @if (cutsceneHost(); as host) {
