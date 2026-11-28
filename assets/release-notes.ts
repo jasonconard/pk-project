@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.49',
+    date: '2026-11-28',
+    notes: [
+      'L\'interface des combats est maintenant en pixel art, comme le reste du jeu : des cadres ardoise et or et une police en pixels.',
+      'Les commandes se choisissent sur un anneau d\'icônes qui tourne autour du combattant : la commande choisie est devant, avec son nom dessous.',
+      'La jauge d\'action, la fenêtre de la cible, les listes de magies et d\'objets et les cartes de l\'équipe ont le même style.',
+      'La fenêtre de fin de combat aussi : « Victoire ! » en doré, « Défaite… » en rouge.',
+    ],
+  },
+  {
     version: '0.0.48',
     date: '2026-11-27',
     notes: [
