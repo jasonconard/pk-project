@@ -14,6 +14,16 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.52',
+    date: '2026-11-28',
+    notes: [
+      'Menu → Sac : le sac montre les objets portés, rangés en quatre onglets. On peut utiliser un objet sur un équipier hors combat, et jeter ceux dont on ne veut plus.',
+      'Menu → Équipe : chaque équipier a sa fiche, avec ses forces, ses compétences et ce qu\'il porte. On y change son équipement avec les objets du sac.',
+      'Menu → Carte : le plan du lieu vu de haut, avec la place du joueur et les passages vers les autres lieux. On le déplace en glissant et on zoome.',
+      'Le jeu attend quand le menu ou une de ses fenêtres est ouvert : les ennemis et l\'heure ne bougent plus.',
+    ],
+  },
+  {
     version: '0.0.51',
     date: '2026-11-28',
     notes: [
