@@ -30,7 +30,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   `cachedFromStorage`… use it rather than `localStorage`), `text.ts` (`nameKey`, `searchKey` without accents), `omit.ts`. `shared/service/`: `core.service` (fullscreen…), `escape.service` (Escape /
   browser back / Android back close the last opened layer — register every closable layer there), `key`, `touch`,
   `gamepad`. `shared/app-visibility.ts` (`setGameCovered`/`isGameCovered`/`isGameAsleep`: game loops, sounds and
-  input listeners must respect it). `stick`, `touch-pad`, `message`, `update-prompt` (GitHub release check, live update).
+  input listeners must respect it). `stick`, `message`, `update-prompt` (GitHub release check, live update).
 - `modules/game/`: `game.component` (main view, game mode / edit mode, editor panels opened over the game via
   `editorPanel` + `@defer`). UI pieces: `editor-bar` (edit UI; `layout` signal, `editor-bar.wide.scss` for
   landscape/desktop, `editor-bar.selection.scss` the selected object's sheet), `game-menu`, `map-controls`, `map-manager` (the maps in sections by kind or made by hand, `SceneMap.section`; a map's settings; `map-manager.settings.scss`), `weather-panel`, `weather-catalog`,
@@ -145,7 +145,6 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
   a clock from its strike (`strike`, `playFlow`, `land(action, percent, states)` in `battle-engine.ts`); several
   hits share the sheet's power. Edited in `database-editor/flow-editor/` (timeline, block settings, undo), opened by
   `DatabaseStore.flowEdit`; its preview is a flat 2D scene drawn at a moment (`shared/flow-scene.ts`, pure).
-- `modules/fight/`: old combat prototype (2021, `fight-ui` shown by the game), to be removed once `battle` replaces it.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
@@ -168,7 +167,7 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 
 - Only through the pencil MCP tools (encrypted files). UI-heavy features get a mockup first.
 - Show the real game: captures of the running game with the UI hidden by injected CSS (`game-editor-bar,
-  game-weather-panel, core-stick, core-touch-pad, .status-tile, .btn-fullscreen`), real model thumbnails
+  game-weather-panel, core-stick, .status-tile, .btn-fullscreen`), real model thumbnails
   (`design/images/models/`), catalog weather images (`design/images/weather/`). No AI images, no Lucide stand-ins
   for content; notes never over the screens.
 
