@@ -28,6 +28,7 @@ L'éditeur permet de modifier la carte directement dans le jeu : poser des bâti
 22. [Le déroulé d'une compétence](22-deroule.md) : animations du lanceur, effets, sons et coups placés dans le temps ; plusieurs coups qui se partagent la puissance.
 23. [Le sac](23-sac.md) : Menu → Sac, les objets portés par sorte, les utiliser hors combat sur un membre de l'équipe, les jeter.
 24. [Le menu Équipe](24-menu-equipe.md) : Menu → Équipe, la fiche de chaque membre (stats, éléments, compétences) et son équipement, changé avec les objets du sac.
+25. [La carte](25-carte.md) : Menu → Carte, le plan du lieu dessiné tout seul, le joueur et les passages vers les autres cartes ; le jeu attend sous le menu et ses fenêtres.
 
 Le [plan des sols et reliefs](plan-sols-reliefs.md) retrace la construction étape par étape.
 

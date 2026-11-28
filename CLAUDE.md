@@ -151,7 +151,11 @@ Mobile-first (portrait + landscape), also desktop. Shipped as a PWA (GitHub Page
 - Team menu (`docs/editeur/24-menu-equipe.md`): Menu → Équipe, `game/team/` the window, `model/team.ts` (`memberCard`,
   `memberSheet`, `equipChoices`); the equipment worn in the game is `MemberProgress.equipment` (`party.ts`: `asWorn`
   gives the character wearing it — use it before `characterStats` / `wornItems` for a team member; `equip` swaps
-  with the bag). The Carte menu is still to come.
+  with the bag).
+- Map plan (`docs/editeur/25-carte.md`): Menu → Carte, `game/map-plan/` the window, `model/map-plan.ts` (`drawMapPlan`: a
+  map drawn from above from its data alone — ground, reliefs, the objects' pictures standing on their footprint — and
+  its passages). `Game.held` (`GameService.setHeld`, set by `game.component` while the menu or one of its windows is
+  open): the player, enemies, events and clock wait, the scene is still drawn — add a new menu window to that effect.
 - `src/assets/`: `map/maps.ts` + `map/world/world.ts` (exported maps), `models/md-*.ts` + `models.ts`, `weather/*.webp`
   (catalog images), `release-notes.ts` (player-facing notes, French).
 
