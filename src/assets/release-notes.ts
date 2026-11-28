@@ -14,6 +14,14 @@ export interface ReleaseNote {
  */
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.0.50',
+    date: '2026-11-28',
+    notes: [
+      'Menu → Projet de jeu : un bouton « Tout remettre à zéro » efface tout ce que l\'appareil garde (créations, parties sauvegardées, réglages) et relance le jeu comme à la première visite.',
+      'Le jeu demande de confirmer avant d\'effacer. Pensez à exporter votre projet avant.',
+    ],
+  },
+  {
     version: '0.0.49',
     date: '2026-11-28',
     notes: [
