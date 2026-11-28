@@ -1,4 +1,7 @@
-# Pk Project
+# Tesselle
+
+Tesselle is the game engine's name (the app shown to players). The repository, the package, the Android app id
+(`com.conardjason.pkproject`) and the browser storage keys (`pk-…`) keep the old name `pk-project`.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.8.
 

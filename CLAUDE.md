@@ -1,5 +1,8 @@
 # pk-project
 
+The app's name shown to players is **Tesselle** (manifest, page title, Android app name); the repository, package,
+Android app id and storage keys keep `pk-project` / `pk-`.
+
 3D pixel-art game (Three.js) that is becoming a **game engine** for a Persona-like game: daily life in a town by
 day, dungeons + Grandia-style combat by night. Every feature should be an editor / data-driven tool so the game is
 built without coding. Direction, ordered tool roadmap and statuses: `docs/idees.md` (keep statuses there).
