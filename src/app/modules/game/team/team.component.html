@@ -1,0 +1,301 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="dialog sheet"
+  [class.tall]="!!card() && !slot()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="team-title"
+>
+  <div class="grip"></div>
+  @if (card(); as m) {
+    @if (worn(); as w) {
+      <!-- A slot: what the bag holds for it -->
+      <header>
+        <button
+          type="button"
+          class="badge"
+          aria-label="Retour à la fiche"
+          (click)="back()"
+        >
+          <svg lucideArrowLeft></svg>
+        </button>
+        <span class="titles">
+          <h2 id="team-title">{{ w.label }} de {{ m.c.name }}</h2>
+          <small>
+            @if (w.item) {
+              Porte : {{ w.item.name }}{{ w.brings ? " · " + w.brings : "" }}
+            } @else {
+              Ne porte rien
+            }
+          </small>
+        </span>
+        <button
+          type="button"
+          class="close"
+          aria-label="Fermer"
+          (click)="closed.emit()"
+        >
+          <svg lucideX></svg>
+        </button>
+      </header>
+      <div class="list">
+        @for (c of choices(); track c.item?.id ?? "") {
+          @let open = picked() === (c.item?.id ?? "");
+          <div class="line" [class.selected]="open">
+            <button
+              type="button"
+              class="pick"
+              [attr.aria-expanded]="open"
+              (click)="pick(c)"
+            >
+              <span class="icon">
+                @if (c.item?.icon; as icon) {
+                  <img [src]="icon" alt="" />
+                } @else if (c.item) {
+                  <svg lucidePackage></svg>
+                } @else {
+                  <svg lucideCircleOff></svg>
+                }
+              </span>
+              <span class="texts">
+                @if (c.item; as item) {
+                  <b>{{ item.name }}</b>
+                  <small>{{ brings(c) || item.note }}</small>
+                } @else {
+                  <b>Retirer</b>
+                  <small>Remet {{ w.item?.name }} dans le sac.</small>
+                }
+              </span>
+              <span class="changes">
+                @for (ch of c.changes; track ch.text) {
+                  <b [class.worse]="!ch.better">{{ ch.text }}</b>
+                }
+              </span>
+            </button>
+            @if (open) {
+              <div class="buy">
+                <button type="button" class="go" (click)="wear(c)">
+                  <svg lucideCheck></svg>
+                  {{ c.item ? "Équiper" : "Retirer" }}
+                </button>
+              </div>
+            }
+          </div>
+        } @empty {
+          <p class="empty">
+            Rien dans le sac que {{ m.c.name }} puisse porter ici.
+          </p>
+        }
+      </div>
+      <p class="foot">
+        @if (notice()) {
+          <b>{{ notice() }}</b>
+        } @else {
+          Vert : mieux qu'avec l'objet porté. Rouge : moins bien. Les objets que
+          {{ m.c.name }} ne peut pas porter ne sont pas listés.
+        }
+      </p>
+    } @else {
+      <!-- A member's sheet -->
+      <header>
+        @if (m.c.portrait ?? m.c.icon; as pic) {
+          <img class="portrait" [src]="pic" alt="" />
+        }
+        <span class="titles">
+          <h2 id="team-title">{{ m.c.name }}</h2>
+          <small>
+            Niveau {{ m.level }}
+            @if (m.xpLeft) {
+              · encore {{ m.xpLeft }} d'expérience
+            } @else {
+              · niveau maximum
+            }
+          </small>
+        </span>
+        <button
+          type="button"
+          class="close round"
+          aria-label="Retour à l'équipe"
+          (click)="back()"
+        >
+          <svg lucideArrowLeft></svg>
+        </button>
+        <button
+          type="button"
+          class="close"
+          aria-label="Fermer"
+          (click)="closed.emit()"
+        >
+          <svg lucideX></svg>
+        </button>
+      </header>
+      <div class="list sheet-body">
+        <div class="bars">
+          <span class="bar hp">
+            <b>PV</b>
+            <span class="track"
+              ><i [style.width.%]="(100 * m.hp) / m.hpMax"></i
+            ></span>
+            <span class="value">{{ m.hp }} / {{ m.hpMax }}</span>
+          </span>
+          <span class="bar mp">
+            <b>PM</b>
+            <span class="track"
+              ><i [style.width.%]="m.mpMax ? (100 * m.mp) / m.mpMax : 0"></i
+            ></span>
+            <span class="value">{{ m.mp }} / {{ m.mpMax }}</span>
+          </span>
+        </div>
+
+        @if (sheet(); as s) {
+          <h3>Stats</h3>
+          <div class="stats">
+            @for (st of s.stats; track st.id) {
+              <span class="stat" [attr.title]="st.label">
+                <small>{{ st.label.slice(0, 3) }}.</small>
+                <b>{{ st.value }}</b>
+                <i [class.worse]="st.bonus < 0">{{
+                  st.bonus ? signed(st.bonus) : ""
+                }}</i>
+              </span>
+            }
+          </div>
+
+          <h3>Équipement</h3>
+          @for (w of m.slots; track w.slot) {
+            <button type="button" class="slot" (click)="openSlot(w.slot)">
+              <span class="icon small">
+                @if (w.item?.icon; as icon) {
+                  <img [src]="icon" alt="" />
+                } @else if (w.item) {
+                  <svg lucidePackage></svg>
+                } @else {
+                  <svg lucidePlus></svg>
+                }
+              </span>
+              <span class="texts">
+                <small>{{ w.label }}</small>
+                <b [class.none]="!w.item">{{ w.item?.name ?? "Rien" }}</b>
+              </span>
+              <small class="brings" [class.none]="!w.item">{{
+                w.item ? w.brings : "Toucher pour équiper"
+              }}</small>
+              <svg lucideChevronRight></svg>
+            </button>
+          }
+          @if (notice()) {
+            <p class="foot inline">
+              <b>{{ notice() }}</b>
+            </p>
+          }
+
+          @if (s.growth.length) {
+            <h3>Éléments et armes</h3>
+            <div class="growth">
+              @for (g of s.growth; track g.id) {
+                <span class="grow">
+                  <span class="head">
+                    @if (g.icon) {
+                      <img [src]="g.icon" alt="" />
+                    }
+                    {{ g.name }}
+                  </span>
+                  <b>Niv. {{ g.level }}</b>
+                  <span class="track"><i [style.width.%]="g.percent"></i></span>
+                </span>
+              }
+            </div>
+          }
+
+          <h3>Compétences</h3>
+          @for (sk of s.skills; track sk.id) {
+            <div class="skill">
+              @if (sk.icon) {
+                <img [src]="sk.icon" alt="" />
+              }
+              <span class="texts">
+                <b>{{ sk.name }}</b>
+                @if (sk.note) {
+                  <small>{{ sk.note }}</small>
+                }
+              </span>
+              <b class="cost">{{ sk.mp }} PM</b>
+            </div>
+          } @empty {
+            <p class="empty">Aucune compétence pour l'instant.</p>
+          }
+        }
+      </div>
+    }
+  } @else {
+    <!-- The team -->
+    <header>
+      <span class="badge"><svg lucideUsers></svg></span>
+      <span class="titles">
+        <h2 id="team-title">Équipe</h2>
+        <small
+          >{{ cards().length }} membre{{ cards().length > 1 ? "s" : "" }}</small
+        >
+      </span>
+      <button
+        type="button"
+        class="close"
+        aria-label="Fermer"
+        (click)="closed.emit()"
+      >
+        <svg lucideX></svg>
+      </button>
+    </header>
+    <div class="list">
+      @for (m of cards(); track m.c.id) {
+        <button type="button" class="member" (click)="open(m.c.id)">
+          @if (m.c.portrait ?? m.c.icon; as pic) {
+            <img class="portrait big" [src]="pic" alt="" />
+          }
+          <span class="who">
+            <span class="name">
+              <b>{{ m.c.name }}</b>
+              <small>Niv. {{ m.level }}</small>
+              <span class="gear">
+                @for (w of m.slots; track w.slot) {
+                  <i [attr.title]="w.label + ' : ' + (w.item?.name ?? 'rien')">
+                    @if (w.item?.icon; as icon) {
+                      <img [src]="icon" alt="" />
+                    }
+                  </i>
+                }
+              </span>
+            </span>
+            <span class="bar hp">
+              <b>PV</b>
+              <span class="track"
+                ><i [style.width.%]="(100 * m.hp) / m.hpMax"></i
+              ></span>
+              <span class="value">{{ m.hp }} / {{ m.hpMax }}</span>
+            </span>
+            <span class="bar mp">
+              <b>PM</b>
+              <span class="track"
+                ><i [style.width.%]="m.mpMax ? (100 * m.mp) / m.mpMax : 0"></i
+              ></span>
+              <span class="value">{{ m.mp }} / {{ m.mpMax }}</span>
+            </span>
+            <span class="bar xp">
+              <b>Exp</b>
+              <span class="track"><i [style.width.%]="m.xpPercent"></i></span>
+              <span class="value">{{
+                m.xpLeft ? "encore " + m.xpLeft : "max"
+              }}</span>
+            </span>
+          </span>
+          <svg lucideChevronRight></svg>
+        </button>
+      } @empty {
+        <p class="empty">Personne dans l'équipe pour l'instant.</p>
+      }
+    </div>
+    <p class="foot">
+      Toucher un membre pour voir sa fiche et changer son équipement.
+    </p>
+  }
+</section>

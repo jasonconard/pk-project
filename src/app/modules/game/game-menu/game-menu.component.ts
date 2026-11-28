@@ -72,11 +72,16 @@ interface MenuEntry {
   /** What the tool brings, shown in the tooltip. */
   soon: string;
   /** What it opens; none yet: greyed. */
-  action?: "saves" | "agenda" | "links" | "bag";
+  action?: "saves" | "agenda" | "links" | "bag" | "team";
 }
 
 const ENTRIES: MenuEntry[] = [
-  { icon: LucideUsers, label: "Équipe", soon: "L'équipe et ses compétences" },
+  {
+    icon: LucideUsers,
+    label: "Équipe",
+    soon: "L'équipe et ses compétences",
+    action: "team",
+  },
   {
     icon: LucideBackpack,
     label: "Sac",
@@ -158,6 +163,8 @@ export class GameMenuComponent {
   readonly links = output<void>();
   /** The bag: the items carried, used or thrown away. */
   readonly bag = output<void>();
+  /** The team: each member's sheet and equipment. */
+  readonly team = output<void>();
   /** The variables test panel: the menu closes, the panel opens. */
   readonly variablesTest = output<void>();
   readonly battleSim = output<void>();
@@ -296,6 +303,11 @@ export class GameMenuComponent {
       }
       case "bag": {
         this.bag.emit();
+
+        break;
+      }
+      case "team": {
+        this.team.emit();
 
         break;
       }

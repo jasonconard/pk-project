@@ -1,0 +1,192 @@
+// The team menu: a member's sheet (stats, equipment, elements and weapon types, skills). It scrolls.
+
+@media (max-width: 599px) {
+  .sheet.tall {
+    max-height: calc(100dvh - 40px - var(--safe-top));
+  }
+}
+
+.sheet-body {
+  gap: 6px;
+
+  // (the sheet scrolls: its parts keep their height)
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+h3 {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.stats {
+  display: flex;
+  gap: 6px;
+}
+
+.stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 2px;
+  border-radius: 10px;
+  background: var(--chip);
+
+  small {
+    font-size: 10px;
+    color: var(--dim);
+  }
+
+  b {
+    font-size: 15px;
+  }
+
+  i {
+    min-height: 12px;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--hp);
+
+    &.worse {
+      color: var(--worse);
+    }
+  }
+}
+
+.slot, .skill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--chip);
+  text-align: left;
+
+  .texts {
+    gap: 2px;
+
+    b {
+      font-size: 14px;
+    }
+  }
+
+  > svg {
+    flex-shrink: 0;
+    color: var(--dim);
+  }
+}
+
+.slot {
+  .texts small {
+    font-size: 10px;
+  }
+
+  .none {
+    color: var(--dim);
+    font-weight: 400;
+  }
+}
+
+.icon.small {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.brings {
+  max-width: 45%;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--hp);
+  text-align: right;
+
+  &.none {
+    font-weight: 400;
+  }
+}
+
+.foot.inline {
+  margin: 0;
+}
+
+.growth {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 6px;
+}
+
+.grow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 6px;
+  border-radius: 10px;
+  background: var(--chip);
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  img {
+    width: 14px;
+    height: 14px;
+    image-rendering: pixelated;
+  }
+
+  b {
+    font-size: 13px;
+  }
+
+  .track {
+    width: 100%;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.35);
+
+    i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+    }
+  }
+}
+
+.skill {
+  img {
+    width: 20px;
+    height: 20px;
+    image-rendering: pixelated;
+  }
+
+  .cost {
+    font-size: 12px;
+    color: var(--mp);
+    white-space: nowrap;
+  }
+}

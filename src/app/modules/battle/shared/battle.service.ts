@@ -20,6 +20,7 @@ import {
   giveItem,
   giveMoney,
   MemberProgress,
+  asWorn,
   memberProgress,
   PartyState,
   restoreParty,
@@ -298,9 +299,10 @@ export class BattleService {
         return [c.id, m ? simProgress(c, m, db) : memberProgress(c)];
       })
     );
-    const team = members.map((c) =>
-      teamFighter(c, this.progress.get(c.id)!, db)
-    );
+    const team = members.map((c) => {
+      const p = this.progress.get(c.id)!;
+      return teamFighter(asWorn(c, p), p, db);
+    });
     const foes = group.members.flatMap((m, i) => {
       const e = db.enemies.find((x) => x.id === m.enemy);
       return e ? [foeFighter(e, i, { x: m.x, y: m.y }, weather, db)] : [];
@@ -524,7 +526,8 @@ export class BattleService {
       if (!c || !p) {
         continue;
       }
-      members.push(this.grow(c, p, f, win ? xp : 0, engine, db));
+      // (as worn in this game: its bonuses, what it makes grow faster)
+      members.push(this.grow(asWorn(c, p), p, f, win ? xp : 0, engine, db));
     }
     saveProgress(Object.fromEntries(this.progress));
     this.outcome = {

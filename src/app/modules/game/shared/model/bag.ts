@@ -8,6 +8,7 @@ import {
   STATS,
 } from "../../../database-editor/shared/database";
 import {
+  asWorn,
   currentParty,
   giveItem,
   memberProgress,
@@ -93,7 +94,7 @@ function workOut(
   db: GameDatabase
 ): { preview: UsePreview; after: MemberProgress } {
   const p = memberProgress(c);
-  const stats = characterStats(c, p.level, db, p.statUps);
+  const stats = characterStats(asWorn(c, p), p.level, db, p.statUps);
   const hp: BarChange = { from: p.hp, to: p.hp, max: stats.hp };
   const mp: BarChange = { from: p.mp, to: p.mp, max: stats.mp };
   const gains: string[] = [];

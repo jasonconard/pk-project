@@ -1,5 +1,11 @@
 import { loadDatabase } from "./database-storage";
-import { characterStats, DbCharacter, statAt, StatId } from "./database";
+import {
+  characterStats,
+  DbCharacter,
+  EquipSlot,
+  statAt,
+  StatId,
+} from "./database";
 import {
   cachedFromStorage,
   readJson,
@@ -30,6 +36,8 @@ export interface MemberProgress {
   growth: Record<string, { level: number; points: number }>;
   /** Stats raised for good by items (a seed of strength). */
   statUps?: Partial<Record<StatId, number>>;
+  /** What it wears now, changed from the team menu (missing: what the database gives it at the start). */
+  equipment?: Partial<Record<EquipSlot, string>>;
 }
 
 export interface PartyState {
@@ -219,6 +227,50 @@ export function memberProgress(c: DbCharacter): MemberProgress {
   };
 }
 
+/** The character as it is in the game being played: wearing what the team menu gave it. */
+export function asWorn(c: DbCharacter, p: MemberProgress): DbCharacter {
+  return p.equipment ? { ...c, equipment: p.equipment } : c;
+}
+
+/**
+ * A member wears an item of the bag in a slot (none: the slot is emptied); what it wore goes back to the bag. Its
+ * PV / PM never stay above their new maximum. False when it can't be done (no such item carried, the bag full of
+ * the one taken off).
+ */
+export function equip(
+  c: DbCharacter,
+  slot: EquipSlot,
+  item: string | null
+): boolean {
+  const db = loadDatabase();
+  const p = memberProgress(c);
+  const worn = { ...asWorn(c, p).equipment };
+  const before = worn[slot];
+  const items = currentParty().items;
+  if (
+    before === (item ?? undefined) ||
+    (item && (items[item] ?? 0) < 1) ||
+    (before && (items[before] ?? 0) >= ITEM_COUNT_MAX)
+  ) {
+    return false;
+  }
+  if (item) {
+    worn[slot] = item;
+    giveItem(item, -1);
+  } else {
+    delete worn[slot];
+  }
+  if (before) {
+    giveItem(before, 1);
+  }
+  p.equipment = worn;
+  const max = characterStats(asWorn(c, p), p.level, db, p.statUps);
+  p.hp = Math.min(p.hp, max.hp);
+  p.mp = Math.min(p.mp, max.mp);
+  saveProgress({ [c.id]: p });
+  return true;
+}
+
 /** Members' progress after a fight. */
 export function saveProgress(progress: Record<string, MemberProgress>): void {
   const party = structuredClone(currentParty());
@@ -236,7 +288,7 @@ export function healTeam(): void {
       continue;
     }
     const p = memberProgress(c);
-    const stats = characterStats(c, p.level, db, p.statUps);
+    const stats = characterStats(asWorn(c, p), p.level, db, p.statUps);
     healed[id] = { ...p, hp: stats.hp, mp: stats.mp, states: [] };
   }
   saveProgress(healed);
@@ -252,7 +304,7 @@ export function hurtTeam(percent: number): void {
       continue;
     }
     const p = memberProgress(c);
-    const max = characterStats(c, p.level, db, p.statUps).hp;
+    const max = characterStats(asWorn(c, p), p.level, db, p.statUps).hp;
     const loss = Math.ceil((max * percent) / 100);
     hurt[id] = { ...p, hp: Math.max(1, p.hp - loss) };
   }

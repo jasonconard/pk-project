@@ -199,6 +199,7 @@
     (agenda)="openAgenda()"
     (links)="openLinks()"
     (bag)="openBag()"
+    (team)="openTeam()"
     (variablesTest)="openVariablesTest()"
     (battleSim)="openBattleSim()"
     (testMode)="openTestList()"
@@ -237,6 +238,10 @@
 
 @if (bagOpen()) {
   <game-bag (closed)="bagOpen.set(false)" />
+}
+
+@if (teamOpen()) {
+  <game-team (closed)="teamOpen.set(false)" />
 }
 
 @if (farm.plantAsk()) {

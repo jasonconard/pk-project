@@ -59,6 +59,7 @@ import { GameSavesComponent } from "./game-saves/game-saves.component";
 import { AgendaComponent } from "./agenda/agenda.component";
 import { LinksComponent } from "./links/links.component";
 import { BagComponent } from "./bag/bag.component";
+import { TeamComponent } from "./team/team.component";
 import { LinkToastComponent } from "./link-toast/link-toast.component";
 import { GiftPickerComponent } from "./gift-picker/gift-picker.component";
 import { ShopComponent } from "./shop/shop.component";
@@ -96,6 +97,7 @@ import { ActionZone } from "./shared/model/action-zone";
     AgendaComponent,
     LinksComponent,
     BagComponent,
+    TeamComponent,
     LinkToastComponent,
     GiftPickerComponent,
     ShopComponent,
@@ -192,6 +194,7 @@ export class GameComponent {
   protected readonly agendaOpen = signal(false);
   protected readonly linksOpen = signal(false);
   protected readonly bagOpen = signal(false);
+  protected readonly teamOpen = signal(false);
   /** The Offrir action of an event: the NPC to give a gift to (null: none asked). */
   protected readonly giftFor = signal<string | null>(null);
   /** The crops: the seeds window, the harvest's message. */
@@ -302,6 +305,7 @@ export class GameComponent {
         !this.agendaOpen() &&
         !this.linksOpen() &&
         !this.bagOpen() &&
+        !this.teamOpen() &&
         !this.variablesTestOpen() &&
         !this.battleSimOpen() &&
         !this.testListOpen() &&
@@ -456,6 +460,11 @@ export class GameComponent {
   protected openBag(): void {
     this.menuOpen.set(false);
     this.bagOpen.set(true);
+  }
+
+  protected openTeam(): void {
+    this.menuOpen.set(false);
+    this.teamOpen.set(true);
   }
 
   protected shopDone(): void {

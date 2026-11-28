@@ -1,0 +1,161 @@
+@use '../shared/item-sheet';
+
+// The team menu (design/main-view.pen, Menu Équipe): the shared sheet of items, in light orange. The members' cards
+// and the slot's list are here, a member's sheet in team.sheet.scss
+:host {
+  --accent: #ffb37a;
+  --on-accent: #2e1503;
+  --hp: #5fd68a;
+  --mp: #5aa8ff;
+  --worse: #ff8a8a;
+}
+
+.badge {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 179, 122, 0.15);
+  color: var(--accent);
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.close.round {
+  border-radius: 50%;
+  background: var(--chip);
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--chip);
+  text-align: left;
+
+  > svg {
+    flex-shrink: 0;
+    color: var(--dim);
+  }
+}
+
+.portrait.big {
+  width: 56px;
+  height: 56px;
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  b {
+    font-size: 15px;
+  }
+
+  small {
+    font-size: 11px;
+    color: var(--dim);
+  }
+}
+
+// What the member wears: three small boxes
+.gear {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+
+  i {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  img {
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+
+  > b {
+    width: 22px;
+  }
+
+  .track {
+    flex: 1;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.35);
+
+    i {
+      display: block;
+      height: 100%;
+      border-radius: 3px;
+    }
+  }
+
+  .value {
+    min-width: 58px;
+    text-align: right;
+    color: var(--dim);
+  }
+
+  &.hp {
+    > b { color: var(--hp); }
+    i { background: var(--hp); }
+  }
+
+  &.mp {
+    > b { color: var(--mp); }
+    i { background: var(--mp); }
+  }
+
+  &.xp {
+    > b { color: var(--accent); }
+    .track { height: 4px; }
+    i { background: var(--accent); }
+  }
+}
+
+// A slot's list: what each item changes, better in green, worse in red
+.changes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  font-size: 12px;
+  color: var(--hp);
+  white-space: nowrap;
+
+  .worse {
+    color: var(--worse);
+  }
+}
