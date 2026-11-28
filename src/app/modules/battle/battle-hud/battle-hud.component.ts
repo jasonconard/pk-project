@@ -8,17 +8,7 @@ import {
   signal,
   untracked,
 } from "@angular/core";
-import {
-  LucideArrowLeft,
-  LucideBackpack,
-  LucideFootprints,
-  LucideMoonStar,
-  LucideShield,
-  LucideSparkles,
-  LucideSun,
-  LucideSword,
-  LucideSwords,
-} from "@lucide/angular";
+import { LucideArrowLeft, LucideMoonStar, LucideSun } from "@lucide/angular";
 import { BattleService } from "../shared/battle.service";
 import { BattleTargetInfoComponent } from "../battle-target-info/battle-target-info.component";
 import { BattleOutcomeComponent } from "../battle-outcome/battle-outcome.component";
@@ -37,6 +27,19 @@ const MENU_WIDTH = 160;
 const MENU_GAP = 34;
 /** A touch this close to a fighter on the screen (css px) aims at it. */
 const PICK_RADIUS = 70;
+
+/**
+ * The commands' ring (css px): the chosen one's size against the others', how far beside it its neighbours are and
+ * how much higher, where the unseen ones wait, how see-through the neighbours are, how far under the fighter.
+ */
+const RING = {
+  front: 1.5,
+  beside: 104,
+  rise: 6,
+  away: 170,
+  dim: 0.55,
+  below: 122,
+};
 
 interface CommandItem {
   kind: CommandKind | "magic" | "items";
@@ -59,17 +62,11 @@ interface CommandItem {
     BattleTargetInfoComponent,
     BattleOutcomeComponent,
     LucideArrowLeft,
-    LucideBackpack,
-    LucideFootprints,
     LucideMoonStar,
-    LucideShield,
-    LucideSparkles,
     LucideSun,
-    LucideSword,
-    LucideSwords,
   ],
   templateUrl: "./battle-hud.component.html",
-  styleUrl: "./battle-hud.component.scss",
+  styleUrls: ["./battle-hud.component.scss", "./battle-hud.ring.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BattleHudComponent {
@@ -88,33 +85,95 @@ export class BattleHudComponent {
   /** The list shown on a turn: the commands, the skills (Magie), the items (Objets). */
   protected readonly menu = signal<"main" | "skills" | "items">("main");
   protected readonly commands = computed<CommandItem[]>(() => [
-    { kind: "attack", label: "Attaque", icon: "sword" },
+    { kind: "attack", label: "Attaque", icon: "attack" },
     {
       kind: "heavy",
       label: "Attaque forte",
-      icon: "swords",
+      icon: "heavy",
       hint: "interrompt",
     },
     {
       kind: "magic",
       label: "Magie",
-      icon: "sparkles",
+      icon: "magic",
       soon: !this.view()?.skills.length,
     },
     {
       kind: "items",
       label: "Objets",
-      icon: "backpack",
+      icon: "items",
       soon: !this.view()?.items.length,
     },
-    { kind: "defend", label: "Défendre", icon: "shield" },
+    { kind: "defend", label: "Défendre", icon: "defend" },
     {
       kind: "flee",
       label: "Fuir",
-      icon: "footprints",
+      icon: "flee",
       soon: !this.view()?.canFlee,
     },
   ]);
+  /**
+   * The commands on their ring around the fighter (design/combat.pen, « menu rotatif »): the chosen one in front,
+   * big; its two neighbours beside it, smaller and half see-through; the others unseen, further on the ring. Turning
+   * moves them all one place, each fading in or out on its way.
+   */
+  protected readonly ring = computed(() => {
+    const list = this.commands();
+    const count = list.length;
+    const chosen = this.selected() % count;
+    return list.map((command, index) => {
+      // (how many places from the front, the short way round: -3 … 2 for six commands)
+      const half = Math.floor(count / 2);
+      const offset = ((index - chosen + count + half) % count) - half;
+      const far = Math.abs(offset);
+      const side = Math.sign(offset);
+      let x = 0;
+      let y = 0;
+      let scale = RING.front;
+      if (far === 1) {
+        x = side * RING.beside;
+        y = -RING.rise;
+        scale = 1;
+      } else if (far > 1) {
+        x = side * RING.away || RING.away;
+        y = -RING.rise * 4;
+        scale = 0.7;
+      }
+      return {
+        command,
+        index,
+        offset,
+        seen: far <= 1,
+        opacity: [1, RING.dim, 0][Math.min(2, far)],
+        transform: `translate(${x}px, ${y}px) scale(${scale})`,
+      };
+    });
+  });
+  /** The command in front, for its title. */
+  protected readonly front = computed(
+    () => this.commands()[this.selected() % this.commands().length]
+  );
+  /** Where the ring's front command is on the screen: under the fighter, kept inside the screen. */
+  protected readonly ringPos = computed(() => {
+    const at = this.view()?.actorScreen;
+    if (!at) {
+      return null;
+    }
+    return {
+      x: Math.min(window.innerWidth - 170, Math.max(170, at.x)),
+      y: Math.min(window.innerHeight - 150, at.y + RING.below),
+    };
+  });
+
+  /** A command of the ring touched: the one in front is chosen, another one comes to the front. */
+  protected turnTo(index: number): void {
+    if (index === this.selected()) {
+      this.pick(this.commands()[index]);
+    } else {
+      this.selected.set(index);
+    }
+  }
+
   protected readonly team = computed(() => {
     const fighters =
       this.view()?.fighters.filter((f) => f.side === "team") ?? [];

@@ -1,5 +1,5 @@
 {
-  "version": "2.22",
+  "version": "2.25",
   "children": [
     {
       "type": "frame",
@@ -5141,6 +5141,838 @@
               "content": "Victoire !",
               "fontFamily": "Roboto",
               "fontSize": 14,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "e97GI",
+      "x": 3190,
+      "y": 964,
+      "name": "Combat · interface pixel art (menu rotatif)",
+      "clip": true,
+      "width": 1280,
+      "height": 800,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "images/ui-combat/terrain.png",
+        "mode": "stretch"
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "hgbXM",
+          "x": 732,
+          "y": 522,
+          "name": "Commande Critique",
+          "opacity": 0.6,
+          "width": 80,
+          "height": 80,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "ugdmq",
+              "x": 0,
+              "y": 0,
+              "name": "Médaillon",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/medaillon.png",
+                "mode": "stretch"
+              },
+              "width": 80,
+              "height": 80
+            },
+            {
+              "type": "rectangle",
+              "id": "ZHtOT",
+              "x": 8,
+              "y": 8,
+              "name": "Icône Critique",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/forte.png",
+                "mode": "stretch"
+              },
+              "width": 64,
+              "height": 64
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "X5GtK",
+          "x": 468,
+          "y": 522,
+          "name": "Commande Fuir",
+          "opacity": 0.6,
+          "width": 80,
+          "height": 80,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tgBzk",
+              "x": 0,
+              "y": 0,
+              "name": "Médaillon",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/medaillon.png",
+                "mode": "stretch"
+              },
+              "width": 80,
+              "height": 80
+            },
+            {
+              "type": "rectangle",
+              "id": "LZTmh",
+              "x": 8,
+              "y": 8,
+              "name": "Icône Fuir",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/fuir.png",
+                "mode": "stretch"
+              },
+              "width": 64,
+              "height": 64
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Q4I6N",
+          "x": 580,
+          "y": 522,
+          "name": "Commande Attaque",
+          "width": 120,
+          "height": 120,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "p5Eaoh",
+              "x": 0,
+              "y": 0,
+              "name": "Médaillon",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/medaillon.png",
+                "mode": "stretch"
+              },
+              "width": 120,
+              "height": 120
+            },
+            {
+              "type": "rectangle",
+              "id": "crl6O",
+              "x": 12,
+              "y": 12,
+              "name": "Icône Attaque",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/attaque.png",
+                "mode": "stretch"
+              },
+              "width": 96,
+              "height": 96
+            },
+            {
+              "type": "ellipse",
+              "id": "mMfFq",
+              "x": -6,
+              "y": -6,
+              "name": "Halo",
+              "fill": "#00000000",
+              "width": 132,
+              "height": 132,
+              "stroke": "#ffe9a8",
+              "strokeWidth": 4
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "dBKap",
+          "x": 548,
+          "y": 660,
+          "name": "Titre de la commande",
+          "width": 184,
+          "height": 44,
+          "fill": "#1c2338",
+          "stroke": "#d9b45a",
+          "strokeWidth": 3,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tpAHU",
+              "x": 3,
+              "y": 3,
+              "name": "Liseré sombre",
+              "fill": "#00000000",
+              "width": 178,
+              "height": 38,
+              "stroke": "#8a6a2c",
+              "strokeWidth": 2
+            },
+            {
+              "type": "rectangle",
+              "id": "mzJrj",
+              "x": 0,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "gvhih",
+              "x": 175,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "f8Eb4x",
+              "x": 0,
+              "y": 35,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "rDphZ",
+              "x": 175,
+              "y": 35,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "text",
+              "id": "e53tb",
+              "x": 0,
+              "y": 9,
+              "name": "Attaque",
+              "fill": "#ffe9a8",
+              "textGrowth": "fixed-width",
+              "width": 184,
+              "content": "Attaque",
+              "textAlign": "center",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 22,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "X07Dc",
+          "x": 480,
+          "y": 712,
+          "name": "Aide",
+          "fill": "#f3ecd6",
+          "textGrowth": "fixed-width",
+          "width": 320,
+          "content": "◀ ▶ tourner   ·   Entrée choisir",
+          "textAlign": "center",
+          "fontFamily": "Pixelify Sans",
+          "fontSize": 14,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "Li49I",
+          "x": 330,
+          "y": 22,
+          "name": "Jauge d'action",
+          "width": 620,
+          "height": 40,
+          "fill": "#1c2338",
+          "stroke": "#d9b45a",
+          "strokeWidth": 3,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "n5aaDB",
+              "x": 3,
+              "y": 3,
+              "name": "Liseré sombre",
+              "fill": "#00000000",
+              "width": 614,
+              "height": 34,
+              "stroke": "#8a6a2c",
+              "strokeWidth": 2
+            },
+            {
+              "type": "rectangle",
+              "id": "MsCyn",
+              "x": 0,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "ByUVR",
+              "x": 611,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "poXoX",
+              "x": 0,
+              "y": 31,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "j5kSGa",
+              "x": 611,
+              "y": 31,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "nSFc2",
+              "x": 12,
+              "y": 15,
+              "name": "Attente",
+              "fill": "#3a4468",
+              "width": 448,
+              "height": 10
+            },
+            {
+              "type": "rectangle",
+              "id": "HR1VP",
+              "x": 460,
+              "y": 15,
+              "name": "Charge",
+              "fill": "#b0413e",
+              "width": 148,
+              "height": 10
+            },
+            {
+              "type": "rectangle",
+              "id": "ro8wO",
+              "x": 458,
+              "y": 9,
+              "name": "Repère COM",
+              "fill": "#d9b45a",
+              "width": 4,
+              "height": 22
+            },
+            {
+              "type": "rectangle",
+              "id": "AtgcC",
+              "x": 236,
+              "y": 11,
+              "name": "Repère décision",
+              "fill": "#8a8d9c",
+              "width": 3,
+              "height": 18
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "PFPSn",
+          "x": 773,
+          "y": 64,
+          "name": "COM",
+          "fill": "#ffe9a8",
+          "content": "COM",
+          "fontFamily": "Pixelify Sans",
+          "fontSize": 13,
+          "fontWeight": "500"
+        },
+        {
+          "type": "text",
+          "id": "B4pYNj",
+          "x": 922,
+          "y": 64,
+          "name": "ACT",
+          "fill": "#ff9a8a",
+          "content": "ACT",
+          "fontFamily": "Pixelify Sans",
+          "fontSize": 13,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "vqygm",
+          "x": 450,
+          "y": 22,
+          "name": "Jeton chauve-souris",
+          "width": 40,
+          "height": 40,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "hF3gZ",
+              "x": 0,
+              "y": 0,
+              "name": "Médaillon",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/medaillon.png",
+                "mode": "stretch"
+              },
+              "width": 40,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "RikRy",
+              "x": 8,
+              "y": 8,
+              "name": "Tête",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/combat/icon-bat.png",
+                "mode": "stretch"
+              },
+              "width": 24,
+              "height": 24
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "I1Nvlc",
+          "x": 540,
+          "y": 22,
+          "name": "Jeton gluant",
+          "width": 40,
+          "height": 40,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "wsxEP",
+              "x": 0,
+              "y": 0,
+              "name": "Médaillon",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/medaillon.png",
+                "mode": "stretch"
+              },
+              "width": 40,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "ZVwpd",
+              "x": 8,
+              "y": 8,
+              "name": "Tête",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/combat/icon-slime.png",
+                "mode": "stretch"
+              },
+              "width": 24,
+              "height": 24
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ix0fL",
+          "x": 592,
+          "y": 22,
+          "name": "Jeton gluant 2",
+          "width": 40,
+          "height": 40,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "evhgS",
+              "x": 0,
+              "y": 0,
+              "name": "Médaillon",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/medaillon.png",
+                "mode": "stretch"
+              },
+              "width": 40,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "OdANL",
+              "x": 8,
+              "y": 8,
+              "name": "Tête",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/combat/icon-slime.png",
+                "mode": "stretch"
+              },
+              "width": 24,
+              "height": 24
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "yMccD",
+          "x": 750,
+          "y": 22,
+          "name": "Jeton Hugo",
+          "width": 40,
+          "height": 40,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "jJKcc",
+              "x": 0,
+              "y": 0,
+              "name": "Médaillon",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/ui-combat/medaillon.png",
+                "mode": "stretch"
+              },
+              "width": 40,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "vZ1F1",
+              "x": 8,
+              "y": 8,
+              "name": "Tête",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/combat/icon-hugo.png",
+                "mode": "stretch"
+              },
+              "width": 24,
+              "height": 24
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "MyxDc",
+          "x": 22,
+          "y": 712,
+          "name": "Carte Hugo",
+          "width": 300,
+          "height": 68,
+          "fill": "#1c2338",
+          "stroke": "#d9b45a",
+          "strokeWidth": 3,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "L0IIp",
+              "x": 3,
+              "y": 3,
+              "name": "Liseré sombre",
+              "fill": "#00000000",
+              "width": 294,
+              "height": 62,
+              "stroke": "#8a6a2c",
+              "strokeWidth": 2
+            },
+            {
+              "type": "rectangle",
+              "id": "B0jRtm",
+              "x": 0,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "T7j0q",
+              "x": 291,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "nFvM4",
+              "x": 0,
+              "y": 59,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "GoAYZ",
+              "x": 291,
+              "y": 59,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "IrBMc",
+              "x": 8,
+              "y": 8,
+              "name": "Portrait",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/combat/portrait-hugo.png",
+                "mode": "stretch"
+              },
+              "width": 52,
+              "height": 52
+            },
+            {
+              "type": "text",
+              "id": "ZRBic",
+              "x": 70,
+              "y": 7,
+              "name": "Hugo",
+              "fill": "#f3ecd6",
+              "content": "Hugo",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "Y0dtn",
+              "x": 232,
+              "y": 10,
+              "name": "Niv. 16",
+              "fill": "#b9c0d8",
+              "content": "Niv. 16",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "wr9W2",
+              "x": 70,
+              "y": 28,
+              "name": "PV",
+              "fill": "#5fd68a",
+              "content": "PV",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 13,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "E52s4y",
+              "x": 96,
+              "y": 31,
+              "name": "Fond PV",
+              "fill": "#0e1220",
+              "width": 154,
+              "height": 9,
+              "stroke": "#8a6a2c",
+              "strokeWidth": 1
+            },
+            {
+              "type": "rectangle",
+              "id": "r21Ff",
+              "x": 98,
+              "y": 33,
+              "name": "Barre PV",
+              "fill": "#5fd68a",
+              "width": 150,
+              "height": 5
+            },
+            {
+              "type": "text",
+              "id": "htVLZ",
+              "x": 258,
+              "y": 27,
+              "name": "176",
+              "fill": "#f3ecd6",
+              "content": "176",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 14,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "MbvlI",
+              "x": 70,
+              "y": 44,
+              "name": "PM",
+              "fill": "#5aa8ff",
+              "content": "PM",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 13,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "FM6Il",
+              "x": 96,
+              "y": 47,
+              "name": "Fond PM",
+              "fill": "#0e1220",
+              "width": 154,
+              "height": 9,
+              "stroke": "#8a6a2c",
+              "strokeWidth": 1
+            },
+            {
+              "type": "rectangle",
+              "id": "MvDi9",
+              "x": 98,
+              "y": 49,
+              "name": "Barre PM",
+              "fill": "#5aa8ff",
+              "width": 138,
+              "height": 5
+            },
+            {
+              "type": "text",
+              "id": "kfoiz",
+              "x": 258,
+              "y": 43,
+              "name": "171",
+              "fill": "#f3ecd6",
+              "content": "171",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 14,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jhjdp",
+          "x": 1096,
+          "y": 22,
+          "name": "Météo",
+          "width": 162,
+          "height": 36,
+          "fill": "#1c2338",
+          "stroke": "#d9b45a",
+          "strokeWidth": 3,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "jJilL",
+              "x": 3,
+              "y": 3,
+              "name": "Liseré sombre",
+              "fill": "#00000000",
+              "width": 156,
+              "height": 30,
+              "stroke": "#8a6a2c",
+              "strokeWidth": 2
+            },
+            {
+              "type": "rectangle",
+              "id": "dGHJe",
+              "x": 0,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "LADYX",
+              "x": 153,
+              "y": 0,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "dJgyI",
+              "x": 0,
+              "y": 27,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "rectangle",
+              "id": "e1VLu",
+              "x": 153,
+              "y": 27,
+              "name": "Coin",
+              "fill": "#d9b45a",
+              "width": 9,
+              "height": 9
+            },
+            {
+              "type": "text",
+              "id": "nKWkG",
+              "x": 14,
+              "y": 8,
+              "name": "Jour · Neutre",
+              "fill": "#f3ecd6",
+              "content": "Jour · Neutre",
+              "fontFamily": "Pixelify Sans",
+              "fontSize": 15,
               "fontWeight": "500"
             }
           ]

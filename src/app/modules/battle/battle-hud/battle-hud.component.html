@@ -89,53 +89,47 @@
           <svg lucideArrowLeft></svg> Retour
         </button>
       </div>
-    } @else if (v.phase === "command") {
-      <div
-        class="menu"
-        role="menu"
-        aria-label="Commandes"
-        [style.left.px]="at.left"
-        [style.top.px]="at.top"
-      >
-        @for (c of commands(); track c.kind; let i = $index) {
-          <button
-            type="button"
-            role="menuitem"
-            [class.on]="i === selected()"
-            [class.soon]="c.soon"
-            [attr.aria-disabled]="c.soon ? 'true' : null"
-            [attr.title]="c.soon ? 'Bientôt' : null"
-            (pointerenter)="selected.set(i)"
-            (click)="pick(c)"
-          >
-            @switch (c.icon) {
-              @case ("sword") {
-                <svg lucideSword></svg>
-              }
-              @case ("swords") {
-                <svg lucideSwords></svg>
-              }
-              @case ("sparkles") {
-                <svg lucideSparkles></svg>
-              }
-              @case ("backpack") {
-                <svg lucideBackpack></svg>
-              }
-              @case ("shield") {
-                <svg lucideShield></svg>
-              }
-              @default {
-                <svg lucideFootprints></svg>
-              }
-            }
-            {{ c.label }}
-            @if (c.hint) {
-              <small class="detail hint">{{ c.hint }}</small>
-            }
-          </button>
+    }
+  }
+  <!-- The commands: a ring of icons around the fighter, the chosen one in front with its title -->
+  @if (v.phase === "command" && menu() === "main" && ringPos(); as at) {
+    <div
+      class="ring"
+      role="menu"
+      aria-label="Commandes"
+      [style.left.px]="at.x"
+      [style.top.px]="at.y"
+    >
+      @for (slot of ring(); track slot.command.kind) {
+        <button
+          type="button"
+          class="slot"
+          role="menuitem"
+          [class.front]="slot.offset === 0"
+          [class.soon]="slot.command.soon"
+          [style.transform]="slot.transform"
+          [style.opacity]="slot.opacity"
+          [style.pointer-events]="slot.seen ? 'auto' : 'none'"
+          [attr.tabindex]="slot.seen ? 0 : -1"
+          [attr.aria-label]="slot.command.label"
+          [attr.aria-disabled]="slot.command.soon ? 'true' : null"
+          (click)="turnTo(slot.index)"
+        >
+          <img class="medallion" src="assets/battle/ui/medallion.png" alt="" />
+          <img
+            class="icon"
+            [src]="'assets/battle/ui/' + slot.command.icon + '.png'"
+            alt=""
+          />
+        </button>
+      }
+      <div class="ring-title" [class.soon]="front().soon">
+        <b>{{ front().label }}</b>
+        @if (front().hint; as hint) {
+          <small>{{ hint }}</small>
         }
       </div>
-    }
+    </div>
   }
 
   <!-- The aimed one: a marker over it, its details in a window -->
