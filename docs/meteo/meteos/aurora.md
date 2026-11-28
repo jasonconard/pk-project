@@ -18,7 +18,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 | `shadowLevel` | 0.6 | – | 0.24 | Luminosité à l'ombre (lumière ambiante seule). |
 | `ambientColor` | #ffffff | – | #5f7fae | Teinte de la lumière ambiante. |
 | `sunColor` | #ffffff | – | #a8e0d0 | Couleur du soleil (la lune la nuit). |
-| `unlitTint` | #ffffff | – | #6f8faa | Teinte des sprites non éclairés (joueur, pokémons). |
+| `unlitTint` | #ffffff | – | #6f8faa | Teinte des sprites non éclairés (joueur, PNJ, ennemis). |
 | `aurora` | 0 | – | 1 | Force des rideaux d'aurore. |
 
 **Température** : **-8 °C** la nuit. La valeur de jour (-6 °C) n'est jamais utilisée : la boucle de `Weather.ts` ne copie les températures que dans les presets existants.

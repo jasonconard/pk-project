@@ -35,14 +35,14 @@ L'onglet **Reliefs** a cinq pinceaux **Paroi**, à passer sur les cases **en hau
 | **Paroi droite** | une falaise verticale |
 | **Paroi raide** | penche de 2 unités par niveau |
 | **Paroi moyenne** | penche de 4 unités par niveau |
-| **Paroi douce** | penche de 8 unités par niveau : une case entière pour deux niveaux, comme les parois des grottes de Pokémon (la case devient alors toute en pente) |
+| **Paroi douce** | penche de 8 unités par niveau : une case entière pour deux niveaux, comme les parois de grotte des vieux jeux en 2D (la case devient alors toute en pente) |
 | **Paroi auto** | efface le réglage : la case suit le style de murs de la carte |
 
 On peut donc mêler falaises droites et plans inclinés sur une même carte, quel que soit son style. Les coins se font tout seuls. L'inclinaison ne dépasse jamais une case. Elle est gardée avec la carte (`SceneChunk.slopes`, « colonne,ligne » → unités par niveau) et s'annule comme le reste (Ctrl Z).
 
 La recette des parois de grotte : une bande de cases au niveau 2 en **Paroi douce** au bord du sol, une bande au niveau 2 sans réglage (le replat), une bande au niveau 4 en **Paroi douce**, puis le dessus.
 
-Pour une grotte « à la Pokémon » : peindre le sol avec **Sol de grotte** (onglet Sols, avec **Sol cristallin**, les **Rails** dans les deux sens et **Dessus de grotte**), monter les cases autour de deux niveaux, puis de quatre un peu plus loin (des gradins), et peindre leur dessus en **Dessus de grotte**. Une salle peut avoir plusieurs niveaux où l'on marche : une terrasse montée d'un niveau, avec des escaliers pour y monter. Garder bas (niveau 1) les murs placés au sud d'un passage : la caméra regarde depuis le sud, un mur haut cacherait le sol derrière lui. La [Grotte de cristal](12-donjons.md#un-exemple--la-grotte-de-cristal) est faite ainsi.
+Pour une grotte aux parois penchées : peindre le sol avec **Sol de grotte** (onglet Sols, avec **Sol cristallin**, les **Rails** dans les deux sens et **Dessus de grotte**), monter les cases autour de deux niveaux, puis de quatre un peu plus loin (des gradins), et peindre leur dessus en **Dessus de grotte**. Une salle peut avoir plusieurs niveaux où l'on marche : une terrasse montée d'un niveau, avec des escaliers pour y monter. Garder bas (niveau 1) les murs placés au sud d'un passage : la caméra regarde depuis le sud, un mur haut cacherait le sol derrière lui. La [Grotte de cristal](12-donjons.md#un-exemple--la-grotte-de-cristal) est faite ainsi.
 
 **Coût** : sur une ligne, les cases plates voisines au même niveau ne forment qu'un seul carré (quelques dizaines de triangles pour un morceau surtout plat, au lieu de 2 par case : 2 048). Quand plus aucune case n'a de hauteur ni d'escalier, le sol plat d'origine revient (2 triangles, un seul matériau, pas d'ombre projetée). Le rayon qui place le joueur sur le sol ne vise que le morceau de carte sous ses pieds, et le cache des hauteurs de la pluie / neige est vidé quand la géométrie d'un sol change.
 

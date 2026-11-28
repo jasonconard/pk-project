@@ -19,7 +19,7 @@ Valeurs réelles du preset de nuit qui diffèrent de la base. La colonne « Base
 | `shadowLevel` | 0.6 | – | 0.24 | Luminosité à l'ombre (lumière ambiante seule). |
 | `ambientColor` | #ffffff | – | #4a9a8a | Teinte de la lumière ambiante. |
 | `sunColor` | #ffffff | – | #a8f0dc | Couleur de la lune. |
-| `unlitTint` | #ffffff | – | #5a948a | Teinte des sprites non éclairés (joueur, pokémons). |
+| `unlitTint` | #ffffff | – | #5a948a | Teinte des sprites non éclairés (joueur, PNJ, ennemis). |
 | `specular` | 0.3 | – | 0.4 | Force des reflets sur les surfaces brillantes. |
 | `windowGlow` | 0 | – | 0.4 | Fenêtres allumées (plus faibles que la nuit de base, 1 : la brume les noie). |
 | `cloudSpeed` | 12 | – | 8 | Vitesse des ombres de nuages au sol (unités/s). |

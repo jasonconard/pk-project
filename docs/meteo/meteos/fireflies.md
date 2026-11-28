@@ -18,7 +18,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 | `litLevel` | 1 | – | 0.42 | Luminosité du sol au soleil. |
 | `shadowLevel` | 0.6 | – | 0.25 | Luminosité à l'ombre (lumière ambiante seule). |
 | `ambientColor` | #ffffff | – | #637fa6 | Teinte de la lumière ambiante. |
-| `unlitTint` | #ffffff | – | #6e7fa6 | Teinte des sprites non éclairés (joueur, pokémons). |
+| `unlitTint` | #ffffff | – | #6e7fa6 | Teinte des sprites non éclairés (joueur, PNJ, ennemis). |
 | `fireflies` | 0 | – | 1 | Densité des lucioles. |
 
 **Température** : **19 °C** la nuit. La valeur de jour (23 °C) n'est jamais utilisée : la boucle de `Weather.ts` ne copie les températures que dans les presets existants.

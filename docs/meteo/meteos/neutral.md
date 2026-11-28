@@ -18,7 +18,7 @@ Neutre **ne modifie rien** : `DAY_PRESETS[NEUTRAL] = DAY_BASE` et `NIGHT_PRESETS
 | `shadowLevel` | 0.6 | 0.26 | Luminosité à l'ombre (lumière ambiante seule). L'écart `litLevel − shadowLevel` donne la force du soleil. |
 | `ambientColor` | `0xffffff` | `0x6d7fb3` | Teinte de la lumière ambiante : blanche le jour, bleue la nuit. |
 | `sunColor` | `0xffffff` | `0xb3c4ff` | Couleur du soleil, puis de la lune. |
-| `unlitTint` | `0xffffff` | `0x707ea8` | Teinte appliquée aux sprites non éclairés (joueur, pokémons) pour qu'ils suivent la lumière. |
+| `unlitTint` | `0xffffff` | `0x707ea8` | Teinte appliquée aux sprites non éclairés (joueur, PNJ, ennemis) pour qu'ils suivent la lumière. |
 | `specular` | 0.3 | 0.4 | Force des reflets du soleil/de la lune sur les surfaces brillantes. |
 | `windowGlow` | 0 | 1 | Fenêtres allumées la nuit. |
 | `cloudSpeed` | 12 | 12 | Vitesse des ombres de nuages (sans effet ici puisque `cloudCover = 0`). |

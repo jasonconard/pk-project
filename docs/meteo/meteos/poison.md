@@ -19,7 +19,7 @@ Valeurs réelles des presets qui diffèrent de la base (jour : `DAY_BASE`, nuit 
 | `shadowLevel` | 0.6 | 0.56 | 0.24 | Luminosité à l'ombre (lumière ambiante seule). |
 | `ambientColor` | #ffffff | #c8a8e0 | #6e4a96 | Teinte de la lumière ambiante. |
 | `sunColor` | #ffffff | #e0c4ff | #b88aff | Couleur du soleil (la lune la nuit). |
-| `unlitTint` | #ffffff | #d0b4e4 | #7a5a9c | Teinte des sprites non éclairés (joueur, pokémons). |
+| `unlitTint` | #ffffff | #d0b4e4 | #7a5a9c | Teinte des sprites non éclairés (joueur, PNJ, ennemis). |
 | `cloudCover` | 0 | 0.5 | 0.4 | Couverture nuageuse (1 = le soleil est totalement masqué). |
 | `cloudAmbient` | 0 | 0.1 | 0 | Part dont les nuages assombrissent aussi l'ambiant (ombres de nuages plus contrastées). |
 | `cloudSpeed` | 12 | 6 | 6 | Vitesse des ombres de nuages au sol (unités/s). |

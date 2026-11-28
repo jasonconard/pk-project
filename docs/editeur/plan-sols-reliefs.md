@@ -48,7 +48,7 @@ Une fois validé, ce plan sera copié dans `docs/editeur/plan-sols-reliefs.md`.
 | 0–4, 12–17 | Dalles et pavés avec bords | Raccords herbe ↔ dalles / pavés |
 | 0–4, 24–26 | Gravier avec bords | Raccords herbe ↔ gravier |
 | 0–4, 27–28 | Sable et rivage d'eau | Plages (sable ↔ eau) |
-| 6–8, 4–9 | Rebords rocheux bruns (bords, coins) | Corniches et falaises basses (sauts à la Pokémon) |
+| 6–8, 4–9 | Rebords rocheux bruns (bords, coins) | Corniches et falaises basses (d'où l'on saute vers le bas) |
 | 10–12, 0–9 | Mare avec berges rocheuses | Raccords herbe ↔ eau |
 | 10–12, 11–17 | Eau profonde, vagues, rochers dans l'eau, cascade | Eau, rochers à poser |
 | Partie droite (x ≈ 320–460, y ≈ 255–680) | Grandes parois de montagne, escaliers, entrées de grotte | Falaises de montagne, escaliers |

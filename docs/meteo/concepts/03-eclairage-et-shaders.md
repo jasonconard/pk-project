@@ -110,7 +110,7 @@ float sunVisibility = 1.0 - uCloudCover * cloud;
 
 ## 5. Matériaux sans éclairage : `UNLIT_MATERIALS`
 
-Les sprites (joueur, pokémons) utilisent `MeshBasicMaterial` / `SpriteMaterial`, qui **ignorent** les lumières. `registerUnlitMaterial` les ajoute à l'ensemble `UNLIT_MATERIALS`, mémorise leur couleur d'origine (`userData['unlitBaseColor']`) et active `applyLinearFog`. Chaque frame :
+Les sprites (joueur, PNJ, ennemis) utilisent `MeshBasicMaterial` / `SpriteMaterial`, qui **ignorent** les lumières. `registerUnlitMaterial` les ajoute à l'ensemble `UNLIT_MATERIALS`, mémorise leur couleur d'origine (`userData['unlitBaseColor']`) et active `applyLinearFog`. Chaque frame :
 
 ```ts
 UNLIT_MATERIALS.forEach(mat => mat.color.copy(this.tmpColor).multiply(mat.userData['unlitBaseColor'] ?? WHITE));
