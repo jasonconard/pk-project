@@ -1,7 +1,7 @@
 {
-  "name": "Pokemon Project",
-  "short_name": "PK Project",
-  "description": "Jeu d'aventure en 3D avec météo dynamique et éditeur de carte.",
+  "name": "Tesselle",
+  "short_name": "Tesselle",
+  "description": "Moteur de jeu en pixel art 3D : la vie en ville le jour, les donjons la nuit, et des éditeurs pour tout créer sans coder.",
   "lang": "fr",
   "display": "fullscreen",
   "orientation": "landscape",
